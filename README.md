@@ -6,6 +6,9 @@
 A minimalistic Webpack ES6 boilerplate project.
 
 ## Prerequisites
+
+[![node][node]][node-url]
+[![npm][npm]][npm-url]
       
 - [Node.js](http://es6-features.org)
 
@@ -40,6 +43,12 @@ A minimalistic Webpack ES6 boilerplate project.
 ## Licence
 
 _webpack-es6-boilerplate_ is available under MIT.
+
+[npm]: https://img.shields.io/npm/v/webpack-es6-boilerplate.svg
+[npm-url]: https://npmjs.com/
+
+[node]: https://img.shields.io/node/v/webpack-es6-boilerplate.svg
+[node-url]: https://nodejs.org
 
 [tests]: http://img.shields.io/travis/jluccisano/webpack-es6-boilerplate.svg
 [tests-url]: https://travis-ci.org/jluccisano/webpack-es6-boilerplate

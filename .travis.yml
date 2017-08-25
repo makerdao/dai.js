@@ -1,11 +1,24 @@
 language: node_js
 node_js:
-  - "7"
-before_script:
-  - npm install -g codecov
+- '7'
+cache:
+  directories:
+  - node_modules
+branches:
+  only:
+  - master
+before_install:
+- npm i -g npm@^5.3.0
 install:
-  - npm install
-  - npm run build
+- npm install
+- npm run build
+before_script:
+- npm install -g codecov
 script:
-  - npm run test
-  - codecov
+- npm run test
+- codecov
+deploy:
+  provider: npm
+  email: joseph.luccisano@gmail.com
+  api_key:
+    secure: NoJUGKo+QwX1k/VIVxkEzXxH/XvEhVaamQtLBt6BCoM9+kz/9NptvXxHyRwNolmnWUrl7h1o9ozaTcvtX06fO78tfuh5Lb1VscAWKKYPemfJjq4lZGI0v0iaLF83NKx4A3f4AAshYUKu78c4WO9ia7baFU7euyxkRnmRMLDr1aVtGvnkmvw81TKnffanWwmRJ6aW9FMzHL5SKkQ+MSF76lmImw7OjNX2MiKUF/jGEIGiSAHOkvZ1KQVGp2oBjOf/Hq5IXOVXzqQwAhdjUF9DC79KMhpxjWjnXKSLrlPHbr8sPJn856ruxvfCWpTiRqEghPFwN17KOkRuIfc20+ukVSo7pyNpKsAOOPMVa+tt61SvhxDaXImsQk5+kP/sWc2qXy3JzF0AkcqSmiJpiLGkw8b49nl8hpQ67G6PdX3qIGWwP51DZ4O5fLqE2m4PevoL2JlKuAaG6ZS3zfdeGx87Nuq6zr8F85KXctvn8NGXRUf+wZ+766wFWQMGQ9r7EuZLKzxdIp/QAwG2pATKyb2lVi1nMxzTYHDVPdYFEzvN/S/tY/DyUDW0yh0Ogw9hUbDhSNEb01bYoPXXw4u/LJjI30G3pyIk/81ngucRIykGLyviJZmnfgC7K/20IhwWDY+zGs5njJIiu1M/u/FWHRIaxZJYK9i1/x3k9OTQe73X0R0=
