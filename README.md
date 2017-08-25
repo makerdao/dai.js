@@ -3,7 +3,7 @@
 [![tests][tests]][tests-url]
 [![coverage][cover]][cover-url]
 
-A minimalistic Webpack ES6 boilerplate project.
+A minimalistic Webpack 2 ES6 boilerplate project.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ A minimalistic Webpack ES6 boilerplate project.
 
 _webpack-es6-boilerplate_ is available under MIT.
 
-[npm]: https://img.shields.io/npm/v/webpack-es6-boilerplate.svg
+[npm]: https://img.shields.io/badge/npm-5.3.0-blue.svg
 [npm-url]: https://npmjs.com/
 
 [node]: https://img.shields.io/node/v/webpack-es6-boilerplate.svg

@@ -5,9 +5,9 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
 
-  context: path.join(process.cwd(), 'src'),
+  context: path.join(process.cwd(), 'src'), //the home directory for webpack
 
-  devtool: 'cheap-module-source-map',
+  devtool: 'source-map', // enhance debugging by adding meta info for the browser devtools
 
   entry: {
     app: './index.js'
@@ -21,8 +21,8 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['.js'],
-    modules: [path.join(process.cwd(), 'src'), 'node_modules']
+    extensions: ['.js'],  // extensions that are used
+    modules: [path.join(process.cwd(), 'src'), 'node_modules'] // directories where to look for modules
   },
 
   module: {
