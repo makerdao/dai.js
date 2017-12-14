@@ -5,13 +5,14 @@ const CommonConfig = require('./webpack.common.js');
 
 module.exports = Merge(CommonConfig, {
   plugins: [
-      new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin()
   ],
   devServer: {
-    publicPath: '/',
+    host: '0.0.0.0',
     port: 9000,
+    disableHostCheck: true,
+    publicPath: '/',
     contentBase: path.join(process.cwd(), 'dist'), // static file location
-    host: 'localhost',
     historyApiFallback: true, // true for index.html upon 404, object for multiple paths
     noInfo: false,
     stats: 'minimal',
