@@ -1,25 +1,28 @@
 {
-  "name": "webpack-es6-boilerplate",
-  "version": "1.0.1",
-  "author": "Joseph Luccisano <joseph.luccisano@gmail.com> (https://jluccisano.github.io)",
-  "description": "A delightfully Webpack ES6 Boilerplate",
+  "name": "makerdao-exchange-integration",
+  "version": "0.0.1",
+  "contributors": [
+    "Wouter Kampmann <wouter@makerdao.com>",
+    "Sean Brennan <sean@makerdao.com>",
+    "Tyler Sorensen <tyler@makerdao.com>"
+  ],
+  "description": "MakerDAO exchange integration library.",
   "license": "MIT",
   "keywords": [
-    "webpack",
-    "boilerplate",
-    "es6",
-    "babel",
-    "eslint",
-    "jest",
-    "sass"
+    "makerdao",
+    "mkr",
+    "dai",
+    "cdp",
+    "eth",
+    "margin"
   ],
   "bugs": {
-    "url": "https://github.com/jluccisano/webpack-es6-boilerplate/issues",
-    "email": "joseph.luccisano@gmail.com"
+    "url": "https://github.com/wkampmann/makerdao-integration-poc/issues",
+    "email": "wouter@makerdao.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jluccisano/webpack-es6-boilerplate.git"
+    "url": "https://github.com/wkampmann/makerdao-integration-poc.git"
   },
   "main": "src/index.js",
   "scripts": {

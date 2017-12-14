@@ -1,9 +1,17 @@
-# Webpack ES6 boilerplate
+# MakerDAO Exchange Integration
 
 [![tests][tests]][tests-url]
 [![coverage][cover]][cover-url]
 
-A minimalistic Webpack 2 ES6 boilerplate project.
+A toolkit for easy integration of MakerDAO smart contract functionality with 
+external platforms. 
+
+If you're a cryptocurrency exchange looking to add leveraged ETH positions through 
+distributed DAI lending to your platform, you're in the right place.
+
+This library aims to support a wide range of platform architectures; from fully 
+decentralized with immediate on-chain settlement, to centralized exchange architectures 
+with internal settlement services.
 
 ## Prerequisites
 
@@ -41,9 +49,10 @@ A minimalistic Webpack 2 ES6 boilerplate project.
 - `npm test` - run all tests
 - `npm run test:watch` - run all tests in watch mode
 
-## Licence
+## License
+_makerdao-exchange-integration_ is available under MIT.
 
-_webpack-es6-boilerplate_ is available under MIT.
+This project was built on the excellent [_webpack-es6-boilerplate_](https://github.com/jluccisano/webpack-es6-boilerplate).
 
 [npm]: https://img.shields.io/badge/npm-5.3.0-blue.svg
 [npm-url]: https://npmjs.com/
