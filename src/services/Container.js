@@ -8,19 +8,19 @@ class InvalidServiceError extends Error {
 
 class ServiceAlreadyRegisteredError extends Error {
   constructor(name) {
-    super("Service with name '" + name + "' is already registered with this container.");
+    super('Service with name \'' + name + '\' is already registered with this container.');
   }
 }
 
 class ServiceNotFoundError extends Error {
   constructor(name) {
-    super("Service with name '" + name + "' cannot be found in this container.");
+    super('Service with name \'' + name + '\' cannot be found in this container.');
   }
 }
 
 class ServiceDependencyLoopError extends Error {
   constructor(names) {
-    super("Service dependency loop in {" + names.join(", ") + "}");
+    super('Service dependency loop in {' + names.join(', ') + '}');
   }
 }
 
@@ -32,7 +32,7 @@ class Container {
 
   register(service, name = null) {
     if (!(service instanceof Service)) {
-      throw new InvalidServiceError("Object must be of type Service");
+      throw new InvalidServiceError('Object must be of type Service');
     }
 
     name = name || service.getName();

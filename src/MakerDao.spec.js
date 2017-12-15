@@ -1,5 +1,12 @@
 import { default as MakerDao, State, IllegalStateError } from './MakerDao';
 
+test('should reflect state through isState()', () => {
+  const md = new MakerDao();
+  expect(md.inState(md.state())).toBe(true);
+  expect(md.inState([md.state()])).toBe(true);
+  expect(md.inState([State.ONLINE, md.state()])).toBe(true);
+});
+
 test('should transition to the ONLINE state after initialize()', () => {
   let md = new MakerDao();
   md.initialize();
