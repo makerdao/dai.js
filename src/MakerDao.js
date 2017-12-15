@@ -1,3 +1,5 @@
+import StateMachine from './StateMachine';
+
 const State = {
   CREATED: 'CREATED',
   INITIALIZING: 'INITIALIZING',
@@ -19,15 +21,14 @@ class IllegalStateError extends Error {}
 class MakerDao {
 
   constructor() {
-    this._state = State.CREATED;
-    this._stateChangedHandlers = [];
+    this._stateMachine = new StateMachine(State.CREATED, stateTransitions);
   }
 
   initialize(connect = true) {
-    this._assertState(State.CREATED, 'initialize');
+    this._stateMachine.assertState(State.CREATED, 'initialize');
 
-    this._setState(State.INITIALIZING);
-    this._setState(State.OFFLINE);
+    this._stateMachine.transitionTo(State.INITIALIZING);
+    this._stateMachine.transitionTo(State.OFFLINE);
 
     if (connect) {
       this.connect();
@@ -35,53 +36,27 @@ class MakerDao {
   }
 
   connect() {
-    this._assertState([State.OFFLINE, State.CONNECTING, State.ONLINE], 'connect');
+    this._stateMachine.assertState([State.OFFLINE, State.CONNECTING, State.ONLINE], 'connect');
 
-    if (this.inState(State.OFFLINE)) {
-      this._setState(State.CONNECTING);
+    if (this._stateMachine.inState(State.OFFLINE)) {
+      this._stateMachine.transitionTo(State.CONNECTING);
     }
 
-    if (this.inState(State.CONNECTING)) {
-      this._setState(State.ONLINE);
+    if (this._stateMachine.inState(State.CONNECTING)) {
+      this._stateMachine.transitionTo(State.ONLINE);
     }
   }
 
   onStateChanged(callback) {
-    this._stateChangedHandlers.push(callback);
+    this._stateMachine.onStateChanged(callback);
   }
 
   state() {
-    return this._state;
+    return this._stateMachine.state();
   }
 
   inState(state) {
-    if (!(state instanceof Array)) {
-      state = [state];
-    }
-
-    return state.indexOf(this._state) >= 0;
-  }
-
-  _assertState(state, operation = '') {
-    if (!this.inState(state)) {
-      throw new IllegalStateError('Illegal operation for state ' + this._state + (operation.length > 0 ? ': ' + operation : ''));
-    }
-  }
-
-  _setState(newState) {
-    if (State[newState] === undefined) {
-      throw new IllegalStateError('Cannot set illegal state: ' + newState);
-    }
-
-    if (newState !== this._state) {
-      if (stateTransitions[this._state].indexOf(newState) < 0) {
-        throw new IllegalStateError('Illegal state transition: ' + this._state + ' to ' + newState);
-      }
-
-      const oldState = this._state;
-      this._state = newState;
-      this._stateChangedHandlers.forEach((cb) => cb(oldState, newState));
-    }
+    return this._stateMachine.inState(state);
   }
 }
 
