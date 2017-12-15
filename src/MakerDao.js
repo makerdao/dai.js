@@ -35,10 +35,15 @@ class MakerDao {
   }
 
   connect() {
-    this._assertState([State.OFFLINE, State.CONNECTING, State.OFFLINE], 'connect');
+    this._assertState([State.OFFLINE, State.CONNECTING, State.ONLINE], 'connect');
 
-    this._setState(State.CONNECTING);
-    this._setState(State.ONLINE);
+    if (this.inState(State.OFFLINE)) {
+      this._setState(State.CONNECTING);
+    }
+
+    if (this.inState(State.CONNECTING)) {
+      this._setState(State.ONLINE);
+    }
   }
 
   onStateChanged(callback) {

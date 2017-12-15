@@ -33,6 +33,18 @@ test('should transition to the ONLINE state on connect()', () => {
   expect(md.state()).toBe(State.ONLINE);
 });
 
+test('should only allow connect() in the appropriate states', () => {
+  const statesAllowingConnect = [State.OFFLINE, State.CONNECTING, State.ONLINE];
+  const md = new MakerDao();
+  md.onStateChanged((newState) => {
+    if (statesAllowingConnect.indexOf(newState) === -1) {
+      expect(() => md.connect()).toThrow(IllegalStateError.Error);
+    } else {
+      expect(md.connect()).toBeFalsy();
+    }
+  });
+});
+
 test('should throw an error when initialized twice', () => {
   let md = new MakerDao();
   md.initialize();
