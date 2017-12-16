@@ -86,6 +86,7 @@ class Container {
         });
 
         if (!postponed) {
+          s.getDependencies().forEach(d => s[d] = this._services[d]);
           result.push(s);
           processed[s.getName()] = true;
         }
@@ -101,6 +102,18 @@ class Container {
 
     // Return the resulting list
     return result;
+  }
+
+  initialize() {
+    return this._waitForServices(s => s._initializeDependencies().then(() => s.initialize()));
+  }
+
+  connect() {
+    return this._waitForServices(s => s._connectDependencies().then(() => s.connect()));
+  }
+
+  _waitForServices(callback) {
+    return Promise.all(this.getServices().map(s => callback(s)));
   }
 }
 

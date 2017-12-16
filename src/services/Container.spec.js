@@ -13,18 +13,20 @@ const serviceE = new Service('ServiceE', ['ServiceF']);
 const serviceF = new Service('ServiceF', ['ServiceE']);
 const serviceG = new Service('ServiceG', ['ServiceG']);
 
-test("should throw when registering an invalid service", () => {
+
+
+test("register() should throw when registering an invalid service", () => {
   expect(() => (new Container()).register()).toThrow(InvalidServiceError.Error);
   expect(() => (new Container({name: "NotAService"})).register()).toThrow(InvalidServiceError.Error);
   expect(() => (new Container("NotAService")).register()).toThrow(InvalidServiceError.Error);
 });
 
-test("should throw when registering a duplicate service", () => {
+test("register()should throw when registering a duplicate service", () => {
   expect(() => (new Container()).register(serviceA, 'MyService').register(serviceB, 'MyService'))
     .toThrow(ServiceAlreadyRegisteredError.Error);
 });
 
-test("should do nothing when registering the same service twice", () => {
+test("register() should do nothing when registering the same service twice", () => {
   new Container()
     .register(serviceA)
     .register(serviceA)
@@ -34,7 +36,7 @@ test("should do nothing when registering the same service twice", () => {
     .register(serviceA, 'MyOtherService');
 });
 
-test("should return a registered service by name", () => {
+test("service() should return a registered service by name", () => {
   const c = new Container()
     .register(serviceA)
     .register(serviceB)
@@ -47,24 +49,24 @@ test("should return a registered service by name", () => {
   expect(c.service('MyOtherNameForB')).toBe(serviceB);
 });
 
-test("should by default throw when a service is not found", () => {
+test("service() should by default throw when a service is not found", () => {
   expect(() => new Container().service('IDontExist')).toThrow(ServiceNotFoundError.Error);
 });
 
-test("should not throw when a service is not found and throwIfMissing = false", () => {
+test("service() should not throw when a service is not found and throwIfMissing = false", () => {
   expect(new Container().service('IDontExist', false)).toBe(undefined);
 });
 
-test("should always throw when a service is requested but no name is provided", () => {
+test("service() should always throw when a service is requested but no name is provided", () => {
   expect(() => new Container().service()).toThrow(ServiceNotFoundError.Error);
   expect(() => new Container().service('', false)).toThrow(ServiceNotFoundError.Error);
 });
 
-test("should return an empty services list, if none are registered", () => {
+test("getServices() should return an empty services list, if none are registered", () => {
   expect(new Container().getServices()).toEqual([]);
 });
 
-test("should return the services in load order, regardless of registration order", () => {
+test("getServices() should return the services in load order, regardless of registration order", () => {
   expect(new Container().register(serviceD).register(serviceC).register(serviceB).register(serviceA).getServices())
     .toEqual([serviceA, serviceB, serviceC, serviceD]);
 
@@ -78,13 +80,19 @@ test("should return the services in load order, regardless of registration order
   })
 });
 
-test("should throw on dependency loops", () => {
+test("getServices() should correctly set all service dependencies", () => {
+  new Container().register(serviceD).register(serviceC).register(serviceB).register(serviceA).getServices()
+    .forEach(s => s.getDependencies().forEach(d => expect(s[d] instanceof Service && s[d].getName() === d).toBe(true)));
+});
+
+test("getServices() should throw on dependency loops", () => {
   expect(() => new Container().register(serviceG).getServices()).toThrow(ServiceDependencyLoopError.Error);
   expect(() => new Container().register(serviceE).register(serviceF).getServices())
     .toThrow(ServiceDependencyLoopError.Error);
 });
 
-test("should throw on missing dependencies", () => {
+test("getServices() should throw on missing dependencies", () => {
   expect(() => new Container().register(serviceB).getServices()).toThrow(ServiceNotFoundError.Error);
   expect(() => new Container().register(serviceC).getServices()).toThrow(ServiceNotFoundError.Error);
 });
+
