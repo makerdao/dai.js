@@ -1,17 +1,16 @@
-import {
-  default as Container, InvalidServiceError, ServiceAlreadyRegisteredError, ServiceDependencyLoopError,
-  ServiceNotFoundError
-} from './Container';
+import
+  Container, { InvalidServiceError, ServiceAlreadyRegisteredError, ServiceDependencyLoopError, ServiceNotFoundError }
+  from './Container';
 
-import Service from './Service';
+import ServiceManager from './ServiceManager';
 
-const serviceA = new Service('ServiceA');
-const serviceB = new Service('ServiceB', ['ServiceA']);
-const serviceC = new Service('ServiceC', ['ServiceA', 'ServiceB']);
-const serviceD = new Service('ServiceD', ['ServiceC']);
-const serviceE = new Service('ServiceE', ['ServiceF']);
-const serviceF = new Service('ServiceF', ['ServiceE']);
-const serviceG = new Service('ServiceG', ['ServiceG']);
+const serviceA = new ServiceManager('ServiceA');
+const serviceB = new ServiceManager('ServiceB', ['ServiceA']);
+const serviceC = new ServiceManager('ServiceC', ['ServiceA', 'ServiceB']);
+const serviceD = new ServiceManager('ServiceD', ['ServiceC']);
+const serviceE = new ServiceManager('ServiceE', ['ServiceF']);
+const serviceF = new ServiceManager('ServiceF', ['ServiceE']);
+const serviceG = new ServiceManager('ServiceG', ['ServiceG']);
 
 
 
@@ -82,7 +81,7 @@ test("getServices() should return the services in load order, regardless of regi
 
 test("getServices() should correctly set all service dependencies", () => {
   new Container().register(serviceD).register(serviceC).register(serviceB).register(serviceA).getServices()
-    .forEach(s => s.getDependencies().forEach(d => expect(s[d] instanceof Service && s[d].getName() === d).toBe(true)));
+    .forEach(s => s.getDependencies().forEach(d => expect(s[d] instanceof ServiceManager && s[d].getName() === d).toBe(true)));
 });
 
 test("getServices() should throw on dependency loops", () => {
@@ -95,4 +94,3 @@ test("getServices() should throw on missing dependencies", () => {
   expect(() => new Container().register(serviceB).getServices()).toThrow(ServiceNotFoundError.Error);
   expect(() => new Container().register(serviceC).getServices()).toThrow(ServiceNotFoundError.Error);
 });
-

@@ -1,5 +1,5 @@
 import { State } from '../MakerDao';
-import { default as StateMachine, IllegalStateError } from './StateMachine';
+import StateMachine, { IllegalStateError } from './StateMachine';
 
 function getTransitionMap() {
   const transitions = {};

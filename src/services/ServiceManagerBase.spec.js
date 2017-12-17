@@ -1,40 +1,41 @@
-import {default as ServiceBase, ServiceType} from "./ServiceBase";
+import ServiceManagerBase from "./ServiceManagerBase";
 import ServiceState from './ServiceState';
+import ServiceType from './ServiceType';
 
 test('constructor() should throw on invalid init function', () => {
-  expect(() => new ServiceBase("")).toThrow('Invalid argument init: not a function or null.');
-  expect(() => new ServiceBase(false)).toThrow('Invalid argument init: not a function or null.');
+  expect(() => new ServiceManagerBase("")).toThrow('Invalid argument init: not a function or null.');
+  expect(() => new ServiceManagerBase(false)).toThrow('Invalid argument init: not a function or null.');
 });
 
 test('constructor() should throw on invalid connect function', () => {
-  expect(() => new ServiceBase(null, "")).toThrow('Invalid argument connect: not a function or null.');
-  expect(() => new ServiceBase(null, false)).toThrow('Invalid argument connect: not a function or null.');
+  expect(() => new ServiceManagerBase(null, "")).toThrow('Invalid argument connect: not a function or null.');
+  expect(() => new ServiceManagerBase(null, false)).toThrow('Invalid argument connect: not a function or null.');
 });
 
 test('constructor() should throw on invalid auth function', () => {
-  expect(() => new ServiceBase(null, null, "")).toThrow('Invalid argument auth: not a function or null.');
-  expect(() => new ServiceBase(null, null, false)).toThrow('Invalid argument auth: not a function or null.');
+  expect(() => new ServiceManagerBase(null, null, "")).toThrow('Invalid argument auth: not a function or null.');
+  expect(() => new ServiceManagerBase(null, null, false)).toThrow('Invalid argument auth: not a function or null.');
 });
 
 test('constructor() should correctly set default lifecycle functions when they are omitted', () => {
   expect.assertions(3);
-  new ServiceBase(null, () => {})._init().then((d) => expect(d).toBeFalsy());
-  new ServiceBase(null, null, () => {})._init().then((d) => expect(d).toBeFalsy());
-  new ServiceBase(null, null, () => {})._connect().then((d) => expect(d).toBeFalsy());
+  new ServiceManagerBase(null, () => {})._init().then((d) => expect(d).toBeFalsy());
+  new ServiceManagerBase(null, null, () => {})._init().then((d) => expect(d).toBeFalsy());
+  new ServiceManagerBase(null, null, () => {})._connect().then((d) => expect(d).toBeFalsy());
 });
 
 test('constructor() should correctly determine the service type', () => {
-  expect(new ServiceBase()._type).toBe(ServiceType.LOCAL);
-  expect(new ServiceBase(() => {})._type).toBe(ServiceType.LOCAL);
-  expect(new ServiceBase(null, () => {})._type).toBe(ServiceType.PUBLIC);
-  expect(new ServiceBase(null, null, () => {})._type).toBe(ServiceType.PRIVATE);
+  expect(new ServiceManagerBase()._type).toBe(ServiceType.LOCAL);
+  expect(new ServiceManagerBase(() => {})._type).toBe(ServiceType.LOCAL);
+  expect(new ServiceManagerBase(null, () => {})._type).toBe(ServiceType.PUBLIC);
+  expect(new ServiceManagerBase(null, null, () => {})._type).toBe(ServiceType.PRIVATE);
 });
 
 test('initialize() should call and wait for the provided init function when INITIALIZING', () => {
   let s = {}, called = false;
   expect.assertions(2);
 
-  s.service = new ServiceBase(() => {
+  s.service = new ServiceManagerBase(() => {
     expect(s.service.state()).toBe(ServiceState.INITIALIZING);
     called = true;
   });
@@ -45,18 +46,18 @@ test('initialize() should call and wait for the provided init function when INIT
 test('initialize() should correctly transition to READY/OFFLINE after successfully INITIALIZING', () => {
   expect.assertions(2);
 
-  const s = new ServiceBase();
+  const s = new ServiceManagerBase();
   s.initialize().then(() => expect(s.state()).toBe(ServiceState.READY));
-  const s2 = new ServiceBase(null, () => {});
+  const s2 = new ServiceManagerBase(null, () => {});
   s2.initialize().then(() => expect(s2.state()).toBe(ServiceState.OFFLINE));
 });
 
 test('initialize() should correctly revert back to CREATED after unsuccessfully INITIALIZING', () => {
   expect.assertions(2);
 
-  const s = new ServiceBase(() => { throw new Error('InitError'); });
+  const s = new ServiceManagerBase(() => { throw new Error('InitError'); });
   s.initialize().then(() => { expect(s.state()).toBe(ServiceState.CREATED) });
-  const s2 = new ServiceBase(() => { return Promise.reject('InitError'); });
+  const s2 = new ServiceManagerBase(() => { return Promise.reject('InitError'); });
   s2.initialize().then(() => { expect(s2.state()).toBe(ServiceState.CREATED) });
 });
 
@@ -64,7 +65,7 @@ test('initialize() should call onInitialized handlers and reflect state through 
   const s = {};
   let inits = 0;
 
-  s.local = new ServiceBase()
+  s.local = new ServiceManagerBase()
     .onInitialized(() => inits++)
     .onInitialized(() => {
       expect(s.local.state()).toBe(ServiceState.READY);
@@ -76,7 +77,7 @@ test('initialize() should call onInitialized handlers and reflect state through 
       inits++;
     });
 
-  s.public = new ServiceBase(null, () => {})
+  s.public = new ServiceManagerBase(null, () => {})
     .onInitialized(() => inits++)
     .onInitialized(() => {
       expect(s.public.state()).toBe(ServiceState.OFFLINE);
@@ -88,7 +89,7 @@ test('initialize() should call onInitialized handlers and reflect state through 
       inits++;
     });
 
-  s.private = new ServiceBase(null, null, () => {})
+  s.private = new ServiceManagerBase(null, null, () => {})
     .onInitialized(() => inits++)
     .onInitialized(() => {
       expect(s.private.state()).toBe(ServiceState.OFFLINE);
@@ -110,7 +111,7 @@ test('initialize() should call onInitialized handlers and reflect state through 
 
 test('initialize() should return the existing init promise when called twice, and should call init only once', () => {
   let called = 0;
-  const s = new ServiceBase(() => { called++; });
+  const s = new ServiceManagerBase(() => { called++; });
 
   expect.assertions(3);
 
@@ -126,7 +127,7 @@ test('initialize() should call onReady() of Local Services and reflect state thr
   const s = {};
   let checkpoints = 0;
 
-  s.local = new ServiceBase()
+  s.local = new ServiceManagerBase()
     .onReady(() => checkpoints++)
     .onReady(() => {
       expect(s.local.state()).toBe(ServiceState.READY);
@@ -156,8 +157,8 @@ test('connect() should first wait for OFFLINE and then call the provided connect
       'OFFLINE > CONNECTING', '== connect ==', 'CONNECTING > READY'],
     log1 = [],
     log2 = [],
-    service1 = new ServiceBase(() => log1.push('== init =='), () => log1.push('== connect ==')),
-    service2 = new ServiceBase(() => { log2.push('== init =='); }, () => { log2.push('== connect =='); });
+    service1 = new ServiceManagerBase(() => log1.push('== init =='), () => log1.push('== connect ==')),
+    service2 = new ServiceManagerBase(() => { log2.push('== init =='); }, () => { log2.push('== connect =='); });
 
   service1._state.onStateChanged((ns, os) => log1.push(ns + ' > ' + os));
   service2._state.onStateChanged((ns, os) => log2.push(ns + ' > ' + os));
@@ -173,7 +174,7 @@ test('connect() should first wait for OFFLINE and then call the provided connect
 });
 
 test('connect() should correctly revert back to OFFLINE after unsuccessfully CONNECTING', (done) => {
-  const s = new ServiceBase(null, () => { throw new Error('ConnectError'); });
+  const s = new ServiceManagerBase(null, () => { throw new Error('ConnectError'); });
   s.connect().then(() => { expect(s.state()).toBe(ServiceState.OFFLINE); done(); });
 });
 
@@ -181,11 +182,11 @@ test('connect() should call onConnected handlers and reflect state through the i
   const s = {};
   let checkpoints = 0;
 
-  s.local = new ServiceBase().onConnected(() => {
+  s.local = new ServiceManagerBase().onConnected(() => {
     throw new Error('onConnected must never be called on a local service');
   });
 
-  s.public = new ServiceBase(null, () => {})
+  s.public = new ServiceManagerBase(null, () => {})
     .onConnected(() => checkpoints++)
     .onConnected(() => {
       expect(s.public.state()).toBe(ServiceState.READY);
@@ -197,7 +198,7 @@ test('connect() should call onConnected handlers and reflect state through the i
       checkpoints++;
     });
 
-  s.private = new ServiceBase(null, null, () => {})
+  s.private = new ServiceManagerBase(null, null, () => {})
     .onConnected(() => checkpoints++)
     .onConnected(() => {
       expect(s.private.state()).toBe(ServiceState.ONLINE);
@@ -222,7 +223,7 @@ test('connect() should return the existing connect promise when called twice, an
 
   const
     proceed = () => { if (--counter < 1) done(); },
-    s = new ServiceBase(null, () => { called++; });
+    s = new ServiceManagerBase(null, () => { called++; });
 
   const p1 = s.connect();
   p1.then(() => { expect(called).toBe(1); proceed(); });
@@ -235,7 +236,7 @@ test('connect() should return the existing connect promise when called twice, an
 
 test('connect() should pass a disconnect() function to the handler, allowing it to disconnect and reconnect', (done) => {
   let disconnect = null;
-  const s = new ServiceBase(null, d => disconnect = d);
+  const s = new ServiceManagerBase(null, d => disconnect = d);
 
   s.connect().then(() => {
       expect(s.state()).toBe(ServiceState.READY);
@@ -254,7 +255,7 @@ test('connect() should call onReady() of Public Services and reflect state throu
   const s = {};
   let checkpoints = 0;
 
-  s.public = new ServiceBase(null, () => {})
+  s.public = new ServiceManagerBase(null, () => {})
     .onReady(() => checkpoints++)
     .onReady(() => {
       expect(s.public.state()).toBe(ServiceState.READY);
@@ -276,7 +277,7 @@ test('connect() should call onReady() of Public Services and reflect state throu
 });
 
 test('_disconnect() should leave the state unchanged if called in an irrelevant state', () => {
-  const s = new ServiceBase(null, () => {});
+  const s = new ServiceManagerBase(null, () => {});
   s._disconnect();
   expect(s.state()).toBe(ServiceState.CREATED);
 });
@@ -285,7 +286,7 @@ test('_disconnect() should call onDisconnected handlers and reflect state throug
   const s = {};
   let checkpoints = 0, disconnect = null;
 
-  s.public = new ServiceBase(null, d => disconnect = d)
+  s.public = new ServiceManagerBase(null, d => disconnect = d)
     .onDisconnected(() => checkpoints++)
     .onDisconnected(() => {
       expect(s.public.state()).toBe(ServiceState.OFFLINE);
@@ -323,8 +324,8 @@ test('authenticate() should first wait for ONLINE and then call the provided aut
     ],
     log1 = [],
     log2 = [],
-    service1 = new ServiceBase(() => log1.push('== init =='), () => log1.push('== connect =='), () => log1.push('== authenticate ==')),
-    service2 = new ServiceBase(() => log2.push('== init =='), () => log2.push('== connect =='), () => log2.push('== authenticate =='));
+    service1 = new ServiceManagerBase(() => log1.push('== init =='), () => log1.push('== connect =='), () => log1.push('== authenticate ==')),
+    service2 = new ServiceManagerBase(() => log2.push('== init =='), () => log2.push('== connect =='), () => log2.push('== authenticate =='));
 
   service1._state.onStateChanged((ns, os) => log1.push(ns + ' > ' + os));
   service2._state.onStateChanged((ns, os) => log2.push(ns + ' > ' + os));
@@ -341,7 +342,7 @@ test('authenticate() should first wait for ONLINE and then call the provided aut
 });
 
 test('authenticate() should correctly revert back to ONLINE after unsuccessfully AUTHENTICATING', (done) => {
-  const s = new ServiceBase(null, null, () => { throw new Error('AuthError'); });
+  const s = new ServiceManagerBase(null, null, () => { throw new Error('AuthError'); });
   s.authenticate().then(() => { expect(s.state()).toBe(ServiceState.ONLINE); done(); });
 });
 
@@ -349,15 +350,15 @@ test('authenticate() should call onAuthenticated handlers and reflect state thro
   const s = {};
   let checkpoints = 0;
 
-  s.local = new ServiceBase().onAuthenticated(() => {
+  s.local = new ServiceManagerBase().onAuthenticated(() => {
     throw new Error('onAuthenticated must never be called on a local service');
   });
 
-  s.public = new ServiceBase(null, () => {}).onAuthenticated(() => {
+  s.public = new ServiceManagerBase(null, () => {}).onAuthenticated(() => {
     throw new Error('onAuthenticated must never be called on a public service');
   });
 
-  s.private = new ServiceBase(null, null, () => {})
+  s.private = new ServiceManagerBase(null, null, () => {})
     .onAuthenticated(() => checkpoints++)
     .onAuthenticated(() => {
       expect(s.private.state()).toBe(ServiceState.READY);
@@ -382,7 +383,7 @@ test('authenticate() should return the existing authPromise when called twice, a
 
   const
     proceed = () => { if (--counter < 1) done(); },
-    s = new ServiceBase(null, null, () => { called++; });
+    s = new ServiceManagerBase(null, null, () => { called++; });
 
   const p1 = s.authenticate();
   p1.then(() => { expect(called).toBe(1); proceed(); });
@@ -395,7 +396,7 @@ test('authenticate() should return the existing authPromise when called twice, a
 
 test('authenticate() should pass a working deauthenticate() function to the handler', (done) => {
   let deauthenticate = null, checkpoints = 0;
-  const s = new ServiceBase(null, null, d => deauthenticate = d);
+  const s = new ServiceManagerBase(null, null, d => deauthenticate = d);
   
   s.authenticate().then(() => {
     expect(s.state()).toBe(ServiceState.READY);
@@ -424,7 +425,7 @@ test('authenticate() should call onReady() of Private Services and reflect state
   const s = {};
   let checkpoints = 0;
 
-  s.private = new ServiceBase(null, null, () => {})
+  s.private = new ServiceManagerBase(null, null, () => {})
     .onReady(() => checkpoints++)
     .onReady(() => {
       expect(s.private.state()).toBe(ServiceState.READY);
@@ -446,7 +447,7 @@ test('authenticate() should call onReady() of Private Services and reflect state
 });
 
 test('_deauthenticate() should leave the state unchanged if called in an irrelevant state', () => {
-  const s = new ServiceBase(null, null, () => {});
+  const s = new ServiceManagerBase(null, null, () => {});
   expect.assertions(2);
 
   s.initialize().then(() => {
@@ -460,7 +461,7 @@ test('_deauthenticate() should call onDeauthenticated handlers and reflect state
   const s = {};
   let checkpoints = 0, deauth = null;
 
-  s.private = new ServiceBase(null, null, d => deauth = d)
+  s.private = new ServiceManagerBase(null, null, d => deauth = d)
     .onDeauthenticated(() => checkpoints++)
     .onDeauthenticated(() => {
       expect(s.private.state()).toBe(ServiceState.ONLINE);
@@ -489,7 +490,7 @@ test('_deauthenticate() should call onDeauthenticated handlers and reflect state
 
 test('should correctly deauthenticate when disconnecting during the READY state.', (done) => {
   let disconnect = null, checkpoints = 0;
-  const s = new ServiceBase(null, d => disconnect = d, () => {});
+  const s = new ServiceManagerBase(null, d => disconnect = d, () => {});
 
   expect(s._type).toBe(ServiceType.PRIVATE);
 
@@ -518,7 +519,7 @@ test('should correctly deauthenticate when disconnecting during the READY state.
 test('should correctly handle a disconnect in the AUTHENTICATING state.', (done) => {
   let disconnect = null, checkpoints = 0, s = {};
 
-  s.service = new ServiceBase(
+  s.service = new ServiceManagerBase(
     null,
     d => disconnect = d,
     () => {

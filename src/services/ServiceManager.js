@@ -1,4 +1,4 @@
-import ServiceBase from './ServiceBase';
+import ServiceManagerBase from './ServiceManagerBase';
 
 class DependencyNotResolvedError extends Error {
   constructor(service, dependency) {
@@ -6,7 +6,7 @@ class DependencyNotResolvedError extends Error {
   }
 }
 
-class Service extends ServiceBase {
+class ServiceManager extends ServiceManagerBase {
 
   /**
    * @param {string} name
@@ -52,7 +52,7 @@ class Service extends ServiceBase {
   }
 
   _dependency(name) {
-    if (!(this[name] instanceof Service)) {
+    if (!(this[name] instanceof ServiceManager)) {
       throw new DependencyNotResolvedError(this, name);
     }
 
@@ -61,6 +61,6 @@ class Service extends ServiceBase {
 }
 
 export {
-  Service as default,
+  ServiceManager as default,
   DependencyNotResolvedError
 };

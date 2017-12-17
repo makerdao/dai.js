@@ -1,4 +1,4 @@
-import Service from './Service';
+import ServiceManager from './ServiceManager';
 
 class InvalidServiceError extends Error {
   constructor(message) {
@@ -31,8 +31,8 @@ class Container {
   }
 
   register(service, name = null) {
-    if (!(service instanceof Service)) {
-      throw new InvalidServiceError('Object must be of type Service');
+    if (!(service instanceof ServiceManager)) {
+      throw new InvalidServiceError('Object must be of type ServiceManager');
     }
 
     name = name || service.getName();

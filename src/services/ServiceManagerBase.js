@@ -1,17 +1,6 @@
 import StateMachine from './StateMachine';
-import {default as ServiceState, privateServiceLifeCycle, publicServiceLifeCycle, localServiceLifeCycle} from './ServiceState';
-
-const ServiceType = {
-  LOCAL: 'LOCAL',
-  PUBLIC: 'PUBLIC',
-  PRIVATE: 'PRIVATE',
-};
-
-const serviceTypeTransitions = {
-  LOCAL: localServiceLifeCycle,
-  PUBLIC: publicServiceLifeCycle,
-  PRIVATE: privateServiceLifeCycle
-};
+import ServiceState from './ServiceState';
+import ServiceType, { serviceTypeTransitions } from "./ServiceType";
 
 function _promisify(unsafeCallback) {
   return new Promise((resolve, reject) => {
@@ -23,7 +12,7 @@ function _promisify(unsafeCallback) {
   });
 }
 
-class ServiceBase {
+class ServiceManagerBase {
 
   /**
    * @param init {function|null}
@@ -333,7 +322,4 @@ class ServiceBase {
   }
 }
 
-export {
-  ServiceBase as default,
-  ServiceType
-}
+export default ServiceManagerBase;
