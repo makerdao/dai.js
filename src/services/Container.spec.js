@@ -4,15 +4,13 @@ import
 
 import ServiceManager from './ServiceManager';
 
-const serviceA = new ServiceManager('ServiceA');
-const serviceB = new ServiceManager('ServiceB', ['ServiceA']);
-const serviceC = new ServiceManager('ServiceC', ['ServiceA', 'ServiceB']);
-const serviceD = new ServiceManager('ServiceD', ['ServiceC']);
-const serviceE = new ServiceManager('ServiceE', ['ServiceF']);
-const serviceF = new ServiceManager('ServiceF', ['ServiceE']);
-const serviceG = new ServiceManager('ServiceG', ['ServiceG']);
-
-
+const serviceA = new ServiceManager('ServiceA').createService();
+const serviceB = new ServiceManager('ServiceB', ['ServiceA']).createService();
+const serviceC = new ServiceManager('ServiceC', ['ServiceA', 'ServiceB']).createService();
+const serviceD = new ServiceManager('ServiceD', ['ServiceC']).createService();
+const serviceE = new ServiceManager('ServiceE', ['ServiceF']).createService();
+const serviceF = new ServiceManager('ServiceF', ['ServiceE']).createService();
+const serviceG = new ServiceManager('ServiceG', ['ServiceG']).createService();
 
 test("register() should throw when registering an invalid service", () => {
   expect(() => (new Container()).register()).toThrow(InvalidServiceError.Error);
@@ -20,7 +18,7 @@ test("register() should throw when registering an invalid service", () => {
   expect(() => (new Container("NotAService")).register()).toThrow(InvalidServiceError.Error);
 });
 
-test("register()should throw when registering a duplicate service", () => {
+test("register() should throw when registering a duplicate service", () => {
   expect(() => (new Container()).register(serviceA, 'MyService').register(serviceB, 'MyService'))
     .toThrow(ServiceAlreadyRegisteredError.Error);
 });
@@ -42,9 +40,9 @@ test("service() should return a registered service by name", () => {
     .register(serviceA, 'MyOtherNameForA')
     .register(serviceB, 'MyOtherNameForB');
 
-  expect(c.service(serviceA.getName())).toBe(serviceA);
+  expect(c.service(serviceA.manager().name())).toBe(serviceA);
   expect(c.service('MyOtherNameForA')).toBe(serviceA);
-  expect(c.service(serviceB.getName())).toBe(serviceB);
+  expect(c.service(serviceB.manager().name())).toBe(serviceB);
   expect(c.service('MyOtherNameForB')).toBe(serviceB);
 });
 
@@ -74,14 +72,14 @@ test("getServices() should return the services in load order, regardless of regi
 
   const processed = {};
   [serviceA, serviceB, serviceC, serviceD].forEach(s => {
-    s.getDependencies().forEach(d => expect(processed[d]).toBe(true));
-    processed[s.getName()] = true;
+    s.manager().dependencies().forEach(d => expect(processed[d]).toBe(true));
+    processed[s.manager().name()] = true;
   })
 });
 
 test("getServices() should correctly set all service dependencies", () => {
   new Container().register(serviceD).register(serviceC).register(serviceB).register(serviceA).getServices()
-    .forEach(s => s.getDependencies().forEach(d => expect(s[d] instanceof ServiceManager && s[d].getName() === d).toBe(true)));
+    .forEach(s => s.manager().dependencies().forEach(d => expect(s.manager().dependency(d).manager() instanceof ServiceManager && s.manager().dependency(d).manager().name() === d).toBe(true)));
 });
 
 test("getServices() should throw on dependency loops", () => {

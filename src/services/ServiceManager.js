@@ -1,12 +1,58 @@
 import ServiceManagerBase from './ServiceManagerBase';
 
+/**
+ *
+ */
+class InvalidServiceError extends Error {
+  constructor(message) {
+    super(message);
+  }
+}
+
+/**
+ *
+ */
+class UnknownDependencyError extends Error {
+  constructor(service, dependency) {
+    super('Injected service ' + dependency + ' is not a dependency of ' + service);
+  }
+}
+
+/**
+ *
+ */
 class DependencyNotResolvedError extends Error {
   constructor(service, dependency) {
     super('Dependency ' + dependency + ' of service ' + service + ' is unavailable.');
   }
 }
 
+/**
+ * @param callback
+ * @returns {Promise}
+ * @private
+ */
+function _waitForDependencies(callback) {
+  return Promise.all(this.dependencies().map(dependency => callback(dependency)));
+}
+
+/**
+ *
+ */
 class ServiceManager extends ServiceManagerBase {
+
+  /**
+   * @param {*} service
+   * @returns {boolean}
+   */
+  static isValidService(service) {
+    return (
+      service !== null &&
+      typeof service === 'object' &&
+      typeof service.manager === 'function' &&
+      service.manager() instanceof ServiceManager
+    );
+  }
 
   /**
    * @param {string} name
@@ -23,44 +69,73 @@ class ServiceManager extends ServiceManagerBase {
     }
 
     this._name = name;
-    this._deps = dependencies;
-    this._deps.forEach(d => this[d] = null);
+    this._dependencies = dependencies;
+    this._injections = {};
+    dependencies.forEach((d) => this._injections[d] = null);
   }
 
-  getName() {
+  name() {
     return this._name;
   }
 
-  getDependencies() {
-    return this._deps;
+  dependencies() {
+    return this._dependencies;
+  }
+  
+  inject(dependency, service) {
+    if (typeof this._injections[dependency] === 'undefined') {
+      throw new UnknownDependencyError(this.name(), dependency);
+    }
+
+    if (!ServiceManager.isValidService(service)) {
+      throw new InvalidServiceError('Cannot inject invalid service in ' + this.name());
+    }
+
+    this._injections[dependency] = service;
+
+    return this;
+  }
+  
+  dependency(name) {
+    if (this._injections[name] === null) {
+      throw new DependencyNotResolvedError(this.name(), name);
+    }
+
+    return this._injections[name];
+  }
+
+  initialize() {
+    return this.initializeDependencies().then(() => super.initialize());
+  }
+
+  connect() {
+    return this.connectDependencies().then(() => super.connect());
+  }
+
+  authenticate() {
+    return this.authenticateDependencies().then(() => super.authenticate());
   }
 
   initializeDependencies() {
-    return this._waitForDependencies(d => this._dependency(d).initialize());
+    return _waitForDependencies.call(this, d => this.dependency(d).manager().initialize());
   }
 
   connectDependencies() {
-    return this._waitForDependencies(d => this._dependency(d).connect());
+    return _waitForDependencies.call(this, d => this.dependency(d).manager().connect());
   }
 
   authenticateDependencies() {
-    return this._waitForDependencies(d => this._dependency(d).authenticate());
+    return _waitForDependencies.call(this, d => this.dependency(d).manager().authenticate());
   }
 
-  _waitForDependencies(callback) {
-    return Promise.all(this.getDependencies().map(dependency => callback(dependency)));
-  }
-
-  _dependency(name) {
-    if (!(this[name] instanceof ServiceManager)) {
-      throw new DependencyNotResolvedError(this, name);
-    }
-
-    return this[name];
+  createService() {
+    return { manager: () => this };
   }
 }
 
 export {
   ServiceManager as default,
+  InvalidServiceError,
+  UnknownDependencyError,
   DependencyNotResolvedError
 };

@@ -25,10 +25,10 @@ test('constructor() should correctly set default lifecycle functions when they a
 });
 
 test('constructor() should correctly determine the service type', () => {
-  expect(new ServiceManagerBase()._type).toBe(ServiceType.LOCAL);
-  expect(new ServiceManagerBase(() => {})._type).toBe(ServiceType.LOCAL);
-  expect(new ServiceManagerBase(null, () => {})._type).toBe(ServiceType.PUBLIC);
-  expect(new ServiceManagerBase(null, null, () => {})._type).toBe(ServiceType.PRIVATE);
+  expect(new ServiceManagerBase().type()).toBe(ServiceType.LOCAL);
+  expect(new ServiceManagerBase(() => {}).type()).toBe(ServiceType.LOCAL);
+  expect(new ServiceManagerBase(null, () => {}).type()).toBe(ServiceType.PUBLIC);
+  expect(new ServiceManagerBase(null, null, () => {}).type()).toBe(ServiceType.PRIVATE);
 });
 
 test('initialize() should call and wait for the provided init function when INITIALIZING', () => {
@@ -492,7 +492,7 @@ test('should correctly deauthenticate when disconnecting during the READY state.
   let disconnect = null, checkpoints = 0;
   const s = new ServiceManagerBase(null, d => disconnect = d, () => {});
 
-  expect(s._type).toBe(ServiceType.PRIVATE);
+  expect(s.type()).toBe(ServiceType.PRIVATE);
 
   s.authenticate().then(() => {
     expect(s.state()).toBe(ServiceState.READY);
@@ -535,7 +535,7 @@ test('should correctly handle a disconnect in the AUTHENTICATING state.', (done)
     }
   );
 
-  expect(s.service._type).toBe(ServiceType.PRIVATE);
+  expect(s.service.type()).toBe(ServiceType.PRIVATE);
 
   s.service.authenticate().then(() => {
     expect(s.service.state()).toBe(ServiceState.OFFLINE);

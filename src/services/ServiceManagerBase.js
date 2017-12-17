@@ -171,6 +171,13 @@ class ServiceManagerBase {
   }
 
   /**
+   * @returns {string}
+   */
+  type() {
+    return this._type;
+  }
+
+  /**
    * @returns {boolean}
    */
   isInitialized() {

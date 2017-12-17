@@ -1,10 +1,4 @@
-import ServiceManager from './ServiceManager';
-
-class InvalidServiceError extends Error {
-  constructor(message) {
-    super(message);
-  }
-}
+import ServiceManager, { InvalidServiceError } from './ServiceManager';
 
 class ServiceAlreadyRegisteredError extends Error {
   constructor(name) {
@@ -31,11 +25,11 @@ class Container {
   }
 
   register(service, name = null) {
-    if (!(service instanceof ServiceManager)) {
-      throw new InvalidServiceError('Object must be of type ServiceManager');
+    if (!ServiceManager.isValidService(service)) {
+      throw new InvalidServiceError('Service must be an object with manager() method returning a valid ServiceManager');
     }
 
-    name = name || service.getName();
+    name = name || service.manager().name();
 
     const s = this.service(name, false);
     if (s !== undefined && s !== service) {
@@ -67,7 +61,7 @@ class Container {
       .map(k => this._services[k]);
 
     // Check if all dependencies are registered.
-    currentStack.forEach(service => service.getDependencies().forEach(d => {
+    currentStack.forEach(service => service.manager().dependencies().forEach(d => {
       if (!this._services[d]) {
         throw new ServiceNotFoundError(d);
       }
@@ -78,7 +72,7 @@ class Container {
       currentStack.forEach(s => {
         let postponed = false;
 
-        s.getDependencies().forEach(d => {
+        s.manager().dependencies().forEach(d => {
           if (!postponed && !processed[d]) {
             nextStack.push(s);
             postponed = true;
@@ -86,14 +80,14 @@ class Container {
         });
 
         if (!postponed) {
-          s.getDependencies().forEach(d => s[d] = this._services[d]);
+          s.manager().dependencies().forEach(d => s.manager().inject(d, this._services[d]));
           result.push(s);
-          processed[s.getName()] = true;
+          processed[s.manager().name()] = true;
         }
       });
 
       if (nextStack.length === currentStack.length) {
-        throw new ServiceDependencyLoopError(currentStack.map(s => s.getName()));
+        throw new ServiceDependencyLoopError(currentStack.map(s => s.manager().name()));
       }
 
       currentStack = nextStack;
@@ -105,11 +99,11 @@ class Container {
   }
 
   initialize() {
-    return this._waitForServices(s => s._initializeDependencies().then(() => s.initialize()));
+    return this._waitForServices(s => s.manager().initialize());
   }
 
   connect() {
-    return this._waitForServices(s => s._connectDependencies().then(() => s.connect()));
+    return this._waitForServices(s => s.manager().connect());
   }
 
   _waitForServices(callback) {
