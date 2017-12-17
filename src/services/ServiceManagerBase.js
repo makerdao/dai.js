@@ -262,11 +262,13 @@ class ServiceManagerBase {
    * @param {function} handler
    */
   onDeauthenticated(handler) {
-    this._state.onStateChanged((oldState, newState) => {
-      if (newState === ServiceState.ONLINE && oldState === ServiceState.READY) {
-        handler();
-      }
-    });
+    if (this.type() === ServiceType.PRIVATE) {
+      this._state.onStateChanged((oldState, newState) => {
+        if ((newState === ServiceState.OFFLINE || newState === ServiceState.ONLINE) && oldState === ServiceState.READY) {
+          handler();
+        }
+      });
+    }
 
     return this;
   }

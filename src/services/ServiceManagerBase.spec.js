@@ -459,14 +459,14 @@ test('_deauthenticate() should leave the state unchanged if called in an irrelev
 
 test('_deauthenticate() should call onDeauthenticated handlers and reflect state through the is* methods', (done) => {
   const s = {};
-  let checkpoints = 0, deauth = null;
+  let checkpoints = 0, deauth = null, disconnect = null;
 
-  s.private = new ServiceManagerBase(null, null, d => deauth = d)
+  s.private = new ServiceManagerBase(null, d => disconnect = d, d => deauth = d)
     .onDeauthenticated(() => checkpoints++)
     .onDeauthenticated(() => {
-      expect(s.private.state()).toBe(ServiceState.ONLINE);
+      expect(s.private.state()).toMatch(/^(ONLINE)|(OFFLINE)$/);
       expect(s.private.isInitialized()).toBe(true);
-      expect(s.private.isConnected()).toBe(true);
+      expect(s.private.isConnected()).toBe(s.private.state() === ServiceState.ONLINE);
       expect(s.private.isAuthenticated()).toBe(false);
       expect(s.private.isReady()).toBe(false);
 
@@ -478,19 +478,26 @@ test('_deauthenticate() should call onDeauthenticated handlers and reflect state
     .then(() => {
       expect(s.private.state()).toBe(ServiceState.READY);
       expect(typeof deauth).toBe('function');
-      checkpoints++;
-
       deauth();
       expect(s.private.state()).toBe(ServiceState.ONLINE);
 
-      expect(checkpoints).toBe(3);
-      done();
+      s.private.authenticate().then(() => {
+        expect(s.private.state()).toBe(ServiceState.READY);
+        expect(typeof disconnect).toBe('function');
+        disconnect();
+        expect(s.private.state()).toBe(ServiceState.OFFLINE);
+
+        expect(checkpoints).toBe(4);
+        done();
+      });
     });
 });
 
 test('should correctly deauthenticate when disconnecting during the READY state.', (done) => {
-  let disconnect = null, checkpoints = 0;
+  let disconnect = null, checkpoints = 0, onDeauth = 0;
   const s = new ServiceManagerBase(null, d => disconnect = d, () => {});
+
+  s.onDeauthenticated(() => onDeauth++);
 
   expect(s.type()).toBe(ServiceType.PRIVATE);
 
@@ -512,22 +519,26 @@ test('should correctly deauthenticate when disconnecting during the READY state.
     
   }).then(() => {
     expect(checkpoints).toBe(3);
+    expect(onDeauth).toBe(1);
     done();
   });
 });
 
 test('should correctly handle a disconnect in the AUTHENTICATING state.', (done) => {
-  let disconnect = null, checkpoints = 0, s = {};
+  let disconnect = null, checkpoints = 0, s = {}, onDeauth = 0;
 
   s.service = new ServiceManagerBase(
-    null,
+    () => {
+      s.service.onDeauthenticated(() => onDeauth++);
+      checkpoints++;
+    },
     d => disconnect = d,
     () => {
       expect(typeof disconnect).toBe('function');
       expect(s.service.state()).toBe(ServiceState.AUTHENTICATING);
 
       // Only disconnect the first time, not when reauthenticating
-      if (checkpoints < 1) {
+      if (checkpoints === 1) {
         disconnect();
       }
 
@@ -549,7 +560,9 @@ test('should correctly handle a disconnect in the AUTHENTICATING state.', (done)
     checkpoints++;
 
   }).then(() => {
-    expect(checkpoints).toBe(4);
+    // onDeauthenticated should NOT be called, because we were not authenticated yet, when the disconnect happened.
+    expect(onDeauth).toBe(0);
+    expect(checkpoints).toBe(5);
     done();
   });
 

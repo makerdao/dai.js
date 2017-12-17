@@ -7,15 +7,24 @@ import ServiceState from './ServiceState';
  * @private
  */
 function _defineLifeCycleMethods(type) {
-  this.initialize = () => {};
+
+  if (typeof this.initialize === 'undefined') {
+    this.initialize = () => {};
+  }
 
   if (type !== ServiceType.LOCAL) {
-    this.connect = () => {};
+    if (typeof this.connect === 'undefined') {
+      this.connect = () => {};
+    }
+
     this.disconnect = () => {};
   }
 
   if (type === ServiceType.PRIVATE) {
-    this.authenticate = () => {};
+    if (typeof this.authenticate === 'undefined') {
+      this.authenticate = () => {};
+    }
+
     this.deauthenticate = () => {};
   }
 }
