@@ -1,5 +1,4 @@
-
-import {default as ServiceBase} from './ServiceBase';
+import ServiceBase from './ServiceBase';
 
 class DependencyNotResolvedError extends Error {
   constructor(service, dependency) {
