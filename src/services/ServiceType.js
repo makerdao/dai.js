@@ -42,4 +42,4 @@ const serviceTypeTransitions = {
 export {
   ServiceType as default,
   serviceTypeTransitions
-}
+};

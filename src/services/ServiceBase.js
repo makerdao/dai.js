@@ -1,6 +1,6 @@
 import ServiceManager from './ServiceManager';
 import ServiceType from './ServiceType';
-import ServiceState from "./ServiceState";
+import ServiceState from './ServiceState';
 
 /**
  * @param {string} type

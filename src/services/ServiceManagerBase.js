@@ -1,6 +1,6 @@
 import StateMachine from './StateMachine';
 import ServiceState from './ServiceState';
-import ServiceType, { serviceTypeTransitions } from "./ServiceType";
+import ServiceType, { serviceTypeTransitions } from './ServiceType';
 
 function _promisify(unsafeCallback) {
   return new Promise((resolve, reject) => {
@@ -103,7 +103,7 @@ class ServiceManagerBase {
             () => {
               // Check if we are still CONNECTING, because another process might have come in between
               if (this._state.inState(ServiceState.CONNECTING)) {
-                this._state.transitionTo(this._type === ServiceType.PUBLIC ? ServiceState.READY : ServiceState.ONLINE)
+                this._state.transitionTo(this._type === ServiceType.PUBLIC ? ServiceState.READY : ServiceState.ONLINE);
               }
             },
             () => {
