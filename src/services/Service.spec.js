@@ -20,17 +20,6 @@ test("should expose the provided dependencies through getDependencies()", () => 
   expect((new Service(name, [name, name])).getDependencies()).toEqual([name, name]);
 });
 
-test("should return promises resolving to true, when calling the life cycle methods", () => {
-  expect.assertions(2);
-
-  return Promise
-    .all([new Service(name).initialize(), new Service(name).connect()])
-    .then(results => {
-      expect(results[0]).toBe(true);
-      expect(results[1]).toBe(true);
-    });
-});
-
 test("should have uninitialized dependency properties after instantiation", () => {
   const serviceA = new Service("ServiceA", ["ServiceB", "ServiceC"]);
   expect(serviceA.ServiceB).toBe(null);
@@ -39,15 +28,15 @@ test("should have uninitialized dependency properties after instantiation", () =
 
 test("should throw when initializing or connecting dependencies before dependency injection", () => {
   const serviceA = new Service("ServiceA", ["ServiceB", "ServiceC"]);
-  expect(() => serviceA._initializeDependencies()).toThrow(DependencyNotResolvedError.Error);
-  expect(() => serviceA._connectDependencies()).toThrow(DependencyNotResolvedError.Error);
+  expect(() => serviceA.initializeDependencies()).toThrow(DependencyNotResolvedError.Error);
+  expect(() => serviceA.connectDependencies()).toThrow(DependencyNotResolvedError.Error);
 });
 
 test("should resolve to empty array when initializing or connecting empty list of dependencies", () => {
   const serviceA = new Service("ServiceA", []);
   expect.assertions(2);
-  serviceA._initializeDependencies().then(d => expect(d).toEqual([]));
-  serviceA._connectDependencies().then(d => expect(d).toEqual([]));
+  serviceA.initializeDependencies().then(d => expect(d).toEqual([]));
+  serviceA.connectDependencies().then(d => expect(d).toEqual([]));
 });
 
 test("should reject with dependency's reason when initializing or connecting failing dependency", () => {
@@ -59,7 +48,7 @@ test("should reject with dependency's reason when initializing or connecting fai
   serviceB.ServiceA = serviceA;
 
   expect.assertions(2);
-  serviceB._initializeDependencies().then(null, (reason) => expect(reason).toBe('InitErrorA'));
-  serviceB._connectDependencies().then(null, (reason) => expect(reason).toBe('ConnectErrorA'));
+  serviceB.initializeDependencies().then(null, (reason) => expect(reason).toBe('InitErrorA'));
+  serviceB.connectDependencies().then(null, (reason) => expect(reason).toBe('ConnectErrorA'));
 });
 

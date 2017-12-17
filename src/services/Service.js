@@ -1,12 +1,24 @@
 
+import {default as ServiceBase} from './ServiceBase';
+
 class DependencyNotResolvedError extends Error {
   constructor(service, dependency) {
     super('Dependency ' + dependency + ' of service ' + service + ' is unavailable.');
   }
 }
 
-class Service {
-  constructor(name, dependencies = []) {
+class Service extends ServiceBase {
+
+  /**
+   * @param {string} name
+   * @param {string[]} dependencies
+   * @param {function|null} init
+   * @param {function|null} connect
+   * @param {function|null} auth
+   */
+  constructor(name, dependencies = [], init = null, connect = null, auth = null) {
+    super(init, connect, auth);
+
     if (!name) {
       throw new Error('Service name must not be empty.');
     }
@@ -24,20 +36,16 @@ class Service {
     return this._deps;
   }
 
-  initialize() {
-    return Promise.resolve(true);
-  }
-
-  connect() {
-    return Promise.resolve(true);
-  }
-
-  _initializeDependencies() {
+  initializeDependencies() {
     return this._waitForDependencies(d => this._dependency(d).initialize());
   }
 
-  _connectDependencies() {
+  connectDependencies() {
     return this._waitForDependencies(d => this._dependency(d).connect());
+  }
+
+  authenticateDependencies() {
+    return this._waitForDependencies(d => this._dependency(d).authenticate());
   }
 
   _waitForDependencies(callback) {

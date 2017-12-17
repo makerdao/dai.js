@@ -1,4 +1,4 @@
-import StateMachine from './StateMachine';
+import StateMachine from './services/StateMachine';
 
 const State = {
   CREATED: 'CREATED',

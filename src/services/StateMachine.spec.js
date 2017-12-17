@@ -1,4 +1,4 @@
-import { State } from './MakerDao';
+import { State } from '../MakerDao';
 import { default as StateMachine, IllegalStateError } from './StateMachine';
 
 function getTransitionMap() {
