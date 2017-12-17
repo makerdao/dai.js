@@ -42,6 +42,30 @@ function _buildServiceManager(type, name, dependencies) {
   return new ServiceManager(name, dependencies, () => this.initialize(), connect, auth);
 }
 
+/**
+ * @param {ServiceManager} mgr
+ * @private
+ */
+function _installLifeCycleHooks(mgr) {
+  mgr.onInitialized(() => {
+
+    if (mgr.type() !== ServiceType.LOCAL) {
+      mgr.dependencies().forEach(d => {
+        this.get(d).manager().onDisconnected(() => this.disconnect());
+      });
+    }
+
+    if (mgr.type() === ServiceType.PRIVATE) {
+      mgr.dependencies().forEach(d => {
+        this.get(d).manager().onDeauthenticated(() => this.deauthenticate());
+      });
+    }
+  });
+}
+
+/**
+ * @private
+ */
 function _guardLifeCycleMethods() {
 
   const original = {
@@ -82,27 +106,6 @@ function _guardLifeCycleMethods() {
   }
 }
 
-/**
- * @param {ServiceManager} mgr
- * @private
- */
-function _installLifeCycleHooks(mgr) {
-  mgr.onInitialized(() => {
-
-    if (mgr.type() !== ServiceType.LOCAL) {
-      mgr.dependencies().forEach(d => {
-        this.get(d).manager().onDisconnected(() => this.disconnect());
-      });
-    }
-
-    if (mgr.type() === ServiceType.PRIVATE) {
-      mgr.dependencies().forEach(d => {
-        this.get(d).manager().onDeauthenticated(() => this.deauthenticate());
-      });
-    }
-  });
-}
-
 class ServiceBase {
   /**
    * @param {string} type
@@ -117,7 +120,7 @@ class ServiceBase {
     _defineLifeCycleMethods.call(this, type);
     this._serviceManager = _buildServiceManager.call(this, type, name, dependencies);
     _installLifeCycleHooks.call(this, this._serviceManager);
-    _guardLifeCycleMethods.call(this, this._serviceManager);
+    _guardLifeCycleMethods.call(this);
   }
 
   /**
