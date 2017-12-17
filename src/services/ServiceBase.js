@@ -175,6 +175,13 @@ class ServiceBase {
   }
 
   /**
+   * @returns {string}
+   */
+  state() {
+    return this._state.state();
+  }
+
+  /**
    * @returns {boolean}
    */
   isInitialized() {
@@ -232,9 +239,48 @@ class ServiceBase {
   /**
    * @param {function} handler
    */
+  onDisconnected(handler) {
+    this._state.onStateChanged((oldState, newState) => {
+      if (newState === ServiceState.OFFLINE && (oldState === ServiceState.ONLINE || oldState === ServiceState.READY)) {
+        handler();
+      }
+    });
+
+    return this;
+  }
+
+  /**
+   * @param {function} handler
+   */
   onAuthenticated(handler) {
     this._state.onStateChanged((oldState, newState) => {
       if (oldState === ServiceState.AUTHENTICATING && newState === ServiceState.READY) {
+        handler();
+      }
+    });
+
+    return this;
+  }
+
+  /**
+   * @param {function} handler
+   */
+  onDeauthenticated(handler) {
+    this._state.onStateChanged((oldState, newState) => {
+      if (newState === ServiceState.ONLINE && oldState === ServiceState.READY) {
+        handler();
+      }
+    });
+
+    return this;
+  }
+
+  /**
+   * @param {function} handler
+   */
+  onReady(handler) {
+    this._state.onStateChanged((_, newState) => {
+      if (newState === ServiceState.READY) {
         handler();
       }
     });
