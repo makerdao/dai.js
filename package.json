@@ -54,5 +54,7 @@
     "webpack-dev-server": "^2.7.1",
     "webpack-merge": "^4.1.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "web3": "^0.20.2"
+  }
 }
