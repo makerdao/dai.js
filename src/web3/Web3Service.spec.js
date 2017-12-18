@@ -1,6 +1,6 @@
 import Web3Service from './Web3Service';
 
-test('should fetch version info on connect', () => {
+test('should fetch version info on connect', (done) => {
   const web3 = new Web3Service();
 
   web3.manager().connect().then(() => {
@@ -8,5 +8,7 @@ test('should fetch version info on connect', () => {
     expect(web3.version().node).toMatch(/^(Parity)|(MetaMask)$/);
     expect(web3.version().network).toMatch(/^[0-9]+$/);
     expect(web3.version().ethereum).toMatch(/^[0-9]+$/);
+    
+    done();
   });
 });
