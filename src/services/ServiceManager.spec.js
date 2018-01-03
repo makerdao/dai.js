@@ -16,12 +16,6 @@ test("should throw an error when no name is provided", () => {
   expect(() => new ServiceManager(null)).toThrow('Service name must not be empty.');
 });
 
-test("should throw an error when no name is provided", () => {
-  expect(() => new ServiceManager()).toThrow('Service name must not be empty.');
-  expect(() => new ServiceManager("")).toThrow('Service name must not be empty.');
-  expect(() => new ServiceManager(null)).toThrow('Service name must not be empty.');
-});
-
 test("should expose the provided service name through name()", () => {
   expect(new ServiceManager(name).name()).toBe('IAmAService');
 });

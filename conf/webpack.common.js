@@ -27,10 +27,15 @@ module.exports = {
 
   resolve: {
     extensions: ['.js'],  // extensions that are used
-    modules: [path.join(process.cwd(), 'src'), 'node_modules'] // directories where to look for modules
+    modules: [path.join(process.cwd(), 'src'), 'node_modules'], // directories where to look for modules,
+    alias: {
+      'source-map-support': path.join(process.cwd(), 'src/shim.js'),
+      'fs': path.join(process.cwd(), 'src/shim.js')
+    }
   },
 
   module: {
+    noParse: [/dtrace-provider/, /safe-json-stringify/, /mv/],
     rules: [{
       enforce: "pre", //to check source files, not modified by other loaders (like babel-loader)
       test: /\.js$/,

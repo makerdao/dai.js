@@ -7,7 +7,7 @@ export default class Web3Service extends PrivateService {
    * @param {string} name
    */
   constructor(name = 'web3') {
-    super(name);
+    super(name, ['log']);
     this._web3 = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } };
   }
@@ -48,18 +48,16 @@ export default class Web3Service extends PrivateService {
         whisper: versions[3],
       },
       reason => {
-        // eslint-disable-next-line
-        console.error(reason);
+        this.get('log').error(reason);
       }
+
     ).then(() => {
-      // eslint-disable-next-line
-      console.log('Web3 version: ', this._info.version);
+      this.get('log').info('Web3 version: ', this._info.version);
     });
   }
 
   authenticate() {
-    // eslint-disable-next-line
-    console.log('Web3 is authenticating...');
+    this.get('log').info('Web3 is authenticating...');
   }
 }
 

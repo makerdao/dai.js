@@ -208,6 +208,7 @@ class ServiceManagerBase {
 
   /**
    * @param {function} handler
+   * @returns {ServiceManagerBase}
    */
   onInitialized(handler) {
     this._state.onStateChanged((oldState, newState) => {
@@ -221,6 +222,7 @@ class ServiceManagerBase {
 
   /**
    * @param {function} handler
+   * @returns {ServiceManagerBase}
    */
   onConnected(handler) {
     this._state.onStateChanged((oldState, newState) => {
@@ -234,6 +236,7 @@ class ServiceManagerBase {
 
   /**
    * @param {function} handler
+   * @returns {ServiceManagerBase}
    */
   onDisconnected(handler) {
     this._state.onStateChanged((oldState, newState) => {
@@ -247,6 +250,7 @@ class ServiceManagerBase {
 
   /**
    * @param {function} handler
+   * @returns {ServiceManagerBase}
    */
   onAuthenticated(handler) {
     this._state.onStateChanged((oldState, newState) => {
@@ -260,6 +264,7 @@ class ServiceManagerBase {
 
   /**
    * @param {function} handler
+   * @returns {ServiceManagerBase}
    */
   onDeauthenticated(handler) {
     if (this.type() === ServiceType.PRIVATE) {
@@ -275,6 +280,7 @@ class ServiceManagerBase {
 
   /**
    * @param {function} handler
+   * @returns {ServiceManagerBase}
    */
   onReady(handler) {
     this._state.onStateChanged((_, newState) => {
@@ -283,6 +289,15 @@ class ServiceManagerBase {
       }
     });
 
+    return this;
+  }
+
+  /**
+   * @param {function} handler
+   * @returns {ServiceManagerBase}
+   */
+  onStateChanged(handler) {
+    this._state.onStateChanged(handler);
     return this;
   }
 
