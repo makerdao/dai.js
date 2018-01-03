@@ -9,7 +9,7 @@ export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
     super(name, ['log']);
     this._web3 = null;
-    this._info = { version: { api: null, node: null, network: null, ethereum: null } };
+    this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
   }
 
   /**
@@ -34,9 +34,9 @@ export default class Web3Service extends PrivateService {
 
   connect() {
     return Promise.all([
-      _web3Promise(_ => this._web3.version.getNode(_), null),
-      _web3Promise(_ => this._web3.version.getNetwork(_), null),
-      _web3Promise(_ => this._web3.version.getEthereum(_), null),
+      _web3Promise(_ => this._web3.version.getNode(_)),
+      _web3Promise(_ => this._web3.version.getNetwork(_)),
+      _web3Promise(_ => this._web3.version.getEthereum(_)),
       _web3Promise(_ => this._web3.version.getWhisper(_), null)
 
     ]).then(
@@ -58,8 +58,20 @@ export default class Web3Service extends PrivateService {
 
   authenticate() {
     this.get('log').info('Web3 is authenticating...');
-  }
-}
+    return _web3Promise(_ => this._web3.eth.getAccounts(_))
+    .then(data => {
+      console.log(data, (data instanceof Array), data.length);
+      if (!(data instanceof Array) || (data.length < 1) ) {
+        console.log('throwing');
+        throw new Error ('Web3 is not authenticated');
+      }
+      this._info.account = data[0];
+    },
+    reason => {
+      this.get('log').error(reason);
+    });
+  };
+};
 
 /* istanbul ignore next */
 function _web3Promise(cb, onErrorValue) {
