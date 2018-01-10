@@ -34,7 +34,7 @@ with internal settlement services.
 
 ## Start Dev Server
 
-1. `git clone https://github.com/wkampmann/makerdao-integration-poc.git`
+1. `git clone https://github.com/makerdao/makerdao-integration-poc`
 2. Run `npm install`
 3. Start the dev server using `npm start`
 3. Open [http://localhost:9000](http://localhost:9000)
