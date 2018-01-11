@@ -26,7 +26,8 @@ export default class Web3Service extends PrivateService {
       web3.setProvider(window.web3.currentProvider);
       window.web3 = web3;
     } else {
-      web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
+      //web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
+      web3.setProvider(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
     }
 
     this._web3 = web3;
@@ -59,19 +60,17 @@ export default class Web3Service extends PrivateService {
   authenticate() {
     this.get('log').info('Web3 is authenticating...');
     return _web3Promise(_ => this._web3.eth.getAccounts(_))
-    .then(data => {
-      console.log(data, (data instanceof Array), data.length);
-      if (!(data instanceof Array) || (data.length < 1) ) {
-        console.log('throwing');
-        throw new Error ('Web3 is not authenticated');
-      }
-      this._info.account = data[0];
-    },
-    reason => {
-      this.get('log').error(reason);
-    });
-  };
-};
+      .then(data => {
+        if (!(data instanceof Array) || (data.length < 1) ) {
+          throw new Error ('Web3 is not authenticated');
+        }
+        this._info.account = data[0];
+      },
+      reason => {
+        this.get('log').error(reason);
+      });
+  }
+}
 
 /* istanbul ignore next */
 function _web3Promise(cb, onErrorValue) {
