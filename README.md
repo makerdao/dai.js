@@ -49,7 +49,7 @@ with internal settlement services.
 - `npm test` - run all tests
 - `npm run test:watch` - run all tests in watch mode
 
-# Adding TravisCI testing
+# testing Adding TravisCI testing
 
 ## License
 _makerdao-exchange-integration_ is available under MIT.
