@@ -20,12 +20,12 @@ test('should reject invalid transition maps', () => {
   delete missingState[State.ONLINE];
 
   const illegalType = getTransitionMap();
-  illegalType[State.ONLINE] = {not: "an array"};
+  illegalType[State.ONLINE] = {not: 'an array'};
 
   expect(() => new StateMachine(State.CREATED, missingState)).toThrow();
   expect(() => new StateMachine(State.CREATED, illegalType)).toThrow();
-  expect(() => new StateMachine(State.CREATED, "not an object")).toThrow();
-  expect(() => new StateMachine("MISSING_INITIAL_STATE", getTransitionMap())).toThrow();
+  expect(() => new StateMachine(State.CREATED, 'not an object')).toThrow();
+  expect(() => new StateMachine('MISSING_INITIAL_STATE', getTransitionMap())).toThrow();
 });
 
 test('should start in the initial state', () => {
@@ -93,6 +93,6 @@ test('should do nothing when transitioning to the current state', () => {
 
   md.transitionTo(md.state());
 
-  expect(md.state()).toBe("CREATED");
+  expect(md.state()).toBe('CREATED');
   expect(triggered).toBe(false);
 });

@@ -1,7 +1,7 @@
 import ServiceBase from './ServiceBase';
 import ServiceType from './ServiceType';
-import ServiceManager from "./ServiceManager";
-import ServiceState from "./ServiceState";
+import ServiceManager from './ServiceManager';
+import ServiceState from './ServiceState';
 
 const serviceName = 'MyService';
 

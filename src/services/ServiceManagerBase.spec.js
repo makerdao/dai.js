@@ -1,19 +1,19 @@
-import ServiceManagerBase from "./ServiceManagerBase";
+import ServiceManagerBase from './ServiceManagerBase';
 import ServiceState from './ServiceState';
 import ServiceType from './ServiceType';
 
 test('constructor() should throw on invalid init function', () => {
-  expect(() => new ServiceManagerBase("")).toThrow('Invalid argument init: not a function or null.');
+  expect(() => new ServiceManagerBase('')).toThrow('Invalid argument init: not a function or null.');
   expect(() => new ServiceManagerBase(false)).toThrow('Invalid argument init: not a function or null.');
 });
 
 test('constructor() should throw on invalid connect function', () => {
-  expect(() => new ServiceManagerBase(null, "")).toThrow('Invalid argument connect: not a function or null.');
+  expect(() => new ServiceManagerBase(null, '')).toThrow('Invalid argument connect: not a function or null.');
   expect(() => new ServiceManagerBase(null, false)).toThrow('Invalid argument connect: not a function or null.');
 });
 
 test('constructor() should throw on invalid auth function', () => {
-  expect(() => new ServiceManagerBase(null, null, "")).toThrow('Invalid argument auth: not a function or null.');
+  expect(() => new ServiceManagerBase(null, null, '')).toThrow('Invalid argument auth: not a function or null.');
   expect(() => new ServiceManagerBase(null, null, false)).toThrow('Invalid argument auth: not a function or null.');
 });
 
@@ -56,9 +56,9 @@ test('initialize() should correctly revert back to CREATED after unsuccessfully 
   expect.assertions(2);
 
   const s = new ServiceManagerBase(() => { throw new Error('InitError'); });
-  s.initialize().then(() => { expect(s.state()).toBe(ServiceState.CREATED) });
+  s.initialize().then(() => { expect(s.state()).toBe(ServiceState.CREATED); });
   const s2 = new ServiceManagerBase(() => { return Promise.reject('InitError'); });
-  s2.initialize().then(() => { expect(s2.state()).toBe(ServiceState.CREATED) });
+  s2.initialize().then(() => { expect(s2.state()).toBe(ServiceState.CREATED); });
 });
 
 test('initialize() should call onInitialized handlers and reflect state through the is* methods', (done) => {
@@ -238,7 +238,8 @@ test('connect() should pass a disconnect() function to the handler, allowing it 
   let disconnect = null;
   const s = new ServiceManagerBase(null, d => disconnect = d);
 
-  s.connect().then(() => {
+  s.connect()
+    .then(() => {
       expect(s.state()).toBe(ServiceState.READY);
       expect(typeof disconnect).toBe('function');
       disconnect();
@@ -397,17 +398,17 @@ test('authenticate() should return the existing authPromise when called twice, a
 test('authenticate() should pass a working deauthenticate() function to the handler', (done) => {
   let deauthenticate = null, checkpoints = 0;
   const s = new ServiceManagerBase(null, null, d => deauthenticate = d);
-  
+
   s.authenticate().then(() => {
     expect(s.state()).toBe(ServiceState.READY);
     expect(typeof deauthenticate).toBe('function');
     checkpoints++;
-    
+
     deauthenticate();
-    
+
     expect(s.state()).toBe(ServiceState.ONLINE);
     checkpoints++;
-    
+
     return s.authenticate();
 
   }).then(() => {
@@ -516,7 +517,7 @@ test('should correctly deauthenticate when disconnecting during the READY state.
   }).then(() => {
     expect(s.state()).toBe(ServiceState.READY);
     checkpoints++;
-    
+
   }).then(() => {
     expect(checkpoints).toBe(3);
     expect(onDeauth).toBe(1);

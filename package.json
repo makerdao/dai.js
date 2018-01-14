@@ -28,7 +28,7 @@
   "scripts": {
     "build": "webpack --env=prod --progress --profile --colors",
     "coverage": "jest --coverage --config=conf/jest.config.js",
-    "lint": "eslint ./src/**.js",
+    "lint": "eslint ./src/**.js ./src/**/**.js",
     "precommit": "npm run lint",
     "prepush": "npm run test",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
