@@ -26,8 +26,8 @@ export default class Web3Service extends PrivateService {
       web3.setProvider(window.web3.currentProvider);
       window.web3 = web3;
     } else {
-      //web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
-      web3.setProvider(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
+      web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
+      //web3.setProvider(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
     }
 
     this._web3 = web3;

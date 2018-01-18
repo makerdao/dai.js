@@ -11,13 +11,11 @@ test('should fetch version info on connect', (done) => {
 
   web3.manager().inject('log', log).connect().then(() => {
     expect(web3.version().api).toMatch(/^([0-9]+\.)*[0-9]+$/);
-    //expect(web3.version().node).toMatch(/^(Parity)|(MetaMask)$/);
-    //expect(web3.version().network).toMatch(/^[0-9]+$/);
+    expect(web3.version().node).toMatch(/^(Parity)|(MetaMask)$/);
+    expect(web3.version().network).toMatch(/^[0-9]+$/);
     expect(web3.version().ethereum).toMatch(/^[0-9]+$/);
-
     done();
   });
-  done();
 });
 
 test('should correctly use web3 provider of a previously injected web3 object, or use default', (done) => {
@@ -33,9 +31,7 @@ test('should correctly use web3 provider of a previously injected web3 object, o
     })
     .then(() => {
       window.web3 = web3;
-
       return service2.manager().inject('log', log).initialize();
-
     })
     .then(() => {
       expect(service2._web3.currentProvider).toBe(window.web3.currentProvider);
