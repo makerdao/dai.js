@@ -58,6 +58,7 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
+    "bignumber.js": "^5.0.0",
     "bunyan": "^1.8.12",
     "web3": "^0.20.2"
   }
