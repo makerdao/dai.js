@@ -12,7 +12,7 @@ before_install:
 - . /home/travis/.nix-profile/etc/profile.d/nix.sh
 - nix-channel --add https://nix.dapphub.com/pkgs/dapphub
 - nix-channel --update
-- nix-env -iA dapphub.{dapp,seth,hevm,solc,ethrun}
+- nix-env -iA dapphub.{dapp,seth,hevm,solc}
 - dapp --version
 - npm i -g npm@^5.3.0
 install:
