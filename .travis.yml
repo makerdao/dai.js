@@ -5,6 +5,10 @@ cache:
   directories:
   - node_modules
 before_install:
+- curl https://nixos.org/nix/install | sh
+- nix-channel --add https://nix.dapphub.com/pkgs/dapphub
+- nix-channel --update
+- nix-env -iA dapphub.{dapp,seth,hevm,evmdis,ethsign}
 - npm i -g npm@^5.3.0
 install:
 - npm install
