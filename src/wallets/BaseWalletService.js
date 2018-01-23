@@ -8,13 +8,9 @@ export default class BaseWalletService extends PrivateService {
   }
 
   balance(currency) {
-    return new Promise((resolve, reject) =>
-      this.accounts()
-        .then(accounts =>
-          Promise.all(accounts.map(a => a.balance(currency)))
-            .then(balances => resolve(balances.reduce((a,b) => a.plus(b))))
-            .catch(reject))
-        .catch(reject));
+    return this.accounts()
+      .then(accounts => Promise.all(accounts.map(a => a.balance(currency))))
+      .then(balances => Promise.resolve(balances.reduce((a,b) => a.plus(b))));
   }
 
   createAccount() {
