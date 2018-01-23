@@ -1,3 +1,5 @@
+dist: trusty
+sudo: required
 language: node_js
 node_js:
 - '7'
@@ -5,10 +7,13 @@ cache:
   directories:
   - node_modules
 before_install:
-- curl https://nixos.org/nix/install | sh
+- sudo mkdir -m 0755 /nix && sudo chown travis /nix
+- curl https://nixos.org/nix/install | sh 
+- . /home/travis/.nix-profile/etc/profile.d/nix.sh
 - nix-channel --add https://nix.dapphub.com/pkgs/dapphub
 - nix-channel --update
-- nix-env -iA dapphub.{dapp,seth,hevm,evmdis,ethsign}
+- nix-env -iA dapphub.{dapp,seth,hevm,solc}
+- dapp --version
 - npm i -g npm@^5.3.0
 install:
 - npm install
@@ -16,6 +21,8 @@ install:
 before_script:
 - npm install -g codecov
 script:
+- dapp init
+- dapp test
 - npm run test
 - codecov
 deploy:

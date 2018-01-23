@@ -5,3 +5,5 @@ node_modules/
 *.iml
 npm-debug.log
 package-lock.json
+*.sw*
+/out
