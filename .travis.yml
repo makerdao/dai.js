@@ -6,14 +6,13 @@ cache:
   directories:
   - node_modules
 before_install:
-- git clone https://github.com/dapphub/dapp; cd dapp; make link prefix=/tmp/dep/; cd ..
-- wget https://github.com/dapphub/ethrun/releases/download/v0.2.4/ethrun-v0.2.4-linux.tar.gz
-- tar -xzf ethrun-v0.2.4-linux.tar.gz ethrun
-- install ethrun /tmp/dep/bin/ethrun
-- export PATH=$PATH:/tmp/dep/bin/
+- curl https://nixos.org/nix/install | sh
+- nix-channel --add https://nix.dapphub.com/pkgs/dapphub
+- nix-channel --update
+- nix-env -iA dapphub.{dapp,seth,hevm,solc,ethrun}
+- dapp --version
 - npm i -g npm@^5.3.0
 install:
-- echo "dapp tools already installed"
 - npm install
 - npm run build
 before_script:
