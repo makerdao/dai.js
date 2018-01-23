@@ -1,4 +1,4 @@
-pragma solidity ^0.4.10+commit.f0d539ae.Linux.g++
+pragma solidity ^0.4.19;
 
 import "ds-test/test.sol";
 
