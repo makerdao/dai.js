@@ -21,6 +21,7 @@ install:
 before_script:
 - npm install -g codecov
 script:
+- dapp init
 - dapp test
 - npm run test
 - codecov
