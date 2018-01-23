@@ -9,8 +9,8 @@ before_install:
 - git clone https://github.com/dapphub/dapp; cd dapp; make link prefix=/tmp/dep/; cd ..
 - wget https://github.com/rainbreak/solidity-static/releases/download/v0.4.10/solc
 - install solc /tmp/dep/bin/
-- wget https://github.com/dapphub/ethrun/releases/download/v0.2.4/ethrun-v0.2.4-linux
-- install ethrun-v0.2.4-linux /tmp/dep/bin/ethrun
+- wget https://github.com/dapphub/ethrun/releases/download/v0.2.4/ethrun-v0.2.4-linux.tar.gz
+- tar -zf ethrun-v0.2.4-linux.tar.gz /tmp/dep/bin/ethrun
 - export PATH=$PATH:/tmp/dep/bin/
 - npm i -g npm@^5.3.0
 install:
