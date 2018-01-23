@@ -6,6 +6,7 @@ node_js:
 cache:
   directories:
   - node_modules
+  - nix
 before_install:
 - sudo mkdir -m 0755 /nix && sudo chown travis /nix
 - curl https://nixos.org/nix/install | sh 
@@ -13,7 +14,6 @@ before_install:
 - nix-channel --add https://nix.dapphub.com/pkgs/dapphub
 - nix-channel --update
 - nix-env -iA dapphub.{dapp,seth,hevm,solc}
-- dapp --version
 - npm i -g npm@^5.3.0
 install:
 - npm install
@@ -21,8 +21,6 @@ install:
 before_script:
 - npm install -g codecov
 script:
-- dapp init
-- dapp test
 - npm run test
 - codecov
 deploy:
