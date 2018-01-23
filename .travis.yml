@@ -8,7 +8,7 @@ cache:
   - node_modules
 before_install:
 - sudo mkdir -m 0755 /nix && sudo chown travis /nix
-- curl https://nixos.org/nix/install
+- curl https://nixos.org/nix/install | sh 
 - . /home/travis/.nix-profile/etc/profile.d/
 - nix-channel --add https://nix.dapphub.com/pkgs/dapphub
 - nix-channel --update
