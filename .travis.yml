@@ -9,7 +9,7 @@ cache:
 before_install:
 - sudo mkdir -m 0755 /nix && sudo chown travis /nix
 - curl https://nixos.org/nix/install | sh 
-- . /home/travis/.nix-profile/etc/profile.d/
+- . /home/travis/.nix-profile/etc/profile.d/nix.sh
 - nix-channel --add https://nix.dapphub.com/pkgs/dapphub
 - nix-channel --update
 - nix-env -iA dapphub.{dapp,seth,hevm,solc,ethrun}
