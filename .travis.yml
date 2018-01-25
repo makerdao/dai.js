@@ -18,7 +18,7 @@ before_install:
 install:
 - npm install
 - npm run build
-- ./node_modules/.bin/ganache-cli -p 2000 -a 2 -m "hill law jazz limb penalty escape public dish stand bracket blue jar"
+- ./node_modules/.bin/ganache-cli -p 2000 -a 2 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" &
 before_script:
 - npm install -g codecov
 script:
