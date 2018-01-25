@@ -18,7 +18,7 @@ before_install:
 install:
 - npm install
 - npm run build
-- ./travis-testnet-script.sh
+- sudo ./travis-testnet-script.sh
 before_script:
 - npm install -g codecov
 script:
