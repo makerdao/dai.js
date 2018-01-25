@@ -1,5 +1,6 @@
 import PrivateService from '../services/PrivateService';
 import Web3 from 'web3';
+import { promisifyAsync } from '../Utils';
 
 export default class Web3Service extends PrivateService {
 
@@ -30,6 +31,13 @@ export default class Web3Service extends PrivateService {
       //web3.setProvider(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
     }
 
+    //_promisifyCallback.call(this, this.web3.eth, ['accounts']);
+    this.eth = {};
+    const methods = [ 'getAccounts' ];
+
+    for (let method of methods) {
+      this.eth[method] = promisifyAsync.call(web3.eth, web3.eth[method]);
+    }
     this._web3 = web3;
   }
 
@@ -73,7 +81,7 @@ export default class Web3Service extends PrivateService {
 }
 
 /* istanbul ignore next */
-function _web3Promise(cb, onErrorValue) {
+export function _web3Promise(cb, onErrorValue) {
   return new Promise((resolve, reject) => {
     try {
       cb((error, result) => {
