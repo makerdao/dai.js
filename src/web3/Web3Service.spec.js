@@ -3,6 +3,7 @@
 import Web3Service from './Web3Service';
 import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 import Web3 from 'web3';
+var ganache = require("ganache-cli");
 
 test('should fetch version info on connect', (done) => {
   const
@@ -64,6 +65,28 @@ test('should return error reason on a failure to connect', (done) => {
     },
     reason => {
       console.error(reason);
+    });
+});
+
+test('should connect to ganache testnet with account 0x16fb9...', (done) => {
+  const
+    log = new NullLoggerService(),
+    web3 = new Web3(),
+    service = new Web3Service(),
+    service2 = new Web3Service();
+
+  service.manager().inject('log', log).initialize()
+    .then(() => {
+      expect(service._web3.currentProvider).toBeInstanceOf(Web3.providers.HttpProvider);
+    })
+    .then(() => {
+      web3.setProvider(ganache.provider());
+      return service2.manager().inject('log', log).initialize();
+    })
+    .then(() => {
+      expect(service2._web3.currentProvider).toBe(window.web3.currentProvider);
+      delete window.web3;
+      done();
     });
 });
 
