@@ -33,7 +33,8 @@
     "prepush": "npm run test",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
     "test": "jest --config=conf/jest.config.js",
-    "test:watch": "jest --config=conf/jest.config.js --watch"
+    "test:watch": "jest --config=conf/jest.config.js --watch",
+    "testnet": "./node_modules/.bin/ganache-cli -p 2000 -a 2 -m 'hill law jazz limb penalty escape public dish stand bracket blue jar'"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
