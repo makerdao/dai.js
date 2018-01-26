@@ -3,7 +3,7 @@
 import Web3Service from './Web3Service';
 import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 import Web3 from 'web3';
-var ganache = require("ganache-cli");
+var ganache = require('ganache-cli');
 
 test('should fetch version info on connect', (done) => {
   const
@@ -71,23 +71,24 @@ test('should return error reason on a failure to connect', (done) => {
 test('should connect to ganache testnet with account 0x16fb9...', (done) => {
   const
     log = new NullLoggerService(),
-    web3 = new Web3(),
-    service = new Web3Service(),
-    service2 = new Web3Service();
+    expectedAccounts = [
+      '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6',
+      '0x81431b69b1e0e334d4161a13c2955e0f3599381e'
+    ],
+    service = new Web3Service(ganache.provider({
+      'mnemonic': 'hill law jazz limb penalty escape public dish stand bracket blue jar',
+      'total_accounts': 2
+    }));
 
   service.manager().inject('log', log).initialize()
     .then(() => {
-      expect(service._web3.currentProvider).toBeInstanceOf(Web3.providers.HttpProvider);
+      return service.eth.getAccounts();
     })
-    .then(() => {
-      web3.setProvider(ganache.provider());
-      return service2.manager().inject('log', log).initialize();
-    })
-    .then(() => {
-      expect(service2._web3.currentProvider).toBe(window.web3.currentProvider);
-      delete window.web3;
+    .then((accounts) => {
+      expect(accounts).toEqual(expectedAccounts);
       done();
-    });
+    })
+    .catch(console.error);
 });
 
 /* test('should throw an error when authenticating if no active account', (done) => {

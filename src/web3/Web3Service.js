@@ -7,10 +7,11 @@ export default class Web3Service extends PrivateService {
   /**
    * @param {string} name
    */
-  constructor(name = 'web3') {
+  constructor(provider = null, name = 'web3') {
     super(name, ['log']);
     this._web3 = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
+    this._provider = provider;
   }
 
   /**
@@ -23,15 +24,15 @@ export default class Web3Service extends PrivateService {
   initialize() {
     const web3 = new Web3();
 
-    if (window.web3) {
+    if (this._provider) {
+      web3.setProvider(this._provider);
+    } else if (window && window.web3) {
       web3.setProvider(window.web3.currentProvider);
       window.web3 = web3;
     } else {
       web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
-      //web3.setProvider(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
     }
 
-    //_promisifyCallback.call(this, this.web3.eth, ['accounts']);
     this.eth = {};
     const methods = [ 'getAccounts' ];
 
@@ -67,6 +68,7 @@ export default class Web3Service extends PrivateService {
 
   authenticate() {
     this.get('log').info('Web3 is authenticating...');
+
     return _web3Promise(_ => this._web3.eth.getAccounts(_))
       .then(data => {
         if (!(data instanceof Array) || (data.length < 1) ) {
