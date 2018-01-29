@@ -10,3 +10,11 @@ export function promisifyAsync(fn) {
     });
   };
 }
+
+export function promisifyAsyncMethods(target, methods) {
+  let output = {};
+  for (let method of methods) {
+    output[method] = promisifyAsync.call(target, target[method]);
+  }
+  return output;
+}

@@ -1,20 +1,21 @@
 import BaseWalletService from './BaseWalletService';
-import promisifyAsync from '../Utils';
 
 export default class EthereumWalletService extends BaseWalletService {
   constructor(name='EthereumWallet') {
     super(name, ['log', 'web3']);
 
-    let web3 = this.get('web3');
+    // Pass through personal web3 service methods.
     const methods = [ 'lockAccount', 'newAccount', 'unlockAccount' ];
-
     for (let method of methods) {
-      this[method] = promisifyAsync.call(web3.personal, web3.personal[method]);
+      this[method] = function () {
+        let personal = this.get('web3').personal;
+        personal[method].apply(personal, arguments);
+      };
     }
   }
 
-  accounts() {
-    return this.get('web3').accounts();
+  getAccounts() {
+    return this.get('web3').getAccounts();
   }
 
   balance(currency) {

@@ -1,6 +1,6 @@
 import PrivateService from '../services/PrivateService';
 import Web3 from 'web3';
-import { promisifyAsync } from '../Utils';
+import { promisifyAsyncMethods } from '../Utils';
 
 export default class Web3Service extends PrivateService {
 
@@ -34,11 +34,15 @@ export default class Web3Service extends PrivateService {
     }
 
     this.eth = {};
-    const methods = [ 'getAccounts' ];
+    Object.assign(this.eth, promisifyAsyncMethods(
+      web3.eth, [ 'getAccounts' ]
+    ));
 
-    for (let method of methods) {
-      this.eth[method] = promisifyAsync.call(web3.eth, web3.eth[method]);
-    }
+    this.personal = {};
+    Object.assign(this.personal, promisifyAsyncMethods(
+      web3.personal,
+      [ 'lockAccount', 'newAccount', 'unlockAccount' ]
+    ));
     this._web3 = web3;
   }
 
