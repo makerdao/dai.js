@@ -1,5 +1,4 @@
 import PrivateService from '../services/PrivateService';
-import Web3 from 'web3';
 import { promisifyAsyncMethods } from '../Utils';
 
 export default class CdpService extends PrivateService {
@@ -15,13 +14,15 @@ export default class CdpService extends PrivateService {
     this.get('web3').contract('tub').open().then((cdpId) => {
       return {
         lock: (amount, token) => this.lock(cdpId, amount, token)
-      }
+      };
     });
   }
 
   lock(cdpId, amount, token) {
+    var ETH;
+    var WETH;
 
-    let result = _promisify(() => this.get('web3').contract('tub').lock(cdpId, amount));
+    let result = promisifyAsyncMethods.promisifyAsync(() => this.get('web3').contract('tub').lock(cdpId, amount));
 
     if (token === ETH) {
       result = this.get('web3').contract('weth').deposit(amount)
