@@ -14,13 +14,23 @@ export default class EthereumWalletService extends BaseWalletService {
     }
   }
 
-  getAccounts() {
-    return this.get('web3').getAccounts();
+  getDefaultAccount() {
+    const defaultAccountAddress = this._defaultAccountAddress;
+    return {
+      getAllowance: (symbol) => this.getAllowance(defaultAccountAddress, symbol),
+      getBalance: (symbol) => this.getBalance(defaultAccountAddress, symbol)
+    };
   }
 
-  balance(currency) {
-    return this.accounts()
-      .then(accounts => Promise.all(accounts.map(a => a.balance(currency))))
-      .then(balances => Promise.resolve(balances.reduce((a,b) => a.plus(b))));
+  getAllowance(account, symbol) {
+    return this.get('token').getToken(symbol).getAllowance(account);
   }
+  
+  getBalance(account, symbol) {
+    return this.get('token').getToken(symbol).getBalance(account);
+  }
+
+  getAccountAddresses() {
+    return this.get('web3').getAccounts();
+  }	
 }

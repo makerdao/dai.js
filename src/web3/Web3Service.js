@@ -1,6 +1,7 @@
 import PrivateService from '../services/PrivateService';
 import Web3 from 'web3';
 import { promisifyAsyncMethods } from '../Utils';
+var ganache = require('ganache-cli');
 
 export default class Web3Service extends PrivateService {
 
@@ -23,13 +24,17 @@ export default class Web3Service extends PrivateService {
 
   initialize() {
     const web3 = new Web3();
+    var $TRAVIS_OS_NAME;
 
     if (this._provider) {
       web3.setProvider(this._provider);
     } else if (window && window.web3) {
       web3.setProvider(window.web3.currentProvider);
       window.web3 = web3;
-    } else {
+    } else if ( $TRAVIS_OS_NAME  == 'linux' ){
+      web3.setProvider(ganache.provider());
+    } 
+    else {
       web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
     }
 
