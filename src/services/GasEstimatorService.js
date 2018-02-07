@@ -18,7 +18,6 @@ export default class GasEstimatorService extends PublicService {
   //should make it so that if the gas would be over the block gas limit, the max allowable gas is returned instead.  Should also test for this
   estimateGasLimit(transaction){
     if (this._percentage == null && this._absolute == null) { throw new Error("no gas limit policy set"); } //0xJS calls estimateGas and addes 200000 if no gas limit provided as of last November: https://github.com/0xProject/0x.js/blob/46ad7b1b38df0f302821258629ffa749e7dd00b9/packages/0x.js/CHANGELOG.md
-    //let blockLimit = 0;
     if (this._percentage == null && this._absolute != null) { return this._absolute; }
     return this.get('web3').eth.estimateGas(transaction)
     .then((estimate) => {
