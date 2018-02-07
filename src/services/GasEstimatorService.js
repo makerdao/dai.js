@@ -9,7 +9,7 @@ export default class GasEstimatorService extends PublicService {
     super(name, ['web3', 'log']);
     this._percentage = null; 
     this._absolute = null;
-
+    this.testingOutGit = 5;
   }
 
 //version that works
