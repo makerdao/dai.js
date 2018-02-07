@@ -2,8 +2,8 @@ import LocalService from './services/LocalService';
 
 export default class TimerService extends LocalService {
 
-  constructor() {
-    super(name, ['timer']);
+  constructor(name = 'timer') {
+    super(name);
     this._timers = {};
   }
 

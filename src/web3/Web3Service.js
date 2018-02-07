@@ -2,6 +2,12 @@ import PrivateService from '../services/PrivateService';
 import Web3 from 'web3';
 import { promisifyAsyncMethods } from '../Utils';
 var ganache = require('ganache-cli');
+import { Web3ProviderType } from '../enums';
+import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
+//{ type : Web3ProviderType.TEST}; 
+//const x = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'};
+//const y = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node', usePredefined : false};
+//const z = { type : Web3ProviderType.HTTP, url : ['https://sai-service.makerdao.com/node', 'https://mainnet.infura.io/ihagQOzC3mkRXYuCivDN']}
 
 export default class Web3Service extends PrivateService {
 
@@ -15,6 +21,19 @@ export default class Web3Service extends PrivateService {
     this._provider = provider;
   }
 
+  static buildTestService(mnemonic , totalAccounts) {
+
+    const result = new Web3Service();
+    result.manager().inject('log', new NullLoggerService())
+    .settings({ provider : { 
+      type : Web3ProviderType.TEST,
+      mnemonic : mnemonic || 'hill law jazz limb penalty escape public dish stand bracket blue jar',
+      totalAccounts : totalAccounts || 2
+    }
+  });
+    return result;
+  }
+
   /**
    * @returns {{api, node, network, ethereum}}
    */
@@ -22,20 +41,25 @@ export default class Web3Service extends PrivateService {
     return this._info.version;
   }
 
-  initialize() {
+  initialize(settings) {
+    settings = settings || { provider : {type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'}};
     const web3 = new Web3();
-    var $TRAVIS_OS_NAME;
-
     if (this._provider) {
       web3.setProvider(this._provider);
     } else if (window && window.web3) {
       web3.setProvider(window.web3.currentProvider);
       window.web3 = web3;
-    } else if ( $TRAVIS_OS_NAME  == 'linux' ){
-      web3.setProvider(ganache.provider());
+    } else if ( settings.provider.type  === Web3ProviderType.TEST ){
+      web3.setProvider(ganache.provider({
+        'mnemonic': settings.provider.mnemonic || undefined,
+        'total_accounts': settings.provider.totalAccounts || 0
+      }));
     } 
-    else {
-      web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
+    else if ( settings.provider.type === Web3ProviderType.HTTP ) {
+      web3.setProvider(new Web3.providers.HttpProvider(settings.provider.url));
+    } else {
+      console.error(settings);
+      throw new Error('Illegal Provider Config');
     }
 
     this.eth = {};

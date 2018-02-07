@@ -53,7 +53,7 @@ class ServiceManagerBase {
   /**
    * @returns {Promise}
    */
-  initialize() {
+  initialize(settings) {
     // If our current state is preceding the INITIALIZING state, we need to set up initialization
     if (this._state.inState(ServiceState.CREATED)) {
 
@@ -67,7 +67,7 @@ class ServiceManagerBase {
       this._state.transitionTo(ServiceState.INITIALIZING);
 
       // After trying to initialize, transition to the success state (READY/OFFLINE) or revert to CREATED
-      this._initPromise = _promisify(() => this._init()).then(
+      this._initPromise = _promisify(() => this._init(settings)).then(
         () => this._state.transitionTo(this._type === ServiceType.LOCAL ? ServiceState.READY : ServiceState.OFFLINE),
         () => this._state.transitionTo(ServiceState.CREATED)
       );
@@ -161,6 +161,14 @@ class ServiceManagerBase {
     }
 
     return this._authPromise;
+  }
+
+  /**
+   * @returns { ServiceManagerBase }
+   */
+  settings(settings) {
+    this._settings = settings;
+    return this;
   }
 
   /**
