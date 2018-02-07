@@ -3,7 +3,7 @@
 import Web3Service from './Web3Service';
 import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 import Web3 from 'web3';
-var ganache = require('ganache-cli');
+//var ganache = require('ganache-cli');
 
 test('should fetch version info on connect', (done) => {
   const
@@ -68,6 +68,7 @@ test('should return error reason on a failure to connect', (done) => {
     });
 });
 
+/*
 test('should connect to ganache testnet with account 0x16fb9...', (done) => {
   const
     log = new NullLoggerService(),
@@ -90,6 +91,7 @@ test('should connect to ganache testnet with account 0x16fb9...', (done) => {
     })
     .catch(console.error);
 });
+*/
 
 /* test('should throw an error when authenticating if no active account', (done) => {
   const
