@@ -93,8 +93,8 @@ export default class Web3Service extends PrivateService {
   //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
   getDummyTransaction(){
     return {
-    to: "0xc4abd0339eb8d57087278718986382264244252f", 
-    data: "0xc6888fa10000000000000000000000000000000000000000000000000000000000000003"
+      to: '0xc4abd0339eb8d57087278718986382264244252f', 
+      data: '0xc6888fa10000000000000000000000000000000000000000000000000000000000000003'
     };
   }
 }
