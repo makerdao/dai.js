@@ -3,7 +3,6 @@
 import Web3Service from './Web3Service';
 import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 import Web3 from 'web3';
-var ganache = require('ganache-cli');
 
 test('should fetch version info on connect', (done) => {
   const
