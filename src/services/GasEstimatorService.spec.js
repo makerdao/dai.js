@@ -4,7 +4,7 @@ import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 
 function buildGasEstimatorService(){
   const log = new NullLoggerService(),
-    web3 = new Web3Service(),
+    web3 = Web3Service.buildTestService(),
     gasEstimator = new GasEstimatorService();
   web3.manager().inject('log', log);
   gasEstimator.manager().inject('log', log);
@@ -92,7 +92,8 @@ test('choose minimum when both policies set using percentage', (done) => {
 });
 
 
-//TODO
+//I'll implement this test once I create the SmartContractService.  Then I'll be able to deploy and call a contract that uses too much gas to test this
+/*
 test('does not set estimate greater than block gas limit', (done) => { 
   const gasEstimator = buildGasEstimatorService();
   const web3 = gasEstimator.get('web3');
@@ -106,7 +107,7 @@ test('does not set estimate greater than block gas limit', (done) => {
       expect(estimate).toBe(20000);
       done();
     });
-});
+});*/
 
 
 //I think we should instead offer some kind of default value 
