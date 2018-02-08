@@ -1,37 +1,32 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
 
 import Web3Service from './Web3Service';
-import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
-import Web3 from 'web3';
 
 test('should fetch version info on connect', (done) => {
-  const
-    log = new NullLoggerService(),
-    web3 = new Web3Service();
+  const web3 = Web3Service.buildTestService();
 
-  web3.manager().inject('log', log).connect().then(() => {
+  web3.manager().connect().then(() => {
     expect(web3.version().api).toMatch(/^([0-9]+\.)*[0-9]+$/);
-    expect(web3.version().node).toMatch(/^(Parity)|(MetaMask)$/);
+    expect(web3.version().node).toMatch(/^(Parity)|(MetaMask)|(EthereumJS.*)$/);
     expect(web3.version().network).toMatch(/^[0-9]+$/);
     expect(web3.version().ethereum).toMatch(/^[0-9]+$/);
     done();
-  });
+  }, reason => console.error(reason));
 });
 
 test('should correctly use web3 provider of a previously injected web3 object, or use default', (done) => {
   const
-    log = new NullLoggerService(),
-    web3 = new Web3(),
-    service = new Web3Service(),
-    service2 = new Web3Service();
+    web3 = Web3Service.buildTestService(),
+    service = Web3Service.buildTestService(),
+    service2 = Web3Service.buildTestService();
 
-  service.manager().inject('log', log).initialize()
+  service.manager().initialize()
     .then(() => {
-      expect(service._web3.currentProvider).toBeInstanceOf(Web3.providers.HttpProvider);
+      expect(service._web3.currentProvider.engine).toBeDefined();
     })
     .then(() => {
       window.web3 = web3;
-      return service2.manager().inject('log', log).initialize();
+      return service2.manager().initialize();
     })
     .then(() => {
       expect(service2._web3.currentProvider).toBe(window.web3.currentProvider);
@@ -41,16 +36,14 @@ test('should correctly use web3 provider of a previously injected web3 object, o
 });
 
 test('should return error reason on a failure to connect', (done) => {
-  const
-    log = new NullLoggerService(),
-    service = new Web3Service();
+  const service = Web3Service.buildTestService();
 
   let error = false;
-  log.error = (msg) => {
+  service.get('log').error = (msg) => {
     error = msg;
   };
 
-  service.manager().inject('log', log).initialize()
+  service.manager().initialize()
     .then(() => {
       service._web3.version.getNode = () => {
         error = true;

@@ -4,6 +4,7 @@ import { promisifyAsyncMethods } from '../Utils';
 var ganache = require('ganache-cli');
 import { Web3ProviderType } from '../enums';
 import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
+import TimerService from '../TimerService';
 //{ type : Web3ProviderType.TEST}; 
 //const x = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'};
 //const y = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node', usePredefined : false};
@@ -15,7 +16,7 @@ export default class Web3Service extends PrivateService {
    * @param {string} name
    */
   constructor(provider = null, name = 'web3') {
-    super(name, ['log']);
+    super(name, ['log', 'timer']);
     this._web3 = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
     this._provider = provider;
@@ -25,6 +26,7 @@ export default class Web3Service extends PrivateService {
 
     const result = new Web3Service();
     result.manager().inject('log', new NullLoggerService())
+      .inject('timer', new TimerService())
       .settings({ provider : { 
         type : Web3ProviderType.TEST,
         mnemonic : mnemonic || 'hill law jazz limb penalty escape public dish stand bracket blue jar',
@@ -83,20 +85,22 @@ export default class Web3Service extends PrivateService {
       _web3Promise(_ => this._web3.version.getWhisper(_), null)
 
     ]).then(
-      versions => this._info.version = {
-        api: this._web3.version.api,
-        node: versions[0],
-        network: versions[1],
-        ethereum: versions[2],
-        whisper: versions[3],
+      versions => {
+        this._info.version = {
+          api: this._web3.version.api,
+          node: versions[0],
+          network: versions[1],
+          ethereum: versions[2],
+          whisper: versions[3],
+        };
       },
       reason => {
         this.get('log').error(reason);
       }
 
-    ).then(() => {
-      this.get('log').info('Web3 version: ', this._info.version);
-    });
+    ).then(
+      () => this.get('log').info('Web3 version: ', this._info.version),
+      reason => this.get('log').error(reason));
   }
 
   authenticate() {
