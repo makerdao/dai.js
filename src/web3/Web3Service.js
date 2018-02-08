@@ -58,12 +58,13 @@ export default class Web3Service extends PrivateService {
     else if ( settings.provider.type === Web3ProviderType.HTTP ) {
       web3.setProvider(new Web3.providers.HttpProvider(settings.provider.url));
     } else {
+      this.get('log').error('Illegal Provider Config', settings);
       throw new Error('Illegal Provider Config');
     }
 
     this.eth = {};
     Object.assign(this.eth, promisifyAsyncMethods(
-      web3.eth, [ 'getAccounts' ]
+      web3.eth, [ 'getAccounts', 'estimateGas', 'getBlock']
     ));
 
     this.personal = {};
@@ -111,6 +112,14 @@ export default class Web3Service extends PrivateService {
       reason => {
         this.get('log').error(reason);
       });
+  }
+
+  //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
+  getDummyTransaction(){
+    return {
+      to: '0xc4abd0339eb8d57087278718986382264244252f', 
+      data: '0xc6888fa10000000000000000000000000000000000000000000000000000000000000003'
+    };
   }
 }
 
