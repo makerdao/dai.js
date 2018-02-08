@@ -25,12 +25,12 @@ export default class Web3Service extends PrivateService {
 
     const result = new Web3Service();
     result.manager().inject('log', new NullLoggerService())
-    .settings({ provider : { 
-      type : Web3ProviderType.TEST,
-      mnemonic : mnemonic || 'hill law jazz limb penalty escape public dish stand bracket blue jar',
-      totalAccounts : totalAccounts || 2
-    }
-  });
+      .settings({ provider : { 
+        type : Web3ProviderType.TEST,
+        mnemonic : mnemonic || 'hill law jazz limb penalty escape public dish stand bracket blue jar',
+        totalAccounts : totalAccounts || 2
+      }
+      });
     return result;
   }
 
@@ -58,7 +58,7 @@ export default class Web3Service extends PrivateService {
     else if ( settings.provider.type === Web3ProviderType.HTTP ) {
       web3.setProvider(new Web3.providers.HttpProvider(settings.provider.url));
     } else {
-      console.error(settings);
+      this.get('log').error('Illegal Provider Config', settings);
       throw new Error('Illegal Provider Config');
     }
 

@@ -1,5 +1,4 @@
 import PrivateService from '../services/PrivateService';
-import { promisifyAsyncMethods } from '../Utils';
 import { Token }  from '../enums';
 
 export default class CdpService extends PrivateService {

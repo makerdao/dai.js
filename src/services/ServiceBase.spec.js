@@ -253,9 +253,9 @@ class DummyService extends ServiceBase {
 test('settings defined on ServiceManager need to be passed to initialize() correctly', (done) => {
   const s = new DummyService('DummyService');
   s.manager()
-  .settings({ type : 1})
-  .initialize().then(() => {
-    expect(s._type).toBe(1);
-    done();
-  });
+    .settings({ type : 1})
+    .initialize().then(() => {
+      expect(s._type).toBe(1);
+      done();
+    });
 });

@@ -1,14 +1,12 @@
 import GasEstimatorService from './GasEstimatorService';
 import Web3Service from '../web3/Web3Service';
-import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 
 function buildGasEstimatorService(){
-  const log = new NullLoggerService(),
-    web3 = Web3Service.buildTestService(),
+  const web3 = Web3Service.buildTestService(),
     gasEstimator = new GasEstimatorService();
-  web3.manager().inject('log', log);
-  gasEstimator.manager().inject('log', log);
-  gasEstimator.manager().inject('web3', web3);
+  //web3.manager().inject('log', log);
+  gasEstimator.manager().inject('log', web3.get('log'))
+    .inject('web3', web3);
   return gasEstimator; //could also call connect here
 }
 
