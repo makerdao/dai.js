@@ -91,7 +91,9 @@ import NullLoggerService from '../loggers/NullLogger/NullLoggerService'
     })
   });
 
-  test('choose minimum when both policies set using absolute', (done) => { 
+
+//TODO
+  test('does not set estimate greater than block gas limit', (done) => { 
     const gasEstimator = buildGasEstimatorService();
     const web3 = gasEstimator.get('web3');
     gasEstimator.manager().connect()
@@ -106,10 +108,8 @@ import NullLoggerService from '../loggers/NullLogger/NullLoggerService'
     })
   });
 
-  //write a test that sets gas limit ot blockLimit if necessary
 
-  //syntax question - why do you need fact arrows in the expect when testing for an error?
-
+//I think we should instead offer some kind of default value 
   test('throws when estimating without a policy', (done) => { 
     const gasEstimator = buildGasEstimatorService();
     const web3 = gasEstimator.get('web3');
