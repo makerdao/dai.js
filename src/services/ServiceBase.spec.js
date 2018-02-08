@@ -232,5 +232,30 @@ test('deauthenticating a dependency should deauthenticate the dependency and all
       done();
     });
   });
+});
+/**
+ *
+ */
+class DummyService extends ServiceBase {
 
+  /**
+   * @param {string} name
+   * @param {string[]} dependencies
+   */
+  constructor(name, dependencies = []) {
+    super(ServiceType.LOCAL, name, dependencies);
+  }
+  initialize(settings) {
+    this._type = settings.type;
+  }
+}
+
+test('settings defined on ServiceManager need to be passed to initialize() correctly', (done) => {
+  const s = new DummyService('DummyService');
+  s.manager()
+  .settings({ type : 1})
+  .initialize().then(() => {
+    expect(s._type).toBe(1);
+    done();
+  });
 });

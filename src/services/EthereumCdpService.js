@@ -1,5 +1,6 @@
 import PrivateService from '../services/PrivateService';
 import { promisifyAsyncMethods } from '../Utils';
+import { Token }  from '../enums';
 
 export default class CdpService extends PrivateService {
 
@@ -11,7 +12,7 @@ export default class CdpService extends PrivateService {
   }
 
   openCdp() {
-    this.get('web3').contract('tub').open().then((cdpId) => {
+    this.get('smartContract').getContractByName('tub').open().then((cdpId) => {
       return {
         lock: (amount, token) => this.lock(cdpId, amount, token)
       };
@@ -19,19 +20,17 @@ export default class CdpService extends PrivateService {
   }
 
   lock(cdpId, amount, token) {
-    var ETH;
-    var WETH;
 
-    let result = promisifyAsyncMethods.promisifyAsync(() => this.get('web3').contract('tub').lock(cdpId, amount));
+    let result = this.get('smartContract').getContractByName('tub').lock(cdpId, amount);
 
-    if (token === ETH) {
-      result = this.get('web3').contract('weth').deposit(amount)
-        .then((wethAmount) => this.get('web3').contract('tub').join(wethAmount))
+    if (token === Token.ETH) {
+      result = this.get('smartContract').getContractByName('weth').deposit(amount)
+        .then((wethAmount) => this.get('smartContract').getContractByName('weth').join(wethAmount))
         .then(result);
     }
 
-    if (token === WETH) {
-      result = this.get('web3').contract('tub').join(amount)
+    if (token === Token.WETH) {
+      result = this.get('smartContract').getContractByName('tub').join(amount)
         .then(result);
     }
 

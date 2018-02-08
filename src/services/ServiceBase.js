@@ -47,8 +47,7 @@ function _buildServiceManager(type, name, dependencies) {
     this.deauthenticate = deauthenticate;
     return this.authenticate();
   });
-
-  return new ServiceManager(name, dependencies, () => this.initialize(), connect, auth);
+  return new ServiceManager(name, dependencies, settings => this.initialize(settings), connect, auth);
 }
 
 /**
@@ -83,13 +82,13 @@ function _guardLifeCycleMethods() {
     authenticate: this.authenticate
   };
 
-  this.initialize = function() {
+  this.initialize = function(settings) {
     if (this.manager().state() !== ServiceState.INITIALIZING) {
       throw new Error('Expected state INITIALIZING, but got ' + this.manager().state() +
         '. Did you mean to call service.manager().initialize() instead of service.initialize()?');
     }
 
-    return original.initialize.call(this);
+    return original.initialize.apply(this, [settings]);
   };
 
   if (typeof original.connect !== 'undefined') {
@@ -99,7 +98,7 @@ function _guardLifeCycleMethods() {
           '. Did you mean to call service.manager().connect() instead of service.connect()?');
       }
 
-      return original.connect.call(this);
+      return original.connect.apply(this);
     };
   }
 
@@ -110,7 +109,7 @@ function _guardLifeCycleMethods() {
           '. Did you mean to call service.manager().authenticate() instead of service.authenticate()?');
       }
 
-      return original.authenticate.call(this);
+      return original.authenticate.apply(this);
     };
   }
 }

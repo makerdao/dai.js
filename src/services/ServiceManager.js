@@ -63,7 +63,6 @@ class ServiceManager extends ServiceManagerBase {
    */
   constructor(name, dependencies = [], init = null, connect = null, auth = null) {
     super(init, connect, auth);
-
     if (!name) {
       throw new Error('Service name must not be empty.');
     }
@@ -105,7 +104,7 @@ class ServiceManager extends ServiceManagerBase {
   }
 
   initialize() {
-    return this.initializeDependencies().then(() => super.initialize());
+    return this.initializeDependencies().then(() => super.initialize(this._settings));
   }
 
   connect() {
