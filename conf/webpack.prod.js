@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const Merge = require('webpack-merge');
 const CommonConfig = require('./webpack.common.js');
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = Merge(CommonConfig, {
   plugins: [
@@ -13,9 +12,8 @@ module.exports = Merge(CommonConfig, {
       'process.env': {
         'NODE_ENV': JSON.stringify('production')
       }
-    }),
-    // new webpack.optimize.UglifyJsPlugin({ // can switch back with webpack 4
-    new UglifyJsPlugin({
+    })
+    /* new webpack.optimize.UglifyJsPlugin({ // can switch back with webpack 4
       beautify: false,
       mangle: {
         screw_ie8: true,
@@ -25,6 +23,6 @@ module.exports = Merge(CommonConfig, {
         screw_ie8: true
       },
       comments: false
-    })
+    }) */ 
   ]
 });
