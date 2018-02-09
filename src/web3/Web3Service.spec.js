@@ -60,7 +60,6 @@ test('should return error reason on a failure to connect', (done) => {
     });
 });
 
-/*
 test('should connect to ganache testnet with account 0x16fb9...', (done) => {
   const
     expectedAccounts = [
@@ -79,7 +78,6 @@ test('should connect to ganache testnet with account 0x16fb9...', (done) => {
     })
     .catch(console.error);
 });
-*/
 
 /* test('should throw an error when authenticating if no active account', (done) => {
   const

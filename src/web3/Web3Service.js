@@ -1,7 +1,6 @@
 import PrivateService from '../services/PrivateService';
 import Web3 from 'web3';
 import { promisifyAsyncMethods } from '../Utils';
-var ganache = require('ganache-cli');
 import { Web3ProviderType } from '../enums';
 import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 import TimerService from '../TimerService';
@@ -52,6 +51,7 @@ export default class Web3Service extends PrivateService {
       web3.setProvider(window.web3.currentProvider);
       window.web3 = web3;
     } else if ( settings.provider.type  === Web3ProviderType.TEST ){
+      var ganache = require('ganache-cli');
       web3.setProvider(ganache.provider({
         'mnemonic': settings.provider.mnemonic || undefined,
         'total_accounts': settings.provider.totalAccounts || 0
