@@ -22,10 +22,23 @@ export default class Web3Service extends PrivateService {
     this._provider = provider;
   }
 
+  static buildDisconnectingService(disconnectAfter = 50){
+    const service = Web3Service.buildTestService();
+    service.manager().onConnected(()=> {
+      service.get('timer').createTimer('disconnect', disconnectAfter, false, ()=>
+      {service._web3.version.getNode =
+        () => {
+          throw new Error('disconnected');
+        };
+      });
+    });
+    return service;
+  }
+
   static buildTestService(mnemonic , totalAccounts) {
 
-    const result = new Web3Service();
-    result.manager().inject('log', new NullLoggerService())
+    const service = new Web3Service();
+    service.manager().inject('log', new NullLoggerService())
       .inject('timer', new TimerService())
       .settings({ provider : { 
         type : Web3ProviderType.TEST,
@@ -33,7 +46,7 @@ export default class Web3Service extends PrivateService {
         totalAccounts : totalAccounts || 2
       }
       });
-    return result;
+    return service;
   }
 
   /**
@@ -93,6 +106,18 @@ export default class Web3Service extends PrivateService {
           ethereum: versions[2],
           whisper: versions[3],
         };
+        this.get('timer').createTimer(
+          'web3CheckConnectionStatus',
+          500,
+          true,
+          ()=> this._isStillConnected()
+            .then(
+              (connected)=> {
+                if (!connected) { 
+                  this.disconnect();}
+              }
+            )
+        );
       },
       reason => {
         this.get('log').error(reason);
@@ -101,6 +126,15 @@ export default class Web3Service extends PrivateService {
     ).then(
       () => this.get('log').info('Web3 version: ', this._info.version),
       reason => this.get('log').error(reason));
+  }
+
+  _isStillConnected() {
+    return _web3Promise(_ => this._web3.version.getNode(_))
+      .then(
+        () => {
+          return true;},
+        () => {
+          return false;});
   }
 
   authenticate() {

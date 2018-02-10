@@ -11,7 +11,7 @@ test('should fetch version info on connect', (done) => {
     expect(web3.version().network).toMatch(/^[0-9]+$/);
     expect(web3.version().ethereum).toMatch(/^[0-9]+$/);
     done();
-  }, reason => console.error(reason));
+  });
 });
 
 test('should correctly use web3 provider of a previously injected web3 object, or use default', (done) => {
@@ -54,11 +54,18 @@ test('should return error reason on a failure to connect', (done) => {
     .then(() => {
       expect(error).toBeInstanceOf(Error);
       done();
-    },
-    reason => {
-      console.error(reason);
     });
 });
+
+test('should correctly handle disconnect', (done) => {
+  const service = Web3Service.buildDisconnectingService();
+  service.manager().onDisconnected(()=>{
+    expect(service.manager().isConnected()).toBe(false);
+    done();
+  });
+  service.manager().connect();
+});
+
 
 /*
 test('should connect to ganache testnet with account 0x16fb9...', (done) => {
