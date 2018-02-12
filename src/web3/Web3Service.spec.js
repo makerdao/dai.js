@@ -66,7 +66,9 @@ test('should correctly handle automatic disconnect', (done) => {
   service.manager().connect();
 });
 
+//this test needs to be commented out in order to push it to git and have it pass the tests
 //need to run this test individually and then disconnect the wifi for it to pass
+/*
 test('should correctly handle a manual disconnect', (done) => {
   const service = Web3Service.buildRemoteService();
   service.manager().onDisconnected(()=>{
@@ -75,6 +77,7 @@ test('should correctly handle a manual disconnect', (done) => {
   });
   service.manager().connect();
 });
+*/
 
 
 /*
