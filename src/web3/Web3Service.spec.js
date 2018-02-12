@@ -57,8 +57,18 @@ test('should return error reason on a failure to connect', (done) => {
     });
 });
 
-test('should correctly handle disconnect', (done) => {
+test('should correctly handle automatic disconnect', (done) => {
   const service = Web3Service.buildDisconnectingService();
+  service.manager().onDisconnected(()=>{
+    expect(service.manager().isConnected()).toBe(false);
+    done();
+  });
+  service.manager().connect();
+});
+
+//need to run this test individually and then disconnect the wifi for it to pass
+test('should correctly handle a manual disconnect', (done) => {
+  const service = Web3Service.buildRemoteService();
   service.manager().onDisconnected(()=>{
     expect(service.manager().isConnected()).toBe(false);
     done();

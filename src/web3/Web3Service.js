@@ -36,7 +36,6 @@ export default class Web3Service extends PrivateService {
   }
 
   static buildTestService(mnemonic , totalAccounts) {
-
     const service = new Web3Service();
     service.manager().inject('log', new NullLoggerService())
       .inject('timer', new TimerService())
@@ -46,6 +45,13 @@ export default class Web3Service extends PrivateService {
         totalAccounts : totalAccounts || 2
       }
       });
+    return service;
+  }
+
+  static buildRemoteService() {
+    const service = new Web3Service();
+    service.manager().inject('log', new NullLoggerService())
+      .inject('timer', new TimerService());
     return service;
   }
 
