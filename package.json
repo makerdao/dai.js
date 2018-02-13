@@ -56,6 +56,7 @@
     "sass-loader": "^6.0.6",
     "solc": "^0.4.19",
     "style-loader": "^0.18.2",
+    "uglifyjs-webpack-plugin": "^1.1.8",
     "webpack": "^3.5.5",
     "webpack-dev-server": "^2.7.1",
     "webpack-merge": "^4.1.0"

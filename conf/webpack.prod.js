@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const Merge = require('webpack-merge');
 const CommonConfig = require('./webpack.common.js');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = Merge(CommonConfig, {
   plugins: [
@@ -12,18 +13,15 @@ module.exports = Merge(CommonConfig, {
       'process.env': {
         'NODE_ENV': JSON.stringify('production')
       }
-    })
-  /*  new webpack.optimize.UglifyJsPlugin({ // can switch back with webpack 4
+    }),
+    new UglifyJSPlugin({ uglifyOptions: {
       beautify: false,
       mangle: {
-        screw_ie8: true,
         keep_fnames: true
       },
-      compress: {
-        screw_ie8: true
-      },
       comments: false
-    }) */
+    } 
+  })
   ],
   externals: [
     'child_process'
