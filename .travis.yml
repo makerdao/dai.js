@@ -24,6 +24,8 @@ before_script:
 script:
 - npm run test
 - codecov
+after_install:
+- cat /home/travis/.npm/_logs/2018-02-09*.log
 deploy:
   provider: npm
   skip_cleanup: true
