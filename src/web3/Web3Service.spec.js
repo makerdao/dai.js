@@ -79,6 +79,15 @@ test('should correctly handle a manual disconnect', (done) => {
 });
 */
 
+test('should correctly handle automatic deauthentication', (done) => {
+  const service = Web3Service.buildDeauthenticatingService();
+  service.manager().onDeauthenticated(()=>{
+    expect(service.manager().isAuthenticated()).toBe(false);
+    done();
+  });
+  service.manager().authenticate();
+});
+
 
 /*
 test('should connect to ganache testnet with account 0x16fb9...', (done) => {

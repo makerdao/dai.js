@@ -35,6 +35,19 @@ export default class Web3Service extends PrivateService {
     return service;
   }
 
+  static buildDeauthenticatingService(deauthenticateAfter = 50){
+    const service = Web3Service.buildTestService();
+    service.manager().onAuthenticated(()=> {
+      service.get('timer').createTimer('deauthenticate', deauthenticateAfter, false, ()=>
+      {service._web3.version.getAccounts =
+        () => {
+          throw new Error('deauthenticated');
+        };
+      });
+    });
+    return service;
+  }
+
   static buildTestService(mnemonic , totalAccounts) {
     const service = new Web3Service();
     service.manager().inject('log', new NullLoggerService())
@@ -146,16 +159,37 @@ export default class Web3Service extends PrivateService {
   authenticate() {
     this.get('log').info('Web3 is authenticating...');
 
-    return _web3Promise(_ => this._web3.eth.getAccounts(_))
+    return _web3Promise(_ => this._web3.eth.getAccounts(_)) // why is there a _ here?
       .then(data => {
         if (!(data instanceof Array) || (data.length < 1) ) {
           throw new Error ('Web3 is not authenticated');
         }
         this._info.account = data[0];
+        this.get('timer').createTimer(
+          'web3CheckAuthenticationStatus',
+          300, //what should this number be?
+          true,
+          ()=> this._isStillAuthenticated()
+            .then(
+              (authenticated)=> {
+                if (!authenticated) { 
+                  this.deauthenticate();}
+              }
+            )
+        );
       },
       reason => {
         this.get('log').error(reason);
       });
+  }
+
+  _isStillAuthenticated() {
+    return _web3Promise(_ => this._web3.version.getAccounts(_))
+      .then(
+        () => {
+          return true;},
+        () => {
+          return false;});
   }
 
   //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
