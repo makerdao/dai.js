@@ -13,7 +13,7 @@ module.exports = Merge(CommonConfig, {
         'NODE_ENV': JSON.stringify('production')
       }
     }),
-    new webpack.optimize.UglifyJsPlugin({
+    new webpack.optimize.UglifyJsPlugin({ // can switch back with webpack 4
       beautify: false,
       mangle: {
         screw_ie8: true,

@@ -108,7 +108,6 @@ test('should connect to ganache testnet with account 0x16fb9...', (done) => {
     })
     .catch(console.error);
 });
-*/
 
 /* test('should throw an error when authenticating if no active account', (done) => {
   const
