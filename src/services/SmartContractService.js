@@ -6,7 +6,7 @@ export default class SmartContractService extends PublicService {
     super(name, ['web3', 'log']);
   }
 
-  // will probably use web3.eth.getCode
+  /* will probably use web3.eth.getCode
   getContractByAddress(address, abi = null) {
     this.get('web3');
   }
@@ -19,6 +19,5 @@ export default class SmartContractService extends PublicService {
   _getAddressByName(name, version = null) {
 
   }
+  */
 }
-
-
