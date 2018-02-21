@@ -49,14 +49,19 @@ export default class Web3Service extends PrivateService {
 
   static buildTestService(mnemonic , totalAccounts) {
     const service = new Web3Service();
-    service.manager().inject('log', new NullLoggerService())
+    service.manager()
+      .inject('log', new NullLoggerService())
       .inject('timer', new TimerService())
-      .settings({ provider : { 
-        type : Web3ProviderType.TEST,
-        mnemonic : mnemonic || 'hill law jazz limb penalty escape public dish stand bracket blue jar',
-        totalAccounts : totalAccounts || 2
-      }
-      });
+      .settings(
+        {
+          provider : {
+            type : Web3ProviderType.TEST,
+            mnemonic : mnemonic || 'hill law jazz limb penalty escape public dish stand bracket blue jar',
+            totalAccounts : totalAccounts || 2
+          }
+        }
+      );
+
     return service;
   }
 
@@ -77,20 +82,24 @@ export default class Web3Service extends PrivateService {
   initialize(settings) {
     settings = settings || { provider : {type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'}};
     const web3 = new Web3();
+
     if (this._provider) {
       web3.setProvider(this._provider);
+
     } else if (window && window.web3) {
       web3.setProvider(window.web3.currentProvider);
       window.web3 = web3;
+
     } else if ( settings.provider.type  === Web3ProviderType.TEST ){
       var ganache = require('ganache-cli');
       web3.setProvider(ganache.provider({
         'mnemonic': settings.provider.mnemonic || undefined,
         'total_accounts': settings.provider.totalAccounts || 0
       }));
-    } 
-    else if ( settings.provider.type === Web3ProviderType.HTTP ) {
+
+    } else if ( settings.provider.type === Web3ProviderType.HTTP ) {
       web3.setProvider(new Web3.providers.HttpProvider(settings.provider.url));
+
     } else {
       this.get('log').error('Illegal Provider Config', settings);
       throw new Error('Illegal Provider Config');
@@ -118,6 +127,7 @@ export default class Web3Service extends PrivateService {
 
     ]).then(
       versions => {
+
         this._info.version = {
           api: this._web3.version.api,
           node: versions[0],
@@ -125,26 +135,26 @@ export default class Web3Service extends PrivateService {
           ethereum: versions[2],
           whisper: versions[3],
         };
+
         this.get('timer').createTimer(
-          'web3CheckConnectionStatus',
-          500,
-          true,
-          ()=> this._isStillConnected()
-            .then(
-              (connected)=> {
-                if (!connected) { 
-                  this.disconnect();}
-              }
-            )
+          'web3CheckConnectionStatus', 500, true,
+          () => this._isStillConnected().then(connected => {
+            if (!connected) {
+              this.disconnect();
+            }
+          })
         );
+
       },
+
       reason => {
         this.get('log').error(reason);
       }
 
     ).then(
       () => this.get('log').info('Web3 version: ', this._info.version),
-      reason => this.get('log').error(reason));
+      reason => this.get('log').error(reason)
+    );
   }
 
   _isStillConnected() {
