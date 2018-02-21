@@ -4,5 +4,5 @@ const enums = {
   WETH : 'WETH',
   PETH : 'PETH',
   ETH : 'ETH'
-}
+};
 export default enums;

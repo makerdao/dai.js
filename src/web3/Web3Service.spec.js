@@ -30,6 +30,8 @@ test('should correctly use web3 provider of a previously injected web3 object, o
     })
     .then(() => {
       expect(service2._web3.currentProvider).toBe(window.web3.currentProvider);
+
+      window.web3 = undefined;
       delete window.web3;
       done();
     });

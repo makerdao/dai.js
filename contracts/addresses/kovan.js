@@ -5,8 +5,8 @@ import tokens from '../tokens';
 
 const mapping = {
 
-	[tokens.DAI] : [
-		{ version: 1, tokenAddress: '0x....', abi: erc20Token_1.interface },
-	]
-}
+  [tokens.DAI] : [
+    { version: 1, tokenAddress: '0x....', abi: erc20Token_1.interface },
+  ]
+};
 export default mapping;

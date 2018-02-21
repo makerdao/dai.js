@@ -1,7 +1,7 @@
 import BaseWalletService from './BaseWalletService';
 
 export default class EthereumWalletService extends BaseWalletService {
-  constructor(name='EthereumWallet') {
+  constructor(name='ethereumWallet') {
     super(name, ['log', 'web3']);
 
     // Pass through personal web3 service methods.

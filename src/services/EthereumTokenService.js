@@ -5,7 +5,7 @@ import SmartContractService from './SmartContractService';
 
 export default class EthereumTokenService extends PrivateService {
 
-	static buildTestService() {
+  static buildTestService() {
 	    const service = new EthereumTokenService();
 	    const smartContractService = SmartContractService.buildTestService();
 	    service.manager()
@@ -15,20 +15,20 @@ export default class EthereumTokenService extends PrivateService {
 	    return service;
 	 }
 
-	constructor(name = 'ethereumToken') {
+  constructor(name = 'ethereumToken') {
     	super(name, ['smartContract', 'web3', 'log']);
-	}
+  }
 
-	getTokens() {
-		return Object.keys(tokens);
-	}
+  getTokens() {
+    return Object.keys(tokens);
+  }
 
-	getTokenVersions(){
+  getTokenVersions(){
 
-	}
+  }
 
-	getToken(symbol, version = null){
-
-	}
+  getToken(symbol, version = null){
+  }
 
 }
+

@@ -21,7 +21,7 @@ module.exports = Merge(CommonConfig, {
       },
       comments: false
     } 
-  })
+    })
   ],
   externals: [
     'child_process'
