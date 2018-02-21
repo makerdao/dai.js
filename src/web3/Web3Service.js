@@ -36,14 +36,13 @@ export default class Web3Service extends PrivateService {
 
   static buildDeauthenticatingService(deauthenticateAfter = 50){
     const service = Web3Service.buildTestService();
-    service.manager().onAuthenticated(()=> {
-      service.get('timer').createTimer('deauthenticate', deauthenticateAfter, false, ()=>
-      {service._web3.version.getAccounts =
-        () => {
-          throw new Error('deauthenticated');
-        };
+
+    service.manager().onAuthenticated(() => {
+      service.get('timer').createTimer('deauthenticate', deauthenticateAfter, false, () => {
+        service._web3.version.getAccounts = (cb) => cb(undefined, []);
       });
     });
+
     return service;
   }
 
@@ -158,12 +157,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillConnected() {
-    return _web3Promise(_ => this._web3.version.getNode(_))
-      .then(
-        () => {
-          return true;},
-        () => {
-          return false;});
+    return _web3Promise(_ => this._web3.version.getNode(_)).then(() => true, () => false);
   }
 
   authenticate() {
@@ -194,12 +188,10 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillAuthenticated() {
-    return _web3Promise(_ => this._web3.version.getAccounts(_))
-      .then(
-        () => {
-          return true;},
-        () => {
-          return false;});
+    return _web3Promise(_ => this._web3.version.getAccounts(_)).then(
+      accounts => (accounts instanceof Array && accounts.length > 0),
+      () => false
+    );
   }
 
   //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
