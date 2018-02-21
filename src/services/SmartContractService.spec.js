@@ -5,4 +5,4 @@ import PublicService from './PublicService';
 
 
 test('get token contract for MKR and see if its 1,000,000', () => {
-  expect(
+});
