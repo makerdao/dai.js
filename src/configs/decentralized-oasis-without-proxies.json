@@ -1,0 +1,34 @@
+{
+  "global": {
+    "enableProxies": false
+  },
+
+  "services": {
+
+    "web3": [
+      "Web3Service",
+      {
+        "provider": {
+          "type": "HTTP",
+          "usePredefined": true,
+          "url": [
+            "https://sai-service.makerdao.com/node",
+            "https://mainnet.infura.io/ihagQOzC3mkRXYuCivDN"
+          ]
+        }
+      }
+    ],
+
+    "ethereumCdpService": "EthereumCdpService",
+    "ethereumWallet": "EthereumWalletService",
+
+    "smartContract": "SmartContractService",
+    "token": "TokenService",
+    "gasEstimator": "GasEstimatorService",
+
+    "exchangeService": "OasisExchangeService",
+
+    "timer": "TimerService",
+    "log": "NullLoggerService"
+  }
+}
