@@ -1,6 +1,17 @@
 import PublicService from './PublicService';
+import Web3Service from '../web3/Web3Service';
 
 export default class SmartContractService extends PublicService {
+
+  static buildTestService() {
+
+    const service = new SmartContractService();
+    const web3 = Web3Service.buildTestService();
+    service.manager()
+      .inject('log', web3.get('log'))
+      .inject('web3', web3);
+    return service;
+  }
 
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log']);
