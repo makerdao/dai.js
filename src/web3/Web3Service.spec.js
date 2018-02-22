@@ -68,6 +68,15 @@ test('should correctly handle automatic disconnect', (done) => {
   service.manager().connect();
 });
 
+test('should correctly handle automatic change of network as a disconnect', (done) => {
+  const service = Web3Service.buildNetworkChangingService();
+  service.manager().onDisconnected(()=>{
+    expect(service.manager().isConnected()).toBe(false);
+    done();
+  });
+  service.manager().connect();
+});
+
 //this test needs to be commented out in order to push it to git and have it pass the tests
 //need to run this test individually and then disconnect the wifi for it to pass
 /*
@@ -83,6 +92,16 @@ test('should correctly handle a manual disconnect', (done) => {
 
 test('should correctly handle automatic deauthentication', (done) => {
   const service = Web3Service.buildDeauthenticatingService();
+  service.manager().onDeauthenticated(()=>{
+    expect(service.manager().isAuthenticated()).toBe(false);
+    done();
+  });
+  service.manager().authenticate();
+});
+
+
+test('should correctly handle automatic change of account as a deauthenticate', (done) => {
+  const service = Web3Service.buildAccountChangingService();
   service.manager().onDeauthenticated(()=>{
     expect(service.manager().isAuthenticated()).toBe(false);
     done();

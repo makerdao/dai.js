@@ -24,11 +24,21 @@ export default class Web3Service extends PrivateService {
   static buildDisconnectingService(disconnectAfter = 50){
     const service = Web3Service.buildTestService();
     service.manager().onConnected(()=> {
-      service.get('timer').createTimer('disconnect', disconnectAfter, false, ()=>
-      {service._web3.version.getNode =
+      service.get('timer').createTimer('disconnect', disconnectAfter, false, () => {
+        service._web3.version.getNode =
         () => {
           throw new Error('disconnected');
         };
+      });
+    });
+    return service;
+  }
+
+  static buildNetworkChangingService(changeNetworkAfter = 50){
+    const service = Web3Service.buildTestService();
+    service.manager().onConnected(()=> {
+      service.get('timer').createTimer('changeNetwork', changeNetworkAfter, false, ()=> {
+        service._web3.version.getNetwork = (cb) => cb(undefined, 999); //fake network id
       });
     });
     return service;
@@ -42,7 +52,16 @@ export default class Web3Service extends PrivateService {
         service._web3.version.getAccounts = (cb) => cb(undefined, []);
       });
     });
+    return service;
+  }
 
+  static buildAccountChangingService(changeAccountAfter = 50){
+    const service = Web3Service.buildTestService();
+    service.manager().onAuthenticated(()=> {
+      service.get('timer').createTimer('changeAccount', changeAccountAfter, false, ()=> {
+        service._web3.version.getAccounts = (cb) => cb(undefined, ['0x123456789']); //fake account
+      });
+    });
     return service;
   }
 
@@ -157,7 +176,13 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillConnected() {
-    return _web3Promise(_ => this._web3.version.getNode(_)).then(() => true, () => false);
+    return Promise.all([
+      _web3Promise(_ => this._web3.version.getNode(_)),
+      _web3Promise(_ => this._web3.version.getNetwork(_))
+    ]).then(
+      versionInfo => (versionInfo[1] === this._info.version['network']),
+      () => false
+    );
   }
 
   authenticate() {
@@ -189,7 +214,7 @@ export default class Web3Service extends PrivateService {
 
   _isStillAuthenticated() {
     return _web3Promise(_ => this._web3.version.getAccounts(_)).then(
-      accounts => (accounts instanceof Array && accounts.length > 0),
+      accounts => (accounts[0] === this._info.account),
       () => false
     );
   }
