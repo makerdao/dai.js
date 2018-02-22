@@ -1,7 +1,8 @@
 import PrivateService from './PrivateService';
 import tokens from '../../contracts/tokens';
 import SmartContractService from './SmartContractService';
-
+import mainnet from '../../contracts/addresses/mainnet'
+import kovan from '../../contracts/addresses/kovan'
 
 export default class EthereumTokenService extends PrivateService {
 
@@ -24,7 +25,12 @@ export default class EthereumTokenService extends PrivateService {
   }
 
   getTokenVersions(){
+    /*this.get('web3').
+    let tokenArray = [];
+    for (var token in Object.keys(tokens)) {
+      if (token === 'ETH') { tokenArray['ETH'] = [1];}
 
+    }*/
   }
 
   getToken(symbol, version = null){

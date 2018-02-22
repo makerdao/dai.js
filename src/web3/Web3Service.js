@@ -49,7 +49,7 @@ export default class Web3Service extends PrivateService {
 
     service.manager().onAuthenticated(() => {
       service.get('timer').createTimer('deauthenticate', deauthenticateAfter, false, () => {
-        service._web3.version.getAccounts = (cb) => cb(undefined, []);
+        service._web3.eth.getAccounts = (cb) => cb(undefined, []);
       });
     });
     return service;
@@ -59,7 +59,7 @@ export default class Web3Service extends PrivateService {
     const service = Web3Service.buildTestService();
     service.manager().onAuthenticated(()=> {
       service.get('timer').createTimer('changeAccount', changeAccountAfter, false, ()=> {
-        service._web3.version.getAccounts = (cb) => cb(undefined, ['0x123456789']); //fake account
+        service._web3.eth.getAccounts = (cb) => cb(undefined, ['0x123456789']); //fake account
       });
     });
     return service;
@@ -213,7 +213,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillAuthenticated() {
-    return _web3Promise(_ => this._web3.version.getAccounts(_)).then(
+    return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
       accounts => (accounts[0] === this._info.account),
       () => false
     );
