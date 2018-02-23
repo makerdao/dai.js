@@ -177,10 +177,10 @@ export default class Web3Service extends PrivateService {
 
   _isStillConnected() {
     return Promise.all([
-      _web3Promise(_ => this._web3.version.getNode(_)),
+      _web3Promise(_ => this._web3.version.getNode(_)), // can remove this
       _web3Promise(_ => this._web3.version.getNetwork(_))
     ]).then(
-      versionInfo => (versionInfo[1] === this._info.version['network']),
+      versionInfo => (/*first check that versionInfo[1] is an array */versionInfo[1] === this._info.version['network']),
       () => false
     );
   }
@@ -214,9 +214,13 @@ export default class Web3Service extends PrivateService {
 
   _isStillAuthenticated() {
     return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
-      accounts => (accounts[0] === this._info.account),
+      accounts => (/*first check its an array*/ accounts[0] === this._info.account),
       () => false
     );
+  }
+
+  getNetwork(){
+    return this._info.version['network'];
   }
 
   //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
