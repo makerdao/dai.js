@@ -106,6 +106,10 @@ class Container {
     return this._waitForServices(s => s.manager().connect());
   }
 
+  authenticate() {
+    return this._waitForServices(s => s.manager().authenticate());
+  }
+
   _waitForServices(callback) {
     return Promise.all(this.getServices().map(s => callback(s)));
   }

@@ -19,14 +19,14 @@
       }
     ],
 
-    "ethereumCdpService": "EthereumCdpService",
-    "ethereumWallet": "EthereumWalletService",
+    "cdp": "EthereumCdpService",
+    "wallet": "EthereumWalletService",
 
     "smartContract": "SmartContractService",
-    "token": "TokenService",
+    "token": "EthereumTokenService",
     "gasEstimator": "GasEstimatorService",
 
-    "exchangeService": "OasisExchangeService",
+    "exchange": "OasisExchangeService",
 
     "timer": "TimerService",
     "log": "NullLoggerService"
