@@ -3,7 +3,7 @@ import Web3Service from '../web3/Web3Service';
 
 export default class SmartContractService extends PublicService {
 
-  static buildSmartContractTestService() {
+  static buildTestService() {
     const service = new SmartContractService();
     const web3 = Web3Service.buildEthersService();
     service.manager()
