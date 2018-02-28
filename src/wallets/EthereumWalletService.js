@@ -30,10 +30,6 @@ export default class EthereumWalletService extends BaseWalletService {
     return this.get('token').getToken(symbol).getBalance(account);
   }
 
-  getAccountAddresses() {
-    return this.get('web3').getAccounts();
-  }	
-
   getTokens(){
     // will be a set list of Tokens
   }

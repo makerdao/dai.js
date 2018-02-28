@@ -109,6 +109,18 @@ test('should correctly handle automatic change of account as a deauthenticate', 
   service.manager().authenticate();
 });
 
+test('should create a ethersjs object running parallel to web3', (done) => {
+  const service = Web3Service.buildEthersService();
+  service.manager().connect()
+    .then(() => {
+      console.log(service._web3.currentProvider);
+      expect(service._ethersProvider).toBeDefined();
+      expect(service._web3.currentProvider).toBe(service._ethersProvider);
+      done();
+    });
+});
+    
+
 
 /*
 test('should connect to ganache testnet with account 0x16fb9...', (done) => {
@@ -140,5 +152,4 @@ test('should connect to ganache testnet with account 0x16fb9...', (done) => {
   done();
   });
 });
- */
-
+*/

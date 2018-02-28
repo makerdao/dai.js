@@ -7,8 +7,8 @@ test('getTokens returns tokens', (done) => {
       return ethereumTokenService.getTokens();
     })
     .then((tokens)=>{
-    	expect(tokens.includes('DAI')).toBe(true);
-    	expect(tokens.includes('MKR')).toBe(true);
-    	done();
+      expect(tokens.includes('DAI')).toBe(true);
+      expect(tokens.includes('MKR')).toBe(true);
+      done();
     });
 });

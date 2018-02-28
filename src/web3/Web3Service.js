@@ -17,6 +17,7 @@ export default class Web3Service extends PrivateService {
   constructor(provider = null, name = 'web3') {
     super(name, ['log', 'timer']);
     this._web3 = null;
+    this._ethersProvider = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
     this._provider = provider;
   }
@@ -83,6 +84,22 @@ export default class Web3Service extends PrivateService {
     return service;
   }
 
+  static buildEthersService() {
+    const service = new Web3Service();
+    service.manager()
+      .inject('log', new NullLoggerService())
+      .inject('timer', new TimerService())
+      .settings(
+        {
+          provider : {
+            type : Web3ProviderType.ETHERS
+          }
+        }
+      );
+
+    return service;
+  }
+
   static buildRemoteService() {
     const service = new Web3Service();
     service.manager().inject('log', new NullLoggerService())
@@ -101,7 +118,17 @@ export default class Web3Service extends PrivateService {
     settings = settings || { provider : {type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'}};
     const web3 = new Web3();
 
-    if (this._provider) {
+    if ( settings.provider.type  === Web3ProviderType.ETHERS ) {
+      var ethers = require('ethers');
+      var ethersProviders = require('ethers').providers;
+
+      //This automatically creates a FallbackProvider backed by INFURA and Etherscan; recommended
+      var ethersProvider = ethersProviders.getDefaultProvider('homestead');
+      this._ethersProvider = ethersProvider;
+      this._ethers = ethers;
+      web3.setProvider(ethersProvider);
+
+    } else if (this._provider) {
       web3.setProvider(this._provider);
 
     } else if (window && window.web3) {
