@@ -68,7 +68,7 @@ export default class EthereumTokenService extends PrivateService {
   }
 
   _getCurrentNetworkMapping(){
-    let networkID = 1;//this.get('web3').getNetwork(); - Why is this not working??
+    let networkID = parseInt(this.get('web3').getNetwork().toString(10), 10);
     const mapping = networks.filter((m)=> m.networkID === networkID);
     if (mapping.length < 1) {throw new Error('networkID not found');}
     return mapping[0].addresses;
