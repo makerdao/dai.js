@@ -1,9 +1,6 @@
-import sayHello from './hello';
 import './index.scss';
 import Web3Service from './web3/Web3Service';
 import BunyanService from './loggers/bunyan/BunyanService';
-
-document.getElementById('root').innerHTML = sayHello();
 
 const
   bunyan = new BunyanService(),
