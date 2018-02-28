@@ -4,11 +4,11 @@ import SmartContractService from '../services/SmartContractService';
 export default class ERC20Token {
 
   constructor(contract) {
-    	this._contract = contract;
+    this._contract = contract;
   }
 
   allowance(tokenOwner, spender){ //returns a promise
-    	return this._contract.allowance(tokenOwner, spender);
+    return this._contract.allowance(tokenOwner, spender);
   }
 
   balanceOf(owner){

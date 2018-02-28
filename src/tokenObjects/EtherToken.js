@@ -3,12 +3,12 @@ import Web3Service from '../web3/Web3Service';
 export default class EtherToken {
 
   constructor(web3Service, gasEstimatorService) {
-    	this._web3 = web3Service;
-    	this._gasEstimator = gasEstimatorService;
+    this._web3 = web3Service;
+    this._gasEstimator = gasEstimatorService;
   }
 
   allowance(tokenOwner, spender){ 
-    	return Promise.resolve(Number.MAX_SAFE_INTEGER); //double check that this should be a promise
+    return Promise.resolve(Number.MAX_SAFE_INTEGER); //double check that this should be a promise
   }
 
   balanceOf(owner){ //returns a promise
