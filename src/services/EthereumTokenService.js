@@ -17,20 +17,20 @@ export default class EthereumTokenService extends PrivateService {
 	      .inject('log', smartContractService.get('log'))
 	      .inject('web3', smartContractService.get('web3'))
 	      .inject('smartContract', smartContractService)
-        .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3'))); //I pass in web3 since both services depend on it
+      .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3'))); //I pass in web3 since both services depend on it
 	    return service;
 	 }
 
   static buildRemoteService() {
-      const service = new EthereumTokenService();
-      const smartContractService = SmartContractService.buildRemoteService();
-      service.manager()
-        .inject('log', smartContractService.get('log'))
-        .inject('web3', smartContractService.get('web3'))
-        .inject('smartContract', smartContractService)
-        .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3')));
-      return service;
-   }
+    const service = new EthereumTokenService();
+    const smartContractService = SmartContractService.buildRemoteService();
+    service.manager()
+      .inject('log', smartContractService.get('log'))
+      .inject('web3', smartContractService.get('web3'))
+      .inject('smartContract', smartContractService)
+      .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3')));
+    return service;
+  }
 
   constructor(name = 'ethereumToken') {
     	super(name, ['smartContract', 'web3', 'log', 'gasEstimator']);
@@ -47,7 +47,7 @@ export default class EthereumTokenService extends PrivateService {
 
   getToken(symbol, version = null){
     if (this.getTokens().indexOf(symbol) < 0) {
-      throw new Error("provided token is not a symbol");
+      throw new Error('provided token is not a symbol');
     }
     if (symbol === tokens.ETH) {
       return new EtherToken(this.get('web3'), this.get('gasEstimator'));
