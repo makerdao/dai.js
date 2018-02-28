@@ -125,7 +125,7 @@ export default class Web3Service extends PrivateService {
 
     this.eth = {};
     Object.assign(this.eth, promisifyAsyncMethods(
-      web3.eth, [ 'getAccounts', 'estimateGas', 'getBlock']
+      web3.eth, [ 'getAccounts', 'estimateGas', 'getBlock', 'sendTransaction', 'getBalance']
     ));
 
     this.personal = {};
@@ -180,7 +180,7 @@ export default class Web3Service extends PrivateService {
       _web3Promise(_ => this._web3.version.getNode(_)), // can remove this
       _web3Promise(_ => this._web3.version.getNetwork(_))
     ]).then(
-      versionInfo => (/*first check that versionInfo[1] is an array */versionInfo[1] === this._info.version['network']),
+      versionInfo => (versionInfo[1] != null && versionInfo[1] === this._info.version['network']),
       () => false
     );
   }
@@ -188,7 +188,7 @@ export default class Web3Service extends PrivateService {
   authenticate() {
     this.get('log').info('Web3 is authenticating...');
 
-    return _web3Promise(_ => this._web3.eth.getAccounts(_)) // why is there a _ here?
+    return _web3Promise(_ => this._web3.eth.getAccounts(_))
       .then(data => {
         if (!(data instanceof Array) || (data.length < 1) ) {
           throw new Error ('Web3 is not authenticated');
@@ -214,7 +214,7 @@ export default class Web3Service extends PrivateService {
 
   _isStillAuthenticated() {
     return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
-      accounts => (/*first check its an array*/ accounts[0] === this._info.account),
+      accounts => (accounts instanceof Array && accounts[0] === this._info.account),
       () => false
     );
   }
@@ -230,6 +230,7 @@ export default class Web3Service extends PrivateService {
       data: '0xc6888fa10000000000000000000000000000000000000000000000000000000000000003'
     };
   }
+
 }
 
 /* istanbul ignore next */

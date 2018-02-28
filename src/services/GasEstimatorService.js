@@ -1,4 +1,5 @@
 import PublicService from '../services/PublicService';
+import Web3Service from '../web3/Web3Service';
 //import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
 
 export default class GasEstimatorService extends PublicService {
@@ -10,6 +11,15 @@ export default class GasEstimatorService extends PublicService {
     this._percentage = null; 
     this._absolute = null;
   }
+
+  static buildTestService(web3 = null){
+    web3 = web3 || Web3Service.buildTestService();
+    const service = new GasEstimatorService();
+    service.manager()
+    .inject('log', web3.get('log'))
+    .inject('web3', web3);
+  return service;
+}
 
   estimateGasLimit(transaction){
     if (this._percentage === null && this._absolute === null) { throw new Error('no gas limit policy set'); }

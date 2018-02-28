@@ -2,6 +2,11 @@ import PrivateService from './PrivateService';
 import tokens from '../../contracts/tokens';
 import SmartContractService from './SmartContractService';
 import networks from '../../contracts/networks';
+import ERC20Token from '../tokenObjects/ERC20Token';
+import EtherToken from '../tokenObjects/EtherToken';
+import WethToken from '../tokenObjects/EtherToken';
+import PethToken from '../tokenObjects/EtherToken';
+import GasEstimatorService from '../services/GasEstimatorService';
 
 export default class EthereumTokenService extends PrivateService {
 
@@ -11,12 +16,24 @@ export default class EthereumTokenService extends PrivateService {
 	    service.manager()
 	      .inject('log', smartContractService.get('log'))
 	      .inject('web3', smartContractService.get('web3'))
-	      .inject('smartContract', smartContractService);
+	      .inject('smartContract', smartContractService)
+        .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3'))); //I pass in web3 since both services depend on it
 	    return service;
 	 }
 
+  static buildRemoteService() {
+      const service = new EthereumTokenService();
+      const smartContractService = SmartContractService.buildRemoteService();
+      service.manager()
+        .inject('log', smartContractService.get('log'))
+        .inject('web3', smartContractService.get('web3'))
+        .inject('smartContract', smartContractService)
+        .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3')));
+      return service;
+   }
+
   constructor(name = 'ethereumToken') {
-    	super(name, ['smartContract', 'web3', 'log']);
+    	super(name, ['smartContract', 'web3', 'log', 'gasEstimator']);
   }
 
   getTokens() {
@@ -29,13 +46,29 @@ export default class EthereumTokenService extends PrivateService {
   }
 
   getToken(symbol, version = null){
-    if (!(this.getTokens().includes(symbol))) {
+    if (this.getTokens().indexOf(symbol) < 0) {
       throw new Error("provided token is not a symbol");
+    }
+    if (symbol === tokens.ETH) {
+      return new EtherToken(this.get('web3'), this.get('gasEstimator'));
+    }
+    else{
+      const mapping = this._getCurrentNetworkMapping();
+      const tokenInfo = mapping[symbol];
+      const tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1]; //get last entry in array if version null
+      const smartContractService = this.get('smartContract');
+      //const contract = smartContractService.getContractByAddress(tokenVersionData.address, tokenVersionData.abi); //this doesn't exist yet
+      if (symbol === tokens.WETH) {return new WethToken(contract);}
+      if (symbol === tokens.PETH) {
+        //const tub = smartContractService.getContractByName('TUB');
+        return new PethToken(contract, tub);
+      }
+      return new ERC20Token(contract);
     }
   }
 
   _getCurrentNetworkMapping(){
-    let networkID = 1; //_web3Promise(_ => this.get('web3')._web3.version.getNetwork(_)); // why can I not do the usual pass-through function on the web3 service?
+    let networkID = 1;//this.get('web3').getNetwork(); - Why is this not working??
     const mapping = networks.filter((m)=> m.networkID === networkID);
     if (mapping.length < 1) {throw new Error('networkID not found');}
     return mapping[0].addresses;
