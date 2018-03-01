@@ -5,7 +5,7 @@ export default class SmartContractService extends PublicService {
 
   static buildTestService() {
     const service = new SmartContractService();
-    const web3 = Web3Service.buildEthersService();
+    const web3 = Web3Service.buildTestService();
     service.manager()
       .inject('log', web3.get('log'))
       .inject('web3', web3);
