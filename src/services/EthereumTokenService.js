@@ -64,11 +64,11 @@ export default class EthereumTokenService extends PrivateService {
       return new EtherToken(this.get('web3'), this.get('gasEstimator'));
     }
     else{
-      const mapping = this._getCurrentNetworkMapping();
+      const mapping = this._getCurrentNetworkMappingEthers();
       const tokenInfo = mapping[symbol];
       const tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1]; //get last entry in array if version null
       const smartContractService = this.get('smartContract');
-      //const contract = smartContractService.getContractByAddressandAbi(tokenVersionData.address, tokenVersionData.abi); //this doesn't exist yet
+      const contract = smartContractService.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
       if (symbol === tokens.WETH) {return new WethToken(contract);}
       if (symbol === tokens.PETH) {
         //const tub = smartContractService.getContractByName('TUB');
@@ -80,6 +80,13 @@ export default class EthereumTokenService extends PrivateService {
 
   _getCurrentNetworkMapping(){
     let networkID = parseInt(this.get('web3').getNetwork().toString(10), 10);
+    const mapping = networks.filter((m)=> m.networkID === networkID);
+    if (mapping.length < 1) {throw new Error('networkID not found');}
+    return mapping[0].addresses;
+  }
+
+  _getCurrentNetworkMappingEthers(){
+    let networkID = 42;//parseInt(this.get('web3').getNetwork().toString(10), 10);
     const mapping = networks.filter((m)=> m.networkID === networkID);
     if (mapping.length < 1) {throw new Error('networkID not found');}
     return mapping[0].addresses;

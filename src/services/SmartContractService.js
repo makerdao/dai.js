@@ -35,13 +35,17 @@ export default class SmartContractService extends PublicService {
     super(name, ['web3', 'log']);
   }
 
-  // abi must be passed in.
-  // change to check web3 for network and provider
-  getContractByAddressAndAbi(address, abi, network = 'kovan', ethersProvider = 'null') {
-    let networkID = parseInt(this.get('web3').getNetwork().toString(10), 10);
-    //how to go from networkID? maybe something like Provider.chainId.homestead
-    var provider = ethers.providers.getDefaultProvider(network);
-    var contract = new ethers.Contract(address, abi, provider);
+  // check web3 for the current wallet
+  getContractByAddressAndAbi(address, abi) {
+    var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
+    var infuraKey = 'ihagQOzC3mkRXYuCivDN';
+    console.log(this.get('web3')._ethers.providers.InfuraProvider);
+    var infuraProvider = new this.get('web3')._ethers.providers.InfuraProvider('kovan', infuraKey);
+    console.log('infuraProvider: ', infuraProvider);
+    var wallet = new this.get('web3')._ethers.Wallet(kovanPrivateKey, infuraProvider);
+    console.log('3');
+    var contract = new this.get('web3')._ethers.Contract(address, abi, wallet);
+    console.log('4');
     return contract;
   }
 
