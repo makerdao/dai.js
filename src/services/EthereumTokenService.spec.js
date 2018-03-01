@@ -65,7 +65,7 @@ test('transfer EtherToken using test blockchain', (done) => {
       done();
     });
 });
-
+/*
 test('transfer EtherToken using blockchain from EthersJS', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService();
   let token = null;
@@ -79,7 +79,7 @@ test('transfer EtherToken using blockchain from EthersJS', (done) => {
       expect(balance.toString(10)).toEqual('1000000000');
       done();
     });
-});
+});*/
 
 test('get Ether balance using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -93,7 +93,7 @@ test('get Ether balance using test blockchain', (done) => {
       done();
     });
 });
-
+/*
 test('get Ether balance using blockchain from EthersJS', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService();
   ethereumTokenService.manager().connect()
@@ -105,7 +105,7 @@ test('get Ether balance using blockchain from EthersJS', (done) => {
       expect(balance.toString(10)).toEqual('0');
       done();
     });
-});
+});*/
 
 test('get Ether allowance returns max safe integer', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
