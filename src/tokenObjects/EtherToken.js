@@ -15,6 +15,10 @@ export default class EtherToken {
     return this._web3.eth.getBalance(owner); //add this as a passthrough to the web3service
   }
 
+  balanceOfWithEthersJS(owner){
+
+  }
+
   approve(spender, value){
     return true;
   }
@@ -30,4 +34,7 @@ export default class EtherToken {
     return this._web3.eth.sendTransaction({from: fromAddress, to: toAddress, value: transferValue, gasLimit: gasLimit, gasPrice: 20000000000});
   }
 
+   transferWithEthersJS(fromAddress, toAddress, transferValue){ //returns a promise
+
+  }
 }

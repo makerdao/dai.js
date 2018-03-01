@@ -21,6 +21,17 @@ export default class EthereumTokenService extends PrivateService {
     return service;
   }
 
+  static buildEthersService() {
+    const service = new EthereumTokenService();
+    const smartContractService = SmartContractService.buildEthersService();
+    service.manager()
+      .inject('log', smartContractService.get('log'))
+      .inject('web3', smartContractService.get('web3'))
+      .inject('smartContract', smartContractService)
+      .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3'))); //I pass in web3 since both services depend on it
+    return service;
+  }
+
   static buildRemoteService() {
     const service = new EthereumTokenService();
     const smartContractService = SmartContractService.buildRemoteService();
@@ -57,7 +68,7 @@ export default class EthereumTokenService extends PrivateService {
       const tokenInfo = mapping[symbol];
       const tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1]; //get last entry in array if version null
       const smartContractService = this.get('smartContract');
-      //const contract = smartContractService.getContractByAddress(tokenVersionData.address, tokenVersionData.abi); //this doesn't exist yet
+      //const contract = smartContractService.getContractByAddressandAbi(tokenVersionData.address, tokenVersionData.abi); //this doesn't exist yet
       if (symbol === tokens.WETH) {return new WethToken(contract);}
       if (symbol === tokens.PETH) {
         //const tub = smartContractService.getContractByName('TUB');

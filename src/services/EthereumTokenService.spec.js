@@ -14,7 +14,7 @@ test('getTokens returns tokens', (done) => {
     });
 });
 
-test('getTokenVersions returns token versions', (done) => {
+test('getTokenVersions returns token versions using remote blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildRemoteService(); //needed to build a remote service here so that its either on mainnet or kovan
   ethereumTokenService.manager().connect()
     .then(() => {
@@ -51,7 +51,7 @@ test('getToken returns an ERC20Token Object', (done) => {
 });
 */
 
-test('transfer EtherToken', (done) => {
+test('transfer EtherToken using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
   let token = null;
   ethereumTokenService.manager().connect()
@@ -66,8 +66,36 @@ test('transfer EtherToken', (done) => {
     });
 });
 
-test('get Ether balance', (done) => {
+test('transfer EtherToken using blockchain from EthersJS', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService();
+  let token = null;
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      token = ethereumTokenService.getToken(tokens.ETH);
+      return token.transfer('0x81431b69b1e0e334d4161a13c2955e0f3599381e', '0x0000000000000000000000000000000000000001', 1000000000);
+    })
+    .then(() => token.balanceOf('0x0000000000000000000000000000000000000001'))
+    .then(balance =>{
+      expect(balance.toString(10)).toEqual('1000000000');
+      done();
+    });
+});
+
+test('get Ether balance using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      const token =  ethereumTokenService.getToken(tokens.ETH);
+      return token.balanceOf('0x0000000000000000000000000000000000000003'); //update to check balance of account with ether
+    })
+    .then(balance => {
+      expect(balance.toString(10)).toEqual('0');
+      done();
+    });
+});
+
+test('get Ether balance using blockchain from EthersJS', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService();
   ethereumTokenService.manager().connect()
     .then(() => {
       const token =  ethereumTokenService.getToken(tokens.ETH);

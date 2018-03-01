@@ -5,6 +5,15 @@ export default class SmartContractService extends PublicService {
 
   static buildTestService() {
     const service = new SmartContractService();
+    const web3 = Web3Service.buildTestService();
+    service.manager()
+      .inject('log', web3.get('log'))
+      .inject('web3', web3);
+    return service;
+  }
+
+  static buildEthersService() {
+    const service = new SmartContractService();
     const web3 = Web3Service.buildEthersService();
     service.manager()
       .inject('log', web3.get('log'))
@@ -29,7 +38,8 @@ export default class SmartContractService extends PublicService {
   // abi must be passed in.
   // change to check web3 for network and provider
   getContractByAddressAndAbi(address, abi, network = 'kovan', ethersProvider = 'null') {
-    
+    let networkID = parseInt(this.get('web3').getNetwork().toString(10), 10);
+    //how to go from networkID? maybe something like Provider.chainId.homestead
     var provider = ethers.providers.getDefaultProvider(network);
     var contract = new ethers.Contract(address, abi, provider);
     return contract;
