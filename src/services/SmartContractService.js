@@ -1,5 +1,7 @@
 import PublicService from './PublicService';
 import Web3Service from '../web3/Web3Service';
+import contracts from '../../contracts/contracts';
+import networks from '../../contracts/networks';
 
 export default class SmartContractService extends PublicService {
 
@@ -48,11 +50,20 @@ export default class SmartContractService extends PublicService {
 
   // mapping of name + version to address + abi.
   getContractByName(name, version = null) {
-  // use mapping in /contracts/addresses
-  // use _getAddressByName(name, version = null)
+    if (Object.keys(contracts).indexOf(name) < 0) {
+      throw new Error('provided name is not a contract');
+    }
+      const mapping = this._getCurrentNetworkMappingEthers();
+      const tokenInfo = mapping[name];
+      const tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1]; //get last entry in array if version null
+      return this.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
   }
 
-  _getAddressByName(name, version = null) {
-
+  //this is the same function that's in EthereumTokenService
+  _getCurrentNetworkMappingEthers(){
+    let networkID = 42;//parseInt(this.get('web3').getNetwork().toString(10), 10);
+    const mapping = networks.filter((m)=> m.networkID === networkID);
+    if (mapping.length < 1) {throw new Error('networkID not found');}
+    return mapping[0].addresses;
   }
 }

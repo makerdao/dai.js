@@ -1,5 +1,6 @@
 // import PublicService from './PublicService';
-
+import contracts from '../../contracts/contracts';
+import SmartContractService from './SmartContractService';
 import Web3Service from '../web3/Web3Service';
 import { debug } from 'util';
 
@@ -139,3 +140,14 @@ test('send an ETH transfer transaction to the Kovan network', (done) => {
       });
     });
 }, 15000);
+
+test('getContractByName returns a contract', (done) => {
+  const smartContractService = SmartContractService.buildEthersService();
+  smartContractService.manager().connect()
+    .then(() => smartContractService.getContractByName(contracts.TUB))
+    .then(contract=>{
+      expect(!!contract).toBe(true);
+      done();
+    })
+});
+
