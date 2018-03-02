@@ -23,7 +23,7 @@ export default class ERC20Token {
     return this._contract.approve(spender); //this only works if its a DSToken
   }
 
-  transferFrom(from, to, value){
+  transfer(from, to, value){
     return this._contract.transfer(from, to, value);
   }
 }

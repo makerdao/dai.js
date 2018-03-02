@@ -36,18 +36,58 @@ test('getToken throws when given unknown token symbol', (done) => {
     });
 });
 
-/*
-test('getToken returns an ERC20Token Object', (done) => {
+
+test('get ERC20 (MKR) balance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
   ethereumTokenService.manager().connect()
     .then(() => {
       return ethereumTokenService.getToken(tokens.MKR);
     })
-    .then( token =>{
-      //expect(!!token).toBe(true);
+    .then(token => token.balanceOf('0x0000000000000000000000000000000000000001'))
+    .then(balance =>{
+      expect(parseInt(balance.toString(10),10)).toBe(0);
       done();
     });
-});*/
+});
+
+test('get ERC20 (MKR) allowance of address', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      return ethereumTokenService.getToken(tokens.MKR);
+    })
+    .then(token => token.allowance('0x0000000000000000000000000000000000000001', '0x0000000000000000000000000000000000000002'))
+    .then(allowance =>{
+      expect(parseInt(allowance.toString(10),10)).toBe(0);
+      done();
+    });
+});
+
+test('approve an ERC20 (MKR) allowance', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      return ethereumTokenService.getToken(tokens.MKR);
+    })
+    .then(token => token.approve('0x0000000000000000000000000000000000000001', 10000))
+    .then(transaction =>{
+      expect(!!transaction).toBe(true);
+      done();
+    });
+});
+
+test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      return ethereumTokenService.getToken(tokens.MKR);
+    })
+    .then(token => token.approveUnlimited('0x0000000000000000000000000000000000000001'))
+    .then(transaction =>{
+      expect(!!transaction).toBe(true);
+      done();
+    });
+});
 
 test('transfer EtherToken using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
