@@ -1,6 +1,6 @@
-import ServiceManagerBase from './ServiceManagerBase';
-import ServiceState from './ServiceState';
-import ServiceType from './ServiceType';
+import ServiceManagerBase from '../services/ServiceManagerBase';
+import ServiceState from '../services/ServiceState';
+import ServiceType from '../services/ServiceType';
 
 test('constructor() should throw on invalid init function', () => {
   expect(() => new ServiceManagerBase('')).toThrow('Invalid argument init: not a function or null.');

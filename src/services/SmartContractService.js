@@ -54,10 +54,10 @@ export default class SmartContractService extends PublicService {
     if (Object.keys(contracts).indexOf(name) < 0) {
       throw new Error('provided name is not a contract');
     }
-      const mapping = this._getCurrentNetworkMappingEthers();
-      const tokenInfo = mapping[name];
-      const tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1]; //get last entry in array if version null
-      return this.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
+    const mapping = this._getCurrentNetworkMappingEthers();
+    const tokenInfo = mapping[name];
+    const tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1]; //get last entry in array if version null
+    return this.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
   }
 
   //this is the same function that's in EthereumTokenService

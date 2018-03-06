@@ -1,4 +1,4 @@
-import { promisifyAsync } from './Utils';
+import { promisifyAsync } from '../Utils';
 
 describe('promisifyAsync makes async functions return Promises', () => {
   test('arguments can be passed and results are resolved', () => {

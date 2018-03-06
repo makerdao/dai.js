@@ -37,7 +37,7 @@ export default class EtherToken {
   }
 
   //need to be able to create a wallet on the fly based on the from address?
-   transferWithEthersJS(fromAddress, toAddress, transferValue){
+  transferWithEthersJS(fromAddress, toAddress, transferValue){
    	var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
     var infuraKey = 'ihagQOzC3mkRXYuCivDN';
     var infuraProvider = new this._web3._ethers.providers.InfuraProvider('kovan', infuraKey);

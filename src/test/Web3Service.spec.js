@@ -1,6 +1,6 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
 
-import Web3Service from './Web3Service';
+import Web3Service from '../web3/Web3Service';
 
 test('should fetch version info on connect', (done) => {
   const web3 = Web3Service.buildTestService();

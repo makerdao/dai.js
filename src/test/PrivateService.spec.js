@@ -1,6 +1,6 @@
-import ServiceBase from './ServiceBase';
-import PrivateService from './PrivateService';
-import ServiceType from './ServiceType';
+import ServiceBase from '../services/ServiceBase';
+import PrivateService from '../services/PrivateService';
+import ServiceType from '../services/ServiceType';
 
 test('should be a service of type PRIVATE, with the provided name and dependencies', () => {
   const service = new PrivateService('MyName', ['X', 'Y', 'Z']);

@@ -1,4 +1,4 @@
-import TestCredentialsService from './TestCredentialsService';
+import TestCredentialsService from '../credentials/TestCredentialsService';
 
 test('returns the credentials supplied at instantiation', () => {
   const loginName = 'mytestlogin';

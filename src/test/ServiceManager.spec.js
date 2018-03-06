@@ -1,4 +1,4 @@
-import ServiceManager, { UnknownDependencyError, DependencyNotResolvedError } from './ServiceManager';
+import ServiceManager, { UnknownDependencyError, DependencyNotResolvedError } from '../services/ServiceManager';
 
 const name = 'IAmAService', _ = ()=>{};
 

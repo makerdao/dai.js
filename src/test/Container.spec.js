@@ -1,7 +1,7 @@
 import Container, { InvalidServiceError, ServiceAlreadyRegisteredError, ServiceDependencyLoopError, ServiceNotFoundError }
-  from './Container';
+  from '../services/Container';
 
-import ServiceManager from './ServiceManager';
+import ServiceManager from '../services/ServiceManager';
 
 const serviceA = new ServiceManager('ServiceA').createService();
 const serviceB = new ServiceManager('ServiceB', ['ServiceA']).createService();

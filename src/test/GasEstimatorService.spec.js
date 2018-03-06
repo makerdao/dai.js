@@ -1,4 +1,4 @@
-import GasEstimatorService from './GasEstimatorService';
+import GasEstimatorService from '../services/GasEstimatorService';
 import Web3Service from '../web3/Web3Service';
 
 function buildGasEstimatorService(){

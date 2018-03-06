@@ -1,4 +1,4 @@
-import { default as MakerDao, State, IllegalStateError } from './MakerDao';
+import { default as MakerDao, State, IllegalStateError } from '../MakerDao';
 
 test('should reflect state through isState()', () => {
   const md = new MakerDao();

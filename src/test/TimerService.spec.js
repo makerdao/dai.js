@@ -1,4 +1,4 @@
-import TimerService from './TimerService';
+import TimerService from '../TimerService';
 
 
 test('allows setting repeating timers', (done) => {

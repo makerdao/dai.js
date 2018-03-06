@@ -1,6 +1,6 @@
 // import PublicService from './PublicService';
 import contracts from '../../contracts/contracts';
-import SmartContractService from './SmartContractService';
+import SmartContractService from '../services/SmartContractService';
 import Web3Service from '../web3/Web3Service';
 import { debug } from 'util';
 
@@ -119,7 +119,8 @@ test('send an ETH transfer transaction to the Kovan network', (done) => {
 
       var transaction = {
         to: '0xFD53E4AB1f71fDA9D5Ea42ECE36981302829c900',
-        value: service._ethers.utils.parseEther('0.001')
+        value: service._ethers.utils.parseEther('0.001'), 
+        nonce: wallet.nonce + 1
       };
       console.log(transaction);
 
@@ -127,7 +128,8 @@ test('send an ETH transfer transaction to the Kovan network', (done) => {
 
       estimateGasPromise.then(function(gasEstimate) {
         console.log(gasEstimate.toString());
-        transaction.gasLimit = gasEstimate;
+        transaction.gasLimit = gasEstimate.add(2000);
+        console.log(transaction.gasLimit);
         expect(gasEstimate.toString()).toBeDefined();
 
         // Send the transaction
@@ -148,6 +150,6 @@ test('getContractByName returns a contract', (done) => {
     .then(contract=>{
       expect(!!contract).toBe(true);
       done();
-    })
+    });
 });
 
