@@ -35,6 +35,7 @@ export default class SmartContractService extends PublicService {
 
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log']);
+    this._provider = null;
   }
 
   // check web3 for the current wallet
