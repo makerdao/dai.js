@@ -20,7 +20,7 @@ export default class ERC20Token {
   }
 
   approveUnlimited(spender){
-    return this._contract.approve(spender); //this only works if its a DSToken
+    return this._contract.approve(spender, -1);
   }
 
   transfer(from, to, value){

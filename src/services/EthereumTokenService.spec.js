@@ -1,5 +1,6 @@
 import EthereumTokenService from './EthereumTokenService';
 import tokens from '../../contracts/tokens';
+var utils = require('ethers').utils;
 
 test('getTokens returns tokens', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService();
@@ -89,37 +90,40 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
     });
 });
 
+/*
 test('transfer EtherToken using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
   const token = ethereumTokenService.getToken(tokens.ETH);
   let initSenderBalance = 0;
   let initReceiverBalance = 0;
+  const senderAddress = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
+  const amount = utils.parseEther('0.0000000015');
   ethereumTokenService.manager().connect()
     .then(() =>{
       return Promise.all([
-        token.balanceOf('0x81431b69b1e0e334d4161a13c2955e0f3599381e'),
+        token.balanceOf(senderAddress),
         token.balanceOf('0x0000000000000000000000000000000000000001')
         ])
     })
     .then(initialBalances => {
       initSenderBalance = initialBalances[0];
       initReceiverBalance = initialBalances[1];
-      return token.transfer('0x81431b69b1e0e334d4161a13c2955e0f3599381e', '0x0000000000000000000000000000000000000001', 1000000000);
+      return token.transfer(senderAddress, '0x0000000000000000000000000000000000000001', 0.0000000015);
     })
     .then(() => {
       return Promise.all([
-        token.balanceOf('0x81431b69b1e0e334d4161a13c2955e0f3599381e'),
+        token.balanceOf(senderAddress),
         token.balanceOf('0x0000000000000000000000000000000000000001')
         ])
     })
     .then(finalBalances =>{
-      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(1000000000); 
-      //expect(parseInt(finalBalances[0].toString(10),10)+1000000000).toEqual(initSenderBalance); //need to figure out how to subtract gas cost from this
+      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(0.0000000015); 
+      expect(parseInt(finalBalances[0].toString(10),10)+0.0000000015).toEqual(initSenderBalance);
       done();
     });
 });
 
-/*
+
 test('transfer EtherToken using blockchain from EthersJS', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService();
   const token = ethereumTokenService.getToken(tokens.ETH);
@@ -135,7 +139,7 @@ test('transfer EtherToken using blockchain from EthersJS', (done) => {
     .then(initialBalances => {
       initSenderBalance = initialBalances[0];
       initReceiverBalance = initialBalances[1];
-      return token.transfer('0x81431b69b1e0e334d4161a13c2955e0f3599381e', '0x0000000000000000000000000000000000000001', 1000000000);
+      return token.transfer('0x81431b69b1e0e334d4161a13c2955e0f3599381e', '0x0000000000000000000000000000000000000001', 15);
     })
     .then(() => {
       return Promise.all([
@@ -144,12 +148,44 @@ test('transfer EtherToken using blockchain from EthersJS', (done) => {
         ])
     })
     .then(finalBalances =>{
-      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(1000000000); 
-      //expect(parseInt(finalBalances[0].toString(10),10)+1000000000).toEqual(initSenderBalance); //need to figure out how to subtract gas cost from this
+      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15); 
+      //expect(parseInt(finalBalances[0].toString(10),10)+15).toEqual(initSenderBalance); //need to figure out how to subtract gas cost from this
+      done();
+    });
+});
+
+test('transfer EtherToken using EthersJS send function', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService();
+  const token = ethereumTokenService.getToken(tokens.ETH);
+  let initSenderBalance = 0;
+  let initReceiverBalance = 0;
+  ethereumTokenService.manager().connect()
+    .then(() =>{
+      return Promise.all([
+        token.balanceOf('0x81431b69b1e0e334d4161a13c2955e0f3599381e'),
+        token.balanceOf('0x0000000000000000000000000000000000000005')
+        ])
+    })
+    .then(initialBalances => {
+      initSenderBalance = initialBalances[0];
+      initReceiverBalance = initialBalances[1];
+      return token.transferWithEthersJS('0x81431b69b1e0e334d4161a13c2955e0f3599381e', '0x0000000000000000000000000000000000000005', 15); //try this with different numbers, or big number objects
+    })
+    .then(() => {
+      return Promise.all([
+        token.balanceOf('0x81431b69b1e0e334d4161a13c2955e0f3599381e'),
+        token.balanceOf('0x0000000000000000000000000000000000000005')
+        ])
+    })
+    .then(finalBalances =>{
+      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15); 
+      expect(parseInt(finalBalances[0].toString(10),10)+15).toEqual(initSenderBalance); //need to figure out how to subtract gas cost from this
       done();
     });
 });
 */
+
+
 
 test('get Ether balance using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -176,8 +212,21 @@ test('get Ether balance using blockchain from EthersJS', (done) => {
       expect(parseInt(balance.toString(10),10)).toEqual(0);
       done();
     });
+});*/
+
+test('get Ether balance using EthersJS getBalance', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService();
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      const token =  ethereumTokenService.getToken(tokens.ETH);
+      return token.balanceOfWithEthersJS('0x000000000000000000000000000000000000000b'); //update to check balance of account with ether
+    })
+    .then(balance => {
+      expect(parseInt(balance.toString(10),10)).toEqual(0);
+      done();
+    });
 });
-*/
+
 
 test('get Ether allowance returns max safe integer', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();

@@ -16,7 +16,9 @@ export default class EtherToken {
   }
 
   balanceOfWithEthersJS(owner){
-
+    var infuraKey = 'ihagQOzC3mkRXYuCivDN';
+    var infuraProvider = new this._web3._ethers.providers.InfuraProvider('kovan', infuraKey);
+    return infuraProvider.getBalance(owner);
   }
 
   approve(spender, value){
@@ -29,12 +31,17 @@ export default class EtherToken {
 
   transfer(fromAddress, toAddress, transferValue){ //returns a promise
     const tx = {from: fromAddress, to: toAddress, amount: transferValue};
-    this._gasEstimator.setPercentage(1.2);
+    this._gasEstimator.setPercentage(1.01);
     const gasLimit = this._gasEstimator.estimateGasLimit(tx);
-    return this._web3.eth.sendTransaction({from: fromAddress, to: toAddress, value: transferValue, gasLimit: gasLimit, gasPrice: 20000000000});
+    return this._web3.eth.sendTransaction({from: fromAddress, to: toAddress, value: transferValue, gasLimit: gasLimit, gasPrice: 300000});
   }
 
-   transferWithEthersJS(fromAddress, toAddress, transferValue){ //returns a promise
-
+  //need to be able to create a wallet on the fly based on the from address?
+   transferWithEthersJS(fromAddress, toAddress, transferValue){
+   	var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
+    var infuraKey = 'ihagQOzC3mkRXYuCivDN';
+    var infuraProvider = new this._web3._ethers.providers.InfuraProvider('kovan', infuraKey);
+    var wallet = new this._web3._ethers.Wallet(kovanPrivateKey, infuraProvider);
+    return wallet.send(toAddress, transferValue); //check why this isn't working
   }
 }
