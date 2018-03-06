@@ -126,7 +126,7 @@ export default class Web3Service extends PrivateService {
       var ethersProvider = ethersProviders.getDefaultProvider('homestead');
       this._ethersProvider = ethersProvider;
       this._ethers = ethers;
-      web3.setProvider(ethersProvider);
+      web3.setProvider(ethersProvider); //is this the right syntax?
 
     } else if (this._provider) {
       web3.setProvider(this._provider);
@@ -149,7 +149,7 @@ export default class Web3Service extends PrivateService {
       this.get('log').error('Illegal Provider Config', settings);
       throw new Error('Illegal Provider Config');
     }
-
+    //new ethers.Web3Provider(web3.currentProvider) - by creatng this, ethers now knows to use this provider?
     this.eth = {};
     Object.assign(this.eth, promisifyAsyncMethods(
       web3.eth, [ 'getAccounts', 'estimateGas', 'getBlock', 'sendTransaction', 'getBalance']

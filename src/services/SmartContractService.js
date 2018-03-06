@@ -43,7 +43,7 @@ export default class SmartContractService extends PublicService {
     var infuraKey = 'ihagQOzC3mkRXYuCivDN';
     const web3Service = this.get('web3');
     var infuraProvider = new web3Service._ethers.providers.InfuraProvider('kovan', infuraKey);
-    var wallet = new web3Service._ethers.Wallet(kovanPrivateKey, infuraProvider);
+    var wallet = new web3Service._ethers.Wallet(kovanPrivateKey, infuraProvider); //provider is optional, remove this, instead use .createSigner because this will work with other providers (e.g. metamask).  instead of injecting wallet, inject the signer
     var contract = new web3Service._ethers.Contract(address, abi, wallet);
     return contract;
   }
