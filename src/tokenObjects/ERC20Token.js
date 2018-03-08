@@ -3,8 +3,10 @@ import SmartContractService from '../services/SmartContractService';
 
 export default class ERC20Token {
 
-  constructor(contract) {
+  constructor(contract, web3Service, gasEstimatorService) {
     this._contract = contract;
+    this._web3 = web3Service;
+    this._gasEstimator = gasEstimatorService;
   }
 
   allowance(tokenOwner, spender){ //returns a promise
@@ -25,5 +27,9 @@ export default class ERC20Token {
 
   transfer(from, to, value){
     return this._contract.transfer(from, to, value);
+  }
+
+  transferWithEthersJS(to, value){
+  	return this._contract.transfer(to, value);
   }
 }

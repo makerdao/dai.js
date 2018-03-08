@@ -62,7 +62,7 @@ export default class SmartContractService extends PublicService {
 
   //this is the same function that's in EthereumTokenService
   _getCurrentNetworkMappingEthers(){
-    let networkID = 42;//parseInt(this.get('web3').getNetwork().toString(10), 10);
+    let networkID = 42;//parseInt(this.get('web3').getNetwork().toString(10), 10); <- should probably replace with a call to ethers
     const mapping = networks.filter((m)=> m.networkID === networkID);
     if (mapping.length < 1) {throw new Error('networkID not found');}
     return mapping[0].addresses;
