@@ -315,7 +315,7 @@ test('approve WETH to TUB', (done) => {
 },15000);
 
 //this works
-test('join PETH', (done) => {
+test.only('join PETH', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
   ethereumTokenService.manager().connect()
     .then(() => {
@@ -344,7 +344,7 @@ test('approve PETH to TUB', (done) => {
 },15000);
 
 //need to approve Tub to delete your PETH before calling this
-test.only('exit PETH', (done) => {
+test('exit PETH', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
   ethereumTokenService.manager().connect()
     .then(() => {

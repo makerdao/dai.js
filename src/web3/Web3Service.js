@@ -19,6 +19,7 @@ export default class Web3Service extends PrivateService {
     this._web3 = null;
     this._ethersProvider = null;
     this._web3Provider = null;
+    this._ethersWallet = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
   }
 
@@ -123,7 +124,15 @@ export default class Web3Service extends PrivateService {
       /*var ethersProviders = ethers.providers;
       var ethersProvider = ethersProviders.getDefaultProvider('homestead');
       this._ethersProvider = ethersProvider;*/
+
+      var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
+      var infuraKey = 'ihagQOzC3mkRXYuCivDN';
+      var infuraProvider = new ethers.providers.InfuraProvider('kovan', infuraKey);
+      this._ethersProvider = infuraProvider;
+      this._ethersWallet = new ethers.Wallet(kovanPrivateKey, this._ethersProvider);
+
       this._ethers = ethers;
+
       //web3.setProvider(ethersProvider);
       web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
 
@@ -270,6 +279,7 @@ export default class Web3Service extends PrivateService {
   getNetwork(){
     return this._info.version['network'];
   }
+
 
   //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
   getDummyTransaction(){
