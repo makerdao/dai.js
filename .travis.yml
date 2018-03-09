@@ -22,8 +22,7 @@ install:
 before_script:
 - npm install -g codecov
 script:
-- whoami
-- ls -hal
+- chmod +x with-deployed-system
 - npm run test
 - codecov
 after_install:
