@@ -10,7 +10,7 @@ const extractSass = new ExtractTextPlugin({
 
 module.exports = {
 
-  context: path.join(process.cwd(), 'src'), //the home directory for webpack
+  context: path.join(process.cwd(), 'web'), //the home directory for webpack
 
   devtool: 'source-map', // enhance debugging by adding meta info for the browser devtools
 
@@ -29,8 +29,8 @@ module.exports = {
     extensions: ['.js'],  // extensions that are used
     modules: [path.join(process.cwd(), 'src'), 'node_modules'], // directories where to look for modules,
     alias: {
-      'source-map-support': path.join(process.cwd(), 'src/shim.js'),
-      'fs': path.join(process.cwd(), 'src/shim.js')
+      'source-map-support': path.join(process.cwd(), 'src/utils/shim.js'),
+      'fs': path.join(process.cwd(), 'src/utils/shim.js')
     }
   },
 
