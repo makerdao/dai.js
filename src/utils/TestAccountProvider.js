@@ -1,4 +1,4 @@
-import accounts from './accounts';
+import accounts from './testAccounts';
 
 /**
  *
