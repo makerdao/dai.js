@@ -1,5 +1,5 @@
-import ServiceManager from '../../services/ServiceManager';
-import PrivateService from '../../services/PrivateService';
+import ServiceManager from '../../core/ServiceManager';
+import PrivateService from '../../core/PrivateService';
 import bunyan from 'bunyan';
 
 /**
@@ -25,7 +25,7 @@ function _appendState(service) {
   };
 }
 
-export default class BunyanService extends PrivateService {
+export default class BunyanLogger extends PrivateService {
   /**
    * @param {string} name
    */

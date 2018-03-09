@@ -29,6 +29,6 @@
     "exchange": "OasisExchangeService",
 
     "timer": "TimerService",
-    "log": "NullLoggerService"
+    "log": "NullLogger"
   }
 }

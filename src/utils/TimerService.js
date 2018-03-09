@@ -1,4 +1,4 @@
-import LocalService from './services/LocalService';
+import LocalService from '../core/LocalService';
 
 export default class TimerService extends LocalService {
 

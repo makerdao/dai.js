@@ -1,6 +1,6 @@
 import PublicService from '../services/PublicService';
 import Web3Service from '../web3/Web3Service';
-//import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
+//import NullLogger from '../loggers/NullLogger/NullLogger';
 
 export default class GasEstimatorService extends PublicService {
   /**

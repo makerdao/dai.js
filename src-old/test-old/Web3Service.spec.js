@@ -153,7 +153,7 @@ test('should connect to ganache testnet with account 0x16fb9...', (done) => {
 
 /* test('should throw an error when authenticating if no active account', (done) => {
   const
-    log = new NullLoggerService(),
+    log = new NullLogger(),
     service = new Web3Service();
 
   service.manager().inject('log', log).authenticate().then(data => {

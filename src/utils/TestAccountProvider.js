@@ -7,7 +7,6 @@ class TestAccountProvider {
 
   constructor(accounts) {
     this._accounts = accounts;
-    console.log('TestProvider constructor');
     this._index = 0; //process.env._TestProviderIndex || 0;
   }
 
@@ -25,7 +24,7 @@ class TestAccountProvider {
     }
 
     const i = this._index++;
-    process.env._TestProviderIndex = i;
+    //process.env._TestProviderIndex = i;
 
     return {
       address: this._accounts.addresses[i],

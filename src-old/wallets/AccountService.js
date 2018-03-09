@@ -1,5 +1,5 @@
 import PrivateService from '../services/PrivateService';
-import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
+import NullLogger from '../loggers/NullLogger/NullLogger';
 import TimerService from '../TimerService';
 var Wallet = require('ethers').Wallet;
 
@@ -75,7 +75,7 @@ export default class AccountService extends PrivateService {
   static buildTestService() {
     const service = new AccountService();
     service.manager()
-      .inject('log', new NullLoggerService())
+      .inject('log', new NullLogger())
       .inject('timer', new TimerService());
 
     return service;

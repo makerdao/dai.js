@@ -7,7 +7,7 @@ import SmartContractService from './services/SmartContractService';
 import GasEstimatorService from './services/GasEstimatorService';
 import OasisExchangeService from './markets/OasisExchangeService';
 import TimerService from './TimerService';
-import NullLoggerService from './loggers/NullLogger/NullLoggerService';
+import NullLogger from './loggers/NullLogger/NullLogger';
 
 const _services = {
   Web3Service,
@@ -18,7 +18,7 @@ const _services = {
   GasEstimatorService,
   OasisExchangeService,
   TimerService,
-  NullLoggerService
+  NullLogger
 };
 
 export default class DefaultServiceProvider {

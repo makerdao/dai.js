@@ -2,7 +2,7 @@ import PrivateService from '../services/PrivateService';
 import Web3 from 'web3';
 import { promisifyAsyncMethods } from '../Utils';
 import { Web3ProviderType } from '../enums';
-import NullLoggerService from '../loggers/NullLogger/NullLoggerService';
+import NullLogger from '../loggers/NullLogger/NullLogger';
 import TimerService from '../TimerService';
 //{ type : Web3ProviderType.TEST}; 
 //const x = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'};
@@ -70,7 +70,7 @@ export default class Web3Service extends PrivateService {
   static buildTestService(mnemonic , totalAccounts) {
     const service = new Web3Service();
     service.manager()
-      .inject('log', new NullLoggerService())
+      .inject('log', new NullLogger())
       .inject('timer', new TimerService())
       .settings(
         {
@@ -88,7 +88,7 @@ export default class Web3Service extends PrivateService {
   static buildEthersService() {
     const service = new Web3Service();
     service.manager()
-      .inject('log', new NullLoggerService())
+      .inject('log', new NullLogger())
       .inject('timer', new TimerService())
       .settings(
         {
@@ -103,7 +103,7 @@ export default class Web3Service extends PrivateService {
 
   static buildRemoteService() {
     const service = new Web3Service();
-    service.manager().inject('log', new NullLoggerService())
+    service.manager().inject('log', new NullLogger())
       .inject('timer', new TimerService());
     return service;
   }

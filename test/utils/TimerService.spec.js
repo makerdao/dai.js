@@ -1,5 +1,6 @@
-import TimerService from '../TimerService';
+import TimerService from '../../src/utils/TimerService';
 
+const DURATION_SHORT = 10, DURATION_LONG = 20;
 
 test('allows setting repeating timers', (done) => {
   const timer = new TimerService();
@@ -22,14 +23,14 @@ test('allows setting non-repeating timers', (done) => {
 
 test('only allow one timer per name, disposing on collision', (done) => {
   const timer = new TimerService();
-  timer.createTimer('collide', 500, false, done.fail);
-  timer.createTimer('collide', 1000, false, done);
+  timer.createTimer('collide', DURATION_SHORT, false, done.fail);
+  timer.createTimer('collide', DURATION_LONG, false, done);
 });
 
 test('only allow one repeating timer per name, disposing on collision', (done) => {
   const timer = new TimerService();
-  timer.createTimer('collide', 500, true, done.fail);
-  timer.createTimer('collide', 1000, true, () => {
+  timer.createTimer('collide', DURATION_SHORT, true, done.fail);
+  timer.createTimer('collide', DURATION_LONG, true, () => {
     done();
     timer.disposeTimer('collide');
   });
@@ -37,26 +38,26 @@ test('only allow one repeating timer per name, disposing on collision', (done) =
 
 test('dispose of timers by name', (done) => {
   const timer = new TimerService();
-  timer.createTimer('fail', 100, false, done.fail);
-  timer.createTimer('pass', 200, false, done);
+  timer.createTimer('fail', DURATION_SHORT, false, done.fail);
+  timer.createTimer('pass', DURATION_LONG, false, done);
   timer.disposeTimer('fail');
 });
 
 test('dispose of all timers', (done) => {
   const timer = new TimerService();
-  timer.createTimer('fail1', 500, false, done.fail);
-  timer.createTimer('fail2', 500, false, done.fail);
-  timer.createTimer('fail3', 500, false, done.fail);
+  timer.createTimer('fail1', DURATION_SHORT, false, done.fail);
+  timer.createTimer('fail2', DURATION_SHORT, false, done.fail);
+  timer.createTimer('fail3', DURATION_SHORT, false, done.fail);
   timer.disposeAllTimers();
 
-  timer.createTimer('pass', 600, false, done);
+  timer.createTimer('pass', DURATION_LONG, false, done);
 });
 
 test('list all timers', () => {
   const timer = new TimerService();
-  timer.createTimer('a', 500, false, () => {});
-  timer.createTimer('b', 500, false, () => {});
-  timer.createTimer('c', 500, false, () => {});
+  timer.createTimer('a', DURATION_SHORT, false, () => {});
+  timer.createTimer('b', DURATION_SHORT, false, () => {});
+  timer.createTimer('c', DURATION_SHORT, false, () => {});
   expect(timer.listTimers()).toEqual(['a','b','c']);
   timer.disposeAllTimers();
 });

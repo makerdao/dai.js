@@ -1,9 +1,9 @@
-import ServiceManager from '../../services/ServiceManager';
-import LocalService from '../../services/LocalService';
+import ServiceManager from '../../core/ServiceManager';
+import LocalService from '../../core/LocalService';
 
 const _ = () => {};
 
-export default class NullLoggerService extends LocalService {
+export default class NullLogger extends LocalService {
   /**
    * @param {string} name
    */

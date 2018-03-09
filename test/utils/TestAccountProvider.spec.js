@@ -8,7 +8,7 @@ test('test provider provides 1000 addresses and keys', () => {
     let account = TestAccountProvider.nextAccount();
     if (typeof account.address !== 'string' || typeof account.key !== 'string') {
       error = i;
-      console.error('Invalid account', account);
+      //console.error('Invalid account', account);
     }
   }
 
@@ -16,7 +16,7 @@ test('test provider provides 1000 addresses and keys', () => {
     let address = TestAccountProvider.nextAddress();
     if (typeof address !== 'string') {
       error = i;
-      console.error('Invalid address', address);
+      //console.error('Invalid address', address);
     }
   }
 
