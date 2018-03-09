@@ -22,10 +22,12 @@ install:
 before_script:
 - npm install -g codecov
 script:
+- whoami
+- ls -hal
 - npm run test
 - codecov
 after_install:
-- cat /home/travis/.npm/_logs/2018-02-09*.log
+- cat /home/travis/.npm/_logs/2018-0*.log
 deploy:
   provider: npm
   skip_cleanup: true
