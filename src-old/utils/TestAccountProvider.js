@@ -7,7 +7,7 @@ class TestAccountProvider {
 
   constructor(accounts) {
     this._accounts = accounts;
-    console.log("TestProvider constructor");
+    console.log('TestProvider constructor');
     this._index = 0; //process.env._TestProviderIndex || 0;
   }
 

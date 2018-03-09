@@ -1,6 +1,6 @@
-import ServiceBase from './ServiceBase';
-import LocalService from './LocalService';
-import ServiceType from './ServiceType';
+import ServiceBase from '../../src/core/ServiceBase';
+import LocalService from '../../src/core/LocalService';
+import ServiceType from '../../src/core/ServiceType';
 
 test('should be a service of type LOCAL, with the provided name and dependencies', () => {
   const service = new LocalService('MyName', ['X', 'Y', 'Z']);

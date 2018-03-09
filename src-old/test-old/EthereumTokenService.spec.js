@@ -57,7 +57,7 @@ test('get ERC20 (MKR) allowance of address', (done) => {
   ethereumTokenService.manager().connect()
     .then(() => {
       const token = ethereumTokenService.getToken(tokens.MKR);
-      return token.allowance('0x0000000000000000000000000000000000000001', '0x0000000000000000000000000000000000000002')
+      return token.allowance('0x0000000000000000000000000000000000000001', '0x0000000000000000000000000000000000000002');
     })
     .then(allowance =>{
       expect(parseInt(allowance.toString(10),10)).toBe(0);
@@ -97,7 +97,7 @@ test('transfer EtherToken using test blockchain', (done) => {
   const token = ethereumTokenService.getToken(tokens.ETH);
   let initSenderBalance = 0;
   let initReceiverBalance = 0;
-  const senderAddress = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';   
+  const senderAddress = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
   const amount = utils.parseEther('0.0000000015');
   ethereumTokenService.manager().connect()
     .then(() =>{
@@ -118,13 +118,11 @@ test('transfer EtherToken using test blockchain', (done) => {
       ]);
     })
     .then(finalBalances =>{
-      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(0.0000000015); 
+      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(0.0000000015);
       //expect(parseInt(finalBalances[0].toString(10),10)+0.0000000015).toEqual(initSenderBalance); //need to figure out how to subtract gas cost from this
       done();
     });
 });
-
-
 test('transfer EtherToken using blockchain from EthersJS', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService();
   const token = ethereumTokenService.getToken(tokens.ETH);
@@ -149,7 +147,7 @@ test('transfer EtherToken using blockchain from EthersJS', (done) => {
         ])
     })
     .then(finalBalances =>{
-      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15); 
+      expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15);
       //expect(parseInt(finalBalances[0].toString(10),10)+15).toEqual(initSenderBalance); //need to figure out how to subtract gas cost from this
       done();
     });
@@ -166,7 +164,7 @@ test('transfer EtherToken using EthersJS send function', (done) => {
       return Promise.all([
         token.balanceOf('0x717bc9648b627316718Fe93f4cD98056E53a8C8d'),
         token.balanceOf('0x0000000000000000000000000000000000000005')
-        ])
+      ])
     })
     .then(initialBalances => {
       initSenderBalance = initialBalances[0];
@@ -177,10 +175,10 @@ test('transfer EtherToken using EthersJS send function', (done) => {
       return Promise.all([
         token.balanceOf('0x717bc9648b627316718Fe93f4cD98056E53a8C8d'),
         token.balanceOf('0x0000000000000000000000000000000000000005')
-        ])
+      ])
     })
     .then(finalBalances =>{
-      //expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15); 
+      //expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15);
       //expect(parseInt(finalBalances[0].toString(10),10)+15).toEqual(initSenderBalance);
       done();
     });
@@ -250,11 +248,11 @@ test('transfer ERC20Token (MKR) using EthersJS send function', (done) => {
   let token = null;
   ethereumTokenService.manager().connect()
     .then(() => {
-    token = ethereumTokenService.getToken(tokens.MKR);
+      token = ethereumTokenService.getToken(tokens.MKR);
       return Promise.all([
         token.balanceOf('0x717bc9648b627316718Fe93f4cD98056E53a8C8d'),
         token.balanceOf('0x0000000000000000000000000000000000000005')
-        ])
+      ])
     })
     .then(initialBalances => {
       initSenderBalance = initialBalances[0];
@@ -265,10 +263,10 @@ test('transfer ERC20Token (MKR) using EthersJS send function', (done) => {
       return Promise.all([
         token.balanceOf('0x717bc9648b627316718Fe93f4cD98056E53a8C8d'),
         token.balanceOf('0x0000000000000000000000000000000000000005')
-        ])
+      ])
     })
     .then(finalBalances =>{
-      //expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15); 
+      //expect(parseInt(finalBalances[1].toString(10),10)-initReceiverBalance).toEqual(15);
       //expect(parseInt(finalBalances[0].toString(10),10)+15).toEqual(initSenderBalance);
       done();
     });
@@ -323,7 +321,7 @@ test.only('join PETH', (done) => {
       return token.join(15);
     })
     .then(transaction =>{
-      console.log('transaction: ', transaction);
+      //console.log('transaction: ', transaction);
       expect(!!transaction).toBe(true);
       done();
     });
@@ -352,7 +350,7 @@ test('exit PETH', (done) => {
       return token.exit(5);
     })
     .then(transaction =>{
-      console.log('transaction: ', transaction);
+      //console.log('transaction: ', transaction);
       expect(!!transaction).toBe(true);
       done();
     });
@@ -371,4 +369,3 @@ test('use Web3 api with ethers provider', (done) => {
       done();
     });
 });*/
-

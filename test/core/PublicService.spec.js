@@ -1,6 +1,6 @@
-import ServiceBase from '../services/ServiceBase';
-import PublicService from '../services/PublicService';
-import ServiceType from '../services/ServiceType';
+import ServiceBase from '../../src/core/ServiceBase';
+import PublicService from '../../src/core/PublicService';
+import ServiceType from '../../src/core/ServiceType';
 
 test('should be a service of type PUBLIC, with the provided name and dependencies', () => {
   const service = new PublicService('MyName', ['X', 'Y', 'Z']);
