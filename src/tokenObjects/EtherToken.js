@@ -36,12 +36,8 @@ export default class EtherToken {
     return this._web3.eth.sendTransaction({from: fromAddress, to: toAddress, value: transferValue, gasLimit: gasLimit, gasPrice: 300000});
   }
 
-  //need to be able to create a wallet on the fly based on the from address?
-  transferWithEthersJS(fromAddress, toAddress, transferValue){
-   	var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
-    var infuraKey = 'ihagQOzC3mkRXYuCivDN';
-    var infuraProvider = new this._web3._ethers.providers.InfuraProvider('kovan', infuraKey);
-    var wallet = new this._web3._ethers.Wallet(kovanPrivateKey, infuraProvider);
-    return wallet.send(toAddress, transferValue); //check why this isn't working
+  transferWithEthersJS(toAddress, transferValue){
+    const wallet = this._web3._ethersWallet;
+    return wallet.send(toAddress, transferValue); //I believe you can add options here, such as gasLimit, gasPrice etc., per https://github.com/ethers-io/ethers.js/blob/master/wallet/wallet.js
   }
 }

@@ -1,22 +1,19 @@
 import SmartContractService from '../services/SmartContractService';
-
+import ERC20Token from './ERC20Token';
 
 export default class PethToken extends ERC20Token {
 
-  constructor(contract, tub) {
-    this._contract = contract;
+  constructor(contract, web3Service, gasEstimatorService, tub) {
+  	super(contract, web3Service, gasEstimatorService);
     this._tub = tub;
   }
 
   join(amount){
-    this._tub.join(amount);
+    return this._tub.join(amount);
   }
 
   exit(amount){
-    this._tub.exit(amount);
+    return this._tub.exit(amount);
   }
-
-  //the join and exit methods are on the TubContract
-  //does it still make sense to 
 
 }

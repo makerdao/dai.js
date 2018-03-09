@@ -40,12 +40,8 @@ export default class SmartContractService extends PublicService {
 
   // check web3 for the current wallet
   getContractByAddressAndAbi(address, abi) {
-    var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
-    var infuraKey = 'ihagQOzC3mkRXYuCivDN';
     const web3Service = this.get('web3');
-    var infuraProvider = new web3Service._ethers.providers.InfuraProvider('kovan', infuraKey);
-    var wallet = new web3Service._ethers.Wallet(kovanPrivateKey, infuraProvider); //provider is optional, remove this, instead use .createSigner because this will work with other providers (e.g. metamask).  instead of injecting wallet, inject the signer
-    var contract = new web3Service._ethers.Contract(address, abi, wallet);
+    var contract = new web3Service._ethers.Contract(address, abi, web3Service._ethersWallet);
     return contract;
   }
 
@@ -62,7 +58,8 @@ export default class SmartContractService extends PublicService {
 
   //this is the same function that's in EthereumTokenService
   _getCurrentNetworkMappingEthers(){
-    let networkID = 42;//parseInt(this.get('web3').getNetwork().toString(10), 10);
+    const web3Service = this.get('web3');
+    let networkID = web3Service._ethersProvider.chainId;
     const mapping = networks.filter((m)=> m.networkID === networkID);
     if (mapping.length < 1) {throw new Error('networkID not found');}
     return mapping[0].addresses;

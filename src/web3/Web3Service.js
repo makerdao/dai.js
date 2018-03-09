@@ -14,12 +14,13 @@ export default class Web3Service extends PrivateService {
   /**
    * @param {string} name
    */
-  constructor(provider = null, name = 'web3') {
+  constructor(name = 'web3') {
     super(name, ['log', 'timer']);
     this._web3 = null;
     this._ethersProvider = null;
+    this._web3Provider = null;
+    this._ethersWallet = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
-    this._provider = provider;
   }
 
   static buildDisconnectingService(disconnectAfter = 50){
@@ -117,19 +118,23 @@ export default class Web3Service extends PrivateService {
   initialize(settings) {
     settings = settings || { provider : {type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'}};
     const web3 = new Web3();
-
-    if ( settings.provider.type  === Web3ProviderType.ETHERS ) {
-      var ethers = require('ethers');
-      var ethersProviders = require('ethers').providers;
-
+    var ethers = require('ethers');
+    if ( settings.provider.type  === Web3ProviderType.ETHERS ) { //should change the name here from ETHERS to INFURA or something
       //This automatically creates a FallbackProvider backed by INFURA and Etherscan; recommended
+      /*var ethersProviders = ethers.providers;
       var ethersProvider = ethersProviders.getDefaultProvider('homestead');
-      this._ethersProvider = ethersProvider;
-      this._ethers = ethers;
-      web3.setProvider(ethersProvider); //is this the right syntax?
+      this._ethersProvider = ethersProvider;*/
 
-    } else if (this._provider) {
-      web3.setProvider(this._provider);
+      var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
+      var infuraKey = 'ihagQOzC3mkRXYuCivDN';
+      var infuraProvider = new ethers.providers.InfuraProvider('kovan', infuraKey);
+      this._ethersProvider = infuraProvider;
+      this._ethersWallet = new ethers.Wallet(kovanPrivateKey, this._ethersProvider);
+
+      this._ethers = ethers;
+
+      //web3.setProvider(ethersProvider);
+      web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
 
     } else if (window && window.web3) {
       web3.setProvider(window.web3.currentProvider);
@@ -149,7 +154,13 @@ export default class Web3Service extends PrivateService {
       this.get('log').error('Illegal Provider Config', settings);
       throw new Error('Illegal Provider Config');
     }
-    //new ethers.Web3Provider(web3.currentProvider) - by creatng this, ethers now knows to use this provider?
+
+    //do web3 and ethers connections here
+    //if (web3.currentProvider!=null){ //I need this test to pass - //web3.currentProvider is null if the provider is set to window.web3 - not sure why
+    //  console.log('web3.currentProvider is not null'); // 
+    //  this._web3Provider = new ethers.providers.Web3Provider(web3.currentProvider);
+    //} //
+
     this.eth = {};
     Object.assign(this.eth, promisifyAsyncMethods(
       web3.eth, [ 'getAccounts', 'estimateGas', 'getBlock', 'sendTransaction', 'getBalance']
@@ -164,6 +175,25 @@ export default class Web3Service extends PrivateService {
   }
 
   connect() {
+
+    //make bridge between web3 and ethers
+    /*
+    if (!!this._ethersProvider){
+      console.log('this._ethersProvider: ', this._ethersProvider);
+      var ProviderBridge = require('ethers-web3-bridge');
+      console.log('ProviderBridge: ', ProviderBridge);
+      console.log('this._web3Provider: ', this._web3Provider);
+      this._web3Provider.listAccounts().then(accounts => {
+        console.log('accounts: '/* accounts*//*);
+        var signer = this._web3Provider.getSigner(/*accounts[0]*//*); //set signer to first account in Web3 - make sure tests that use web3 to sign only use 1st account in ganache
+        console.log('signer: ', signer);
+        var providerBridge = new ProviderBridge(this._ethersProvider, signer);
+        providerBridge.connectEthers(this._ethersProvider, signer);
+        console.log('2');
+        this._web3.setProvider(providerBridge);
+      });
+    }*/
+
     return Promise.all([
       _web3Promise(_ => this._web3.version.getNode(_)),
       _web3Promise(_ => this._web3.version.getNetwork(_)),
@@ -249,6 +279,7 @@ export default class Web3Service extends PrivateService {
   getNetwork(){
     return this._info.version['network'];
   }
+
 
   //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
   getDummyTransaction(){

@@ -1,11 +1,12 @@
 import PrivateService from './PrivateService';
 import tokens from '../../contracts/tokens';
+import contracts from '../../contracts/contracts';
 import SmartContractService from './SmartContractService';
 import networks from '../../contracts/networks';
 import ERC20Token from '../tokenObjects/ERC20Token';
 import EtherToken from '../tokenObjects/EtherToken';
-import WethToken from '../tokenObjects/EtherToken';
-import PethToken from '../tokenObjects/EtherToken';
+import WethToken from '../tokenObjects/WethToken';
+import PethToken from '../tokenObjects/PethToken';
 import GasEstimatorService from '../services/GasEstimatorService';
 
 export default class EthereumTokenService extends PrivateService {
@@ -69,12 +70,13 @@ export default class EthereumTokenService extends PrivateService {
       const tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1]; //get last entry in array if version null
       const smartContractService = this.get('smartContract');
       const contract = smartContractService.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
-      if (symbol === tokens.WETH) {return new WethToken(contract);}
+      if (symbol === tokens.WETH) {
+        return new WethToken(contract, this.get('web3'), this.get('gasEstimator'));}
       if (symbol === tokens.PETH) {
-        //const tub = smartContractService.getContractByName('TUB');
-        return new PethToken(contract, tub);
+        const tub = smartContractService.getContractByName(contracts.TUB);
+        return new PethToken(contract, this.get('web3'), this.get('gasEstimator'), tub);
       }
-      return new ERC20Token(contract);
+      return new ERC20Token(contract, this.get('web3'), this.get('gasEstimator'));
     }
   }
 

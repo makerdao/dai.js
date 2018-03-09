@@ -119,6 +119,15 @@ test('should create a ethersjs object running parallel to web3', (done) => {
       done();
     });
 });
+
+test('test web3 ethers bridge', (done) => {
+  const service = Web3Service.buildEthersService();
+  service.manager().authenticate()
+    .then(() => {
+      
+      done();
+    });
+});
     
 
 

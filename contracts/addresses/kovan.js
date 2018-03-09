@@ -13,6 +13,12 @@ const mapping = {
   [tokens.MKR] : [
     { version: 1, address: '0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD', abi: erc20Token_1.interface }
   ],
+  [tokens.WETH] : [
+    { version: 1, address: '0xd0A1E359811322d97991E03f863a0C30C2cF029C', abi: dsEthToken_1.interface }
+  ],
+  [tokens.PETH] : [
+    { version: 1, address: '0xf4d791139cE033Ad35DB2B2201435fAd668B1b64', abi: erc20Token_1.interface }
+  ],
   [contracts.TOP] : [
     { version: 1, address: '0x....', abi: top_1.interface }
   ],
