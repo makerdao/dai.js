@@ -91,6 +91,7 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
       done();
     });
 },15000);
+
 /*
 test('transfer EtherToken using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -315,7 +316,7 @@ test('approve WETH to TUB', (done) => {
 },15000);
 
 //this works
-test.only('join PETH', (done) => {
+test('join PETH', (done) => {
   const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
   ethereumTokenService.manager().connect()
     .then(() => {
@@ -336,6 +337,19 @@ test('approve PETH to TUB', (done) => {
       const token = ethereumTokenService.getToken(tokens.PETH);
       const smartContractService = ethereumTokenService.get('smartContract');
       return token.approveUnlimited(smartContractService.getContractByName(contracts.TUB).address);
+    })
+    .then(transaction =>{
+      expect(!!transaction).toBe(true);
+      done();
+    });
+},15000);
+
+test.only('approve DAI to Oasis', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      const token = ethereumTokenService.getToken(tokens.DAI);
+      return token.approveUnlimited('0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9');
     })
     .then(transaction =>{
       expect(!!transaction).toBe(true);

@@ -17,6 +17,10 @@ export default class ERC20Token {
     return this._contract.balanceOf(owner);
   }
 
+  address(){
+    return this._contract.address; //should I just make this a public variable like it is in ethers?
+  }
+
   approve(spender, value){
     return this._contract.approve(spender, value);
   }

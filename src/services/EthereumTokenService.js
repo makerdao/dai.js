@@ -22,9 +22,9 @@ export default class EthereumTokenService extends PrivateService {
     return service;
   }
 
-  static buildEthersService() {
+  static buildEthersService(smartContractService = null) {
     const service = new EthereumTokenService();
-    const smartContractService = SmartContractService.buildEthersService();
+    smartContractService = smartContractService || SmartContractService.buildEthersService();
     service.manager()
       .inject('log', smartContractService.get('log'))
       .inject('web3', smartContractService.get('web3'))

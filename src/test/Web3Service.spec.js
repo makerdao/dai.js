@@ -109,6 +109,7 @@ test('should correctly handle automatic change of account as a deauthenticate', 
   service.manager().authenticate();
 });
 
+
 test('should create a ethersjs object running parallel to web3', (done) => {
   const service = Web3Service.buildEthersService();
   service.manager().connect()
