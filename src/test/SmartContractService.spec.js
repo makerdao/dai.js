@@ -18,7 +18,7 @@ test('wrap .001 kovan eth', (done) => {
     // create ethersjs Wallet with infura kovan Provider attached to it
       var infuraProvider = new service._ethers.providers.InfuraProvider('kovan', infuraKey);
       var wallet = new service._ethers.Wallet(kovanPrivateKey, infuraProvider);
-      console.log(wallet);
+      //console.log(wallet);
 
       // create WETH Contract object
       var contractAddress = '0xd0a1e359811322d97991e03f863a0c30c2cf029c';
@@ -26,30 +26,30 @@ test('wrap .001 kovan eth', (done) => {
         {'constant':true,'inputs':[],'name':'name','outputs':[{'name':'','type':'string'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':false,'inputs':[{'name':'guy','type':'address'},{'name':'wad','type':'uint256'}],'name':'approve','outputs':[{'name':'','type':'bool'}],'payable':false,'stateMutability':'nonpayable','type':'function'},{'constant':true,'inputs':[],'name':'totalSupply','outputs':[{'name':'','type':'uint256'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':false,'inputs':[{'name':'src','type':'address'},{'name':'dst','type':'address'},{'name':'wad','type':'uint256'}],'name':'transferFrom','outputs':[{'name':'','type':'bool'}],'payable':false,'stateMutability':'nonpayable','type':'function'},{'constant':false,'inputs':[{'name':'wad','type':'uint256'}],'name':'withdraw','outputs':[],'payable':false,'stateMutability':'nonpayable','type':'function'},{'constant':true,'inputs':[],'name':'decimals','outputs':[{'name':'','type':'uint8'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':true,'inputs':[{'name':'','type':'address'}],'name':'balanceOf','outputs':[{'name':'','type':'uint256'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':true,'inputs':[],'name':'symbol','outputs':[{'name':'','type':'string'}],'payable':false,'stateMutability':'view','type':'function'},{'constant':false,'inputs':[{'name':'dst','type':'address'},{'name':'wad','type':'uint256'}],'name':'transfer','outputs':[{'name':'','type':'bool'}],'payable':false,'stateMutability':'nonpayable','type':'function'},{'constant':false,'inputs':[],'name':'deposit','outputs':[],'payable':true,'stateMutability':'payable','type':'function'},{'constant':true,'inputs':[{'name':'','type':'address'},{'name':'','type':'address'}],'name':'allowance','outputs':[{'name':'','type':'uint256'}],'payable':false,'stateMutability':'view','type':'function'},{'payable':true,'stateMutability':'payable','type':'fallback'},{'anonymous':false,'inputs':[{'indexed':true,'name':'src','type':'address'},{'indexed':true,'name':'guy','type':'address'},{'indexed':false,'name':'wad','type':'uint256'}],'name':'Approval','type':'event'},{'anonymous':false,'inputs':[{'indexed':true,'name':'src','type':'address'},{'indexed':true,'name':'dst','type':'address'},{'indexed':false,'name':'wad','type':'uint256'}],'name':'Transfer','type':'event'},{'anonymous':false,'inputs':[{'indexed':true,'name':'dst','type':'address'},{'indexed':false,'name':'wad','type':'uint256'}],'name':'Deposit','type':'event'},{'anonymous':false,'inputs':[{'indexed':true,'name':'src','type':'address'},{'indexed':false,'name':'wad','type':'uint256'}],'name':'Withdrawal','type':'event'}
       ];
       var contract = new service._ethers.Contract(contractAddress, abi, wallet);
-      console.log(contract);
+      //console.log(contract);
     
       // check Eth balance of Wallet
       var ethBalance = wallet.getBalance();         //Returns a Promise with the balance of the wallet (as a BigNumber, in wei) at the blockTag, defaults to latest.
       ethBalance.then(function(balance) {
         var currentEthBalance = service._ethers.utils.formatEther('' + balance);
-        console.log('current ETH balance is: ', currentEthBalance);  // this is a decimal, like .8395
+        //console.log('current ETH balance is: ', currentEthBalance);  // this is a decimal, like .8395
       });
 
       // callPromise to check WETH balance of Wallet
       var callPromise = contract.balanceOf('0x717bc9648b627316718Fe93f4cD98056E53a8C8d');
       callPromise.then(function(balance) {
         var wethBalance = service._ethers.utils.formatEther('' + balance);
-        console.log('current WETH balance is: ', wethBalance);
+        //console.log('current WETH balance is: ', wethBalance);
       });
 
       // sendPromise to approve the wrapping
       var sendPromise = contract.approve('0x717bc9648b627316718Fe93f4cD98056E53a8C8d', service._ethers.utils.parseEther('20000'));
       sendPromise.then(function(transaction) {
-        console.log(transaction);
+        //console.log(transaction);
       });
 
       // create override options to send a value with the deposit()
-      console.log(service._ethers.utils.parseEther('.001'));       // BigNumber { _bn: <BN: 38d7ea4c68000> }
+      //console.log(service._ethers.utils.parseEther('.001'));       // BigNumber { _bn: <BN: 38d7ea4c68000> }
       var wei = service._ethers.utils.parseEther('.001');
       var overrideOptions = {
         value: wei
@@ -58,7 +58,7 @@ test('wrap .001 kovan eth', (done) => {
       // sendPromise2 to wrap 0.001 eth
       var sendPromise2 = contract.deposit(overrideOptions);
       sendPromise2.then(function(transaction) {
-        console.log(transaction);
+        //console.log(transaction);
         done();
 
       // checking the updated balances is not working. I'll try incrementing the nonce each time
@@ -66,15 +66,15 @@ test('wrap .001 kovan eth', (done) => {
       var newEthBalance = wallet.getBalance();         //Returns a Promise with the balance of the wallet (as a BigNumber, in wei) at the blockTag, defaults to latest.
       newEthBalance.then(function(balance) {
         var newEthBalance = service._ethers.utils.formatEther('' + balance);
-        console.log('new ETH balance is: ', newEthBalance);  // this is a decimal, like .8395
+        //console.log('new ETH balance is: ', newEthBalance);  // this is a decimal, like .8395
       });
   
       // callPromise to check new WETH balance of Wallet
       var callPromise2 = contract.balanceOf('0x717bc9648b627316718Fe93f4cD98056E53a8C8d');
-      console.log(callPromise2);
+      //console.log(callPromise2);
       callPromise2.then(function(balance) {
         var newWethBalance = service._ethers.utils.formatEther('' + balance);
-        console.log('new WETH balance is: ', newWethBalance);
+        //console.log('new WETH balance is: ', newWethBalance);
       });
       */
       });
@@ -96,7 +96,7 @@ test('get token contract for MKR and see if its supply is 1,000,000', (done) => 
       var callPromise = contract.totalSupply();
       callPromise.then(function(result) {
         var q = '' + result[0]._bn;  // converts hex to a string number
-        console.log(q);
+        //console.log(q);
         var num = service._ethers.utils.formatUnits(q, 18);  // converts from wei
         expect(num).toBe('1000000.0');
         done();
@@ -122,21 +122,21 @@ test('send an ETH transfer transaction to the Kovan network', (done) => {
         value: service._ethers.utils.parseEther('0.001'), 
         nonce: wallet.nonce + 1
       };
-      console.log(transaction);
+      //console.log(transaction);
 
       var estimateGasPromise = wallet.estimateGas(transaction);
 
       estimateGasPromise.then(function(gasEstimate) {
-        console.log(gasEstimate.toString());
+        //console.log(gasEstimate.toString());
         transaction.gasLimit = gasEstimate.add(2000);
-        console.log(transaction.gasLimit);
+        //console.log(transaction.gasLimit);
         expect(gasEstimate.toString()).toBeDefined();
 
         // Send the transaction
         var sendTransactionPromise = wallet.sendTransaction(transaction);
 
         sendTransactionPromise.then(function(transactionHash) {
-          console.log(transactionHash);
+          //console.log(transactionHash);
           done();
         });
       });
