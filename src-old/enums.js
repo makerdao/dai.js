@@ -5,8 +5,5 @@ const Token = {
   DAI : 'DAI',
   MKR : 'MKR'
 };
-const Web3ProviderType = {
-  TEST : 'TEST',
-  HTTP : 'HTTP',
-};
-export {Token, Web3ProviderType};
+
+export {Token};

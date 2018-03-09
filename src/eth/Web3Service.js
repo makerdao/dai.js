@@ -1,10 +1,11 @@
-import PrivateService from '../services/PrivateService';
+import PrivateService from '../core/PrivateService';
+import Web3ProviderType from './Web3ProviderType';
+import { promisifyAsyncMethods } from '../utils';
+import NullLogger from '../utils/loggers/NullLogger';
+import TimerService from '../utils/TimerService';
 import Web3 from 'web3';
-import { promisifyAsyncMethods } from '../Utils';
-import { Web3ProviderType } from '../enums';
-import NullLogger from '../loggers/NullLogger/NullLogger';
-import TimerService from '../TimerService';
-//{ type : Web3ProviderType.TEST}; 
+
+//{ type : Web3ProviderType.TEST};
 //const x = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'};
 //const y = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node', usePredefined : false};
 //const z = { type : Web3ProviderType.HTTP, url : ['https://sai-service.makerdao.com/node', 'https://mainnet.infura.io/ihagQOzC3mkRXYuCivDN']}
@@ -18,7 +19,6 @@ export default class Web3Service extends PrivateService {
     super(name, ['log', 'timer']);
     this._web3 = null;
     this._ethersProvider = null;
-    this._web3Provider = null;
     this._ethersWallet = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
   }
@@ -67,36 +67,16 @@ export default class Web3Service extends PrivateService {
     return service;
   }
 
-  static buildTestService(mnemonic , totalAccounts) {
+  static buildTestService() {
     const service = new Web3Service();
+
     service.manager()
       .inject('log', new NullLogger())
       .inject('timer', new TimerService())
-      .settings(
-        {
-          provider : {
-            type : Web3ProviderType.TEST,
-            mnemonic : mnemonic || 'hill law jazz limb penalty escape public dish stand bracket blue jar',
-            totalAccounts : totalAccounts || 2
-          }
-        }
-      );
-
-    return service;
-  }
-
-  static buildEthersService() {
-    const service = new Web3Service();
-    service.manager()
-      .inject('log', new NullLogger())
-      .inject('timer', new TimerService())
-      .settings(
-        {
-          provider : {
-            type : Web3ProviderType.ETHERS
-          }
-        }
-      );
+      .settings({
+        usePresetProvider: true,
+        provider : { type : Web3ProviderType.TEST }
+      });
 
     return service;
   }
@@ -116,62 +96,26 @@ export default class Web3Service extends PrivateService {
   }
 
   initialize(settings) {
-    settings = settings || { provider : {type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'}};
-    const web3 = new Web3();
-    var ethers = require('ethers');
-    if ( settings.provider.type  === Web3ProviderType.ETHERS ) { //should change the name here from ETHERS to INFURA or something
-      //This automatically creates a FallbackProvider backed by INFURA and Etherscan; recommended
-      /*var ethersProviders = ethers.providers;
-      var ethersProvider = ethersProviders.getDefaultProvider('homestead');
-      this._ethersProvider = ethersProvider;*/
+    const web3 = new Web3(), ethers = require('ethers');
+    settings = this._normalizeSettings(settings);
 
-      var kovanPrivateKey = '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700';
-      var infuraKey = 'ihagQOzC3mkRXYuCivDN';
-      var infuraProvider = new ethers.providers.InfuraProvider('kovan', infuraKey);
-      this._ethersProvider = infuraProvider;
-      this._ethersWallet = new ethers.Wallet(kovanPrivateKey, this._ethersProvider);
+    this._createWeb3Objects(web3);
+    this._ethers = ethers;
 
-      this._ethers = ethers;
-
-      //web3.setProvider(ethersProvider);
-      web3.setProvider(new Web3.providers.HttpProvider('https://sai-service.makerdao.com/node'));
-
-    } else if (window && window.web3) {
-      web3.setProvider(window.web3.currentProvider);
+    let web3Provider = null;
+    if (settings.usePresetProvider && window && window.web3) {
+      web3Provider = window.web3.currentProvider;
       window.web3 = web3;
-
-    } else if ( settings.provider.type  === Web3ProviderType.TEST ){
-      var ganache = require('ganache-cli');
-      web3.setProvider(ganache.provider({
-        'mnemonic': settings.provider.mnemonic || undefined,
-        'total_accounts': settings.provider.totalAccounts || 0
-      }));
-
-    } else if ( settings.provider.type === Web3ProviderType.HTTP ) {
-      web3.setProvider(new Web3.providers.HttpProvider(settings.provider.url));
-
     } else {
-      this.get('log').error('Illegal Provider Config', settings);
-      throw new Error('Illegal Provider Config');
+      web3Provider = this._getWeb3Provider(settings.provider);
     }
 
-    //do web3 and ethers connections here
-    //if (web3.currentProvider!=null){ //I need this test to pass - //web3.currentProvider is null if the provider is set to window.web3 - not sure why
-    //  console.log('web3.currentProvider is not null'); // 
-    //  this._web3Provider = new ethers.providers.Web3Provider(web3.currentProvider);
-    //} //
+    web3.setProvider(web3Provider);
 
-    this.eth = {};
-    Object.assign(this.eth, promisifyAsyncMethods(
-      web3.eth, [ 'getAccounts', 'estimateGas', 'getBlock', 'sendTransaction', 'getBalance']
-    ));
-
-    this.personal = {};
-    Object.assign(this.personal, promisifyAsyncMethods(
-      web3.personal,
-      [ 'lockAccount', 'newAccount', 'unlockAccount' ]
-    ));
-    this._web3 = web3;
+    this._ethersProvider = new ethers.providers.Web3Provider(web3Provider);
+    if (settings.privateKey) {
+      this._ethersWallet = new ethers.Wallet(settings.privateKey, this._ethersProvider);
+    }
   }
 
   connect() {
@@ -232,16 +176,6 @@ export default class Web3Service extends PrivateService {
     );
   }
 
-  _isStillConnected() {
-    return Promise.all([
-      _web3Promise(_ => this._web3.version.getNode(_)), // can remove this
-      _web3Promise(_ => this._web3.version.getNetwork(_))
-    ]).then(
-      versionInfo => (versionInfo[1] != null && versionInfo[1] === this._info.version['network']),
-      () => false
-    );
-  }
-
   authenticate() {
     this.get('log').info('Web3 is authenticating...');
 
@@ -269,17 +203,9 @@ export default class Web3Service extends PrivateService {
       });
   }
 
-  _isStillAuthenticated() {
-    return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
-      accounts => (accounts instanceof Array && accounts[0] === this._info.account),
-      () => false
-    );
-  }
-
   getNetwork(){
     return this._info.version['network'];
   }
-
 
   //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
   getDummyTransaction(){
@@ -289,6 +215,70 @@ export default class Web3Service extends PrivateService {
     };
   }
 
+  _normalizeSettings(settings) {
+    const defaultSettings = {
+      usePresetProvider: true,
+      provider : {
+        type : Web3ProviderType.HTTP,
+        url : 'https://sai-service.makerdao.com/node'
+      }
+    };
+
+    if (!settings) {
+      settings = defaultSettings;
+    }
+
+    if (!settings.provider) {
+      settings.provider = defaultSettings.provider;
+    }
+
+    return settings;
+  }
+
+  _createWeb3Objects(web3) {
+    this._web3 = web3;
+
+    this.eth = {};
+    Object.assign(this.eth, promisifyAsyncMethods(
+      web3.eth, [ 'getAccounts', 'estimateGas', 'getBlock', 'sendTransaction', 'getBalance']
+    ));
+
+    this.personal = {};
+    Object.assign(this.personal, promisifyAsyncMethods(
+      web3.personal,
+      [ 'lockAccount', 'newAccount', 'unlockAccount' ]
+    ));
+  }
+
+  _getWeb3Provider(settings) {
+    switch (settings.type) {
+    case Web3ProviderType.HTTP:
+      return new Web3.providers.HttpProvider(settings.url);
+    case Web3ProviderType.INFURA:
+      return new Web3.providers.HttpProvider('https://' + settings.network + '.infura.io/' + settings.infuraApiKey);
+    case Web3ProviderType.TEST:
+      return new Web3.providers.HttpProvider('http://127.1:2000');
+    default:
+      throw new Error('Illegal web3 provider type: ' + settings.provider.type);
+   }
+  }
+
+  _isStillConnected() {
+    return Promise.all([
+      _web3Promise(_ => this._web3.version.getNode(_)), // can remove this
+      _web3Promise(_ => this._web3.version.getNetwork(_))
+    ]).then(
+      versionInfo => (versionInfo[1] != null && versionInfo[1] === this._info.version['network']),
+      () => false
+    );
+  }
+
+  _isStillAuthenticated() {
+    return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
+      accounts => (accounts instanceof Array && accounts[0] === this._info.account),
+      () => false
+    );
+  }
 }
 
 /* istanbul ignore next */

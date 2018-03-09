@@ -1,6 +1,6 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
 
-import Web3Service from '../web3/Web3Service';
+import Web3Service from '../../src/eth/Web3Service';
 
 test('should fetch version info on connect', (done) => {
   const web3 = Web3Service.buildTestService();
@@ -22,7 +22,7 @@ test('should correctly use web3 provider of a previously injected web3 object, o
 
   service.manager().initialize()
     .then(() => {
-      expect(service._web3.currentProvider.engine).toBeDefined();
+      expect(service._web3.currentProvider).toBeDefined();
     })
     .then(() => {
       window.web3 = web3;
@@ -99,7 +99,6 @@ test('should correctly handle automatic deauthentication', (done) => {
   service.manager().authenticate();
 });
 
-
 test('should correctly handle automatic change of account as a deauthenticate', (done) => {
   const service = Web3Service.buildAccountChangingService();
   service.manager().onDeauthenticated(()=>{
@@ -110,55 +109,30 @@ test('should correctly handle automatic change of account as a deauthenticate', 
 });
 
 test('should create a ethersjs object running parallel to web3', (done) => {
-  const service = Web3Service.buildEthersService();
+  const service = Web3Service.buildTestService();
   service.manager().connect()
     .then(() => {
-      console.log(service._web3.currentProvider);
+      expect(service._ethers).toBeDefined();
       expect(service._ethersProvider).toBeDefined();
-      expect(service._web3.currentProvider).toBe(service._ethersProvider);
+      expect(service._web3.currentProvider).toBe(service._ethersProvider._web3Provider);
       done();
     });
 });
 
-test('test web3 ethers bridge', (done) => {
-  const service = Web3Service.buildEthersService();
-  service.manager().authenticate()
-    .then(() => {
-      
-      done();
-    });
-});
-    
-
-
-/*
 test('should connect to ganache testnet with account 0x16fb9...', (done) => {
-  const
+  const service = Web3Service.buildTestService(),
     expectedAccounts = [
       '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6',
       '0x81431b69b1e0e334d4161a13c2955e0f3599381e'
-    ],
-    service = Web3Service.buildTestService(); //injects log
+    ];
 
   service.manager().initialize()
     .then(() => {
       return service.eth.getAccounts();
     })
     .then((accounts) => {
-      expect(accounts).toEqual(expectedAccounts);
+      expect(accounts.slice(0 ,2)).toEqual(expectedAccounts);
       done();
     })
     .catch(console.error);
 });
-
-/* test('should throw an error when authenticating if no active account', (done) => {
-  const
-    log = new NullLogger(),
-    service = new Web3Service();
-
-  service.manager().inject('log', log).authenticate().then(data => {
-  expect(service.manager().state()).toBe(ServiceState.ONLINE);
-  done();
-  });
-});
-*/

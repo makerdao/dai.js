@@ -16,6 +16,7 @@ before_install:
 - nix-env -iA dapphub.{dapp,seth,hevm,solc}
 - npm i -g npm@^5.3.0
 install:
+- git submodule update --init --recursive
 - npm install
 - npm run build
 - ./node_modules/.bin/ganache-cli -p 2000 -a 2 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" &

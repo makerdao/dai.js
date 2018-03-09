@@ -32,8 +32,8 @@
     "precommit": "npm run lint",
     "prepush": "npm run test",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
-    "test": "jest --config=conf/jest.config.js --runInBand",
-    "test:watch": "jest --config=conf/jest.config.js --watch --runInBand",
+    "test": "./with-deployed-system jest --config=conf/jest.config.js --runInBand",
+    "test:watch": "./with-deployed-system jest --config=conf/jest.config.js --watch --runInBand",
     "testnet": "./node_modules/.bin/ganache-cli -p 2000 -a 2 -m 'hill law jazz limb penalty escape public dish stand bracket blue jar'"
   },
   "devDependencies": {
