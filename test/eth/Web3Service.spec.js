@@ -143,7 +143,7 @@ test ('should have a balance of 100 ETH in test account', (done) => {
   service.manager().connect()
     .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
-      expect(service._web3.fromWei(balance).toString()).toEqual("100");
+      expect(service._web3.fromWei(balance).toString()).toEqual('100');
       done();
     });
 });

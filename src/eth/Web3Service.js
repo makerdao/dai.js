@@ -83,8 +83,11 @@ export default class Web3Service extends PrivateService {
 
   static buildRemoteService() {
     const service = new Web3Service();
-    service.manager().inject('log', new NullLogger())
+
+    service.manager()
+      .inject('log', new NullLogger())
       .inject('timer', new TimerService());
+
     return service;
   }
 
@@ -95,6 +98,22 @@ export default class Web3Service extends PrivateService {
     return this._info.version;
   }
 
+  /**
+   * @returns {number}
+   */
+  networkId() {
+    const result = this.version().network;
+
+    if (result === null) {
+      throw new Error('Cannot resolve network ID. Are you connected?');
+    }
+
+    return parseInt(result);
+  }
+
+  /**
+   * @param settings
+   */
   initialize(settings) {
     const web3 = new Web3(), ethers = require('ethers');
     settings = this._normalizeSettings(settings);
@@ -111,8 +130,8 @@ export default class Web3Service extends PrivateService {
     }
 
     web3.setProvider(web3Provider);
+    this._ethersProvider = new ethers.providers.Web3Provider(web3Provider, {name: 'test', chainId: 999});
 
-    this._ethersProvider = new ethers.providers.Web3Provider(web3Provider);
     if (settings.privateKey) {
       this._ethersWallet = new ethers.Wallet(settings.privateKey, this._ethersProvider);
     }
@@ -260,7 +279,7 @@ export default class Web3Service extends PrivateService {
       return new Web3.providers.HttpProvider('http://127.1:2000');
     default:
       throw new Error('Illegal web3 provider type: ' + settings.provider.type);
-   }
+    }
   }
 
   _isStillConnected() {
