@@ -1,15 +1,10 @@
-import SmartContractService from '../services/SmartContractService';
+export default class Erc20Token {
 
-
-export default class ERC20Token {
-
-  constructor(contract, web3Service, gasEstimatorService) {
+  constructor(contract) {
     this._contract = contract;
-    this._web3 = web3Service;
-    this._gasEstimator = gasEstimatorService;
   }
 
-  allowance(tokenOwner, spender){ //returns a promise
+  allowance(tokenOwner, spender){
     return this._contract.allowance(tokenOwner, spender);
   }
 

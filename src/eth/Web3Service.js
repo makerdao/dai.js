@@ -4,6 +4,7 @@ import { promisifyAsyncMethods } from '../utils';
 import NullLogger from '../utils/loggers/NullLogger';
 import TimerService from '../utils/TimerService';
 import Web3 from 'web3';
+import TestAccountProvider from '../utils/TestAccountProvider';
 
 //{ type : Web3ProviderType.TEST};
 //const x = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'};
@@ -230,11 +231,11 @@ export default class Web3Service extends PrivateService {
     return this._info.version['network'];
   }
 
-  //using same dummy data as in the web3 documentation: https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethestimategas
   getDummyTransaction(){
     return {
-      to: '0xc4abd0339eb8d57087278718986382264244252f', 
-      data: '0xc6888fa10000000000000000000000000000000000000000000000000000000000000003'
+      from: TestAccountProvider.nextAddress(),
+      to: TestAccountProvider.nextAddress(),
+      amount: this._web3.toWei('0.01')
     };
   }
 

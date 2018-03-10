@@ -1,5 +1,3 @@
-import Web3Service from '../web3/Web3Service';
-
 export default class EtherToken {
 
   constructor(web3Service, gasEstimatorService) {
@@ -8,29 +6,23 @@ export default class EtherToken {
   }
 
   allowance(tokenOwner, spender){ 
-    return Promise.resolve(Number.MAX_SAFE_INTEGER); //double check that this should be a promise
+    return Promise.resolve(Number.MAX_SAFE_INTEGER);
   }
 
-  balanceOf(owner){ //returns a promise
-    return this._web3.eth.getBalance(owner); //add this as a passthrough to the web3service
-  }
-
-  balanceOfWithEthersJS(owner){
-    var infuraKey = 'ihagQOzC3mkRXYuCivDN';
-    var infuraProvider = new this._web3._ethers.providers.InfuraProvider('kovan', infuraKey);
-    return infuraProvider.getBalance(owner);
+  balanceOf(owner){
+    return this._web3.ethersProvider().getBalance(owner);
   }
 
   approve(spender, value){
-    return true;
+    return Promise.resolve(true);
   }
 
   approveUnlimited(spender){ 
-    return true;
+    return Promise.resolve(true);
   }
 
   transfer(fromAddress, toAddress, transferValue){ //returns a promise
-    const tx = {from: fromAddress, to: toAddress, amount: transferValue};
+    const tx = { from: fromAddress, to: toAddress, amount: transferValue };
     this._gasEstimator.setPercentage(1.01);
     const gasLimit = this._gasEstimator.estimateGasLimit(tx);
     return this._web3.eth.sendTransaction({from: fromAddress, to: toAddress, value: transferValue, gasLimit: gasLimit, gasPrice: 300000});

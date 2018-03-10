@@ -1,0 +1,95 @@
+import PrivateService from '../core/PrivateService';
+import tokens from '../../contracts/tokens';
+import contracts from '../../contracts/contracts';
+import networks from '../../contracts/networks';
+import SmartContractService from './SmartContractService';
+import Erc20Token from './tokens/Erc20Token';
+import EtherToken from './tokens/EtherToken';
+//import WethToken from './tokens/WethToken';
+import PethToken from './tokens/PethToken';
+import GasEstimatorService from './GasEstimatorService';
+
+export default class EthereumTokenService extends PrivateService {
+
+  static buildTestService() {
+    const service = new EthereumTokenService();
+    const smartContractService = SmartContractService.buildTestService();
+
+    service.manager()
+      .inject('log', smartContractService.get('log'))
+      .inject('web3', smartContractService.get('web3'))
+      .inject('smartContract', smartContractService)
+      .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3')));
+
+    return service;
+  }
+
+  constructor(name = 'token') {
+    super(name, ['smartContract', 'web3', 'log', 'gasEstimator']);
+  }
+
+  getTokens() {
+    return Object.keys(tokens);
+  }
+
+  getTokenVersions(){
+    const mapping = this._getCurrentNetworkMapping();
+    return this._selectTokenVersions(mapping);
+  }
+
+  getToken(symbol, version = null){
+    if (this.getTokens().indexOf(symbol) < 0) {
+      throw new Error('provided token is not a symbol');
+    }
+
+    if (symbol === tokens.ETH) {
+      return new EtherToken(this.get('web3'), this.get('gasEstimator'));
+
+    } else {
+      const mapping = this._getCurrentNetworkMapping(),
+        tokenInfo = mapping[symbol],
+        tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1],
+        smartContractService = this.get('smartContract'),
+        contract = smartContractService.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
+
+      if (symbol === tokens.WETH) {
+        throw new Error('WETH is currently disabled!');
+        //return new WethToken(contract, this.get('web3'), this.get('gasEstimator'));
+      }
+
+      if (symbol === tokens.PETH) {
+        const tub = smartContractService.getContractByName(contracts.TUB);
+        return new PethToken(contract, this.get('web3'), this.get('gasEstimator'), tub);
+      }
+
+      return new Erc20Token(contract, this.get('web3'), this.get('gasEstimator'));
+    }
+  }
+
+  _getCurrentNetworkMapping(){
+    let networkID = this.get('web3').networkId();
+    const mapping = networks.filter((m)=> m.networkID === networkID);
+
+    if (mapping.length < 1) {
+      throw new Error('networkID not found');
+    }
+
+    return mapping[0].addresses;
+  }
+
+  _selectTokenVersions(mapping){
+    const tokenArray = [];
+    for (let token in tokens) {
+      if (!(token in mapping)) {continue;}
+      if (token === 'ETH') { tokenArray['ETH'] = [1];}
+      else{
+        let versionArray = [];
+        mapping[token].forEach((e) => {
+          versionArray.push(e.version);
+        });
+        tokenArray[token] = versionArray;
+      }
+    }
+    return tokenArray;
+  }
+}

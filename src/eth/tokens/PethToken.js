@@ -1,7 +1,6 @@
-import SmartContractService from '../services/SmartContractService';
-import ERC20Token from './ERC20Token';
+import Erc20Token from './Erc20Token';
 
-export default class PethToken extends ERC20Token {
+export default class PethToken extends Erc20Token {
 
   constructor(contract, web3Service, gasEstimatorService, tub) {
   	super(contract, web3Service, gasEstimatorService);

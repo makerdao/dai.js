@@ -1,17 +1,8 @@
-import GasEstimatorService from '../services/GasEstimatorService';
-import Web3Service from '../web3/Web3Service';
-
-function buildGasEstimatorService(){
-  const web3 = Web3Service.buildTestService(),
-    gasEstimator = new GasEstimatorService();
-  //web3.manager().inject('log', log);
-  gasEstimator.manager().inject('log', web3.get('log'))
-    .inject('web3', web3);
-  return gasEstimator; //could also call connect here
-}
+import GasEstimatorService from '../../src/eth/GasEstimatorService';
 
 test('policies initially null', (done) => {
-  const gasEstimator = buildGasEstimatorService();
+  const gasEstimator = GasEstimatorService.buildTestService();
+
   gasEstimator.manager().connect()
     .then(() => {
       expect(gasEstimator.getPercentage()).toBe(null);
@@ -21,7 +12,8 @@ test('policies initially null', (done) => {
 });
 
 test('update policies', (done) => {
-  const gasEstimator = buildGasEstimatorService();
+  const gasEstimator = GasEstimatorService.buildTestService();
+
   gasEstimator.manager().connect()
     .then(() => {
       gasEstimator.setPercentage(1);
@@ -33,7 +25,8 @@ test('update policies', (done) => {
 });
 
 test('clear policies', (done) => {
-  const gasEstimator = buildGasEstimatorService();
+  const gasEstimator = GasEstimatorService.buildTestService();
+
   gasEstimator.manager().connect()
     .then(() => {
       gasEstimator.setPercentage(1);
@@ -46,23 +39,25 @@ test('clear policies', (done) => {
     });
 });
 
-test('use percentage when absolute null', (done) => { 
-  const gasEstimator = buildGasEstimatorService();
-  const web3 = gasEstimator.get('web3');
+test('use percentage when absolute null', (done) => {
+  const gasEstimator = GasEstimatorService.buildTestService(),
+    web3 = gasEstimator.get('web3');
+
   gasEstimator.manager().connect()
-    .then(()=>{
-      gasEstimator.setPercentage(1);
-      return web3.getDummyTransaction();})
-    .then(transaction => gasEstimator.estimateGasLimit(transaction))
+    .then(() => {
+      gasEstimator.setPercentage(1.1);
+      return gasEstimator.estimateGasLimit(web3.getDummyTransaction());
+    })
     .then(estimate => {
-      expect(estimate).toBe(21464); //uses percentage policy
+      expect(estimate).toBeCloseTo(21000 * 1.1, 12);
       done();
     });
 });
 
-test('use absolute when percentage null', (done) => { 
-  const gasEstimator = buildGasEstimatorService();
-  const web3 = gasEstimator.get('web3');
+test('use absolute when percentage null', (done) => {
+  const gasEstimator = GasEstimatorService.buildTestService(),
+    web3 = gasEstimator.get('web3');
+
   gasEstimator.manager().connect()
     .then(()=>{
       gasEstimator.setAbsolute(20000);
@@ -74,27 +69,28 @@ test('use absolute when percentage null', (done) => {
     });
 });
 
-test('choose minimum when both policies set using percentage', (done) => { 
-  const gasEstimator = buildGasEstimatorService();
-  const web3 = gasEstimator.get('web3');
+test('choose minimum when both policies set using percentage', (done) => {
+  const gasEstimator = GasEstimatorService.buildTestService(),
+    web3 = gasEstimator.get('web3');
+
   gasEstimator.manager().connect()
     .then(()=>{
-      gasEstimator.setPercentage(1);
+      gasEstimator.setPercentage(1.1);
       gasEstimator.setAbsolute(1000000);
-      return web3.getDummyTransaction();})
-    .then(transaction => gasEstimator.estimateGasLimit(transaction))
+      return gasEstimator.estimateGasLimit(web3.getDummyTransaction());
+    })
     .then(estimate => {
-      expect(estimate).toBe(21464);
+      expect(estimate).toBeCloseTo(21000 * 1.1, 12);
       done();
     });
 });
 
-
 //I'll implement this test once I create the SmartContractService.  Then I'll be able to deploy and call a contract that uses too much gas to test this
 /*
 test('does not set estimate greater than block gas limit', (done) => { 
-  const gasEstimator = buildGasEstimatorService();
-  const web3 = gasEstimator.get('web3');
+  const gasEstimator = GasEstimatorService.buildTestService(),
+    web3 = gasEstimator.get('web3');
+
   gasEstimator.manager().connect()
     .then(()=>{
       gasEstimator.setPercentage(1);
@@ -107,22 +103,20 @@ test('does not set estimate greater than block gas limit', (done) => {
     });
 });*/
 
+test('throws when estimating without a policy', (done) => {
+  const gasEstimator = GasEstimatorService.buildTestService(),
+    web3 = gasEstimator.get('web3');
 
-//I think we should instead offer some kind of default value 
-test('throws when estimating without a policy', (done) => { 
-  const gasEstimator = buildGasEstimatorService();
-  const web3 = gasEstimator.get('web3');
   gasEstimator.manager().connect()
-    .then(()=> web3.getDummyTransaction())
-    .then(transaction => {
-      expect(() => gasEstimator.estimateGasLimit(transaction)).toThrow();
+    .then(() => {
+      expect(() => gasEstimator.estimateGasLimit(web3.getDummyTransaction())).toThrow();
       done();
     });
 });
 
-
 test('throws on setting policy less than zero', (done) => {
-  const gasEstimator = buildGasEstimatorService();
+  const gasEstimator = GasEstimatorService.buildTestService();
+
   gasEstimator.manager().connect()
     .then(() => {
       expect(() => gasEstimator.setPercentage(-1)).toThrow();
@@ -130,4 +124,3 @@ test('throws on setting policy less than zero', (done) => {
       done();
     });
 });
-
