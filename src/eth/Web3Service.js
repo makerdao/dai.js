@@ -111,6 +111,10 @@ export default class Web3Service extends PrivateService {
     return parseInt(result);
   }
 
+  ethersProvider() {
+    return this._ethersProvider;
+  }
+
   /**
    * @param settings
    */

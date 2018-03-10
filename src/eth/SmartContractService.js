@@ -3,6 +3,7 @@ import Web3Service from './Web3Service';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
+import { Contract } from 'ethers';
 
 export default class SmartContractService extends PublicService {
 
@@ -33,9 +34,7 @@ export default class SmartContractService extends PublicService {
   }
 
   getContractByAddressAndAbi(address, abi) {
-    return this.get('web3')._web3.eth.contract(abi).at(address);
-    //console.log(contract);
-    //return new this.get('web3')._ethers.Contract(address, abi, this.get('web3')._ethersProvider);
+    return new Contract(address, abi, this.get('web3').ethersProvider());
   }
 
   getContractByName(name, version = null) {
