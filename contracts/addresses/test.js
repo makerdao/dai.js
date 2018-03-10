@@ -1,3 +1,4 @@
+import dsEthToken_1 from '../abi/ds-eth-token/v1';
 import erc20Token_1 from '../abi/erc20-token/v1';
 import top_1 from '../abi/dai/v1/top';
 import tub_1 from '../abi/dai/v1/tub';
@@ -23,12 +24,18 @@ const contractAdresses = {
 };
 
 const mapping = {
+  [tokens.WETH] : [
+    { version: 1, address: contractAdresses.GEM, abi: dsEthToken_1.interface },
+  ],
+  [tokens.PETH] : [
+    { version: 1, address: contractAdresses.SKR, abi: erc20Token_1.interface },
+  ],
   [tokens.DAI] : [
     { version: 1, address: contractAdresses.SAI, abi: erc20Token_1.interface },
   ],
   [tokens.MKR] : [
-    { version: 1, address: null, abi: erc20Token_1.interface },
-    { version: 2, address: contractAdresses.SKR, abi: erc20Token_1.interface },
+    { version: 1, address: '0x0000000000000000000000000000000000000001', abi: erc20Token_1.interface },
+    { version: 2, address: contractAdresses.GOV, abi: erc20Token_1.interface },
   ],
   [contracts.TOP] : [
     { version: 1, address: contractAdresses.TOP, abi: top_1.interface },

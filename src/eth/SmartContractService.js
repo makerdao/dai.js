@@ -34,6 +34,10 @@ export default class SmartContractService extends PublicService {
   }
 
   getContractByAddressAndAbi(address, abi) {
+    if (!address) {
+      throw Error('Contract address is required');
+    }
+
     return new Contract(address, abi, this.get('web3').ethersProvider());
   }
 

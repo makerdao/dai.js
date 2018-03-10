@@ -1,13 +1,13 @@
 import PrivateService from '../core/PrivateService';
+import SmartContractService from './SmartContractService';
+import GasEstimatorService from './GasEstimatorService';
 import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
 import networks from '../../contracts/networks';
-import SmartContractService from './SmartContractService';
 import Erc20Token from './tokens/Erc20Token';
 import EtherToken from './tokens/EtherToken';
-//import WethToken from './tokens/WethToken';
+import WethToken from './tokens/WethToken';
 import PethToken from './tokens/PethToken';
-import GasEstimatorService from './GasEstimatorService';
 
 export default class EthereumTokenService extends PrivateService {
 
@@ -53,16 +53,15 @@ export default class EthereumTokenService extends PrivateService {
         contract = smartContractService.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
 
       if (symbol === tokens.WETH) {
-        throw new Error('WETH is currently disabled!');
-        //return new WethToken(contract, this.get('web3'), this.get('gasEstimator'));
+        return new WethToken(contract);
       }
 
       if (symbol === tokens.PETH) {
         const tub = smartContractService.getContractByName(contracts.TUB);
-        return new PethToken(contract, this.get('web3'), this.get('gasEstimator'), tub);
+        return new PethToken(contract, tub);
       }
 
-      return new Erc20Token(contract, this.get('web3'), this.get('gasEstimator'));
+      return new Erc20Token(contract);
     }
   }
 
@@ -71,6 +70,7 @@ export default class EthereumTokenService extends PrivateService {
     const mapping = networks.filter((m)=> m.networkID === networkID);
 
     if (mapping.length < 1) {
+      /* istanbul ignore next */
       throw new Error('networkID not found');
     }
 
@@ -79,10 +79,13 @@ export default class EthereumTokenService extends PrivateService {
 
   _selectTokenVersions(mapping){
     const tokenArray = [];
+
     for (let token in tokens) {
-      if (!(token in mapping)) {continue;}
-      if (token === 'ETH') { tokenArray['ETH'] = [1];}
-      else{
+      if (token === 'ETH') {
+        tokenArray['ETH'] = [1];
+      }
+
+      if (token in mapping) {
         let versionArray = [];
         mapping[token].forEach((e) => {
           versionArray.push(e.version);
@@ -90,6 +93,7 @@ export default class EthereumTokenService extends PrivateService {
         tokenArray[token] = versionArray;
       }
     }
+
     return tokenArray;
   }
 }

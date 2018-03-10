@@ -2,8 +2,8 @@ import Erc20Token from './Erc20Token';
 
 export default class PethToken extends Erc20Token {
 
-  constructor(contract, web3Service, gasEstimatorService, tub) {
-  	super(contract, web3Service, gasEstimatorService);
+  constructor(contract, tub) {
+  	super(contract);
     this._tub = tub;
   }
 

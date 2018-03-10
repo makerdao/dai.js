@@ -17,11 +17,11 @@ test('getContractByName should have proper error checking', done => {
 test('getContractByName should return a functioning contract', done => {
   const service = SmartContractService.buildTestService();
   service.manager().connect().then(() => {
-    // Read the MKR address by calling TOP.skr(). Confirm that it's the same as the configured address.
+    // Read the PETH address by calling TOP.skr(). Confirm that it's the same as the configured address.
     service.getContractByName(contracts.TOP).skr().then(
       data => {
         expect(data.toString().toUpperCase())
-          .toEqual(service.getContractByName(tokens.MKR).address.toUpperCase());
+          .toEqual(service.getContractByName(tokens.PETH).address.toUpperCase());
         done();
       }
     );
