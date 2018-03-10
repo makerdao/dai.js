@@ -5,9 +5,9 @@ import accounts from './testAccounts';
  */
 class TestAccountProvider {
 
-  constructor(accounts) {
-    this._accounts = accounts;
-    this._index = 0; //process.env._TestProviderIndex || 0;
+  constructor(accounts, initialIndex = 0) {
+    this._setAccounts(accounts);
+    this.setIndex(initialIndex);
   }
 
   nextAddress() {
@@ -16,6 +16,30 @@ class TestAccountProvider {
 
   nextAccount() {
     return this._next();
+  }
+
+  getIndex() {
+    return this._index;
+  }
+
+  setIndex(i) {
+    if (typeof i !== 'number' || i < 0 || i >= this._accounts.addresses.length) {
+      throw new Error('Index must be a natural number between 0 and ' + (this._accounts.addresses.length - 1));
+    }
+
+    this._index = i;
+  }
+
+  _setAccounts(accounts) {
+    if (typeof accounts !== 'object' || !accounts.addresses || !accounts.keys) {
+      throw new Error('Accounts must be an object with properties addresses and keys');
+    }
+
+    if (accounts.addresses.length !== accounts.keys.length) {
+      throw new Error('Accounts addresses and keys arrays must have the same length');
+    }
+
+    this._accounts = accounts;
   }
 
   _next() {
@@ -33,5 +57,6 @@ class TestAccountProvider {
   }
 }
 
-const p = new TestAccountProvider(accounts);
-export default p;
+const i = 1; //process.env._TestProviderIndex || 1;
+const p = new TestAccountProvider(accounts, i);
+export {p as default, TestAccountProvider};

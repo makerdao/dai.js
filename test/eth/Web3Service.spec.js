@@ -1,5 +1,5 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
-
+import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import Web3Service from '../../src/eth/Web3Service';
 
 test('should fetch version info on connect', (done) => {
@@ -135,4 +135,15 @@ test('should connect to ganache testnet with account 0x16fb9...', (done) => {
       done();
     })
     .catch(console.error);
+});
+
+test ('should have a balance of 100 ETH in test account', (done) => {
+  const service = Web3Service.buildTestService();
+
+  service.manager().connect()
+    .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
+    .then(balance => {
+      expect(service._web3.fromWei(balance).toString()).toEqual("100");
+      done();
+    });
 });
