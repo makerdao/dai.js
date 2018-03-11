@@ -31,38 +31,34 @@ test('get PETH allowance of address', (done) => {
     });
 });
 
-test('INCOMPLETE -- should successfully join and exit PETH', done => {
+test('should successfully join and exit PETH', done => {
   const tokenService = EthereumTokenService.buildTestService();
   let weth = null, peth = null, tub = null, owner = null, initialBalance = null;
 
   tokenService.manager().authenticate().then(() => {
       tub = tokenService.get('smartContract').getContractByName(contracts.TUB);
-
-      /*console.log('WETH = ', tokenService.get('smartContract').getContractByName(tokens.WETH).address);
-      console.log('PETH = ', tokenService.get('smartContract').getContractByName(tokens.PETH).address);
-      tokenService.get('smartContract').getContractByName(tokens.PETH).authority().then(
-        (auth) => console.log('PETH Auth = ', auth)
-      );*/
-
       owner = tokenService.get('web3').defaultAccount();
       weth = tokenService.getToken(tokens.WETH);
       peth = tokenService.getToken(tokens.PETH);
 
-      return Promise.all([ weth.deposit(utils.parseEther('0.1')), peth.balanceOf(owner) ]);
+      return Promise.all([
+        peth.balanceOf(owner),
+        weth.approveUnlimited(tub.address),
+        weth.deposit(utils.parseEther('0.1'))
+      ]);
     })
     .then(result => {
-      initialBalance = parseFloat(utils.formatEther(result[1]));
-      return weth.balanceOf(owner);
+      initialBalance = parseFloat(utils.formatEther(result[0]));
+      return peth.join(utils.parseEther('0.1'));
     })
-    .then(balance => weth.approve(tub.address, balance).then(() => balance))
-    .then(balance => weth.allowance(owner, tub.address).then(allowance => [balance, allowance]))
-    //.then(() => peth.approveUnlimited(tub.address))
-    .then(result => {
-      expect(result[0].toString()).toEqual(result[1].toString());
-      //console.log(result[0].toString(), result[1].toString());
-      return true; //peth.join(50); //<< TODO: fix peth.join(). No idea why it's failing.
+    .then(() => peth.balanceOf(owner))
+    .then(balance => {
+      expect(parseFloat(utils.formatEther(balance))).toBeCloseTo(initialBalance + 0.1, 12);
+      return peth.exit(utils.parseEther('0.1'));
     })
-    .then(() => {
+    .then(() => peth.balanceOf(owner))
+    .then(balance => {
+      expect(parseFloat(utils.formatEther(balance))).toBeCloseTo(initialBalance, 12);
       done();
     });
 });
