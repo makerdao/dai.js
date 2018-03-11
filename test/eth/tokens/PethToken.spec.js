@@ -51,9 +51,12 @@ test('should successfully join and exit PETH', done => {
       initialBalance = parseFloat(utils.formatEther(result[0]));
       return peth.join(utils.parseEther('0.1'));
     })
-    .then(() => peth.balanceOf(owner))
-    .then(balance => {
-      expect(parseFloat(utils.formatEther(balance))).toBeCloseTo(initialBalance + 0.1, 12);
+    .then(() => Promise.all([
+      peth.balanceOf(owner),
+      peth.approveUnlimited(tub.address)
+    ]))
+    .then(result => {
+      expect(parseFloat(utils.formatEther(result[0]))).toBeCloseTo(initialBalance + 0.1, 12);
       return peth.exit(utils.parseEther('0.1'));
     })
     .then(() => peth.balanceOf(owner))
