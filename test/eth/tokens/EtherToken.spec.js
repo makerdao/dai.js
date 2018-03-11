@@ -48,7 +48,7 @@ test('approve and approveUnlimited should resolve to true', done => {
     });
 });
 
-test('transfer should move transferValue from sender to receiver', done => {
+test('ether transfer should move transferValue from sender to receiver', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
     receiver = TestAccountProvider.nextAddress();
 

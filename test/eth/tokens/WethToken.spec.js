@@ -4,19 +4,6 @@ import TestAccountProvider from '../../../src/utils/TestAccountProvider';
 
 const utils = require('ethers').utils;
 
-test('get WETH balance of address', (done) => {
-  const ethereumTokenService = EthereumTokenService.buildTestService();
-
-  ethereumTokenService.manager().authenticate().then(() => {
-      const token = ethereumTokenService.getToken(tokens.WETH);
-      return token.balanceOf(TestAccountProvider.nextAddress());
-    })
-    .then(balance =>{
-      expect(balance.toString()).toBe('0');
-      done();
-    });
-});
-
 test('get WETH allowance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
@@ -51,7 +38,7 @@ test('token name and symbol are correct', (done) => {
 
 test('wrap and unwrap ETH', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
-    parseBalance = b => parseFloat(utils.formatEther(b[0].toString()));
+    parseBalance = b => parseFloat(utils.formatEther(b.toString()));
 
   let token = null, originalBalance = null, owner = null;
 

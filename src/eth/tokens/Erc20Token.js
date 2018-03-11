@@ -5,11 +5,11 @@ export default class Erc20Token {
   }
 
   allowance(tokenOwner, spender){
-    return this._contract.allowance(tokenOwner, spender);
+    return this._contract.allowance(tokenOwner, spender).then(_ => _[0]);
   }
 
   balanceOf(owner){
-    return this._contract.balanceOf(owner);
+    return this._contract.balanceOf(owner).then(_ => _[0]);
   }
 
   approve(spender, value){
@@ -21,14 +21,10 @@ export default class Erc20Token {
   }
 
   transfer(from, to, value){
-    return this._contract.transfer(from, to, value);
-  }
-
-  transferWithEthersJS(to, value){
-  	return this._contract.transfer(to, value);
+    return this._contract.transferFrom(from, to, value);
   }
 
   totalSupply(){
-    return this._contract.totalSupply();
+    return this._contract.totalSupply().then(_ => _[0]);
   }
 }

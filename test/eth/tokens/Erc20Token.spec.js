@@ -2,6 +2,8 @@ import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
 
+const utils = require('ethers').utils;
+
 test('get ERC20 (MKR) balance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
@@ -50,14 +52,71 @@ test('approve an ERC20 (MKR) allowance', (done) => {
 });
 
 test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
-  const ethereumTokenService = EthereumTokenService.buildTestService();
+  const ethereumTokenService = EthereumTokenService.buildTestService(),
+    spender = TestAccountProvider.nextAddress();
+
+  let token = null;
 
   ethereumTokenService.manager().authenticate().then(() => {
-      const token = ethereumTokenService.getToken(tokens.MKR);
-      return token.approveUnlimited('0x0000000000000000000000000000000000000001');
+      token = ethereumTokenService.getToken(tokens.MKR);
+      return token.approveUnlimited(spender);
     })
     .then(transaction => {
       expect(!!transaction).toBe(true);
+      return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
+    })
+    .then(allowance => {
+      expect(allowance.toHexString()).toBe('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+      done();
+    });
+});
+
+test('ERC20 transfer should move transferValue from sender to receiver', done => {
+  const ethereumTokenService = EthereumTokenService.buildTestService(),
+    receiver = TestAccountProvider.nextAddress();
+
+  let sender = null, token = null, senderBalance = null, receiverBalance = null;
+
+  ethereumTokenService.manager().authenticate().then(() => {
+      sender = ethereumTokenService.get('web3').defaultAccount();
+      token =  ethereumTokenService.getToken(tokens.WETH);
+      return token.deposit(utils.parseEther('0.1'));
+    })
+    .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
+    .then(balances => {
+      senderBalance = parseFloat(utils.formatEther(balances[0].toString()));
+      receiverBalance = parseFloat(utils.formatEther(balances[1].toString()));
+      return token.transfer(sender, receiver, utils.parseEther('0.1').toString());
+    })
+    .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
+    .then(balances => {
+      const newSenderBalance = parseFloat(utils.formatEther(balances[0].toString())),
+        newReceiverBalance = parseFloat(utils.formatEther(balances[1].toString()));
+
+      expect(newSenderBalance).toBeCloseTo(senderBalance - 0.1, 12);
+      expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
+      done();
+    });
+});
+
+test('totalSupply() should increase when new tokens are minted', done => {
+  const ethereumTokenService = EthereumTokenService.buildTestService();
+
+  let sender = null, token = null, initialSupply = null;
+
+  ethereumTokenService.manager().authenticate().then(() => {
+      sender = ethereumTokenService.get('web3').defaultAccount();
+      token =  ethereumTokenService.getToken(tokens.WETH);
+      return token.totalSupply();
+    })
+    .then(supply => {
+      initialSupply = parseFloat(utils.formatEther(supply.toString()));
+      return token.deposit(utils.parseEther('0.1'));
+    })
+    .then(() => token.totalSupply())
+    .then(supply => {
+      const newSupply = parseFloat(utils.formatEther(supply.toString()));
+      expect(newSupply).toBeCloseTo(initialSupply + 0.1, 12);
       done();
     });
 });
