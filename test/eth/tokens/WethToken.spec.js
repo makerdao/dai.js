@@ -49,7 +49,7 @@ test('token name and symbol are correct', (done) => {
     });
 });
 
-test('wrap ETH', (done) => {
+test('wrap and unwrap ETH', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
     parseBalance = b => parseFloat(utils.formatEther(b[0].toString()));
 
