@@ -112,8 +112,20 @@ export default class Web3Service extends PrivateService {
     return parseInt(result);
   }
 
+  defaultAccount() {
+    if (!this.manager().isAuthenticated()) {
+      throw new Error('Default account is unavailable when not authenticated.');
+    }
+
+    return this._info.account;
+  }
+
   ethersProvider() {
     return this._ethersProvider;
+  }
+
+  ethersSigner() {
+    return this._ethersWallet || this._ethersProvider.getSigner(this.defaultAccount());
   }
 
   /**
@@ -143,25 +155,6 @@ export default class Web3Service extends PrivateService {
   }
 
   connect() {
-
-    //make bridge between web3 and ethers
-    /*
-    if (!!this._ethersProvider){
-      console.log('this._ethersProvider: ', this._ethersProvider);
-      var ProviderBridge = require('ethers-web3-bridge');
-      console.log('ProviderBridge: ', ProviderBridge);
-      console.log('this._web3Provider: ', this._web3Provider);
-      this._web3Provider.listAccounts().then(accounts => {
-        console.log('accounts: '/* accounts*//*);
-        var signer = this._web3Provider.getSigner(/*accounts[0]*//*); //set signer to first account in Web3 - make sure tests that use web3 to sign only use 1st account in ganache
-        console.log('signer: ', signer);
-        var providerBridge = new ProviderBridge(this._ethersProvider, signer);
-        providerBridge.connectEthers(this._ethersProvider, signer);
-        console.log('2');
-        this._web3.setProvider(providerBridge);
-      });
-    }*/
-
     return Promise.all([
       _web3Promise(_ => this._web3.version.getNode(_)),
       _web3Promise(_ => this._web3.version.getNetwork(_)),
@@ -170,7 +163,6 @@ export default class Web3Service extends PrivateService {
 
     ]).then(
       versions => {
-
         this._info.version = {
           api: this._web3.version.api,
           node: versions[0],
@@ -187,7 +179,6 @@ export default class Web3Service extends PrivateService {
             }
           })
         );
-
       },
 
       reason => {
@@ -205,10 +196,13 @@ export default class Web3Service extends PrivateService {
 
     return _web3Promise(_ => this._web3.eth.getAccounts(_))
       .then(data => {
+
         if (!(data instanceof Array) || (data.length < 1) ) {
           throw new Error ('Web3 is not authenticated');
         }
+
         this._info.account = data[0];
+
         this.get('timer').createTimer(
           'web3CheckAuthenticationStatus',
           300, //what should this number be?

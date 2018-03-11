@@ -27,4 +27,8 @@ export default class Erc20Token {
   transferWithEthersJS(to, value){
   	return this._contract.transfer(to, value);
   }
+
+  totalSupply(){
+    return this._contract.totalSupply();
+  }
 }

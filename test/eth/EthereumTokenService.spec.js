@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 test('getTokens returns tokens', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
-  ethereumTokenService.manager().connect()
+  ethereumTokenService.manager().authenticate()
     .then(() => {
       const tokensList = ethereumTokenService.getTokens();
       expect(tokensList.includes(tokens.DAI)).toBe(true);
@@ -16,7 +16,7 @@ test('getTokens returns tokens', (done) => {
 test('getTokenVersions returns token versions using remote blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
-  ethereumTokenService.manager().connect()
+  ethereumTokenService.manager().authenticate()
     .then(() => {
       const tokenVersions = ethereumTokenService.getTokenVersions();
 
@@ -34,7 +34,7 @@ test('getTokenVersions returns token versions using remote blockchain', (done) =
 test('getToken returns token object of correct version', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
-  ethereumTokenService.manager().connect()
+  ethereumTokenService.manager().authenticate()
     .then(() => {
 
       expect(ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase())

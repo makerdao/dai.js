@@ -7,7 +7,7 @@ const utils = require('ethers').utils;
 test('get Ether balance using test blockchain', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
-  ethereumTokenService.manager().connect()
+  ethereumTokenService.manager().authenticate()
     .then(() => {
       const token =  ethereumTokenService.getToken(tokens.ETH);
       return token.balanceOf(TestAccountProvider.nextAddress());
@@ -20,7 +20,7 @@ test('get Ether balance using test blockchain', (done) => {
 
 test('get Ether allowance returns max safe integer', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
-  ethereumTokenService.manager().connect()
+  ethereumTokenService.manager().authenticate()
     .then(() => {
       const token = ethereumTokenService.getToken(tokens.ETH);
       return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
