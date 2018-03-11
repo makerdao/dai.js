@@ -1,22 +1,22 @@
-import Container from './services/Container';
-import Web3Service from './web3/Web3Service';
-import EthereumCdpService from './services/EthereumCdpService';
-import EthereumWalletService from './wallets/EthereumWalletService';
-import EthereumTokenService from './services/EthereumTokenService';
-import SmartContractService from './services/SmartContractService';
-import GasEstimatorService from './services/GasEstimatorService';
-import OasisExchangeService from './markets/OasisExchangeService';
+import Container from '../core/Container';
+import Web3Service from '../eth/Web3Service';
+import EthereumCdpService from '../eth/EthereumCdpService';
+//import EthereumWalletService from './wallets/EthereumWalletService';
+import EthereumTokenService from '../eth/EthereumTokenService';
+import SmartContractService from '../eth/SmartContractService';
+import GasEstimatorService from '../eth/GasEstimatorService';
+//import OasisExchangeService from './markets/OasisExchangeService';
 import TimerService from './TimerService';
-import NullLogger from './loggers/NullLogger/NullLogger';
+import NullLogger from './loggers/NullLogger';
 
 const _services = {
   Web3Service,
   EthereumCdpService,
-  EthereumWalletService,
+  //EthereumWalletService,
   EthereumTokenService,
   SmartContractService,
   GasEstimatorService,
-  OasisExchangeService,
+  //OasisExchangeService,
   TimerService,
   NullLogger
 };

@@ -1,12 +1,9 @@
-import PrivateService from '../services/PrivateService';
-import { Token }  from '../enums';
+import PrivateService from '../core/PrivateService';
+import tokens from '../../contracts/tokens';
 
 export default class CdpService extends PrivateService {
 
-  /**
-   * @param {string} name
-   */
-  constructor(name = 'makerdao') {
+  constructor(name = 'cdp') {
     super(name, ['log', 'web3']);
   }
 
@@ -22,18 +19,17 @@ export default class CdpService extends PrivateService {
 
     let result = this.get('smartContract').getContractByName('tub').lock(cdpId, amount);
 
-    if (token === Token.ETH) {
+    if (token === tokens.ETH) {
       result = this.get('smartContract').getContractByName('weth').deposit(amount)
         .then((wethAmount) => this.get('smartContract').getContractByName('weth').join(wethAmount))
         .then(result);
     }
 
-    if (token === Token.WETH) {
+    if (token === tokens.WETH) {
       result = this.get('smartContract').getContractByName('tub').join(amount)
         .then(result);
     }
 
     return result;
   }
-
 }

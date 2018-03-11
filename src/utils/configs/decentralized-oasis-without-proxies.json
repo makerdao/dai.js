@@ -9,24 +9,17 @@
       "Web3Service",
       {
         "provider": {
-          "type": "HTTP",
-          "usePredefined": true,
-          "url": [
-            "https://sai-service.makerdao.com/node",
-            "https://mainnet.infura.io/ihagQOzC3mkRXYuCivDN"
-          ]
+          "type": "TEST",
+          "usePredefined": true
         }
       }
     ],
 
     "cdp": "EthereumCdpService",
-    "wallet": "EthereumWalletService",
 
     "smartContract": "SmartContractService",
     "token": "EthereumTokenService",
     "gasEstimator": "GasEstimatorService",
-
-    "exchange": "OasisExchangeService",
 
     "timer": "TimerService",
     "log": "NullLogger"
