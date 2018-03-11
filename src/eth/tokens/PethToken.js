@@ -8,10 +8,10 @@ export default class PethToken extends Erc20Token {
   }
 
   join(amount){
-    return this._tub.join(amount, { gasLimit: 100000 });
+    return this._tub.join(amount, { gasLimit: 200000 });
   }
 
   exit(amount){
-    return this._tub.exit(amount);
+    return this._tub.exit(amount, { gasLimit: 100000 });
   }
 }
