@@ -16,9 +16,7 @@ before_install:
 - nix-env -iA dapphub.{dapp,seth,hevm,solc}
 - npm i -g npm@^5.3.0
 install:
-- git submodule update --init --recursive
 - sed -i '13s/DSToken.*/WETH9)/' ./lib/sai/bin/deploy
-- cat ./lib/sai/bin/deploy
 - npm install
 - npm run build
 before_script:
@@ -28,7 +26,7 @@ script:
 - npm run test
 - codecov
 after_install:
-- cat /home/travis/.npm/_logs/2018-0*.log
+- cat /home/travis/.npm/_logs/2018-02-*.log
 deploy:
   provider: npm
   skip_cleanup: true
