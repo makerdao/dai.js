@@ -82,7 +82,7 @@ export default class Web3Service extends PrivateService {
     return service;
   }
 
-  static buildInfuraService(network) {
+  static buildInfuraService(network, privateKey = null) {
     const service = new Web3Service();
 
     service.manager()
@@ -90,6 +90,7 @@ export default class Web3Service extends PrivateService {
       .inject('timer', new TimerService())
       .settings({
         usePresetProvider: false,
+        privateKey: privateKey,
         provider : {
           type : Web3ProviderType.INFURA,
           network : network,

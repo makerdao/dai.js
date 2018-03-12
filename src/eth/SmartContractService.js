@@ -7,9 +7,9 @@ import { Contract } from 'ethers';
 
 export default class SmartContractService extends PublicService {
 
-  static buildTestService() {
-    const service = new SmartContractService(),
-      web3 = Web3Service.buildTestService();
+  static buildTestService(web3 = null) {
+    const service = new SmartContractService();
+    web3 = web3 || Web3Service.buildTestService();
 
     service.manager()
       .inject('log', web3.get('log'))

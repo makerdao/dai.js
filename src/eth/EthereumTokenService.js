@@ -11,9 +11,9 @@ import PethToken from './tokens/PethToken';
 
 export default class EthereumTokenService extends PrivateService {
 
-  static buildTestService() {
+  static buildTestService(smartContractService = null) {
     const service = new EthereumTokenService();
-    const smartContractService = SmartContractService.buildTestService();
+    smartContractService = smartContractService || SmartContractService.buildTestService();
 
     service.manager()
       .inject('log', smartContractService.get('log'))
