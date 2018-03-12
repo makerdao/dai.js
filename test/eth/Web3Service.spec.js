@@ -147,3 +147,12 @@ test ('should have a balance of 100 ETH in test account', (done) => {
       done();
     });
 });
+
+test ('should connect to the right network when using the INFURA provider type', done => {
+  const service = Web3Service.buildInfuraService('kovan');
+  service.manager().connect().then(() => {
+    expect(service.manager().isConnected()).toBe(true);
+    expect(service.networkId()).toBe(42);
+    done();
+  });
+});

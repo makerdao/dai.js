@@ -18,17 +18,6 @@ export default class SmartContractService extends PublicService {
     return service;
   }
 
-  static buildRemoteService() {
-    const service = new SmartContractService(),
-      web3 = Web3Service.buildRemoteService();
-
-    service.manager()
-      .inject('log', web3.get('log'))
-      .inject('web3', web3);
-
-    return service;
-  }
-
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log']);
   }

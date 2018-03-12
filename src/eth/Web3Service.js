@@ -82,12 +82,20 @@ export default class Web3Service extends PrivateService {
     return service;
   }
 
-  static buildRemoteService() {
+  static buildInfuraService(network) {
     const service = new Web3Service();
 
     service.manager()
       .inject('log', new NullLogger())
-      .inject('timer', new TimerService());
+      .inject('timer', new TimerService())
+      .settings({
+        usePresetProvider: false,
+        provider : {
+          type : Web3ProviderType.INFURA,
+          network : network,
+          infuraApiKey : 'ihagQOzC3mkRXYuCivDN'
+        }
+      });
 
     return service;
   }
