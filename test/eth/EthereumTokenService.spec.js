@@ -1,5 +1,6 @@
 import EthereumTokenService from '../../src/eth/EthereumTokenService';
 import tokens from '../../contracts/tokens';
+import contracts from '../../contracts/contracts';
 
 test('getTokens returns tokens', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -47,11 +48,10 @@ test('getToken returns token object of correct version', (done) => {
     });
 });
 
-
 test('getToken throws when given unknown token symbol', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
-  ethereumTokenService.manager().connect()
+  ethereumTokenService.manager().authenticate()
     .then(() => {
       expect(() => ethereumTokenService.getToken('XYZ')).toThrow();
       done();
@@ -59,11 +59,13 @@ test('getToken throws when given unknown token symbol', (done) => {
 });
 
 test('approve DAI to Oasis', (done) => {
-  const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
-  ethereumTokenService.manager().connect()
+  const ethereumTokenService = EthereumTokenService.buildEthersService();
+
+  ethereumTokenService.manager().authenticate()
     .then(() => {
-      const token = ethereumTokenService.getToken(tokens.DAI);
-      return token.approveUnlimited('0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9');
+      const token = ethereumTokenService.getToken(tokens.DAI),
+        makerOtcAddress = ethereumTokenService.get('smartContract').getContractByName(contracts.MAKER_OTC).address;
+      return token.approveUnlimited(makerOtcAddress);
     })
     .then(transaction =>{
       expect(!!transaction).toBe(true);

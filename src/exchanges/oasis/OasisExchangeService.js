@@ -1,10 +1,10 @@
-import PrivateService from '../../services/PrivateService';
-import SmartContractService from '../../services/SmartContractService';
-import OasisOrder from './OasisOrder';
-import GasEstimatorService from '../../services/GasEstimatorService';
-import EthereumTokenService from '../../services/EthereumTokenService';
-import makerOTC from './makerOTC';
+import PrivateService from '../../core/PrivateService';
+import SmartContractService from '../../eth/SmartContractService';
+//import OasisOrder from './OasisOrder';
+import GasEstimatorService from '../../eth/GasEstimatorService';
+import EthereumTokenService from '../../eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
+import contracts from '../../../contracts/contracts';
 
 export default class OasisExchangeService extends PrivateService {
 
@@ -26,7 +26,7 @@ export default class OasisExchangeService extends PrivateService {
   }
 
   sellDai(daiAmount, tokenSymbol, minFillAmount = 0){
-  	const oasisContract = this.get('smartContract').getContractByAddressAndAbi('0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9', makerOTC.interface);
+  	const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
   	const daiAddress = this.get('ethereumToken').getToken(tokens.DAI).address();
   	const buyTokenAddress = this.get('ethereumToken').getToken(tokenSymbol).address();
   	return oasisContract.sellAllAmount(daiAddress, daiAmount, buyTokenAddress, minFillAmount);

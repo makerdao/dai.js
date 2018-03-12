@@ -1,5 +1,5 @@
-import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
-import tokens from '../../contracts/tokens';
+import OasisExchangeService from '../../../src/exchanges/oasis/OasisExchangeService';
+import tokens from '../../../contracts/tokens';
 
 test('sell Dai for WETH', (done) => {
   const oasisExchangeService = OasisExchangeService.buildEthersService();
