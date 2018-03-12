@@ -135,7 +135,7 @@ export default class Web3Service extends PrivateService {
 
   ethersSigner() {
     if (this._ethersWallet === null && this._ethersProvider === null) {
-      throw new Error('Cannot get ethersSigner: ethers wallet and provider are null.');;
+      throw new Error('Cannot get ethersSigner: ethers wallet and provider are null.');
     }
 
     return this._ethersWallet || this._ethersProvider.getSigner(this.defaultAccount());
