@@ -8,7 +8,7 @@ import contracts from '../contracts';
 const mapping = {
 
   [tokens.DAI] : [
-    { version: 1, address: '0x....', abi: erc20Token_1.interface }
+    { version: 1, address: '0xC4375B7De8af5a38a93548eb8453a498222C4fF2', abi: erc20Token_1.interface }
   ],
   [tokens.MKR] : [
     { version: 1, address: '0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD', abi: erc20Token_1.interface }

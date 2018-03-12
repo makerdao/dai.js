@@ -24,6 +24,17 @@ export default class EthereumTokenService extends PrivateService {
     return service;
   }
 
+  static buildEthersService(smartContractService = null) {
+    const service = new EthereumTokenService();
+    smartContractService = smartContractService || SmartContractService.buildEthersService();
+    service.manager()
+      .inject('log', smartContractService.get('log'))
+      .inject('web3', smartContractService.get('web3'))
+      .inject('smartContract', smartContractService)
+      .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3'))); //I pass in web3 since both services depend on it
+    return service;
+  }
+
   constructor(name = 'token') {
     super(name, ['smartContract', 'web3', 'log', 'gasEstimator']);
   }

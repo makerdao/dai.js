@@ -57,3 +57,16 @@ test('getToken throws when given unknown token symbol', (done) => {
       done();
     });
 });
+
+test('approve DAI to Oasis', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildEthersService(); //need to connect to a blockchain with deployed contracts
+  ethereumTokenService.manager().connect()
+    .then(() => {
+      const token = ethereumTokenService.getToken(tokens.DAI);
+      return token.approveUnlimited('0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9');
+    })
+    .then(transaction =>{
+      expect(!!transaction).toBe(true);
+      done();
+    });
+}, 15000);

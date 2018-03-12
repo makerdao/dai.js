@@ -12,6 +12,10 @@ export default class Erc20Token {
     return this._contract.balanceOf(owner).then(_ => _[0]);
   }
 
+  address(){
+    return this._contract.address;
+  }
+
   approve(spender, value){
     return this._contract.approve(spender, value);
   }
