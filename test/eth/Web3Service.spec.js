@@ -112,7 +112,6 @@ test('should create a ethersjs object running parallel to web3', (done) => {
   const service = Web3Service.buildTestService();
   service.manager().connect()
     .then(() => {
-      expect(service._ethers).toBeDefined();
       expect(service._ethersProvider).toBeDefined();
       expect(service._web3.currentProvider).toBe(service._ethersProvider._web3Provider);
       done();

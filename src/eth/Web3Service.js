@@ -1,6 +1,6 @@
 import PrivateService from '../core/PrivateService';
 import Web3ProviderType from './Web3ProviderType';
-import { promisifyAsyncMethods } from '../utils';
+import { promisifyAsyncMethods, getNetworkName } from '../utils';
 import NullLogger from '../utils/loggers/NullLogger';
 import TimerService from '../utils/TimerService';
 import Web3 from 'web3';
@@ -133,6 +133,10 @@ export default class Web3Service extends PrivateService {
   }
 
   ethersSigner() {
+    if (this._ethersWallet === null && this._ethersProvider === null) {
+      throw new Error('Cannot get ethersSigner: ethers wallet and provider are null.');;
+    }
+
     return this._ethersWallet || this._ethersProvider.getSigner(this.defaultAccount());
   }
 
@@ -140,11 +144,10 @@ export default class Web3Service extends PrivateService {
    * @param settings
    */
   initialize(settings) {
-    const web3 = new Web3(), ethers = require('ethers');
+    const web3 = new Web3();
     settings = this._normalizeSettings(settings);
 
     this._createWeb3Objects(web3);
-    this._ethers = ethers;
 
     let web3Provider = null;
     if (settings.usePresetProvider && window && window.web3) {
@@ -155,11 +158,7 @@ export default class Web3Service extends PrivateService {
     }
 
     web3.setProvider(web3Provider);
-    this._ethersProvider = new ethers.providers.Web3Provider(web3Provider, {name: 'test', chainId: 999});
-
-    if (settings.privateKey) {
-      this._ethersWallet = new ethers.Wallet(settings.privateKey, this._ethersProvider);
-    }
+    this._privateKey = settings.privateKey || null;
   }
 
   connect() {
@@ -178,6 +177,8 @@ export default class Web3Service extends PrivateService {
           ethereum: versions[2],
           whisper: versions[3],
         };
+
+        this._setUpEthers(this.networkId());
 
         this.get('timer').createTimer(
           'web3CheckConnectionStatus', 500, true,
@@ -239,6 +240,19 @@ export default class Web3Service extends PrivateService {
       to: TestAccountProvider.nextAddress(),
       amount: this._web3.toWei('0.01')
     };
+  }
+
+  _setUpEthers(chainId) {
+    const ethers = require('ethers');
+
+    this._ethersProvider = new ethers.providers.Web3Provider(
+      this._web3.currentProvider,
+      { name: getNetworkName(chainId), chainId: chainId }
+    );
+
+    if (this._privateKey) {
+      this._ethersWallet = new ethers.Wallet(this._privateKey, this._ethersProvider);
+    }
   }
 
   _normalizeSettings(settings) {
