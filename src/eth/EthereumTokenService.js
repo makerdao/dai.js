@@ -77,12 +77,12 @@ export default class EthereumTokenService extends PrivateService {
   }
 
   _getCurrentNetworkMapping(){
-    let networkID = this.get('web3').networkId();
-    const mapping = networks.filter((m)=> m.networkID === networkID);
+    let networkId = this.get('web3').networkId();
+    const mapping = networks.filter((m)=> m.networkId === networkId);
 
     if (mapping.length < 1) {
       /* istanbul ignore next */
-      throw new Error('networkID not found');
+      throw new Error('networkId not found');
     }
 
     return mapping[0].addresses;

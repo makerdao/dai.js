@@ -3,9 +3,12 @@ import kovanMapping from './addresses/kovan';
 import testMapping from './addresses/test';
 
 const mapping = [
-  { name: 'main', networkID: 1, addresses: mainnetMapping },
-  { name: 'kovan', networkID: 42, addresses: kovanMapping },
-  { name: 'test', networkID: 999, addresses: testMapping }
+  { name: 'mainnet', networkId: 1, addresses: mainnetMapping },
+  { name: 'morden', networkId: 2, addresses: null },
+  { name: 'ropsten', networkId: 3, addresses: null },
+  { name: 'rinkeby', networkId: 4, addresses: null },
+  { name: 'kovan', networkId: 42, addresses: kovanMapping },
+  { name: 'test', networkId: 999, addresses: testMapping }
 ];
 
 export default mapping;

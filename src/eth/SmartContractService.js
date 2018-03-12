@@ -61,7 +61,7 @@ export default class SmartContractService extends PublicService {
 
   _getCurrentNetworkMapping(contractName) {
     const networkId = this.get('web3').networkId(),
-      mapping = networks.filter((m)=> m.networkID === networkId);
+      mapping = networks.filter((m)=> m.networkId === networkId);
 
     if (mapping.length < 1) {
       /* istanbul ignore next */
