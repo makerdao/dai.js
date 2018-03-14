@@ -9,7 +9,7 @@ import contracts from '../../../contracts/contracts';
 
 export default class OasisExchangeService extends PrivateService {
 
-  static buildTestService() {
+  static buildKovanService() {
     const service = new OasisExchangeService(),
       web3 = Web3Service.buildInfuraService('kovan', '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700'),
       smartContractService = SmartContractService.buildTestService(web3),
@@ -24,6 +24,22 @@ export default class OasisExchangeService extends PrivateService {
 
     return service;
   }
+
+  static buildTestService(privateKey = null) {
+    const service = new OasisExchangeService(),
+      web3 = Web3Service.buildTestService(privateKey),
+      smartContractService = SmartContractService.buildTestService(web3),
+      ethereumTokenService = EthereumTokenService.buildTestService(smartContractService);
+
+    service.manager()
+      .inject('log', smartContractService.get('log'))
+      .inject('web3', smartContractService.get('web3'))
+      .inject('smartContract', smartContractService)
+      .inject('ethereumToken', ethereumTokenService)
+      .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3')));
+
+    return service;
+  } 
 
   constructor(name = 'oasisExchange') {
     super(name, ['smartContract', 'ethereumToken', 'web3', 'log', 'gasEstimator']);
