@@ -15,6 +15,7 @@ export default class SmartContractService extends PublicService {
       .inject('log', web3.get('log'))
       .inject('web3', web3);
 
+    console.log('web3 is: ', web3);
     return service;
   }
 

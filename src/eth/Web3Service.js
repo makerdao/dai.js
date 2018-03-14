@@ -78,6 +78,7 @@ export default class Web3Service extends PrivateService {
         usePresetProvider: true,
         provider : { type : Web3ProviderType.TEST }
       });
+    service.manager().connect();   // not connecting??
 
     return service;
   }
@@ -180,6 +181,7 @@ export default class Web3Service extends PrivateService {
         };
 
         this._setUpEthers(this.networkId());
+        console.log('network id is :', this.networkId());
 
         this.get('timer').createTimer(
           'web3CheckConnectionStatus', 500, true,
