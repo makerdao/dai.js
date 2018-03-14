@@ -68,7 +68,7 @@ export default class Web3Service extends PrivateService {
     return service;
   }
 
-  static buildTestService() {
+  static buildTestService(privateKey = null) {
     const service = new Web3Service();
 
     service.manager()
@@ -76,6 +76,7 @@ export default class Web3Service extends PrivateService {
       .inject('timer', new TimerService())
       .settings({
         usePresetProvider: true,
+        privateKey: privateKey,
         provider : { type : Web3ProviderType.TEST }
       });
 
