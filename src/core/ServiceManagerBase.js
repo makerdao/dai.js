@@ -69,7 +69,11 @@ class ServiceManagerBase {
       // After trying to initialize, transition to the success state (READY/OFFLINE) or revert to CREATED
       this._initPromise = _promisify(() => this._init(settings)).then(
         () => this._state.transitionTo(this._type === ServiceType.LOCAL ? ServiceState.READY : ServiceState.OFFLINE),
-        () => this._state.transitionTo(ServiceState.CREATED)
+        (reason) => {
+          // eslint-disable-next-line
+          console.error(reason);
+          return this._state.transitionTo(ServiceState.CREATED);
+        }
       );
     }
 
