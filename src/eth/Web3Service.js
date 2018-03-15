@@ -181,7 +181,7 @@ export default class Web3Service extends PrivateService {
           whisper: versions[3],
         };
         this._setUpEthers(this.networkId());
-        console.log('network id is :', this.networkId());
+        //console.log('network id is :', this.networkId());
 
         this.get('timer').createTimer(
           'web3CheckConnectionStatus', 500, true,
