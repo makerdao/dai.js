@@ -4,25 +4,22 @@ import contracts from '../../contracts/contracts';
 
 test('open a CDP on ganache', (done) => {
   const service = EthereumCdpService.buildTestService();
-  console.log(service.get('smartContract'));
 
 
-  service.manager().connect()
+  service.manager().authenticate()
     .then(() => {
-      console.log(service.get('smartContract'));
-      var contract = this.get('smartContract').getContractByName(contracts.TUB);
-      console.log(contract);
+      console.log(service);
 
       // open a CDP
-      var callPromise = EthereumCdpService.open();
+      var callPromise = service.openCdp();
       callPromise.then(function(txInfo) {
         console.log('transaction data is: ', txInfo);
         done();
       });
     });
-  }); 
+  }, 10000); 
 
-  test('close a CDP on ganache', (done) => {
+  /* test('close a CDP on ganache', (done) => {
     
     const service = EthereumCdpService.buildTestService();
   
@@ -39,4 +36,4 @@ test('open a CDP on ganache', (done) => {
           done();
         });
       });
-    }); 
+    }); */

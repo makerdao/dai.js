@@ -1,6 +1,8 @@
 import PrivateService from '../core/PrivateService';
-import tokens from '../../contracts/tokens';
 import SmartContractService from '../../src/eth/SmartContractService';
+import tokens from '../../contracts/tokens';
+import contracts from '../../contracts/contracts';
+
 
 export default class EthereumCdpService extends PrivateService {
 
@@ -17,16 +19,20 @@ export default class EthereumCdpService extends PrivateService {
 
     service.manager()
       .inject('smartContract', smartContract);
-      
-    console.log(smartContract);
-    console.log(service);
     
     return service;
   }
 
-  // returns the ID as a string (example: '338')
   openCdp() {
-    this.get('smartContract').getContractByName(contracts.TUB).open();
+    let contract = this.get('smartContract');
+    let ethersProvider = contract.get('web3')._ethersProvider;
+    return contract.getContractByName(contracts.TUB).open().then((transaction) => {
+    console.log(contract.getContractByName(contracts.TUB));
+    return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+      console.log(transaction.hash);
+      return transactionHash;
+    });
+  });
   }
 
   // put collateral into a CDP
@@ -34,13 +40,13 @@ export default class EthereumCdpService extends PrivateService {
 
     let result = this.get('smartContract').getContractByName('tub').lock(cdpId, amount);
 
-    if (token === Token.ETH) {
+    if (token === tokens.ETH) {
       result = this.get('smartContract').getContractByName('weth').deposit(amount)
         .then((wethAmount) => this.get('smartContract').getContractByName('weth').join(wethAmount))
         .then(result);
     }
 
-    if (token === Token.WETH) {
+    if (token === tokens.WETH) {
       result = this.get('smartContract').getContractByName('tub').join(amount)
         .then(result);
     }
@@ -68,21 +74,21 @@ export default class EthereumCdpService extends PrivateService {
     return result;
   }
 
-    // free all collateral and close a CDP
-    shut(cdpId){
-    
-      let result = this.get('smartContract').getContractByName('tub').shut(cdpId);
-      return result;
-    }
-
-    // transfer control of a CDP to a different address
-    give(cdpId, address){
-      let result = this.get('smartContract').getContractByName('tub').give(cdpId, address);
-      return result;
-    }
-
-
+  // free all collateral and close a CDP
+  shut(cdpId){
   
+    let result = this.get('smartContract').getContractByName('tub').shut(cdpId);
+    return result;
+  }
+
+  // transfer control of a CDP to a different address
+  give(cdpId, address){
+    let result = this.get('smartContract').getContractByName('tub').give(cdpId, address);
+    return result;
+  }
+
+
+// can look for tx hash and/or events related to wallet address   
 _logEvent(eventTopic){
   this._provider.on([ eventTopic ], function(log) {
     console.log('Event Log for: ', eventTopic);

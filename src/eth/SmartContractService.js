@@ -15,7 +15,6 @@ export default class SmartContractService extends PublicService {
       .inject('log', web3.get('log'))
       .inject('web3', web3);
 
-    console.log('web3 is: ', web3);
     return service;
   }
 
@@ -43,6 +42,13 @@ export default class SmartContractService extends PublicService {
     }
 
     return this.getContractByAddressAndAbi(contractInfo.address, contractInfo.abi);
+  }
+
+  stringToBytes32(text) {
+    var data = utils.toUtf8Bytes(text);
+    if (data.length > 32) { throw new Error('too long'); }
+    data = utils.padZeros(data, 32);
+    return utils.hexlify(data);
   }
 
   _selectContractVersion(mapping, version) {
@@ -76,4 +82,5 @@ export default class SmartContractService extends PublicService {
 
     return mapping[0].addresses[contractName];
   }
+
 }

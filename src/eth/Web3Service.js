@@ -69,6 +69,9 @@ export default class Web3Service extends PrivateService {
   }
 
   static buildTestService() {
+    process.on('unhandledRejection', err => {
+      console.log('Unhandled rejection:', err);
+    });
     const service = new Web3Service();
 
     service.manager()
@@ -78,7 +81,6 @@ export default class Web3Service extends PrivateService {
         usePresetProvider: true,
         provider : { type : Web3ProviderType.TEST }
       });
-    service.manager().connect();   // not connecting??
 
     return service;
   }
