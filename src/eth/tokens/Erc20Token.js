@@ -24,6 +24,10 @@ export default class Erc20Token {
     return this._contract.approve(spender, -1);
   }
 
+  transferFromSigner(to, value){
+    return this._contract.transfer(to, value);
+  }
+
   transfer(from, to, value){
     return this._contract.transferFrom(from, to, value);
   }

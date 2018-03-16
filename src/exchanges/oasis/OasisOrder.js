@@ -1,19 +1,20 @@
 import OasisExchangeService from './OasisExchangeService';
+import orderType from '../orderType';
 
 export default class OasisOrder {
 
   constructor(transaction) { //may need to pass addl arguments to listen for tx events
   	this._transaction = transaction;
-  	this._timeStamp = new Date(); //current time
+  	this._timeStamp = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
   	this._fillAmount = 0;
   }
 
 	timeStamp(){
-		return 'banana';
+		return this._timeStamp;
 	}	
 
 	fees(){
-		//gas cost in this case
+		//gas cost in this case - need to wait for tx to get mined
 	}		
 
 	status(){
@@ -25,7 +26,7 @@ export default class OasisOrder {
 	}			
 
 	fillAmount(){
-		return this._fillAmount;
+		return this._fillAmount; //need to wait for tx to get mined
 	}			
 
 }
