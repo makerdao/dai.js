@@ -67,8 +67,8 @@ export default class Web3Service extends PrivateService {
     });
     return service;
   }
-
-  static buildTestService() {
+   
+  static buildTestService(privateKey = null) {
     process.on('unhandledRejection', err => {
       console.log('Unhandled rejection:', err);
     });
@@ -79,6 +79,7 @@ export default class Web3Service extends PrivateService {
       .inject('timer', new TimerService())
       .settings({
         usePresetProvider: true,
+        privateKey: privateKey,
         provider : { type : Web3ProviderType.TEST }
       });
 
@@ -162,7 +163,7 @@ export default class Web3Service extends PrivateService {
     }
 
     web3.setProvider(web3Provider);
-    this._privateKey = settings.privateKey || null;
+    this._setPrivateKey(settings.privateKey);
   }
 
   connect() {
@@ -181,7 +182,6 @@ export default class Web3Service extends PrivateService {
           ethereum: versions[2],
           whisper: versions[3],
         };
-
         this._setUpEthers(this.networkId());
         console.log('network id is :', this.networkId());
 
@@ -256,7 +256,14 @@ export default class Web3Service extends PrivateService {
     );
 
     if (this._privateKey) {
-      this._ethersWallet = new ethers.Wallet(this._privateKey, this._ethersProvider);
+
+      try{
+        this._ethersWallet = new ethers.Wallet(this._privateKey, this._ethersProvider);
+      }catch(e){
+        //console.log(e);
+        //console.log(e.trace);
+      }
+      //console.log('created Ethers Wallet');
     }
   }
 
@@ -293,6 +300,13 @@ export default class Web3Service extends PrivateService {
       web3.personal,
       [ 'lockAccount', 'newAccount', 'unlockAccount' ]
     ));
+  }
+
+  _setPrivateKey(privateKey){
+    if (privateKey && (typeof privateKey !== 'string' || privateKey.match(/^0x[0-9a-fA-F]{64}$/)===null)){
+      throw new Error('Invalid private key format');
+    }
+    this._privateKey = privateKey || null;
   }
 
   _getWeb3Provider(settings) {

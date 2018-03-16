@@ -155,3 +155,30 @@ test ('should connect to the right network when using the INFURA provider type',
     done();
   });
 });
+
+test ('should reject invalid private key formats', (done) => {
+
+  const service1 = Web3Service.buildTestService(TestAccountProvider.nextAccount()),
+    service2 = Web3Service.buildTestService(TestAccountProvider.nextAccount().key.substr(2)),
+    service3 = Web3Service.buildTestService(TestAccountProvider.nextAccount().key.substr(0,65)),
+    service4 = Web3Service.buildTestService(TestAccountProvider.nextAddress()),
+    service5 = Web3Service.buildTestService(TestAccountProvider.nextAccount().key);
+
+  Promise.all([
+    service1.manager().initialize(),
+    service2.manager().initialize(),
+    service3.manager().initialize(),
+    service4.manager().initialize(),
+    service5.manager().initialize()
+
+  ]).then(() => {
+    expect(service1.manager().isInitialized()).toBe(false);
+    expect(service2.manager().isInitialized()).toBe(false);
+    expect(service3.manager().isInitialized()).toBe(false);
+    expect(service4.manager().isInitialized()).toBe(false);
+    expect(service5.manager().isInitialized()).toBe(true);
+    done();
+  });
+});
+
+
