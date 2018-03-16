@@ -2,6 +2,7 @@ import PrivateService from '../core/PrivateService';
 import SmartContractService from '../../src/eth/SmartContractService';
 import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
+var utils = require('ethers').utils;
 
 
 export default class EthereumCdpService extends PrivateService {
@@ -26,10 +27,14 @@ export default class EthereumCdpService extends PrivateService {
   openCdp() {
     let contract = this.get('smartContract');
     let ethersProvider = contract.get('web3')._ethersProvider;
-    return contract.getContractByName(contracts.TUB).open().then((transaction) => {
-    console.log(contract.getContractByName(contracts.TUB));
+    let tubContract = contract.getContractByName(contracts.TUB)
+
+    tubContract.onlognewcup = function(address, cdpIdBytes32) {
+      console.log('cup created, cdpId is: ', utils.bigNumberify(cdpIdBytes32).toString());
+    };
+
+    return tubContract.open().then((transaction) => {
     return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
-      console.log(transaction.hash);
       return transactionHash;
     });
   });

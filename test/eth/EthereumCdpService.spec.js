@@ -8,7 +8,6 @@ test('open a CDP on ganache', (done) => {
 
   service.manager().authenticate()
     .then(() => {
-      console.log(service);
 
       // open a CDP
       var callPromise = service.openCdp();
