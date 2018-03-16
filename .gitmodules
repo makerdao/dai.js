@@ -4,6 +4,3 @@
 [submodule "lib/sai"]
 	path = lib/sai
 	url = https://github.com/makerdao/sai.git
-[submodule "maker-otc"]
-	path = maker-otc
-	url = https://github.com/makerdao/maker-otc
