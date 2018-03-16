@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -ex
+##don't need to verify command, since we're just using some randome date in 2020
+test -z $1 && exit 1
+if ! [[ $1 =~ ^[0-9]+$ ]]
+    then
+        exit 1
+fi
+
+export SOLC_FLAGS=${SOLC_FLAGS:-"--optimize"}
+export ETH_GAS=${ETH_GAS:-"4000000"}
+export ETH_FROM=$(seth rpc eth_coinbase)
+export NETWORK=$(seth chain) ##change this to just say test, or remove
+
+. ./bin/$NETWORK-pairs ## don't need the pairs either
+. ./bin/$NETWORK-dustlimits ## can get rid of dustlimits
+
+test -z $NETWORK && exit 1 ## don't need this either
+##first need to make sure in the proper folder
+dapp build
+
+OTC=$(dapp create MatchingMarket 1577836800) ##this is some random date in 2020
+
+export SETH_ASYNC=yes
+
+for pair in $pairs; do ##Delete this for loop, just call seth send $OTC "addTokenPairWhitelist(address, address)" WethAddress DaiAddress
+    addr1=$(echo $pair | cut -f1 -d-)
+    addr2=$(echo $pair | cut -f2 -d-)
+    seth send $OTC "addTokenPairWhitelist(address, address)" $addr1 $addr2
+done
+
+for dustLimit in $dustLimits; do ##delete this as well
+	token=$(echo $dustLimit | cut -f1 -d-)
+	limit=$(echo $dustLimit | cut -f2 -d-)
+	seth send $OTC "setMinSell(address, uint)" $token $limit
+done
+
+export OTC=$OTC
+
+echo OTC DEPLOYED AT: $OTC
