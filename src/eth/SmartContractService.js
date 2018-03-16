@@ -28,7 +28,9 @@ export default class SmartContractService extends PublicService {
       throw Error('Contract address is required');
     }
 
-    return new Contract(address, abi, this.get('web3').ethersSigner());
+    let createdContract = new Contract(address, abi, this.get('web3').ethersSigner());
+    return createdContract;
+
   }
 
   getContractByName(name, version = null) {
@@ -43,6 +45,13 @@ export default class SmartContractService extends PublicService {
     }
 
     return this.getContractByAddressAndAbi(contractInfo.address, contractInfo.abi);
+  }
+
+  stringToBytes32(text) {
+    var data = utils.toUtf8Bytes(text);
+    if (data.length > 32) { throw new Error('too long'); }
+    data = utils.padZeros(data, 32);
+    return utils.hexlify(data);
   }
 
   _selectContractVersion(mapping, version) {
@@ -76,4 +85,5 @@ export default class SmartContractService extends PublicService {
 
     return mapping[0].addresses[contractName];
   }
+
 }

@@ -6,27 +6,28 @@ test('open a CDP on ganache', (done) => {
   done();
   return;
   const service = EthereumCdpService.buildTestService();
-  console.log(service.get('smartContract'));
 
 
-  service.manager().connect()
+  service.manager().authenticate()
     .then(() => {
-      console.log(service.get('smartContract'));
-      var contract = this.get('smartContract').getContractByName(contracts.TUB);
-      console.log(contract);
 
       // open a CDP
-      var callPromise = EthereumCdpService.open();
+      var callPromise = service.openCdp();
       callPromise.then(function(txInfo) {
         console.log('transaction data is: ', txInfo);
         done();
       });
     });
-  }); 
+  }, 10000); 
 
+<<<<<<< HEAD
   test('close a CDP on ganache', (done) => {
     done();
     return;
+=======
+  /* test('close a CDP on ganache', (done) => {
+    
+>>>>>>> 1f5c1e3a4b82a38935ce4ca646230ace625c8d15
     const service = EthereumCdpService.buildTestService();
   
     service.manager().connect()
@@ -42,4 +43,4 @@ test('open a CDP on ganache', (done) => {
           done();
         });
       });
-    }); 
+    }); */
