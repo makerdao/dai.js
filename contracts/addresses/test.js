@@ -1,3 +1,4 @@
+import makerOtc_1 from '../abi/maker-otc/v1';
 import dsEthToken_1 from '../abi/ds-eth-token/v1';
 import erc20Token_1 from '../abi/erc20-token/v1';
 import top_1 from '../abi/dai/v1/top';
@@ -42,6 +43,9 @@ const mapping = {
   ],
   [contracts.TUB] : [
     { version: 1, address: contractAdresses.TUB, abi: tub_1.interface },
+  ],
+  [contracts.MAKER_OTC] : [
+    { version: 1, address: '0x0aa4e9ba2d892307784c69e94f3b5d7b7aff4201', abi: makerOtc_1.interface }
   ]
 };
 export default mapping;

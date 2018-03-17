@@ -10,8 +10,9 @@ let web3 = new Web3(
 
 
 async function start () {
+  console.log('start called');
   var MyContract = web3.eth.contract(abiArray);
-  var contractInstance = MyContract.at('0xf104a50668c3b1026e8f9b0d9d404faf8e42e642');
+  var contractInstance = MyContract.at('0x0aa4e9ba2d892307784c69e94f3b5d7b7aff4201');
     await contractInstance.isTokenPairWhitelisted(address1, address2, function (error, result) {
       if (!error) {
         console.log('isTokenPairWhitelisted: ', result);

@@ -20,14 +20,12 @@ test('open a CDP on ganache', (done) => {
     });
   }, 10000); 
 
-<<<<<<< HEAD
+/*
   test('close a CDP on ganache', (done) => {
     done();
     return;
-=======
   /* test('close a CDP on ganache', (done) => {
     
->>>>>>> 1f5c1e3a4b82a38935ce4ca646230ace625c8d15
     const service = EthereumCdpService.buildTestService();
   
     service.manager().connect()

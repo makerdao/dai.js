@@ -72,6 +72,11 @@ export default class OasisExchangeService extends PrivateService {
     //if tokenSymbol is WETH extraAccount wraps ETH, then send WETH to mainAccount
   } 
 
+  offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos){
+    const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
+    return new OasisOrder(oasisContract.offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos));
+  }
+
   buyDai(daiAmount, tokenSymbol, maxFillAmount = null){
 
   }
