@@ -6,7 +6,7 @@ import OasisOrder from './OasisOrder';
 import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
-import testAccountProvider from '../../../src/utils/TestAccountProvider'
+import testAccountProvider from '../../../src/utils/TestAccountProvider';
 
 export default class OasisExchangeService extends PrivateService {
 
@@ -60,12 +60,12 @@ export default class OasisExchangeService extends PrivateService {
     const dai = this.get('ethereumToken').getToken(tokens.DAI); //general structure problem? - I needed to authenticate for this to work, even though in reality that shouldn't be necessary
     const buyTokenAddress = this.get('ethereumToken').getToken(tokenSymbol).address();
     extraOasisExchangeService.manager().authenticate() 
-    .then(() => {
-      console.log('dai.address(): ', dai.address());
-      console.log('this.get(\'web3\').ethersSigner()', this.get('web3').ethersSigner());
-      console.log('extraAccount.address', extraAccount.address);
-      console.log('daiAmount', daiAmount);
-    });
+      .then(() => {
+        console.log('dai.address(): ', dai.address());
+        console.log('this.get(\'web3\').ethersSigner()', this.get('web3').ethersSigner());
+        console.log('extraAccount.address', extraAccount.address);
+        console.log('daiAmount', daiAmount);
+      });
     //first I need to create DAI!
     return new OasisOrder(dai.transferFromSigner(extraAccount.address, daiAmount));
     //actually, have mainAccount send Dai to extraAccount
@@ -81,7 +81,7 @@ export default class OasisExchangeService extends PrivateService {
 
   }
 
-   getOasisOrder(txHash){
+  getOasisOrder(txHash){
   	
   }
 

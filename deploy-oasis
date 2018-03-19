@@ -11,9 +11,7 @@ export SETH_STATUS=yes
 export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
 
 dapp build
-
 OTC=$(dapp create MatchingMarket 1577836800) ##this is some random date in 2020
-
 addr1="0xc226f3cd13d508bc319f4f4290172748199d6612"
 addr2="0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238"
 seth send $OTC "addTokenPairWhitelist(address, address)" $addr1 $addr2

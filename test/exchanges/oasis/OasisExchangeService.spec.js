@@ -7,22 +7,22 @@ import orderType from '../../../src/exchanges/orderType';
 import contracts from '../../../contracts/contracts';
 
 test('sell Dai for WETH', (done) => setTimeout(() => {
-    const oasisExchangeService = OasisExchangeService.buildKovanService();
-    let oasisOrder = null;
-    oasisExchangeService.manager().authenticate()
-      .then(() => {
-        oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
-        return oasisOrder._transaction;
-      })
-      .then(tx => {
-        console.log(tx);
-        expect(tx.data.length).toBeGreaterThan(20);
-        expect(oasisOrder.type()).toBe('market');
-        done();
-      });
-  },
-  15000),
-  30000
+  const oasisExchangeService = OasisExchangeService.buildKovanService();
+  let oasisOrder = null;
+  oasisExchangeService.manager().authenticate()
+    .then(() => {
+      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      return oasisOrder._transaction;
+    })
+    .then(tx => {
+      console.log(tx);
+      expect(tx.data.length).toBeGreaterThan(20);
+      expect(oasisOrder.type()).toBe('market');
+      done();
+    });
+},
+15000),
+30000
 );
 
 /*

@@ -8,9 +8,9 @@ test('get ERC20 (MKR) balance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
   ethereumTokenService.manager().authenticate().then(() => {
-      const token = ethereumTokenService.getToken(tokens.MKR);
-      return token.balanceOf(TestAccountProvider.nextAddress());
-    })
+    const token = ethereumTokenService.getToken(tokens.MKR);
+    return token.balanceOf(TestAccountProvider.nextAddress());
+  })
     .then(balance =>{
       expect(balance.toString()).toBe('0');
       done();
@@ -21,9 +21,9 @@ test('get ERC20 (MKR) allowance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
   ethereumTokenService.manager().authenticate().then(() => {
-      const token = ethereumTokenService.getToken(tokens.MKR);
-      return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
-    })
+    const token = ethereumTokenService.getToken(tokens.MKR);
+    return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
+  })
     .then(allowance => {
       expect(allowance.toBe(null));
       done();
@@ -38,9 +38,9 @@ test('approve an ERC20 (MKR) allowance', (done) => {
   let token = null;
 
   ethereumTokenService.manager().authenticate().then(() => {
-      token = ethereumTokenService.getToken(tokens.MKR);
-      return token.approve(spender, allowance);
-    })
+    token = ethereumTokenService.getToken(tokens.MKR);
+    return token.approve(spender, allowance);
+  })
     .then(transaction => {
       expect(!!transaction).toBe(true);
       return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
@@ -58,9 +58,9 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
   let token = null;
 
   ethereumTokenService.manager().authenticate().then(() => {
-      token = ethereumTokenService.getToken(tokens.MKR);
-      return token.approveUnlimited(spender);
-    })
+    token = ethereumTokenService.getToken(tokens.MKR);
+    return token.approveUnlimited(spender);
+  })
     .then(transaction => {
       expect(!!transaction).toBe(true);
       return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
@@ -78,10 +78,10 @@ test('ERC20 transfer should move transferValue from sender to receiver', done =>
   let sender = null, token = null, senderBalance = null, receiverBalance = null;
 
   ethereumTokenService.manager().authenticate().then(() => {
-      sender = ethereumTokenService.get('web3').defaultAccount();
-      token =  ethereumTokenService.getToken(tokens.WETH);
-      return token.deposit(utils.parseEther('0.1'));
-    })
+    sender = ethereumTokenService.get('web3').defaultAccount();
+    token =  ethereumTokenService.getToken(tokens.WETH);
+    return token.deposit(utils.parseEther('0.1'));
+  })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
       senderBalance = parseFloat(utils.formatEther(balances[0].toString()));
@@ -105,10 +105,10 @@ test('totalSupply() should increase when new tokens are minted', done => {
   let sender = null, token = null, initialSupply = null;
 
   ethereumTokenService.manager().authenticate().then(() => {
-      sender = ethereumTokenService.get('web3').defaultAccount();
-      token =  ethereumTokenService.getToken(tokens.WETH);
-      return token.totalSupply();
-    })
+    sender = ethereumTokenService.get('web3').defaultAccount();
+    token =  ethereumTokenService.getToken(tokens.WETH);
+    return token.totalSupply();
+  })
     .then(supply => {
       initialSupply = parseFloat(utils.formatEther(supply.toString()));
       return token.deposit(utils.parseEther('0.1'));

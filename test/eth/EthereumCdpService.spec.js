@@ -18,7 +18,7 @@ test('open a CDP on ganache', (done) => {
         done();
       });
     });
-  }, 10000); 
+}, 10000); 
 
 /*
   test('close a CDP on ganache', (done) => {

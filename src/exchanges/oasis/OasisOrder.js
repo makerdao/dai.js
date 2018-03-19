@@ -9,24 +9,24 @@ export default class OasisOrder {
   	this._fillAmount = 0;
   }
 
-	timeStamp(){
-		return this._timeStamp;
-	}	
+  timeStamp(){
+    return this._timeStamp;
+  }	
 
-	fees(){
-		//gas cost in this case - need to wait for tx to get mined
-	}		
+  fees(){
+    //gas cost in this case - need to wait for tx to get mined
+  }		
 
-	status(){
-		//include every state that a tx can be in, and maybe other states as well, e.g. something related to oasis
-	}		
+  status(){
+    //include every state that a tx can be in, and maybe other states as well, e.g. something related to oasis
+  }		
 
-	type(){
-		return orderType.market; //create enum for this
-	}			
+  type(){
+    return orderType.market; //create enum for this
+  }			
 
-	fillAmount(){
-		return this._fillAmount; //need to wait for tx to get mined
-	}			
+  fillAmount(){
+    return this._fillAmount; //need to wait for tx to get mined
+  }			
 
 }
