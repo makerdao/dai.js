@@ -10,12 +10,15 @@ let web3 = new Web3(
 
 
 async function start () {
-  console.log('start called');
+  const OTC = process.env["OTC"];
+  console.log('start called', OTC);
   var MyContract = web3.eth.contract(abiArray);
-  var contractInstance = MyContract.at('0x0aa4e9ba2d892307784c69e94f3b5d7b7aff4201');
+  var contractInstance = MyContract.at(OTC);
     await contractInstance.isTokenPairWhitelisted(address1, address2, function (error, result) {
       if (!error) {
         console.log('isTokenPairWhitelisted: ', result);
+      } else {
+        console.log('error: ', error);
       }
     });
 }
