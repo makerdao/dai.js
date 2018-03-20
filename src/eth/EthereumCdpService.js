@@ -27,17 +27,17 @@ export default class EthereumCdpService extends PrivateService {
   openCdp() {
     let contract = this.get('smartContract');
     let ethersProvider = contract.get('web3')._ethersProvider;
-    let tubContract = contract.getContractByName(contracts.TUB)
+    let tubContract = contract.getContractByName(contracts.TUB);
 
     tubContract.onlognewcup = function(address, cdpIdBytes32) {
       console.log('cup created, cdpId is: ', utils.bigNumberify(cdpIdBytes32).toString());
     };
 
     return tubContract.open().then((transaction) => {
-    return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
-      return transactionHash;
+      return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+        return transactionHash;
+      });
     });
-  });
   }
 
   // put collateral into a CDP
@@ -93,11 +93,11 @@ export default class EthereumCdpService extends PrivateService {
   }
 
 
-// can look for tx hash and/or events related to wallet address   
-_logEvent(eventTopic){
-  this._provider.on([ eventTopic ], function(log) {
-    console.log('Event Log for: ', eventTopic);
-    console.log(log);
+  // can look for tx hash and/or events related to wallet address   
+  _logEvent(eventTopic){
+    this._provider.on([ eventTopic ], function(log) {
+      console.log('Event Log for: ', eventTopic);
+      console.log(log);
     });
   }
 }

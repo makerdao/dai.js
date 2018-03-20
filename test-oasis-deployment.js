@@ -21,6 +21,11 @@ async function start () {
         console.log('error: ', error);
       }
     });
+    await contractInstance.getBestOffer(address2, address1, function (error, result) {
+      if (!error) {
+        console.log('getBestOffer: ', result);
+      }
+    });
 }
 
 start();

@@ -5,7 +5,7 @@ module.exports = {
     path.join(process.cwd(), '/src/'),
     path.join(process.cwd(), '/test/')
   ],
-  testRegex: "test/.*.spec.js$",
+  testRegex: 'test/.*.spec.js$',
   collectCoverage: true,
   verbose: true
 };

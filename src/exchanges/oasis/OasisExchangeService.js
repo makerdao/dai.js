@@ -6,7 +6,7 @@ import OasisOrder from './OasisOrder';
 import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
-import testAccountProvider from '../../../src/utils/TestAccountProvider'
+import testAccountProvider from '../../../src/utils/TestAccountProvider';
 
 export default class OasisExchangeService extends PrivateService {
 
@@ -53,35 +53,41 @@ export default class OasisExchangeService extends PrivateService {
   	//return oasisContract.sellAllAmount(daiAddress, daiAmount, buyTokenAddress, minFillAmount);
     return new OasisOrder(oasisContract.sellAllAmount(daiAddress, daiAmount, buyTokenAddress, minFillAmount));
   }
-
+  /*
   sellDaiSpoof(daiAmount, tokenSymbol, minFillAmount = 0){
     const extraAccount = testAccountProvider.nextAccount();
     const extraOasisExchangeService = OasisExchangeService.buildTestService(extraAccount.key);
     const dai = this.get('ethereumToken').getToken(tokens.DAI); //general structure problem? - I needed to authenticate for this to work, even though in reality that shouldn't be necessary
     const buyTokenAddress = this.get('ethereumToken').getToken(tokenSymbol).address();
     extraOasisExchangeService.manager().authenticate() 
-    .then(() => {
-      console.log('dai.address(): ', dai.address());
-      console.log('this.get(\'web3\').ethersSigner()', this.get('web3').ethersSigner());
-      console.log('extraAccount.address', extraAccount.address);
-      console.log('daiAmount', daiAmount);
-    });
+      .then(() => {
+        console.log('dai.address(): ', dai.address());
+        console.log('this.get(\'web3\').ethersSigner()', this.get('web3').ethersSigner());
+        console.log('extraAccount.address', extraAccount.address);
+        console.log('daiAmount', daiAmount);
+      });
     //first I need to create DAI!
     return new OasisOrder(dai.transferFromSigner(extraAccount.address, daiAmount));
     //actually, have mainAccount send Dai to extraAccount
     //if tokenSymbol is WETH extraAccount wraps ETH, then send WETH to mainAccount
-  } 
+  }
+
+
 
   offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos){
     const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
     return new OasisOrder(oasisContract.offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos));
-  }
+  }*/
 
   buyDai(daiAmount, tokenSymbol, maxFillAmount = null){
+    const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
+    const daiAddress = this.get('ethereumToken').getToken(tokens.DAI).address();
+    const sellTokenAddress = this.get('ethereumToken').getToken(tokenSymbol).address();
+    return new OasisOrder(oasisContract.buyAllAmount(daiAddress, daiAmount, sellTokenAddress, minFillAmount));
 
   }
 
-   getOasisOrder(txHash){
+  getOasisOrder(txHash){
   	
   }
 

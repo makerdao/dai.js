@@ -8,9 +8,9 @@ test('get WETH allowance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
   ethereumTokenService.manager().authenticate().then(() => {
-      const token = ethereumTokenService.getToken(tokens.WETH);
-      return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
-    })
+    const token = ethereumTokenService.getToken(tokens.WETH);
+    return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
+  })
     .then(allowance => {
       expect(allowance.toString()).toBe('0');
       done();
@@ -23,9 +23,9 @@ test('token name and symbol are correct', (done) => {
   let token = null;
 
   ethereumTokenService.manager().authenticate().then(() => {
-      token = ethereumTokenService.getToken(tokens.WETH);
-      return token.symbol();
-    })
+    token = ethereumTokenService.getToken(tokens.WETH);
+    return token.symbol();
+  })
     .then(symbol => {
       expect(symbol).toEqual('WETH');
       return token.name();
