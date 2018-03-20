@@ -53,7 +53,7 @@ export default class OasisExchangeService extends PrivateService {
   	//return oasisContract.sellAllAmount(daiAddress, daiAmount, buyTokenAddress, minFillAmount);
     return new OasisOrder(oasisContract.sellAllAmount(daiAddress, daiAmount, buyTokenAddress, minFillAmount));
   }
-
+  /*
   sellDaiSpoof(daiAmount, tokenSymbol, minFillAmount = 0){
     const extraAccount = testAccountProvider.nextAccount();
     const extraOasisExchangeService = OasisExchangeService.buildTestService(extraAccount.key);
@@ -70,14 +70,20 @@ export default class OasisExchangeService extends PrivateService {
     return new OasisOrder(dai.transferFromSigner(extraAccount.address, daiAmount));
     //actually, have mainAccount send Dai to extraAccount
     //if tokenSymbol is WETH extraAccount wraps ETH, then send WETH to mainAccount
-  } 
+  }
+
+
 
   offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos){
     const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
     return new OasisOrder(oasisContract.offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos));
-  }
+  }*/
 
   buyDai(daiAmount, tokenSymbol, maxFillAmount = null){
+    const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
+    const daiAddress = this.get('ethereumToken').getToken(tokens.DAI).address();
+    const sellTokenAddress = this.get('ethereumToken').getToken(tokenSymbol).address();
+    return new OasisOrder(oasisContract.buyAllAmount(daiAddress, daiAmount, sellTokenAddress, minFillAmount));
 
   }
 

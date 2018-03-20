@@ -21,20 +21,20 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
       done();
     });
 },
-15000),
-30000
+10000),
+20000
 );
 
-test('sell Dai on testnet', (done) => setTimeout(() => {
-  const oasisExchangeService = OasisExchangeService.buildTestService();
+test.only('buy Dai with WETH', (done) => setTimeout(() => {
+  const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(()=>{
-      const daiToken = oasisExchangeService.get('ethereumToken').getToken(tokens.DAI);
-      return daiToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).address);
+      const wethToken = oasisExchangeService.get('ethereumToken').getToken(tokens.WETH);
+      return wethToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).address);
     })
     .then(tx => {
-      console.log('dai approval tx:', tx);
+      console.log('weth approval tx:', tx);
       oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
       return oasisOrder._transaction;
     })
@@ -45,24 +45,59 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
       done();
     });
 },
-15000),
-30000
+10000),
+20000
+);
+
+test('sell Dai on testnet', (done) => setTimeout(() => {
+  const oasisExchangeService = OasisExchangeService.buildTestService();
+  let oasisOrder = null;
+  oasisExchangeService.manager().authenticate()
+    .then(()=>{
+      //acquire some DAI
+
+    })
+    .then(()=>{
+      const daiToken = oasisExchangeService.get('ethereumToken').getToken(tokens.DAI);
+      return daiToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).address);
+    })
+    .then(tx => {
+      console.log('dai approval tx:', tx);
+      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.1'), tokens.WETH);
+      return oasisOrder._transaction;
+    })
+    .then(tx => {
+      console.log(tx);
+      expect(tx.data.length).toBeGreaterThan(20);
+      expect(oasisOrder.type()).toBe('market');
+      done();
+    });
+},
+2000),
+4000
 );
 
 test('check out Oasis limit order', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildTestService();
+  let oasisContract = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
-      const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
+      oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
       return oasisContract.getBestOffer(oasisExchangeService.get('ethereumToken').getToken(tokens.WETH).address(), oasisExchangeService.get('ethereumToken').getToken(tokens.DAI).address());
     })
     .then(bestOffer =>{
       console.log('bestOffer: ', bestOffer);
       console.log('bestOffer.toString(): ', bestOffer.toString());
+      return oasisContract.getOffer(bestOffer);
+    })
+    .then(offer=>{
+      console.log('offer: ', offer);
+      console.log(offer[0].toString(), offer[2].toString());
+      done();
     });
 },
-15000),
-30000
+2000),
+4000
 );
 
 /*
