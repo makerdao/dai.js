@@ -18,6 +18,11 @@ async function start () {
         console.log('isTokenPairWhitelisted: ', result);
       }
     });
+    await contractInstance.getBestOffer(address2, address1, function (error, result) {
+      if (!error) {
+        console.log('getBestOffer: ', result);
+      }
+    });
 }
 
 start();

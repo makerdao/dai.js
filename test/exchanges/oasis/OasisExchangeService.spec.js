@@ -25,6 +25,46 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
 30000
 );
 
+test('sell Dai on testnet', (done) => setTimeout(() => {
+  const oasisExchangeService = OasisExchangeService.buildTestService();
+  let oasisOrder = null;
+  oasisExchangeService.manager().authenticate()
+    .then(()=>{
+      const daiToken = oasisExchangeService.get('ethereumToken').getToken(tokens.DAI);
+      return daiToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).address);
+    })
+    .then(tx => {
+      console.log('dai approval tx:', tx);
+      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      return oasisOrder._transaction;
+    })
+    .then(tx => {
+      console.log(tx);
+      expect(tx.data.length).toBeGreaterThan(20);
+      expect(oasisOrder.type()).toBe('market');
+      done();
+    });
+},
+15000),
+30000
+);
+
+test('check out Oasis limit order', (done) => setTimeout(() => {
+  const oasisExchangeService = OasisExchangeService.buildTestService();
+  oasisExchangeService.manager().authenticate()
+    .then(() => {
+      const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
+      return oasisContract.getBestOffer(oasisExchangeService.get('ethereumToken').getToken(tokens.WETH).address(), oasisExchangeService.get('ethereumToken').getToken(tokens.DAI).address());
+    })
+    .then(bestOffer =>{
+      console.log('bestOffer: ', bestOffer);
+      console.log('bestOffer.toString(): ', bestOffer.toString());
+    });
+},
+15000),
+30000
+);
+
 /*
 test('sell Dai spoof', (done) => setTimeout(() => {
     const account = testAccountProvider.nextAccount();
@@ -44,8 +84,8 @@ test('sell Dai spoof', (done) => setTimeout(() => {
   10000
 );
 */
-
-/*attempting to create limit order on testnet, not working
+/*
+attempting to create limit order on testnet, not working
 test.only('create buy order on testnet', (done) => setTimeout(() => {
     const oasisExchangeService = OasisExchangeService.buildTestService();
     let oasisOrder = null;
@@ -64,7 +104,7 @@ test.only('create buy order on testnet', (done) => setTimeout(() => {
         const wethAddress = wethToken.address();
         const daiAddress = ethereumTokenService.getToken(tokens.DAI).address();
         var overrideOptions = { gasLimit: 5000000};
-        oasisOrder = oasisExchangeService.offer(utils.parseEther('1.0'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, overrideOptions);
+        oasisOrder = oasisExchangeService.offer(utils.parseEther('1.0'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, false, overrideOptions);
         return oasisOrder._transaction;
       })
       .then(tx => {
@@ -77,5 +117,4 @@ test.only('create buy order on testnet', (done) => setTimeout(() => {
   15000),
   30000
 
-);
-*/
+);*/
