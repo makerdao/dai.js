@@ -6,7 +6,7 @@ class ConfigPresetNotFoundError extends Error {
   }
 }
 
-export default class ConfigFactory {
+export class ConfigFactory {
   /**
    * @param {string} presetName
    */
@@ -19,3 +19,5 @@ export default class ConfigFactory {
     }
   }
 }
+
+export default { ConfigFactory };

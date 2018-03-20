@@ -1,5 +1,5 @@
 {
-  "name": "makerdao-exchange-integration",
+  "name": "@makerdao/makerdao-exchange-integration",
   "version": "0.0.1",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
