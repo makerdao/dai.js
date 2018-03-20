@@ -1,20 +1,16 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
-import SmartContractService from '../../src/eth/SmartContractService';
-import contracts from '../../contracts/contracts';
+//import SmartContractService from '../../src/eth/SmartContractService';
+//import contracts from '../../contracts/contracts';
 
 test('open a CDP on ganache', (done) => {
-  done();
-  return;
   const service = EthereumCdpService.buildTestService();
-
 
   service.manager().authenticate()
     .then(() => {
-
       // open a CDP
       var callPromise = service.openCdp();
-      callPromise.then(function(txInfo) {
-        console.log('transaction data is: ', txInfo);
+      callPromise.then(function(/*txInfo*/) {
+        //console.log('transaction data is: ', txInfo);
         done();
       });
     });
