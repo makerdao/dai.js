@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -9,31 +8,17 @@ const extractSass = new ExtractTextPlugin({
 });
 
 module.exports = {
-
   context: path.join(process.cwd(), 'web'), //the home directory for webpack
-
   devtool: 'source-map', // enhance debugging by adding meta info for the browser devtools
-
   entry: {
-    app: './utils/index.js'
+    app: '../src/index.js'
   },
-
   output: {
     path: path.join(process.cwd(), 'dist'),
     filename: '[name].[hash].js',
     publicPath: '/',
     sourceMapFilename: '[name].map'
   },
-
-  resolve: {
-    extensions: ['.js'],  // extensions that are used
-    modules: [path.join(process.cwd(), 'src'), 'node_modules'], // directories where to look for modules,
-    alias: {
-      'source-map-support': path.join(process.cwd(), 'src/utils/shim.js'),
-      'fs': path.join(process.cwd(), 'src/utils/shim.js')
-    }
-  },
-
   module: {
     noParse: [/dtrace-provider/, /safe-json-stringify/, /mv/],
     rules: [{
@@ -73,9 +58,6 @@ module.exports = {
     new CleanWebpackPlugin(['dist'], {root: process.cwd()}),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor'
-    }),
-    new HtmlWebpackPlugin({
-      template: 'index.html'
     }),
     extractSass
   ]
