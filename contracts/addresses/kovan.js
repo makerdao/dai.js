@@ -1,10 +1,11 @@
-import makerOtc_1 from '../abi/maker-otc/v1';
-import dsEthToken_1 from '../abi/ds-eth-token/v1';
-import erc20Token_1 from '../abi/erc20-token/v1';
-import top_1 from '../abi/dai/v1/top';
-import tub_1 from '../abi/dai/v1/tub';
 import tokens from '../tokens';
 import contracts from '../contracts';
+
+import dsEthToken_1 from '../abi/ds-eth-token/v1.json';
+import erc20Token_1 from '../abi/erc20-token/v1.json';
+import makerOtc_1 from '../abi/maker-otc/v1.json';
+import top_1 from '../abi/dai/v1/top.json';
+import tub_1 from '../abi/dai/v1/tub.json';
 
 const mapping = {
   [tokens.DAI] : [

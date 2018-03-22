@@ -1,4 +1,4 @@
-import decentralizedOasisWithoutProxies from './configs/decentralized-oasis-without-proxies';
+import decentralizedOasisWithoutProxies from './configs/decentralized-oasis-without-proxies.json';
 
 class ConfigPresetNotFoundError extends Error {
   constructor(message) {
@@ -6,7 +6,7 @@ class ConfigPresetNotFoundError extends Error {
   }
 }
 
-export class ConfigFactory {
+export default class ConfigFactory {
   /**
    * @param {string} presetName
    */
@@ -19,5 +19,3 @@ export class ConfigFactory {
     }
   }
 }
-
-export default { ConfigFactory };

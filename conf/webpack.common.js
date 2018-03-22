@@ -15,7 +15,7 @@ module.exports = {
   devtool: 'source-map', // enhance debugging by adding meta info for the browser devtools
 
   entry: {
-    app: './index.js'
+    app: './utils/index.js'
   },
 
   output: {
