@@ -15,17 +15,58 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
       return oasisOrder._transaction;
     })
     .then(tx => {
-      console.log(tx);
+      console.log('tx', tx);
       expect(tx.data.length).toBeGreaterThan(20);
       expect(oasisOrder.type()).toBe('market');
+      const fees = oasisOrder.fees();
+      console.log('fees: ', fees);
+      return fees;
+    })
+    .then(minedTx=>{
+      console.log('minedTx:', minedTx);
       done();
     });
 },
-10000),
-20000
+15000),
+30000
 );
 
-test.only('buy Dai with WETH', (done) => setTimeout(() => {
+test('get fees', (done) => setTimeout(() => {
+  const oasisExchangeService = OasisExchangeService.buildKovanService();
+  let oasisOrder = null;
+  oasisExchangeService.manager().authenticate()
+    .then(() => {
+      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      return oasisOrder.fees();
+    })
+    .then(fees => {
+      console.log('fees: ', fees);
+      console.log('typeof fees: ', typeof fees); 
+      done();
+    });
+},
+25000),
+50000
+);
+
+test('get fillAmount', (done) => setTimeout(() => {
+  const oasisExchangeService = OasisExchangeService.buildKovanService();
+  let oasisOrder = null;
+  oasisExchangeService.manager().authenticate()
+    .then(() => {
+      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      return oasisOrder.fillAmount();
+    })
+    .then(fillAmount => {
+      console.log('fillAmount: ', fillAmount);
+      done();
+    });
+},
+15000),
+30000
+);
+
+test('buy Dai with WETH', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -49,6 +90,7 @@ test.only('buy Dai with WETH', (done) => setTimeout(() => {
 20000
 );
 
+/*
 test('sell Dai on testnet', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildTestService();
   let oasisOrder = null;
@@ -76,7 +118,9 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
 2000),
 4000
 );
+*/
 
+/*
 test('check out Oasis limit order', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildTestService();
   let oasisContract = null;
@@ -98,7 +142,7 @@ test('check out Oasis limit order', (done) => setTimeout(() => {
 },
 2000),
 4000
-);
+);*/
 
 /*
 test('sell Dai spoof', (done) => setTimeout(() => {
