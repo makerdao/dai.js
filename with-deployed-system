@@ -46,11 +46,11 @@ seth send $addr2 "deposit()" --value $(seth --to-wei 1 eth) ##wrap some eth to w
 ##make sure I have WETH
 seth send $addr2 "approve(address, uint256)" $OTC ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ##approve weth to oasis
 seth send $OTC "offer(uint256, address, uint256, address, uint256, bool)" $(seth --to-uint256 $(seth --to-wei 0.5 eth)) $addr2 $(seth --to-uint256 $(seth --to-wei 1 eth)) $addr1 0 1 ## create an offer to buy Dai for Weth <- this isn't working
+export OTC=$OTC
 
 cd ../..
 
 node test-oasis-deployment.js
-
 
 # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
 # See the list at the bottom of the in the deploy script.

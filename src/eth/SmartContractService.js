@@ -5,6 +5,8 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 
+const utils = require('ethers').utils;
+
 export default class SmartContractService extends PublicService {
 
   static buildTestService(web3 = null) {

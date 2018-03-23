@@ -1,7 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  rootDir: path.join(process.cwd(), ''),
+  roots: [
+    path.join(process.cwd(), '/src/'),
+    path.join(process.cwd(), '/test/')
+  ],
   testRegex: 'test/.*.spec.js$',
   collectCoverage: true,
   verbose: true

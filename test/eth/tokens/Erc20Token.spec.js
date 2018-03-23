@@ -25,7 +25,7 @@ test('get ERC20 (MKR) allowance of address', (done) => {
     return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
   })
     .then(allowance => {
-      expect(allowance.toBe(null));
+      expect(allowance.toString()).toBe('0');
       done();
     });
 });
