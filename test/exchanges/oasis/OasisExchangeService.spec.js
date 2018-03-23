@@ -86,8 +86,8 @@ test('buy Dai with WETH', (done) => setTimeout(() => {
       done();
     });
 },
-10000),
-20000
+15000),
+30000
 );
 
 /*
