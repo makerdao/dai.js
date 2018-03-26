@@ -19,11 +19,11 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
       expect(tx.data.length).toBeGreaterThan(20);
       expect(oasisOrder.type()).toBe('market');
       const fees = oasisOrder.fees();
-      console.log('fees: ', fees);
+      //console.log('fees: ', fees);
       return fees;
     })
     .then(minedTx=>{
-      console.log('minedTx:', minedTx);
+      //console.log('minedTx:', minedTx);
       done();
     });
 },
@@ -40,8 +40,7 @@ test('get fees', (done) => setTimeout(() => {
       return oasisOrder.fees();
     })
     .then(fees => {
-      console.log('fees: ', fees);
-      console.log('typeof fees: ', typeof fees); 
+      expect(fees).toBeGreaterThan(0);
       done();
     });
 },
@@ -49,7 +48,7 @@ test('get fees', (done) => setTimeout(() => {
 50000
 );
 
-test('get fillAmount', (done) => setTimeout(() => {
+test.only('get fillAmount', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -58,7 +57,7 @@ test('get fillAmount', (done) => setTimeout(() => {
       return oasisOrder.fillAmount();
     })
     .then(fillAmount => {
-      console.log('fillAmount: ', fillAmount);
+      //console.log('fillAmount: ', fillAmount);
       done();
     });
 },

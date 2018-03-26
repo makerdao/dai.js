@@ -50,8 +50,8 @@ export default class OasisOrder {
       const filter = {
         fromBlock: "latest", //what if somehow another block gets added in between here?
         toBlock: "latest",
-        address: '0xc4375b7de8af5a38a93548eb8453a498222c4ff2' //kovan dai address - how do we know that it was Dai that was sold?  update once we determine if this is the proper event to search for
-        //topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'] //hash of Transfer(...)
+        address: '0xd0a1e359811322d97991e03f863a0c30c2cf029c', //kovan weth address - probably better to use the Oasis log logTrade shouldwork), then we don't care whether it was weth or dai that was purchased.
+        topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'] //hash of Transfer(...)
       }
       return this._ethersProvider.getLogs(filter);
     }).
@@ -59,11 +59,13 @@ export default class OasisOrder {
       //console.log('filterResults', filterResults);
       //console.log('transaction.hash', transaction.hash);
       const events = filterResults.filter((t)=> t.transactionHash === transaction.hash); //there could be several of these
+      let totalDai = 0;
       events.forEach(event=>{
         //console.log('event: ', event);
-        //console.log('amount of Dai sold: ', event.data);
-        return event.data;
+        //console.log('amount of weth received: ', event.data);
+        totalDai += parseInt(event.data, 16);
       });
+      return utils.formatEther(totalDai);
     })
   }			
 
