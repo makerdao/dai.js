@@ -12,10 +12,10 @@ export default class ConfigFactory {
    */
   static create(presetName) {
     switch (presetName) {
-    case 'decentralized-oasis-without-proxies':
-      return decentralizedOasisWithoutProxies;
-    default:
-      throw new ConfigPresetNotFoundError(presetName);
+      case 'decentralized-oasis-without-proxies':
+        return decentralizedOasisWithoutProxies;
+      default:
+        throw new ConfigPresetNotFoundError(presetName);
     }
   }
 }

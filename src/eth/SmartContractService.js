@@ -6,12 +6,12 @@ import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 
 export default class SmartContractService extends PublicService {
-
   static buildTestService(web3 = null) {
     const service = new SmartContractService();
     web3 = web3 || Web3Service.buildTestService();
 
-    service.manager()
+    service
+      .manager()
       .inject('log', web3.get('log'))
       .inject('web3', web3);
 
@@ -28,23 +28,37 @@ export default class SmartContractService extends PublicService {
       throw Error('Contract address is required');
     }
 
-    let createdContract = new Contract(address, abi, this.get('web3').ethersSigner());
+    let createdContract = new Contract(
+      address,
+      abi,
+      this.get('web3').ethersSigner()
+    );
     return createdContract;
-
   }
 
   getContractByName(name, version = null) {
-    if (Object.keys(contracts).indexOf(name) < 0 && Object.keys(tokens).indexOf(name) < 0) {
+    if (
+      Object.keys(contracts).indexOf(name) < 0 &&
+      Object.keys(tokens).indexOf(name) < 0
+    ) {
       throw new Error('Provided name "' + name + '" is not a contract');
     }
 
-    const contractInfo = this._selectContractVersion(this._getCurrentNetworkMapping(name), version);
+    const contractInfo = this._selectContractVersion(
+      this._getCurrentNetworkMapping(name),
+      version
+    );
 
     if (contractInfo === null) {
-      throw new Error('Cannot find version ' + version + ' of contract ' + name);
+      throw new Error(
+        'Cannot find version ' + version + ' of contract ' + name
+      );
     }
 
-    return this.getContractByAddressAndAbi(contractInfo.address, contractInfo.abi);
+    return this.getContractByAddressAndAbi(
+      contractInfo.address,
+      contractInfo.abi
+    );
   }
 
   stringToBytes32(text) {
@@ -72,7 +86,7 @@ export default class SmartContractService extends PublicService {
 
   _getCurrentNetworkMapping(contractName) {
     const networkId = this.get('web3').networkId(),
-      mapping = networks.filter((m)=> m.networkId === networkId);
+      mapping = networks.filter(m => m.networkId === networkId);
 
     if (mapping.length < 1) {
       /* istanbul ignore next */
@@ -81,10 +95,14 @@ export default class SmartContractService extends PublicService {
 
     if (typeof mapping[0].addresses[contractName] === 'undefined') {
       /* istanbul ignore next */
-      throw new Error('Contract ' + contractName + ' not found in mapping of network with ID ' + networkId);
+      throw new Error(
+        'Contract ' +
+          contractName +
+          ' not found in mapping of network with ID ' +
+          networkId
+      );
     }
 
     return mapping[0].addresses[contractName];
   }
-
 }

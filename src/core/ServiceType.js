@@ -36,10 +36,7 @@ const privateServiceLifeCycle = {
 const serviceTypeTransitions = {
   LOCAL: localServiceLifeCycle,
   PUBLIC: publicServiceLifeCycle,
-  PRIVATE: privateServiceLifeCycle
+  PRIVATE: privateServiceLifeCycle,
 };
 
-export {
-  ServiceType as default,
-  serviceTypeTransitions
-};
+export { ServiceType as default, serviceTypeTransitions };

@@ -10,16 +10,20 @@ import WethToken from './tokens/WethToken';
 import PethToken from './tokens/PethToken';
 
 export default class EthereumTokenService extends PrivateService {
-
   static buildTestService(smartContractService = null) {
     const service = new EthereumTokenService();
-    smartContractService = smartContractService || SmartContractService.buildTestService();
+    smartContractService =
+      smartContractService || SmartContractService.buildTestService();
 
-    service.manager()
+    service
+      .manager()
       .inject('log', smartContractService.get('log'))
       .inject('web3', smartContractService.get('web3'))
       .inject('smartContract', smartContractService)
-      .inject('gasEstimator', GasEstimatorService.buildTestService(smartContractService.get('web3')));
+      .inject(
+        'gasEstimator',
+        GasEstimatorService.buildTestService(smartContractService.get('web3'))
+      );
 
     return service;
   }
@@ -32,25 +36,30 @@ export default class EthereumTokenService extends PrivateService {
     return Object.keys(tokens);
   }
 
-  getTokenVersions(){
+  getTokenVersions() {
     const mapping = this._getCurrentNetworkMapping();
     return this._selectTokenVersions(mapping);
   }
 
-  getToken(symbol, version = null){
+  getToken(symbol, version = null) {
     if (this.getTokens().indexOf(symbol) < 0) {
       throw new Error('provided token is not a symbol');
     }
 
     if (symbol === tokens.ETH) {
       return new EtherToken(this.get('web3'), this.get('gasEstimator'));
-
     } else {
       const mapping = this._getCurrentNetworkMapping(),
         tokenInfo = mapping[symbol],
-        tokenVersionData = (version === null) ? tokenInfo[tokenInfo.length - 1] : tokenInfo[version - 1],
+        tokenVersionData =
+          version === null
+            ? tokenInfo[tokenInfo.length - 1]
+            : tokenInfo[version - 1],
         smartContractService = this.get('smartContract'),
-        contract = smartContractService.getContractByAddressAndAbi(tokenVersionData.address, tokenVersionData.abi);
+        contract = smartContractService.getContractByAddressAndAbi(
+          tokenVersionData.address,
+          tokenVersionData.abi
+        );
 
       if (symbol === tokens.WETH) {
         return new WethToken(contract);
@@ -65,9 +74,9 @@ export default class EthereumTokenService extends PrivateService {
     }
   }
 
-  _getCurrentNetworkMapping(){
+  _getCurrentNetworkMapping() {
     let networkId = this.get('web3').networkId();
-    const mapping = networks.filter((m)=> m.networkId === networkId);
+    const mapping = networks.filter(m => m.networkId === networkId);
 
     if (mapping.length < 1) {
       /* istanbul ignore next */
@@ -77,7 +86,7 @@ export default class EthereumTokenService extends PrivateService {
     return mapping[0].addresses;
   }
 
-  _selectTokenVersions(mapping){
+  _selectTokenVersions(mapping) {
     const tokenArray = [];
 
     for (let token in tokens) {
@@ -87,7 +96,7 @@ export default class EthereumTokenService extends PrivateService {
 
       if (token in mapping) {
         let versionArray = [];
-        mapping[token].forEach((e) => {
+        mapping[token].forEach(e => {
           versionArray.push(e.version);
         });
         tokenArray[token] = versionArray;

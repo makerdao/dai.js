@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -30,6 +30,7 @@
     "coverage": "jest --coverage --config=conf/jest.config.js",
     "lint": "eslint ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
     "precommit": "npm run lint",
+    "prettier": "find ./src/**/*.js | xargs prettier --write --print-width 80 --single-quote --trailing-comma es5",
     "prepush": "npm run test",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
     "test": "./with-deployed-system jest --config=conf/jest.config.js --runInBand",
@@ -54,6 +55,7 @@
     "husky": "^0.14.3",
     "jest": "^20.0.4",
     "node-sass": "^4.5.3",
+    "prettier": "^1.11.1",
     "sass-loader": "^6.0.6",
     "solc": "^0.4.19",
     "style-loader": "^0.18.2",

@@ -18,7 +18,7 @@ module.exports = {
     filename: '[name].[hash].js',
     publicPath: '/',
     sourceMapFilename: '[name].map',
-    library: 'ConfigFactory',
+    library: '@makerdao/makerdao-integration-poc',
     libraryTarget: 'umd',
   },
   resolve: {

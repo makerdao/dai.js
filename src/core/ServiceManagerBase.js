@@ -13,7 +13,6 @@ function _promisify(unsafeCallback) {
 }
 
 class ServiceManagerBase {
-
   /**
    * @param init {function|null}
    * @param connect {function|null}
@@ -43,8 +42,14 @@ class ServiceManagerBase {
     this._init = init;
     this._connect = connect;
     this._auth = auth;
-    this._type = (auth === null ? (connect === null ? ServiceType.LOCAL : ServiceType.PUBLIC) : ServiceType.PRIVATE);
-    this._state = new StateMachine(ServiceState.CREATED, serviceTypeTransitions[this._type]);
+    this._type =
+      auth === null
+        ? connect === null ? ServiceType.LOCAL : ServiceType.PUBLIC
+        : ServiceType.PRIVATE;
+    this._state = new StateMachine(
+      ServiceState.CREATED,
+      serviceTypeTransitions[this._type]
+    );
     this._initPromise = null;
     this._connectPromise = null;
     this._authPromise = null;
@@ -56,7 +61,6 @@ class ServiceManagerBase {
   initialize(settings) {
     // If our current state is preceding the INITIALIZING state, we need to set up initialization
     if (this._state.inState(ServiceState.CREATED)) {
-
       // Assert that there is no initPromise at this point
       /* istanbul ignore next */
       if (this._initPromise) {
@@ -68,8 +72,13 @@ class ServiceManagerBase {
 
       // After trying to initialize, transition to the success state (READY/OFFLINE) or revert to CREATED
       this._initPromise = _promisify(() => this._init(settings)).then(
-        () => this._state.transitionTo(this._type === ServiceType.LOCAL ? ServiceState.READY : ServiceState.OFFLINE),
-        (reason) => {
+        () =>
+          this._state.transitionTo(
+            this._type === ServiceType.LOCAL
+              ? ServiceState.READY
+              : ServiceState.OFFLINE
+          ),
+        reason => {
           // eslint-disable-next-line
           console.error(reason);
           return this._state.transitionTo(ServiceState.CREATED);
@@ -91,32 +100,37 @@ class ServiceManagerBase {
 
     // If our current state is preceding the CONNECTING state, we need to set up a new connection
     if (
-      this._state.inState([ServiceState.CREATED, ServiceState.INITIALIZING, ServiceState.OFFLINE]) &&
+      this._state.inState([
+        ServiceState.CREATED,
+        ServiceState.INITIALIZING,
+        ServiceState.OFFLINE,
+      ]) &&
       this._connectPromise === null
     ) {
-
       // Make sure to be initialized before trying to connect
       this._connectPromise = this.initialize().then(() => {
-
         // Enter the CONNECTING state
         this._state.transitionTo(ServiceState.CONNECTING);
 
         // After trying to connect, transition to the success state (ONLINE/READY) or revert to OFFLINE.
-        return _promisify(() => this._connect(() => this._disconnect()))
-          .then(
-            () => {
-              // Check if we are still CONNECTING, because another process might have come in between
-              if (this._state.inState(ServiceState.CONNECTING)) {
-                this._state.transitionTo(this._type === ServiceType.PUBLIC ? ServiceState.READY : ServiceState.ONLINE);
-              }
-            },
-            () => {
-              // Check if we are still CONNECTING, because another process might have come in between
-              if (this._state.inState(ServiceState.CONNECTING)) {
-                this._state.transitionTo(ServiceState.OFFLINE);
-              }
+        return _promisify(() => this._connect(() => this._disconnect())).then(
+          () => {
+            // Check if we are still CONNECTING, because another process might have come in between
+            if (this._state.inState(ServiceState.CONNECTING)) {
+              this._state.transitionTo(
+                this._type === ServiceType.PUBLIC
+                  ? ServiceState.READY
+                  : ServiceState.ONLINE
+              );
             }
-          );
+          },
+          () => {
+            // Check if we are still CONNECTING, because another process might have come in between
+            if (this._state.inState(ServiceState.CONNECTING)) {
+              this._state.transitionTo(ServiceState.OFFLINE);
+            }
+          }
+        );
       });
     }
 
@@ -134,33 +148,36 @@ class ServiceManagerBase {
 
     // If our current state is preceding the AUTHENTICATING state, we need to set up a new authentication
     if (
-      this._state.inState([ServiceState.CREATED, ServiceState.INITIALIZING, ServiceState.OFFLINE, ServiceState.CONNECTING, ServiceState.ONLINE]) &&
+      this._state.inState([
+        ServiceState.CREATED,
+        ServiceState.INITIALIZING,
+        ServiceState.OFFLINE,
+        ServiceState.CONNECTING,
+        ServiceState.ONLINE,
+      ]) &&
       this._authPromise === null
     ) {
-
       // Make sure to be connected before trying to authenticate
       this._authPromise = this.connect().then(() => {
-
         // Enter the AUTHENTICATING state
         this._state.transitionTo(ServiceState.AUTHENTICATING);
 
         // After trying to authenticate, transition to the success state (READY) or revert to ONLINE
-        return _promisify(() => this._auth(() => this._deauthenticate()))
-          .then(
-            () => {
-              // Check if we are still AUTHENTICATING, because another process might have come in between
-              // (Most notably, a disconnect may have transitioned us into OFFLINE state).
-              if (this._state.inState(ServiceState.AUTHENTICATING)) {
-                this._state.transitionTo(ServiceState.READY);
-              }
-            },
-            () => {
-              // Check if we are still AUTHENTICATING, because another process might have come in between
-              if (this._state.inState(ServiceState.AUTHENTICATING)) {
-                this._state.transitionTo(ServiceState.ONLINE);
-              }
+        return _promisify(() => this._auth(() => this._deauthenticate())).then(
+          () => {
+            // Check if we are still AUTHENTICATING, because another process might have come in between
+            // (Most notably, a disconnect may have transitioned us into OFFLINE state).
+            if (this._state.inState(ServiceState.AUTHENTICATING)) {
+              this._state.transitionTo(ServiceState.READY);
             }
-          );
+          },
+          () => {
+            // Check if we are still AUTHENTICATING, because another process might have come in between
+            if (this._state.inState(ServiceState.AUTHENTICATING)) {
+              this._state.transitionTo(ServiceState.ONLINE);
+            }
+          }
+        );
       });
     }
 
@@ -193,22 +210,32 @@ class ServiceManagerBase {
    * @returns {boolean}
    */
   isInitialized() {
-    return !this._state.inState([ServiceState.CREATED, ServiceState.INITIALIZING]);
+    return !this._state.inState([
+      ServiceState.CREATED,
+      ServiceState.INITIALIZING,
+    ]);
   }
 
   /**
    * @returns {boolean|null}
    */
   isConnected() {
-    return (this._type === ServiceType.LOCAL ? null:
-      this._state.inState([ServiceState.ONLINE, ServiceState.AUTHENTICATING, ServiceState.READY]));
+    return this._type === ServiceType.LOCAL
+      ? null
+      : this._state.inState([
+          ServiceState.ONLINE,
+          ServiceState.AUTHENTICATING,
+          ServiceState.READY,
+        ]);
   }
 
   /**
    * @returns {boolean|null}
    */
   isAuthenticated() {
-    return (this._type === ServiceType.PRIVATE ? this._state.inState(ServiceState.READY) : null);
+    return this._type === ServiceType.PRIVATE
+      ? this._state.inState(ServiceState.READY)
+      : null;
   }
 
   /**
@@ -224,7 +251,10 @@ class ServiceManagerBase {
    */
   onInitialized(handler) {
     this._state.onStateChanged((oldState, newState) => {
-      if (oldState === ServiceState.INITIALIZING && (newState === ServiceState.OFFLINE || newState === ServiceState.READY)) {
+      if (
+        oldState === ServiceState.INITIALIZING &&
+        (newState === ServiceState.OFFLINE || newState === ServiceState.READY)
+      ) {
         handler();
       }
     });
@@ -238,7 +268,10 @@ class ServiceManagerBase {
    */
   onConnected(handler) {
     this._state.onStateChanged((oldState, newState) => {
-      if (oldState === ServiceState.CONNECTING && (newState === ServiceState.ONLINE || newState === ServiceState.READY)) {
+      if (
+        oldState === ServiceState.CONNECTING &&
+        (newState === ServiceState.ONLINE || newState === ServiceState.READY)
+      ) {
         handler();
       }
     });
@@ -252,7 +285,10 @@ class ServiceManagerBase {
    */
   onDisconnected(handler) {
     this._state.onStateChanged((oldState, newState) => {
-      if (newState === ServiceState.OFFLINE && (oldState === ServiceState.ONLINE || oldState === ServiceState.READY)) {
+      if (
+        newState === ServiceState.OFFLINE &&
+        (oldState === ServiceState.ONLINE || oldState === ServiceState.READY)
+      ) {
         handler();
       }
     });
@@ -266,7 +302,10 @@ class ServiceManagerBase {
    */
   onAuthenticated(handler) {
     this._state.onStateChanged((oldState, newState) => {
-      if (oldState === ServiceState.AUTHENTICATING && newState === ServiceState.READY) {
+      if (
+        oldState === ServiceState.AUTHENTICATING &&
+        newState === ServiceState.READY
+      ) {
         handler();
       }
     });
@@ -281,7 +320,11 @@ class ServiceManagerBase {
   onDeauthenticated(handler) {
     if (this.type() === ServiceType.PRIVATE) {
       this._state.onStateChanged((oldState, newState) => {
-        if ((newState === ServiceState.OFFLINE || newState === ServiceState.ONLINE) && oldState === ServiceState.READY) {
+        if (
+          (newState === ServiceState.OFFLINE ||
+            newState === ServiceState.ONLINE) &&
+          oldState === ServiceState.READY
+        ) {
           handler();
         }
       });
@@ -330,7 +373,13 @@ class ServiceManagerBase {
       this._deauthenticate();
     }
 
-    if (this._state.inState([ServiceState.READY, ServiceState.ONLINE, ServiceState.CONNECTING])) {
+    if (
+      this._state.inState([
+        ServiceState.READY,
+        ServiceState.ONLINE,
+        ServiceState.CONNECTING,
+      ])
+    ) {
       this._authPromise = null;
       this._connectPromise = null;
 
@@ -348,10 +397,14 @@ class ServiceManagerBase {
   _deauthenticate() {
     /* istanbul ignore next */
     if (this._type !== ServiceType.PRIVATE) {
-      throw new Error('_deauthenticate must not be called on a Local or Public Service');
+      throw new Error(
+        '_deauthenticate must not be called on a Local or Public Service'
+      );
     }
 
-    if (this._state.inState([ServiceState.READY, ServiceState.AUTHENTICATING])) {
+    if (
+      this._state.inState([ServiceState.READY, ServiceState.AUTHENTICATING])
+    ) {
       this._authPromise = null;
       this._state.transitionTo(ServiceState.ONLINE);
     }

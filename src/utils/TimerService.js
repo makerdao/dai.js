@@ -1,7 +1,6 @@
 import LocalService from '../core/LocalService';
 
 export default class TimerService extends LocalService {
-
   constructor(name = 'timer') {
     super(name);
     this._timers = {};
@@ -11,7 +10,7 @@ export default class TimerService extends LocalService {
     this.disposeTimer(name);
     this._timers[name] = {
       repeating,
-      id: (repeating ? setInterval : setTimeout)(callback, duration)
+      id: (repeating ? setInterval : setTimeout)(callback, duration),
     };
   }
 
