@@ -48,10 +48,8 @@ export default class EthereumCdpService extends PrivateService {
     var tubContract = contract.getContractByName(contracts.TUB);
     var ethersUtils = contract.get('web3').ethersUtils();
     let wethContract = contract.getContractByName('WETH');
-    console.log('weth', wethContract);
     
     let amountBytes32 = contract.stringToBytes32(amount); // or BigNumber
-    console.log('amount is: ', amountBytes32);
     
     return wethContract.deposit().then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
       .then(tubContract.join(amountBytes32)) 
@@ -87,9 +85,7 @@ export default class EthereumCdpService extends PrivateService {
 
 
     let cdpIdBytes32 = ethersUtils.hexlify(cdpId);
-    console.log('cdpId hexlified is: ', cdpIdBytes32);
     let amountBytes32 = ethersUtils.hexlify(amount);
-    console.log('amount hexlified is: ', amountBytes32);
 
     return tubContract.lock(cdpIdBytes32, amountBytes32).then((transaction) => {
       return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
@@ -112,8 +108,8 @@ export default class EthereumCdpService extends PrivateService {
     return tubContract.free(cdpIdBytes32, amountBytes32).then((transaction) => {
       return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
         return transactionHash;
-        });
       });
+    });
   }
 
   // take Dai from a CDP and give to the wallet.  Needs to have locked collateral inside it.  
@@ -131,8 +127,8 @@ export default class EthereumCdpService extends PrivateService {
     return tubContract.draw(cdpIdBytes32, amountBytes32).then((transaction) => {
       return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
         return transactionHash;
-        });
       });
+    });
   }
 
   // send Dai to a CDP to cancel debt
@@ -149,8 +145,8 @@ export default class EthereumCdpService extends PrivateService {
     return tubContract.wipe(cdpIdBytes32, amountBytes32).then((transaction) => {
       return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
         return transactionHash;
-        });
       });
+    });
   }
 
   // free all collateral and close a CDP
@@ -159,7 +155,7 @@ export default class EthereumCdpService extends PrivateService {
       return new Error('cdpId is null or undefined');
     }
 
-    console.log('cdpId inside is:', cdpId);
+    //console.log('cdpId inside is:', cdpId);
     var contract = this.get('smartContract');     
     var ethersProvider = contract.get('web3').ethersProvider();    // redeclare?  
     var tubContract = contract.getContractByName(contracts.TUB);
@@ -167,16 +163,15 @@ export default class EthereumCdpService extends PrivateService {
 
     let cdpIdBN = ethersUtils.bigNumberify(35);
     let cdpHex = ethersUtils.hexlify(cdpIdBN);
-    console.log(cdpHex);
+    // console.log(cdpHex);
 
     var estimatePromise = tubContract.estimate.shut(cdpHex);
     return estimatePromise.then(function(gasCost) {
     // gasCost is returned as BigNumber
-    console.log('Estimated Gas Cost: ' + gasCost.toString());
+      //console.log('Estimated Gas Cost: ' + gasCost.toString());
     });
-    console.log('hit');
     
-/*     return tubContract.shut(cdpIdBN).then((transaction) => {
+    /*     return tubContract.shut(cdpIdBN).then((transaction) => {
       return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
         console.log('shutting cup: ', cdpIdBN.toString());
         return transactionHash;
@@ -196,8 +191,8 @@ export default class EthereumCdpService extends PrivateService {
     return tubContract.give(cdpIdBytes32, address).then((transaction) => {
       return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
         return transactionHash;
-        });
       });
+    });
   }
 
 

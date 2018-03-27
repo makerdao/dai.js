@@ -50,12 +50,9 @@ export default class SmartContractService extends PublicService {
   stringToBytes32(text) {
     const ethersUtils = this.get('web3').ethersUtils(); 
     var data = ethersUtils.toUtf8Bytes(text);
-    console.log('utf8 ', data);
     if (data.length > 32) { throw new Error('too long'); }
     data = ethersUtils.padZeros(data, 32);
-    console.log('padded32zeroes ', data);
     return ethersUtils.hexlify(data);
-    console.log('hexlified ', data)
   }
 
   _selectContractVersion(mapping, version) {

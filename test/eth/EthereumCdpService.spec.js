@@ -19,10 +19,10 @@ beforeAll( (done) => {
       var seq = Promise.resolve();
 
       var eventPromise = new Promise(function(resolve, reject) {
-          tubContract.onlognewcup = function(address, cdpIdBytes32) {
-              resolve(cdpIdBytes32);
-              this.removeListener();
-          };
+        tubContract.onlognewcup = function(address, cdpIdBytes32) {
+          resolve(cdpIdBytes32);
+          this.removeListener();
+        };
       });
 
       // open CDP
@@ -35,15 +35,15 @@ beforeAll( (done) => {
       // Wait for the eventPromise to be triggered
       seq = seq.then(function() {
         return eventPromise.then(function(cdpIdBytes32) {
-            cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
-            console.log('Open CDP event was triggered with cdpId: ', cdpId) 
-            done();
-            });
-          });
+          cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
+          console.log('Open CDP event was triggered with cdpId: ', cdpId); 
+          done();
+        });
       });
-  }, 10000);
+    });
+}, 10000);
 
-  test('lock ETH in CDP on ganache', (done) => {
+test('lock ETH in CDP on ganache', (done) => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {
@@ -122,19 +122,19 @@ test('wipe Dai debt from a CDP on ganache', (done) => {
 }, 10000);  
 
 test.only('close a CDP on ganache', (done) => {
-      console.log('closing cdpId: ',  cdpId);
+  console.log('closing cdpId: ',  cdpId);
 
-      var cdpIdBytes32 = ethersUtils.hexlify(cdpId);
-      var estimatePromise = tubContract.estimate.shut(cdpIdBytes32);
+  var cdpIdBytes32 = ethersUtils.hexlify(cdpId);
+  var estimatePromise = tubContract.estimate.shut(cdpIdBytes32);
 
-      // let address2 = '0x81431b69b1e0e334d4161a13c2955e0f3599381e';
-      // var estimatePromise = tubContract.estimate.give(cdpIdBytes32, address2);   doesnt work either
-      return estimatePromise.then(function(gasCost) {
-      // gasCost is returned as BigNumber
-      console.log('Estimated Gas Cost: ' + gasCost.toString());
-      });
+  // let address2 = '0x81431b69b1e0e334d4161a13c2955e0f3599381e';
+  // var estimatePromise = tubContract.estimate.give(cdpIdBytes32, address2);   doesnt work either
+  return estimatePromise.then(function(gasCost) {
+    // gasCost is returned as BigNumber
+    console.log('Estimated Gas Cost: ' + gasCost.toString());
+  });
 
-      /* var callPromise2 = service.shut(cdpId);
+  /* var callPromise2 = service.shut(cdpId);
       callPromise2.then(function(txInfo) {
         console.log(txInfo);
         done();

@@ -20,14 +20,14 @@ export default class OasisOrder {
       gasPrice = tx.gasPrice;
       return this._ethersProvider.waitForTransaction(tx.hash);
     })
-    .then(tx => {
-      return this._ethersProvider.getTransactionReceipt(tx.hash);
-    }).
-    then(receipt=>{
+      .then(tx => {
+        return this._ethersProvider.getTransactionReceipt(tx.hash);
+      }).
+      then(receipt=>{
       //unable to convert a decimal number to a BigNumber, so convert from wei to ether after the multiplication
-      const fee = receipt.gasUsed.mul(gasPrice);
-      return utils.formatEther(fee);
-    })
+        const fee = receipt.gasUsed.mul(gasPrice);
+        return utils.formatEther(fee);
+      });
   }		
 
   status(){
@@ -45,31 +45,28 @@ export default class OasisOrder {
       transaction = tx;
       return this._ethersProvider.waitForTransaction(tx.hash);
     })
-    .then(tx => {
+      .then(tx => {
       //console.log('txHash after mined', tx);
-      const filter = {
-        fromBlock: "latest", //what if somehow another block gets added in between here?
-        toBlock: "latest",
-        //address: '0xd0a1e359811322d97fi991e03f863a0c30c2cf029c', kovan weth
-        address: '0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9', //kovan oasis
-        //topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'] //hash of Transfer(...)
-        topics: ['0x819e390338feffe95e2de57172d6faf337853dfd15c7a09a32d76f7fd2443875']
-      }
-      return this._ethersProvider.getLogs(filter);
-    }).
-    then(filterResults=>{
+        const filter = {
+          fromBlock: 'latest', //what if somehow another block gets added in between here?
+          toBlock: 'latest',
+          address: '0xd0a1e359811322d97991e03f863a0c30c2cf029c', //kovan weth address - probably better to use the Oasis log logTrade shouldwork), then we don't care whether it was weth or dai that was purchased.
+          topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'] //hash of Transfer(...)
+        };
+        return this._ethersProvider.getLogs(filter);
+      }).
+      then(filterResults=>{
       //console.log('filterResults', filterResults);
       //console.log('transaction.hash', transaction.hash);
-      const events = filterResults.filter((t)=> t.transactionHash === transaction.hash); //there could be several of these
-      let totalDai = 0;
-      events.forEach(event=>{
-        console.log('event: ', event);
-        console.log('amount of token received: ', event.data.substring(2,66));
-        totalDai += parseInt(event.data.substring(2,66), 16);
+        const events = filterResults.filter((t)=> t.transactionHash === transaction.hash); //there could be several of these
+        let totalDai = 0;
+        events.forEach(event=>{
+        //console.log('event: ', event);
+        //console.log('amount of weth received: ', event.data);
+          totalDai += parseInt(event.data, 16);
+        });
+        return utils.formatEther(totalDai);
       });
-      console.log('totalDai', totalDai);
-      return utils.formatEther(totalDai);
-    })
-  }	
+  }			
 
 }
