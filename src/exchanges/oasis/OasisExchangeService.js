@@ -50,7 +50,6 @@ export default class OasisExchangeService extends PrivateService {
   	const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
   	const daiAddress = this.get('ethereumToken').getToken(tokens.DAI).address();
   	const buyTokenAddress = this.get('ethereumToken').getToken(tokenSymbol).address();
-  	//return oasisContract.sellAllAmount(daiAddress, daiAmount, buyTokenAddress, minFillAmount);
     return new OasisOrder(oasisContract.sellAllAmount(daiAddress, daiAmount, buyTokenAddress, minFillAmount), this.get('web3').ethersProvider());
   }
 
@@ -59,11 +58,11 @@ export default class OasisExchangeService extends PrivateService {
     return new OasisOrder(oasisContract.offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos));
   }*/
 
-  buyDai(daiAmount, tokenSymbol, maxFillAmount = null){
+  buyDai(daiAmount, tokenSymbol, maxFillAmount = -1){
     const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
     const daiAddress = this.get('ethereumToken').getToken(tokens.DAI).address();
     const sellTokenAddress = this.get('ethereumToken').getToken(tokenSymbol).address();
-    return new OasisOrder(oasisContract.buyAllAmount(daiAddress, daiAmount, sellTokenAddress, minFillAmount));
+    return new OasisOrder(oasisContract.buyAllAmount(daiAddress, daiAmount, sellTokenAddress, maxFillAmount), this.get('web3').ethersProvider());
   }
 
 }
