@@ -1,35 +1,66 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
-//import SmartContractService from '../../src/eth/SmartContractService';
-//import contracts from '../../contracts/contracts';
+import contracts from '../../contracts/contracts';
 
-test('open a CDP on ganache', (done) => {
-  const service = EthereumCdpService.buildTestService();
+let cdpId;
+let service;
+var contract;
+var tubContract;
+var ethersUtils;
+
+beforeAll( (done) => {
+  service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {
-      // open a CDP
-      var callPromise = service.openCdp();
-      callPromise.then(function(/*txInfo*/) {
-        //console.log('transaction data is: ', txInfo);
-        done();
-      });
-    });
-}, 10000); 
+      contract = service.get('smartContract');
+      tubContract = contract.getContractByName(contracts.TUB);
+      ethersUtils = contract.get('web3').ethersUtils();
 
-test('lock ETH in CDP on ganache', (done) => {
-  const service = EthereumCdpService.buildTestService();
-  service.manager().authenticate()
-    .then(() => {
+      // Create a promise that resolves when the event is triggered
+      var seq = Promise.resolve();
 
-      let cdpId = '1';
-      let amount = 100
-      var callPromise = service.lockEth(cdpId, amount);
-      callPromise.then(function(txInfo) {
-        console.log('transaction data is: ', txInfo);
-        done();
+      var eventPromise = new Promise(function(resolve, reject) {
+          tubContract.onlognewcup = function(address, cdpIdBytes32) {
+              resolve(cdpIdBytes32);
+              this.removeListener();
+          };
       });
-    });
-  }, 10000); 
+
+      // open CDP
+      seq = seq.then(function() {
+        var callPromise = service.openCdp();
+        callPromise.then(function(txInfo) {
+        });
+      });
     
+      // Wait for the eventPromise to be triggered
+      seq = seq.then(function() {
+        return eventPromise.then(function(cdpIdBytes32) {
+            cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
+            console.log('Open CDP event was triggered with cdpId: ', cdpId) 
+            done();
+            });
+          });
+      });
+  }, 10000);
+
+  test('lock ETH in CDP on ganache', (done) => {
+  const service = EthereumCdpService.buildTestService();
+  service.manager().authenticate()
+    .then(() => {
+      let cdpId = '1';
+      let amount = 100;
+
+
+      console.log('service is', service);
+      var callPromise2 = service.lockEth(cdpId, amount);
+      console.log(callPromise2);
+      callPromise2.then(function(txInfo) {
+        console.log('CDP lock ETH transaction data is: ', txInfo);
+        done();
+      });
+    });
+}, 10000);
+
 test('lock WETH in CDP on ganache', (done) => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
@@ -39,11 +70,11 @@ test('lock WETH in CDP on ganache', (done) => {
       let amount = 100;
       var callPromise = service.lockWeth(cdpId, amount);
       callPromise.then(function(txInfo) {
-        console.log('transaction data is: ', txInfo);
+        //console.log('transaction data is: ', txInfo);
         done();
       });
     });
-  }, 10000); 
+}, 10000); 
 
 test('free PETH from a CDP on ganache', (done) => {
   const service = EthereumCdpService.buildTestService();
@@ -54,11 +85,11 @@ test('free PETH from a CDP on ganache', (done) => {
       let amount = 100;
       var callPromise = service.free(cdpId, amount);
       callPromise.then(function(txInfo) {
-        console.log('transaction data is: ', txInfo);
+        //console.log('transaction data is: ', txInfo);
         done();
       });
     });
-  }, 10000);
+}, 10000);
 
 test('draw Dai from a CDP on ganache', (done) => {
   const service = EthereumCdpService.buildTestService();
@@ -69,11 +100,11 @@ test('draw Dai from a CDP on ganache', (done) => {
       let amount = 100;
       var callPromise = service.draw(cdpId, amount);
       callPromise.then(function(txInfo) {
-        console.log('transaction data is: ', txInfo);
+        //console.log('transaction data is: ', txInfo);
         done();
       });
     });
-  }, 10000); 
+}, 10000); 
 
 test('wipe Dai debt from a CDP on ganache', (done) => {
   const service = EthereumCdpService.buildTestService();
@@ -84,39 +115,45 @@ test('wipe Dai debt from a CDP on ganache', (done) => {
       let amount = 100;
       var callPromise = service.wipe(cdpId, amount);
       callPromise.then(function(txInfo) {
-        console.log('transaction data is: ', txInfo);
+        //console.log('transaction data is: ', txInfo);
         done();
       });
     });
-  }, 10000);   
+}, 10000);  
 
- test('close a CDP on ganache', (done) => {
+test.only('close a CDP on ganache', (done) => {
+      console.log('closing cdpId: ',  cdpId);
+
+      var cdpIdBytes32 = ethersUtils.hexlify(cdpId);
+      var estimatePromise = tubContract.estimate.shut(cdpIdBytes32);
+
+      // let address2 = '0x81431b69b1e0e334d4161a13c2955e0f3599381e';
+      // var estimatePromise = tubContract.estimate.give(cdpIdBytes32, address2);   doesnt work either
+      return estimatePromise.then(function(gasCost) {
+      // gasCost is returned as BigNumber
+      console.log('Estimated Gas Cost: ' + gasCost.toString());
+      });
+
+      /* var callPromise2 = service.shut(cdpId);
+      callPromise2.then(function(txInfo) {
+        console.log(txInfo);
+        done();
+      }); */
+}, 10000);
+
+
+test('give a CDP to another address on ganache', (done) => {
   const service = EthereumCdpService.buildTestService();
-
+  
   service.manager().authenticate()
     .then(() => {
-
-      var cdpId = '1';
-      var callPromise = contract.shut(cdpId);
+  
+      var cdpId = 1;
+      var address = '0x0000000000000000000000000000000000000123';
+      var callPromise = service.give(cdpId, address);
       callPromise.then(function(txInfo) {
         console.log('transaction data is: ', txInfo);
         done();
       });
     });
-  }, 10000);
-
-  test('give a CDP to another address on ganache', (done) => {
-    const service = EthereumCdpService.buildTestService();
-  
-    service.manager().authenticate()
-      .then(() => {
-  
-        var cdpId = '1';
-        var address = '0x0000000000000000000000000000000000123';
-        var callPromise = contract.give(cdpId, address);
-        callPromise.then(function(txInfo) {
-          console.log('transaction data is: ', txInfo);
-          done();
-        });
-      });
-    }, 10000);
+}, 10000); 

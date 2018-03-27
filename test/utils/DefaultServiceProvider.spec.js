@@ -26,7 +26,7 @@ test('Should configure the settings of a created service', done => {
 });
 */
 
-test('Should correctly create a container with all when passed a service configuration', done => {
+test('Should correctly create a container with all services when passed a service configuration', done => {
   const container = new DefaultServiceProvider().buildContainer(config.services);
   expect(Object.keys(container._services).indexOf('smartContract')).toBeGreaterThan(-1);
   container.authenticate().then(() => {
@@ -37,6 +37,7 @@ test('Should correctly create a container with all when passed a service configu
 
 test('Should throw an error when passing a config with unsupported service', () => {
   const servicesCopy = {...config.services};
+  console.log('servicesCopy is: ', servicesCopy);
   servicesCopy.missingService = 'DoesNotExist';
   expect(() => new DefaultServiceProvider().buildContainer(servicesCopy))
     .toThrow('Unsupported service in configuration: DoesNotExist');

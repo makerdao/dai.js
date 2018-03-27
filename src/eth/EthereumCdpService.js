@@ -2,7 +2,7 @@ import PrivateService from '../core/PrivateService';
 import SmartContractService from '../../src/eth/SmartContractService';
 import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
-//var utils = require('ethers').utils;
+
 
 
 export default class EthereumCdpService extends PrivateService {
@@ -25,13 +25,11 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   openCdp() {
-    let contract = this.get('smartContract');
-    let ethersProvider = contract.get('web3')._ethersProvider;
-    let tubContract = contract.getContractByName(contracts.TUB);
-
-    tubContract.onlognewcup = function(/*address, cdpIdBytes32*/) {
-      //console.log('cup created, cdpId is: ', utils.bigNumberify(cdpIdBytes32).toString());
-    };
+    var cdpCreatedId = null;
+    var contract = this.get('smartContract');
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
 
     return tubContract.open().then((transaction) => {
       return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
@@ -40,115 +38,166 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-// TODO: clean error-checking for tx failures.  Output the function call and the tx id of the failed tx
-// treat all amounts as ether / full token values.
+  // TODO: clean error-checking for tx failures.  Output the function call and the tx id of the failed tx
+  // treat all amounts as ether / full token values.
 
-// put ETH collateral into a CDP
+  // put ETH collateral into a CDP
   lockEth(cdpId, amount) {
-    _assignContracts();
-    let wethContract = contract.getContractByName('weth');
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
+    let wethContract = contract.getContractByName('WETH');
+    console.log('weth', wethContract);
     
-    let amountBytes32 = utils.hexlify(amount); // or BigNumber
+    let amountBytes32 = contract.stringToBytes32(amount); // or BigNumber
+    console.log('amount is: ', amountBytes32);
     
-    // use wethContract's conversion 
-    return wethContract.deposit(amount).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
+    return wethContract.deposit().then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
       .then(tubContract.join(amountBytes32)) 
       .then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
       .then(
-        lockPeth(cdpId, amount)
-      );
+        this.lockPeth(cdpId, amount)
+      ); 
   }
 
-// put WETH collateral into a CDP
+  // put WETH collateral into a CDP
   lockWeth(cdpId, amount) {
-    _assignContracts();
-    let wethContract = contract.getContractByName('weth');
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
+
     
-    let amountBytes32 = utils.hexlify(amount);
+    let amountBytes32 = ethersUtils.hexlify(amount);
     
     return tubContract.join(amountBytes32).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
       .then(
-        lockPeth(cdpId, amount)
+        this.lockPeth(cdpId, amount)
       );
-}
+  }
 
 
   // lock PETH into a CDP
   lockPeth(cdpId, amount) {
-    _assignContracts();
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
 
-    let cdpIdBytes32 = utils.hexlify(cdpId);
-    let amountBytes32 = utils.hexlify(amount);
 
-    return tubContract.lock(cdpIdBytes32, amountBytes32).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
-    .then(function(transactionHash) {
-      return transactionHash;
-  });
-}
+    let cdpIdBytes32 = ethersUtils.hexlify(cdpId);
+    console.log('cdpId hexlified is: ', cdpIdBytes32);
+    let amountBytes32 = ethersUtils.hexlify(amount);
+    console.log('amount hexlified is: ', amountBytes32);
+
+    return tubContract.lock(cdpIdBytes32, amountBytes32).then((transaction) => {
+      return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+        return transactionHash;
+      });
+    });
+  }
 
   // remove collateral from a CDP
   free(cdpId, amount){
-    _assignContracts();
-    
-    let cdpIdBytes32 = utils.hexlify(cdpId);
-    let amountBytes32 = utils.hexlify(amount);
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
 
-    return tubContract.free(cdpIdBytes32, amountBytes32).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
-    .then(function(transactionHash) {
-      return transactionHash;
-    });
+    
+    let cdpIdBytes32 = ethersUtils.hexlify(cdpId);
+    let amountBytes32 = ethersUtils.hexlify(amount);
+
+    return tubContract.free(cdpIdBytes32, amountBytes32).then((transaction) => {
+      return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+        return transactionHash;
+        });
+      });
   }
 
   // take Dai from a CDP and give to the wallet.  Needs to have locked collateral inside it.  
   draw(cdpId, amount){
-    _assignContracts();
     
-    let cdpIdBytes32 = utils.hexlify(cdpId);
-    let amountBytes32 = utils.hexlify(amount);
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
 
-    return tubContract.draw(cdpIdBytes32, amountBytes32).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
-    .then(function(transactionHash) {
-      return transactionHash;
-    });
+    
+    let cdpIdBytes32 = ethersUtils.hexlify(cdpId);
+    let amountBytes32 = ethersUtils.hexlify(amount);
+
+    return tubContract.draw(cdpIdBytes32, amountBytes32).then((transaction) => {
+      return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+        return transactionHash;
+        });
+      });
   }
 
   // send Dai to a CDP to cancel debt
   wipe(cdpId, amount){
-    _assignContracts();
-    
-    let cdpIdBytes32 = utils.hexlify(cdpId);
-    let amountBytes32 = utils.hexlify(amount);
-    console.log('hexlify turns a 100 , a number, into: ', amountBytes32)
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
 
-    return tubContract.wipe(cdpIdBytes32, ).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
-    .then(function(transactionHash) {
-      return transactionHash;
-    });
+    
+    let cdpIdBytes32 = contract.stringToBytes32(cdpId);
+    let amountBytes32 = contract.stringToBytes32(amount);
+
+    return tubContract.wipe(cdpIdBytes32, amountBytes32).then((transaction) => {
+      return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+        return transactionHash;
+        });
+      });
   }
 
   // free all collateral and close a CDP
   shut(cdpId){
-    _assignContracts();
-    
-    let cdpIdBytes32 = utils.hexlify(cdpId);
+    if (cdpId == null || typeof cdpId == 'undefined') {
+      return new Error('cdpId is null or undefined');
+    }
 
-    return tubContract.shut(cdpIdBytes32).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
-    .then(function(transactionHash) {
-      return transactionHash;
+    console.log('cdpId inside is:', cdpId);
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();    // redeclare?  
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
+
+    let cdpIdBN = ethersUtils.bigNumberify(35);
+    let cdpHex = ethersUtils.hexlify(cdpIdBN);
+    console.log(cdpHex);
+
+    var estimatePromise = tubContract.estimate.shut(cdpHex);
+    return estimatePromise.then(function(gasCost) {
+    // gasCost is returned as BigNumber
+    console.log('Estimated Gas Cost: ' + gasCost.toString());
     });
+    console.log('hit');
+    
+/*     return tubContract.shut(cdpIdBN).then((transaction) => {
+      return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+        console.log('shutting cup: ', cdpIdBN.toString());
+        return transactionHash;
+        }); 
+      });    */
   }
 
   // transfer control of a CDP to a different address
   give(cdpId, address){
-    _assignContracts();
-    
-    let cdpIdBytes32 = utils.hexlify(cdpId);
-    console.log('hexlify turns \'1\' into: ', cdpIdBytes32);
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
 
-    return tubContract.give(cdpIdBytes32, address).then((transaction) => ethersProvider.waitForTransaction(transaction.hash))
-    .then(function(transactionHash) {
-      return transactionHash;
-    });
+    let cdpIdBytes32 = contract.stringToBytes32(cdpId);
+
+    return tubContract.give(cdpIdBytes32, address).then((transaction) => {
+      return ethersProvider.waitForTransaction(transaction.hash).then(function(transactionHash) {
+        return transactionHash;
+        });
+      });
   }
 
 
@@ -160,9 +209,15 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-_assignContracts(){
-  let contract = this.get('smartContract');
-  let ethersProvider = contract.get('web3').ethersProvider();
-  let tubContract = contract.getContractByName(contracts.TUB);
+  _contractFactory() {
+    var contract = this.get('smartContract');     
+    var ethersProvider = contract.get('web3').ethersProvider();     
+    var tubContract = contract.getContractByName(contracts.TUB);
+    var ethersUtils = contract.get('web3').ethersUtils();
+    
+    let contractObj =
+      [ contract, ethersProvider, ethersUtils, tubContract ];
+    
+    return contractObj;
   }
 }

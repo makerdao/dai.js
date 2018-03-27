@@ -108,7 +108,7 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
       //return oasisOrder._transaction;
     });
 
-    /*
+  /*
     .then(tx => {
       //console.log(tx);
       expect(tx.data.length).toBeGreaterThan(20);

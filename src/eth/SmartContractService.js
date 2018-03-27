@@ -5,13 +5,11 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 
-const utils = require('ethers').utils;
-
 export default class SmartContractService extends PublicService {
 
   static buildTestService(web3 = null) {
     const service = new SmartContractService();
-    web3 = web3 || Web3Service.buildTestService();
+    web3 = web3 || Web3Service.buildTestService('0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e');
 
     service.manager()
       .inject('log', web3.get('log'))
@@ -50,10 +48,14 @@ export default class SmartContractService extends PublicService {
   }
 
   stringToBytes32(text) {
-    var data = utils.toUtf8Bytes(text);
+    const ethersUtils = this.get('web3').ethersUtils(); 
+    var data = ethersUtils.toUtf8Bytes(text);
+    console.log('utf8 ', data);
     if (data.length > 32) { throw new Error('too long'); }
-    data = utils.padZeros(data, 32);
-    return utils.hexlify(data);
+    data = ethersUtils.padZeros(data, 32);
+    console.log('padded32zeroes ', data);
+    return ethersUtils.hexlify(data);
+    console.log('hexlified ', data)
   }
 
   _selectContractVersion(mapping, version) {

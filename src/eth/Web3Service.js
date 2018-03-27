@@ -21,6 +21,7 @@ export default class Web3Service extends PrivateService {
     this._web3 = null;
     this._ethersProvider = null;
     this._ethersWallet = null;
+    this._ethersUtils = null;
     this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
   }
 
@@ -71,7 +72,7 @@ export default class Web3Service extends PrivateService {
   static buildTestService(privateKey = null) {
     /* eslint-disable */
     process.on('unhandledRejection', err => {
-      console.log('Unhandled rejection:', err);
+      console.log('Unhandled rejection is:', err);
     });
     const service = new Web3Service();
 
@@ -144,6 +145,10 @@ export default class Web3Service extends PrivateService {
     }
 
     return this._ethersWallet || this._ethersProvider.getSigner(this.defaultAccount());
+  }
+
+  ethersUtils() {
+    return this._ethersUtils;
   }
 
   /**
@@ -250,12 +255,13 @@ export default class Web3Service extends PrivateService {
 
   _setUpEthers(chainId) {
     const ethers = require('ethers');
+    this._ethersUtils = ethers.utils;
 
     this._ethersProvider = new ethers.providers.Web3Provider(
       this._web3.currentProvider,
       { name: getNetworkName(chainId), chainId: chainId }
     );
-
+    //console.log('ethers provider is: ', this._ethersProvider)
     if (this._privateKey) {
 
       try{
@@ -264,7 +270,7 @@ export default class Web3Service extends PrivateService {
         //console.log(e);
         //console.log(e.trace);
       }
-      //console.log('created Ethers Wallet');
+      console.log('created Ethers Wallet: ', this._ethersWallet);
     }
   }
 
