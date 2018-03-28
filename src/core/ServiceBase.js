@@ -91,7 +91,7 @@ function _guardLifeCycleMethods() {
   const original = {
     initialize: this.initialize,
     connect: this.connect,
-    authenticate: this.authenticate,
+    authenticate: this.authenticate
   };
 
   this.initialize = function(settings) {

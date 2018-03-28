@@ -2,19 +2,15 @@ import ServiceManager, { InvalidServiceError } from './ServiceManager';
 
 class ServiceAlreadyRegisteredError extends Error {
   constructor(name) {
-    super(
-      "Service with name '" +
-        name +
-        "' is already registered with this container."
-    );
+    // prettier-ignore
+    super('Service with name \'' + name + '\' is already registered with this container.');
   }
 }
 
 class ServiceNotFoundError extends Error {
   constructor(name) {
-    super(
-      "Service with name '" + name + "' cannot be found in this container."
-    );
+    // prettier-ignore
+    super('Service with name \'' + name + '\' cannot be found in this container.');
   }
 }
 
@@ -140,5 +136,5 @@ export {
   InvalidServiceError,
   ServiceAlreadyRegisteredError,
   ServiceNotFoundError,
-  ServiceDependencyLoopError,
+  ServiceDependencyLoopError
 };
