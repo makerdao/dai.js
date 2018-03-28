@@ -9,7 +9,7 @@ export default class SmartContractService extends PublicService {
 
   static buildTestService(web3 = null) {
     const service = new SmartContractService();
-    web3 = web3 || Web3Service.buildTestService('0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e');
+    web3 = web3 || Web3Service.buildTestService();
 
     service.manager()
       .inject('log', web3.get('log'))

@@ -37,7 +37,6 @@ test('Should correctly create a container with all services when passed a servic
 
 test('Should throw an error when passing a config with unsupported service', () => {
   const servicesCopy = {...config.services};
-  console.log('servicesCopy is: ', servicesCopy);
   servicesCopy.missingService = 'DoesNotExist';
   expect(() => new DefaultServiceProvider().buildContainer(servicesCopy))
     .toThrow('Unsupported service in configuration: DoesNotExist');

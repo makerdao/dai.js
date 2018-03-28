@@ -270,7 +270,7 @@ export default class Web3Service extends PrivateService {
         //console.log(e);
         //console.log(e.trace);
       }
-      console.log('created Ethers Wallet: ', this._ethersWallet);
+      //console.log('created Ethers Wallet: ', this._ethersWallet);
     }
   }
 
