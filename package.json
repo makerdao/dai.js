@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -40,8 +40,8 @@
   "lint-staged": {
     "./src/**/*.js": [
       "prettier --single-quote es5 --write",
-      "eslint ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
-      "git add"
+      "git add",
+      "eslint ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js"
     ]
   },
   "devDependencies": {
