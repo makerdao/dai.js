@@ -165,7 +165,6 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
       //oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.1'), tokens.WETH);
       //return oasisOrder._transaction;
     });
-
   /*
     .then(tx => {
       //console.log(tx);
@@ -212,5 +211,4 @@ test.only('create buy order on testnet', (done) => setTimeout(() => {
   },
   15000),
   30000
-
 );*/

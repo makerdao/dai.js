@@ -89,7 +89,7 @@ export default class Web3Service extends PrivateService {
       .settings({
         usePresetProvider: true,
         privateKey: privateKey,
-        provider: { type: Web3ProviderType.TEST },
+        provider: { type: Web3ProviderType.TEST }
       });
 
     return service;
@@ -108,8 +108,8 @@ export default class Web3Service extends PrivateService {
         provider: {
           type: Web3ProviderType.INFURA,
           network: network,
-          infuraApiKey: 'ihagQOzC3mkRXYuCivDN',
-        },
+          infuraApiKey: 'ihagQOzC3mkRXYuCivDN'
+        }
       });
 
     return service;
@@ -190,7 +190,7 @@ export default class Web3Service extends PrivateService {
       _web3Promise(_ => this._web3.version.getNode(_)),
       _web3Promise(_ => this._web3.version.getNetwork(_)),
       _web3Promise(_ => this._web3.version.getEthereum(_)),
-      _web3Promise(_ => this._web3.version.getWhisper(_), null),
+      _web3Promise(_ => this._web3.version.getWhisper(_), null)
     ])
       .then(
         versions => {
@@ -199,7 +199,7 @@ export default class Web3Service extends PrivateService {
             node: versions[0],
             network: versions[1],
             ethereum: versions[2],
-            whisper: versions[3],
+            whisper: versions[3]
           };
           this._setUpEthers(this.networkId());
           //console.log('network id is :', this.networkId());
@@ -264,7 +264,7 @@ export default class Web3Service extends PrivateService {
     return {
       from: TestAccountProvider.nextAddress(),
       to: TestAccountProvider.nextAddress(),
-      amount: this._web3.toWei('0.01'),
+      amount: this._web3.toWei('0.01')
     };
   }
 
@@ -296,8 +296,8 @@ export default class Web3Service extends PrivateService {
       usePresetProvider: true,
       provider: {
         type: Web3ProviderType.HTTP,
-        url: 'https://sai-service.makerdao.com/node',
-      },
+        url: 'https://sai-service.makerdao.com/node'
+      }
     };
 
     if (!settings) {
@@ -322,7 +322,7 @@ export default class Web3Service extends PrivateService {
         'estimateGas',
         'getBlock',
         'sendTransaction',
-        'getBalance',
+        'getBalance'
       ])
     );
 
@@ -332,7 +332,7 @@ export default class Web3Service extends PrivateService {
       promisifyAsyncMethods(web3.personal, [
         'lockAccount',
         'newAccount',
-        'unlockAccount',
+        'unlockAccount'
       ])
     );
   }
@@ -368,7 +368,7 @@ export default class Web3Service extends PrivateService {
   _isStillConnected() {
     return Promise.all([
       _web3Promise(_ => this._web3.version.getNode(_)), // can remove this
-      _web3Promise(_ => this._web3.version.getNetwork(_)),
+      _web3Promise(_ => this._web3.version.getNetwork(_))
     ]).then(
       versionInfo =>
         versionInfo[1] != null &&
