@@ -4,12 +4,10 @@ import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
 
 export default class EthereumCdpService extends PrivateService {
-
   static buildTestService() {
     const service = new EthereumCdpService();
     const smartContract = SmartContractService.buildTestService();
-    service.manager()
-      .inject('smartContract', smartContract);
+    service.manager().inject('smartContract', smartContract);
     return service;
   }
 
@@ -34,7 +32,7 @@ export default class EthereumCdpService extends PrivateService {
           resolve(cdpId);
           this.removeListener();
         }
-      }
+      };
     });
 
     tubContract.open();

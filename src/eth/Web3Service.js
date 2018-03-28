@@ -21,7 +21,10 @@ export default class Web3Service extends PrivateService {
     this._ethersProvider = null;
     this._ethersWallet = null;
     this._ethersUtils = null;
-    this._info = { version: { api: null, node: null, network: null, ethereum: null } , account: null };
+    this._info = {
+      version: { api: null, node: null, network: null, ethereum: null },
+      account: null
+    };
   }
 
   static buildDisconnectingService(disconnectAfter = 50) {

@@ -62,9 +62,11 @@ export default class SmartContractService extends PublicService {
   }
 
   stringToBytes32(text) {
-    const ethersUtils = this.get('web3').ethersUtils(); 
+    const ethersUtils = this.get('web3').ethersUtils();
     var data = ethersUtils.toUtf8Bytes(text);
-    if (data.length > 32) { throw new Error('too long'); }
+    if (data.length > 32) {
+      throw new Error('too long');
+    }
     data = ethersUtils.padZeros(data, 32);
     return ethersUtils.hexlify(data);
   }
