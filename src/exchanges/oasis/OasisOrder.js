@@ -1,6 +1,6 @@
 // import OasisExchangeService from './OasisExchangeService';
 import orderStyle from '../orderStyle';
-import orderState from './oasisOrderState';
+import orderState from './OasisOrderState';
 import OrderType from '../OrderTransitions';
 import { utils } from 'ethers';
 import TransactionManager from '../TransactionManager';
