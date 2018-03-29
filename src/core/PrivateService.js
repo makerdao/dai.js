@@ -5,7 +5,6 @@ import ServiceBase from './ServiceBase';
  *
  */
 class PrivateService extends ServiceBase {
-
   /**
    * @param {string} name
    * @param {string[]} dependencies

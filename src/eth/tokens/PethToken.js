@@ -1,17 +1,16 @@
 import Erc20Token from './Erc20Token';
 
 export default class PethToken extends Erc20Token {
-
   constructor(contract, tub) {
-  	super(contract);
+    super(contract);
     this._tub = tub;
   }
 
-  join(amount){
+  join(amount) {
     return this._tub.join(amount, { gasLimit: 200000 });
   }
 
-  exit(amount){
+  exit(amount) {
     return this._tub.exit(amount, { gasLimit: 100000 });
   }
 }

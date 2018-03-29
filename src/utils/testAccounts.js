@@ -1000,7 +1000,8 @@ const mapping = {
     '0xee1d23050f186df0d0eb4aa8a87fce8bebd1fba7',
     '0x2c4199a1d168eae2e0c41672be44e82b162bc514',
     '0x63110433ca3dda974b8a449fa1965f0476e87328'
-  ], keys: [
+  ],
+  keys: [
     '474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e',
     'b3ae65f191aac33f3e3f662b8411cabf14f91f2b48cf338151d6021ea1c08541',
     'bc838ab7af00cda00cb02efbbe4dbb1ce51f5d2613acfe11bd970ce659ad8704',

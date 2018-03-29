@@ -16,7 +16,4 @@ const orderTypeTransitions = {
   oasis: oasisOrderLifeCycle
 };
 
-export {
-  OrderType as default,
-  orderTypeTransitions
-};
+export { OrderType as default, orderTypeTransitions };

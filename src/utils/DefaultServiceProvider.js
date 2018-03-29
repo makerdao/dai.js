@@ -22,7 +22,6 @@ const _services = {
 };
 
 export default class DefaultServiceProvider {
-
   /**
    * @param {string} serviceName
    * @returns {boolean}
@@ -37,7 +36,9 @@ export default class DefaultServiceProvider {
    * @returns {object} | null
    */
   create(serviceName, settings = {}) {
-    const result = this.supports(serviceName) ? new _services[serviceName]() : null;
+    const result = this.supports(serviceName)
+      ? new _services[serviceName]()
+      : null;
 
     if (result !== null) {
       result.manager().settings(settings);
@@ -54,13 +55,17 @@ export default class DefaultServiceProvider {
     const container = new Container();
 
     Object.keys(servicesConfig).forEach(role => {
-      const serviceItem = servicesConfig[role] instanceof Array ?
-        servicesConfig[role] : [servicesConfig[role], {}];
+      const serviceItem =
+        servicesConfig[role] instanceof Array
+          ? servicesConfig[role]
+          : [servicesConfig[role], {}];
 
       if (this.supports(serviceItem[0])) {
         container.register(this.create(serviceItem[0], serviceItem[1]), role);
       } else {
-        throw new Error('Unsupported service in configuration: ' + serviceItem[0]);
+        throw new Error(
+          'Unsupported service in configuration: ' + serviceItem[0]
+        );
       }
     });
 

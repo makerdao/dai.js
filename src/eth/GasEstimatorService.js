@@ -2,12 +2,12 @@ import PublicService from '../core/PublicService';
 import Web3Service from './Web3Service';
 
 export default class GasEstimatorService extends PublicService {
-
-  static buildTestService(web3 = null){
+  static buildTestService(web3 = null) {
     web3 = web3 || Web3Service.buildTestService();
     const service = new GasEstimatorService();
 
-    service.manager()
+    service
+      .manager()
       .inject('log', web3.get('log'))
       .inject('web3', web3);
 
@@ -16,11 +16,11 @@ export default class GasEstimatorService extends PublicService {
 
   constructor(name = 'gasEstimator') {
     super(name, ['web3', 'log']);
-    this._percentage = null; 
+    this._percentage = null;
     this._absolute = null;
   }
 
-  estimateGasLimit(transaction){
+  estimateGasLimit(transaction) {
     if (this._percentage === null && this._absolute === null) {
       throw new Error('no gas limit policy set');
     }
@@ -28,9 +28,9 @@ export default class GasEstimatorService extends PublicService {
     return Promise.all([
       this.get('web3').eth.getBlock('latest'),
       this.get('web3').eth.estimateGas(transaction)
-
-    ]).then( web3Data => {
-      const blockLimit = web3Data[0].gasLimit, estimate = web3Data[1];
+    ]).then(web3Data => {
+      const blockLimit = web3Data[0].gasLimit,
+        estimate = web3Data[1];
 
       if (this._percentage === null && this._absolute !== null) {
         return Math.min(this._absolute, blockLimit);
@@ -44,14 +44,14 @@ export default class GasEstimatorService extends PublicService {
     });
   }
 
-  setPercentage(number){
+  setPercentage(number) {
     if (number <= 0) {
       throw new Error('gas limit percentage must be greater than 0');
     }
     this._percentage = number;
   }
 
-  setAbsolute(number){
+  setAbsolute(number) {
     if (number <= 0) {
       throw new Error('gas limit must be greater than 0');
     }
@@ -59,19 +59,19 @@ export default class GasEstimatorService extends PublicService {
     this._absolute = number;
   }
 
-  removePercentage(){
+  removePercentage() {
     this._percentage = null;
   }
 
-  removeAbsolute(){
+  removeAbsolute() {
     this._absolute = null;
   }
 
-  getPercentage(){
+  getPercentage() {
     return this._percentage;
   }
 
-  getAbsolute(){
+  getAbsolute() {
     return this._absolute;
   }
 }

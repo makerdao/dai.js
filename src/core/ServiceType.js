@@ -3,14 +3,14 @@ import ServiceState from './ServiceState';
 const ServiceType = {
   LOCAL: 'LOCAL',
   PUBLIC: 'PUBLIC',
-  PRIVATE: 'PRIVATE',
+  PRIVATE: 'PRIVATE'
 };
 
 const localServiceLifeCycle = {
   CREATED: [ServiceState.INITIALIZING],
   INITIALIZING: [ServiceState.CREATED, ServiceState.READY],
   READY: [ServiceState.ERROR],
-  ERROR: [],
+  ERROR: []
 };
 
 const publicServiceLifeCycle = {
@@ -19,7 +19,7 @@ const publicServiceLifeCycle = {
   OFFLINE: [ServiceState.CONNECTING],
   CONNECTING: [ServiceState.OFFLINE, ServiceState.READY],
   READY: [ServiceState.OFFLINE, ServiceState.ERROR],
-  ERROR: [],
+  ERROR: []
 };
 
 const privateServiceLifeCycle = {
@@ -30,7 +30,7 @@ const privateServiceLifeCycle = {
   ONLINE: [ServiceState.OFFLINE, ServiceState.AUTHENTICATING],
   AUTHENTICATING: [ServiceState.ONLINE, ServiceState.READY],
   READY: [ServiceState.OFFLINE, ServiceState.ONLINE, ServiceState.ERROR],
-  ERROR: [],
+  ERROR: []
 };
 
 const serviceTypeTransitions = {
@@ -39,7 +39,4 @@ const serviceTypeTransitions = {
   PRIVATE: privateServiceLifeCycle
 };
 
-export {
-  ServiceType as default,
-  serviceTypeTransitions
-};
+export { ServiceType as default, serviceTypeTransitions };

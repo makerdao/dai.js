@@ -56,3 +56,7 @@ node test-oasis-deployment.js
 # See the list at the bottom of the in the deploy script.
 # Proceed to the command given as arguments.
 "$@"
+
+# The testnet will continue to run with its deployed contracts
+# until the user confirms it should shut down.
+bash ./confirm-kill-testnet

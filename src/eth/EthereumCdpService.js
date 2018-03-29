@@ -1,15 +1,13 @@
 import PrivateService from '../core/PrivateService';
 import SmartContractService from '../../src/eth/SmartContractService';
-import tokens from '../../contracts/tokens';
+// import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
 
 export default class EthereumCdpService extends PrivateService {
-
   static buildTestService() {
     const service = new EthereumCdpService();
     const smartContract = SmartContractService.buildTestService();
-    service.manager()
-      .inject('smartContract', smartContract);
+    service.manager().inject('smartContract', smartContract);
     return service;
   }
 
@@ -27,6 +25,7 @@ export default class EthereumCdpService extends PrivateService {
       ethersUtils = contract.get('web3').ethersUtils();
 
     // Need to get the cdp ID, so set up a event listener for the LogNewCup event
+    // eslint-disable-next-line
     const eventPromise = new Promise((resolve, reject) => {
       tubContract.onlognewcup = function(address, cdpIdBytes32) {
         if (ethersSigner.address.toLowerCase() == address.toLowerCase()) {
@@ -34,7 +33,7 @@ export default class EthereumCdpService extends PrivateService {
           resolve(cdpId);
           this.removeListener();
         }
-      }
+      };
     });
 
     tubContract.open();

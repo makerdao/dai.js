@@ -1,5 +1,5 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
-import contracts from '../../contracts/contracts';
+// import contracts from '../../contracts/contracts';
 
 test('should open a CDP and return cdp ID', done => {
   const service = EthereumCdpService.buildTestService();

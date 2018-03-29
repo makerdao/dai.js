@@ -1,4 +1,4 @@
-import decentralizedOasisWithoutProxies from './configs/decentralized-oasis-without-proxies';
+import decentralizedOasisWithoutProxies from './configs/decentralized-oasis-without-proxies.json';
 
 class ConfigPresetNotFoundError extends Error {
   constructor(message) {
@@ -12,10 +12,10 @@ export default class ConfigFactory {
    */
   static create(presetName) {
     switch (presetName) {
-    case 'decentralized-oasis-without-proxies':
-      return decentralizedOasisWithoutProxies;
-    default:
-      throw new ConfigPresetNotFoundError(presetName);
+      case 'decentralized-oasis-without-proxies':
+        return decentralizedOasisWithoutProxies;
+      default:
+        throw new ConfigPresetNotFoundError(presetName);
     }
   }
 }
