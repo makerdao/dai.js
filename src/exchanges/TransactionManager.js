@@ -28,47 +28,21 @@ class TransactionManager {
    * @returns {Promise}
    */
   pending() {
-
-    if (
-      this._state.inState(oasisOrderState.initialized)
-    ) {
-        // Enter the confirm state
-        this._state.transitionTo(oasisOrderState.pending);
-
-      }
-
-    //should this return anything?
+    this._state.transitionTo(oasisOrderState.pending);
   }
 
   /**
    * @returns {Promise}
    */
   confirm() {
-
-    if (
-      this._state.inState(oasisOrderState.pending)
-    ) {
-        // Enter the confirm state
-        this._state.transitionTo(oasisOrderState.confirmed);
-
-      }
-
-    //should this return anything?
+    this._state.transitionTo(oasisOrderState.confirmed);
   }
 
   /**
    * @returns {Promise}
    */
   complete() {
-
-    if (
-      this._state.inState(oasisOrderState.confirmed)
-    ) {
-        // Enter the confirm state
-        this._state.transitionTo(oasisOrderState.completed);
-      }
-
-    //should this return anything?
+    this._state.transitionTo(oasisOrderState.completed);
   }
 
   error(){
