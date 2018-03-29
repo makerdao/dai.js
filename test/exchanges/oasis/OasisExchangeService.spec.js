@@ -3,7 +3,7 @@ import Web3Service from '../../../src/eth/Web3Service';
 import tokens from '../../../contracts/tokens';
 import { utils } from 'ethers';
 import testAccountProvider from '../../../src/utils/TestAccountProvider';
-import orderType from '../../../src/exchanges/orderType';
+import orderStyle from '../../../src/exchanges/orderStyle';
 import contracts from '../../../contracts/contracts';
 
 test('sell Dai for WETH', (done) => setTimeout(() => {
@@ -37,16 +37,39 @@ test('get fees', (done) => setTimeout(() => {
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
-      return oasisOrder.fees();
-    })
-    .then(fees => {
-      //expect(fees.toNumber()).toBeGreaterThan(0);
-      done();
+      oasisOrder.state().onCompleted(()=>{
+        expect(parseFloat(oasisOrder.fees(),10)).toBeGreaterThan(0);
+        done();
+      });
     });
 },
-25000),
-50000
+15000),
+30000
 );
+
+/*
+test.only('transaction state machine works', (done) => setTimeout(() => {
+  const oasisExchangeService = OasisExchangeService.buildKovanService();
+  let oasisOrder = null;
+  oasisExchangeService.manager().authenticate()
+    .then(() => {
+      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      oasisOrder.state().onPending(()=>{
+        //expect isPending to be true
+      });
+      oasisOrder.state().onConfirmed(()=>{
+        //expect is confirmed to be true
+      });
+      oasisOrder.state().onCompleted(()=>{
+        //expect is completed to be true
+      });
+      done()
+    });
+},
+15000),
+30000
+);
+*/
 
 test('get fillAmount sellDai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
@@ -54,11 +77,10 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
-      return oasisOrder.fillAmount();
-    })
-    .then(fillAmount => {
-      //console.log('fillAmount (sell Dai): ', fillAmount);
-      done();
+      oasisOrder.state().onCompleted(()=>{
+        expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
+        done();
+      });
     });
 },
 15000),
@@ -83,7 +105,7 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
 30000
 );*/
 
-test.only('buy Dai with WETH', (done) => setTimeout(() => {
+test('buy Dai with WETH', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -113,16 +135,17 @@ test('test keccak', (done) => setTimeout(() => {
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(()=>{
-      const string = 'LogTrade(uint256,address,uint256,address)';
+      //const string = 'LogTrade(uint256,address,uint256,address)';
+      const string = 'LogTake(bytes32,bytes32,address,address,address,address,uint128,uint128,uint64)';
       const hex = oasisExchangeService.get('web3')._web3.toHex(string);
-        console.log(utils.keccak256(hex)); // 0x819e390338feffe95e2de57172d6faf337853dfd15c7a09a32d76f7fd2443875
+        console.log(utils.keccak256(hex));
       done();
     });
 },
 1000),
 3000
-);
-*/
+);*/
+
 
 /*
 test('sell Dai on testnet', (done) => setTimeout(() => {
