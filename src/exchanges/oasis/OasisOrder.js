@@ -76,6 +76,7 @@ export default class OasisOrder {
     return this._timeStampMined;
   }
 
+
   fees(){
     return this._fees;
   }
