@@ -1,9 +1,9 @@
 import OasisExchangeService from '../../../src/exchanges/oasis/OasisExchangeService';
-import Web3Service from '../../../src/eth/Web3Service';
+// import Web3Service from '../../../src/eth/Web3Service';
 import tokens from '../../../contracts/tokens';
 import { utils } from 'ethers';
-import testAccountProvider from '../../../src/utils/TestAccountProvider';
-import orderStyle from '../../../src/exchanges/orderStyle';
+// import testAccountProvider from '../../../src/utils/TestAccountProvider';
+// import orderStyle from '../../../src/exchanges/orderStyle';
 import contracts from '../../../contracts/contracts';
 
 test('sell Dai for WETH', (done) => setTimeout(() => {
@@ -22,7 +22,7 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
       //console.log('fees: ', fees);
       return fees;
     })
-    .then(minedTx=>{
+    .then(minedTx=>{ // eslint-disable-line
       //console.log('minedTx:', minedTx);
       done();
     });
@@ -113,7 +113,7 @@ test('buy Dai with WETH', (done) => setTimeout(() => {
       const wethToken = oasisExchangeService.get('ethereumToken').getToken(tokens.WETH);
       return wethToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).address);
     })
-    .then(tx => {
+    .then(tx => { // eslint-disable-line
       //console.log('weth approval tx:', tx);
       oasisOrder = oasisExchangeService.buyDai(utils.parseEther('0.01'), tokens.WETH);
       return oasisOrder._transaction;

@@ -2,6 +2,7 @@ import StateMachine from '../core/StateMachine';
 import oasisOrderState from './oasis/oasisOrderState';
 import OrderType, { orderTypeTransitions } from './orderTransitions';
 
+// eslint-disable-next-line
 function _promisify(unsafeCallback) {
   return new Promise((resolve, reject) => {
     try {

@@ -6,7 +6,7 @@ import OasisOrder from './OasisOrder';
 import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
-import testAccountProvider from '../../../src/utils/TestAccountProvider';
+// import testAccountProvider from '../../../src/utils/TestAccountProvider';
 
 export default class OasisExchangeService extends PrivateService {
   static buildKovanService() {
