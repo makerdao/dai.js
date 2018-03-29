@@ -1,4 +1,4 @@
-import oasisOrderStatus from './oasis/oasisOrderState';
+import oasisOrderStatus from './oasis/OasisOrderState';
 
 const OrderType = {
   oasis: 'oasis'
