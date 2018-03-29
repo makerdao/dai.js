@@ -103,7 +103,7 @@ class ServiceManagerBase {
       this._state.inState([
         ServiceState.CREATED,
         ServiceState.INITIALIZING,
-        ServiceState.OFFLINE,
+        ServiceState.OFFLINE
       ]) &&
       this._connectPromise === null
     ) {
@@ -153,7 +153,7 @@ class ServiceManagerBase {
         ServiceState.INITIALIZING,
         ServiceState.OFFLINE,
         ServiceState.CONNECTING,
-        ServiceState.ONLINE,
+        ServiceState.ONLINE
       ]) &&
       this._authPromise === null
     ) {
@@ -212,7 +212,7 @@ class ServiceManagerBase {
   isInitialized() {
     return !this._state.inState([
       ServiceState.CREATED,
-      ServiceState.INITIALIZING,
+      ServiceState.INITIALIZING
     ]);
   }
 
@@ -225,7 +225,7 @@ class ServiceManagerBase {
       : this._state.inState([
           ServiceState.ONLINE,
           ServiceState.AUTHENTICATING,
-          ServiceState.READY,
+          ServiceState.READY
         ]);
   }
 
@@ -377,7 +377,7 @@ class ServiceManagerBase {
       this._state.inState([
         ServiceState.READY,
         ServiceState.ONLINE,
-        ServiceState.CONNECTING,
+        ServiceState.CONNECTING
       ])
     ) {
       this._authPromise = null;

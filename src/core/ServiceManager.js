@@ -163,5 +163,5 @@ export {
   ServiceManager as default,
   InvalidServiceError,
   UnknownDependencyError,
-  DependencyNotResolvedError,
+  DependencyNotResolvedError
 };

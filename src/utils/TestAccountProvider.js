@@ -62,7 +62,7 @@ class TestAccountProvider {
 
     return {
       address: this._accounts.addresses[i],
-      key: '0x' + this._accounts.keys[i],
+      key: '0x' + this._accounts.keys[i]
     };
   }
 }

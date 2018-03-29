@@ -6,7 +6,7 @@ const ServiceState = {
   ONLINE: 'ONLINE',
   AUTHENTICATING: 'AUTHENTICATING',
   READY: 'READY',
-  ERROR: 'ERROR',
+  ERROR: 'ERROR'
 };
 
 export default ServiceState;

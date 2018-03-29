@@ -27,7 +27,7 @@ export default class GasEstimatorService extends PublicService {
 
     return Promise.all([
       this.get('web3').eth.getBlock('latest'),
-      this.get('web3').eth.estimateGas(transaction),
+      this.get('web3').eth.estimateGas(transaction)
     ]).then(web3Data => {
       const blockLimit = web3Data[0].gasLimit,
         estimate = web3Data[1];

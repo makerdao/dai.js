@@ -18,7 +18,7 @@ const _services = {
   GasEstimatorService,
   //OasisExchangeService,
   TimerService,
-  NullLogger,
+  NullLogger
 };
 
 export default class DefaultServiceProvider {

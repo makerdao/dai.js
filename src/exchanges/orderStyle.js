@@ -1,5 +1,5 @@
 const enums = {
   market: 'market',
-  limit: 'limit',
+  limit: 'limit'
 };
 export default enums;
