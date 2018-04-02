@@ -71,6 +71,23 @@ export default class SmartContractService extends PublicService {
     return ethersUtils.hexlify(data);
   }
 
+  bytes32ToNumber(bytes32) {
+    const ethersUtils = this.get('web3').ethersUtils();
+    return ethersUtils.bigNumberify(bytes32).toNumber();
+  }
+
+  numberToBytes32(num) {
+    const ethersUtils = this.get('web3').ethersUtils();
+    return (
+      '0x' +
+      ethersUtils
+        .bigNumberify(num)
+        .toHexString()
+        .substring(2)
+        .padStart(64, '0')
+    );
+  }
+
   _selectContractVersion(mapping, version) {
     if (version === null) {
       version = Math.max(...mapping.map(info => info.version));

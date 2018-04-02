@@ -52,4 +52,12 @@ export default class EthereumCdpService extends PrivateService {
       .then(transaction => ethersProvider.waitForTransaction(transaction.hash))
       .then(() => {});
   }
+
+  getCdpInfo(cdpId) {
+    const contract = this.get('smartContract'),
+      tubContract = contract.getContractByName(contracts.TUB);
+
+    const hexCdpId = contract.numberToBytes32(cdpId);
+    return tubContract.cups(hexCdpId);
+  }
 }
