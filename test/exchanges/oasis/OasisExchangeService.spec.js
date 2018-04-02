@@ -104,7 +104,6 @@ test('get fillAmount buyDai', (done) =>  {
 },
 30000
 );
-
 /*
 test('test keccak', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
@@ -152,4 +151,3 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
 2000),
 4000
 );
-*/
