@@ -6,6 +6,29 @@ import { utils } from 'ethers';
 // import orderStyle from '../../../src/exchanges/orderStyle';
 import contracts from '../../../contracts/contracts';
 
+
+beforeAll(()=>{
+    const oasisExchangeService = OasisExchangeService.buildTestService();
+    let oasisOrder = null;
+    oasisExchangeService.manager().authenticate()
+      .then(()=> {
+        const ethToken = oasisExchangeService.get('ethereumToken').getToken(tokens.ETH);
+        return ethToken.balanceOf(oasisExchangeService.get('web3').ethersSigner().address);
+      })
+      .then((balance) => {
+        const ethereumTokenService = oasisExchangeService.get('ethereumToken');
+        const wethToken = ethereumTokenService.getToken(tokens.WETH);
+        wethToken.deposit(utils.parseEther('2.0'));
+        const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
+        wethToken.approveUnlimited(oasisContract.address);
+        const wethAddress = wethToken.address();
+        const daiAddress = ethereumTokenService.getToken(tokens.DAI).address();
+        var overrideOptions = { gasLimit: 5000000};
+        oasisOrder = oasisExchangeService.offer(utils.parseEther('1.0'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, overrideOptions);
+        return oasisOrder;
+      })
+}, 30000);
+/*
 test('sell Dai for WETH', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
@@ -30,8 +53,9 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
 15000),
 30000
 );
+*/
 
-test('get fees', (done) => setTimeout(() => {
+test('get fees sell Dai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -87,7 +111,7 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
 30000
 );
 
-/*test('get fillAmount buyDai', (done) => setTimeout(() => {
+test('get fillAmount buyDai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -103,8 +127,8 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
 },
 15000),
 30000
-);*/
-
+);
+/*
 test('buy Dai with WETH', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
@@ -177,38 +201,3 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
 4000
 );
 */
-
-
-/*
-attempting to create limit order on testnet, not working
-test.only('create buy order on testnet', (done) => setTimeout(() => {
-    const oasisExchangeService = OasisExchangeService.buildTestService();
-    let oasisOrder = null;
-    oasisExchangeService.manager().authenticate()
-      .then(()=> {
-        const ethToken = oasisExchangeService.get('ethereumToken').getToken(tokens.ETH);
-        return ethToken.balanceOf(oasisExchangeService.get('web3').ethersSigner().address);
-      })
-      .then((balance) => {
-        console.log('balance: ', balance.toString());
-        const ethereumTokenService = oasisExchangeService.get('ethereumToken');
-        const wethToken = ethereumTokenService.getToken(tokens.WETH);
-        wethToken.deposit(utils.parseEther('2.0'));
-        const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
-        wethToken.approveUnlimited(oasisContract.address);
-        const wethAddress = wethToken.address();
-        const daiAddress = ethereumTokenService.getToken(tokens.DAI).address();
-        var overrideOptions = { gasLimit: 5000000};
-        oasisOrder = oasisExchangeService.offer(utils.parseEther('1.0'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, false, overrideOptions);
-        return oasisOrder._transaction;
-      })
-      .then(tx => {
-        console.log(tx);
-        expect(tx.data.length).toBeGreaterThan(20);
-        expect(oasisOrder.type()).toBe('market');
-        done();
-      });
-  },
-  15000),
-  30000
-);*/

@@ -87,10 +87,26 @@ export default class OasisExchangeService extends PrivateService {
     );
   }
 
-  /*offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos){
-    const oasisContract = this.get('smartContract').getContractByName(contracts.MAKER_OTC);
-    return new OasisOrder(oasisContract.offer(payAmount, payTokenAddress, buyAmount, buyTokenAddress, pos));
-  }*/
+  offer(
+    payAmount,
+    payTokenAddress,
+    buyAmount,
+    buyTokenAddress,
+    pos,
+    overrides
+  ) {
+    const oasisContract = this.get('smartContract').getContractByName(
+      contracts.MAKER_OTC
+    );
+    return oasisContract.offer(
+      payAmount,
+      payTokenAddress,
+      buyAmount,
+      buyTokenAddress,
+      pos,
+      overrides
+    );
+  }
 
   buyDai(daiAmount, tokenSymbol, maxFillAmount = -1) {
     const oasisContract = this.get('smartContract').getContractByName(
