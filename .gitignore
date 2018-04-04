@@ -7,3 +7,4 @@ npm-debug.log
 package-lock.json
 *.sw*
 /out
+src/.DS_Store
