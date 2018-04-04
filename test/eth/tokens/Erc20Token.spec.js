@@ -41,15 +41,18 @@ test('approve an ERC20 (MKR) allowance', (done) => {
     token = ethereumTokenService.getToken(tokens.MKR);
     return token.approve(spender, allowance);
   })
-    .then(transaction => {
+    .then(transaction => { //does this not need to be a promise??
       expect(!!transaction).toBe(true);
-      return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
+      return transaction.state().onConfirmedPromise();
+    })
+    .then(()=>{
+        return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
     })
     .then(result => {
       expect(result.toString()).toBe(allowance);
       done();
     });
-});
+}, 10000);
 
 test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
@@ -63,6 +66,7 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
   })
     .then(transaction => {
       expect(!!transaction).toBe(true);
+      done();
       return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
     })
     .then(allowance => {

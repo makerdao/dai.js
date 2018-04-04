@@ -1,7 +1,10 @@
+import TransactionObject from '../TransactionObject';
+
 export default class Erc20Token {
 
-  constructor(contract) {
+  constructor(contract, ethersProvider) {
     this._contract = contract;
+    this._ethersProvider = ethersProvider;
   }
 
   allowance(tokenOwner, spender){
@@ -17,7 +20,8 @@ export default class Erc20Token {
   }
 
   approve(spender, value){
-    return this._contract.approve(spender, value);
+    //return this._contract.approve(spender, value);
+    return new TransactionObject(this._contract.approve(spender, value), this._ethersProvider);
   }
 
   approveUnlimited(spender){

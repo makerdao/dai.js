@@ -70,7 +70,7 @@ export default class EthereumTokenService extends PrivateService {
         return new PethToken(contract, tub);
       }
 
-      return new Erc20Token(contract);
+      return new Erc20Token(contract, this.get('web3').ethersProvider());
     }
   }
 

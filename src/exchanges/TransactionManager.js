@@ -1,5 +1,5 @@
 import StateMachine from '../core/StateMachine';
-import oasisOrderState from './oasis/oasisOrderState';
+import oasisOrderState from './oasis/OasisOrderState';
 import OrderType, { orderTypeTransitions } from './orderTransitions';
 
 // eslint-disable-next-line
@@ -19,8 +19,9 @@ class TransactionManager {
    * @param connect {function|null}
    * @param auth {function|null}
    */
-  constructor(type = OrderType.oasis) {
+  constructor(type = OrderType.oasis, wrapperObject) {
     this._type = type;
+    this.wrapperObject = wrapperObject;
     this._state = new StateMachine(
       oasisOrderState.initialized,
       orderTypeTransitions[this._type]
@@ -30,25 +31,25 @@ class TransactionManager {
   /**
    * @returns {Promise}
    */
-  pending() {
+  _pending() {
     this._state.transitionTo(oasisOrderState.pending);
   }
 
   /**
    * @returns {Promise}
    */
-  confirm() {
+  _confirm() {
     this._state.transitionTo(oasisOrderState.confirmed);
   }
 
   /**
    * @returns {Promise}
    */
-  complete() {
+  _complete() {
     this._state.transitionTo(oasisOrderState.completed);
   }
 
-  error() {
+  _error() {
     this._state.transitionTo(oasisOrderState.error);
   }
 
@@ -123,16 +124,23 @@ class TransactionManager {
    * @returns {TransactionManager}
    */
   onConfirmed(handler) {
-    this._state.onStateChanged((oldState, newState) => {
+    return new Promise((resolve,reject) => {
+      this._state.onStateChanged((oldState, newState) => {
       if (
         oldState === oasisOrderState.pending &&
         newState === oasisOrderState.confirmed
       ) {
-        handler();
+        handler(this.wrapperObject);
+        resolve(this.wrapperObject);
       }
     });
+    });
+  }
 
-    return this;
+  onConfirmedPromise(){
+    return new Promise((resolve,reject) => {
+         this.onConfirmed(resolve);
+    });
   }
 
   /**

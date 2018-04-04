@@ -1,18 +1,17 @@
 // import OasisExchangeService from './OasisExchangeService';
 import orderStyle from '../orderStyle';
-import orderState from './OasisOrderState';
 import OrderType from '../OrderTransitions';
 import { utils } from 'ethers';
 import TransactionManager from '../TransactionManager';
 
-export default class OasisOrder {
+export default class OasisOrder extends TransactionLifecycle{
   constructor(transaction, ethersProvider) {
+    super(OrderType.oasis, this);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._fillAmount = null;
     this._fees = null;
     this._error = null;
-    this._transactionState = new TransactionManager(OrderType.oasis);
     this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
     this._timeStampMined = null;
     this._getTransactionReceiptAndLogs();
@@ -28,11 +27,6 @@ export default class OasisOrder {
 
   fees() {
     return this._fees;
-  }
-
-  status() {
-    return this._state;
-    //include every state that a tx can be in, pending, succeeded, reverted, transaction mined by execution failed
   }
 
   type() {
@@ -66,7 +60,7 @@ export default class OasisOrder {
         },
         // eslint-disable-next-line
         reason => {
-          this._error = null;
+          this._error = reason;
           this._transactionState.error();
         }
       )
@@ -90,7 +84,7 @@ export default class OasisOrder {
           this._ethersProvider.getTransactionReceipt(tx.hash)
         ]);
       }, reason => {
-          this._error = null;
+          this._error = reason;
           this._transactionState.error();
         })
       .then(filterResultsAndReceipt => {
@@ -114,7 +108,7 @@ export default class OasisOrder {
         //console.log('this._fillAmount', this._fillAmount);
         this._transactionState.complete();
       }, reason => {
-          this._error = null;
+          this._error = reason;
           this._transactionState.error();
         });
   }

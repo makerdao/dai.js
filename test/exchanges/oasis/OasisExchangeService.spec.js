@@ -12,10 +12,6 @@ beforeAll(()=>{
     let oasisOrder = null;
     oasisExchangeService.manager().authenticate()
       .then(()=> {
-        const ethToken = oasisExchangeService.get('ethereumToken').getToken(tokens.ETH);
-        return ethToken.balanceOf(oasisExchangeService.get('web3').ethersSigner().address);
-      })
-      .then((balance) => {
         const ethereumTokenService = oasisExchangeService.get('ethereumToken');
         const wethToken = ethereumTokenService.getToken(tokens.WETH);
         wethToken.deposit(utils.parseEther('2.0'));
@@ -26,7 +22,7 @@ beforeAll(()=>{
         var overrideOptions = { gasLimit: 5000000};
         oasisOrder = oasisExchangeService.offer(utils.parseEther('1.0'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, overrideOptions);
         return oasisOrder;
-      })
+      });
 }, 30000);
 /*
 test('sell Dai for WETH', (done) => setTimeout(() => {
@@ -110,24 +106,23 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
 15000),
 30000
 );
-
+/*
 test('get fillAmount buyDai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.buyDai(utils.parseEther('0.01'), tokens.WETH);
-      console.log('oasisOrder: ', oasisOrder);
-      return oasisOrder.fillAmount();
-    })
-    .then(fillAmount => {
-      console.log('fillAmount (buy Dai): ', fillAmount);
-      done();
+      oasisOrder.state().onCompleted(()=>{
+        expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
+        done();
+      });
     });
 },
 15000),
 30000
-);
+);*/
+
 /*
 test('buy Dai with WETH', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
