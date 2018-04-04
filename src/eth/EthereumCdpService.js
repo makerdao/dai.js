@@ -42,10 +42,9 @@ export default class EthereumCdpService extends PrivateService {
   shutCdp(cdpId) {
     const contract = this.get('smartContract'),
       tubContract = contract.getContractByName(contracts.TUB),
-      ethersProvider = contract.get('web3').ethersProvider(),
-      ethersUtils = contract.get('web3').ethersUtils();
+      ethersProvider = contract.get('web3').ethersProvider();
 
-    const hexCdpId = ethersUtils.hexlify(cdpId);
+    const hexCdpId = contract.numberToBytes32(cdpId);
 
     return tubContract
       .shut(hexCdpId)

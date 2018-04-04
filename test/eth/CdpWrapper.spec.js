@@ -7,7 +7,7 @@ test('should create a cdp object with an authenticated service and a cdp id', do
     .then(() => {
       service.openCdp()
       .catch(err => {
-        done.fail(new Error('error opening CDP'))
+        done.fail(new Error('error opening CDP: ', err));
       })
       .then(cdpId => {
         const cdp = new CdpWrapper(service, cdpId);
@@ -18,4 +18,4 @@ test('should create a cdp object with an authenticated service and a cdp id', do
         done();
       });
     });
-}, 10000);
+});
