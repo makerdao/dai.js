@@ -62,12 +62,12 @@ export default class EthereumTokenService extends PrivateService {
         );
 
       if (symbol === tokens.WETH) {
-        return new WethToken(contract);
+        return new WethToken(contract, this.get('web3').ethersProvider());
       }
 
       if (symbol === tokens.PETH) {
         const tub = smartContractService.getContractByName(contracts.TUB);
-        return new PethToken(contract, tub);
+        return new PethToken(contract, tub, this.get('web3').ethersProvider());
       }
 
       return new Erc20Token(contract, this.get('web3').ethersProvider());

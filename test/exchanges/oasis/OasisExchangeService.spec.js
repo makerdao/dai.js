@@ -57,7 +57,7 @@ test('get fees sell Dai', (done) => setTimeout(() => {
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
-      oasisOrder.state().onCompleted(()=>{
+      oasisOrder.onMined(()=>{
         expect(parseFloat(oasisOrder.fees(),10)).toBeGreaterThan(0);
         done();
       });
@@ -97,7 +97,7 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
-      oasisOrder.state().onCompleted(()=>{
+      oasisOrder.onMined(()=>{
         expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
         done();
       });
@@ -113,7 +113,7 @@ test('get fillAmount buyDai', (done) => setTimeout(() => {
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.buyDai(utils.parseEther('0.01'), tokens.WETH);
-      oasisOrder.state().onCompleted(()=>{
+      oasisOrder.onMined(()=>{
         expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
         done();
       });

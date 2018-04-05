@@ -1,6 +1,8 @@
 import StateMachine from '../core/StateMachine';
-import oasisOrderState from './oasis/OasisOrderState';
-import OrderType, { orderTypeTransitions } from './orderTransitions';
+import transactionState from '../eth/TransactionState';
+import TransactionType, {
+  transactionTypeTransitions
+} from './TransactionTransitions';
 
 // eslint-disable-next-line
 function _promisify(unsafeCallback) {
@@ -19,12 +21,19 @@ class TransactionManager {
    * @param connect {function|null}
    * @param auth {function|null}
    */
-  constructor(type = OrderType.oasis, wrapperObject) {
+  constructor(type = TransactionType.oasis) {
+    /*super((resolve,reject)=>{
+      /*this.onMined(()=>{
+        resolve(this);
+      });
+      this.onError(()=>{
+        reject(this);
+      });*/
+    //});
     this._type = type;
-    this.wrapperObject = wrapperObject;
     this._state = new StateMachine(
-      oasisOrderState.initialized,
-      orderTypeTransitions[this._type]
+      transactionState.initialized,
+      transactionTypeTransitions[this._type]
     );
   }
 
@@ -32,25 +41,25 @@ class TransactionManager {
    * @returns {Promise}
    */
   _pending() {
-    this._state.transitionTo(oasisOrderState.pending);
+    this._state.transitionTo(transactionState.pending);
   }
 
   /**
    * @returns {Promise}
    */
-  _confirm() {
-    this._state.transitionTo(oasisOrderState.confirmed);
+  _mine() {
+    this._state.transitionTo(transactionState.mined);
   }
 
   /**
    * @returns {Promise}
    */
-  _complete() {
-    this._state.transitionTo(oasisOrderState.completed);
+  _finalize() {
+    this._state.transitionTo(transactionState.finalized);
   }
 
   _error() {
-    this._state.transitionTo(oasisOrderState.error);
+    this._state.transitionTo(transactionState.error);
   }
 
   /**
@@ -71,35 +80,35 @@ class TransactionManager {
    * @returns {boolean}
    */
   isInitialized() {
-    return this._state.inState(oasisOrderState.initialized);
+    return this._state.inState(transactionState.initialized);
   }
 
   /**
    * @returns {boolean}
    */
   isPending() {
-    return this._state.inState(oasisOrderState.pending);
+    return this._state.inState(transactionState.pending);
   }
 
   /**
    * @returns {boolean|null}
    */
-  isConfirmed() {
-    return this._state.inState(oasisOrderState.confirmed);
+  isMined() {
+    return this._state.inState(transactionState.mined);
   }
 
   /**
    * @returns {boolean|null}
    */
-  isCompleted() {
-    return this._state.inState(oasisOrderState.completed);
+  isFinalized() {
+    return this._state.inState(transactionState.finalized);
   }
 
   /**
    * @returns {boolean}
    */
   isError() {
-    return this._state.inState(oasisOrderState.error);
+    return this._state.inState(transactionState.error);
   }
 
   /**
@@ -109,8 +118,8 @@ class TransactionManager {
   onPending(handler) {
     this._state.onStateChanged((oldState, newState) => {
       if (
-        oldState === oasisOrderState.initialized &&
-        newState === oasisOrderState.pending
+        oldState === transactionState.initialized &&
+        newState === transactionState.pending
       ) {
         handler();
       }
@@ -123,23 +132,20 @@ class TransactionManager {
    * @param {function} handler
    * @returns {TransactionManager}
    */
-  onConfirmed(handler) {
-    return new Promise((resolve,reject) => {
+  onMined(handler = () => {}) {
+    return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
-      if (
-        oldState === oasisOrderState.pending &&
-        newState === oasisOrderState.confirmed
-      ) {
-        handler(this.wrapperObject);
-        resolve(this.wrapperObject);
-      }
-    });
-    });
-  }
-
-  onConfirmedPromise(){
-    return new Promise((resolve,reject) => {
-         this.onConfirmed(resolve);
+        if (
+          oldState === transactionState.pending &&
+          newState === transactionState.mined
+        ) {
+          handler(this);
+          resolve(this);
+        }
+        if (newState === transactionState.error) {
+          reject();
+        }
+      });
     });
   }
 
@@ -147,11 +153,11 @@ class TransactionManager {
    * @param {function} handler
    * @returns {TransactionManager}
    */
-  onCompleted(handler) {
+  onFinalized(handler) {
     this._state.onStateChanged((oldState, newState) => {
       if (
-        oldState === oasisOrderState.confirmed &&
-        newState === oasisOrderState.completed
+        oldState === transactionState.mined &&
+        newState === transactionState.finalized
       ) {
         handler();
       }
@@ -167,8 +173,11 @@ class TransactionManager {
   onError(handler) {
     this._state.onStateChanged((oldState, newState) => {
       if (
-        oldState === (oasisOrderState.pending || oasisOrderState.confirmed) &&
-        newState === oasisOrderState.error
+        oldState ===
+          (transactionState.initialized ||
+            transactionState.pending ||
+            transactionState.mined) &&
+        newState === transactionState.error
       ) {
         handler();
       }

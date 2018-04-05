@@ -1,9 +1,10 @@
 import { utils } from 'ethers';
-import TransactionManager from '../exchanges/TransactionManager';
+import TransactionLifeCycle from '../exchanges/TransactionLifeCycle';
+import transactionType from '../exchanges/TransactionTransitions';
 
-export default class TransactionObject extends TransactionLifecycle{
+export default class TransactionObject extends TransactionLifeCycle {
   constructor(transaction, ethersProvider) {
-    super(/*regular transaction type*/, this);
+    super(transactionType.transaction);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._error = null;
@@ -32,43 +33,45 @@ export default class TransactionObject extends TransactionLifecycle{
     return this._transactionState;
   }
 
-  _getTransactionReceiptAndLogs(){
-    let resolvedTransaction = null;
+  _getTransactionReceiptAndLogs() {
     let gasPrice = null;
     this._transaction
       .then(
         tx => {
           //console.log('tx', tx);
-          resolvedTransaction = tx;
           gasPrice = tx.gasPrice;
-          this._transactionState.pending();
+          super._pending();
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
           return this._ethersProvider.waitForTransaction(tx.hash);
         },
         // eslint-disable-next-line
         reason => {
           this._error = reason;
-          this._transactionState.error();
+          super._error();
         }
       )
-      .then(tx => {
-        this._timeStampMined = new Date();
-        this._transactionState.confirm();
-        return this._ethersProvider.getTransactionReceipt(tx.hash);
-      }, reason => {
+      .then(
+        tx => {
+          this._timeStampMined = new Date();
+          super._mine();
+          return this._ethersProvider.getTransactionReceipt(tx.hash);
+        },
+        reason => {
           this._error = reason;
-          this._transactionState.error();
-        })
-      .then(receipt => {
-        //console.log('filterResultsAndReceipt', filterResultsAndReceipt);
-        //console.log('transaction.hash', resolvedTransaction.hash);
-        this._fees = utils.formatEther(
-          receipt.gasUsed.mul(gasPrice)
-        );
-        this._transactionState.complete();
-      }, reason => {
+          super._error();
+        }
+      )
+      .then(
+        receipt => {
+          //console.log('filterResultsAndReceipt', filterResultsAndReceipt);
+          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+          this._mine();
+        },
+        reason => {
           this._error = reason;
-          this._transactionState.error();
-        });
+          super._error();
+        }
+      );
+    //after a certain number of blocks, call this._finalize
   }
 }

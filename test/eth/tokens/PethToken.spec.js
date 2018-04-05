@@ -40,28 +40,34 @@ test('should successfully join and exit PETH', done => {
     owner = tokenService.get('web3').defaultAccount();
     weth = tokenService.getToken(tokens.WETH);
     peth = tokenService.getToken(tokens.PETH);
+    const depositTransaction = weth.deposit(utils.parseEther('0.1'));
 
     return Promise.all([
       peth.balanceOf(owner),
       weth.approveUnlimited(tub.address),
-      weth.deposit(utils.parseEther('0.1'))
+      depositTransaction.onMined()
     ]);
   })
     .then(result => {
       initialBalance = parseFloat(utils.formatEther(result[0]));
-      return peth.join(utils.parseEther('0.1'));
+      const joinTransaction = peth.join(utils.parseEther('0.1'));
+      return joinTransaction.onMined();
     })
-    .then(() => Promise.all([
+    .then(() => {
+      const approveTransaction = peth.approveUnlimited(tub.address);
+      return Promise.all([
       peth.balanceOf(owner),
-      peth.approveUnlimited(tub.address)
-    ]))
+      approveTransaction.onMined()
+      ]);
+    })
     .then(result => {
       expect(parseFloat(utils.formatEther(result[0]))).toBeCloseTo(initialBalance + 0.1, 12);
-      return peth.exit(utils.parseEther('0.1'));
+      const exitTransaction = peth.exit(utils.parseEther('0.1'));
+      return exitTransaction.onMined();
     })
     .then(() => peth.balanceOf(owner))
     .then(balance => {
       expect(parseFloat(utils.formatEther(balance))).toBeCloseTo(initialBalance, 12);
       done();
     });
-});
+}, 25000);

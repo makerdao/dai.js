@@ -1,3 +1,5 @@
+import TransactionObject from '../TransactionObject';
+
 export default class EtherToken {
   constructor(web3Service, gasEstimatorService) {
     this._web3 = web3Service;
@@ -24,10 +26,14 @@ export default class EtherToken {
   }
 
   transfer(fromAddress, toAddress, transferValue) {
-    return this._web3.eth.sendTransaction({
-      from: fromAddress,
-      to: toAddress,
-      value: transferValue
-    });
+    //todo, this needs to be changed from a web3 call to a ethersJS call
+    return new TransactionObject(
+      this._web3.eth.sendTransaction({
+        from: fromAddress,
+        to: toAddress,
+        value: transferValue
+      }),
+      this._web3.ethersProvider()
+    );
   }
 }

@@ -50,16 +50,18 @@ test('wrap and unwrap ETH', (done) => {
     })
     .then(b => {
       originalBalance = parseBalance(b);
-      return token.deposit(utils.parseEther('0.1'));
+      const TransactionWrapper = token.deposit(utils.parseEther('0.1'));
+      return TransactionWrapper.onMined();
     })
     .then(() => token.balanceOf(owner))
     .then(b => {
       expect(parseBalance(b)).toBeCloseTo(originalBalance + 0.1, 12);
-      return token.withdraw(utils.parseEther('0.1'));
+      const TransactionWrapper = token.withdraw(utils.parseEther('0.1'));
+      return TransactionWrapper.onMined();
     })
     .then(() => token.balanceOf(owner))
     .then(b => {
       expect(parseBalance(b)).toBeCloseTo(originalBalance, 12);
       done();
     });
-});
+}, 15000);
