@@ -1,7 +1,7 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 import Cdp from '../../src/eth/Cdp';
 
-xtest('should create a cdp object with an authenticated service and a cdp id', done => {
+test('should create a cdp object with an authenticated service and a cdp id', done => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {
@@ -36,7 +36,7 @@ test('it should update state to \'pending\' when a CDP is shut', done => {
     })
 }, 20000);
 
-xtest('it should update state to \'mined\' when a CDP is shut', done => {
+test('it should update state to \'mined\' when a CDP is shut', done => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {
