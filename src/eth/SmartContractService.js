@@ -4,6 +4,7 @@ import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
+import injectPadStart from '../utils/injectPadStart';
 
 export default class SmartContractService extends PublicService {
   static buildTestService(web3 = null) {
@@ -21,6 +22,7 @@ export default class SmartContractService extends PublicService {
 
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log']);
+    injectPadStart();
   }
 
   getContractByAddressAndAbi(address, abi) {
