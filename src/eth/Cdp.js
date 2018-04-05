@@ -1,11 +1,7 @@
-export default class CdpWrapper {
+export default class Cdp {
   constructor(cdpService, cdpId) {
     this._service = cdpService;
     this._id = cdpId;
-  }
-
-  open() {
-    return this._service.openCdp();
   }
 
   shut() {

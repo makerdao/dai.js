@@ -1,5 +1,5 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
-import CdpWrapper from '../../src/eth/CdpWrapper';
+import Cdp from '../../src/eth/Cdp';
 
 test('should create a cdp object with an authenticated service and a cdp id', done => {
   const service = EthereumCdpService.buildTestService();
@@ -10,7 +10,7 @@ test('should create a cdp object with an authenticated service and a cdp id', do
         done.fail(new Error('error opening CDP: ', err));
       })
       .then(cdpId => {
-        const cdp = new CdpWrapper(service, cdpId);
+        const cdp = new Cdp(service, cdpId);
         
         expect(cdp).toBeDefined();
         expect(cdp._service).toBeDefined();
