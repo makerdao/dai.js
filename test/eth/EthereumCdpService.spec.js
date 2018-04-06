@@ -13,6 +13,7 @@ function openCdp(){
     });
 }
 
+// eslint-disable-next-line
 function lockPeth(amount){
   return openCdp().then(cdpId => {
     return createdCdpService.lockEth(cdpId, amount).then(() => {

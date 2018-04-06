@@ -13,7 +13,7 @@
 set -ex
 
 # Start a local testnet on port 2000; set to stop on exit.
-./node_modules/.bin/ganache-cli -i 999 -b 5 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >/dev/null & netpid=$!
+./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >/dev/null & netpid=$!
 trap "kill $netpid" EXIT
 
 # Wait until it's up, then use it for the deployment.

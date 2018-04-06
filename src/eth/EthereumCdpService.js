@@ -87,6 +87,7 @@ export default class EthereumCdpService extends PrivateService {
             ethersProvider.waitForTransaction(transaction.hash)
           )
           .then(() => {
+            // eslint-disable-next-line
             this.getCdpInfo(cdpId).then(result => console.log(result));
           });
       });
@@ -106,6 +107,7 @@ export default class EthereumCdpService extends PrivateService {
       .draw(hexCdpId, parsedAmount)
       .then(transaction => ethersProvider.waitForTransaction(transaction.hash))
       .then(() => {
+        // eslint-disable-next-line
         this.getCdpInfo(cdpId).then(result => console.log(result));
       });
   }
@@ -113,14 +115,9 @@ export default class EthereumCdpService extends PrivateService {
   shutCdp(cdpId) {
     const contract = this.get('smartContract'),
       tubContract = contract.getContractByName(contracts.TUB),
-      ethersProvider = contract.get('web3').ethersProvider();
+      hexCdpId = contract.numberToBytes32(cdpId);
 
-    const hexCdpId = contract.numberToBytes32(cdpId);
-
-    return tubContract
-      .shut(hexCdpId)
-      .then(transaction => ethersProvider.waitForTransaction(transaction.hash))
-      .then(() => {});
+    return tubContract.shut(hexCdpId);
   }
 
   getCdpInfo(cdpId) {

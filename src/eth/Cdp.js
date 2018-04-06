@@ -1,21 +1,21 @@
-import TransactionManager from '../exchanges/TransactionManager';
-import StateMachine from '../core/StateMachine';
 import TransactionObject from './TransactionObject';
-import { orderTypeTransitions } from '../exchanges/orderTransitions';
 
-export default class Cdp extends TransactionManager {
-  // no longer needs to extend TransactionManager
-  // Update through TransactionObject.super?
-  
+export default class Cdp {
   constructor(cdpService, cdpId) {
-    super();
     this._service = cdpService;
     this._id = cdpId;
+    this._ethersProvider = this._service
+      .get('smartContract')
+      .get('web3')._ethersProvider;
   }
 
   shut() {
-    super._pending();
-    return this._service.shutCdp(this._id);
+    const transaction = new TransactionObject(
+      this._service.shutCdp(this._id),
+      this._ethersProvider
+    );
+
+    return transaction;
   }
 
   getInfo() {

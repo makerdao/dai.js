@@ -20,34 +20,18 @@ test('should create a cdp object with an authenticated service and a cdp id', do
     });
 });
 
-test('it should update state to \'pending\' when a CDP is shut', done => {
+test('shut CDP should have an \'onMined\' event', done => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {
       service.openCdp()
       .then(cdpId => {
-        const cdp = new CdpWrapper(service, cdpId);
-        cdp.shut()
-        .then(() => {
-          expect(cdp._state._state).toBe('pending');
+        const cdp = new Cdp(service, cdpId);
+        const transaction = cdp.shut();
+        transaction.onMined().then(() => {
+          expect(transaction._state._state).toBe('mined');
           done();
-        })
-      })
-    })
+        });
+      });
+    });
 }, 20000);
-
-test('it should update state to \'mined\' when a CDP is shut', done => {
-  const service = EthereumCdpService.buildTestService();
-  service.manager().authenticate()
-    .then(() => {
-      service.openCdp()
-      .then(cdpId => {
-        const cdp = new CdpWrapper(service, cdpId);
-        cdp.shut()
-        .then(() => {
-          // trigger 'mined'
-          done();
-        })
-      })
-    })
-});

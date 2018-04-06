@@ -34,7 +34,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
-          //console.log('tx in TransactionObject', tx);
           gasPrice = tx.gasPrice;
           super._pending();
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
@@ -64,30 +63,12 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         receipt => {
-          //console.log('receipt', receipt);
-          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+          if (receipt) {
+            //console.log('filterResultsAndReceipt', filterResultsAndReceipt);
+            this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+          }
+
           this._mine();
-          const callback = currentBlockNumber => {
-            if (currentBlockNumber >= receipt.blockNumber + 1) {
-              //arbitrary number, in practice should probably be closer to 5-15 blocks
-              this._ethersProvider.getTransactionReceipt(txHash).then(
-                receiptCheck => {
-                  if (receiptCheck.blockHash === receipt.blockHash) {
-                    //console.log('about to finalize');
-                    super._finalize();
-                  } else {
-                    this._ethersProvider.once('block', callback);
-                  }
-                },
-                () => {
-                  this._ethersProvider.once('block', callback);
-                }
-              );
-            } else {
-              this._ethersProvider.once('block', callback);
-            }
-          };
-          //this._ethersProvider.once('block', callback);
         },
         reason => {
           //console.log('error getting tx receipt', reason);
