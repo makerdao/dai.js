@@ -13,7 +13,7 @@ export default class EthereumCdpService extends PrivateService {
     service
       .manager()
       .inject('smartContract', smartContract)
-      .inject('tokenService', tokenService);
+      .inject('token', tokenService);
 
     return service;
   }
@@ -22,7 +22,7 @@ export default class EthereumCdpService extends PrivateService {
    * @param {string} name
    */
   constructor(name = 'cdp') {
-    super(name, ['smartContract', 'tokenService']);
+    super(name, ['smartContract', 'token']);
   }
 
   openCdp() {
@@ -52,7 +52,7 @@ export default class EthereumCdpService extends PrivateService {
       tubContract = contract.getContractByName(contracts.TUB),
       ethersUtils = contract.get('web3').ethersUtils(),
       ethersProvider = contract.get('web3').ethersProvider(),
-      tokenService = this.get('tokenService');
+      tokenService = this.get('token');
 
     const parsedAmount = ethersUtils.parseEther(eth);
     const wethToken = tokenService.getToken(tokens.WETH);
