@@ -34,7 +34,7 @@ test('should be able to get a CDP\'s info', done => {
           expect(info).toBeDefined();
           expect(typeof info).toBe('object');
           done();
-        })
+        });
       });
     });
 }, 10000);
@@ -51,11 +51,11 @@ test('should be able to close a CDP', done => {
           cdp.getInfo().then(info => {
             expect((info['0'][0])).toBe('0');
             done();
-          })
+          });
         });
       });
     });
-}, 10000)
+}, 10000);
 
 test('should have an \'onMined\' event when a user shuts a CDP', done => {
   const service = EthereumCdpService.buildTestService();
