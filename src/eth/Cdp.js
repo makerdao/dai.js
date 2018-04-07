@@ -10,15 +10,20 @@ export default class Cdp {
   }
 
   shut() {
-    const transaction = new TransactionObject(
+    return new TransactionObject(
       this._service.shutCdp(this._id),
       this._ethersProvider
     );
-
-    return transaction;
   }
 
   getInfo() {
     return this._service.getCdpInfo(this._id);
+  }
+
+  convertEthToPeth(eth) {
+    return new TransactionObject(
+      this._service.convertEthToPeth(eth),
+      this._ethersProvider
+    );
   }
 }

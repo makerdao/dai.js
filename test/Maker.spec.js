@@ -15,7 +15,7 @@ beforeAll(() => {
     } catch (error) {
       reject(error.message);
     }
-  })
+  });
 });
 
 test('openCdp should open a CDP', done => {
