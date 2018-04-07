@@ -15,21 +15,8 @@ function _promisify(unsafeCallback) {
   });
 }
 
-class TransactionManager {
-  /**
-   * @param init {function|null}
-   * @param connect {function|null}
-   * @param auth {function|null}
-   */
-  constructor(type = TransactionType.oasis) {
-    /*super((resolve,reject)=>{
-      /*this.onMined(()=>{
-        resolve(this);
-      });
-      this.onError(()=>{
-        reject(this);
-      });*/
-    //});
+class TransactionLifeCycle {
+  constructor(type = TransactionType.transaction) {
     this._type = type;
     this._state = new StateMachine(
       transactionState.initialized,
@@ -37,23 +24,14 @@ class TransactionManager {
     );
   }
 
-  /**
-   * @returns {Promise}
-   */
   _pending() {
     this._state.transitionTo(transactionState.pending);
   }
 
-  /**
-   * @returns {Promise}
-   */
   _mine() {
     this._state.transitionTo(transactionState.mined);
   }
 
-  /**
-   * @returns {Promise}
-   */
   _finalize() {
     this._state.transitionTo(transactionState.finalized);
   }
@@ -62,16 +40,10 @@ class TransactionManager {
     this._state.transitionTo(transactionState.error);
   }
 
-  /**
-   * @returns {string}
-   */
   state() {
     return this._state.state();
   }
 
-  /**
-   * @returns {string}
-   */
   type() {
     return this._type;
   }
@@ -111,27 +83,23 @@ class TransactionManager {
     return this._state.inState(transactionState.error);
   }
 
-  /**
-   * @param {function} handler
-   * @returns {TransactionManager}
-   */
-  onPending(handler) {
-    this._state.onStateChanged((oldState, newState) => {
-      if (
-        oldState === transactionState.initialized &&
-        newState === transactionState.pending
-      ) {
-        handler();
-      }
+  onPending(handler = () => {}) {
+    return new Promise((resolve, reject) => {
+      this._state.onStateChanged((oldState, newState) => {
+        if (
+          oldState === transactionState.initialized &&
+          newState === transactionState.pending
+        ) {
+          handler(this);
+          resolve(this);
+        }
+        if (newState === transactionState.error) {
+          reject();
+        }
+      });
     });
-
-    return this;
   }
 
-  /**
-   * @param {function} handler
-   * @returns {TransactionManager}
-   */
   onMined(handler = () => {}) {
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
@@ -149,51 +117,44 @@ class TransactionManager {
     });
   }
 
-  /**
-   * @param {function} handler
-   * @returns {TransactionManager}
-   */
-  onFinalized(handler) {
-    this._state.onStateChanged((oldState, newState) => {
-      if (
-        oldState === transactionState.mined &&
-        newState === transactionState.finalized
-      ) {
-        handler();
-      }
+  onFinalized(handler = () => {}) {
+    return new Promise((resolve, reject) => {
+      this._state.onStateChanged((oldState, newState) => {
+        if (
+          oldState === transactionState.mined &&
+          newState === transactionState.finalized
+        ) {
+          handler(this);
+          resolve(this);
+        }
+        if (newState === transactionState.error) {
+          reject();
+        }
+      });
     });
-
-    return this;
   }
 
-  /**
-   * @param {function} handler
-   * @returns {TransactionManager}
-   */
-  onError(handler) {
-    this._state.onStateChanged((oldState, newState) => {
-      if (
-        oldState ===
-          (transactionState.initialized ||
-            transactionState.pending ||
-            transactionState.mined) &&
-        newState === transactionState.error
-      ) {
-        handler();
-      }
+  onError(handler = () => {}) {
+    return new Promise((resolve, reject) => {
+      this._state.onStateChanged((oldState, newState) => {
+        if (
+          oldState ===
+            (transactionState.initialized ||
+              transactionState.pending ||
+              transactionState.mined) &&
+          newState === transactionState.error
+        ) {
+          handler(this);
+          resolve(this);
+        }
+      });
     });
-
-    return this;
   }
 
-  /**
-   * @param {function} handler
-   * @returns {ServiceManagerBase}
-   */
   onStateChanged(handler) {
     this._state.onStateChanged(handler);
     return this;
   }
 }
 
-export default TransactionManager;
+export default TransactionLifeCycle;

@@ -30,7 +30,7 @@ test('get ERC20 (MKR) allowance of address', (done) => {
     });
 });
 
-test('approve an ERC20 (MKR) allowance', (done) => {
+test.only('approve an ERC20 (MKR) allowance', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
     spender = TestAccountProvider.nextAddress(),
     allowance = '10000';
@@ -75,7 +75,7 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
     });
 }, 10000);
 
-test.only('ERC20 transfer should move transferValue from sender to receiver', done => {
+test('ERC20 transfer should move transferValue from sender to receiver', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
     receiver = TestAccountProvider.nextAddress();
 
@@ -129,3 +129,5 @@ test('totalSupply() should increase when new tokens are minted', done => {
       done();
     });
 });
+
+

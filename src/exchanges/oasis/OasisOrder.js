@@ -47,7 +47,7 @@ export default class OasisOrder extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
-          //console.log('tx', tx);
+          console.log('tx in OasisOrder', tx);
           resolvedTransaction = tx;
           gasPrice = tx.gasPrice;
           super._pending();
@@ -87,7 +87,7 @@ export default class OasisOrder extends TransactionLifeCycle {
       )
       .then(
         filterResultsAndReceipt => {
-          //console.log('filterResultsAndReceipt', filterResultsAndReceipt);
+          console.log('receipt', filterResultsAndReceipt[1]);
           //console.log('transaction.hash', resolvedTransaction.hash);
           this._fees = utils.formatEther(
             filterResultsAndReceipt[1].gasUsed.mul(gasPrice)

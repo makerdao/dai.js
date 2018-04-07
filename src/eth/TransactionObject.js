@@ -4,13 +4,13 @@ import transactionType from '../exchanges/TransactionTransitions';
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(transaction, ethersProvider) {
-    super(transactionType.transaction);
+    super();
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._error = null;
     this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
     this._timeStampMined = null;
-    this._getTransactionReceiptAndLogs();
+    this._getTransactionReceipt();
   }
 
   timeStampSubmitted() {
@@ -29,16 +29,12 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._error;
   }
 
-  state() {
-    return this._transactionState;
-  }
-
-  _getTransactionReceiptAndLogs() {
+  _getTransactionReceipt() {
     let gasPrice = null;
     this._transaction
       .then(
         tx => {
-          //console.log('tx', tx);
+          console.log('tx in TransactionObject', tx);
           gasPrice = tx.gasPrice;
           super._pending();
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
@@ -46,6 +42,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         // eslint-disable-next-line
         reason => {
+          console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           super._error();
         }
@@ -53,21 +50,23 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         tx => {
           this._timeStampMined = new Date();
-          super._mine();
+          this._mine(); //remove this
           return this._ethersProvider.getTransactionReceipt(tx.hash);
         },
         reason => {
+          console.log('error calling waitForTransaction', reason);
           this._error = reason;
           super._error();
         }
       )
       .then(
         receipt => {
-          //console.log('filterResultsAndReceipt', filterResultsAndReceipt);
+          console.log('receipt', receipt);
           this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           this._mine();
         },
         reason => {
+          console.log('error getting tx receipt', reason);
           this._error = reason;
           super._error();
         }

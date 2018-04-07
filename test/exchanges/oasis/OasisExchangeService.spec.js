@@ -10,17 +10,23 @@ import contracts from '../../../contracts/contracts';
 beforeAll(()=>{
     const oasisExchangeService = OasisExchangeService.buildTestService();
     let oasisOrder = null;
+    let wethToken = null;
+    let ethereumTokenService = null;
     oasisExchangeService.manager().authenticate()
       .then(()=> {
-        const ethereumTokenService = oasisExchangeService.get('ethereumToken');
-        const wethToken = ethereumTokenService.getToken(tokens.WETH);
-        wethToken.deposit(utils.parseEther('2.0'));
+        ethereumTokenService = oasisExchangeService.get('ethereumToken');
+        wethToken = ethereumTokenService.getToken(tokens.WETH);
+        return wethToken.deposit(utils.parseEther('0.1')).onPending(); //I think doing this will make sure we don't use the same nonce twice
+      })
+      .then(()=>{
         const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
-        wethToken.approveUnlimited(oasisContract.address);
+        return wethToken.approveUnlimited(oasisContract.address).onPending();
+      })
+      .then(()=>{
         const wethAddress = wethToken.address();
         const daiAddress = ethereumTokenService.getToken(tokens.DAI).address();
         var overrideOptions = { gasLimit: 5000000};
-        oasisOrder = oasisExchangeService.offer(utils.parseEther('1.0'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, overrideOptions);
+        oasisOrder = oasisExchangeService.offer(utils.parseEther('0.05'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, overrideOptions);
         return oasisOrder;
       });
 }, 30000);
@@ -51,13 +57,14 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
 );
 */
 
-test('get fees sell Dai', (done) => setTimeout(() => {
+test.only('get fees sell Dai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
       oasisOrder.onMined(()=>{
+        console.log('fees', oasisOrder.fees());
         expect(parseFloat(oasisOrder.fees(),10)).toBeGreaterThan(0);
         done();
       });
