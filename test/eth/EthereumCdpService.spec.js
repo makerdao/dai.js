@@ -39,6 +39,7 @@ test('should check if a cdp for a specific id exists', done => {
       });
 }, 10000);
 
+// Needs to be updated to accomodate new txnObject return statement
 test('should open and then shut a CDP', done => {
   openCdp().then(cdpId => {
     createdCdpService.shutCdp(cdpId)

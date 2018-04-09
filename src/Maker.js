@@ -14,17 +14,12 @@ export default class Maker {
     });
   }
 
-  //
-
+  // TODO:
   openCdp() {
-    // this._authenticatedPromise.then(() => {
-    // const hash = this._container.service('cdp').openCdp().then((obj) => { return obj.hash });
-
-    // return new TransactionObject(
-    //   hash,
-    //   this._ethersProvider
-    // );
-    // });
+    // This method invokes new Cdp()
+    // then calls cdp.open(), enabling
+    // cdp lifecycle events while still
+    // allowing us to return the cdp itself
 
     return this._authenticatedPromise.then(() =>
       this._container.service('cdp').openCdp()
