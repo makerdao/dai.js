@@ -55,7 +55,7 @@ test('should be able to close a CDP', done => {
         });
       });
     });
-}, 10000);
+}, 20000);
 
 test('should have an \'onMined\' event when a user shuts a CDP', done => {
   const service = EthereumCdpService.buildTestService();
@@ -71,4 +71,4 @@ test('should have an \'onMined\' event when a user shuts a CDP', done => {
         });
       });
     });
-}, 20000);
+}, 10000);

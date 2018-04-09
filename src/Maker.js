@@ -14,6 +14,8 @@ export default class Maker {
     });
   }
 
+  //
+
   openCdp() {
     // this._authenticatedPromise.then(() => {
     // const hash = this._container.service('cdp').openCdp().then((obj) => { return obj.hash });
