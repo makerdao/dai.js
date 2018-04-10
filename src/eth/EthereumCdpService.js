@@ -5,6 +5,7 @@ import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import Cdp from './Cdp';
 import getNewCdpId from '../utils/getNewCdpId';
+import TransactionObject from './TransactionObject';
 
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
@@ -33,11 +34,13 @@ export default class EthereumCdpService extends PrivateService {
     // Need to get the cdp ID, so set up a event listener for the LogNewCup event
     const eventPromise = getNewCdpId(this);
 
-    this.get('smartContract')
+    const transaction = this.get('smartContract')
       .getContractByName(contracts.TUB)
       .open();
 
-    return eventPromise;
+    console.log(this);
+
+    return new TransactionObject(transaction, this);
   }
 
   convertEthToPeth(eth) {

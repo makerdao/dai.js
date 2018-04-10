@@ -6,13 +6,13 @@ let service;
 beforeAll(() => {
   service = EthereumCdpService.buildTestService();
   service.manager().authenticate();
-})
+});
 
 test('should create a CDP service automatically', done => {
   const newCdp = new Cdp();
   console.log(newCdp._ethersProvider);
   done();
-})
+});
 
 xtest('should create a cdp object with an authenticated service and a cdp id', done => {
   const service = EthereumCdpService.buildTestService();
@@ -38,7 +38,7 @@ xtest('should be able to open a new CDP', done => {
   const newCdp = new Cdp(service);
   console.log(newCdp);
   done();
-})
+});
 
 xtest('should be able to get a CDP\'s info', done => {
   const service = EthereumCdpService.buildTestService();
