@@ -9,6 +9,18 @@ export default class Cdp {
       .get('web3')._ethersProvider;
   }
 
+  open() {
+    return new Promise((resolve, reject) => {
+      try {
+        resolve(
+          new TransactionObject(this._service.openCdp(), this._ethersProvider)
+        );
+      } catch (error) {
+        reject(error.message);
+      }
+    });
+  }
+
   shut() {
     return new TransactionObject(
       this._service.shutCdp(this._id),

@@ -1,5 +1,6 @@
 import DefaultServiceProvider from './utils/DefaultServiceProvider';
 import TransactionObject from './eth/TransactionObject';
+import Cdp from './eth/Cdp';
 
 export default class Maker {
   constructor(config) {
@@ -21,8 +22,20 @@ export default class Maker {
     // cdp lifecycle events while still
     // allowing us to return the cdp itself
 
-    return this._authenticatedPromise.then(() =>
-      this._container.service('cdp').openCdp()
-    );
+    this._authenticatedPromise.then(() => {
+      // this._container.service('cdp').openCdp()
+      cdp.open().then(transaction => {
+        return new Promise((resolve, reject) => {
+          try {
+            resolve({
+              cdp: cdp,
+              transaction: transaction
+            });
+          } catch (error) {
+            reject(message.error);
+          }
+        });
+      });
+    });
   }
 }
