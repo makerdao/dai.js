@@ -3,8 +3,8 @@ import TransactionLifeCycle from '../exchanges/TransactionLifeCycle';
 import transactionType from '../exchanges/TransactionTransitions';
 
 export default class TransactionObject extends TransactionLifeCycle {
-  constructor(transaction, ethersProvider) {
-    super();
+  constructor(transaction, ethersProvider, businessObject=null) {
+    super(transactionType.transaction, businessObject);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._error = null;
@@ -31,10 +31,11 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionReceipt() {
     let gasPrice = null;
+    let txHash = null;
     this._transaction
       .then(
         tx => {
-          console.log('tx in TransactionObject', tx);
+          //console.log('tx in TransactionObject', tx);
           gasPrice = tx.gasPrice;
           super._pending();
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
@@ -49,12 +50,15 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         tx => {
+          //console.log('tx after waiting:', tx);
+          //console.log('tx.hash after waiting:', tx.hash);
+          txHash = tx.hash;
           this._timeStampMined = new Date();
           this._mine(); //remove this
           return this._ethersProvider.getTransactionReceipt(tx.hash);
         },
         reason => {
-          console.log('error calling waitForTransaction', reason);
+          //console.log('error calling waitForTransaction', reason);
           this._error = reason;
           super._error();
         }
@@ -62,6 +66,18 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         receipt => {
           console.log('receipt', receipt);
+          this._ethersProvider.removeAllListeners('block');
+          const callback = currentBlockNumber=> {
+            if(currentBlockNumber===receipt.blockNumber + 1){ //arbitrary number, in practice should probably be closer to 5-15 blocks
+              this._ethersProvider.getTransactionReceipt(txHash).then(receiptCheck=>{
+                //check if receipt block hash and/or block number is the same
+                super._finalize();
+                console.log('receiptCheck', receiptCheck);
+              });
+            }
+          };
+          this._ethersProvider.removeListener('block', callback);
+          this._ethersProvider.on('block', callback);
           this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           this._mine();
         },
@@ -71,6 +87,5 @@ export default class TransactionObject extends TransactionLifeCycle {
           super._error();
         }
       );
-    //after a certain number of blocks, call this._finalize
   }
 }

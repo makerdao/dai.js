@@ -62,6 +62,7 @@ export default class OasisOrder extends TransactionLifeCycle {
       )
       .then(
         tx => {
+          console.log('tx in OasisOrder after waiting', tx);
           this._timeStampMined = new Date();
           //console.log('txHash after mined', tx);
           const filter = {

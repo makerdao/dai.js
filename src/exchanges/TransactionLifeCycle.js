@@ -138,12 +138,9 @@ class TransactionLifeCycle {
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
         if (
-          oldState ===
-            (transactionState.initialized ||
-              transactionState.pending ||
-              transactionState.mined) &&
           newState === transactionState.error
         ) {
+          console.log("about to call onError handler/resolve");
           handler(this);
           resolve(this);
         }
