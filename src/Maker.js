@@ -14,8 +14,8 @@ export default class Maker {
   }
 
   openCdp() {
-    return this._authenticatedPromise.then(() => {
-      return this._container.service('cdp').openCdp();
-    });
+    return this._authenticatedPromise.then(() =>
+      this._container.service('cdp').openCdp()
+    );
   }
 }

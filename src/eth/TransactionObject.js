@@ -5,12 +5,7 @@ import Cdp from './Cdp';
 import getNewCdpId from '../utils/getNewCdpId';
 
 export default class TransactionObject extends TransactionLifeCycle {
-  constructor(
-    transaction,
-    ethersProvider,
-    businessObject = null,
-    service = null
-  ) {
+  constructor(transaction, ethersProvider, businessObject = null) {
     super(transactionType.transaction, businessObject);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
@@ -18,7 +13,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
     this._timeStampMined = null;
     this._businessObject = businessObject;
-    this._service = service;
     this._getTransactionReceipt();
   }
 
@@ -40,6 +34,7 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionReceipt() {
     let gasPrice = null;
+    let txHash = null;
     this._transaction
       .then(
         tx => {
@@ -75,13 +70,6 @@ export default class TransactionObject extends TransactionLifeCycle {
           if (receipt) {
             //console.log('filterResultsAndReceipt', filterResultsAndReceipt);
             this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
-          }
-
-          if (this._businessObject === 'cdp') {
-            getNewCdpId(this._service).then(id => {
-              this._mine();
-              return new Cdp(this._service, id);
-            });
           }
 
           this._mine();

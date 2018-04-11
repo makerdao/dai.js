@@ -10,12 +10,11 @@ beforeAll(() => {
 });
 
 test('openCdp should open a CDP', done => {
-  maker.openCdp().then(txn => {
-    txn.onMined(cdp => {
-      console.log(cdp);
+  maker.openCdp().then(cdp => cdp.getCdpId()).then(id => {
+      expect(typeof id).toBe('number');
+      expect(id).toBeGreaterThan(0);
       done();
     });
-  });
 }, 10000);
 
 xtest('openCdp should have an onMined event handler', done => {

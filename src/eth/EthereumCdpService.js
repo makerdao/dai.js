@@ -4,6 +4,7 @@ import EthereumTokenService from './EthereumTokenService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import TransactionObject from './TransactionObject';
+import Cdp from './Cdp';
 
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
@@ -27,13 +28,12 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   openCdp() {
-    const transaction = this.get('smartContract')
-      .getContractByName(contracts.TUB)
-      .open();
-    const ethersProvider = this.get('smartContract').get('web3')
-      ._ethersProvider;
-
-    return new TransactionObject(transaction, ethersProvider, 'cdp', this);
+    // const transaction = this.get('smartContract')
+    //   .getContractByName(contracts.TUB)
+    //   .open();
+    // const ethersProvider = this.get('smartContract').get('web3')
+    //   ._ethersProvider;
+    return new Cdp(this.get('smartContract'));
   }
 
   convertEthToPeth(eth) {

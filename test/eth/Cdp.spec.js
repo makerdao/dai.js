@@ -1,11 +1,20 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 import Cdp from '../../src/eth/Cdp';
 
-let service;
+function buildService() {
+  const service = EthereumCdpService.buildTestService();
+  return service.manager().authenticate().then(() => service);
+}
 
-beforeAll(() => {
-  service = EthereumCdpService.buildTestService();
-  service.manager().authenticate();
+test('should open a new CDP and return its ID', done => {
+  buildService().then(service => {
+    const newCdp = new Cdp(service.get('smartContract'));
+    newCdp.getCdpId().then(id => {
+      expect(typeof id).toBe('number');
+      expect(id).toBeGreaterThan(0);
+      done();
+    });
+  });
 });
 
 xtest('should create a cdp object with an authenticated service and a cdp id', done => {
