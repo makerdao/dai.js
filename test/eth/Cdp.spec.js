@@ -8,7 +8,7 @@ function buildService() {
 
 test('should open a new CDP and return its ID', done => {
   buildService().then(service => {
-    const newCdp = new Cdp(service.get('smartContract'));
+    const newCdp = new Cdp(service);
     newCdp.getCdpId().then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
@@ -55,22 +55,17 @@ xtest('should be able to get a CDP\'s info', done => {
     });
 }, 10000);
 
-xtest('should be able to close a CDP', done => {
+test('should be able to close a CDP', done => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
-    .then(() => {
-      service.openCdp()
-      .then(cdpId => {
-        const cdp = new Cdp(service, cdpId);
-        const transaction = cdp.shut();
-        transaction.onMined().then(() => {
-          cdp.getInfo().then(info => {
-            expect((info['0'][0])).toBe('0');
-            done();
-          });
-        });
+    .then(() => service.openCdp().onMined())
+    .then(cdp => cdp.shut())
+    .then(tx => tx.onMined())
+    .then(cdp => cdp.getInfo())
+    .then(info => {
+        expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+        done();
       });
-    });
 }, 20000);
 
 xtest('should have an \'onMined\' event when a user shuts a CDP', done => {

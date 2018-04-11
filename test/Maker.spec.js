@@ -10,7 +10,7 @@ beforeAll(() => {
 });
 
 test('openCdp should open a CDP', done => {
-  maker.openCdp().then(cdp => cdp.getCdpId()).then(id => {
+  maker.openCdp().then(tx => tx.onMined()).then(cdp => cdp.getCdpId()).then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
       done();

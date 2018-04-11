@@ -28,7 +28,10 @@ function lockPeth(amount){
 
 test('should open a CDP and return cdp ID', done => {
   createdCdpService.manager().authenticate().then(() => {
-    createdCdpService.openCdp().getCdpId().then(id => {
+    createdCdpService.openCdp()
+    .onMined()
+    .then(cdp => cdp.getCdpId())
+    .then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
       done();

@@ -28,12 +28,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   openCdp() {
-    // const transaction = this.get('smartContract')
-    //   .getContractByName(contracts.TUB)
-    //   .open();
-    // const ethersProvider = this.get('smartContract').get('web3')
-    //   ._ethersProvider;
-    return new Cdp(this.get('smartContract'));
+    return new Cdp(this).transactionObject();
   }
 
   convertEthToPeth(eth) {
