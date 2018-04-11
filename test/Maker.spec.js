@@ -9,12 +9,14 @@ beforeAll(() => {
   );
 });
 
-xtest('openCdp should open a CDP', done => {
-  maker.openCdp().then((newCdp) => {
-    console.log(newCdp);
-    done();
-  })
-});
+test('openCdp should open a CDP', done => {
+  maker.openCdp().then(txn => {
+    txn.onMined(cdp => {
+      console.log(cdp);
+      done();
+    });
+  });
+}, 10000);
 
 xtest('openCdp should have an onMined event handler', done => {
   // console.log(maker.openCdp());

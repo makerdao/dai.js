@@ -3,8 +3,6 @@ import SmartContractService from './SmartContractService';
 import EthereumTokenService from './EthereumTokenService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import Cdp from './Cdp';
-import getNewCdpId from '../utils/getNewCdpId';
 import TransactionObject from './TransactionObject';
 
 export default class EthereumCdpService extends PrivateService {
@@ -29,18 +27,13 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   openCdp() {
-    // Create new CDP object here
-
-    // Need to get the cdp ID, so set up a event listener for the LogNewCup event
-    const eventPromise = getNewCdpId(this);
-
     const transaction = this.get('smartContract')
       .getContractByName(contracts.TUB)
       .open();
+    const ethersProvider = this.get('smartContract').get('web3')
+      ._ethersProvider;
 
-    console.log(this);
-
-    return new TransactionObject(transaction, this);
+    return new TransactionObject(transaction, ethersProvider, 'cdp', this);
   }
 
   convertEthToPeth(eth) {

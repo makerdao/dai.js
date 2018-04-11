@@ -1,14 +1,24 @@
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../exchanges/TransactionLifeCycle';
+import transactionType from '../exchanges/TransactionTransitions';
+import Cdp from './Cdp';
+import getNewCdpId from '../utils/getNewCdpId';
 
 export default class TransactionObject extends TransactionLifeCycle {
-  constructor(transaction, ethersProvider, businessObject = null) {
-    super(businessObject);
+  constructor(
+    transaction,
+    ethersProvider,
+    businessObject = null,
+    service = null
+  ) {
+    super(transactionType.transaction, businessObject);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._error = null;
     this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
     this._timeStampMined = null;
+    this._businessObject = businessObject;
+    this._service = service;
     this._getTransactionReceipt();
   }
 
@@ -30,7 +40,6 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionReceipt() {
     let gasPrice = null;
-    let txHash = null;
     this._transaction
       .then(
         tx => {
@@ -39,9 +48,9 @@ export default class TransactionObject extends TransactionLifeCycle {
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
           return this._ethersProvider.waitForTransaction(tx.hash);
         },
-        // eslint-disable-next-line
         reason => {
-          //console.log('error waiting for initial tx to return', reason);
+          // eslint-disable-next-line
+          console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           super._error();
         }
@@ -68,10 +77,18 @@ export default class TransactionObject extends TransactionLifeCycle {
             this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           }
 
+          if (this._businessObject === 'cdp') {
+            getNewCdpId(this._service).then(id => {
+              this._mine();
+              return new Cdp(this._service, id);
+            });
+          }
+
           this._mine();
         },
         reason => {
-          //console.log('error getting tx receipt', reason);
+          // eslint-disable-next-line
+          console.log('error getting tx receipt', reason);
           this._error = reason;
           super._error();
         }

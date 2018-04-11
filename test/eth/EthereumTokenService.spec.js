@@ -29,7 +29,6 @@ test('getTokenVersions returns token versions using remote blockchain', (done) =
 
       expect(ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase())
         .toBe(ethereumTokenService.getToken(tokens.MKR, 2)._contract.address.toUpperCase());
-
       done();
     });
 });

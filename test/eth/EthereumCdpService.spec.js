@@ -3,6 +3,10 @@ import EthereumCdpService from '../../src/eth/EthereumCdpService';
 let createdCdpId;
 let createdCdpService;
 
+beforeAll(() => {
+  return createdCdpService = EthereumCdpService.buildTestService();
+});
+
 function openCdp(){
   createdCdpService = EthereumCdpService.buildTestService();
   return createdCdpService.manager().authenticate()
@@ -23,12 +27,12 @@ function lockPeth(amount){
 }
 
 test('should open a CDP and return cdp ID', done => {
-  openCdp().then(cdpId => {
-      console.log(cdpId);
-      // expect(cdpId).toBeGreaterThan(0);
-      // expect(typeof cdpId).toBe('number');
+  createdCdpService.manager().authenticate().then(() => {
+    createdCdpService.openCdp().onMined(cdp => {
+      console.log(cdp);
       done();
     });
+  });
 }, 10000);
 
 xtest('should check if a cdp for a specific id exists', done => {
