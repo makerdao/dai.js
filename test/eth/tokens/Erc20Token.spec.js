@@ -12,7 +12,7 @@ test('get ERC20 (MKR) balance of address', (done) => {
     return token.balanceOf(TestAccountProvider.nextAddress());
   })
     .then(balance =>{
-      expect(balance.toString()).toBe('0');
+      expect(balance).toEqual('0.0');
       done();
     });
 });
@@ -25,15 +25,15 @@ test('get ERC20 (MKR) allowance of address', (done) => {
     return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
   })
     .then(allowance => {
-      expect(allowance.toString()).toBe('0');
+      expect(allowance).toBe('0.0');
       done();
     });
 });
 
-test.only('approve an ERC20 (MKR) allowance', (done) => {
+test('approve an ERC20 (MKR) allowance', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
     spender = TestAccountProvider.nextAddress(),
-    allowance = '10000';
+    allowance = '10000.0';
 
   let token = null;
 
@@ -70,7 +70,7 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
       return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
     })
     .then(allowance => {
-      expect(allowance.toHexString()).toBe('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+      expect(allowance).toBe(utils.formatUnits(utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff').toString(),token.decimals()));
       done();
     });
 }, 10000);
@@ -84,21 +84,19 @@ test('ERC20 transfer should move transferValue from sender to receiver', done =>
   ethereumTokenService.manager().authenticate().then(() => {
     sender = ethereumTokenService.get('web3').defaultAccount();
     token =  ethereumTokenService.getToken(tokens.WETH);
-    //const TransactionWrapper = token.deposit(utils.parseEther('0.1'));
-    //return TransactionWrapper.onMined();
-    return token.deposit(utils.parseEther('0.1')).onMined();
+    return token.deposit('0.1').onMined();
   })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
-      senderBalance = parseFloat(utils.formatEther(balances[0].toString()));
-      receiverBalance = parseFloat(utils.formatEther(balances[1].toString()));
-      const TransactionWrapper = token.transfer(sender, receiver, utils.parseEther('0.1').toString());
+      senderBalance = parseFloat(balances[0].toString());
+      receiverBalance = parseFloat(balances[1].toString());
+      const TransactionWrapper = token.transfer(sender, receiver, '0.1');
       return TransactionWrapper.onMined();
     })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
-      const newSenderBalance = parseFloat(utils.formatEther(balances[0].toString())),
-        newReceiverBalance = parseFloat(utils.formatEther(balances[1].toString()));
+      const newSenderBalance = parseFloat(balances[0].toString()),
+        newReceiverBalance = parseFloat(balances[1].toString());
 
       expect(newSenderBalance).toBeCloseTo(senderBalance - 0.1, 12);
       expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
@@ -118,16 +116,18 @@ test('totalSupply() should increase when new tokens are minted', done => {
     return token.totalSupply();
   })
     .then(supply => {
-      initialSupply = parseFloat(utils.formatEther(supply.toString()));
-      const TransactionWrapper = token.deposit(utils.parseEther('0.1'));
+      initialSupply = parseFloat(supply.toString());
+      const TransactionWrapper = token.deposit('0.1');
       return TransactionWrapper.onMined();
     })
-    .then(() => token.totalSupply())
+    .then(() => {
+      return token.totalSupply();
+    })
     .then(supply => {
-      const newSupply = parseFloat(utils.formatEther(supply.toString()));
+      const newSupply = parseFloat(supply.toString());
       expect(newSupply).toBeCloseTo(initialSupply + 0.1, 12);
       done();
     });
-});
+}, 15000);
 
 

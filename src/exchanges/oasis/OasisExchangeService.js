@@ -66,22 +66,23 @@ export default class OasisExchangeService extends PrivateService {
     ]);
   }
 
-  sellDai(daiAmount, tokenSymbol, minFillAmount = 0) {
+  sellDai(daiAmount, tokenSymbol, minFillAmount = '0') {
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    const daiAddress = this.get('ethereumToken')
-      .getToken(tokens.DAI)
-      .address();
+    const daiToken = this.get('ethereumToken').getToken(tokens.DAI);
+    const daiAddress = daiToken.address();
     const buyTokenAddress = this.get('ethereumToken')
       .getToken(tokenSymbol)
       .address();
+    const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
+    const minFillAmountEVM = daiToken.toEthereumFormat(minFillAmount);
     return new OasisOrder(
       oasisContract.sellAllAmount(
         daiAddress,
-        daiAmount,
+        daiAmountEVM,
         buyTokenAddress,
-        minFillAmount
+        minFillAmountEVM
       ),
       this.get('web3').ethersProvider()
     );
@@ -108,22 +109,23 @@ export default class OasisExchangeService extends PrivateService {
     );
   }
 
-  buyDai(daiAmount, tokenSymbol, maxFillAmount = -1) {
+  buyDai(daiAmount, tokenSymbol, maxFillAmount = '-1') {
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    const daiAddress = this.get('ethereumToken')
-      .getToken(tokens.DAI)
-      .address();
+    const daiToken = this.get('ethereumToken').getToken(tokens.DAI);
+    const daiAddress = daiToken.address();
+    const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
+    const maxFillAmountEVM = daiToken.toEthereumFormat(maxFillAmount);
     const sellTokenAddress = this.get('ethereumToken')
       .getToken(tokenSymbol)
       .address();
     return new OasisOrder(
       oasisContract.buyAllAmount(
         daiAddress,
-        daiAmount,
+        daiAmountEVM,
         sellTokenAddress,
-        maxFillAmount
+        maxFillAmountEVM
       ),
       this.get('web3').ethersProvider()
     );

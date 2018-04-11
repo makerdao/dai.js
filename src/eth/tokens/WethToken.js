@@ -1,5 +1,4 @@
 import TransactionObject from '../TransactionObject';
-
 import Erc20Token from './Erc20Token';
 
 export default class WethToken extends Erc20Token {
@@ -16,17 +15,19 @@ export default class WethToken extends Erc20Token {
   }
 
   deposit(amount) {
+    const valueInWei = this.toEthereumFormat(amount);
     return new TransactionObject(
       this._contract.deposit({
-        value: amount
+        value: valueInWei
       }),
       this._ethersProvider
     );
   }
 
   withdraw(amount) {
+    const valueInWei = this.toEthereumFormat(amount);
     return new TransactionObject(
-      this._contract.withdraw(amount),
+      this._contract.withdraw(valueInWei),
       this._ethersProvider
     );
   }

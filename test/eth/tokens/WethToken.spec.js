@@ -2,7 +2,6 @@ import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
 
-const utils = require('ethers').utils;
 
 test('get WETH allowance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -12,7 +11,7 @@ test('get WETH allowance of address', (done) => {
     return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
   })
     .then(allowance => {
-      expect(allowance.toString()).toBe('0');
+      expect(allowance.toString()).toBe('0.0');
       done();
     });
 });
@@ -36,9 +35,8 @@ test('token name and symbol are correct', (done) => {
     });
 });
 
-test('wrap and unwrap ETH', (done) => {
-  const ethereumTokenService = EthereumTokenService.buildTestService(),
-    parseBalance = b => parseFloat(utils.formatEther(b.toString()));
+test.only('wrap and unwrap ETH', (done) => {
+  const ethereumTokenService = EthereumTokenService.buildTestService();
 
   let token = null, originalBalance = null, owner = null;
 
@@ -49,19 +47,19 @@ test('wrap and unwrap ETH', (done) => {
       return token.balanceOf(owner);
     })
     .then(b => {
-      originalBalance = parseBalance(b);
-      const TransactionWrapper = token.deposit(utils.parseEther('0.1'));
+      originalBalance = parseFloat(b);
+      const TransactionWrapper = token.deposit('0.1');
       return TransactionWrapper.onMined();
     })
     .then(() => token.balanceOf(owner))
     .then(b => {
-      expect(parseBalance(b)).toBeCloseTo(originalBalance + 0.1, 12);
-      const TransactionWrapper = token.withdraw(utils.parseEther('0.1'));
+      expect(parseFloat(b)).toBeCloseTo(originalBalance + 0.1, 12);
+      const TransactionWrapper = token.withdraw('0.1');
       return TransactionWrapper.onMined();
     })
     .then(() => token.balanceOf(owner))
     .then(b => {
-      expect(parseBalance(b)).toBeCloseTo(originalBalance, 12);
+      expect(parseFloat(b)).toBeCloseTo(originalBalance, 12);
       done();
     });
 }, 15000);

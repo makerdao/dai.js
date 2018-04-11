@@ -1,4 +1,5 @@
 import TransactionObject from '../TransactionObject';
+const utils = require('ethers').utils;
 
 export default class EtherToken {
   constructor(web3Service, gasEstimatorService) {
@@ -12,7 +13,10 @@ export default class EtherToken {
   }
 
   balanceOf(owner) {
-    return this._web3.ethersProvider().getBalance(owner);
+    return this._web3
+      .ethersProvider()
+      .getBalance(owner)
+      .then(b => utils.formatEther(b));
   }
 
   // eslint-disable-next-line
@@ -26,12 +30,13 @@ export default class EtherToken {
   }
 
   transfer(fromAddress, toAddress, transferValue) {
-    //todo, this needs to be changed from a web3 call to a ethersJS call
+    const valueInWei = utils.parseEther(transferValue);
+    //todo,change from a web3 call to a ethersJS call?
     return new TransactionObject(
       this._web3.eth.sendTransaction({
         from: fromAddress,
         to: toAddress,
-        value: transferValue
+        value: valueInWei
       }),
       this._web3.ethersProvider()
     );

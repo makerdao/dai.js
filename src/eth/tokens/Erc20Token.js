@@ -1,26 +1,44 @@
 import TransactionObject from '../TransactionObject';
+const utils = require('ethers').utils;
 
 export default class Erc20Token {
-  constructor(contract, ethersProvider) {
+  constructor(contract, ethersProvider, decimals = 18) {
     this._contract = contract;
     this._ethersProvider = ethersProvider;
+    this._decimals = decimals;
   }
 
   allowance(tokenOwner, spender) {
-    return this._contract.allowance(tokenOwner, spender).then(_ => _[0]);
+    //needs to convert from wei to ether
+    return this._contract
+      .allowance(tokenOwner, spender)
+      .then(_ => this.toUserFormat(_[0]));
   }
 
   balanceOf(owner) {
-    return this._contract.balanceOf(owner).then(_ => _[0]);
+    return this._contract.balanceOf(owner).then(_ => this.toUserFormat(_[0]));
   }
 
   address() {
     return this._contract.address;
   }
 
+  decimals() {
+    return this._decimals;
+  }
+
+  //think of name ToDecimal?
+  toUserFormat(value) {
+    return utils.formatUnits(value, this._decimals);
+  }
+  toEthereumFormat(value) {
+    return utils.parseUnits(value, this._decimals);
+  }
+
   approve(spender, value) {
+    const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
-      this._contract.approve(spender, value),
+      this._contract.approve(spender, valueInWei),
       this._ethersProvider
     );
   }
@@ -33,20 +51,22 @@ export default class Erc20Token {
   }
 
   transferFromSigner(to, value) {
+    const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
-      this._contract.transfer(to, value),
+      this._contract.transfer(to, valueInWei),
       this._ethersProvider
     );
   }
 
   transfer(from, to, value) {
+    const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
-      this._contract.transferFrom(from, to, value),
+      this._contract.transferFrom(from, to, valueInWei),
       this._ethersProvider
     );
   }
 
   totalSupply() {
-    return this._contract.totalSupply().then(_ => _[0]);
+    return this._contract.totalSupply().then(_ => this.toUserFormat(_[0]));
   }
 }

@@ -1,9 +1,8 @@
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../exchanges/TransactionLifeCycle';
-import transactionType from '../exchanges/TransactionTransitions';
 
 export default class TransactionObject extends TransactionLifeCycle {
-  constructor(transaction, ethersProvider, businessObject=null) {
+  constructor(transaction, ethersProvider, businessObject = null) {
     super(businessObject);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
@@ -43,7 +42,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         // eslint-disable-next-line
         reason => {
-          console.log('error waiting for initial tx to return', reason);
+          //console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           super._error();
         }
@@ -65,15 +64,18 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         receipt => {
-          console.log('receipt', receipt);
+          //console.log('receipt', receipt);
           this._ethersProvider.removeAllListeners('block');
-          const callback = currentBlockNumber=> {
-            if(currentBlockNumber===receipt.blockNumber + 1){ //arbitrary number, in practice should probably be closer to 5-15 blocks
-              this._ethersProvider.getTransactionReceipt(txHash).then(receiptCheck=>{
-                if(receiptCheck.blockHash===receipt.blockHash){
-                  super._finalize();
-                }
-              });
+          const callback = currentBlockNumber => {
+            if (currentBlockNumber === receipt.blockNumber + 1) {
+              //arbitrary number, in practice should probably be closer to 5-15 blocks
+              this._ethersProvider
+                .getTransactionReceipt(txHash)
+                .then(receiptCheck => {
+                  if (receiptCheck.blockHash === receipt.blockHash) {
+                    super._finalize();
+                  }
+                });
             }
           };
           this._ethersProvider.removeListener('block', callback);
@@ -82,7 +84,7 @@ export default class TransactionObject extends TransactionLifeCycle {
           this._mine();
         },
         reason => {
-          console.log('error getting tx receipt', reason);
+          //console.log('error getting tx receipt', reason);
           this._error = reason;
           super._error();
         }

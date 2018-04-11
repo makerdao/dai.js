@@ -1,6 +1,5 @@
 // import OasisExchangeService from './OasisExchangeService';
 import orderStyle from '../orderStyle';
-import OrderType from '../TransactionTransitions';
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../TransactionLifeCycle';
 
@@ -47,7 +46,7 @@ export default class OasisOrder extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
-          console.log('tx in OasisOrder', tx);
+          //console.log('tx in OasisOrder', tx);
           resolvedTransaction = tx;
           gasPrice = tx.gasPrice;
           super._pending();
@@ -62,7 +61,7 @@ export default class OasisOrder extends TransactionLifeCycle {
       )
       .then(
         tx => {
-          console.log('tx in OasisOrder after waiting', tx);
+          //console.log('tx in OasisOrder after waiting', tx);
           this._timeStampMined = new Date();
           //console.log('txHash after mined', tx);
           const filter = {
@@ -88,7 +87,7 @@ export default class OasisOrder extends TransactionLifeCycle {
       )
       .then(
         filterResultsAndReceipt => {
-          console.log('receipt', filterResultsAndReceipt[1]);
+          //console.log('receipt', filterResultsAndReceipt[1]);
           //console.log('transaction.hash', resolvedTransaction.hash);
           this._fees = utils.formatEther(
             filterResultsAndReceipt[1].gasUsed.mul(gasPrice)

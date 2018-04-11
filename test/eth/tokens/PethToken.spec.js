@@ -3,7 +3,6 @@ import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
 
-const utils = require('ethers').utils;
 
 test('get PETH balance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -13,7 +12,7 @@ test('get PETH balance of address', (done) => {
     return token.balanceOf(TestAccountProvider.nextAddress());
   })
     .then(balance =>{
-      expect(balance.toString()).toBe('0');
+      expect(balance.toString()).toBe('0.0');
       done();
     });
 });
@@ -26,12 +25,12 @@ test('get PETH allowance of address', (done) => {
     return token.allowance(TestAccountProvider.nextAddress(), TestAccountProvider.nextAddress());
   })
     .then(allowance => {
-      expect(allowance.toString()).toBe('0');
+      expect(allowance.toString()).toBe('0.0');
       done();
     });
 });
 
-test('should successfully join and exit PETH', done => {
+test.only('should successfully join and exit PETH', done => {
   const tokenService = EthereumTokenService.buildTestService();
   let weth = null, peth = null, tub = null, owner = null, initialBalance = null;
 
@@ -40,8 +39,7 @@ test('should successfully join and exit PETH', done => {
     owner = tokenService.get('web3').defaultAccount();
     weth = tokenService.getToken(tokens.WETH);
     peth = tokenService.getToken(tokens.PETH);
-    const depositTransaction = weth.deposit(utils.parseEther('0.1'));
-
+    const depositTransaction = weth.deposit('0.1');
     return Promise.all([
       peth.balanceOf(owner),
       weth.approveUnlimited(tub.address),
@@ -49,8 +47,8 @@ test('should successfully join and exit PETH', done => {
     ]);
   })
     .then(result => {
-      initialBalance = parseFloat(utils.formatEther(result[0]));
-      const joinTransaction = peth.join(utils.parseEther('0.1'));
+      initialBalance = parseFloat(result[0]);
+      const joinTransaction = peth.join('0.1');
       return joinTransaction.onMined();
     })
     .then(() => {
@@ -61,13 +59,13 @@ test('should successfully join and exit PETH', done => {
       ]);
     })
     .then(result => {
-      expect(parseFloat(utils.formatEther(result[0]))).toBeCloseTo(initialBalance + 0.1, 12);
-      const exitTransaction = peth.exit(utils.parseEther('0.1'));
+      expect(parseFloat(result[0])).toBeCloseTo(initialBalance + 0.1, 12);
+      const exitTransaction = peth.exit('0.1');
       return exitTransaction.onMined();
     })
     .then(() => peth.balanceOf(owner))
     .then(balance => {
-      expect(parseFloat(utils.formatEther(balance))).toBeCloseTo(initialBalance, 12);
+      expect(parseFloat(balance)).toBeCloseTo(initialBalance, 12);
       done();
     });
 }, 25000);

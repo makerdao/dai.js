@@ -1,7 +1,7 @@
 import EthereumTokenService from '../../src/eth/EthereumTokenService';
 import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
-import TransactionState from '../../src/eth/TransactionState'
+import TransactionState from '../../src/eth/TransactionState';
 import OasisExchangeService from '../../src/exchanges/oasis/OasisExchangeService';
 
 test('TransactionObject event listeners work as promises', done => {
@@ -12,11 +12,10 @@ test('TransactionObject event listeners work as promises', done => {
   oasisService.manager().authenticate()
     .then(() => {
       service = oasisService.get('ethereumToken');
-      const web3 = service.get('web3');
       const wethToken = service.getToken(tokens.WETH);
       const randomAddress = TestAccountProvider.nextAddress();
       const TransactionObject = wethToken.approveUnlimited(randomAddress);
-      TransactionObject.onError(()=>{console.log('onError() triggered');});
+      //TransactionObject.onError(()=>{console.log('onError() triggered');});
       return TransactionObject.onPending();
     })
     .then(TransactionObject=>{
@@ -28,11 +27,11 @@ test('TransactionObject event listeners work as promises', done => {
       return TransactionObject.onFinalized();
     })
     .then(TransactionObject=>{
-      console.log('finalized!');
+      //console.log('finalized!');
       expect(TransactionObject.state()).toBe(TransactionState.finalized);
       done();
-    })
-},20000);
+    });
+},25000);
 
 test('TransactionObject event listeners work as callbacks', done => {
   const oasisService = OasisExchangeService.buildKovanService();
@@ -42,12 +41,11 @@ test('TransactionObject event listeners work as callbacks', done => {
   oasisService.manager().authenticate()
     .then(() => {
       service = oasisService.get('ethereumToken');
-      const web3 = service.get('web3');
       const wethToken = service.getToken(tokens.WETH);
       const randomAddress = TestAccountProvider.nextAddress();
       const TransactionObject = wethToken.approveUnlimited(randomAddress);
       TransactionObject.onError(()=>{
-        console.log('onError() triggered');
+        //console.log('onError() triggered');
         expect(TransactionObject.state()).toBe(TransactionState.error);
       });
       TransactionObject.onPending(()=>{
@@ -57,12 +55,12 @@ test('TransactionObject event listeners work as callbacks', done => {
       expect(TransactionObject.state()).toBe(TransactionState.mined);
       });
       TransactionObject.onFinalized(()=>{
-      console.log('finalized callback');
+      //console.log('finalized callback');
       expect(TransactionObject.state()).toBe(TransactionState.finalized);
       done();
       });
-    })
-},20000);
+    });
+},25000);
 
 //currently using the test blockchain causes it to go to the error state
 test('TransactionObject error event listeners works', done => {
@@ -73,13 +71,12 @@ test('TransactionObject error event listeners works', done => {
   //oasisService.manager().authenticate()
     .then(() => {
       //service = oasisService.get('ethereumToken');
-      const web3 = service.get('web3');
       const wethToken = service.getToken(tokens.WETH);
       const randomAddress = TestAccountProvider.nextAddress();
       const TransactionObject = wethToken.approveUnlimited(randomAddress);
       TransactionObject.onError(()=>{
-        console.log('onError() triggered');
+        //console.log('onError() triggered');
         done();
       });
-    })
+    });
 },10000);

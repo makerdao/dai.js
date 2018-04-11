@@ -16,7 +16,7 @@ beforeAll(()=>{
       .then(()=> {
         ethereumTokenService = oasisExchangeService.get('ethereumToken');
         wethToken = ethereumTokenService.getToken(tokens.WETH);
-        return wethToken.deposit(utils.parseEther('0.1')).onPending(); //I think doing this will make sure we don't use the same nonce twice
+        return wethToken.deposit('0.1').onPending(); //I think doing this will make sure we don't use the same nonce twice
       })
       .then(()=>{
         const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
@@ -36,7 +36,7 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
-      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      oasisOrder = oasisExchangeService.sellDai('0.01', tokens.WETH);
       return oasisOrder._transaction;
     })
     .then(tx => {
@@ -62,9 +62,9 @@ test.only('get fees sell Dai', (done) => setTimeout(() => {
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
-      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      oasisOrder = oasisExchangeService.sellDai('0.01', tokens.WETH);
       oasisOrder.onMined(()=>{
-        console.log('fees', oasisOrder.fees());
+        //console.log('fees', oasisOrder.fees());
         expect(parseFloat(oasisOrder.fees(),10)).toBeGreaterThan(0);
         done();
       });
@@ -74,36 +74,12 @@ test.only('get fees sell Dai', (done) => setTimeout(() => {
 30000
 );
 
-/*
-test.only('transaction state machine works', (done) => setTimeout(() => {
-  const oasisExchangeService = OasisExchangeService.buildKovanService();
-  let oasisOrder = null;
-  oasisExchangeService.manager().authenticate()
-    .then(() => {
-      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
-      oasisOrder.state().onPending(()=>{
-        //expect isPending to be true
-      });
-      oasisOrder.state().onConfirmed(()=>{
-        //expect is confirmed to be true
-      });
-      oasisOrder.state().onCompleted(()=>{
-        //expect is completed to be true
-      });
-      done()
-    });
-},
-15000),
-30000
-);
-*/
-
 test('get fillAmount sellDai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
-      oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.01'), tokens.WETH);
+      oasisOrder = oasisExchangeService.sellDai('0.01', tokens.WETH);
       oasisOrder.onMined(()=>{
         expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
         done();
@@ -113,13 +89,14 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
 15000),
 30000
 );
+
 /*
 test('get fillAmount buyDai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
-      oasisOrder = oasisExchangeService.buyDai(utils.parseEther('0.01'), tokens.WETH);
+      oasisOrder = oasisExchangeService.buyDai('0.01', tokens.WETH);
       oasisOrder.onMined(()=>{
         expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
         done();
@@ -141,7 +118,7 @@ test('buy Dai with WETH', (done) => setTimeout(() => {
     })
     .then(tx => { // eslint-disable-line
       //console.log('weth approval tx:', tx);
-      oasisOrder = oasisExchangeService.buyDai(utils.parseEther('0.01'), tokens.WETH);
+      oasisOrder = oasisExchangeService.buyDai('0.01', tokens.WETH);
       return oasisOrder._transaction;
     })
     .then(tx => {
@@ -188,7 +165,7 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
     .then(tx => {
       //console.log('dai approval tx:', tx);
       done();
-      //oasisOrder = oasisExchangeService.sellDai(utils.parseEther('0.1'), tokens.WETH);
+      //oasisOrder = oasisExchangeService.sellDai('0.1', tokens.WETH);
       //return oasisOrder._transaction;
     });
   /*
