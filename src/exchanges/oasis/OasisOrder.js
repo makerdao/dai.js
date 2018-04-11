@@ -6,7 +6,7 @@ import TransactionLifeCycle from '../TransactionLifeCycle';
 
 export default class OasisOrder extends TransactionLifeCycle {
   constructor(transaction, ethersProvider) {
-    super(OrderType.oasis);
+    super();
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._fillAmount = null;

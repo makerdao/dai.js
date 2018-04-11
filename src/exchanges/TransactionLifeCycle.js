@@ -16,12 +16,12 @@ function _promisify(unsafeCallback) {
 }
 
 class TransactionLifeCycle {
-  constructor(type = TransactionType.transaction) {
-    this._type = type;
+  constructor(businessObject=null) {
     this._state = new StateMachine(
       transactionState.initialized,
-      transactionTypeTransitions[this._type]
+      transactionTypeTransitions[TransactionType.transaction]
     );
+    this._businessObject = businessObject;
   }
 
   _pending() {
@@ -42,10 +42,6 @@ class TransactionLifeCycle {
 
   state() {
     return this._state.state();
-  }
-
-  type() {
-    return this._type;
   }
 
   /**
@@ -90,8 +86,8 @@ class TransactionLifeCycle {
           oldState === transactionState.initialized &&
           newState === transactionState.pending
         ) {
-          handler(this);
-          resolve(this);
+          handler(this._businessObject || this);
+          resolve(this._businessObject || this);
         }
         if (newState === transactionState.error) {
           reject();
@@ -107,8 +103,8 @@ class TransactionLifeCycle {
           oldState === transactionState.pending &&
           newState === transactionState.mined
         ) {
-          handler(this);
-          resolve(this);
+          handler(this._businessObject || this);
+          resolve(this._businessObject || this);
         }
         if (newState === transactionState.error) {
           reject();
@@ -124,8 +120,8 @@ class TransactionLifeCycle {
           oldState === transactionState.mined &&
           newState === transactionState.finalized
         ) {
-          handler(this);
-          resolve(this);
+          handler(this._businessObject || this);
+          resolve(this._businessObject || this);
         }
         if (newState === transactionState.error) {
           reject();
@@ -134,15 +130,14 @@ class TransactionLifeCycle {
     });
   }
 
-  onError(handler = () => {}) {
+  onError(handler = () => {}) { 
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
         if (
           newState === transactionState.error
         ) {
-          console.log("about to call onError handler/resolve");
-          handler(this);
-          resolve(this);
+          handler(this.error(), this._businessObject || this);
+          reject(this.error(), this._businessObject || this);
         }
       });
     });

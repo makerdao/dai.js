@@ -4,7 +4,7 @@ import transactionType from '../exchanges/TransactionTransitions';
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(transaction, ethersProvider, businessObject=null) {
-    super(transactionType.transaction, businessObject);
+    super(businessObject);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._error = null;
@@ -70,9 +70,9 @@ export default class TransactionObject extends TransactionLifeCycle {
           const callback = currentBlockNumber=> {
             if(currentBlockNumber===receipt.blockNumber + 1){ //arbitrary number, in practice should probably be closer to 5-15 blocks
               this._ethersProvider.getTransactionReceipt(txHash).then(receiptCheck=>{
-                //check if receipt block hash and/or block number is the same
-                super._finalize();
-                console.log('receiptCheck', receiptCheck);
+                if(receiptCheck.blockHash===receipt.blockHash){
+                  super._finalize();
+                }
               });
             }
           };
