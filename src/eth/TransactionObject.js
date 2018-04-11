@@ -1,18 +1,14 @@
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../exchanges/TransactionLifeCycle';
-import transactionType from '../exchanges/TransactionTransitions';
-import Cdp from './Cdp';
-import getNewCdpId from '../utils/getNewCdpId';
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(transaction, ethersProvider, businessObject = null) {
-    super(transactionType.transaction, businessObject);
+    super(businessObject);
     this._ethersProvider = ethersProvider;
     this._transaction = transaction;
     this._error = null;
     this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
     this._timeStampMined = null;
-    this._businessObject = businessObject;
     this._getTransactionReceipt();
   }
 
@@ -38,14 +34,15 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
+          //console.log('tx in TransactionObject', tx);
           gasPrice = tx.gasPrice;
           super._pending();
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
           return this._ethersProvider.waitForTransaction(tx.hash);
         },
+        // eslint-disable-next-line
         reason => {
-          // eslint-disable-next-line
-          console.log('error waiting for initial tx to return', reason);
+          //console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           super._error();
         }
@@ -67,16 +64,27 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         receipt => {
-          if (receipt) {
-            //console.log('filterResultsAndReceipt', filterResultsAndReceipt);
-            this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
-          }
-
+          //console.log('receipt', receipt);
+          this._ethersProvider.removeAllListeners('block');
+          const callback = currentBlockNumber => {
+            if (currentBlockNumber === receipt.blockNumber + 1) {
+              //arbitrary number, in practice should probably be closer to 5-15 blocks
+              this._ethersProvider
+                .getTransactionReceipt(txHash)
+                .then(receiptCheck => {
+                  if (receiptCheck.blockHash === receipt.blockHash) {
+                    super._finalize();
+                  }
+                });
+            }
+          };
+          this._ethersProvider.removeListener('block', callback);
+          this._ethersProvider.on('block', callback);
+          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           this._mine();
         },
         reason => {
-          // eslint-disable-next-line
-          console.log('error getting tx receipt', reason);
+          //console.log('error getting tx receipt', reason);
           this._error = reason;
           super._error();
         }

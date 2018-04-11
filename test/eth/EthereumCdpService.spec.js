@@ -63,7 +63,7 @@ xtest('should open and then shut a CDP', done => {
   });
 }, 12000);
 
-xtest('should convert .1 eth to peth', done => {
+test('should convert .1 eth to peth', done => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {

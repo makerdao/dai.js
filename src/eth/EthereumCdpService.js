@@ -50,7 +50,7 @@ export default class EthereumCdpService extends PrivateService {
       .then(transaction => ethersProvider.waitForTransaction(transaction.hash))
       .then(() => pethToken.join(parsedAmount)) // TODO: have to account for the WETH/PETH ratio
       .then(transaction => {
-        return transaction;
+        return new TransactionObject(transaction, ethersProvider);
       });
   }
 

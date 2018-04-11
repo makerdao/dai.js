@@ -18,4 +18,10 @@ export default class Maker {
       this._container.service('cdp').openCdp()
     );
   }
+
+  convertEthToPeth(eth) {
+    return this._authenticatedPromise.then(() =>
+      this._container.service('cdp').convertEthToPeth(eth)
+    );
+  }
 }

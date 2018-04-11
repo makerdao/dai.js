@@ -21,3 +21,9 @@ xtest('openCdp should have an onMined event handler', done => {
   // console.log(maker.openCdp());
   done();
 }, 10000);
+
+test('should be able to convert eth to peth', async done => {
+  const conversion = await maker.convertEthToPeth('.1');
+  console.log(conversion);
+  done();
+})
