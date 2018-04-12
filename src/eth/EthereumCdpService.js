@@ -45,13 +45,7 @@ export default class EthereumCdpService extends PrivateService {
     return Promise.all([
       pethToken.approveUnlimited(tubContract.address),
       wethToken.approveUnlimited(tubContract.address)
-    ])
-      .then(() => wethToken.deposit(parsedAmount))
-      .then(transaction => ethersProvider.waitForTransaction(transaction.hash))
-      .then(() => pethToken.join(parsedAmount)) // TODO: have to account for the WETH/PETH ratio
-      .then(transaction => {
-        return new TransactionObject(transaction, ethersProvider);
-      });
+    ]).then(() => wethToken.deposit(parsedAmount), ethersProvider);
   }
 
   lockEth(cdpId, eth) {
