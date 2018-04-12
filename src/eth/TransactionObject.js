@@ -9,6 +9,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._error = null;
     this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
     this._timeStampMined = null;
+    this._businessObject = businessObject;
     this._getTransactionReceipt();
   }
 
@@ -31,7 +32,6 @@ export default class TransactionObject extends TransactionLifeCycle {
   _getTransactionReceipt() {
     let gasPrice = null;
     let txHash = null;
-    console.log(this._transaction);
     this._transaction
       .then(
         tx => {

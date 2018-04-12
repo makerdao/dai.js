@@ -75,23 +75,53 @@ test('should convert .1 eth to peth', done => {
     });
 }, 20000);
 
+test('should be able to lock eth in a cdp', done => {
+  const service = EthereumCdpService.buildTestService();
+  let locked;
+  let id;
+  let txn;
+
+  service.manager().authenticate().then(() => {
+    const cdp = service.openCdp();
+    cdp._businessObject._cdpIdPromise.then(id => {
+      id = id;
+      service.getCdpInfo(id)
+      .then(result => locked = result.ink.toString())
+      .then(() => service.lockEth(id, '.1'))
+      .then(txn => {
+        txn.onMined()
+        console.log(id);
+        done();
+      })
+    });
+  });
+});
+
 xtest('should lock .1 peth into a cdp', done => {
   let lockedAmount = 0;
-
-  openCdp().then(cdpId => {
+  createdCdpService.manager().authenticate().then(() => {
+    createdCdpService.openCdp()
+    .onMined()
+    .then(cdp => cdp.getCdpId())
+    .then(cdpId => {
     createdCdpService.getCdpInfo(cdpId)
     .then(result => lockedAmount = result.ink.toString())
     .then(() => createdCdpService.lockEth(cdpId, '.1'))
-    .then(result => { 
-      expect(result).toBeFalsy();    
-      expect(typeof result).toBe('undefined');
-      createdCdpService.getCdpInfo(createdCdpId)
-        .then(result => {
-          expect(lockedAmount).toBe('0');
-          lockedAmount = result.ink.toString();
-          expect(lockedAmount).toBe('100000000000000000');
-          done();
-        });
-      });
+    .then(transaction =>
+      transaction.onMined())
+      .then(cdp => {
+      console.log(cdp)
+        createdCdpService.getCdpInfo(cdpId)
+          .then(result => {
+            console.log(result);
+            expect(lockedAmount).toBe('0');
+            lockedAmount = result.ink.toString();
+            expect(lockedAmount).toBe('100000000000000000');
+            done();
+          });
+          
     });
+      });
+      });
+    // });
 }, 25000);

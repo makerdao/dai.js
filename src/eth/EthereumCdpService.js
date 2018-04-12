@@ -54,21 +54,14 @@ export default class EthereumCdpService extends PrivateService {
       ethersUtils = contract.get('web3').ethersUtils(),
       ethersProvider = contract.get('web3').ethersProvider();
 
-    return this.convertEthToPeth(eth)
-      .then(transaction => ethersProvider.waitForTransaction(transaction.hash))
-      .then(() => {
-        const hexCdpId = contract.numberToBytes32(cdpId);
-        const parsedAmount = ethersUtils.parseEther(eth);
-        return tubContract
-          .lock(hexCdpId, parsedAmount) // solidity code: function lock(bytes32 cup, uint wad) public note
-          .then(transaction =>
-            ethersProvider.waitForTransaction(transaction.hash)
-          )
-          .then(() => {
-            // eslint-disable-next-line
-            this.getCdpInfo(cdpId).then(result => console.log(result));
-          });
-      });
+    return this.convertEthToPeth(eth).then(() => {
+      const hexCdpId = contract.numberToBytes32(cdpId);
+      const parsedAmount = ethersUtils.parseEther(eth);
+      return new TransactionObject(
+        tubContract.lock(hexCdpId, parsedAmount),
+        ethersProvider
+      ); // solidity code: function lock(bytes32 cup, uint wad) public note
+    });
   }
 
   drawDai(cdpId, amount) {
