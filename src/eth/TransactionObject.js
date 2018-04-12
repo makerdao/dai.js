@@ -65,7 +65,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         receipt => {
           //console.log('receipt', receipt);
-          this._ethersProvider.removeAllListeners('block');
           const callback = currentBlockNumber => {
             if (currentBlockNumber === receipt.blockNumber + 1) {
               //arbitrary number, in practice should probably be closer to 5-15 blocks

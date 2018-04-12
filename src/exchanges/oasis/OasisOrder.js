@@ -89,6 +89,27 @@ export default class OasisOrder extends TransactionLifeCycle {
         filterResultsAndReceipt => {
           //console.log('receipt', filterResultsAndReceipt[1]);
           //console.log('transaction.hash', resolvedTransaction.hash);
+          const callback = currentBlockNumber => {
+            if (
+              currentBlockNumber ===
+              filterResultsAndReceipt[1].blockNumber + 1
+            ) {
+              //arbitrary number, in practice should probably be closer to 5-15 blocks
+              this._ethersProvider
+                .getTransactionReceipt(resolvedTransaction.hash)
+                .then(receiptCheck => {
+                  if (
+                    receiptCheck.blockHash ===
+                    filterResultsAndReceipt[1].blockHash
+                  ) {
+                    super._finalize();
+                  }
+                });
+            }
+          };
+          this._ethersProvider.removeListener('block', callback); //will this interfere with the callback in transaction object??
+          this._ethersProvider.on('block', callback);
+
           this._fees = utils.formatEther(
             filterResultsAndReceipt[1].gasUsed.mul(gasPrice)
           );

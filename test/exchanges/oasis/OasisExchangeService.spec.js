@@ -5,7 +5,7 @@ import { utils } from 'ethers';
 // import testAccountProvider from '../../../src/utils/TestAccountProvider';
 // import orderStyle from '../../../src/exchanges/orderStyle';
 import contracts from '../../../contracts/contracts';
-
+import TransactionState from '../../../src/eth/TransactionState';
 
 beforeAll(()=>{
     const oasisExchangeService = OasisExchangeService.buildTestService();
@@ -57,7 +57,7 @@ test('sell Dai for WETH', (done) => setTimeout(() => {
 );
 */
 
-test.only('get fees sell Dai', (done) => setTimeout(() => {
+test('get fees sell Dai', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -89,6 +89,33 @@ test('get fillAmount sellDai', (done) => setTimeout(() => {
 15000),
 30000
 );
+
+test.only('OasisOrder event listeners work as promises, and can use business object', done => {
+  const oasisService = OasisExchangeService.buildKovanService();
+  let oasisOrder = null;
+  oasisService.manager().authenticate()
+    .then(() => {
+      oasisOrder = oasisService.sellDai('0.01', tokens.WETH);
+      //TransactionObject.onError(()=>{console.log('onError() triggered');});
+      return oasisOrder.onPending();
+    })
+    .then(OrderObject=>{
+      //console.log('1', OrderObject);
+      expect(OrderObject.state()).toBe(TransactionState.pending);
+      return OrderObject.onMined();
+    })
+    .then(OrderObject=>{
+            //console.log('2', OrderObject);
+      expect(OrderObject.state()).toBe(TransactionState.mined);
+      return OrderObject.onFinalized();
+    })
+    .then(OrderObject=>{
+            //console.log('3', OrderObject);
+      //console.log('finalized!');
+      expect(OrderObject.state()).toBe(TransactionState.finalized);
+      done();
+    });
+},25000);
 
 /*
 test('get fillAmount buyDai', (done) => setTimeout(() => {
