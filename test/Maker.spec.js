@@ -17,13 +17,34 @@ test('openCdp should open a CDP', done => {
     });
 }, 10000);
 
-xtest('openCdp should have an onMined event handler', done => {
-  // console.log(maker.openCdp());
-  done();
-}, 10000);
+// This and the corresponding test in CDPService
+// should be more robust.
+// How to check Peth is really deposited?
+test('should be able to convert eth to peth', done => {
+  maker.convertEthToPeth('.1').then(tx => {
+    tx.onMined()
+    .then(() => {
+      expect(tx).toBeTruthy();
+      done();
+    });
+  });
+});
 
-test('should be able to convert eth to peth', async done => {
-  const conversion = await maker.convertEthToPeth('.1');
-  console.log(conversion);
-  done();
-})
+test('should create a new CDP object for existing CDPs', done => {
+  let createdCdp;
+
+  maker.openCdp()
+    .then(tx => tx.onMined())
+    .then(cdp => {
+      createdCdp = cdp;
+      cdp.getCdpId()
+      .then(id => {
+        maker.cdp(id).then(newCdpObject => {
+          expect(createdCdp.getCdpId()).toEqual(newCdpObject.getCdpId());
+          expect(createdCdp._cdpService).toEqual(newCdpObject._cdpService);
+          expect(createdCdp._smartContractService).toEqual(newCdpObject._smartContractService);
+          done();
+        });
+      });
+  });
+});

@@ -59,7 +59,8 @@ export default class EthereumCdpService extends PrivateService {
       const parsedAmount = ethersUtils.parseEther(eth);
       return new TransactionObject(
         tubContract.lock(hexCdpId, parsedAmount),
-        ethersProvider
+        ethersProvider,
+        'finished running'
       ); // solidity code: function lock(bytes32 cup, uint wad) public note
     });
   }

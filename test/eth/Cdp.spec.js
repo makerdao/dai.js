@@ -17,35 +17,29 @@ test('should open a new CDP and return its ID', done => {
   });
 });
 
-xtest('should create a cdp object with an authenticated service and a cdp id', done => {
+test('should create a cdp object with an authenticated service and a cdp id', done => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {
       service.openCdp()
-      .catch(err => {
-        done.fail(new Error('error opening CDP: ', err));
-      })
-      .then(cdpId => {
-        const cdp = new Cdp(service, cdpId);
-        
+      .onMined()
+      .then(cdp => {
         expect(cdp).toBeDefined();
-        expect(cdp._service).toBeDefined();
-        expect(cdp._id).toBeGreaterThan(0);
+        expect(cdp._cdpService).toBeDefined();
+        expect(cdp._smartContractService).toBeDefined();
+        cdp.getCdpId().then(id => expect(id).toBeGreaterThan(0));
         done();
       });
     });
 });
 
-xtest('should be able to get a CDP\'s info', done => {
+test('should be able to get a CDP\'s info', done => {
   const service = EthereumCdpService.buildTestService();
   service.manager().authenticate()
     .then(() => {
       service.openCdp()
-      .catch(err => {
-        done.fail(new Error('error opening CDP: ', err));
-      })
-      .then(cdpId => {
-        const cdp = new Cdp(service, cdpId);
+      .onMined()
+      .then(cdp => {
         cdp.getInfo().then(info => {
           expect(info).toBeDefined();
           expect(typeof info).toBe('object');
@@ -68,18 +62,21 @@ test('should be able to close a CDP', done => {
       });
 }, 20000);
 
-xtest('should have an \'onMined\' event when a user shuts a CDP', done => {
+test('should have an \'onMined\' event when a user shuts a CDP', done => {
   const service = EthereumCdpService.buildTestService();
+
   service.manager().authenticate()
     .then(() => {
       service.openCdp()
-      .then(cdpId => {
-        const cdp = new Cdp(service, cdpId);
-        const transaction = cdp.shut();
-        transaction.onMined().then(() => {
-          expect(transaction._state._state).toBe('mined');
+      .onMined()
+      .then(cdp => {
+        cdp.shut()
+        .then(tx => {
+        tx.onMined().then(() => {
+          expect(tx._state._state).toBe('mined');
           done();
         });
       });
     });
+  });
 }, 10000);

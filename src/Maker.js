@@ -1,4 +1,5 @@
 import DefaultServiceProvider from './utils/DefaultServiceProvider';
+import Cdp from './eth/Cdp';
 
 export default class Maker {
   constructor(config) {
@@ -16,6 +17,13 @@ export default class Maker {
   openCdp() {
     return this._authenticatedPromise.then(() =>
       this._container.service('cdp').openCdp()
+    );
+  }
+
+  // Should check if this CDP actually exists
+  cdp(cdpId) {
+    return this._authenticatedPromise.then(
+      () => new Cdp(this._container.service('cdp'), cdpId)
     );
   }
 
