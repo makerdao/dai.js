@@ -39,7 +39,7 @@ test('should create a new CDP object for existing CDPs', done => {
       createdCdp = cdp;
       cdp.getCdpId()
       .then(id => {
-        maker.cdp(id).then(newCdpObject => {
+        maker.getCdp(id).then(newCdpObject => {
           expect(createdCdp.getCdpId()).toEqual(newCdpObject.getCdpId());
           expect(createdCdp._cdpService).toEqual(newCdpObject._cdpService);
           expect(createdCdp._smartContractService).toEqual(newCdpObject._smartContractService);

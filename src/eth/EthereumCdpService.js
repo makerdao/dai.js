@@ -45,7 +45,12 @@ export default class EthereumCdpService extends PrivateService {
     return Promise.all([
       pethToken.approveUnlimited(tubContract.address),
       wethToken.approveUnlimited(tubContract.address)
-    ]).then(() => wethToken.deposit(parsedAmount), ethersProvider);
+    ])
+      .then(() => wethToken.deposit(parsedAmount), ethersProvider)
+      .then(txn => {
+        txn.onMined();
+        return pethToken.join(parsedAmount);
+      });
   }
 
   lockEth(cdpId, eth) {
@@ -58,10 +63,11 @@ export default class EthereumCdpService extends PrivateService {
       return conversionTxn.onMined().then(() => {
         const hexCdpId = contract.numberToBytes32(cdpId);
         const parsedAmount = ethersUtils.parseEther(eth);
+        // solidity code: function lock(bytes32 cup, uint wad) public note
         const lockTxn = new TransactionObject(
           tubContract.lock(hexCdpId, parsedAmount),
           ethersProvider
-        ); // solidity code: function lock(bytes32 cup, uint wad) public note
+        );
 
         return lockTxn;
       });

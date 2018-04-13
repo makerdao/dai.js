@@ -33,7 +33,6 @@ test('should check if a cdp for a specific id exists', done => {
         });
 }, 10000);
 
-// Needs to be updated to accomodate new txnObject return statement
 test('should open and then shut a CDP', done => {
   createdCdpService.manager().authenticate().then(() => {
     createdCdpService.openCdp()
@@ -71,67 +70,29 @@ test('should convert .1 eth to peth', done => {
         done();
       });
     });
-}, 20000);
+}, 10000);
 
 test('should be able to lock eth in a cdp', done => {
   const service = EthereumCdpService.buildTestService();
-  let locked;
+  let firstInfoCall;
   let cdpId;
-  let newTxn;
 
   service.manager().authenticate().then(() => {
     const cdp = service.openCdp();
     cdp._businessObject.getCdpId().then(id => {
       cdpId = id;
       service.getCdpInfo(id)
-      .then(result => locked = result.ink.toString())
+      .then(result => firstInfoCall = result)
       .then(() => service.lockEth(id, '.1'))
       .then(txn => {
-        newTxn = txn;
-        console.log(newTxn);
-        newTxn._transaction
-        .then(() => {
-          console.log(newTxn._state._state);
+        txn.onMined()
+        service.getCdpInfo(cdpId)
+        .then(secondInfoCall => {
+          expect(firstInfoCall.ink.toString()).toEqual('0');
+          expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
+          done();
         })
-        // txn.onMined()
-        // .then(message => {
-        //   console.log(message);
-        //   // txn._transaction.then(result => console.log(result));
-        //   done();
-        // });
-        done();
       });
     });
   });
-}, 20000);
-
-// Old test:
-
-// xtest('should lock .1 peth into a cdp', done => {
-//   let lockedAmount = 0;
-//   createdCdpService.manager().authenticate().then(() => {
-//     createdCdpService.openCdp()
-//     .onMined()
-//     .then(cdp => cdp.getCdpId())
-//     .then(cdpId => {
-//     createdCdpService.getCdpInfo(cdpId)
-//     .then(result => lockedAmount = result.ink.toString())
-//     .then(() => createdCdpService.lockEth(cdpId, '.1'))
-//     .then(transaction =>
-//       transaction.onMined())
-//       .then(cdp => {
-//       console.log(cdp)
-//         createdCdpService.getCdpInfo(cdpId)
-//           .then(result => {
-//             console.log(result);
-//             expect(lockedAmount).toBe('0');
-//             lockedAmount = result.ink.toString();
-//             expect(lockedAmount).toBe('100000000000000000');
-//             done();
-//           });
-          
-//     });
-//       });
-//       });
-//     // });
-// }, 25000);
+}, 10000);
