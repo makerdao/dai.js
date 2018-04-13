@@ -21,7 +21,10 @@ export default class Maker {
   }
 
   // Should check if this CDP actually exists
-  cdp(cdpId) {
+  // Should be number
+  // Should return promise
+  // if (!validCdp) return Promise.reject(error.message)
+  getCdp(cdpId) {
     return this._authenticatedPromise.then(
       () => new Cdp(this._container.service('cdp'), cdpId)
     );

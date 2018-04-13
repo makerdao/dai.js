@@ -8,8 +8,13 @@ export default class Cdp {
     if (cdpId === null) {
       this._cdpIdPromise = this._newCdpPromise();
     } else {
-      this._cdpIdPromise = Promise.resolve(cdpId);
+      this._cdpIdPromise = Promise.resolve(cdpId); // Call validate method
     }
+  }
+
+  _validateCdp(cdpId) {
+    // Creates promise
+    // Resolves/rejects based on validity, resolves to cdpId
   }
 
   _captureCdpIdPromise(tubContract) {

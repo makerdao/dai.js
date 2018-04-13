@@ -73,26 +73,37 @@ test('should convert .1 eth to peth', done => {
     });
 }, 20000);
 
-xtest('should be able to lock eth in a cdp', done => {
+test('should be able to lock eth in a cdp', done => {
   const service = EthereumCdpService.buildTestService();
   let locked;
-  let id;
-  let txn;
+  let cdpId;
+  let newTxn;
 
   service.manager().authenticate().then(() => {
     const cdp = service.openCdp();
     cdp._businessObject.getCdpId().then(id => {
-      id = id;
+      cdpId = id;
       service.getCdpInfo(id)
       .then(result => locked = result.ink.toString())
       .then(() => service.lockEth(id, '.1'))
       .then(txn => {
-        txn._transaction.then(result => console.log(result));
+        newTxn = txn;
+        console.log(newTxn);
+        newTxn._transaction
+        .then(() => {
+          console.log(newTxn._state._state);
+        })
+        // txn.onMined()
+        // .then(message => {
+        //   console.log(message);
+        //   // txn._transaction.then(result => console.log(result));
+        //   done();
+        // });
         done();
       });
     });
   });
-}, 30000);
+}, 20000);
 
 // Old test:
 
