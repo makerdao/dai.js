@@ -1,4 +1,6 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
+import Cdp from '../../src/eth/Cdp';
+import { create } from 'domain';
 
 let createdCdpService;
 
@@ -61,10 +63,9 @@ test('should open and then shut a CDP', done => {
 }, 12000);
 
 test('should convert .1 eth to peth', done => {
-  const service = EthereumCdpService.buildTestService();
-  service.manager().authenticate()
+  createdCdpService.manager().authenticate()
     .then(() => {
-      service.convertEthToPeth('.1')
+      createdCdpService.convertEthToPeth('.1')
       .then((result) => {
         expect(result).toBeTruthy();    
         done();
@@ -73,26 +74,53 @@ test('should convert .1 eth to peth', done => {
 }, 10000);
 
 test('should be able to lock eth in a cdp', done => {
-  const service = EthereumCdpService.buildTestService();
   let firstInfoCall;
   let cdpId;
 
-  service.manager().authenticate().then(() => {
-    const cdp = service.openCdp();
+  createdCdpService.manager().authenticate().then(() => {
+    const cdp = createdCdpService.openCdp();
     cdp._businessObject.getCdpId().then(id => {
       cdpId = id;
-      service.getCdpInfo(id)
+      createdCdpService.getCdpInfo(id)
       .then(result => firstInfoCall = result)
-      .then(() => service.lockEth(id, '.1'))
+      .then(() => createdCdpService.lockEth(id, '.1'))
       .then(txn => {
-        txn.onMined()
-        service.getCdpInfo(cdpId)
+        txn.onMined();
+        createdCdpService.getCdpInfo(cdpId)
         .then(secondInfoCall => {
           expect(firstInfoCall.ink.toString()).toEqual('0');
           expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
           done();
-        })
+        });
       });
     });
   });
 }, 10000);
+
+xtest('should validate the provided CDP ID', done => {
+  let cdpId;
+  let validCdp;
+  let firstInvalidCdp;
+  let secondInvalidCdp;
+
+  createdCdpService.manager().authenticate().then(() => {
+    const cdp = createdCdpService.openCdp();
+    cdp._businessObject.getCdpId().then(id => {
+      cdpId = id;
+      validCdp = new Cdp(createdCdpService, cdpId)
+      validCdp.getCdpId().then(() => {
+        firstInvalidCdp = new Cdp(createdCdpService, 'a')
+        firstInvalidCdp.getCdpId()
+        .then(() => {
+          secondInvalidCdp = new Cdp(createdCdpService, 8000);
+          secondInvalidCdp.getCdpId()
+          .then(() => {
+            expect(validCdp.getCdpId()).toEqual(cdpId);
+            console.log('in test:', firstInvalidCdp.getCdpId());
+            done();
+          });
+        });
+      });
+    });
+  });
+}, 20000);

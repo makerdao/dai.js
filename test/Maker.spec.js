@@ -9,7 +9,7 @@ beforeAll(() => {
   );
 });
 
-test('openCdp should open a CDP', done => {
+xtest('openCdp should open a CDP', done => {
   maker.openCdp().then(tx => tx.onMined()).then(cdp => cdp.getCdpId()).then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
@@ -20,7 +20,7 @@ test('openCdp should open a CDP', done => {
 // This and the corresponding test in CDPService
 // should be more robust.
 // How to check Peth is really deposited?
-test('should be able to convert eth to peth', done => {
+xtest('should be able to convert eth to peth', done => {
   maker.convertEthToPeth('.1').then(tx => {
     tx.onMined()
     .then(() => {
@@ -30,7 +30,7 @@ test('should be able to convert eth to peth', done => {
   });
 });
 
-test('should create a new CDP object for existing CDPs', done => {
+xtest('should create a new CDP object for existing CDPs', done => {
   let createdCdp;
 
   maker.openCdp()
@@ -46,5 +46,38 @@ test('should create a new CDP object for existing CDPs', done => {
           done();
         });
       });
+  });
+});
+
+test('should validate the provided CDP ID', done => {
+  let cdpId;
+  let validCdp;
+  let firstInvalidCdp;
+  let secondInvalidCdp;
+
+  const cdp = maker.openCdp().then(txn => {
+    txn.onMined()
+    .then(cdp => {
+      cdp.getCdpId().then(id => {
+        cdpId = id;
+        maker.getCdp(cdpId)
+        .then(cdp => {
+          cdp.getCdpId().then(fetchedId => {
+            expect(fetchedId).toEqual(cdpId);
+            maker.getCdp('a')
+            .then(response => {
+              console.log(response);
+            // expect(response).toEqual('ID must be a number.');
+              done();
+              // secondInvalidCdp = maker.getCdp(8000)
+              // .then(() => {
+              //   console.log(secondInvalidCdp);
+              //   done();
+              // });
+            });
+          });
+        });
+      });
+    });
   });
 });
