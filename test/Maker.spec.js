@@ -52,7 +52,7 @@ test('should create a new CDP object for existing CDPs', done => {
 test('should validate the provided CDP ID', done => {
   let cdpId;
 
-  const cdp = maker.openCdp().then(txn => {
+  maker.openCdp().then(txn => {
     txn.onMined()
     .then(cdp => {
       cdp.getCdpId().then(id => {

@@ -1,6 +1,4 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
-import Cdp from '../../src/eth/Cdp';
-import { create } from 'domain';
 
 let createdCdpService;
 
@@ -91,34 +89,6 @@ test('should be able to lock eth in a cdp', done => {
           expect(firstInfoCall.ink.toString()).toEqual('0');
           expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
           done();
-        });
-      });
-    });
-  });
-}, 10000);
-
-xtest('should validate the provided CDP ID', done => {
-  let cdpId;
-  let validCdp;
-  let firstInvalidCdp;
-  let secondInvalidCdp;
-
-  createdCdpService.manager().authenticate().then(() => {
-    const cdp = createdCdpService.openCdp();
-    cdp._businessObject.getCdpId().then(id => {
-      cdpId = id;
-      validCdp = new Cdp(createdCdpService, cdpId)
-      validCdp.getCdpId().then(() => {
-        firstInvalidCdp = new Cdp(createdCdpService, 'a')
-        firstInvalidCdp.getCdpId()
-        .then(() => {
-          secondInvalidCdp = new Cdp(createdCdpService, 8000);
-          secondInvalidCdp.getCdpId()
-          .then(() => {
-            expect(validCdp.getCdpId()).toEqual(cdpId);
-            console.log('in test:', firstInvalidCdp.getCdpId());
-            done();
-          });
         });
       });
     });

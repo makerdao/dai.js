@@ -2,7 +2,6 @@ import PrivateService from '../core/PrivateService';
 import SmartContractService from './SmartContractService';
 import EthereumTokenService from './EthereumTokenService';
 import contracts from '../../contracts/contracts';
-import tokens from '../../contracts/tokens';
 import TransactionObject from './TransactionObject';
 import Cdp from './Cdp';
 
@@ -29,28 +28,6 @@ export default class EthereumCdpService extends PrivateService {
 
   openCdp() {
     return new Cdp(this).transactionObject();
-  }
-
-  convertEthToPeth(eth) {
-    const contract = this.get('smartContract'),
-      tubContract = contract.getContractByName(contracts.TUB),
-      ethersUtils = contract.get('web3').ethersUtils(),
-      ethersProvider = contract.get('web3').ethersProvider(),
-      tokenService = this.get('token');
-
-    const parsedAmount = ethersUtils.parseEther(eth);
-    const wethToken = tokenService.getToken(tokens.WETH);
-    const pethToken = tokenService.getToken(tokens.PETH);
-
-    return Promise.all([
-      pethToken.approveUnlimited(tubContract.address),
-      wethToken.approveUnlimited(tubContract.address)
-    ])
-      .then(() => wethToken.deposit(parsedAmount), ethersProvider)
-      .then(txn => {
-        txn.onMined();
-        return pethToken.join(parsedAmount);
-      });
   }
 
   lockEth(cdpId, eth) {
