@@ -16,20 +16,28 @@ export default class Maker {
 
   _validateCdp(cdpId) {
     return this._authenticatedPromise.then(() => {
-      if (typeof cdpId !== 'number') {
-        return new Error('ID must be a number.');
-      } else {
-        return this._container.service('cdp')
-        .getCdpInfo(cdpId)
-        .then(info => {
-          if (info.lad === '0x0000000000000000000000000000000000000000') {
-            return new Error('That CDP doesn\'t exist--try opening a new one.');
-          } else {
-            console.log(cdpId, typeof cdpId);
-              return true;
+      return new Promise((resolve, reject) => {
+        if (typeof cdpId !== 'number') {
+          reject(new Error('ID must be a number.'));
+        }
+
+        this._container
+          .service('cdp')
+          .getCdpInfo(cdpId)
+          .then(info => {
+            if (
+              info.lad.toString() ===
+              '0x0000000000000000000000000000000000000000'
+            ) {
+              reject(
+                // eslint-disable-next-line
+                new Error("That CDP doesn't exist--try opening a new one.")
+              );
+            } else {
+              resolve(true);
             }
           });
-      }
+      });
     });
   }
 
@@ -39,23 +47,17 @@ export default class Maker {
     );
   }
 
-
-  // Move validation method here
-  // Should check if this CDP actually exists
-  // Should be number
-  // Should return promise
-  // if (!validCdp) return Promise.reject(error.message)
   getCdp(cdpId) {
     return this._authenticatedPromise.then(() => {
       return new Promise((resolve, reject) => {
-        const result = this._validateCdp(cdpId)
-        // console.log(result);
-        if (result === true) {
-          return resolve(new Cdp(this._container.service('cdp'), cdpId));
+        try {
+          this._validateCdp(cdpId).then(() => {
+            resolve(new Cdp(this._container.service('cdp'), cdpId));
+          });
+        } catch (error) {
+          reject(error.message);
         }
-
-        return reject(result);
-      }); 
+      });
     });
   }
 

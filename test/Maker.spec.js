@@ -9,7 +9,7 @@ beforeAll(() => {
   );
 });
 
-xtest('openCdp should open a CDP', done => {
+test('openCdp should open a CDP', done => {
   maker.openCdp().then(tx => tx.onMined()).then(cdp => cdp.getCdpId()).then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
@@ -20,7 +20,7 @@ xtest('openCdp should open a CDP', done => {
 // This and the corresponding test in CDPService
 // should be more robust.
 // How to check Peth is really deposited?
-xtest('should be able to convert eth to peth', done => {
+test('should be able to convert eth to peth', done => {
   maker.convertEthToPeth('.1').then(tx => {
     tx.onMined()
     .then(() => {
@@ -30,7 +30,7 @@ xtest('should be able to convert eth to peth', done => {
   });
 });
 
-xtest('should create a new CDP object for existing CDPs', done => {
+test('should create a new CDP object for existing CDPs', done => {
   let createdCdp;
 
   maker.openCdp()
@@ -51,9 +51,6 @@ xtest('should create a new CDP object for existing CDPs', done => {
 
 test('should validate the provided CDP ID', done => {
   let cdpId;
-  let validCdp;
-  let firstInvalidCdp;
-  let secondInvalidCdp;
 
   const cdp = maker.openCdp().then(txn => {
     txn.onMined()
@@ -64,17 +61,9 @@ test('should validate the provided CDP ID', done => {
         .then(cdp => {
           cdp.getCdpId().then(fetchedId => {
             expect(fetchedId).toEqual(cdpId);
-            maker.getCdp('a')
-            .then(response => {
-              console.log(response);
-            // expect(response).toEqual('ID must be a number.');
-              done();
-              // secondInvalidCdp = maker.getCdp(8000)
-              // .then(() => {
-              //   console.log(secondInvalidCdp);
-              //   done();
-              // });
-            });
+            expect(maker.getCdp('a')).rejects.toThrowError('must be a number');
+            expect(maker.getCdp(8000)).rejects.toThrowError('try opening a new one');
+            done();
           });
         });
       });
