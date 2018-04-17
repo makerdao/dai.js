@@ -19,6 +19,7 @@
 
     "smartContract": "SmartContractService",
     "token": "EthereumTokenService",
+    "conversionService": "TokenConversionService",
     "gasEstimator": "GasEstimatorService",
 
     "timer": "TimerService",

@@ -7,6 +7,7 @@ import SmartContractService from '../eth/SmartContractService';
 import GasEstimatorService from '../eth/GasEstimatorService';
 //import OasisExchangeService from './markets/OasisExchangeService';
 import TimerService from './TimerService';
+import TokenConversionService from '../eth/TokenConversionService';
 import NullLogger from './loggers/NullLogger';
 
 const _services = {
@@ -18,6 +19,7 @@ const _services = {
   GasEstimatorService,
   //OasisExchangeService,
   TimerService,
+  TokenConversionService,
   NullLogger
 };
 

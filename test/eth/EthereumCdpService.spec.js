@@ -6,7 +6,7 @@ beforeAll(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
 });
 
-test('should open a CDP and return cdp ID', done => {
+test('should open a CDP and get cdp ID', done => {
   createdCdpService.manager().authenticate().then(() => {
     createdCdpService.openCdp()
     .onMined()
@@ -59,17 +59,6 @@ test('should open and then shut a CDP', done => {
     });
   });
 }, 12000);
-
-test('should convert .1 eth to peth', done => {
-  createdCdpService.manager().authenticate()
-    .then(() => {
-      createdCdpService.convertEthToPeth('.1')
-      .then((result) => {
-        expect(result).toBeTruthy();    
-        done();
-      });
-    });
-}, 10000);
 
 test('should be able to lock eth in a cdp', done => {
   let firstInfoCall;

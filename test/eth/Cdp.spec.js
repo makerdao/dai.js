@@ -1,14 +1,16 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 import Cdp from '../../src/eth/Cdp';
 
-function buildService() {
-  const service = EthereumCdpService.buildTestService();
-  return service.manager().authenticate().then(() => service);
-}
+let createdCdpService;
+
+beforeAll(() => {
+  return createdCdpService = EthereumCdpService.buildTestService();
+});
 
 test('should open a new CDP and return its ID', done => {
-  buildService().then(service => {
-    const newCdp = new Cdp(service);
+  createdCdpService.manager().authenticate()
+  .then(() => {
+    const newCdp = new Cdp(createdCdpService);
     newCdp.getCdpId().then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
@@ -18,10 +20,9 @@ test('should open a new CDP and return its ID', done => {
 });
 
 test('should create a cdp object with an authenticated service and a cdp id', done => {
-  const service = EthereumCdpService.buildTestService();
-  service.manager().authenticate()
+  createdCdpService.manager().authenticate()
     .then(() => {
-      service.openCdp()
+      createdCdpService.openCdp()
       .onMined()
       .then(cdp => {
         expect(cdp).toBeDefined();
@@ -31,13 +32,12 @@ test('should create a cdp object with an authenticated service and a cdp id', do
         done();
       });
     });
-});
+}, 10000);
 
 test('should be able to get a CDP\'s info', done => {
-  const service = EthereumCdpService.buildTestService();
-  service.manager().authenticate()
+  createdCdpService.manager().authenticate()
     .then(() => {
-      service.openCdp()
+      createdCdpService.openCdp()
       .onMined()
       .then(cdp => {
         cdp.getInfo().then(info => {
@@ -50,32 +50,27 @@ test('should be able to get a CDP\'s info', done => {
 }, 10000);
 
 test('should be able to close a CDP', done => {
-  const service = EthereumCdpService.buildTestService();
-  service.manager().authenticate()
-    .then(() => service.openCdp().onMined())
-    .then(cdp => cdp.shut())
-    .then(tx => tx.onMined())
-    .then(cdp => cdp.getInfo())
-    .then(info => {
-        expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
-        done();
-      });
+  createdCdpService.manager().authenticate()
+  .then(() => createdCdpService.openCdp().onMined())
+  .then(cdp => cdp.shut())
+  .then(tx => tx.onMined())
+  .then(cdp => cdp.getInfo())
+  .then(info => {
+    expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+    done();
+  });
 }, 20000);
 
-test('should have an \'onMined\' event when a user shuts a CDP', done => {
-  const service = EthereumCdpService.buildTestService();
-
-  service.manager().authenticate()
-    .then(() => {
-      service.openCdp()
-      .onMined()
-      .then(cdp => {
-        cdp.shut()
-        .then(tx => {
-        tx.onMined().then(() => {
-          expect(tx._state._state).toBe('mined');
-          done();
-        });
+test('should be able to lock eth', done => {
+  createdCdpService.manager().authenticate()
+  .then(() => {
+    createdCdpService.openCdp()
+    .onMined()
+    .then(cdp => {
+      cdp.lockEth('0.1').then(response => {
+        expect(response).toBeTruthy();
+        expect(typeof response).toBe('object');
+        done();
       });
     });
   });

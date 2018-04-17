@@ -67,10 +67,7 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.getCdpInfo(id));
   }
 
-  convertEthToPeth(eth) {
-    return new TransactionObject(
-      this._service.convertEthToPeth(eth),
-      this._ethersProvider
-    );
+  lockEth(eth) {
+    return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
   }
 }

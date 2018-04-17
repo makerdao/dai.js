@@ -17,19 +17,6 @@ test('openCdp should open a CDP', done => {
     });
 }, 10000);
 
-// This and the corresponding test in CDPService
-// should be more robust.
-// How to check Peth is really deposited?
-test('should be able to convert eth to peth', done => {
-  maker.convertEthToPeth('.1').then(tx => {
-    tx.onMined()
-    .then(() => {
-      expect(tx).toBeTruthy();
-      done();
-    });
-  });
-});
-
 test('should create a new CDP object for existing CDPs', done => {
   let createdCdp;
 

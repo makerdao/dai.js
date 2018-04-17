@@ -60,10 +60,4 @@ export default class Maker {
       });
     });
   }
-
-  convertEthToPeth(eth) {
-    return this._authenticatedPromise.then(() =>
-      this._container.service('cdp').convertEthToPeth(eth)
-    );
-  }
 }

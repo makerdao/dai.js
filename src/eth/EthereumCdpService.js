@@ -1,6 +1,7 @@
 import PrivateService from '../core/PrivateService';
 import SmartContractService from './SmartContractService';
 import EthereumTokenService from './EthereumTokenService';
+import TokenConversionService from './TokenConversionService';
 import contracts from '../../contracts/contracts';
 import TransactionObject from './TransactionObject';
 import Cdp from './Cdp';
@@ -10,11 +11,13 @@ export default class EthereumCdpService extends PrivateService {
     const service = new EthereumCdpService();
     const tokenService = EthereumTokenService.buildTestService();
     const smartContract = SmartContractService.buildTestService();
+    const conversionService = TokenConversionService.buildTestService();
 
     service
       .manager()
       .inject('smartContract', smartContract)
-      .inject('token', tokenService);
+      .inject('token', tokenService)
+      .inject('conversionService', conversionService);
 
     return service;
   }
@@ -23,7 +26,7 @@ export default class EthereumCdpService extends PrivateService {
    * @param {string} name
    */
   constructor(name = 'cdp') {
-    super(name, ['smartContract', 'token']);
+    super(name, ['smartContract', 'token', 'conversionService']);
   }
 
   openCdp() {
@@ -33,21 +36,16 @@ export default class EthereumCdpService extends PrivateService {
   lockEth(cdpId, eth) {
     const contract = this.get('smartContract'),
       tubContract = contract.getContractByName(contracts.TUB),
-      ethersUtils = contract.get('web3').ethersUtils(),
-      ethersProvider = contract.get('web3').ethersProvider();
+      conversionService = this.get('conversionService'),
+      ethersProvider = contract.get('web3').ethersProvider(),
+      hexCdpId = contract.numberToBytes32(cdpId),
+      parsedAmount = conversionService._parseDenomination(eth);
 
-    return this.convertEthToPeth(eth).then(conversionTxn => {
-      return conversionTxn.onMined().then(() => {
-        const hexCdpId = contract.numberToBytes32(cdpId);
-        const parsedAmount = ethersUtils.parseEther(eth);
-        // solidity code: function lock(bytes32 cup, uint wad) public note
-        const lockTxn = new TransactionObject(
-          tubContract.lock(hexCdpId, parsedAmount),
-          ethersProvider
-        );
-
-        return lockTxn;
-      });
+    return conversionService.convertEthToPeth(eth).then(() => {
+      return new TransactionObject(
+        tubContract.lock(hexCdpId, parsedAmount),
+        ethersProvider
+      );
     });
   }
 
@@ -80,9 +78,9 @@ export default class EthereumCdpService extends PrivateService {
 
   getCdpInfo(cdpId) {
     const contract = this.get('smartContract'),
-      tubContract = contract.getContractByName(contracts.TUB);
+      tubContract = contract.getContractByName(contracts.TUB),
+      hexCdpId = contract.numberToBytes32(cdpId);
 
-    const hexCdpId = contract.numberToBytes32(cdpId);
     return tubContract.cups(hexCdpId);
   }
 }
