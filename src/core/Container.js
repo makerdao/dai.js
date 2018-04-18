@@ -137,6 +137,5 @@ export {
   InvalidServiceError,
   ServiceAlreadyRegisteredError,
   ServiceNotFoundError,
-  ServiceDependencyLoopError,
-  service
+  ServiceDependencyLoopError
 };

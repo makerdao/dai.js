@@ -16,18 +16,20 @@ function parseBigNumber(number) {
   return parseFloat(utils.formatEther(number));
 }
 
-xtest('should convert eth to weth', done => {
+test('should convert eth to weth', done => {
   let initialBalance;
 
   conversionService.manager().authenticate().then(() => {
-    const owner = tokenService.get('web3').defaultAccount();
-    const token = tokenService.getToken(tokens.WETH);
+    tokenService.manager().authenticate().then(() => {
+      const owner = tokenService.get('web3').defaultAccount();
+      const token = tokenService.getToken(tokens.WETH);
 
-    token.getBalanceOf(owner).then(balance => initialBalance = parseBigNumber(balance));
-    conversionService.convertEthToWeth('0.1').then(() => {
-      token.getBalanceOf(owner).then(newBalance => {
-        expect(parseBigNumber(newBalance)).toBeCloseTo(parseBigNumber(initialBalance) + 0.1);
-        done();
+      token.balanceOf(owner).then(balance => initialBalance = parseBigNumber(balance));
+      conversionService.convertEthToWeth('0.1').then(() => {
+        token.balanceOf(owner).then(newBalance => {
+          expect(parseBigNumber(newBalance)).toBeCloseTo(initialBalance + 0.1);
+          done();
+        });
       });
     });
   });
@@ -62,7 +64,7 @@ test('should convert eth to peth', done => {
     const token = tokenService.getToken(tokens.PETH);
 
     token.balanceOf(owner).then(balance => initialBalance = parseBigNumber(balance));
-    conversionService.convertEthToPeth('0.1').then(result => {
+    conversionService.convertEthToPeth('0.1').then(() => {
       token.balanceOf(owner).then(newBalance => {
         expect(parseBigNumber(newBalance)).toBeCloseTo(initialBalance + 0.1);
         done();

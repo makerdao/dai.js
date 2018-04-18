@@ -1,10 +1,11 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
-    "Tyler Sorensen <tyler@makerdao.com>"
+    "Tyler Sorensen <tyler@makerdao.com>",
+    "Ethan Bennett <ethan@makerdao.com>"
   ],
   "description": "MakerDAO exchange integration library.",
   "license": "MIT",
