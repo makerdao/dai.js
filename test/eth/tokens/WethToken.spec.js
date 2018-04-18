@@ -2,6 +2,7 @@ import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
 
+import { utils } from 'ethers';
 
 test('get WETH allowance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();

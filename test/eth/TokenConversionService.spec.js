@@ -1,36 +1,72 @@
 import TokenConversionService from '../../src/eth/TokenConversionService';
+import EthereumTokenService from '../../src/eth/EthereumTokenService';
+import tokens from '../../contracts/tokens';
 
-let createdTokenService;
+import { utils } from 'ethers';
+
+let conversionService;
+let tokenService;
 
 beforeAll(() => {
-  return createdTokenService = TokenConversionService.buildTestService();
+  conversionService = TokenConversionService.buildTestService();
+  return tokenService = EthereumTokenService.buildTestService();
 });
 
-test('should convert eth to weth', done => {
-  createdTokenService.manager().authenticate().then(() => {
-    createdTokenService.convertEthToWeth('0.1').then(result => {
-      expect(result).toBeTruthy();
-      done();
-    });
-  });
-});
+function parseBigNumber(number) {
+  return parseFloat(utils.formatEther(number));
+}
 
-test('should convert weth to peth', done => {
-  createdTokenService.manager().authenticate().then(() => {
-    createdTokenService.convertEthToWeth('0.1').then(() => {
-      createdTokenService.convertWethToPeth('0.1').then(result => {
-        expect(result).toBeTruthy();
+xtest('should convert eth to weth', done => {
+  let initialBalance;
+
+  conversionService.manager().authenticate().then(() => {
+    const owner = tokenService.get('web3').defaultAccount();
+    const token = tokenService.getToken(tokens.WETH);
+
+    token.getBalanceOf(owner).then(balance => initialBalance = parseBigNumber(balance));
+    conversionService.convertEthToWeth('0.1').then(() => {
+      token.getBalanceOf(owner).then(newBalance => {
+        expect(parseBigNumber(newBalance)).toBeCloseTo(parseBigNumber(initialBalance) + 0.1);
         done();
       });
     });
   });
 });
 
+test('should convert weth to peth', done => {
+  let initialBalance;
+
+  conversionService.manager().authenticate().then(() => {
+    tokenService.manager().authenticate().then(() => {
+      const owner = tokenService.get('web3').defaultAccount();
+      const token = tokenService.getToken(tokens.PETH);
+
+      token.balanceOf(owner).then(balance => initialBalance = parseBigNumber(balance));
+      conversionService.convertEthToWeth('0.1').then(() => {
+        conversionService.convertWethToPeth('0.1').then(() => {
+          token.balanceOf(owner).then(newBalance => {
+            expect(parseBigNumber(newBalance)).toBeCloseTo(initialBalance + 0.1);
+            done();
+          });
+        });
+      });
+    });
+  });
+});
+
 test('should convert eth to peth', done => {
-  createdTokenService.manager().authenticate().then(() => {
-    createdTokenService.convertEthToPeth('0.1').then(result => {
-      expect(result).toBeTruthy();
-      done();
+  let initialBalance;
+
+  conversionService.manager().authenticate().then(() => {
+    const owner = tokenService.get('web3').defaultAccount();
+    const token = tokenService.getToken(tokens.PETH);
+
+    token.balanceOf(owner).then(balance => initialBalance = parseBigNumber(balance));
+    conversionService.convertEthToPeth('0.1').then(result => {
+      token.balanceOf(owner).then(newBalance => {
+        expect(parseBigNumber(newBalance)).toBeCloseTo(initialBalance + 0.1);
+        done();
+      });
     });
   });
 });

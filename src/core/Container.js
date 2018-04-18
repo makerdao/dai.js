@@ -43,6 +43,7 @@ class Container {
     return this;
   }
 
+  // export just this function
   service(name, throwIfMissing = true) {
     if (!name) {
       throw new Error('Provide a service name.');
@@ -136,5 +137,6 @@ export {
   InvalidServiceError,
   ServiceAlreadyRegisteredError,
   ServiceNotFoundError,
-  ServiceDependencyLoopError
+  ServiceDependencyLoopError,
+  service
 };

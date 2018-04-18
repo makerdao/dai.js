@@ -21,7 +21,7 @@ export default class TokenConversionService extends PrivateService {
   /**
    * @param {string} name
    */
-  constructor(name = 'tokenConversionService') {
+  constructor(name = 'conversionService') {
     super(name, ['smartContract', 'token']);
   }
 
@@ -72,15 +72,14 @@ export default class TokenConversionService extends PrivateService {
       .then(() => pethToken.join(parsedAmount));
   }
 
-  // prettier-ignore
-  convertEthToPeth(eth) {
-    const parsedAmount = this._parseDenomination(eth);
+  convertEthToPeth(value) {
     const wethToken = this._getToken(tokens.WETH);
     const pethToken = this._getToken(tokens.PETH);
 
-    return this._approveToken(wethToken).onPending()
-      this._approveToken(pethToken).onPending()
-      this.convertEthToWeth(parsedAmount).onMined()
-      this.convertWethToPeth(parsedAmount);
+    this._approveToken(wethToken).onPending();
+    this._approveToken(pethToken).onPending();
+    this.convertEthToWeth(value).then(txn => txn.onMined());
+
+    return this.convertWethToPeth(value);
   }
 }
