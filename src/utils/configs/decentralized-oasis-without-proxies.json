@@ -23,6 +23,6 @@
     "gasEstimator": "GasEstimatorService",
 
     "timer": "TimerService",
-    "log": "NullLogger"
+    "log": "ConsoleLogger"
   }
 }

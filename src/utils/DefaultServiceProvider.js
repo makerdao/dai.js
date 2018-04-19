@@ -8,7 +8,7 @@ import GasEstimatorService from '../eth/GasEstimatorService';
 //import OasisExchangeService from './markets/OasisExchangeService';
 import TimerService from './TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
-import NullLogger from './loggers/NullLogger';
+import ConsoleLogger from './loggers/ConsoleLogger';
 
 const _services = {
   Web3Service,
@@ -20,7 +20,7 @@ const _services = {
   //OasisExchangeService,
   TimerService,
   TokenConversionService,
-  NullLogger
+  ConsoleLogger
 };
 
 export default class DefaultServiceProvider {

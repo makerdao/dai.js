@@ -9,7 +9,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._error = null;
     this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
     this._timeStampMined = null;
-    this._businessObject = businessObject;
     this._getTransactionReceipt();
   }
 
@@ -66,23 +65,29 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         receipt => {
           //console.log('receipt', receipt);
-          this._ethersProvider.removeAllListeners('block');
-          const callback = currentBlockNumber => {
-            if (currentBlockNumber === receipt.blockNumber + 1) {
-              //arbitrary number, in practice should probably be closer to 5-15 blocks
-              this._ethersProvider
-                .getTransactionReceipt(txHash)
-                .then(receiptCheck => {
-                  if (receiptCheck.blockHash === receipt.blockHash) {
-                    super._finalize();
-                  }
-                });
-            }
-          };
-          this._ethersProvider.removeListener('block', callback);
-          this._ethersProvider.on('block', callback);
           this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           this._mine();
+          const callback = currentBlockNumber => {
+            if (currentBlockNumber >= receipt.blockNumber + 1) {
+              //arbitrary number, in practice should probably be closer to 5-15 blocks
+              this._ethersProvider.getTransactionReceipt(txHash).then(
+                receiptCheck => {
+                  if (receiptCheck.blockHash === receipt.blockHash) {
+                    //console.log('about to finalize');
+                    super._finalize();
+                  } else {
+                    this._ethersProvider.once('block', callback);
+                  }
+                },
+                () => {
+                  this._ethersProvider.once('block', callback);
+                }
+              );
+            } else {
+              this._ethersProvider.once('block', callback);
+            }
+          };
+          //this._ethersProvider.once('block', callback);
         },
         reason => {
           //console.log('error getting tx receipt', reason);
