@@ -90,7 +90,7 @@ test('ERC20 transfer should move transferValue from sender to receiver', done =>
     .then(balances => {
       senderBalance = parseFloat(balances[0].toString());
       receiverBalance = parseFloat(balances[1].toString());
-      const TransactionWrapper = token.transfer(sender, receiver, '0.1');
+      const TransactionWrapper = token.transferFrom(sender, receiver, '0.1');
       return TransactionWrapper.onMined();
     })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))

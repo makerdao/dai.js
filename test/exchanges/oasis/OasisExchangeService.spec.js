@@ -1,13 +1,11 @@
 import OasisExchangeService from '../../../src/exchanges/oasis/OasisExchangeService';
 // import Web3Service from '../../../src/eth/Web3Service';
 import tokens from '../../../contracts/tokens';
-import { utils } from 'ethers';
 // import testAccountProvider from '../../../src/utils/TestAccountProvider';
 // import orderStyle from '../../../src/exchanges/orderStyle';
-import contracts from '../../../contracts/contracts';
 import TransactionState from '../../../src/eth/TransactionState';
 
-beforeAll(()=>{
+/*beforeAll(()=>{ //can comment this out after has been run once
     const oasisExchangeService = OasisExchangeService.buildTestService();
     let oasisOrder = null;
     let wethToken = null;
@@ -29,35 +27,11 @@ beforeAll(()=>{
         oasisOrder = oasisExchangeService.offer(utils.parseEther('0.05'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, overrideOptions);
         return oasisOrder;
       });
-}, 30000);
-/*
-test('sell Dai for WETH', (done) => setTimeout(() => {
-  const oasisExchangeService = OasisExchangeService.buildKovanService();
-  let oasisOrder = null;
-  oasisExchangeService.manager().authenticate()
-    .then(() => {
-      oasisOrder = oasisExchangeService.sellDai('0.01', tokens.WETH);
-      return oasisOrder._transaction;
-    })
-    .then(tx => {
-      //console.log(tx);
-      expect(tx.data.length).toBeGreaterThan(20);
-      expect(oasisOrder.type()).toBe('market');
-      const fees = oasisOrder.fees();
-      //console.log('fees: ', fees);
-      return fees;
-    })
-    .then(minedTx=>{ // eslint-disable-line
-      //console.log('minedTx:', minedTx);
-      done();
-    });
-},
-15000),
-30000
-);
-*/
+}, 30000);*/
 
-test('get fees sell Dai', (done) => setTimeout(() => {
+
+
+test('get fees sell Dai', (done) => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -70,27 +44,26 @@ test('get fees sell Dai', (done) => setTimeout(() => {
       });
     });
 },
-15000),
 30000
 );
 
-test('get fillAmount sellDai', (done) => setTimeout(() => {
+test('get fillAmount sellDai', (done) =>  {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.sellDai('0.01', tokens.WETH);
       oasisOrder.onMined(()=>{
+        //console.log('fillAmount', oasisOrder.fillAmount());
         expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
         done();
       });
     });
 },
-15000),
 30000
 );
 
-test.only('OasisOrder event listeners work as promises, and can use business object', done => {
+test('OasisOrder event listeners work as promises, and can use business object', done => {
   const oasisService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisService.manager().authenticate()
@@ -100,62 +73,33 @@ test.only('OasisOrder event listeners work as promises, and can use business obj
       return oasisOrder.onPending();
     })
     .then(OrderObject=>{
-      //console.log('1', OrderObject);
       expect(OrderObject.state()).toBe(TransactionState.pending);
       return OrderObject.onMined();
     })
     .then(OrderObject=>{
-            //console.log('2', OrderObject);
       expect(OrderObject.state()).toBe(TransactionState.mined);
       return OrderObject.onFinalized();
     })
     .then(OrderObject=>{
-            //console.log('3', OrderObject);
-      //console.log('finalized!');
       expect(OrderObject.state()).toBe(TransactionState.finalized);
       done();
     });
-},25000);
+},30000);
 
-/*
-test('get fillAmount buyDai', (done) => setTimeout(() => {
+
+test('get fillAmount buyDai', (done) =>  {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
     .then(() => {
       oasisOrder = oasisExchangeService.buyDai('0.01', tokens.WETH);
       oasisOrder.onMined(()=>{
+        //console.log('fillAmount: ', oasisOrder.fillAmount());
         expect(parseFloat(oasisOrder.fillAmount(),10)).toBeGreaterThan(0);
         done();
       });
     });
 },
-15000),
-30000
-);*/
-
-/*
-test('buy Dai with WETH', (done) => setTimeout(() => {
-  const oasisExchangeService = OasisExchangeService.buildKovanService();
-  let oasisOrder = null;
-  oasisExchangeService.manager().authenticate()
-    .then(()=>{
-      const wethToken = oasisExchangeService.get('ethereumToken').getToken(tokens.WETH);
-      return wethToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).address);
-    })
-    .then(tx => { // eslint-disable-line
-      //console.log('weth approval tx:', tx);
-      oasisOrder = oasisExchangeService.buyDai('0.01', tokens.WETH);
-      return oasisOrder._transaction;
-    })
-    .then(tx => {
-      //console.log(tx);
-      expect(tx.data.length).toBeGreaterThan(20);
-      expect(oasisOrder.type()).toBe('market');
-      done();
-    });
-},
-15000),
 30000
 );
 

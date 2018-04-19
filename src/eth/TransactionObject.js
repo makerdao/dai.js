@@ -65,6 +65,8 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         receipt => {
           //console.log('receipt', receipt);
+          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+          this._mine();
           const callback = currentBlockNumber => {
             if (currentBlockNumber === receipt.blockNumber + 1) {
               //arbitrary number, in practice should probably be closer to 5-15 blocks
@@ -73,14 +75,12 @@ export default class TransactionObject extends TransactionLifeCycle {
                 .then(receiptCheck => {
                   if (receiptCheck.blockHash === receipt.blockHash) {
                     super._finalize();
+                    //this._ethersProvider.removeListener('block', callback); <- how to do this?
                   }
                 });
             }
           };
-          this._ethersProvider.removeListener('block', callback);
           this._ethersProvider.on('block', callback);
-          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
-          this._mine();
         },
         reason => {
           //console.log('error getting tx receipt', reason);

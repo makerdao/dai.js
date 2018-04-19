@@ -29,16 +29,40 @@ export default class EtherToken {
     return Promise.resolve(true);
   }
 
-  transfer(fromAddress, toAddress, transferValue) {
-    const valueInWei = utils.parseEther(transferValue);
-    //todo,change from a web3 call to a ethersJS call?
+  transfer(toAddress, transferValue) {
+    const valueInWei = utils.parseEther(transferValue).toString();
+    const defaultAccount = this._web3.defaultAccount();
+    const tx = this._web3.eth.sendTransaction({
+      from: defaultAccount,
+      to: toAddress,
+      value: valueInWei
+    });
+    /*return tx.then(TX=>{
+      console.log('returnedTX', TX);
+      return this._web3.ethersProvider().waitForTransaction(TX)
+    })
+    .then(tx=>{
+      console.log('mined tx', tx);
+    });*/
     return new TransactionObject(
-      this._web3.eth.sendTransaction({
-        from: fromAddress,
-        to: toAddress,
-        value: valueInWei
-      }),
-      this._web3.ethersProvider()
+      tx.then(tx => ({ hash: tx })),
+      this._web3.ethersProvider(),
+      null
+    );
+  }
+
+  transferFrom(fromAddress, toAddress, transferValue) {
+    const valueInWei = utils.parseEther(transferValue).toString();
+    return new TransactionObject(
+      this._web3.eth
+        .sendTransaction({
+          from: fromAddress,
+          to: toAddress,
+          value: valueInWei
+        })
+        .then(tx => ({ hash: tx })),
+      this._web3.ethersProvider(),
+      null
     );
   }
 }

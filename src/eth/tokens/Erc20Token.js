@@ -50,7 +50,7 @@ export default class Erc20Token {
     );
   }
 
-  transferFromSigner(to, value) {
+  transfer(to, value) {
     const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
       this._contract.transfer(to, valueInWei),
@@ -58,7 +58,7 @@ export default class Erc20Token {
     );
   }
 
-  transfer(from, to, value) {
+  transferFrom(from, to, value) {
     const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
       this._contract.transferFrom(from, to, valueInWei),

@@ -35,7 +35,7 @@ test('token name and symbol are correct', (done) => {
     });
 });
 
-test.only('wrap and unwrap ETH', (done) => {
+test('wrap and unwrap ETH', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
   let token = null, originalBalance = null, owner = null;

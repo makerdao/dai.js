@@ -27,11 +27,10 @@ test('TransactionObject event listeners work as promises', done => {
       return TransactionObject.onFinalized();
     })
     .then(TransactionObject=>{
-      //console.log('finalized!');
       expect(TransactionObject.state()).toBe(TransactionState.finalized);
       done();
     });
-},25000);
+},30000);
 
 test('TransactionObject event listeners work as callbacks', done => {
   const oasisService = OasisExchangeService.buildKovanService();
@@ -60,7 +59,7 @@ test('TransactionObject event listeners work as callbacks', done => {
       done();
       });
     });
-},25000);
+},30000);
 
 //currently using the test blockchain causes it to go to the error state
 test('TransactionObject error event listeners works', done => {

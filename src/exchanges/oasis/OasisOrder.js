@@ -89,6 +89,21 @@ export default class OasisOrder extends TransactionLifeCycle {
         filterResultsAndReceipt => {
           //console.log('receipt', filterResultsAndReceipt[1]);
           //console.log('transaction.hash', resolvedTransaction.hash);
+          this._fees = utils.formatEther(
+            filterResultsAndReceipt[1].gasUsed.mul(gasPrice)
+          );
+          //console.log('this._fees', this._fees);
+          const events = filterResultsAndReceipt[0].filter(
+            t => t.transactionHash === resolvedTransaction.hash
+          ); //there could be several of these
+          let total = 0;
+          events.forEach(event => {
+            //console.log('event: ', event);
+            //console.log('amount of token received: ', event.data.substring(2,66));
+            total += parseInt(event.data.substring(2, 66), 16);
+          });
+          this._fillAmount = utils.formatEther(total.toString());
+          super._mine();
           const callback = currentBlockNumber => {
             if (
               currentBlockNumber ===
@@ -103,30 +118,13 @@ export default class OasisOrder extends TransactionLifeCycle {
                     filterResultsAndReceipt[1].blockHash
                   ) {
                     super._finalize();
+                    //this._ethersProvider.removeListener('block', callback); //will this interfere with the callback in transaction object??
                   }
                 });
             }
           };
-          this._ethersProvider.removeListener('block', callback); //will this interfere with the callback in transaction object??
           this._ethersProvider.on('block', callback);
-
-          this._fees = utils.formatEther(
-            filterResultsAndReceipt[1].gasUsed.mul(gasPrice)
-          );
-          //console.log('this._fees', this._fees);
-          const events = filterResultsAndReceipt[0].filter(
-            t => t.transactionHash === resolvedTransaction.hash
-          ); //there could be several of these
-          let total = 0;
-          events.forEach(event => {
-            //console.log('event: ', event);
-            //console.log('amount of token received: ', event.data.substring(2,66));
-            total += parseInt(event.data.substring(2, 66), 16);
-          });
-          //console.log('total', total);
-          this._fillAmount = utils.formatEther(total);
           //console.log('this._fillAmount', this._fillAmount);
-          super._mine();
         },
         reason => {
           this._error = reason;

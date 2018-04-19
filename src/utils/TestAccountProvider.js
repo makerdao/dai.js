@@ -29,11 +29,18 @@ class TestAccountProvider {
     ) {
       throw new Error(
         'Index must be a natural number between 0 and ' +
-          (this._accounts.addresses.length - 1)
+          (this._accounts.addresses.length - 1) +
+          ', got: ' +
+          i
       );
     }
+    this._setIndex(i);
+  }
 
+  _setIndex(i) {
     this._index = i;
+    // eslint-disable-next-line
+    process.env._TestProviderIndex = '' + this._index;
   }
 
   _setAccounts(accounts) {
@@ -56,9 +63,8 @@ class TestAccountProvider {
     if (this._index >= this._accounts.addresses.length) {
       throw new Error('No more test accounts available.');
     }
-
-    const i = this._index++;
-    //process.env._TestProviderIndex = i;
+    const i = this.getIndex();
+    this._setIndex(i + 1);
 
     return {
       address: this._accounts.addresses[i],
@@ -66,7 +72,10 @@ class TestAccountProvider {
     };
   }
 }
-
-const i = 1; //process.env._TestProviderIndex || 1;
+// eslint-disable-next-line
+const i = process.env._TestProviderIndex
+  ? // eslint-disable-next-line
+    parseInt(process.env._TestProviderIndex)
+  : 1;
 const p = new TestAccountProvider(accounts, i);
 export { p as default, TestAccountProvider };

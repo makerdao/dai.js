@@ -30,7 +30,7 @@ test('get PETH allowance of address', (done) => {
     });
 });
 
-test.only('should successfully join and exit PETH', done => {
+test('should successfully join and exit PETH', done => {
   const tokenService = EthereumTokenService.buildTestService();
   let weth = null, peth = null, tub = null, owner = null, initialBalance = null;
 

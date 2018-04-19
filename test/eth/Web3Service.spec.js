@@ -59,6 +59,17 @@ test('should return error reason on a failure to connect', (done) => {
     });
 });
 
+test('should be authenticated and know default address when private key passed in', (done) => {
+  const service = Web3Service.buildInfuraService('kovan',
+        '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700');
+  service.manager().authenticate()
+    .then(() => {
+      expect(service.manager().isAuthenticated()).toBe(true);
+      expect(service.defaultAccount()).toBe('0x717bc9648b627316718Fe93f4cD98056E53a8C8d');
+      done();
+    });
+});
+
 test('should correctly handle automatic disconnect', (done) => {
   const service = Web3Service.buildDisconnectingService();
   service.manager().onDisconnected(()=>{
