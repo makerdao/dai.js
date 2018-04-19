@@ -5,6 +5,9 @@ import TokenConversionService from './TokenConversionService';
 import contracts from '../../contracts/contracts';
 import TransactionObject from './TransactionObject';
 import Cdp from './Cdp';
+import tokens from '../../contracts/tokens';
+
+import { utils } from 'ethers';
 
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
@@ -71,9 +74,20 @@ export default class EthereumCdpService extends PrivateService {
   shutCdp(cdpId) {
     const contract = this.get('smartContract'),
       tubContract = contract.getContractByName(contracts.TUB),
-      hexCdpId = contract.numberToBytes32(cdpId);
+      hexCdpId = contract.numberToBytes32(cdpId),
+      owner = contract.get('web3').defaultAccount(),
+      token = this.get('token').getToken(tokens.PETH);
 
-    return tubContract.shut(hexCdpId);
+    return token.balanceOf(owner).then(balance => {
+      if (parseFloat(utils.formatEther(balance)) > 0) {
+        this.get('conversionService')
+          ._approveToken(token)
+          .onPending();
+        return tubContract.shut(hexCdpId);
+      } else {
+        return tubContract.shut(hexCdpId);
+      }
+    });
   }
 
   getCdpInfo(cdpId) {
