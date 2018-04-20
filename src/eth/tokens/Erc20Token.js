@@ -1,5 +1,5 @@
 import TransactionObject from '../TransactionObject';
-const utils = require('ethers').utils;
+import { utils } from 'ethers';
 
 export default class Erc20Token {
   constructor(contract, ethersProvider, decimals = 18) {

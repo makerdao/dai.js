@@ -58,7 +58,7 @@ test('should open and then shut a CDP', done => {
       });
     });
   });
-}, 12000);
+});
 
 test('should be able to lock eth in a cdp', done => {
   let firstInfoCall;

@@ -7,8 +7,6 @@ import TransactionObject from './TransactionObject';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 
-import { utils } from 'ethers';
-
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
     const service = new EthereumCdpService();
@@ -79,7 +77,7 @@ export default class EthereumCdpService extends PrivateService {
       token = this.get('token').getToken(tokens.PETH);
 
     return token.balanceOf(owner).then(balance => {
-      if (parseFloat(utils.formatEther(balance)) > 0) {
+      if (balance > 0) {
         this.get('conversionService')
           ._approveToken(token)
           .onPending();

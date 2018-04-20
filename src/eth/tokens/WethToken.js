@@ -16,6 +16,7 @@ export default class WethToken extends Erc20Token {
 
   deposit(amount) {
     const valueInWei = this.toEthereumFormat(amount);
+
     return new TransactionObject(
       this._contract.deposit({
         value: valueInWei
@@ -26,6 +27,7 @@ export default class WethToken extends Erc20Token {
 
   withdraw(amount) {
     const valueInWei = this.toEthereumFormat(amount);
+
     return new TransactionObject(
       this._contract.withdraw(valueInWei),
       this._ethersProvider

@@ -55,21 +55,19 @@ export default class TokenConversionService extends PrivateService {
   }
 
   convertEthToWeth(eth) {
-    const parsedAmount = this._parseDenomination(eth);
     const wethToken = this._getToken(tokens.WETH);
 
     return this._approveToken(wethToken)
       .onPending()
-      .then(() => wethToken.deposit(parsedAmount, this._ethersProvider()));
+      .then(() => wethToken.deposit(eth), this._ethersProvider());
   }
 
   convertWethToPeth(weth) {
-    const parsedAmount = this._parseDenomination(weth);
     const pethToken = this._getToken(tokens.PETH);
 
     return this._approveToken(pethToken)
       .onPending()
-      .then(() => pethToken.join(parsedAmount));
+      .then(() => pethToken.join(weth));
   }
 
   convertEthToPeth(value) {
