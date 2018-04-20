@@ -42,6 +42,11 @@ addr1="0xc226f3cd13d508bc319f4f4290172748199d6612"
 addr2="0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238"
 seth send $OTC "addTokenPairWhitelist(address, address)" $addr1 $addr2
 
+
+##seth send $addr2 "deposit()" --value $(seth --to-wei 1 eth) ##wrap some eth to weth
+##make sure I have WETH
+##seth send $addr2 "approve(address, uint256)" $OTC ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ##approve weth to oasis
+##seth send $OTC "offer(uint256, address, uint256, address, uint256, bool)" $(seth --to-uint256 $(seth --to-wei 0.5 eth)) $addr2 $(seth --to-uint256 $(seth --to-wei 1 eth)) $addr1 0 1 ## create an offer to buy Dai for Weth <- this isn't working
 export OTC=$OTC
 
 cd ../..
