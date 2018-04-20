@@ -90,6 +90,35 @@ test('ERC20 transfer should move transferValue from sender to receiver', done =>
     .then(balances => {
       senderBalance = parseFloat(balances[0].toString());
       receiverBalance = parseFloat(balances[1].toString());
+      const TransactionWrapper = token.transfer(receiver, '0.1');
+      return TransactionWrapper.onMined();
+    })
+    .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
+    .then(balances => {
+      const newSenderBalance = parseFloat(balances[0].toString()),
+        newReceiverBalance = parseFloat(balances[1].toString());
+
+      expect(newSenderBalance).toBeCloseTo(senderBalance - 0.1, 12);
+      expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
+      done();
+    });
+},15000);
+
+test('ERC20 transferFrom should move transferValue from sender to receiver', done => {
+  const ethereumTokenService = EthereumTokenService.buildTestService(),
+    receiver = TestAccountProvider.nextAddress();
+
+  let sender = null, token = null, senderBalance = null, receiverBalance = null;
+
+  ethereumTokenService.manager().authenticate().then(() => {
+    sender = ethereumTokenService.get('web3').defaultAccount();
+    token =  ethereumTokenService.getToken(tokens.WETH);
+    return token.deposit('0.1').onMined();
+  })
+    .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
+    .then(balances => {
+      senderBalance = parseFloat(balances[0].toString());
+      receiverBalance = parseFloat(balances[1].toString());
       const TransactionWrapper = token.transferFrom(sender, receiver, '0.1');
       return TransactionWrapper.onMined();
     })

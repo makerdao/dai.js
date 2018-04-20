@@ -36,14 +36,8 @@ export default class EtherToken {
       from: defaultAccount,
       to: toAddress,
       value: valueInWei
+      //gasPrice: 500000000
     });
-    /*return tx.then(TX=>{
-      console.log('returnedTX', TX);
-      return this._web3.ethersProvider().waitForTransaction(TX)
-    })
-    .then(tx=>{
-      console.log('mined tx', tx);
-    });*/
     return new TransactionObject(
       tx.then(tx => ({ hash: tx })),
       this._web3.ethersProvider(),

@@ -92,6 +92,9 @@ export default class OasisOrder extends TransactionLifeCycle {
           this._fees = utils.formatEther(
             filterResultsAndReceipt[1].gasUsed.mul(gasPrice)
           );
+          //console.log('receipt logs: ', filterResultsAndReceipt[1].logs);
+          //const receiptLogs = filterResultsAndReceipt[1].logs;
+          //const receiptEvents = receiptLogs.filter()
           //console.log('this._fees', this._fees);
           const events = filterResultsAndReceipt[0].filter(
             t => t.transactionHash === resolvedTransaction.hash
@@ -106,24 +109,33 @@ export default class OasisOrder extends TransactionLifeCycle {
           super._mine();
           const callback = currentBlockNumber => {
             if (
-              currentBlockNumber ===
+              currentBlockNumber >=
               filterResultsAndReceipt[1].blockNumber + 1
             ) {
               //arbitrary number, in practice should probably be closer to 5-15 blocks
               this._ethersProvider
                 .getTransactionReceipt(resolvedTransaction.hash)
-                .then(receiptCheck => {
-                  if (
-                    receiptCheck.blockHash ===
-                    filterResultsAndReceipt[1].blockHash
-                  ) {
-                    super._finalize();
-                    //this._ethersProvider.removeListener('block', callback); //will this interfere with the callback in transaction object??
+                .then(
+                  receiptCheck => {
+                    if (
+                      receiptCheck.blockHash ===
+                      filterResultsAndReceipt[1].blockHash
+                    ) {
+                      super._finalize();
+                    } else {
+                      this._ethersProvider.once('block', callback);
+                    }
+                  },
+                  () => {
+                    //error calling getTransactionReceipt
+                    this._ethersProvider.once('block', callback);
                   }
-                });
+                );
+            } else {
+              this._ethersProvider.once('block', callback);
             }
           };
-          this._ethersProvider.on('block', callback);
+          //this._ethersProvider.once('block', callback);
           //console.log('this._fillAmount', this._fillAmount);
         },
         reason => {

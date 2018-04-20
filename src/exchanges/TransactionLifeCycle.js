@@ -16,7 +16,7 @@ function _promisify(unsafeCallback) {
 }
 
 class TransactionLifeCycle {
-  constructor(businessObject=null) {
+  constructor(businessObject = null) {
     this._state = new StateMachine(
       transactionState.initialized,
       transactionTypeTransitions[TransactionType.transaction]
@@ -130,22 +130,15 @@ class TransactionLifeCycle {
     });
   }
 
-  onError(handler = () => {}) { 
+  onError(handler = () => {}) {
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
-        if (
-          newState === transactionState.error
-        ) {
+        if (newState === transactionState.error) {
           handler(this.error(), this._businessObject || this);
           reject(this.error(), this._businessObject || this);
         }
       });
     });
-  }
-
-  onStateChanged(handler) {
-    this._state.onStateChanged(handler);
-    return this;
   }
 }
 

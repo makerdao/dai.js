@@ -4,8 +4,10 @@ import tokens from '../../../contracts/tokens';
 // import testAccountProvider from '../../../src/utils/TestAccountProvider';
 // import orderStyle from '../../../src/exchanges/orderStyle';
 import TransactionState from '../../../src/eth/TransactionState';
+import contracts from '../../../contracts/contracts';
+const utils = require('ethers').utils;
 
-/*beforeAll(()=>{ //can comment this out after has been run once
+beforeAll(()=>{ //can comment this out after has been run once
     const oasisExchangeService = OasisExchangeService.buildTestService();
     let oasisOrder = null;
     let wethToken = null;
@@ -27,7 +29,7 @@ import TransactionState from '../../../src/eth/TransactionState';
         oasisOrder = oasisExchangeService.offer(utils.parseEther('0.05'), wethAddress, utils.parseEther('10.0'), daiAddress, 0, overrideOptions);
         return oasisOrder;
       });
-}, 30000);*/
+}, 30000);
 
 
 
@@ -84,7 +86,7 @@ test('OasisOrder event listeners work as promises, and can use business object',
       expect(OrderObject.state()).toBe(TransactionState.finalized);
       done();
     });
-},30000);
+},35000);
 
 
 test('get fillAmount buyDai', (done) =>  {
