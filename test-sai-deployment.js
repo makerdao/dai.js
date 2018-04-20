@@ -1,4 +1,5 @@
 // Set `boxes[SAI_TUB]` and so on to addresses from the environment.
+/*
 let boxes = (
   "GEM GOV PIP PEP PIT ADM SAI SIN SKR DAD MOM VOX TUB TAP TOP".split(" ")
 ).reduce((o, x) => Object.assign(o, { [x] : process.env[`SAI_${x}`] }), {});
@@ -24,7 +25,7 @@ let sys = {
   skr: abi("DSToken", boxes.SKR),
   sai: abi("DSToken", boxes.SAI),
 };
-*/
+*//*
 
 async function start () {
   [
@@ -48,4 +49,4 @@ async function start () {
   });
 }
 
-start();
+start();*/

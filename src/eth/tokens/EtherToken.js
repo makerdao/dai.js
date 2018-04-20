@@ -1,3 +1,6 @@
+import TransactionObject from '../TransactionObject';
+const utils = require('ethers').utils;
+
 export default class EtherToken {
   constructor(web3Service, gasEstimatorService) {
     this._web3 = web3Service;
@@ -10,7 +13,10 @@ export default class EtherToken {
   }
 
   balanceOf(owner) {
-    return this._web3.ethersProvider().getBalance(owner);
+    return this._web3
+      .ethersProvider()
+      .getBalance(owner)
+      .then(b => utils.formatEther(b));
   }
 
   // eslint-disable-next-line
@@ -23,11 +29,34 @@ export default class EtherToken {
     return Promise.resolve(true);
   }
 
-  transfer(fromAddress, toAddress, transferValue) {
-    return this._web3.eth.sendTransaction({
-      from: fromAddress,
+  transfer(toAddress, transferValue) {
+    const valueInWei = utils.parseEther(transferValue).toString();
+    const defaultAccount = this._web3.defaultAccount();
+    const tx = this._web3.eth.sendTransaction({
+      from: defaultAccount,
       to: toAddress,
-      value: transferValue
+      value: valueInWei
+      //gasPrice: 500000000
     });
+    return new TransactionObject(
+      tx.then(tx => ({ hash: tx })),
+      this._web3.ethersProvider(),
+      null
+    );
+  }
+
+  transferFrom(fromAddress, toAddress, transferValue) {
+    const valueInWei = utils.parseEther(transferValue).toString();
+    return new TransactionObject(
+      this._web3.eth
+        .sendTransaction({
+          from: fromAddress,
+          to: toAddress,
+          value: valueInWei
+        })
+        .then(tx => ({ hash: tx })),
+      this._web3.ethersProvider(),
+      null
+    );
   }
 }

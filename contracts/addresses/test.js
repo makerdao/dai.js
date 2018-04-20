@@ -27,17 +27,17 @@ const contractAdresses = {
 
 const mapping = {
   [tokens.WETH] : [
-    { version: 1, address: contractAdresses.GEM, abi: dsEthToken_1.interface },
+    { version: 1, address: contractAdresses.GEM, abi: dsEthToken_1.interface, decimals: 18 },
   ],
   [tokens.PETH] : [
-    { version: 1, address: contractAdresses.SKR, abi: erc20Token_1.interface },
+    { version: 1, address: contractAdresses.SKR, abi: erc20Token_1.interface, decimals: 18 },
   ],
   [tokens.DAI] : [
-    { version: 1, address: contractAdresses.SAI, abi: erc20Token_1.interface },
+    { version: 1, address: contractAdresses.SAI, abi: erc20Token_1.interface, decimals: 18 },
   ],
   [tokens.MKR] : [
-    { version: 1, address: '0x0000000000000000000000000000000000000001', abi: erc20Token_1.interface },
-    { version: 2, address: contractAdresses.GOV, abi: erc20Token_1.interface },
+    { version: 1, address: '0x0000000000000000000000000000000000000001', abi: erc20Token_1.interface, decimals: 18 },
+    { version: 2, address: contractAdresses.GOV, abi: erc20Token_1.interface, decimals: 18 },
   ],
   [contracts.TOP] : [
     { version: 1, address: contractAdresses.TOP, abi: top_1.interface },

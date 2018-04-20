@@ -235,11 +235,13 @@ export default class Web3Service extends PrivateService {
 
     return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
       data => {
-        if (!(data instanceof Array) || data.length < 1) {
+        if (this._hasPrivateKey()) {
+          this._info.account = this._ethersWallet.address;
+        } else if (data instanceof Array && data.length > 0) {
+          this._info.account = data[0];
+        } else {
           throw new Error('Web3 is not authenticated');
         }
-
-        this._info.account = data[0];
 
         this.get('timer').createTimer(
           'web3CheckAuthenticationStatus',
@@ -351,6 +353,10 @@ export default class Web3Service extends PrivateService {
     this._privateKey = privateKey || null;
   }
 
+  _hasPrivateKey() {
+    return !!this._privateKey;
+  }
+
   _getWeb3Provider(settings) {
     switch (settings.type) {
       case Web3ProviderType.HTTP:
@@ -381,6 +387,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillAuthenticated() {
+    if (this._hasPrivateKey()) return this._isStillConnected();
     return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
       accounts =>
         accounts instanceof Array && accounts[0] === this._info.account,
