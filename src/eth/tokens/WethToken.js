@@ -7,11 +7,11 @@ export default class WethToken extends Erc20Token {
   }
 
   name() {
-    return this._contract.name().then(n => n[0]);
+    return this._contract.name();
   }
 
   symbol() {
-    return this._contract.symbol().then(s => s[0]);
+    return this._contract.symbol();
   }
 
   deposit(amount) {
