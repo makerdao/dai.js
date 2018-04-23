@@ -63,6 +63,7 @@ test('TransactionObject event listeners work as callbacks', done => {
 },25000);
 
 //currently using the test blockchain causes it to go to the error state
+
 test('TransactionObject error event listeners works', done => {
   //const oasisService = OasisExchangeService.buildKovanService();
   //let service = null;

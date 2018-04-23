@@ -104,7 +104,7 @@ test('ERC20 transfer should move transferValue from sender to receiver', done =>
     });
 },15000);
 
-test.only('ERC20 transferFrom should move transferValue from sender to receiver', done => {
+test('ERC20 transferFrom should move transferValue from sender to receiver', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
     receiver = TestAccountProvider.nextAddress();
 

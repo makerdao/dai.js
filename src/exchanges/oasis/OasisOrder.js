@@ -64,21 +64,7 @@ export default class OasisOrder extends TransactionLifeCycle {
           //console.log('tx in OasisOrder after waiting', tx);
           this._timeStampMined = new Date();
           //console.log('txHash after mined', tx);
-          const filter = {
-            fromBlock: tx.blockNumber,
-            toBlock: tx.blockNumber,
-            //address: '0xd0a1e359811322d97fi991e03f863a0c30c2cf029c', kovan weth
-            address: '0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9', //kovan oasis
-            //topics: ['0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'] //hash of Transfer(...)
-            topics: [
-              '0x819e390338feffe95e2de57172d6faf337853dfd15c7a09a32d76f7fd2443875'
-            ] //hash of LogTrade(..)
-            //topics: ['0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f'] //hash of LogTake(...)
-          };
-          return Promise.all([
-            this._ethersProvider.getLogs(filter),
-            this._ethersProvider.getTransactionReceipt(tx.hash)
-          ]);
+          return this._ethersProvider.getTransactionReceipt(tx.hash);
         },
         reason => {
           this._error = reason;
@@ -86,41 +72,38 @@ export default class OasisOrder extends TransactionLifeCycle {
         }
       )
       .then(
-        filterResultsAndReceipt => {
+        receipt => {
           //console.log('receipt', filterResultsAndReceipt[1]);
           //console.log('transaction.hash', resolvedTransaction.hash);
-          this._fees = utils.formatEther(
-            filterResultsAndReceipt[1].gasUsed.mul(gasPrice)
+          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+          const receiptLogs = receipt.logs;
+          //console.log('receiptLogs', receiptLogs);
+          const receiptEvents = receiptLogs.filter(
+            e =>
+              e.topics[0] ===
+                '0x819e390338feffe95e2de57172d6faf337853dfd15c7a09a32d76f7fd2443875' &&
+              e.address === '0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9'
           );
-          //console.log('receipt logs: ', filterResultsAndReceipt[1].logs);
-          //const receiptLogs = filterResultsAndReceipt[1].logs;
-          //const receiptEvents = receiptLogs.filter()
           //console.log('this._fees', this._fees);
-          const events = filterResultsAndReceipt[0].filter(
-            t => t.transactionHash === resolvedTransaction.hash
-          ); //there could be several of these
           let total = 0;
-          events.forEach(event => {
+          receiptEvents.forEach(event => {
             //console.log('event: ', event);
             //console.log('amount of token received: ', event.data.substring(2,66));
-            total += parseInt(event.data.substring(2, 66), 16);
+            //total += parseInt(event.data.substring(66, 130), 16); //for buyDai
+            total += parseInt(event.data.substring(2, 66), 16); //for sellDai
           });
           this._fillAmount = utils.formatEther(total.toString());
+          //console.log('receiptEvents', receiptEvents);
+          //console.log('fillAmount', this._fillAmount);
           super._mine();
           const callback = currentBlockNumber => {
-            if (
-              currentBlockNumber >=
-              filterResultsAndReceipt[1].blockNumber + 1
-            ) {
+            if (currentBlockNumber >= receipt.blockNumber + 1) {
               //arbitrary number, in practice should probably be closer to 5-15 blocks
               this._ethersProvider
                 .getTransactionReceipt(resolvedTransaction.hash)
                 .then(
                   receiptCheck => {
-                    if (
-                      receiptCheck.blockHash ===
-                      filterResultsAndReceipt[1].blockHash
-                    ) {
+                    if (receiptCheck.blockHash === receipt.blockHash) {
                       super._finalize();
                     } else {
                       this._ethersProvider.once('block', callback);
