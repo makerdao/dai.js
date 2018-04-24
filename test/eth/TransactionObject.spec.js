@@ -33,6 +33,23 @@ test('TransactionObject event listeners work as promises', done => {
     });
 },25000);
 
+test('get fees from TransactionObject', done => {
+  const service = EthereumTokenService.buildTestService();
+  service.manager().authenticate()
+    .then(() => {
+      const wethToken = service.getToken(tokens.WETH);
+      const randomAddress = TestAccountProvider.nextAddress();
+      const TransactionObject = wethToken.approveUnlimited(randomAddress);
+      //TransactionObject.onError(()=>{console.log('onError() triggered');});
+      return TransactionObject.onMined();
+    })
+    .then(TransactionObject=>{
+      expect(TransactionObject.state()).toBe(TransactionState.mined);
+      expect(parseFloat(TransactionObject.fees())).toBeGreaterThan(0);
+      done();
+    });
+},25000);
+
 test('TransactionObject event listeners work as callbacks', done => {
   const oasisService = OasisExchangeService.buildKovanService();
   let service = null;

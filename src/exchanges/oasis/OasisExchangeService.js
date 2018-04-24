@@ -2,7 +2,8 @@ import PrivateService from '../../core/PrivateService';
 import Web3Service from '../../eth/Web3Service';
 import SmartContractService from '../../eth/SmartContractService';
 import EthereumTokenService from '../../eth/EthereumTokenService';
-import OasisOrder from './OasisOrder';
+import OasisOrderSell from './OasisOrderSell';
+import OasisOrderBuy from './OasisOrderBuy';
 import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
@@ -77,7 +78,7 @@ export default class OasisExchangeService extends PrivateService {
       .address();
     const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
     const minFillAmountEVM = daiToken.toEthereumFormat(minFillAmount);
-    return new OasisOrder(
+    return new OasisOrderSell(
       oasisContract.sellAllAmount(
         daiAddress,
         daiAmountEVM,
@@ -120,7 +121,7 @@ export default class OasisExchangeService extends PrivateService {
     const sellTokenAddress = this.get('ethereumToken')
       .getToken(tokenSymbol)
       .address();
-    return new OasisOrder(
+    return new OasisOrderBuy(
       oasisContract.buyAllAmount(
         daiAddress,
         daiAmountEVM,
