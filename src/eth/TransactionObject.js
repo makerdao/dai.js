@@ -46,8 +46,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
-          //console.log('tx in TransactionObject', tx);
-          gasPrice = tx.gasPrice;
           super._pending();
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
           return this._ethersProvider.waitForTransaction(tx.hash);
@@ -61,7 +59,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         tx => {
-          //console.log('tx after waiting:', tx);
+          gasPrice = tx.gasPrice;
           //console.log('tx.hash after waiting:', tx.hash);
           txHash = tx.hash;
           this._timeStampMined = new Date();
@@ -76,7 +74,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         receipt => {
-          //console.log('receipt', receipt);
+          //console.log(typeof receipt.gasUsed, typeof gasPrice);
           this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           this._logs = this._logsParser(receipt.logs);
           this._mine();
