@@ -75,9 +75,20 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         receipt => {
           //console.log(typeof receipt.gasUsed, typeof gasPrice);
-          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           this._logs = this._logsParser(receipt.logs);
+          //console.log('receipt', receipt);
+          if (!!receipt.gasUsed && !!gasPrice) {
+            this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+          } else {
+            /*
+              console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
+                receipt.gasUsed ? receipt.gasUsed.toString() : '<not set>',
+                'Price = ', gasPrice ? gasPrice.toString() : '<not set>'
+              );
+            */
+          }
           this._mine();
+
           const callback = currentBlockNumber => {
             if (currentBlockNumber >= receipt.blockNumber + 1) {
               //arbitrary number, in practice should probably be closer to 5-15 blocks
