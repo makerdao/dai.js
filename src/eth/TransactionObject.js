@@ -17,6 +17,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._error = null;
     this._fees = null;
     this._logs = null;
+    this._hash = null;
     this._getTransactionData();
   }
 
@@ -32,6 +33,10 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._fees;
   }
 
+  hash() {
+    return this._hash;
+  }
+
   logs() {
     return this._logs;
   }
@@ -42,12 +47,12 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionData() {
     let gasPrice = null;
-    let txHash = null;
     this._transaction
       .then(
         tx => {
           super._pending(); //set state to pending
-          return this._ethersProvider.waitForTransaction(tx.hash);
+          this._hash = tx.hash;
+          return this._ethersProvider.waitForTransaction(this._hash);
         },
         // eslint-disable-next-line
         reason => {
@@ -58,9 +63,8 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         tx => {
           gasPrice = tx.gasPrice;
-          txHash = tx.hash;
           this._timeStampMined = new Date();
-          return this._ethersProvider.getTransactionReceipt(tx.hash);
+          return this._ethersProvider.getTransactionReceipt(this._hash);
         },
         reason => {
           this._error = reason;
@@ -85,7 +89,7 @@ export default class TransactionObject extends TransactionLifeCycle {
           const callback = currentBlockNumber => {
             if (currentBlockNumber >= receipt.blockNumber + 1) {
               //arbitrary number, in practice should probably be closer to 5-15 blocks
-              this._ethersProvider.getTransactionReceipt(txHash).then(
+              this._ethersProvider.getTransactionReceipt(this._hash).then(
                 receiptCheck => {
                   if (receiptCheck.blockHash === receipt.blockHash) {
                     super._finalize(); //set state to finalized
