@@ -9,14 +9,13 @@ export default class Erc20Token {
   }
 
   allowance(tokenOwner, spender) {
-    //needs to convert from wei to ether
     return this._contract
       .allowance(tokenOwner, spender)
-      .then(_ => this.toUserFormat(_[0]));
+      .then(_ => this.toUserFormat(_));
   }
 
   balanceOf(owner) {
-    return this._contract.balanceOf(owner).then(_ => this.toUserFormat(_[0]));
+    return this._contract.balanceOf(owner).then(_ => this.toUserFormat(_));
   }
 
   address() {
@@ -67,6 +66,6 @@ export default class Erc20Token {
   }
 
   totalSupply() {
-    return this._contract.totalSupply().then(_ => this.toUserFormat(_[0]));
+    return this._contract.totalSupply().then(_ => this.toUserFormat(_));
   }
 }
