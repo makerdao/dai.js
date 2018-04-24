@@ -1,5 +1,5 @@
 import { utils } from 'ethers';
-import TransactionLifeCycle from '../exchanges/TransactionLifeCycle';
+import TransactionLifeCycle from '../eth/TransactionLifeCycle';
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(
@@ -9,15 +9,15 @@ export default class TransactionObject extends TransactionLifeCycle {
     logsParser = logs => logs
   ) {
     super(businessObject);
-    this._ethersProvider = ethersProvider;
     this._transaction = transaction;
-    this._error = null;
-    this._timeStampSubmitted = new Date(); //time that the transaction was submitted to the network.  should we also have a time for when it was accepted
+    this._ethersProvider = ethersProvider;
+    this._logsParser = logsParser;
+    this._timeStampSubmitted = new Date();
     this._timeStampMined = null;
+    this._error = null;
     this._fees = null;
     this._logs = null;
-    this._logsParser = logsParser;
-    this._getTransactionReceipt();
+    this._getTransactionData();
   }
 
   timeStampSubmitted() {
@@ -40,19 +40,17 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._error;
   }
 
-  _getTransactionReceipt() {
+  _getTransactionData() {
     let gasPrice = null;
     let txHash = null;
     this._transaction
       .then(
         tx => {
-          super._pending();
-          //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
+          super._pending(); //set state to pending
           return this._ethersProvider.waitForTransaction(tx.hash);
         },
         // eslint-disable-next-line
         reason => {
-          //console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           super._error();
         }
@@ -60,23 +58,18 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(
         tx => {
           gasPrice = tx.gasPrice;
-          //console.log('tx.hash after waiting:', tx.hash);
           txHash = tx.hash;
           this._timeStampMined = new Date();
-          //this._mine(); //remove this
           return this._ethersProvider.getTransactionReceipt(tx.hash);
         },
         reason => {
-          //console.log('error calling waitForTransaction', reason);
           this._error = reason;
           super._error();
         }
       )
       .then(
         receipt => {
-          //console.log(typeof receipt.gasUsed, typeof gasPrice);
           this._logs = this._logsParser(receipt.logs);
-          //console.log('receipt', receipt);
           if (!!receipt.gasUsed && !!gasPrice) {
             this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           } else {
@@ -87,7 +80,7 @@ export default class TransactionObject extends TransactionLifeCycle {
               );
             */
           }
-          this._mine();
+          this._mine(); //set state to mined
 
           const callback = currentBlockNumber => {
             if (currentBlockNumber >= receipt.blockNumber + 1) {
@@ -95,8 +88,7 @@ export default class TransactionObject extends TransactionLifeCycle {
               this._ethersProvider.getTransactionReceipt(txHash).then(
                 receiptCheck => {
                   if (receiptCheck.blockHash === receipt.blockHash) {
-                    //console.log('about to finalize');
-                    super._finalize();
+                    super._finalize(); //set state to finalized
                   } else {
                     this._ethersProvider.once('block', callback);
                   }
@@ -112,7 +104,6 @@ export default class TransactionObject extends TransactionLifeCycle {
           //this._ethersProvider.once('block', callback);
         },
         reason => {
-          //console.log('error getting tx receipt', reason);
           this._error = reason;
           super._error();
         }

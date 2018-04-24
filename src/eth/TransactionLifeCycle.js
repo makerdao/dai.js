@@ -4,17 +4,6 @@ import TransactionType, {
   transactionTypeTransitions
 } from './TransactionTransitions';
 
-// eslint-disable-next-line
-function _promisify(unsafeCallback) {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(unsafeCallback());
-    } catch (e) {
-      reject(e.message);
-    }
-  });
-}
-
 class TransactionLifeCycle {
   constructor(businessObject = null) {
     this._state = new StateMachine(

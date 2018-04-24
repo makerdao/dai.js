@@ -1,17 +1,8 @@
-import oasisOrderStatus from './oasis/OasisOrderState';
 import transactionStatus from '../eth/TransactionState';
 
 const TransactionType = {
   oasis: 'oasis',
   transaction: 'transaction'
-};
-
-const oasisOrderLifeCycle = {
-  initialized: [oasisOrderStatus.pending, oasisOrderStatus.error],
-  pending: [oasisOrderStatus.error, oasisOrderStatus.mined],
-  mined: [oasisOrderStatus.finalized, oasisOrderStatus.error],
-  finalized: [],
-  error: []
 };
 
 const transactionLifeCycle = {
@@ -23,7 +14,6 @@ const transactionLifeCycle = {
 };
 
 const transactionTypeTransitions = {
-  oasis: oasisOrderLifeCycle,
   transaction: transactionLifeCycle
 };
 
