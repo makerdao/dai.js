@@ -76,12 +76,14 @@ export default class EthereumCdpService extends PrivateService {
       .approveToken(peth)
       .onPending();
 
+    // Promise.all to wait for approval
+
     return this._tubContract().shut(hexCdpId);
   }
 
   lockEth(cdpId, eth) {
-    const parsedAmount = this._parseDenomination(eth);
     const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = this._parseDenomination(eth);
 
     return this._conversionService()
       .convertEthToPeth(eth)
@@ -91,6 +93,21 @@ export default class EthereumCdpService extends PrivateService {
           this._ethersProvider()
         );
       });
+  }
+
+  freePeth(cdpId, amount) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = this._parseDenomination(amount);
+    const peth = this.get('token').getToken(tokens.PETH);
+
+    this._conversionService()
+      .approveToken(peth)
+      .onMined();
+
+    return new TransactionObject(
+      this._tubContract().free(hexCdpId, parsedAmount),
+      this._ethersProvider()
+    );
   }
 
   drawDai(cdpId, amount) {

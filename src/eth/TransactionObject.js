@@ -98,6 +98,8 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionData() {
     let gasPrice = null;
+    let txHash = null;
+    console.log(this._transaction);
     this._transaction
       .then(
         tx => {
