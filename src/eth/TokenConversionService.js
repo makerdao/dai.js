@@ -25,13 +25,6 @@ export default class TokenConversionService extends PrivateService {
     super(name, ['smartContract', 'token']);
   }
 
-  _parseDenomination(value) {
-    const contract = this.get('smartContract');
-    const ethersUtils = contract.get('web3').ethersUtils();
-
-    return ethersUtils.parseEther(value);
-  }
-
   _smartContract() {
     return this.get('smartContract');
   }
@@ -50,14 +43,14 @@ export default class TokenConversionService extends PrivateService {
     return this.get('token').getToken(token);
   }
 
-  _approveToken(token) {
+  approveToken(token) {
     return token.approveUnlimited(this._tubContract().address);
   }
 
   convertEthToWeth(eth) {
     const wethToken = this._getToken(tokens.WETH);
 
-    return this._approveToken(wethToken)
+    return this.approveToken(wethToken)
       .onPending()
       .then(() => wethToken.deposit(eth), this._ethersProvider());
   }
@@ -65,7 +58,7 @@ export default class TokenConversionService extends PrivateService {
   convertWethToPeth(weth) {
     const pethToken = this._getToken(tokens.PETH);
 
-    return this._approveToken(pethToken)
+    return this.approveToken(pethToken)
       .onPending()
       .then(() => pethToken.join(weth));
   }
@@ -74,8 +67,8 @@ export default class TokenConversionService extends PrivateService {
     const wethToken = this._getToken(tokens.WETH);
     const pethToken = this._getToken(tokens.PETH);
 
-    this._approveToken(wethToken).onPending();
-    this._approveToken(pethToken).onPending();
+    this.approveToken(wethToken).onPending();
+    this.approveToken(pethToken).onPending();
     this.convertEthToWeth(value).then(txn => txn.onMined());
 
     return this.convertWethToPeth(value);

@@ -30,68 +30,88 @@ export default class EthereumCdpService extends PrivateService {
     super(name, ['smartContract', 'token', 'conversionService']);
   }
 
+  _smartContract() {
+    return this.get('smartContract');
+  }
+
+  _tubContract() {
+    return this._smartContract().getContractByName(contracts.TUB);
+  }
+
+  _ethersProvider() {
+    return this._smartContract()
+      .get('web3')
+      .ethersProvider();
+  }
+
+  _conversionService() {
+    return this.get('conversionService');
+  }
+
+  _parseDenomination(amount) {
+    return this._smartContract()
+      .get('web3')
+      .ethersUtils()
+      .parseEther(amount);
+  }
+
+  _hexCdpId(cdpId) {
+    return this._smartContract().numberToBytes32(cdpId);
+  }
+
   openCdp() {
     return new Cdp(this).transactionObject();
   }
 
-  lockEth(cdpId, eth) {
-    const contract = this.get('smartContract'),
-      tubContract = contract.getContractByName(contracts.TUB),
-      conversionService = this.get('conversionService'),
-      hexCdpId = contract.numberToBytes32(cdpId),
-      parsedAmount = conversionService._parseDenomination(eth);
+  shutCdp(cdpId) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const peth = this.get('token').getToken(tokens.PETH);
+    const dai = this.get('token').getToken(tokens.DAI);
 
-    return conversionService.convertEthToPeth(eth).then(() => {
-      return new TransactionObject(
-        tubContract.lock(hexCdpId, parsedAmount),
-        contract.get('web3')
-      );
-    });
+    this._conversionService()
+      .approveToken(dai)
+      .onPending();
+
+    this._conversionService()
+      .approveToken(peth)
+      .onPending();
+
+    return this._tubContract().shut(hexCdpId);
+  }
+
+  lockEth(cdpId, eth) {
+    const parsedAmount = this._parseDenomination(eth);
+    const hexCdpId = this._hexCdpId(cdpId);
+
+    return this._conversionService()
+      .convertEthToPeth(eth)
+      .then(() => {
+        return new TransactionObject(
+          this._tubContract().lock(hexCdpId, parsedAmount),
+          this._ethersProvider()
+        );
+      });
   }
 
   drawDai(cdpId, amount) {
-    const contract = this.get('smartContract'),
-      tubContract = contract.getContractByName(contracts.TUB),
-      ethersUtils = contract.get('web3').ethersUtils(),
-      ethersProvider = contract.get('web3').ethersProvider();
-
-    const hexCdpId = contract.numberToBytes32(cdpId);
-    const parsedAmount = ethersUtils.parseEther(amount);
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = this._parseDenomination(amount);
 
     //cdp must have peth locked inside it
-    return tubContract
+    return this._tubContract()
       .draw(hexCdpId, parsedAmount)
-      .then(transaction => ethersProvider.waitForTransaction(transaction.hash))
+      .then(transaction =>
+        this._ethersProvider().waitForTransaction(transaction.hash)
+      )
       .then(() => {
         // eslint-disable-next-line
         this.getCdpInfo(cdpId).then(result => console.log(result));
       });
   }
 
-  shutCdp(cdpId) {
-    const contract = this.get('smartContract'),
-      tubContract = contract.getContractByName(contracts.TUB),
-      hexCdpId = contract.numberToBytes32(cdpId),
-      owner = contract.get('web3').defaultAccount(),
-      token = this.get('token').getToken(tokens.PETH);
-
-    return token.balanceOf(owner).then(balance => {
-      if (balance > 0) {
-        this.get('conversionService')
-          ._approveToken(token)
-          .onPending();
-        return tubContract.shut(hexCdpId);
-      } else {
-        return tubContract.shut(hexCdpId);
-      }
-    });
-  }
-
   getCdpInfo(cdpId) {
-    const contract = this.get('smartContract'),
-      tubContract = contract.getContractByName(contracts.TUB),
-      hexCdpId = contract.numberToBytes32(cdpId);
+    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
 
-    return tubContract.cups(hexCdpId);
+    return this._tubContract().cups(hexCdpId);
   }
 }
