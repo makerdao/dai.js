@@ -68,21 +68,24 @@ xtest('should be able to close a CDP', done => {
 
 test('should be able to lock eth', done => {
   let newCdp;
+  let firstBalance;
 
   createdCdpService.manager().authenticate()
   .then(() => createdCdpService.openCdp().onMined())
   .then(cdp => {
     newCdp = cdp;
-    newCdp.lockEth('0.1')
+    newCdp.getInfo()
+    .then(info => firstBalance = parseFloat(info.ink))
+    .then(() => newCdp.lockEth('0.1'))
     .then(txn => {
       txn.onMined()
       .then(() => {
         newCdp.getInfo()
         .then(info => {
-          console.log(info.ink.toString())
+          expect(parseFloat(info.ink)).toBeCloseTo(firstBalance + 100000000000000000)
           done();
         });
       });
     });
   });
-}, 20000);
+}, 15000);

@@ -68,17 +68,19 @@ export default class EthereumCdpService extends PrivateService {
     const peth = this.get('token').getToken(tokens.PETH);
     const dai = this.get('token').getToken(tokens.DAI);
 
-    this._conversionService()
-      .approveToken(dai)
-      .onPending();
-
-    this._conversionService()
-      .approveToken(peth)
-      .onPending();
-
-    // Promise.all to wait for approval
-
-    return this._tubContract().shut(hexCdpId);
+    return Promise.all([
+      this._conversionService()
+        .approveToken(dai)
+        .then(txn => txn.onPending()),
+      this._conversionService()
+        .approveToken(peth)
+        .then(txn => txn.onPending())
+    ]).then(() => {
+      return new TransactionObject(
+        this._tubContract().shut(hexCdpId),
+        this._ethersProvider()
+      );
+    });
   }
 
   lockEth(cdpId, eth) {
