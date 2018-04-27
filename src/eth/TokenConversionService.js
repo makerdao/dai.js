@@ -3,6 +3,7 @@ import EthereumTokenService from './EthereumTokenService';
 import SmartContractService from './SmartContractService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
+import TransactionObject from '../eth/TransactionObject';
 
 export default class TokenConversionService extends PrivateService {
   static buildTestService() {
@@ -44,33 +45,53 @@ export default class TokenConversionService extends PrivateService {
   }
 
   approveToken(token) {
-    return token.approveUnlimited(this._tubContract().address);
+    return new Promise((resolve, reject) => {
+      resolve(token.approveUnlimited(this._tubContract().address));
+    });
   }
 
   convertEthToWeth(eth) {
     const wethToken = this._getToken(tokens.WETH);
 
-    return this.approveToken(wethToken)
-      .onPending()
-      .then(() => wethToken.deposit(eth), this._ethersProvider());
+    return this.approveToken(wethToken).then(txn =>
+      txn.onPending().then(() => wethToken.deposit(eth), this._ethersProvider())
+    );
   }
 
   convertWethToPeth(weth) {
     const pethToken = this._getToken(tokens.PETH);
 
     return this.approveToken(pethToken)
-      .onPending()
-      .then(() => pethToken.join(weth));
+      .then(tx => tx.onPending())
+      .then(() => {
+        return new TransactionObject(
+          pethToken.join(weth),
+          this._ethersProvider()
+        );
+      });
   }
 
   convertEthToPeth(value) {
     const wethToken = this._getToken(tokens.WETH);
     const pethToken = this._getToken(tokens.PETH);
 
-    this.approveToken(wethToken).onPending();
-    this.approveToken(pethToken).onPending();
-    this.convertEthToWeth(value).then(txn => txn.onMined());
+    return this.convertEthToWeth(value).then(txn => {
+      return txn.onMined().then(() => {
+        return this.convertWethToPeth(value);
+      });
+    });
 
-    return this.convertWethToPeth(value);
+    return new Promise((resolve, reject) => {
+      this.approveToken(wethToken).then(txn => {
+        txn.onPending();
+        this.approveToken(pethToken).then(txn => {
+          txn.onPending();
+          this.convertEthToWeth(value).then(txn => {
+            txn.onMined();
+            resolve(this.convertWethToPeth(value));
+          });
+        });
+      });
+    });
   }
 }

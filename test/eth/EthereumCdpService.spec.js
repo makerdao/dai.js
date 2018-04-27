@@ -89,7 +89,7 @@ test('should be able to lock eth in a cdp', done => {
   });
 }, 20000);
 
-test.only('should be able to free peth from a cdp', done => {
+xtest('should be able to free peth from a cdp', done => {
   createdCdpService.manager().authenticate().then(() => {
     const cdp = createdCdpService.openCdp()._businessObject;
     cdp.lockEth('0.1').then(txn => {
@@ -98,10 +98,13 @@ test.only('should be able to free peth from a cdp', done => {
         const firstInfoCall = info;
         cdp.getCdpId().then(id => {
           const cdpId = id;
-          createdCdpService.freePeth(cdpId, '0.1').onMined();
-          cdp.getInfo().then(info => {
-            console.log(info);
-            done();
+          createdCdpService.freePeth(cdpId, '0.1')
+            .then(() => {
+              // console.log(txn)
+              cdp.getInfo().then(info => {
+                console.log(info.ink.toString());
+                done();
+              });
           });
           // txn._transaction.then(() => {
           //   console.log('got here');

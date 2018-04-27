@@ -99,16 +99,18 @@ export default class TransactionObject extends TransactionLifeCycle {
   _getTransactionData() {
     let gasPrice = null;
     let txHash = null;
-    console.log(this._transaction);
     this._transaction
       .then(
         tx => {
-          this._pending(); //set state to pending
-          this._hash = tx.hash;
-          return this._ethersProvider.waitForTransaction(this._hash);
+          // console.log(tx);
+          gasPrice = tx.gasPrice;
+          super._pending();
+          //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
+          return this._ethersProvider.waitForTransaction(tx.hash);
         },
         // eslint-disable-next-line
         reason => {
+          // console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           this._error();
         }

@@ -87,7 +87,8 @@ export default class EthereumCdpService extends PrivateService {
 
     return this._conversionService()
       .convertEthToPeth(eth)
-      .then(() => {
+      .then(txn => {
+        txn.onMined();
         return new TransactionObject(
           this._tubContract().lock(hexCdpId, parsedAmount),
           this._ethersProvider()
@@ -100,14 +101,20 @@ export default class EthereumCdpService extends PrivateService {
     const parsedAmount = this._parseDenomination(amount);
     const peth = this.get('token').getToken(tokens.PETH);
 
-    this._conversionService()
-      .approveToken(peth)
-      .onMined();
+    return new Promise((resolve, reject) => {
+      this._conversionService()
+        .approveToken(peth)
+        .onMined()
+        .then(() => {
+          console.log('got here');
+          resolve(peth.exit(amount));
+        });
+    });
 
-    return new TransactionObject(
-      this._tubContract().free(hexCdpId, parsedAmount),
-      this._ethersProvider()
-    );
+    // return new TransactionObject(
+    //   this._tubContract().free(hexCdpId, parsedAmount),
+    //   this._ethersProvider()
+    // );
   }
 
   drawDai(cdpId, amount) {

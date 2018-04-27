@@ -11,10 +11,7 @@ export default class PethToken extends Erc20Token {
   join(amount) {
     const valueInWei = this.toEthereumFormat(amount);
 
-    return new TransactionObject(
-      this._tub.join(valueInWei, { gasLimit: 200000 }),
-      this._web3Service
-    );
+    return this._tub.join(valueInWei, { gasLimit: 200000 });
   }
 
   exit(amount) {
