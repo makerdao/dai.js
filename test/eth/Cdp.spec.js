@@ -54,12 +54,13 @@ test('should be able to get a CDP\'s info', done => {
     });
 }, 10000);
 
-xtest('should be able to close a CDP', done => {
+test('should be able to close a CDP', done => {
   createdCdpService.manager().authenticate()
-  .then(() => createdCdpService.openCdp().onMined())
+  .then(() => createdCdpService.openCdp())
+  .then(txn => txn.onMined())
   .then(cdp => cdp.shut())
-  .then(tx => tx.onMined())
-  .then(cdp => cdp.getInfo())
+  .then(txn => txn.onMined())
+  .then(cdpId => createdCdpService.getCdpInfo(cdpId))
   .then(info => {
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
     done();
@@ -82,10 +83,10 @@ test('should be able to lock eth', done => {
       .then(() => {
         newCdp.getInfo()
         .then(info => {
-          expect(parseFloat(info.ink)).toBeCloseTo(firstBalance + 100000000000000000)
+          expect(parseFloat(info.ink)).toBeCloseTo(firstBalance + 100000000000000000);
           done();
         });
       });
     });
   });
-}, 15000);
+}, 20000);

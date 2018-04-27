@@ -78,7 +78,8 @@ export default class EthereumCdpService extends PrivateService {
     ]).then(() => {
       return new TransactionObject(
         this._tubContract().shut(hexCdpId),
-        this._ethersProvider()
+        this._ethersProvider(),
+        cdpId
       );
     });
   }
@@ -109,7 +110,7 @@ export default class EthereumCdpService extends PrivateService {
         .onMined()
         .then(() => {
           console.log('got here');
-          resolve(peth.exit(amount));
+          // resolve(peth.exit(amount));
         });
     });
 

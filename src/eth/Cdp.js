@@ -54,14 +54,7 @@ export default class Cdp {
   }
 
   shut() {
-    return this.getCdpId().then(
-      id =>
-        new TransactionObject(
-          this._cdpService.shutCdp(id),
-          this._smartContractService.get('web3'),
-          this
-        )
-    );
+    return this.getCdpId().then(id => this._cdpService.shutCdp(id));
   }
 
   getInfo() {
