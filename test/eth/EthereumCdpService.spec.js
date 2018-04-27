@@ -89,34 +89,30 @@ test('should be able to lock eth in a cdp', done => {
   });
 }, 20000);
 
-xtest('should be able to free peth from a cdp', done => {
+// In progress
+test('should be able to free peth from a cdp', done => {
+  let newCdp;
+  let firstBalance;
+  let cdpId;
+
   createdCdpService.manager().authenticate().then(() => {
-    const cdp = createdCdpService.openCdp()._businessObject;
-    cdp.lockEth('0.1').then(txn => {
-      txn.onMined();
-      cdp.getInfo().then(info => {
-        const firstInfoCall = info;
-        cdp.getCdpId().then(id => {
-          const cdpId = id;
+    createdCdpService.openCdp().onMined()
+    .then(cdp => {
+      newCdp = cdp;
+      newCdp.getCdpId().then(id => cdpId = id)
+      .then(() => createdCdpService.lockEth(cdpId, '0.1'))
+      .then(txn => {
+        txn.onMined()
+        newCdp.getInfo().then(info => firstBalance = parseFloat(info.ink))
+        .then(() => {
           createdCdpService.freePeth(cdpId, '0.1')
-            .then(() => {
-              // console.log(txn)
-              cdp.getInfo().then(info => {
-                console.log(info.ink.toString());
-                done();
-              });
+          .then(txn => txn.onMined())
+          .then(() => {
+            console.log(txn);
+            done();
           });
-          // txn._transaction.then(() => {
-          //   console.log('got here');
-          //   done()
-          // });
-          // console.log(txn);
-          // cdp.getInfo().then(info => {
-          //   // console.log(info.ink.toString());
-          //   done();
-          // });
         });
       });
     });
   });
-});
+}, 20000);

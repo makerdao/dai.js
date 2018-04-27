@@ -104,20 +104,17 @@ export default class EthereumCdpService extends PrivateService {
     const parsedAmount = this._parseDenomination(amount);
     const peth = this.get('token').getToken(tokens.PETH);
 
-    return new Promise((resolve, reject) => {
-      this._conversionService()
-        .approveToken(peth)
-        .onMined()
-        .then(() => {
-          console.log('got here');
-          // resolve(peth.exit(amount));
+    // Approve weth token as well, wait for both
+    return this._conversionService()
+      .approveToken(peth)
+      .then(txn => {
+        return txn.onMined().then(() => {
+          return new TransactionObject(
+            this._tubContract().free(hexCdpId, parsedAmount),
+            this._ethersProvider()
+          );
         });
-    });
-
-    // return new TransactionObject(
-    //   this._tubContract().free(hexCdpId, parsedAmount),
-    //   this._ethersProvider()
-    // );
+      });
   }
 
   drawDai(cdpId, amount) {
