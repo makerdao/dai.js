@@ -7,6 +7,8 @@ import TransactionObject from './TransactionObject';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 
+import { utils } from 'ethers';
+
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
     const service = new EthereumCdpService();
@@ -48,13 +50,6 @@ export default class EthereumCdpService extends PrivateService {
     return this.get('conversionService');
   }
 
-  _parseDenomination(amount) {
-    return this._smartContract()
-      .get('web3')
-      .ethersUtils()
-      .parseEther(amount);
-  }
-
   _hexCdpId(cdpId) {
     return this._smartContract().numberToBytes32(cdpId);
   }
@@ -71,10 +66,10 @@ export default class EthereumCdpService extends PrivateService {
     return Promise.all([
       this._conversionService()
         .approveToken(dai)
-        .then(txn => txn.onPending()),
+        .then(txn => txn.onMined()),
       this._conversionService()
         .approveToken(peth)
-        .then(txn => txn.onPending())
+        .then(txn => txn.onMined())
     ]).then(() => {
       return new TransactionObject(
         this._tubContract().shut(hexCdpId),
@@ -86,7 +81,7 @@ export default class EthereumCdpService extends PrivateService {
 
   lockEth(cdpId, eth) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = this._parseDenomination(eth);
+    const parsedAmount = utils.parseUnits(eth, 18);
 
     return this._conversionService()
       .convertEthToPeth(eth)
@@ -101,25 +96,28 @@ export default class EthereumCdpService extends PrivateService {
 
   freePeth(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = this._parseDenomination(amount);
+    const parsedAmount = utils.parseUnits(amount, 18);
+    const weth = this.get('token').getToken(tokens.WETH);
     const peth = this.get('token').getToken(tokens.PETH);
 
-    // Approve weth token as well, wait for both
-    return this._conversionService()
-      .approveToken(peth)
-      .then(txn => {
-        return txn.onMined().then(() => {
-          return new TransactionObject(
-            this._tubContract().free(hexCdpId, parsedAmount),
-            this._ethersProvider()
-          );
-        });
-      });
+    return Promise.all([
+      this._conversionService()
+        .approveToken(weth)
+        .then(txn => txn.onMined()),
+      this._conversionService()
+        .approveToken(peth)
+        .then(txn => txn.onMined())
+    ]).then(() => {
+      return new TransactionObject(
+        this._tubContract().free(hexCdpId, parsedAmount),
+        this._ethersProvider()
+      );
+    });
   }
 
   drawDai(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = this._parseDenomination(amount);
+    const parsedAmount = utils.parseUnits(amount, 18);
 
     //cdp must have peth locked inside it
     return this._tubContract()

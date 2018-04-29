@@ -102,7 +102,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
-          // console.log(tx);
           gasPrice = tx.gasPrice;
           super._pending();
           //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
@@ -110,7 +109,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         // eslint-disable-next-line
         reason => {
-          // console.log('error waiting for initial tx to return', reason);
+          console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           this._error();
         }

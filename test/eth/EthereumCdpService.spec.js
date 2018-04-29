@@ -63,7 +63,39 @@ test('should open and then shut a CDP', done => {
       });
     });
   });
-});
+}, 20000);
+
+test('should open and then shut a CDP with peth locked in it', done => {
+  let firstInfoCall;
+
+  createdCdpService.manager().authenticate().then(() => {
+    createdCdpService.openCdp()
+    .onMined()
+    .then(cdp => {
+      cdp.getCdpId()
+      .then(id => {
+        createdCdpService.getCdpInfo(id)
+        .then(info => firstInfoCall = info)
+        .then(() => cdp.lockEth('0.1'))
+        .then(txn => txn.onMined())
+        .then(() => {
+          createdCdpService.shutCdp(id)
+          .catch((err) => { 
+            done.fail(new Error('shutting CDP had an error: ', err));
+          })
+          .then(() => {  
+            createdCdpService.getCdpInfo(id)
+            .then(secondInfoCall => {
+              expect(firstInfoCall).not.toBe(secondInfoCall);
+              expect(secondInfoCall.lad).toBe('0x0000000000000000000000000000000000000000');
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+}, 20000);
 
 test('should be able to lock eth in a cdp', done => {
   let firstInfoCall;
@@ -75,7 +107,7 @@ test('should be able to lock eth in a cdp', done => {
       cdpId = id;
       createdCdpService.getCdpInfo(id)
       .then(result => firstInfoCall = result)
-      .then(() => createdCdpService.lockEth(id, '.1'))
+      .then(() => createdCdpService.lockEth(id, '0.1'))
       .then(txn => {
         txn.onMined();
         createdCdpService.getCdpInfo(cdpId)
@@ -89,7 +121,6 @@ test('should be able to lock eth in a cdp', done => {
   });
 }, 20000);
 
-// In progress
 test('should be able to free peth from a cdp', done => {
   let newCdp;
   let firstBalance;
@@ -101,16 +132,17 @@ test('should be able to free peth from a cdp', done => {
       newCdp = cdp;
       newCdp.getCdpId().then(id => cdpId = id)
       .then(() => createdCdpService.lockEth(cdpId, '0.1'))
-      .then(txn => {
-        // wait for this
-        txn.onMined();
+      .then(txn => txn.onMined())
+      .then(() => {
         newCdp.getInfo().then(info => firstBalance = parseFloat(info.ink))
         .then(() => {
           createdCdpService.freePeth(cdpId, '0.1')
           .then(txn => txn.onMined())
           .then(() => {
-            console.log(txn);
-            done();
+            newCdp.getInfo().then(info => {
+              expect(parseFloat(info.ink)).toBeCloseTo(firstBalance - 100000000000000000);
+              done();
+            });
           });
         });
       });

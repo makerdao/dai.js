@@ -89,4 +89,4 @@ test('should be able to lock eth', done => {
       });
     });
   });
-}, 20000);
+}, 30000);

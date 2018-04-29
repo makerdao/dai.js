@@ -57,7 +57,7 @@ export default class TokenConversionService extends PrivateService {
     const wethToken = this._getToken(tokens.WETH);
 
     return this.approveToken(wethToken)
-      .then(txn => txn.onPending())
+      .then(txn => txn.onMined())
       .then(() => wethToken.deposit(eth));
   }
 
@@ -65,7 +65,7 @@ export default class TokenConversionService extends PrivateService {
     const pethToken = this._getToken(tokens.PETH);
 
     return this.approveToken(pethToken)
-      .then(txn => txn.onPending())
+      .then(txn => txn.onMined())
       .then(() => pethToken.join(weth));
   }
 
