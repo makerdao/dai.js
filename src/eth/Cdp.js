@@ -1,6 +1,5 @@
 import TransactionObject from './TransactionObject';
 import contracts from '../../contracts/contracts';
-import tokens from '../../contracts/tokens';
 
 export default class Cdp {
   constructor(cdpService, cdpId = null) {

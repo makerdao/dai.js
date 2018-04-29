@@ -102,7 +102,8 @@ test('should be able to free peth from a cdp', done => {
       newCdp.getCdpId().then(id => cdpId = id)
       .then(() => createdCdpService.lockEth(cdpId, '0.1'))
       .then(txn => {
-        txn.onMined()
+        // wait for this
+        txn.onMined();
         newCdp.getInfo().then(info => firstBalance = parseFloat(info.ink))
         .then(() => {
           createdCdpService.freePeth(cdpId, '0.1')
