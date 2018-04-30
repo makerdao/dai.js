@@ -1,6 +1,7 @@
 import TokenConversionService from '../../src/eth/TokenConversionService';
 import EthereumTokenService from '../../src/eth/EthereumTokenService';
 import tokens from '../../contracts/tokens';
+import Web3ServiceList from '../../src/utils/Web3ServiceList';
 
 let conversionService;
 let tokenService;
@@ -8,6 +9,10 @@ let tokenService;
 beforeAll(() => {
   conversionService = TokenConversionService.buildTestService();
   return tokenService = EthereumTokenService.buildTestService();
+});
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
 });
 
 test('should convert eth to weth', done => {

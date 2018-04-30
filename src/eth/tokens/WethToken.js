@@ -2,8 +2,8 @@ import TransactionObject from '../TransactionObject';
 import Erc20Token from './Erc20Token';
 
 export default class WethToken extends Erc20Token {
-  constructor(contract, ethersProvider) {
-    super(contract, ethersProvider);
+  constructor(contract, web3Service, decimals) {
+    super(contract, web3Service, decimals);
   }
 
   name() {
@@ -21,7 +21,7 @@ export default class WethToken extends Erc20Token {
       this._contract.deposit({
         value: valueInWei
       }),
-      this._ethersProvider
+      this._web3Service
     );
   }
 
@@ -30,7 +30,7 @@ export default class WethToken extends Erc20Token {
 
     return new TransactionObject(
       this._contract.withdraw(valueInWei),
-      this._ethersProvider
+      this._web3Service
     );
   }
 }

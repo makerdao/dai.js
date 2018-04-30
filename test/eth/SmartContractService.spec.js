@@ -1,6 +1,11 @@
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import SmartContractService from '../../src/eth/SmartContractService';
+import Web3ServiceList from '../../src/utils/Web3ServiceList';
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
+});
 
 test('getContractByName should have proper error checking', done => {
   const service = SmartContractService.buildTestService();

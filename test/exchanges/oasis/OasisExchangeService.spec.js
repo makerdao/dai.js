@@ -6,13 +6,19 @@ import tokens from '../../../contracts/tokens';
 import TransactionState from '../../../src/eth/TransactionState';
 import contracts from '../../../contracts/contracts';
 const utils = require('ethers').utils;
+import Web3ServiceList from '../../../src/utils/Web3ServiceList';
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
+});
+
 
 beforeAll(()=>{ //can comment this out after has been run once
     const oasisExchangeService = OasisExchangeService.buildTestService();
     let oasisOrder = null;
     let wethToken = null;
     let ethereumTokenService = null;
-    oasisExchangeService.manager().authenticate()
+    return oasisExchangeService.manager().authenticate()
       .then(()=> {
         ethereumTokenService = oasisExchangeService.get('ethereumToken');
         wethToken = ethereumTokenService.getToken(tokens.WETH);
@@ -104,6 +110,7 @@ test('get fillAmount buyDai', (done) =>  {
 },
 30000
 );
+
 /*
 test('test keccak', (done) => setTimeout(() => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();

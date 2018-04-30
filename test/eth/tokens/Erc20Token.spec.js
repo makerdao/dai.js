@@ -1,8 +1,13 @@
 import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
+import Web3ServiceList from '../../../src/utils/Web3ServiceList';
 
 const utils = require('ethers').utils;
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
+});
 
 test('get ERC20 (MKR) balance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();

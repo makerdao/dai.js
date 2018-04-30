@@ -5,7 +5,8 @@ import EthereumCdpService from '../eth/EthereumCdpService';
 import EthereumTokenService from '../eth/EthereumTokenService';
 import SmartContractService from '../eth/SmartContractService';
 import GasEstimatorService from '../eth/GasEstimatorService';
-//import OasisExchangeService from './markets/OasisExchangeService';
+import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
+import ZeroExExchangeService from '../exchanges/zeroEx/ZeroExExchangeService';
 import TimerService from './TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
 import ConsoleLogger from './loggers/ConsoleLogger';
@@ -17,7 +18,8 @@ const _services = {
   EthereumTokenService,
   SmartContractService,
   GasEstimatorService,
-  //OasisExchangeService,
+  OasisExchangeService,
+  ZeroExExchangeService,
   TimerService,
   TokenConversionService,
   ConsoleLogger

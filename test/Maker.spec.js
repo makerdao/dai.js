@@ -1,5 +1,6 @@
 import Maker from '../src/Maker';
 import ConfigFactory from '../src/utils/ConfigFactory';
+import Web3ServiceList from '../src/utils/Web3ServiceList';
 
 let maker;
 
@@ -7,6 +8,10 @@ beforeAll(() => {
   maker = new Maker(
     ConfigFactory.create('decentralized-oasis-without-proxies')
   );
+});
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
 });
 
 test('openCdp should open a CDP', done => {

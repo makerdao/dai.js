@@ -38,11 +38,7 @@ export default class EtherToken {
       value: valueInWei
       //gasPrice: 500000000
     });
-    return new TransactionObject(
-      tx.then(tx => ({ hash: tx })),
-      this._web3.ethersProvider(),
-      null
-    );
+    return new TransactionObject(tx.then(tx => ({ hash: tx })), this._web3);
   }
 
   transferFrom(fromAddress, toAddress, transferValue) {
@@ -55,8 +51,7 @@ export default class EtherToken {
           value: valueInWei
         })
         .then(tx => ({ hash: tx })),
-      this._web3.ethersProvider(),
-      null
+      this._web3
     );
   }
 }

@@ -4,13 +4,14 @@ import TransactionLifeCycle from '../eth/TransactionLifeCycle';
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(
     transaction,
-    ethersProvider,
+    web3Service,
     businessObject = null,
     logsParser = logs => logs
   ) {
     super(businessObject);
     this._transaction = transaction;
-    this._ethersProvider = ethersProvider;
+    this._web3Service = web3Service;
+    this._ethersProvider = web3Service.ethersProvider();
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
     this._timeStampMined = null;
@@ -45,19 +46,69 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._error;
   }
 
+  /*
+  _waitForConfirmations(originalBlockNumber, originalBlockHash, requiredConfirmations = 3){
+    
+    let assertBlockHashUnchanged = newBlockNumber => {
+
+      if (newBlockNumber < originalBlockNumber + requiredConfirmations) {
+        console.log('reregistering handler: newBlockNumber: ', newBlockNumber, ' is lower than required blockNumber: ', originalBlockNumber + requiredConfirmations);
+        this._ethersProvider.once('block', b=>{console.log(b)});
+
+      } else {
+        console.log('required block number ', originalBlockNumber + requiredConfirmations, ' reached, refreshing transaction receipt', this._hash);
+        this._ethersProvider.getTransactionReceipt(this._hash).then(
+          newReceipt => {
+            if (newReceipt.blockHash === originalBlockHash) {
+              this._finalize(); //set state to finalized
+            } else {
+              this._error = "transaction block hash changed";
+              this._error();
+            }
+          },
+          reason => {
+            this._error = reason;
+            this._error();
+          }
+        );
+      }
+    };
+
+    console.log('registering handler.  original block number: ', originalBlockNumber, ' required block number: ', originalBlockNumber + requiredConfirmations);
+    this._ethersProvider.once('block', assertBlockHashUnchanged);
+  }
+  */
+
+  _assertBlockHashUnchanged(originalBlockHash) {
+    this._ethersProvider.getTransactionReceipt(this._hash).then(
+      newReceipt => {
+        if (newReceipt.blockHash === originalBlockHash) {
+          this._finalize(); //set state to finalized
+        } else {
+          this._error = 'transaction block hash changed';
+          this._error();
+        }
+      },
+      reason => {
+        this._error = reason;
+        this._error();
+      }
+    );
+  }
+
   _getTransactionData() {
     let gasPrice = null;
     this._transaction
       .then(
         tx => {
-          super._pending(); //set state to pending
+          this._pending(); //set state to pending
           this._hash = tx.hash;
           return this._ethersProvider.waitForTransaction(this._hash);
         },
         // eslint-disable-next-line
         reason => {
           this._error = reason;
-          super._error();
+          this._error();
         }
       )
       .then(
@@ -68,7 +119,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         reason => {
           this._error = reason;
-          super._error();
+          this._error();
         }
       )
       .then(
@@ -86,30 +137,19 @@ export default class TransactionObject extends TransactionLifeCycle {
           }
           this._mine(); //set state to mined
 
-          const callback = currentBlockNumber => {
-            if (currentBlockNumber >= receipt.blockNumber + 1) {
-              //arbitrary number, in practice should probably be closer to 5-15 blocks
-              this._ethersProvider.getTransactionReceipt(this._hash).then(
-                receiptCheck => {
-                  if (receiptCheck.blockHash === receipt.blockHash) {
-                    super._finalize(); //set state to finalized
-                  } else {
-                    this._ethersProvider.once('block', callback);
-                  }
-                },
-                () => {
-                  this._ethersProvider.once('block', callback);
-                }
-              );
-            } else {
-              this._ethersProvider.once('block', callback);
+          //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
+          const requiredConfirmations = 3;
+          //console.log('originalBlockNumber:', receipt.blockNumber);
+          this._web3Service.waitForBlockNumber(
+            receipt.blockNumber + requiredConfirmations,
+            () => {
+              this._assertBlockHashUnchanged(receipt.blockHash);
             }
-          };
-          //this._ethersProvider.once('block', callback);
+          );
         },
         reason => {
           this._error = reason;
-          super._error();
+          this._error();
         }
       );
   }

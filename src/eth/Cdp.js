@@ -35,7 +35,7 @@ export default class Cdp {
     const contractPromise = tubContract.open();
     this._transactionObject = new TransactionObject(
       contractPromise,
-      this._smartContractService.get('web3').ethersProvider(),
+      this._smartContractService.get('web3'),
       this
     );
 
@@ -57,7 +57,7 @@ export default class Cdp {
       id =>
         new TransactionObject(
           this._cdpService.shutCdp(id),
-          this._smartContractService.get('web3').ethersProvider(),
+          this._smartContractService.get('web3'),
           this
         )
     );

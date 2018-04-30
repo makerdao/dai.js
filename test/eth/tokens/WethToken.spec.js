@@ -1,6 +1,11 @@
 import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
+import Web3ServiceList from '../../../src/utils/Web3ServiceList';
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
+});
 
 test('get WETH allowance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();

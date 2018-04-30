@@ -1,4 +1,9 @@
 import GasEstimatorService from '../../src/eth/GasEstimatorService';
+import Web3ServiceList from '../../src/utils/Web3ServiceList';
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
+});
 
 test('policies initially null', (done) => {
   const gasEstimator = GasEstimatorService.buildTestService();

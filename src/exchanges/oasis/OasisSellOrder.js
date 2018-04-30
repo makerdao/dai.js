@@ -2,8 +2,8 @@ import TransactionObject from '../../eth/TransactionObject';
 import { utils } from 'ethers';
 
 export default class OasisSellOrder extends TransactionObject {
-  constructor(transaction, ethersProvider) {
-    super(transaction, ethersProvider, null, receiptLogs => {
+  constructor(transaction, web3Service) {
+    super(transaction, web3Service, null, receiptLogs => {
       const receiptEvents = receiptLogs.filter(
         e =>
           e.topics[0] ===

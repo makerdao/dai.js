@@ -64,7 +64,7 @@ export default class EthereumTokenService extends PrivateService {
       if (symbol === tokens.WETH) {
         return new WethToken(
           contract,
-          this.get('web3').ethersProvider(),
+          this.get('web3'),
           tokenVersionData.decimals
         );
       }
@@ -74,14 +74,14 @@ export default class EthereumTokenService extends PrivateService {
         return new PethToken(
           contract,
           tub,
-          this.get('web3').ethersProvider(),
+          this.get('web3'),
           tokenVersionData.decimals
         );
       }
 
       return new Erc20Token(
         contract,
-        this.get('web3').ethersProvider(),
+        this.get('web3'),
         tokenVersionData.decimals
       );
     }

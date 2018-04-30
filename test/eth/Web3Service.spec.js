@@ -1,6 +1,11 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import Web3Service from '../../src/eth/Web3Service';
+import Web3ServiceList from '../../src/utils/Web3ServiceList';
+
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
+});
 
 test('should fetch version info on connect', (done) => {
   const web3 = Web3Service.buildTestService();

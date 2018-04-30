@@ -89,7 +89,7 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
         buyTokenAddress,
         minFillAmountEVM
       ),
-      this.get('web3').ethersProvider()
+      this.get('web3')
     );
   }
 
@@ -116,7 +116,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
         sellTokenAddress,
         maxFillAmountEVM
       ),
-      this.get('web3').ethersProvider()
+      this.get('web3')
     );
   }
 

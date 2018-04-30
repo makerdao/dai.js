@@ -2,8 +2,8 @@ import TransactionObject from '../../eth/TransactionObject';
 import { utils } from 'ethers';
 
 export default class OasisBuyOrder extends TransactionObject {
-  constructor(transaction, ethersProvider) {
-    super(transaction, ethersProvider, null, receiptLogs => {
+  constructor(transaction, web3Service) {
+    super(transaction, web3Service, null, receiptLogs => {
       const receiptEvents = receiptLogs.filter(
         e =>
           e.topics[0] ===
@@ -12,13 +12,13 @@ export default class OasisBuyOrder extends TransactionObject {
       );
       let total = 0;
       receiptEvents.forEach(event => {
-        total += parseInt(event.data.substring(66, 130), 16); //for sellDai
+        total += parseInt(event.data.substring(66, 130), 16); //search for a more understandable way to parse logs
       });
-      return utils.formatEther(total.toString());
+      this._fillAmount = utils.formatEther(total.toString());
     });
   }
 
   fillAmount() {
-    return super.logs();
+    return this._fillAmount;
   }
 }

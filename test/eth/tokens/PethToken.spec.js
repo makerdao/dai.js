@@ -2,7 +2,11 @@ import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
+import Web3ServiceList from '../../../src/utils/Web3ServiceList';
 
+afterEach(() => {
+  Web3ServiceList.disconnectAll();
+});
 
 test('get PETH balance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();

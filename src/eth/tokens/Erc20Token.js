@@ -2,9 +2,9 @@ import TransactionObject from '../TransactionObject';
 import { utils } from 'ethers';
 
 export default class Erc20Token {
-  constructor(contract, ethersProvider, decimals = 18) {
+  constructor(contract, web3Service, decimals = 18) {
     this._contract = contract;
-    this._ethersProvider = ethersProvider;
+    this._web3Service = web3Service;
     this._decimals = decimals;
   }
 
@@ -38,14 +38,14 @@ export default class Erc20Token {
     const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
       this._contract.approve(spender, valueInWei),
-      this._ethersProvider
+      this._web3Service
     );
   }
 
   approveUnlimited(spender) {
     return new TransactionObject(
       this._contract.approve(spender, -1),
-      this._ethersProvider
+      this._web3Service
     );
   }
 
@@ -53,7 +53,7 @@ export default class Erc20Token {
     const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
       this._contract.transfer(to, valueInWei),
-      this._ethersProvider
+      this._web3Service
     );
   }
 
@@ -61,7 +61,7 @@ export default class Erc20Token {
     const valueInWei = this.toEthereumFormat(value);
     return new TransactionObject(
       this._contract.transferFrom(from, to, valueInWei),
-      this._ethersProvider
+      this._web3Service
     );
   }
 

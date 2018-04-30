@@ -38,14 +38,13 @@ export default class EthereumCdpService extends PrivateService {
     const contract = this.get('smartContract'),
       tubContract = contract.getContractByName(contracts.TUB),
       conversionService = this.get('conversionService'),
-      ethersProvider = contract.get('web3').ethersProvider(),
       hexCdpId = contract.numberToBytes32(cdpId),
       parsedAmount = conversionService._parseDenomination(eth);
 
     return conversionService.convertEthToPeth(eth).then(() => {
       return new TransactionObject(
         tubContract.lock(hexCdpId, parsedAmount),
-        ethersProvider
+        contract.get('web3')
       );
     });
   }

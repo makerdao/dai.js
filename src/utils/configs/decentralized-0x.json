@@ -16,7 +16,10 @@
     ],
 
     "cdp": "EthereumCdpService",
-    "exchange": "OasisExchangeService",
+    "exchange": ["ZeroExExchangeService",
+      {
+        "relay": /*insert relayer url*/
+    }],
     "smartContract": "SmartContractService",
     "token": "EthereumTokenService",
     "conversionService": "TokenConversionService",

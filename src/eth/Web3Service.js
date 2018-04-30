@@ -5,6 +5,7 @@ import NullLogger from '../utils/loggers/NullLogger';
 import TimerService from '../utils/TimerService';
 import Web3 from 'web3';
 import TestAccountProvider from '../utils/TestAccountProvider';
+import Web3ServiceList from '../utils/Web3ServiceList';
 
 //{ type : Web3ProviderType.TEST};
 //const x = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'};
@@ -19,12 +20,15 @@ export default class Web3Service extends PrivateService {
     super(name, ['log', 'timer']);
     this._web3 = null;
     this._ethersProvider = null;
+    this._blockListeners = {};
+    this._currentBlock = null;
     this._ethersWallet = null;
     this._ethersUtils = null;
     this._info = {
       version: { api: null, node: null, network: null, ethereum: null },
       account: null
     };
+    Web3ServiceList.push(this);
   }
 
   static buildDisconnectingService(disconnectAfter = 50) {
@@ -273,6 +277,28 @@ export default class Web3Service extends PrivateService {
     };
   }
 
+  waitForBlockNumber(blockNumber, callback) {
+    if (blockNumber < this._currentBlock) {
+      throw new Error('cannot wait for past block ', blockNumber);
+    } else if (blockNumber === this._currentBlock) {
+      callback(blockNumber);
+    } else {
+      if (!this._blockListeners[blockNumber]) {
+        this._blockListeners[blockNumber] = [];
+      }
+      this._blockListeners[blockNumber].push(callback);
+    }
+  }
+
+  _updateBlockNumber(blockNumber) {
+    //console.log('new blockNumber: ', blockNumber);
+    if (this._blockListeners[blockNumber]) {
+      this._blockListeners[blockNumber].forEach(c => c(blockNumber));
+      this._blockListeners[blockNumber] = undefined;
+    }
+    this._currentBlock = blockNumber;
+  }
+
   _setUpEthers(chainId) {
     const ethers = require('ethers');
     this._ethersUtils = ethers.utils;
@@ -281,6 +307,13 @@ export default class Web3Service extends PrivateService {
       this._web3.currentProvider,
       { name: getNetworkName(chainId), chainId: chainId }
     );
+    this.manager().onDisconnected(() => {
+      this._ethersProvider.removeAllListeners('block');
+      //console.log('called removeAllListeners');
+    });
+    this._ethersProvider.on('block', num => {
+      this._updateBlockNumber(num);
+    });
     //console.log('ethers provider is: ', this._ethersProvider)
     if (this._privateKey) {
       try {
