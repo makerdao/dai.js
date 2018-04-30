@@ -12,54 +12,59 @@
 
 set -ex
 
-# Start a local testnet on port 2000; set to stop on exit.
-./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >/dev/null & netpid=$!
-trap "kill $netpid" EXIT
+# Check if a testnet is already running on port 2000.
+if [ ! lsof -i:2000 ]; then
+  # Start a local testnet on port 2000; set to stop on exit.
+  ./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >/dev/null & netpid=$!
+  trap "kill $netpid" EXIT
 
-# Wait until it's up, then use it for the deployment.
-export ETH_RPC_URL=http://127.1:2000
-until curl -s "$ETH_RPC_URL"; do sleep 2; done
-# first try to connect to existing chain, if it can, don't start a new one
-# later on accept param for port to allow multiple chains
+  # Wait until it's up, then use it for the deployment.
+  export ETH_RPC_URL=http://127.1:2000
+  until curl -s "$ETH_RPC_URL"; do sleep 2; done
 
-# Use the Sai system's deploy scripts to start it.
-cd lib/sai
-export SETH_STATUS=yes
-export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
-bin/deploy-fab && . load-fab-unknown
-bin/deploy     && . load-env-unknown
-cd ../..
+  # Use the Sai system's deploy scripts to start it.
+  cd lib/sai
+  export SETH_STATUS=yes
+  export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
+  bin/deploy-fab && . load-fab-unknown
+  bin/deploy     && . load-env-unknown
+  cd ../..
 
-cd lib/maker-otc
+  cd lib/maker-otc
 
-export SOLC_FLAGS=${SOLC_FLAGS:-"--optimize"}
-export ETH_GAS=${ETH_GAS:-"4000000"}
-export ETH_FROM=$(seth rpc eth_coinbase)
-export SETH_STATUS=yes
-export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
+  export SOLC_FLAGS=${SOLC_FLAGS:-"--optimize"}
+  export ETH_GAS=${ETH_GAS:-"4000000"}
+  export ETH_FROM=$(seth rpc eth_coinbase)
+  export SETH_STATUS=yes
+  export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
 
-dapp build
-OTC=$(dapp create MatchingMarket 1577836800) ##this is some random date in 2020
-addr1="0xc226f3cd13d508bc319f4f4290172748199d6612"
-addr2="0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238"
-seth send $OTC "addTokenPairWhitelist(address, address)" $addr1 $addr2
+  dapp build
+  OTC=$(dapp create MatchingMarket 1577836800) ##this is some random date in 2020
+  addr1="0xc226f3cd13d508bc319f4f4290172748199d6612"
+  addr2="0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238"
+  seth send $OTC "addTokenPairWhitelist(address, address)" $addr1 $addr2
 
 
-##seth send $addr2 "deposit()" --value $(seth --to-wei 1 eth) ##wrap some eth to weth
-##make sure I have WETH
-##seth send $addr2 "approve(address, uint256)" $OTC ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ##approve weth to oasis
-##seth send $OTC "offer(uint256, address, uint256, address, uint256, bool)" $(seth --to-uint256 $(seth --to-wei 0.5 eth)) $addr2 $(seth --to-uint256 $(seth --to-wei 1 eth)) $addr1 0 1 ## create an offer to buy Dai for Weth <- this isn't working
-export OTC=$OTC
+  ##seth send $addr2 "deposit()" --value $(seth --to-wei 1 eth) ##wrap some eth to weth
+  ##make sure I have WETH
+  ##seth send $addr2 "approve(address, uint256)" $OTC ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ##approve weth to oasis
+  ##seth send $OTC "offer(uint256, address, uint256, address, uint256, bool)" $(seth --to-uint256 $(seth --to-wei 0.5 eth)) $addr2 $(seth --to-uint256 $(seth --to-wei 1 eth)) $addr1 0 1 ## create an offer to buy Dai for Weth <- this isn't working
+  export OTC=$OTC
 
-cd ../..
+  cd ../..
 
-node test-oasis-deployment.js
+  node test-oasis-deployment.js
 
-# We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
-# See the list at the bottom of the in the deploy script.
-# Proceed to the command given as arguments.
-"$@"
+  # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
+  # See the list at the bottom of the in the deploy script.
+  # Proceed to the command given as arguments.
+  "$@"
 
-# The testnet will continue to run with its deployed contracts
-# until the user confirms it should shut down.
-bash ./confirm-kill-testnet
+  # The testnet will continue to run with its deployed contracts
+  # until the user confirms it should shut down.
+  bash ./confirm-kill-testnet
+
+else
+  echo "You already have a test network running on port 2000."
+
+fi

@@ -109,7 +109,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         // eslint-disable-next-line
         reason => {
-          console.log('error waiting for initial tx to return', reason);
+          // console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           this._error();
         }
