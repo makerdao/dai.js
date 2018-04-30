@@ -13,7 +13,7 @@
 set -ex
 
 # Check if a testnet is already running on port 2000.
-if [ ! lsof -i:2000 ]; then
+if ! nc -z 127.0.0.1 2000; then
   # Start a local testnet on port 2000; set to stop on exit.
   ./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >/dev/null & netpid=$!
   trap "kill $netpid" EXIT
