@@ -95,7 +95,7 @@ test('OasisOrder event listeners work as promises, and can use business object',
 },35000);
 
 
-test('get fillAmount buyDai', (done) =>  {
+test.only('get fillAmount buyDai', (done) =>  {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()

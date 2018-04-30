@@ -38,10 +38,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._hash;
   }
 
-  logs() {
-    return this._logs;
-  }
-
   error() {
     return this._error;
   }
@@ -124,7 +120,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         receipt => {
-          this._logs = this._logsParser(receipt.logs);
+          this._logsParser(receipt.logs);
           if (!!receipt.gasUsed && !!gasPrice) {
             this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           } else {
