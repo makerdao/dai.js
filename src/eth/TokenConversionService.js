@@ -25,28 +25,18 @@ export default class TokenConversionService extends PrivateService {
     super(name, ['smartContract', 'token']);
   }
 
-  _smartContract() {
-    return this.get('smartContract');
-  }
-
-  _tubContract() {
-    return this._smartContract().getContractByName(contracts.TUB);
-  }
-
-  _ethersProvider() {
-    return this._smartContract()
-      .get('web3')
-      .ethersProvider();
-  }
-
   _getToken(token) {
     return this.get('token').getToken(token);
   }
 
   approveToken(token) {
+    const tubContract = this.get('smartContract').getContractByName(
+      contracts.TUB
+    );
+
     return new Promise((resolve, reject) => {
       try {
-        resolve(token.approveUnlimited(this._tubContract().address));
+        resolve(token.approveUnlimited(tubContract.address));
       } catch (err) {
         reject(err.message);
       }

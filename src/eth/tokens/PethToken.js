@@ -13,7 +13,7 @@ export default class PethToken extends Erc20Token {
 
     return new TransactionObject(
       this._tub.join(valueInWei, { gasLimit: 200000 }),
-      this._ethersProvider
+      this._web3Service
     );
   }
 

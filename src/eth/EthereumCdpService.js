@@ -40,10 +40,8 @@ export default class EthereumCdpService extends PrivateService {
     return this._smartContract().getContractByName(contracts.TUB);
   }
 
-  _ethersProvider() {
-    return this._smartContract()
-      .get('web3')
-      .ethersProvider();
+  _web3Service() {
+    return this._smartContract().get('web3');
   }
 
   _conversionService() {
@@ -73,7 +71,7 @@ export default class EthereumCdpService extends PrivateService {
     ]).then(() => {
       return new TransactionObject(
         this._tubContract().shut(hexCdpId),
-        this._ethersProvider(),
+        this._web3Service(),
         cdpId
       );
     });
@@ -89,7 +87,7 @@ export default class EthereumCdpService extends PrivateService {
         txn.onMined();
         return new TransactionObject(
           this._tubContract().lock(hexCdpId, parsedAmount),
-          this._ethersProvider()
+          this._web3Service()
         );
       });
   }
@@ -110,25 +108,9 @@ export default class EthereumCdpService extends PrivateService {
     ]).then(() => {
       return new TransactionObject(
         this._tubContract().free(hexCdpId, parsedAmount),
-        this._ethersProvider()
+        this._web3Service()
       );
     });
-  }
-
-  drawDai(cdpId, amount) {
-    const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(amount, 18);
-
-    //cdp must have peth locked inside it
-    return this._tubContract()
-      .draw(hexCdpId, parsedAmount)
-      .then(transaction =>
-        this._ethersProvider().waitForTransaction(transaction.hash)
-      )
-      .then(() => {
-        // eslint-disable-next-line
-        this.getCdpInfo(cdpId).then(result => console.log(result));
-      });
   }
 
   getCdpInfo(cdpId) {
@@ -136,4 +118,20 @@ export default class EthereumCdpService extends PrivateService {
 
     return this._tubContract().cups(hexCdpId);
   }
+
+  // drawDai(cdpId, amount) {
+  //   const hexCdpId = this._hexCdpId(cdpId);
+  //   const parsedAmount = utils.parseUnits(amount, 18);
+
+  //   //cdp must have peth locked inside it
+  //   return this._tubContract()
+  //     .draw(hexCdpId, parsedAmount)
+  //     .then(transaction =>
+  //       this._ethersProvider().waitForTransaction(transaction.hash)
+  //     )
+  //     .then(() => {
+  //       // eslint-disable-next-line
+  //       this.getCdpInfo(cdpId).then(result => console.log(result));
+  //     });
+  // }
 }
