@@ -2,8 +2,9 @@ import EthereumCdpService from '../../src/eth/EthereumCdpService';
 import Web3ServiceList from '../../src/utils/Web3ServiceList';
 
 let createdCdpService;
+let createdCdpId;
 
-beforeAll(() => {
+beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
 });
 
@@ -11,54 +12,54 @@ afterEach(() => {
   Web3ServiceList.disconnectAll();
 });
 
+function openCdp(){
+  return createdCdpService.manager().authenticate()
+    .then(() => createdCdpService.openCdp())
+    .then(txn => txn.onMined())
+    .then(cdp => createdCdpId = cdp.getCdpId())
+}
+
+function lockEth(amount){
+  return openCdp()
+    .then(() => createdCdpService.lockEth(createdCdpId, amount))
+    .then(txn => txn.onMined())
+    .then(cdp => cdp.getCdpInfo())
+}
+
 test('should open a CDP and get cdp ID', done => {
-  createdCdpService.manager().authenticate().then(() => {
-    createdCdpService.openCdp()
-    .onMined()
-    .then(cdp => cdp.getCdpId())
-    .then(id => {
-      expect(typeof id).toBe('number');
-      expect(id).toBeGreaterThan(0);
-      done();
-    });
+  openCdp()
+  .then(id => {
+    expect(typeof id).toBe('number');
+    expect(id).toBeGreaterThan(0);
+    done();
   });
 }, 10000);
 
 test('should check if a cdp for a specific id exists', done => {
-  createdCdpService.manager().authenticate().then(() => {
-    createdCdpService.openCdp()
-    .onMined()
-    .then(cdp => cdp.getCdpId())
-      .then(cdpId => createdCdpService.getCdpInfo(cdpId))
-        .then((result) => {
-            expect(result).toBeTruthy();
-            expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-            done();
-          });
-        });
+  openCdp()
+  .then(cdpId => createdCdpService.getCdpInfo(cdpId))
+    .then(result => {
+        expect(result).toBeTruthy();
+        expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+        done();
+      });
 }, 10000);
 
 test('should open and then shut a CDP', done => {
-  createdCdpService.manager().authenticate().then(() => {
-    createdCdpService.openCdp()
-    .onMined()
-    .then(cdp => {
-      cdp.getCdpId()
-      .then(id => {
+  openCdp()
+  .then(id => {
+    createdCdpService.getCdpInfo(id)
+    .then(firstInfoCall => {
+      createdCdpService.shutCdp(id)
+      .catch((err) => { 
+        done.fail(new Error('shutting CDP had an error: ', err));
+      })
+      .then(() => {  
         createdCdpService.getCdpInfo(id)
-        .then(firstInfoCall => {
-          createdCdpService.shutCdp(id)
-          .catch((err) => { 
-            done.fail(new Error('shutting CDP had an error: ', err));
-          })
-          .then(() => {  
-            createdCdpService.getCdpInfo(id)
-            .then(secondInfoCall => {
-              expect(firstInfoCall).not.toBe(secondInfoCall);
-              expect(secondInfoCall.lad).toBe('0x0000000000000000000000000000000000000000');
-              done();
-            });
-          });
+        .then(secondInfoCall => {
+          expect(firstInfoCall).not.toBe(secondInfoCall);
+          expect(secondInfoCall.lad).toBe('0x0000000000000000000000000000000000000000');
+          done();
         });
       });
     });
@@ -68,29 +69,23 @@ test('should open and then shut a CDP', done => {
 xtest('should open and then shut a CDP with peth locked in it', done => {
   let firstInfoCall;
 
-  createdCdpService.manager().authenticate().then(() => {
-    createdCdpService.openCdp()
-    .onMined()
-    .then(cdp => {
-      cdp.getCdpId()
-      .then(id => {
+  openCdp()
+  .then(id => {
+    createdCdpService.getCdpInfo(id)
+    .then(info => firstInfoCall = info)
+    .then(() => cdp.lockEth('0.1'))
+    .then(txn => txn.onMined())
+    .then(() => {
+      createdCdpService.shutCdp(id)
+      .catch((err) => { 
+        done.fail(new Error('shutting CDP had an error: ', err));
+      })
+      .then(() => {  
         createdCdpService.getCdpInfo(id)
-        .then(info => firstInfoCall = info)
-        .then(() => cdp.lockEth('0.1'))
-        .then(txn => txn.onMined())
-        .then(() => {
-          createdCdpService.shutCdp(id)
-          .catch((err) => { 
-            done.fail(new Error('shutting CDP had an error: ', err));
-          })
-          .then(() => {  
-            createdCdpService.getCdpInfo(id)
-            .then(secondInfoCall => {
-              expect(firstInfoCall).not.toBe(secondInfoCall);
-              expect(secondInfoCall.lad).toBe('0x0000000000000000000000000000000000000000');
-              done();
-            });
-          });
+        .then(secondInfoCall => {
+          expect(firstInfoCall).not.toBe(secondInfoCall);
+          expect(secondInfoCall.lad).toBe('0x0000000000000000000000000000000000000000');
+          done();
         });
       });
     });
