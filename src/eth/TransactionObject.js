@@ -50,11 +50,9 @@ export default class TransactionObject extends TransactionLifeCycle {
   _waitForConfirmations(originalBlockNumber, originalBlockHash, requiredConfirmations = 3){
     
     let assertBlockHashUnchanged = newBlockNumber => {
-
       if (newBlockNumber < originalBlockNumber + requiredConfirmations) {
         console.log('reregistering handler: newBlockNumber: ', newBlockNumber, ' is lower than required blockNumber: ', originalBlockNumber + requiredConfirmations);
         this._ethersProvider.once('block', b=>{console.log(b)});
-
       } else {
         console.log('required block number ', originalBlockNumber + requiredConfirmations, ' reached, refreshing transaction receipt', this._hash);
         this._ethersProvider.getTransactionReceipt(this._hash).then(
@@ -73,7 +71,6 @@ export default class TransactionObject extends TransactionLifeCycle {
         );
       }
     };
-
     console.log('registering handler.  original block number: ', originalBlockNumber, ' required block number: ', originalBlockNumber + requiredConfirmations);
     this._ethersProvider.once('block', assertBlockHashUnchanged);
   }
@@ -98,18 +95,15 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionData() {
     let gasPrice = null;
-    let txHash = null;
     this._transaction
       .then(
         tx => {
-          gasPrice = tx.gasPrice;
-          super._pending();
-          //go to pending state here, initially start off in initial state.  Figure out what exactly this means (is it sent, signed etc.)
-          return this._ethersProvider.waitForTransaction(tx.hash);
+          this._pending(); //set state to pending
+          this._hash = tx.hash;
+          return this._ethersProvider.waitForTransaction(this._hash);
         },
         // eslint-disable-next-line
         reason => {
-          // console.log('error waiting for initial tx to return', reason);
           this._error = reason;
           this._error();
         }

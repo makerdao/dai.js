@@ -30,6 +30,7 @@ export default class Erc20Token {
   toUserFormat(value) {
     return utils.formatUnits(value, this._decimals);
   }
+
   toEthereumFormat(value) {
     return utils.parseUnits(value, this._decimals);
   }

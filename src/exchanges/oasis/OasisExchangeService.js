@@ -25,7 +25,7 @@ export default class OasisExchangeService extends PrivateService {
       .inject('log', smartContractService.get('log'))
       .inject('web3', smartContractService.get('web3'))
       .inject('smartContract', smartContractService)
-      .inject('ethereumToken', ethereumTokenService)
+      .inject('token', ethereumTokenService)
       .inject(
         'gasEstimator',
         GasEstimatorService.buildTestService(smartContractService.get('web3'))
@@ -47,7 +47,7 @@ export default class OasisExchangeService extends PrivateService {
       .inject('log', smartContractService.get('log'))
       .inject('web3', smartContractService.get('web3'))
       .inject('smartContract', smartContractService)
-      .inject('ethereumToken', ethereumTokenService)
+      .inject('token', ethereumTokenService)
       .inject(
         'gasEstimator',
         GasEstimatorService.buildTestService(smartContractService.get('web3'))
@@ -57,13 +57,7 @@ export default class OasisExchangeService extends PrivateService {
   }
 
   constructor(name = 'oasisExchange') {
-    super(name, [
-      'smartContract',
-      'ethereumToken',
-      'web3',
-      'log',
-      'gasEstimator'
-    ]);
+    super(name, ['smartContract', 'token', 'web3', 'log', 'gasEstimator']);
   }
 
   /*
@@ -75,9 +69,9 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    const daiToken = this.get('ethereumToken').getToken(tokens.DAI);
+    const daiToken = this.get('token').getToken(tokens.DAI);
     const daiAddress = daiToken.address();
-    const buyTokenAddress = this.get('ethereumToken')
+    const buyTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
     const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
@@ -102,11 +96,11 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    const daiToken = this.get('ethereumToken').getToken(tokens.DAI);
+    const daiToken = this.get('token').getToken(tokens.DAI);
     const daiAddress = daiToken.address();
     const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
     const maxFillAmountEVM = daiToken.toEthereumFormat(maxFillAmount);
-    const sellTokenAddress = this.get('ethereumToken')
+    const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
     return new OasisBuyOrder(
