@@ -53,14 +53,7 @@ export default class Cdp {
   }
 
   shut() {
-    return this.getCdpId().then(
-      id =>
-        new TransactionObject(
-          this._cdpService.shutCdp(id),
-          this._smartContractService.get('web3'),
-          this
-        )
-    );
+    return this.getCdpId().then(id => this._cdpService.shutCdp(id));
   }
 
   getInfo() {
@@ -68,6 +61,14 @@ export default class Cdp {
   }
 
   lockEth(eth) {
-    return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
+    let cdpId;
+
+    return this.getCdpId()
+      .then(id => (cdpId = id))
+      .then(() => {
+        return this._cdpService.lockEth(cdpId, eth).then(txn => {
+          return txn;
+        });
+      });
   }
 }

@@ -22,7 +22,7 @@ test('openCdp should open a CDP', done => {
     });
 }, 10000);
 
-test('should create a new CDP object for existing CDPs', done => {
+xtest('should create a new CDP object for existing CDPs', done => {
   let createdCdp;
 
   maker.openCdp()
@@ -41,7 +41,7 @@ test('should create a new CDP object for existing CDPs', done => {
   });
 });
 
-test('should validate the provided CDP ID', done => {
+xtest('should validate the provided CDP ID', done => {
   let cdpId;
 
   maker.openCdp().then(txn => {

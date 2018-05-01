@@ -46,11 +46,9 @@ export default class TransactionObject extends TransactionLifeCycle {
   _waitForConfirmations(originalBlockNumber, originalBlockHash, requiredConfirmations = 3){
     
     let assertBlockHashUnchanged = newBlockNumber => {
-
       if (newBlockNumber < originalBlockNumber + requiredConfirmations) {
         console.log('reregistering handler: newBlockNumber: ', newBlockNumber, ' is lower than required blockNumber: ', originalBlockNumber + requiredConfirmations);
         this._ethersProvider.once('block', b=>{console.log(b)});
-
       } else {
         console.log('required block number ', originalBlockNumber + requiredConfirmations, ' reached, refreshing transaction receipt', this._hash);
         this._ethersProvider.getTransactionReceipt(this._hash).then(
@@ -69,7 +67,6 @@ export default class TransactionObject extends TransactionLifeCycle {
         );
       }
     };
-
     console.log('registering handler.  original block number: ', originalBlockNumber, ' required block number: ', originalBlockNumber + requiredConfirmations);
     this._ethersProvider.once('block', assertBlockHashUnchanged);
   }

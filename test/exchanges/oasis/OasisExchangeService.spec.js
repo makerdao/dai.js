@@ -20,7 +20,7 @@ beforeAll(()=>{ //can comment this out after has been run once
     let ethereumTokenService = null;
     return oasisExchangeService.manager().authenticate()
       .then(()=> {
-        ethereumTokenService = oasisExchangeService.get('ethereumToken');
+        ethereumTokenService = oasisExchangeService.get('token');
         wethToken = ethereumTokenService.getToken(tokens.WETH);
         return wethToken.deposit('0.1').onPending(); //I think doing this will make sure we don't use the same nonce twice
       })

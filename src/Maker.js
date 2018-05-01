@@ -6,12 +6,7 @@ export default class Maker {
     this._container = new DefaultServiceProvider().buildContainer(
       config.services
     );
-    this._authenticatedPromise = this._container.authenticate().then(() => {
-      this._ethersProvider = this._container
-        .service('cdp')
-        .get('smartContract')
-        .get('web3')._ethersProvider;
-    });
+    this._authenticatedPromise = this._container.authenticate();
   }
 
   _validateCdp(cdpId) {

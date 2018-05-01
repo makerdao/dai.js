@@ -53,7 +53,7 @@ test('should successfully join and exit PETH', done => {
     .then(result => {
       initialBalance = parseFloat(result[0]);
       const joinTransaction = peth.join('0.1');
-      return joinTransaction.onMined();
+      return joinTransaction;
     })
     .then(() => {
       const approveTransaction = peth.approveUnlimited(tub.address);
