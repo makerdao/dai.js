@@ -107,7 +107,7 @@ export default class EthereumCdpService extends PrivateService {
         .then(txn => txn.onMined())
     ]).then(() => {
       return new TransactionObject(
-        this._tubContract().free(hexCdpId, parsedAmount),
+        this._tubContract().free(hexCdpId, parsedAmount, { gasLimit: 200000 }),
         this._web3Service()
       );
     });

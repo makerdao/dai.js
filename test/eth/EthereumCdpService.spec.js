@@ -148,4 +148,4 @@ xtest('should be able to free peth from a cdp', done => {
       });
     });
   });
-}, 20000);
+}, 30000);
