@@ -6,6 +6,7 @@ import erc20Token_1 from '../abi/erc20-token/v1.json';
 import makerOtc_1 from '../abi/maker-otc/v1.json';
 import top_1 from '../abi/dai/v1/top.json';
 import tub_1 from '../abi/dai/v1/tub.json';
+import zeroExExchange_1 from '../abi/zeroExExchange/v1.json';
 
 const mapping = {
   [tokens.DAI] : [
@@ -28,6 +29,9 @@ const mapping = {
   ],
   [contracts.MAKER_OTC] : [
     { version: 1, address: '0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9', abi: makerOtc_1.interface }
+  ],
+  [contracts.ZERO_EX_EXCHANGE] : [
+    {version: 1, address: '0x90Fe2Af704B34E0224bF2299C838E04d4Dcf1364', abi: zeroExExchange_1.interface }
   ]
 };
 export default mapping;
