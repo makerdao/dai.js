@@ -1,20 +1,16 @@
 import Maker from '../src/Maker';
 import ConfigFactory from '../src/utils/ConfigFactory';
-import Web3ServiceList from '../src/utils/Web3ServiceList';
 
-let maker;
 
-beforeAll(() => {
-  maker = new Maker(
+function createMaker() {
+  return new Maker(
     ConfigFactory.create('decentralized-oasis-without-proxies')
   );
-});
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
+}
 
 test('openCdp should open a CDP', done => {
+  const maker = createMaker();
+
   maker.openCdp().then(tx => tx.onMined()).then(cdp => cdp.getCdpId()).then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
@@ -22,7 +18,8 @@ test('openCdp should open a CDP', done => {
     });
 }, 10000);
 
-xtest('should create a new CDP object for existing CDPs', done => {
+test('should create a new CDP object for existing CDPs', done => {
+  const maker = createMaker();
   let createdCdp;
 
   maker.openCdp()
@@ -41,7 +38,8 @@ xtest('should create a new CDP object for existing CDPs', done => {
   });
 });
 
-xtest('should validate the provided CDP ID', done => {
+test('should validate the provided CDP ID', done => {
+  const maker = createMaker();
   let cdpId;
 
   maker.openCdp().then(txn => {

@@ -121,7 +121,7 @@ test('should be able to lock eth in a cdp', done => {
   });
 }, 20000);
 
-xtest('should be able to free peth from a cdp', done => {
+test.only('should be able to free peth from a cdp', done => {
   let newCdp;
   let firstBalance;
   let cdpId;
@@ -148,4 +148,4 @@ xtest('should be able to free peth from a cdp', done => {
       });
     });
   });
-}, 20000);
+}, 30000);
