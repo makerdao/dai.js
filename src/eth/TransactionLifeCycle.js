@@ -69,6 +69,15 @@ class TransactionLifeCycle {
   }
 
   onPending(handler = () => {}) {
+    if (
+      this._state.inState(transactionState.pending) ||
+      this._state.inState(transactionState.mined) ||
+      this._state.inState(transactionState.finalized)
+    ) {
+      return Promise.resolve(this._businessObject || this);
+    } else if (this._state.inState(transactionState.error)) {
+      return Promise.reject();
+    }
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
         if (
@@ -86,6 +95,14 @@ class TransactionLifeCycle {
   }
 
   onMined(handler = () => {}) {
+    if (
+      this._state.inState(transactionState.mined) ||
+      this._state.inState(transactionState.finalized)
+    ) {
+      return Promise.resolve(this._businessObject || this);
+    } else if (this._state.inState(transactionState.error)) {
+      return Promise.reject();
+    }
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
         if (
@@ -103,7 +120,14 @@ class TransactionLifeCycle {
   }
 
   onFinalized(handler = () => {}) {
+    if (this._state.inState(transactionState.finalized)) {
+      return Promise.resolve(this._businessObject || this);
+    } else if (this._state.inState(transactionState.error)) {
+      return Promise.reject();
+    }
     return new Promise((resolve, reject) => {
+      //if this._state.inState(transactionState.finalized)
+
       this._state.onStateChanged((oldState, newState) => {
         if (
           oldState === transactionState.mined &&
@@ -120,6 +144,9 @@ class TransactionLifeCycle {
   }
 
   onError(handler = () => {}) {
+    if (this._state.inState(transactionState.error)) {
+      return Promise.reject();
+    }
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
         if (newState === transactionState.error) {

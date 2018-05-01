@@ -95,7 +95,7 @@ test('OasisOrder event listeners work as promises, and can use business object',
 },35000);
 
 
-test.only('get fillAmount buyDai', (done) =>  {
+test('get fillAmount buyDai', (done) =>  {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisExchangeService.manager().authenticate()
@@ -111,22 +111,6 @@ test.only('get fillAmount buyDai', (done) =>  {
 30000
 );
 
-/*
-test('test keccak', (done) => setTimeout(() => {
-  const oasisExchangeService = OasisExchangeService.buildKovanService();
-  let oasisOrder = null;
-  oasisExchangeService.manager().authenticate()
-    .then(()=>{
-      //const string = 'LogTrade(uint256,address,uint256,address)';
-      const string = 'LogTake(bytes32,bytes32,address,address,address,address,uint128,uint128,uint64)';
-      const hex = oasisExchangeService.get('web3')._web3.toHex(string);
-        console.log(utils.keccak256(hex));
-      done();
-    });
-},
-1000),
-3000
-);*/
 
 
 /*

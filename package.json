@@ -76,6 +76,7 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
+    "@0xproject/connect": "^0.6.10",
     "bignumber.js": "^5.0.0",
     "bunyan": "^1.8.12",
     "ethers": "^3.0.15",
