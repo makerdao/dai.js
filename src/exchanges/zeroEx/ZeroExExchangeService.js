@@ -92,9 +92,35 @@ export default class ZeroExExchangeService extends PrivateService {
   }
 
   connect(){ //TODO, find a better way to test this
-  	return this._relayerClient.getOrdersAsync({ page: 1, perPage: 1}).then(orders => {
+  	return this._relayerClient.getOrdersAsync({ page: 1, perPage: 1})
+  	.then(orders => {
+
   		this._firstOrder = orders[0];
-  	});
+
+  		this.get('timer').createTimer(
+            'zeroExCheckConnectionStatus',
+            500,
+            true,
+            () =>
+              this._isStillConnected().then(connected => {
+                if (!connected) {
+                  this.disconnect();
+                }
+              })
+          );
+  	},
+  	reason => {
+    	this.get('log').error(reason);
+    });
+  }
+
+  _isStillConnected() {
+    return this._relayerClient.getOrdersAsync({ page: 1, perPage: 1})
+  	.then(
+      orders =>
+        orders[0].orderHash != null,
+      () => false
+    );
   }
 
 /*
