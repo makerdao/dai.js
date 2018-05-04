@@ -21,6 +21,15 @@ test('should correctly initialize', done => {
   });
 });
 
+test('should correctly connect', done => {
+  const apiEndpoint = 'https://api.radarrelay.com/0x/v0';
+  const service = ZeroExExchangeService.buildKovanService(apiEndpoint);
+  service.manager().connect().then(()=>{
+    expect(service._firstOrder.orderHash).toBeDefined();
+    done();
+  });
+});
+
 /*
 test('get fees sell Dai - kovan', (done) => {
   const zeroExExchangeService = ZeroExExchangeService.buildKovanService();

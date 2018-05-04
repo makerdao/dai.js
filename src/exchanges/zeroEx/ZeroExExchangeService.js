@@ -82,12 +82,19 @@ export default class ZeroExExchangeService extends PrivateService {
       'gasEstimator'
     ]);
     this._relayerClient = null;
+    this._firstOrder = null;
   }
 
 
   initialize(settings) {
     const relayerApiUrl = settings.relayerApi;
 	this._relayerClient = new HttpClient(relayerApiUrl);
+  }
+
+  connect(){ //TODO, find a better way to test this
+  	return this._relayerClient.getOrdersAsync({ page: 1, perPage: 1}).then(orders => {
+  		this._firstOrder = orders[0];
+  	});
   }
 
 /*
