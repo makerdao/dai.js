@@ -154,6 +154,10 @@ export default class Web3Service extends PrivateService {
     return this._ethersProvider;
   }
 
+  web3Provider() {
+    return this._web3.currentProvider;
+  }
+
   ethersSigner() {
     if (this._ethersWallet === null && this._ethersProvider === null) {
       throw new Error(
