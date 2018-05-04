@@ -99,7 +99,7 @@ export default class ZeroExExchangeService extends PrivateService {
 
   		this.get('timer').createTimer(
             'zeroExCheckConnectionStatus',
-            500,
+            30000,
             true,
             () =>
               this._isStillConnected().then(connected => {
@@ -112,6 +112,11 @@ export default class ZeroExExchangeService extends PrivateService {
   	reason => {
     	this.get('log').error(reason);
     });
+  }
+
+  authenticate(){
+	const providerEngine = new Web3ProviderEngine();
+	console.log('provider engine', providerEngine);
   }
 
   _isStillConnected() {

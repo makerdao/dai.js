@@ -124,7 +124,9 @@ class ServiceManagerBase {
               );
             }
           },
-          () => {
+          reason => {
+            // eslint-disable-next-line
+            console.error('connect error: ', reason);
             // Check if we are still CONNECTING, because another process might have come in between
             if (this._state.inState(ServiceState.CONNECTING)) {
               this._state.transitionTo(ServiceState.OFFLINE);
@@ -171,7 +173,9 @@ class ServiceManagerBase {
               this._state.transitionTo(ServiceState.READY);
             }
           },
-          () => {
+          reason => {
+            // eslint-disable-next-line
+            console.error('authenticate error: ',reason);
             // Check if we are still AUTHENTICATING, because another process might have come in between
             if (this._state.inState(ServiceState.AUTHENTICATING)) {
               this._state.transitionTo(ServiceState.ONLINE);
