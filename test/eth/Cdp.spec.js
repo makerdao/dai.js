@@ -1,15 +1,10 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 import Cdp from '../../src/eth/Cdp';
-import Web3ServiceList from '../../src/utils/Web3ServiceList';
 
 let createdCdpService;
 
 beforeAll(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
-});
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
 });
 
 test('should open a new CDP and return its ID', done => {

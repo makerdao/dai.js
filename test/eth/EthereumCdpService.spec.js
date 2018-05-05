@@ -1,15 +1,10 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
-import Web3ServiceList from '../../src/utils/Web3ServiceList';
 
 let createdCdpService;
 let createdCdpId;
 
 beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
-});
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
 });
 
 function openCdp(){

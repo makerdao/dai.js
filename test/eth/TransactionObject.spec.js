@@ -3,11 +3,6 @@ import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import TransactionState from '../../src/eth/TransactionState';
 //import OasisExchangeService from '../../src/exchanges/oasis/OasisExchangeService';
-import Web3ServiceList from '../../src/utils/Web3ServiceList';
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
 
 /*
 test('TransactionObject event listeners work as promises - kovan', done => {
