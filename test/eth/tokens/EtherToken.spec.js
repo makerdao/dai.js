@@ -1,11 +1,6 @@
 import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
-import Web3ServiceList from '../../../src/utils/Web3ServiceList';
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
 
 test('get Ether allowance returns max safe integer', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -75,7 +70,7 @@ test('ether transfer should move transferValue from sender to receiver', done =>
       expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
       done();
     });
-}, 10000);
+}, 5000);
 
 test('ether transferFrom should move transferValue from sender to receiver', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
@@ -103,5 +98,5 @@ test('ether transferFrom should move transferValue from sender to receiver', don
       expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
       done();
     });
-}, 10000);
+}, 5000);
 

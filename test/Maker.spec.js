@@ -16,7 +16,7 @@ test('openCdp should open a CDP', done => {
       expect(id).toBeGreaterThan(0);
       done();
     });
-}, 10000);
+}, 5000);
 
 test('should create a new CDP object for existing CDPs', done => {
   const maker = createMaker();

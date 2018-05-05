@@ -32,7 +32,7 @@ test('TransactionObject event listeners work as promises - kovan', done => {
       expect(TransactionObject.state()).toBe(TransactionState.finalized);
       done();
     });
-},35000);
+}, 5000);
 */
 
 test('TransactionObject event listeners work as promises', done => {
@@ -74,7 +74,7 @@ test('TransactionObject event listeners work as promises', done => {
       expect(TransactionObject.state()).toBe(TransactionState.finalized);
       done();
     });*/
-},30000);
+}, 5000);
 
 test('get fees from TransactionObject', done => {
   const service = EthereumTokenService.buildTestService();
@@ -91,7 +91,7 @@ test('get fees from TransactionObject', done => {
       expect(parseFloat(TransactionObject.fees())).toBeGreaterThan(0);
       done();
     });
-},20000);
+}, 5000);
 
 test('TransactionObject event listeners work as callbacks', done => {
   //const oasisService = OasisExchangeService.buildKovanService();
@@ -125,7 +125,7 @@ test('TransactionObject event listeners work as callbacks', done => {
       done();
       });
     });
-},30000);
+}, 5000);
 
 /* need to figure out a way to induce error state
 test('TransactionObject error event listeners works', done => {
@@ -144,5 +144,5 @@ test('TransactionObject error event listeners works', done => {
         done();
       });
     });
-},20000);
+}, 5000);
 */

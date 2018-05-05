@@ -28,7 +28,7 @@ test('should open a CDP and get cdp ID', done => {
     expect(id).toBeGreaterThan(0);
     done();
   });
-}, 10000);
+}, 5000);
 
 test('should check if a cdp for a specific id exists', done => {
   openCdp()
@@ -38,7 +38,7 @@ test('should check if a cdp for a specific id exists', done => {
         expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
         done();
       });
-}, 10000);
+}, 5000);
 
 test('should open and then shut a CDP', done => {
   openCdp()
@@ -59,7 +59,7 @@ test('should open and then shut a CDP', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 xtest('should open and then shut a CDP with peth locked in it', done => {
   let firstInfoCall;
@@ -85,7 +85,7 @@ xtest('should open and then shut a CDP with peth locked in it', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 test('should be able to lock eth in a cdp', done => {
   let firstInfoCall;
@@ -109,7 +109,7 @@ test('should be able to lock eth in a cdp', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 xtest('should be able to free peth from a cdp', done => {
   let newCdp;
@@ -138,4 +138,4 @@ xtest('should be able to free peth from a cdp', done => {
       });
     });
   });
-}, 30000);
+}, 5000);

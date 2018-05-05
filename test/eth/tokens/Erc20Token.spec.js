@@ -1,13 +1,8 @@
 import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
-import Web3ServiceList from '../../../src/utils/Web3ServiceList';
 
 const utils = require('ethers').utils;
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
 
 test('get ERC20 (MKR) balance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -58,7 +53,7 @@ test('approve an ERC20 (MKR) allowance', (done) => {
     .then(()=>{
       done();
     });
-}, 15000);
+}, 5000);
 
 test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
@@ -78,7 +73,7 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
       expect(allowance).toBe(utils.formatUnits(utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff').toString(),token.decimals()));
       done();
     });
-}, 10000);
+}, 5000);
 
 test('ERC20 transfer should move transferValue from sender to receiver', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
@@ -107,7 +102,7 @@ test('ERC20 transfer should move transferValue from sender to receiver', done =>
       expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
       done();
     });
-},15000);
+}, 5000);
 
 test('ERC20 transferFrom should move transferValue from sender to receiver', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService(),
@@ -136,7 +131,7 @@ test('ERC20 transferFrom should move transferValue from sender to receiver', don
       expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
       done();
     });
-},15000);
+}, 5000);
 
 test('totalSupply() should increase when new tokens are minted', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -162,6 +157,6 @@ test('totalSupply() should increase when new tokens are minted', done => {
       expect(newSupply).toBeCloseTo(initialSupply + 0.1, 12);
       done();
     });
-}, 15000);
+}, 5000);
 
 

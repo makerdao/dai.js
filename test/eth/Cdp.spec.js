@@ -28,11 +28,14 @@ test('should create a cdp object with an authenticated service and a cdp id', do
         expect(cdp).toBeDefined();
         expect(cdp._cdpService).toBeDefined();
         expect(cdp._smartContractService).toBeDefined();
-        cdp.getCdpId().then(id => expect(id).toBeGreaterThan(0));
+        return cdp.getCdpId();
+      })
+      .then(id => {
+        expect(id).toBeGreaterThan(0);
         done();
       });
     });
-}, 10000);
+}, 5000);
 
 test('should be able to get a CDP\'s info', done => {
   createdCdpService.manager().authenticate()
@@ -47,7 +50,7 @@ test('should be able to get a CDP\'s info', done => {
         });
       });
     });
-}, 10000);
+}, 5000);
 
 test('should be able to close a CDP', done => {
   createdCdpService.manager().authenticate()
@@ -60,7 +63,7 @@ test('should be able to close a CDP', done => {
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
     done();
   });
-}, 20000);
+}, 5000);
 
 test('should be able to lock eth', done => {
   let newCdp;
@@ -84,4 +87,4 @@ test('should be able to lock eth', done => {
       });
     });
   });
-}, 30000);
+}, 5000);

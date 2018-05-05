@@ -1,17 +1,8 @@
 import OasisExchangeService from '../../../src/exchanges/oasis/OasisExchangeService';
-// import Web3Service from '../../../src/eth/Web3Service';
 import tokens from '../../../contracts/tokens';
-// import testAccountProvider from '../../../src/utils/TestAccountProvider';
-// import orderStyle from '../../../src/exchanges/orderStyle';
 import TransactionState from '../../../src/eth/TransactionState';
 import contracts from '../../../contracts/contracts';
 const utils = require('ethers').utils;
-import Web3ServiceList from '../../../src/utils/Web3ServiceList';
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
-
 
 beforeAll(()=>{ //can comment this out after has been run once
     const oasisExchangeService = OasisExchangeService.buildTestService();

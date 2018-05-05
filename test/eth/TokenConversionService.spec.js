@@ -27,7 +27,7 @@ test('should convert eth to weth', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 test('should convert weth to peth', done => {
   let initialBalance;
@@ -48,7 +48,7 @@ test('should convert weth to peth', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 test('should convert eth to peth', done => {
   let initialBalance;
@@ -65,4 +65,4 @@ test('should convert eth to peth', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
