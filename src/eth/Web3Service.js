@@ -83,10 +83,6 @@ export default class Web3Service extends PrivateService {
   }
 
   static buildTestService(privateKey = null) {
-    /* eslint-disable */
-    process.on('unhandledRejection', err => {
-      console.log('Unhandled rejection is:', err);
-    });
     const service = new Web3Service();
 
     service

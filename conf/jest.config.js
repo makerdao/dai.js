@@ -7,5 +7,7 @@ module.exports = {
   ],
   testRegex: 'test/.*.spec.js$',
   collectCoverage: true,
-  verbose: true
+  verbose: true,
+  globalSetup: path.join(process.cwd(), '/test/setup-global.js'),
+  setupTestFrameworkScriptFile: path.join(process.cwd(), '/test/setup-test.js')
 };

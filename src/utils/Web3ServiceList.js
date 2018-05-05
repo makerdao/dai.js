@@ -8,11 +8,7 @@ class Web3ServiceList {
   }
 
   disconnectAll() {
-    this._list.forEach(s => {
-      //console.log('about to force disconnect');
-      s.manager()._disconnect();
-      //console.log('done force disconnecting');
-    });
+    this._list.forEach(s => s.manager()._disconnect());
     this._list = [];
   }
 }
