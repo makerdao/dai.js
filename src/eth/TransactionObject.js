@@ -1,3 +1,4 @@
+import '../polyfills';
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../eth/TransactionLifeCycle';
 
@@ -100,7 +101,10 @@ export default class TransactionObject extends TransactionLifeCycle {
         tx => {
           this._pending(); //set state to pending
           this._hash = tx.hash;
-          return this._ethersProvider.waitForTransaction(this._hash);
+          return Promise.any([
+            this._ethersProvider.getTransaction(this._hash),
+            this._ethersProvider.waitForTransaction(this._hash)
+          ]);
         },
         // eslint-disable-next-line
         reason => {
