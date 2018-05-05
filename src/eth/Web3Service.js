@@ -7,10 +7,13 @@ import Web3 from 'web3';
 import TestAccountProvider from '../utils/TestAccountProvider';
 import Web3ServiceList from '../utils/Web3ServiceList';
 
+const TIMER_CONNECTION = 'web3CheckConnectionStatus';
+const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
+const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
 
-  static buildTestService(privateKey = null) {
+  static buildTestService(privateKey = null, statusTimerDelay = 5000) {
     const service = new Web3Service();
 
     service
@@ -20,7 +23,8 @@ export default class Web3Service extends PrivateService {
       .settings({
         usePresetProvider: true,
         privateKey: privateKey,
-        provider: { type: Web3ProviderType.TEST }
+        provider: { type: Web3ProviderType.TEST },
+        statusTimerDelay: statusTimerDelay
       });
 
     return service;
@@ -59,6 +63,8 @@ export default class Web3Service extends PrivateService {
       version: { api: null, node: null, network: null, ethereum: null },
       account: null
     };
+    this._statusTimerDelay = TIMER_DEFAULT_DELAY;
+
     Web3ServiceList.push(this);
   }
 
@@ -111,7 +117,10 @@ export default class Web3Service extends PrivateService {
     this._web3 = this._createWeb3();
     this._web3.setProvider(this._getWeb3Provider(settings));
 
+    this._setStatusTimerDelay(settings.statusTimerDelay);
     this._setPrivateKey(settings.privateKey);
+
+    this._installCleanUpHooks();
   }
 
   connect() {
@@ -123,6 +132,7 @@ export default class Web3Service extends PrivateService {
     ])
       .then(
         versions => {
+
           this._info.version = {
             api: this._web3.version.api,
             node: versions[0],
@@ -130,20 +140,9 @@ export default class Web3Service extends PrivateService {
             ethereum: versions[2],
             whisper: versions[3]
           };
-          this._setUpEthers(this.networkId());
-          //console.log('network id is :', this.networkId());
 
-          this.get('timer').createTimer(
-            'web3CheckConnectionStatus',
-            500,
-            true,
-            () =>
-              this._isStillConnected().then(connected => {
-                if (!connected) {
-                  this.disconnect();
-                }
-              })
-          );
+          this._setUpEthers(this.networkId());
+          this._installDisconnectCheck();
         },
 
         reason => {
@@ -169,17 +168,7 @@ export default class Web3Service extends PrivateService {
           throw new Error('Expected Web3 to be authenticated, but no default account is available.');
         }
 
-        this.get('timer').createTimer(
-          'web3CheckAuthenticationStatus',
-          300, //what should this number be?
-          true,
-          () =>
-            this._isStillAuthenticated().then(authenticated => {
-              if (!authenticated) {
-                this.deauthenticate();
-              }
-            })
-        );
+        this._installDeauthenticationCheck();
       },
       reason => {
         this.get('log').error(reason);
@@ -219,6 +208,16 @@ export default class Web3Service extends PrivateService {
       this._blockListeners[blockNumber] = undefined;
     }
     this._currentBlock = blockNumber;
+  }
+
+  _installCleanUpHooks() {
+    this.manager().onDisconnected(() => {
+      this.get('timer').disposeTimer(TIMER_CONNECTION);
+    });
+
+    this.manager().onDeauthenticated(() => {
+      this.get('timer').disposeTimer(TIMER_AUTHENTICATION);
+    });
   }
 
   _setUpEthers(chainId) {
@@ -347,6 +346,24 @@ export default class Web3Service extends PrivateService {
     }
   }
 
+  _setStatusTimerDelay(delay) {
+    this._statusTimerDelay = delay ? parseInt(delay) : TIMER_DEFAULT_DELAY;
+  }
+
+  _installDisconnectCheck() {
+    this.get('timer').createTimer(
+      TIMER_CONNECTION,
+      this._statusTimerDelay,
+      true,
+      () =>
+        this._isStillConnected().then(connected => {
+          if (!connected) {
+            this.disconnect();
+          }
+        })
+    );
+  }
+
   _isStillConnected() {
     return Promise.all([
       _web3Promise(_ => this._web3.version.getNode(_)), // can remove this
@@ -356,6 +373,20 @@ export default class Web3Service extends PrivateService {
         versionInfo[1] != null &&
         versionInfo[1] === this._info.version['network'],
       () => false
+    );
+  }
+
+  _installDeauthenticationCheck() {
+    this.get('timer').createTimer(
+      TIMER_AUTHENTICATION,
+      this._statusTimerDelay, //what should this number be?
+      true,
+      () =>
+        this._isStillAuthenticated().then(authenticated => {
+          if (!authenticated) {
+            this.deauthenticate();
+          }
+        })
     );
   }
 
@@ -389,7 +420,6 @@ export function _web3Promise(cb, onErrorValue) {
     } catch (e) {
       if (typeof onErrorValue === 'undefined') {
         console.log(e);
-        console.log(e.stack);
         reject(e);
       } else {
         resolve(onErrorValue);

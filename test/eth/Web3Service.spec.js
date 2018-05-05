@@ -1,10 +1,10 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import Web3Service from '../../src/eth/Web3Service';
-import Web3ServiceList from '../../src/utils/Web3ServiceList';
 
-function buildDisconnectingService(disconnectAfter = 50) {
-  const service = Web3Service.buildTestService();
+function buildDisconnectingService(disconnectAfter = 25) {
+  const service = Web3Service.buildTestService(null, disconnectAfter + 25);
+
   service.manager().onConnected(() => {
     service
       .get('timer')
@@ -14,11 +14,12 @@ function buildDisconnectingService(disconnectAfter = 50) {
         };
       });
   });
+
   return service;
 }
 
-function buildNetworkChangingService(changeNetworkAfter = 50) {
-  const service = Web3Service.buildTestService();
+function buildNetworkChangingService(changeNetworkAfter = 25) {
+  const service = Web3Service.buildTestService(null, changeNetworkAfter + 25);
   service.manager().onConnected(() => {
     service
       .get('timer')
@@ -29,8 +30,8 @@ function buildNetworkChangingService(changeNetworkAfter = 50) {
   return service;
 }
 
-function buildDeauthenticatingService(deauthenticateAfter = 50) {
-  const service = Web3Service.buildTestService();
+function buildDeauthenticatingService(deauthenticateAfter = 25) {
+  const service = Web3Service.buildTestService(null, deauthenticateAfter + 25);
 
   service.manager().onAuthenticated(() => {
     service
@@ -42,8 +43,8 @@ function buildDeauthenticatingService(deauthenticateAfter = 50) {
   return service;
 }
 
-function buildAccountChangingService(changeAccountAfter = 50) {
-  const service = Web3Service.buildTestService();
+function buildAccountChangingService(changeAccountAfter = 25) {
+  const service = Web3Service.buildTestService(null, changeAccountAfter + 25);
   service.manager().onAuthenticated(() => {
     service
       .get('timer')
@@ -92,6 +93,10 @@ test('should correctly use web3 provider of a previously injected web3 object, o
 test('should return error reason on a failure to connect', (done) => {
   const service = Web3Service.buildTestService();
 
+  // Disable console.log for this test.
+  const origConsoleLog = console.log;
+  console.log = () => {};
+
   let error = false;
   service.get('log').error = (msg) => {
     error = msg;
@@ -107,13 +112,14 @@ test('should return error reason on a failure to connect', (done) => {
     })
     .then(() => {
       expect(error).toBeInstanceOf(Error);
+      console.log = origConsoleLog;
       done();
     });
 });
 
 test('should be authenticated and know default address when private key passed in', (done) => {
-  const service = Web3Service.buildInfuraService('kovan',
-        '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700');
+  const service = Web3Service.buildTestService('0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700');
+
   service.manager().authenticate()
     .then(() => {
       expect(service.manager().isAuthenticated()).toBe(true);
@@ -123,11 +129,19 @@ test('should be authenticated and know default address when private key passed i
 });
 
 test('should correctly handle automatic disconnect', (done) => {
+
+  // Disable console.log for this test.
+  const origConsoleLog = console.log;
+  console.log = () => {};
+
   const service = buildDisconnectingService();
-  service.manager().onDisconnected(()=>{
-    expect(service.manager().isConnected()).toBe(false);
-    done();
-  });
+  service.manager().onDisconnected(
+    () => {
+      expect(service.manager().isConnected()).toBe(false);
+      console.log = origConsoleLog;
+      done();
+    });
+
   service.manager().connect();
 });
 
