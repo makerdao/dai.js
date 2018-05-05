@@ -7,80 +7,8 @@ import Web3 from 'web3';
 import TestAccountProvider from '../utils/TestAccountProvider';
 import Web3ServiceList from '../utils/Web3ServiceList';
 
-//{ type : Web3ProviderType.TEST};
-//const x = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node'};
-//const y = { type : Web3ProviderType.HTTP, url : 'https://sai-service.makerdao.com/node', usePredefined : false};
-//const z = { type : Web3ProviderType.HTTP, url : ['https://sai-service.makerdao.com/node', 'https://mainnet.infura.io/ihagQOzC3mkRXYuCivDN']}
 
 export default class Web3Service extends PrivateService {
-  /**
-   * @param {string} name
-   */
-  constructor(name = 'web3') {
-    super(name, ['log', 'timer']);
-    this._web3 = null;
-    this._ethersProvider = null;
-    this._blockListeners = {};
-    this._currentBlock = null;
-    this._ethersWallet = null;
-    this._ethersUtils = null;
-    this._info = {
-      version: { api: null, node: null, network: null, ethereum: null },
-      account: null
-    };
-    Web3ServiceList.push(this);
-  }
-
-  static buildDisconnectingService(disconnectAfter = 50) {
-    const service = Web3Service.buildTestService();
-    service.manager().onConnected(() => {
-      service
-        .get('timer')
-        .createTimer('disconnect', disconnectAfter, false, () => {
-          service._web3.version.getNode = () => {
-            throw new Error('disconnected');
-          };
-        });
-    });
-    return service;
-  }
-
-  static buildNetworkChangingService(changeNetworkAfter = 50) {
-    const service = Web3Service.buildTestService();
-    service.manager().onConnected(() => {
-      service
-        .get('timer')
-        .createTimer('changeNetwork', changeNetworkAfter, false, () => {
-          service._web3.version.getNetwork = cb => cb(undefined, 999); //fake network id
-        });
-    });
-    return service;
-  }
-
-  static buildDeauthenticatingService(deauthenticateAfter = 50) {
-    const service = Web3Service.buildTestService();
-
-    service.manager().onAuthenticated(() => {
-      service
-        .get('timer')
-        .createTimer('deauthenticate', deauthenticateAfter, false, () => {
-          service._web3.eth.getAccounts = cb => cb(undefined, []);
-        });
-    });
-    return service;
-  }
-
-  static buildAccountChangingService(changeAccountAfter = 50) {
-    const service = Web3Service.buildTestService();
-    service.manager().onAuthenticated(() => {
-      service
-        .get('timer')
-        .createTimer('changeAccount', changeAccountAfter, false, () => {
-          service._web3.eth.getAccounts = cb => cb(undefined, ['0x123456789']); //fake account
-        });
-    });
-    return service;
-  }
 
   static buildTestService(privateKey = null) {
     const service = new Web3Service();
@@ -118,16 +46,26 @@ export default class Web3Service extends PrivateService {
     return service;
   }
 
-  /**
-   * @returns {{api, node, network, ethereum}}
-   */
+  constructor(name = 'web3') {
+    super(name, ['log', 'timer']);
+
+    this._web3 = null;
+    this._ethersProvider = null;
+    this._blockListeners = {};
+    this._currentBlock = null;
+    this._ethersWallet = null;
+    this._ethersUtils = null;
+    this._info = {
+      version: { api: null, node: null, network: null, ethereum: null },
+      account: null
+    };
+    Web3ServiceList.push(this);
+  }
+
   version() {
     return this._info.version;
   }
 
-  /**
-   * @returns {number}
-   */
   networkId() {
     const result = this.version().network;
 
@@ -167,24 +105,12 @@ export default class Web3Service extends PrivateService {
     return this._ethersUtils;
   }
 
-  /**
-   * @param settings
-   */
   initialize(settings) {
-    const web3 = new Web3();
     settings = this._normalizeSettings(settings);
 
-    this._createWeb3Objects(web3);
+    this._web3 = this._createWeb3();
+    this._web3.setProvider(this._getWeb3Provider(settings));
 
-    let web3Provider = null;
-    if (settings.usePresetProvider && window && window.web3) {
-      web3Provider = window.web3.currentProvider;
-      window.web3 = web3;
-    } else {
-      web3Provider = this._getWeb3Provider(settings.provider);
-    }
-
-    web3.setProvider(web3Provider);
     this._setPrivateKey(settings.privateKey);
   }
 
@@ -240,7 +166,7 @@ export default class Web3Service extends PrivateService {
         } else if (data instanceof Array && data.length > 0) {
           this._info.account = data[0];
         } else {
-          throw new Error('Web3 is not authenticated');
+          throw new Error('Expected Web3 to be authenticated, but no default account is available.');
         }
 
         this.get('timer').createTimer(
@@ -275,7 +201,7 @@ export default class Web3Service extends PrivateService {
 
   waitForBlockNumber(blockNumber, callback) {
     if (blockNumber < this._currentBlock) {
-      throw new Error('cannot wait for past block ', blockNumber);
+      throw new Error('Cannot wait for past block ' + blockNumber);
     } else if (blockNumber === this._currentBlock) {
       callback(blockNumber);
     } else {
@@ -298,31 +224,34 @@ export default class Web3Service extends PrivateService {
   _setUpEthers(chainId) {
     const ethers = require('ethers');
     this._ethersUtils = ethers.utils;
+    this._ethersProvider = this._buildEthersProvider(ethers, chainId);
+    this._ethersWallet = this._buildEthersWallet(ethers, this._privateKey, this._ethersProvider);
+  }
 
-    this._ethersProvider = new ethers.providers.Web3Provider(
+  _buildEthersProvider(ethers, chainId) {
+    const provider = new ethers.providers.Web3Provider(
       this._web3.currentProvider,
       { name: getNetworkName(chainId), chainId: chainId }
     );
-    this.manager().onDisconnected(() => {
-      this._ethersProvider.removeAllListeners('block');
-      //console.log('called removeAllListeners');
-    });
-    this._ethersProvider.on('block', num => {
-      this._updateBlockNumber(num);
-    });
-    //console.log('ethers provider is: ', this._ethersProvider)
-    if (this._privateKey) {
+
+    provider.on('block', num => this._updateBlockNumber(num));
+    this.manager().onDisconnected(() => provider.removeAllListeners('block'));
+
+    return provider;
+  }
+
+  _buildEthersWallet(ethers, privateKey, provider) {
+    let wallet = null;
+
+    if (privateKey) {
       try {
-        this._ethersWallet = new ethers.Wallet(
-          this._privateKey,
-          this._ethersProvider
-        );
+        wallet = new ethers.Wallet(privateKey, provider);
       } catch (e) {
-        //console.log(e);
-        //console.log(e.trace);
+        this.get('log').error(e);
       }
-      //console.log('created Ethers Wallet: ', this._ethersWallet);
     }
+
+    return wallet;
   }
 
   _normalizeSettings(settings) {
@@ -345,8 +274,8 @@ export default class Web3Service extends PrivateService {
     return settings;
   }
 
-  _createWeb3Objects(web3) {
-    this._web3 = web3;
+  _createWeb3() {
+    const web3 = new Web3();
 
     this.eth = {};
     Object.assign(
@@ -369,6 +298,8 @@ export default class Web3Service extends PrivateService {
         'unlockAccount'
       ])
     );
+
+    return web3;
   }
 
   _setPrivateKey(privateKey) {
@@ -387,6 +318,19 @@ export default class Web3Service extends PrivateService {
   }
 
   _getWeb3Provider(settings) {
+    let web3Provider = null;
+
+    if (settings.usePresetProvider && window && window.web3) {
+      web3Provider = window.web3.currentProvider;
+      window.web3 = web3;
+    } else {
+      web3Provider = this._buildWeb3Provider(settings.provider);
+    }
+
+    return web3Provider;
+  }
+
+  _buildWeb3Provider(settings) {
     switch (settings.type) {
       case Web3ProviderType.HTTP:
         return new Web3.providers.HttpProvider(settings.url);

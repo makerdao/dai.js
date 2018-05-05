@@ -3,9 +3,56 @@ import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import Web3Service from '../../src/eth/Web3Service';
 import Web3ServiceList from '../../src/utils/Web3ServiceList';
 
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
+function buildDisconnectingService(disconnectAfter = 50) {
+  const service = Web3Service.buildTestService();
+  service.manager().onConnected(() => {
+    service
+      .get('timer')
+      .createTimer('disconnect', disconnectAfter, false, () => {
+        service._web3.version.getNode = () => {
+          throw new Error('fake disconnection error');
+        };
+      });
+  });
+  return service;
+}
+
+function buildNetworkChangingService(changeNetworkAfter = 50) {
+  const service = Web3Service.buildTestService();
+  service.manager().onConnected(() => {
+    service
+      .get('timer')
+      .createTimer('changeNetwork', changeNetworkAfter, false, () => {
+        service._web3.version.getNetwork = cb => cb(undefined, 999); //fake network id
+      });
+  });
+  return service;
+}
+
+function buildDeauthenticatingService(deauthenticateAfter = 50) {
+  const service = Web3Service.buildTestService();
+
+  service.manager().onAuthenticated(() => {
+    service
+      .get('timer')
+      .createTimer('deauthenticate', deauthenticateAfter, false, () => {
+        service._web3.eth.getAccounts = cb => cb(undefined, []);
+      });
+  });
+  return service;
+}
+
+function buildAccountChangingService(changeAccountAfter = 50) {
+  const service = Web3Service.buildTestService();
+  service.manager().onAuthenticated(() => {
+    service
+      .get('timer')
+      .createTimer('changeAccount', changeAccountAfter, false, () => {
+        service._web3.eth.getAccounts = cb => cb(undefined, ['0x123456789']); //fake account
+      });
+  });
+  return service;
+}
 
 test('should fetch version info on connect', (done) => {
   const web3 = Web3Service.buildTestService();
@@ -54,7 +101,7 @@ test('should return error reason on a failure to connect', (done) => {
     .then(() => {
       service._web3.version.getNode = () => {
         error = true;
-        throw new Error('connection failed');
+        throw new Error('fake connection failure error');
       };
       return service.manager().connect();
     })
@@ -76,7 +123,7 @@ test('should be authenticated and know default address when private key passed i
 });
 
 test('should correctly handle automatic disconnect', (done) => {
-  const service = Web3Service.buildDisconnectingService();
+  const service = buildDisconnectingService();
   service.manager().onDisconnected(()=>{
     expect(service.manager().isConnected()).toBe(false);
     done();
@@ -85,7 +132,7 @@ test('should correctly handle automatic disconnect', (done) => {
 });
 
 test('should correctly handle automatic change of network as a disconnect', (done) => {
-  const service = Web3Service.buildNetworkChangingService();
+  const service = buildNetworkChangingService();
   service.manager().onDisconnected(()=>{
     expect(service.manager().isConnected()).toBe(false);
     done();
@@ -107,7 +154,7 @@ test('should correctly handle a manual disconnect', (done) => {
 */
 
 test('should correctly handle automatic deauthentication', (done) => {
-  const service = Web3Service.buildDeauthenticatingService();
+  const service = buildDeauthenticatingService();
   service.manager().onDeauthenticated(()=>{
     expect(service.manager().isAuthenticated()).toBe(false);
     done();
@@ -116,7 +163,7 @@ test('should correctly handle automatic deauthentication', (done) => {
 });
 
 test('should correctly handle automatic change of account as a deauthenticate', (done) => {
-  const service = Web3Service.buildAccountChangingService();
+  const service = buildAccountChangingService();
   service.manager().onDeauthenticated(()=>{
     expect(service.manager().isAuthenticated()).toBe(false);
     done();
