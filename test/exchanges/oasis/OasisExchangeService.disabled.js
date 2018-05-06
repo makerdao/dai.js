@@ -5,7 +5,7 @@ import contracts from '../../../contracts/contracts';
 const utils = require('ethers').utils;
 
 beforeAll(()=>{ //can comment this out after has been run once
-    const oasisExchangeService = OasisExchangeService.buildTestService();
+    const oasisExchangeService = OasisExchangeService.buildKovanService();
     let oasisOrder = null;
     let wethToken = null;
     let ethereumTokenService = null;
@@ -27,8 +27,6 @@ beforeAll(()=>{ //can comment this out after has been run once
         return oasisOrder;
       });
 }, 30000);
-
-
 
 test('get fees sell Dai', (done) => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
@@ -83,7 +81,7 @@ test('OasisOrder event listeners work as promises, and can use business object',
       expect(OrderObject.state()).toBe(TransactionState.finalized);
       done();
     });
-},35000);
+}, 30000);
 
 
 test('get fillAmount buyDai', (done) =>  {
