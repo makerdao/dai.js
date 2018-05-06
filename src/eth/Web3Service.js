@@ -407,8 +407,8 @@ export function _web3Promise(cb, onErrorValue) {
       cb((error, result) => {
         if (error) {
           if (typeof onErrorValue === 'undefined') {
-            console.log(error);
-            console.log(new Error().stack);
+            //console.log(error);
+            //console.log(new Error().stack);
             reject(error);
           } else {
             resolve(onErrorValue);
@@ -419,7 +419,7 @@ export function _web3Promise(cb, onErrorValue) {
       });
     } catch (e) {
       if (typeof onErrorValue === 'undefined') {
-        console.log(e);
+        //console.log(e);
         reject(e);
       } else {
         resolve(onErrorValue);

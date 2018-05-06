@@ -1,6 +1,7 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import Web3Service from '../../src/eth/Web3Service';
+import {captureConsole} from '../../src/utils';
 
 function buildDisconnectingService(disconnectAfter = 25) {
   const service = Web3Service.buildTestService(null, disconnectAfter + 25);
@@ -96,30 +97,26 @@ test('should correctly use web3 provider of a previously injected web3 object, o
 });
 
 test('should return error reason on a failure to connect', (done) => {
-  const service = Web3Service.buildTestService();
+  captureConsole(() => {
+    const service = Web3Service.buildTestService();
+    let error = false;
+    service.get('log').error = (msg) => {
+      error = msg;
+    };
 
-  // Disable console.log for this test.
-  const origConsoleLog = console.log;
-  console.log = () => {};
-
-  let error = false;
-  service.get('log').error = (msg) => {
-    error = msg;
-  };
-
-  service.manager().initialize()
-    .then(() => {
-      service._web3.version.getNode = () => {
-        error = true;
-        throw new Error('fake connection failure error');
-      };
-      return service.manager().connect();
-    })
-    .then(() => {
-      expect(error).toBeInstanceOf(Error);
-      console.log = origConsoleLog;
-      done();
-    });
+    service.manager().initialize()
+      .then(() => {
+        service._web3.version.getNode = () => {
+          error = true;
+          throw new Error('fake connection failure error');
+        };
+        return service.manager().connect();
+      })
+      .then(() => {
+        expect(error).toBeInstanceOf(Error);
+        done();
+      });
+  });
 });
 
 test('should be authenticated and know default address when private key passed in', (done) => {
@@ -134,20 +131,17 @@ test('should be authenticated and know default address when private key passed i
 });
 
 test('should correctly handle automatic disconnect', (done) => {
+  captureConsole(() => {
+    const service = buildDisconnectingService();
 
-  // Disable console.log for this test.
-  const origConsoleLog = console.log;
-  console.log = () => {};
+    service.manager().onDisconnected(
+      () => {
+        expect(service.manager().isConnected()).toBe(false);
+        done();
+      });
 
-  const service = buildDisconnectingService();
-  service.manager().onDisconnected(
-    () => {
-      expect(service.manager().isConnected()).toBe(false);
-      console.log = origConsoleLog;
-      done();
-    });
-
-  service.manager().connect();
+    service.manager().connect();
+  });
 });
 
 test('should correctly handle automatic change of network as a disconnect', (done) => {

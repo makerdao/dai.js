@@ -1,3 +1,4 @@
+/*eslint no-console: ['error', { 'allow': ['error'] }] */
 import '../polyfills';
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../eth/TransactionLifeCycle';
@@ -62,12 +63,12 @@ export default class TransactionObject extends TransactionLifeCycle {
               this._finalize(); //set state to finalized
             } else {
               this._error = "transaction block hash changed";
-              this._error();
+              console.error(reason);
             }
           },
           reason => {
             this._error = reason;
-            this._error();
+            console.error(reason);
           }
         );
       }
@@ -84,12 +85,12 @@ export default class TransactionObject extends TransactionLifeCycle {
           this._finalize(); //set state to finalized
         } else {
           this._error = 'transaction block hash changed';
-          this._error();
+          console.error(this._error);
         }
       },
       reason => {
         this._error = reason;
-        this._error();
+        console.error(reason);
       }
     );
   }
@@ -109,7 +110,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         // eslint-disable-next-line
         reason => {
           this._error = reason;
-          this._error();
+          console.error(reason);
         }
       )
       .then(
@@ -120,7 +121,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         reason => {
           this._error = reason;
-          this._error();
+          console.error(reason);
         }
       )
       .then(
@@ -150,7 +151,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         reason => {
           this._error = reason;
-          this._error();
+          console.error(reason);
         }
       );
   }

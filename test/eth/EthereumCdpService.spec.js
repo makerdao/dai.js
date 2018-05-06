@@ -1,7 +1,6 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 
 let createdCdpService;
-let createdCdpId;
 
 beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
@@ -11,15 +10,17 @@ function openCdp(){
   return createdCdpService.manager().authenticate()
     .then(() => createdCdpService.openCdp())
     .then(txn => txn.onMined())
-    .then(cdp => createdCdpId = cdp.getCdpId())
+    .then(cdp => cdp.getCdpId());
 }
 
+/*
 function lockEth(amount){
   return openCdp()
     .then(() => createdCdpService.lockEth(createdCdpId, amount))
     .then(txn => txn.onMined())
-    .then(cdp => cdp.getCdpInfo())
+    .then(cdp => cdp.getCdpInfo());
 }
+*/
 
 test('should open a CDP and get cdp ID', done => {
   openCdp()
@@ -68,7 +69,7 @@ xtest('should open and then shut a CDP with peth locked in it', done => {
   .then(id => {
     createdCdpService.getCdpInfo(id)
     .then(info => firstInfoCall = info)
-    .then(() => cdp.lockEth('0.1'))
+    //.then(() => cdp.lockEth('0.1'))
     .then(txn => txn.onMined())
     .then(() => {
       createdCdpService.shutCdp(id)
