@@ -115,7 +115,7 @@ export default class Web3Service extends PrivateService {
     settings = this._normalizeSettings(settings);
 
     this._web3 = this._createWeb3();
-    this._web3.setProvider(this._getWeb3Provider(settings));
+    this._web3.setProvider(this._getWeb3Provider(settings, this._web3));
 
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._setPrivateKey(settings.privateKey);
@@ -316,7 +316,7 @@ export default class Web3Service extends PrivateService {
     return !!this._privateKey;
   }
 
-  _getWeb3Provider(settings) {
+  _getWeb3Provider(settings, web3) {
     let web3Provider = null;
 
     if (settings.usePresetProvider && window && window.web3) {

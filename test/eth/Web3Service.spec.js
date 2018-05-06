@@ -68,26 +68,31 @@ test('should fetch version info on connect', (done) => {
 });
 
 test('should correctly use web3 provider of a previously injected web3 object, or use default', (done) => {
-  const
-    web3 = Web3Service.buildTestService(),
-    service = Web3Service.buildTestService(),
+  const service = Web3Service.buildTestService(),
     service2 = Web3Service.buildTestService();
 
-  service.manager().initialize()
+  service.manager()
+    .initialize()
     .then(() => {
       expect(service._web3.currentProvider).toBeDefined();
-    })
-    .then(() => {
-      window.web3 = web3;
+      window.web3 = service._web3;
       return service2.manager().initialize();
     })
     .then(() => {
+      expect(typeof service2._web3.currentProvider).toBe('object');
       expect(service2._web3.currentProvider).toBe(window.web3.currentProvider);
+      expect(service2._web3.currentProvider).toBe(service._web3.currentProvider);
+
+      // The window.web3 object also needs to be set to the initializing service's web3 object now.
+      expect(window.web3).toBe(service2._web3);
 
       window.web3 = undefined;
       delete window.web3;
+
       done();
-    });
+    })
+    .catch(() => done.fail());
+
 });
 
 test('should return error reason on a failure to connect', (done) => {
