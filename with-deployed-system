@@ -57,18 +57,16 @@ if ! nc -z 127.0.0.1 2000; then
 
   cd ../..
 
-  node test-oasis-deployment.js
-
-  # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
-  # See the list at the bottom of the in the deploy script.
-  # Proceed to the command given as arguments.
-  "$@"
-
-  # The testnet will continue to run with its deployed contracts
-  # until the user confirms it should shut down.
-  bash ./confirm-kill-testnet
-
 else
   echo "You already have a test network running on port 2000."
 
 fi
+
+# We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
+# See the list at the bottom of the in the deploy script.
+# Proceed to the command given as arguments.
+"$@"
+
+# The testnet will continue to run with its deployed contracts
+# until the user confirms it should shut down.
+bash ./confirm-kill-testnet
