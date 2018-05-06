@@ -1,6 +1,7 @@
 const path = require('path');
 
 module.exports = {
+  rootDir: process.cwd(),
   roots: [
     path.join(process.cwd(), '/src/'),
     path.join(process.cwd(), '/test/')
