@@ -3,11 +3,15 @@ import Web3Service from '../../eth/Web3Service';
 import SmartContractService from '../../eth/SmartContractService';
 import EthereumTokenService from '../../eth/EthereumTokenService';
 import GasEstimatorService from '../../eth/GasEstimatorService';
+import TimerService from '../../utils/TimerService';
 //import * as Web3ProviderEngine  from 'web3-provider-engine';
+
 const Web3ProviderEngine = require('web3-provider-engine');
+const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet.js');
+const RPCSubprovider = require('web3-provider-engine/subproviders/rpc.js')
 import * as RpcSource  from 'web3-provider-engine/subproviders/rpc';
-import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
-import * as RPCSubprovider from 'web3-provider-engine/subproviders/rpc';
+//import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
+//import * as RPCSubprovider from 'web3-provider-engine/subproviders/rpc';
 import { PrivateKeySubprovider } from '@0xproject/subproviders';
 import { ZeroEx, ZeroExConfig } from '0x.js';
 import {
@@ -36,6 +40,7 @@ export default class ZeroExExchangeService extends PrivateService {
 
     service
       .manager()
+      .inject('timer', new TimerService())
       .inject('log', smartContractService.get('log'))
       .inject('web3', smartContractService.get('web3'))
       .inject('smartContract', smartContractService)
@@ -61,6 +66,7 @@ export default class ZeroExExchangeService extends PrivateService {
 
     service
       .manager()
+      .inject('timer', new TimerService())
       .inject('log', smartContractService.get('log'))
       .inject('web3', smartContractService.get('web3'))
       .inject('smartContract', smartContractService)
@@ -79,10 +85,12 @@ export default class ZeroExExchangeService extends PrivateService {
       'ethereumToken',
       'web3',
       'log',
-      'gasEstimator'
+      'gasEstimator',
+      'timer'
     ]);
     this._relayerClient = null;
     this._firstOrder = null;
+    this._availableAddress = null;
   }
 
 
@@ -116,7 +124,23 @@ export default class ZeroExExchangeService extends PrivateService {
 
   authenticate(){
 	const providerEngine = new Web3ProviderEngine();
-	console.log('provider engine', providerEngine);
+	providerEngine.addProvider(new HookedWalletSubprovider({
+	  getAccounts: (cb)=>{cb(null, [this.get('web3').ethersSigner().getAddress()])},
+	  approveTransaction: function(cb){ },
+	  signTransaction: function(cb){ },
+	}));
+	providerEngine.addProvider(new RPCSubprovider({
+		rpcUrl: this.get('web3').web3Provider().host
+	}));
+	providerEngine.start();
+
+    const zeroExConfig = {
+		networkId: this.get('web3').networkId(),
+	};
+	const zeroEx = new ZeroEx(providerEngine, zeroExConfig);
+	return zeroEx.getAvailableAddressesAsync().then(address=>{
+		this._availableAddress = address[0];
+	});
   }
 
   _isStillConnected() {

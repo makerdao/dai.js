@@ -29,15 +29,15 @@ test('should correctly connect', done => {
     done();
   });
 });
-/*
+
 test('should correctly authenticate', done => {
   const apiEndpoint = 'https://api.radarrelay.com/0x/v0';
   const service = ZeroExExchangeService.buildKovanService(apiEndpoint);
   service.manager().authenticate().then(()=>{
-    expect(service._firstOrder.orderHash).toBeDefined();
+    expect(service._availableAddress.length).toBe(42);
     done();
   });
-});*/
+},10000);
 
 /*
 test('get fees sell Dai - kovan', (done) => {
