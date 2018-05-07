@@ -12,9 +12,9 @@ import { utils } from 'ethers';
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
     const service = new EthereumCdpService();
-    const tokenService = EthereumTokenService.buildTestService();
     const smartContract = SmartContractService.buildTestService();
-    const conversionService = TokenConversionService.buildTestService();
+    const tokenService = EthereumTokenService.buildTestService(smartContract);
+    const conversionService = TokenConversionService.buildTestService(smartContract);
 
     service
       .manager()
