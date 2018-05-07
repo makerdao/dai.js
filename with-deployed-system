@@ -62,11 +62,20 @@ else
 
 fi
 
-# We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
-# See the list at the bottom of the in the deploy script.
-# Proceed to the command given as arguments.
-"$@"
+if [[ "$1" != '--ci' ]]; then
+    # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
+    # See the list at the bottom of the in the deploy script.
+    # Proceed to the command given as arguments (but first strip --ci as first param).
+    "$@"
 
-# The testnet will continue to run with its deployed contracts
-# until the user confirms it should shut down.
-bash ./confirm-kill-testnet
+    # The testnet will continue to run with its deployed contracts
+    # until the user confirms it should shut down.
+    bash ./confirm-kill-testnet
+
+else
+    # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
+    # See the list at the bottom of the in the deploy script.
+    # Proceed to the command given as arguments (but first strip --ci as first param).
+    $(echo "$@" | sed 's/^\-\-ci //')
+
+fi
