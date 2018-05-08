@@ -119,19 +119,28 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().cups(hexCdpId);
   }
 
-  // drawDai(cdpId, amount) {
-  //   const hexCdpId = this._hexCdpId(cdpId);
-  //   const parsedAmount = utils.parseUnits(amount, 18);
+  drawDai(cdpId, amount) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = utils.parseUnits(amount.toString(), 18);
+    const dai = this.get('token').getToken(tokens.DAI);
+    const peth = this.get('token').getToken(tokens.PETH);
 
-  //   //cdp must have peth locked inside it
-  //   return this._tubContract()
-  //     .draw(hexCdpId, parsedAmount)
-  //     .then(transaction =>
-  //       this._ethersProvider().waitForTransaction(transaction.hash)
-  //     )
-  //     .then(() => {
-  //       // eslint-disable-next-line
-  //       this.getCdpInfo(cdpId).then(result => console.log(result));
-  //     });
-  // }
+    return Promise.all([
+
+      this._conversionService()
+        .approveToken(peth)
+        .then(txn => txn.onMined()),
+
+      this._conversionService()
+        .approveToken(dai)
+        .then(txn => txn.onMined())
+
+    ])
+    .then(() => {
+      return new TransactionObject(
+        this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 }),
+        this._web3Service()
+      );
+    });
+  }
 }
