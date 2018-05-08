@@ -34,7 +34,7 @@ test('should successfully join and exit PETH', done => {
   let weth = null, peth = null, tub = null, owner = null, initialBalance = null;
 
   tokenService.manager().authenticate().then(() => {
-    tub = tokenService.get('smartContract').getContractByName(contracts.TUB);
+    tub = tokenService.get('smartContract').getContractByName(contracts.SAI_TUB);
     owner = tokenService.get('web3').defaultAccount();
     weth = tokenService.getToken(tokens.WETH);
     peth = tokenService.getToken(tokens.PETH);

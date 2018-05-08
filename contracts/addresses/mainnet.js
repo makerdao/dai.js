@@ -4,8 +4,8 @@ import contracts from '../contracts';
 
 import erc20Token_1 from '../abi/erc20-token/v1.json';
 import makerOtc_1 from '../abi/maker-otc/v1.json';
-import top_1 from '../abi/dai/v1/top.json';
-import tub_1 from '../abi/dai/v1/tub.json';
+import top_1 from '../abi/dai/v1/SaiTop.json';
+import tub_1 from '../abi/dai/v1/SaiTub.json';
 
 const mapping = {
 
@@ -16,11 +16,11 @@ const mapping = {
     { version: 1, address: '0x....', abi: erc20Token_1.interface, decimals: 18 },
     { version: 2, address: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2', abi: erc20Token_1.interface, decimals: 18 },
   ],
-  [contracts.TOP] : [
-    { version: 1, address: '0x....', abi: top_1.interface },
+  [contracts.SAI_TOP] : [
+    { version: 1, address: '0x....', abi: top_1 },
   ],
-  [contracts.TUB] : [
-    { version: 1, address: '0x448a5065aeBB8E423F0896E6c5D525C040f59af3', abi: tub_1.interface },
+  [contracts.SAI_TUB] : [
+    { version: 1, address: '0x448a5065aeBB8E423F0896E6c5D525C040f59af3', abi: tub_1 },
   ],
   [contracts.MAKER_OTC] : [
     { version: 1, address: '0x14FBCA95be7e99C15Cc2996c6C9d841e54B79425', abi: makerOtc_1.interface }

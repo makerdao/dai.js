@@ -70,7 +70,7 @@ export default class EthereumTokenService extends PrivateService {
       }
 
       if (symbol === tokens.PETH) {
-        const tub = smartContractService.getContractByName(contracts.TUB);
+        const tub = smartContractService.getContractByName(contracts.SAI_TUB);
         return new PethToken(
           contract,
           tub,
