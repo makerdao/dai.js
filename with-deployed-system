@@ -32,7 +32,30 @@ if ! nc -z 127.0.0.1 2000; then
   export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
   bin/deploy-fab && . load-fab-unknown
   bin/deploy     && . load-env-unknown
+
+  # Save the contract addresses to a JSON file
+  cat > ./out/addresses.json <<- EOM
+{
+  "GEM": "$SAI_GEM",
+  "GOV": "$SAI_GOV",
+  "PIP": "$SAI_PIP",
+  "PEP": "$SAI_PEP",
+  "PIT": "$SAI_PIT",
+  "ADM": "$SAI_ADM",
+  "SAI": "$SAI_SAI",
+  "SIN": "$SAI_SIN",
+  "SKR": "$SAI_SKR",
+  "DAD": "$SAI_DAD",
+  "MOM": "$SAI_MOM",
+  "VOX": "$SAI_VOX",
+  "TUB": "$SAI_TUB",
+  "TAP": "$SAI_TAP",
+  "TOP": "$SAI_TOP"
+}
+EOM
+
   cd ../..
+  ./update-abis
 
   cd lib/maker-otc
 

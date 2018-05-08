@@ -22,7 +22,7 @@ install:
 before_script:
 - npm install -g codecov
 script:
-- chmod +x with-deployed-system
+- chmod +x with-deployed-system update-abis
 - npm run test
 - codecov
 after_install:
