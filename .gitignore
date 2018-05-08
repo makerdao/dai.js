@@ -9,3 +9,4 @@ package-lock.json
 /out
 .DS_Store
 ganache.out
+contracts/abi/
