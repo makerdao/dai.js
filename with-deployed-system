@@ -41,6 +41,9 @@ if ! nc -z 127.0.0.1 2000; then
 
   # Set the ETH price feed to 400 USD
   seth send $SAI_PIP "poke(bytes32)" 0x000000000000000000000000000000000000000000000015af1d78b58c400000
+
+  # Setting pep won't work until we can fund test accounts with MKR:
+  # seth send $SAI_PEP "poke(bytes32)" 0x00000000000000000000000000000000000000000000003867bb3260a7cf7200
   seth send $SAI_MOM "setCap(uint256)" $(seth --to-uint256 $(seth --to-wei 1000 eth))
 
   # Save the contract addresses to a JSON file
@@ -109,5 +112,4 @@ else
     # See the list at the bottom of the in the deploy script.
     # Proceed to the command given as arguments (but first strip --ci as first param).
     $(echo "$@" | sed 's/^\-\-ci //')
-
 fi
