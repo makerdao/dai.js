@@ -1,0 +1,9 @@
+mkdir -p ./contracts/abi/dai/v1/
+rm -f ./contracts/abi/dai/v1/*.json
+cp ./lib/sai/out/*.abi ./contracts/abi/dai/v1/
+cd ./contracts/abi/dai/v1
+for file in *.abi; do
+    mv "$file" "$(basename "$file" .abi).json"
+done
+rm -f *Test*.json *Fab.json Dev*.json
+cd ../../../..

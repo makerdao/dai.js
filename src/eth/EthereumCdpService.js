@@ -37,7 +37,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   _tubContract() {
-    return this._smartContract().getContractByName(contracts.TUB);
+    return this._smartContract().getContractByName(contracts.SAI_TUB);
   }
 
   _web3Service() {

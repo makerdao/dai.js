@@ -29,7 +29,7 @@ export default class Cdp {
 
   _newCdpPromise() {
     const tubContract = this._smartContractService.getContractByName(
-      contracts.TUB
+      contracts.SAI_TUB
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
     const contractPromise = tubContract.open();
@@ -61,14 +61,12 @@ export default class Cdp {
   }
 
   lockEth(eth) {
-    let cdpId;
-
     return this.getCdpId()
-      .then(id => (cdpId = id))
-      .then(() => {
-        return this._cdpService.lockEth(cdpId, eth).then(txn => {
-          return txn;
-        });
-      });
+      .then(id => this._cdpService.lockEth(id, eth));
+  }
+
+  drawDai(amount) {
+    return this.getCdpId()
+      .then(id => this._cdpService.drawDai(id, amount));
   }
 }

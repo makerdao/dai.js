@@ -31,7 +31,7 @@ export default class TokenConversionService extends PrivateService {
 
   approveToken(token) {
     const tubContract = this.get('smartContract').getContractByName(
-      contracts.TUB
+      contracts.SAI_TUB
     );
 
     return new Promise((resolve, reject) => {
