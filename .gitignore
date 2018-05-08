@@ -8,3 +8,5 @@ package-lock.json
 *.sw*
 /out
 .DS_Store
+contracts/abi/
+ganache.out
