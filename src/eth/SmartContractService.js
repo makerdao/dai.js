@@ -29,37 +29,70 @@ export default class SmartContractService extends PublicService {
       throw Error('Contract address is required');
     }
 
-    let createdContract = new Contract(
+    return new Contract(
       address,
       abi,
       this.get('web3').ethersSigner()
     );
-    return createdContract;
   }
 
   getContractByName(name, version = null) {
-    if (
-      Object.keys(contracts).indexOf(name) < 0 &&
-      Object.keys(tokens).indexOf(name) < 0
-    ) {
-      throw new Error('Provided name "' + name + '" is not a contract');
+    const info = this._getContractInfo(name, version);
+    return this.getContractByAddressAndAbi(info.address, info.abi);
+  }
+
+  lookupContractName(address) {
+    address = address.toUpperCase();
+
+    const mapping = this._getCurrentNetworkMapping()[0].addresses,
+      names = Object.keys(mapping);
+
+    for(let i=0; i<names.length; i++) {
+      for(let j=0; j<mapping[names[i]].length; j++) {
+        if (mapping[names[i]][j].address.toUpperCase() === address) {
+          return names[i];
+        }
+      }
     }
 
-    const contractInfo = this._selectContractVersion(
-      this._getCurrentNetworkMapping(name),
-      version
-    );
+    return null;
+  }
 
-    if (contractInfo === null) {
-      throw new Error(
-        'Cannot find version ' + version + ' of contract ' + name
-      );
-    }
+  getContractState(name, version = null, exclude = ['tag'], recursion = 0, beautify = true) {
+    const info = this._getContractInfo(name, version),
+      contract = this.getContractByAddressAndAbi(info.address, info.abi),
+      inspectableMembers = info.abi
+        .filter(m => m.constant && m.inputs.length < 1 && exclude.indexOf(m.name) < 0)
+        //.slice(0,10)
+        .map(m => {
+          //console.log('About to call ' + m.name + '();');
+          return { name: m.name, promise: contract[m.name]() };
+        });
 
-    return this.getContractByAddressAndAbi(
-      contractInfo.address,
-      contractInfo.abi
-    );
+    return Promise.all(inspectableMembers.map(m => m.promise))
+      .then(results => {
+        const valuePromises = [];
+        for (let i=0; i<results.length; i++) {
+          const key = inspectableMembers[i].name,
+            value = results[i],
+            contractName = this.lookupContractName(value.toString());
+
+          if (contractName && recursion > 0) {
+            valuePromises.push(this.getContractState(contractName, null, exclude, recursion - 1, beautify));
+          } else if (contractName) {
+            valuePromises.push([key, beautify ? value + '; ' + contractName : value]);
+          } else {
+            valuePromises.push([key, beautify ? value.toString() : value]);
+          }
+        }
+
+        return Promise.all(valuePromises);
+      })
+      .then(values => {
+        const result = {};
+        values.forEach(v => result[v[0]] = v.length > 2 ? v.slice(1) : v[1]);
+        return result;
+      });
   }
 
   stringToBytes32(text) {
@@ -89,6 +122,28 @@ export default class SmartContractService extends PublicService {
     );
   }
 
+  _getContractInfo(name, version = null) {
+    if (
+      Object.keys(contracts).indexOf(name) < 0 &&
+      Object.keys(tokens).indexOf(name) < 0
+    ) {
+      throw new Error('Provided name "' + name + '" is not a contract');
+    }
+
+    const contractInfo = this._selectContractVersion(
+      this._getCurrentNetworkMapping(name),
+      version
+    );
+
+    if (contractInfo === null) {
+      throw new Error(
+        'Cannot find version ' + version + ' of contract ' + name
+      );
+    }
+
+    return contractInfo;
+  }
+
   _selectContractVersion(mapping, version) {
     if (version === null) {
       version = Math.max(...mapping.map(info => info.version));
@@ -104,13 +159,17 @@ export default class SmartContractService extends PublicService {
     return result;
   }
 
-  _getCurrentNetworkMapping(contractName) {
+  _getCurrentNetworkMapping(contractName = null) {
     const networkId = this.get('web3').networkId(),
       mapping = networks.filter(m => m.networkId === networkId);
 
     if (mapping.length < 1) {
       /* istanbul ignore next */
       throw new Error('Network ID ' + networkId + ' not found in mapping.');
+    }
+
+    if (!contractName) {
+      return mapping;
     }
 
     if (typeof mapping[0].addresses[contractName] === 'undefined') {
