@@ -8,7 +8,7 @@ import TimerService from '../../utils/TimerService';
 
 const Web3ProviderEngine = require('web3-provider-engine');
 const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet.js');
-const RPCSubprovider = require('web3-provider-engine/subproviders/rpc.js')
+const RPCSubprovider = require('web3-provider-engine/subproviders/rpc.js');
 import * as RpcSource  from 'web3-provider-engine/subproviders/rpc';
 //import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
 //import * as RPCSubprovider from 'web3-provider-engine/subproviders/rpc';
@@ -51,7 +51,7 @@ export default class ZeroExExchangeService extends PrivateService {
       )
       .settings({
         relayerApi: relayerApiEndpoint
-      })
+      });
 
     return service;
   }
@@ -91,6 +91,7 @@ export default class ZeroExExchangeService extends PrivateService {
     this._relayerClient = null;
     this._firstOrder = null;
     this._availableAddress = null;
+    this._zeroEx = null;
   }
 
 
@@ -125,9 +126,13 @@ export default class ZeroExExchangeService extends PrivateService {
   authenticate(){
 	const providerEngine = new Web3ProviderEngine();
 	providerEngine.addProvider(new HookedWalletSubprovider({
-	  getAccounts: (cb)=>{cb(null, [this.get('web3').ethersSigner().getAddress()])},
-	  approveTransaction: function(cb){ },
-	  signTransaction: function(cb){ },
+	  getAccounts: (cb)=>{cb(null, [this.get('web3').ethersSigner().getAddress()]);},
+	  approveTransaction: (txParams, cb)=>{ 
+	  	console.log('in approveTransaction function');
+	  	cb() },
+	  signTransaction: (txParams, cb)=>{
+	  	console.log('in signTransaction function');
+	  	cb(null,'signedTx') },
 	}));
 	providerEngine.addProvider(new RPCSubprovider({
 		rpcUrl: this.get('web3').web3Provider().host
@@ -137,8 +142,8 @@ export default class ZeroExExchangeService extends PrivateService {
     const zeroExConfig = {
 		networkId: this.get('web3').networkId(),
 	};
-	const zeroEx = new ZeroEx(providerEngine, zeroExConfig);
-	return zeroEx.getAvailableAddressesAsync().then(address=>{
+	this._zeroEx = new ZeroEx(providerEngine, zeroExConfig);
+	return this._zeroEx.getAvailableAddressesAsync().then(address=>{
 		this._availableAddress = address[0];
 	});
   }
@@ -157,52 +162,23 @@ daiAmount: amount of Dai to sell
 tokenSymbol: symbol of token to buy
 minFillAmount: minimum amount of token being bought required.  If this can't be met, the trade will fail
 */
-/*
-async sellDai(daiAmount, tokenSymbol, minFillAmount = '0') {
-    const zeroExContract = this.get('smartContract').getContractByName(
-      contracts.ZERO_EX_EXCHANGE
-    );
 
-    const zeroExConfig = {
-		networkId: this.get('web3').networkId(),
-	};
-	console.log('Web3ProviderEngine', Web3ProviderEngine);
-	const providerEngine = new Web3ProviderEngine();
-
-	providerEngine.addProvider(new PrivateKeySubprovider('0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700')); //use web3Service instead
-	
-	providerEngine.addProvider(new RPCSubprovider({  }));
-	
-	providerEngine.start();
-    const zeroEx = new ZeroEx(providerEngine, zeroExConfig);
-    const zeroEx = new ZeroEx(this.get('web3').ethersProvider()._web3Provider, zeroExConfig);
-    const zeroEx = new ZeroEx(this.get('web3')._web3.currentProvider, zeroExConfig);
-
-    this.get('web3').eth.getAccounts().then(accounts => {console.log('getAccounts ', accounts);});
-
-    const relayerApiUrl = 'https://api.radarrelay.com/0x/v0/';
-	const relayerClient = new HttpClient(relayerApiUrl);
-	const EXCHANGE_ADDRESS = await zeroEx.exchange.getContractAddress();
+sellDai(daiAmount, tokenSymbol, minFillAmount = '0') {
 
 	const daiToken = this.get('ethereumToken').getToken(tokens.DAI);
 	const daiAddress = daiToken.address();
 	const wethToken = this.get('ethereumToken').getToken(tokens.WETH);
 	const wethAddress = wethToken.address();
-	const balance = await zeroEx.token.getBalanceAsync(daiAddress, this.get('web3').ethersSigner().address);
-	console.log('balance using 0xJS', balance.toString());
-	const availableAddresses = await zeroEx.getAvailableAddressesAsync();
-	console.log('available addresses: ', availableAddresses);
-	//const setDaiAllowanceTxHash = await zeroEx.token.setUnlimitedProxyAllowanceAsync(daiAddress, this.get('web3').ethersSigner().address);
-	//zeroEx.token.setUnlimitedProxyAllowanceAsync(wethAddress, this.get('web3').ethersSigner().address);
-
     const buyTokenAddress = this.get('ethereumToken')
       .getToken(tokenSymbol)
       .address();
     const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
     const minFillAmountEVM = daiToken.toEthereumFormat(minFillAmount);
 
+   return this._zeroEx.token.setUnlimitedProxyAllowanceAsync(daiAddress, this.get('web3').ethersSigner().address)
+   .then(val => val);
+
   }
-  */
 }
 
 

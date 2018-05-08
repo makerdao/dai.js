@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 test('should correctly initialize', done => {
-  const apiEndpoint = 'https://api.radarrelay.com/0x/v0';
+  const apiEndpoint = 'https://api.kovan.radarrelay.com/0x/v0';
   const service = ZeroExExchangeService.buildKovanService(apiEndpoint);
   service.manager().initialize().then(()=>{
     expect(service._relayerClient._apiEndpointUrl).toBe(apiEndpoint);
@@ -22,16 +22,16 @@ test('should correctly initialize', done => {
 });
 
 test('should correctly connect', done => {
-  const apiEndpoint = 'https://api.radarrelay.com/0x/v0';
+  const apiEndpoint = 'https://api.kovan.radarrelay.com/0x/v0';
   const service = ZeroExExchangeService.buildKovanService(apiEndpoint);
   service.manager().connect().then(()=>{
-    expect(service._firstOrder.orderHash).toBeDefined();
+    expect(service._firstOrder.orderHash.length).toBe(66);
     done();
   });
 });
 
 test('should correctly authenticate', done => {
-  const apiEndpoint = 'https://api.radarrelay.com/0x/v0';
+  const apiEndpoint = 'https://api.kovan.radarrelay.com/0x/v0';
   const service = ZeroExExchangeService.buildKovanService(apiEndpoint);
   service.manager().authenticate().then(()=>{
     expect(service._availableAddress.length).toBe(42);
@@ -39,16 +39,18 @@ test('should correctly authenticate', done => {
   });
 },10000);
 
-/*
+
 test('get fees sell Dai - kovan', (done) => {
-  const zeroExExchangeService = ZeroExExchangeService.buildKovanService();
-  let oasisOrder = null;
+  const apiEndpoint = 'https://api.kovan.radarrelay.com/0x/v0';
+  const zeroExExchangeService = ZeroExExchangeService.buildKovanService(apiEndpoint);
   zeroExExchangeService.manager().authenticate()
     .then(() => {
       zeroExExchangeService.sellDai('0.01', tokens.WETH)
+      .then(result => {
+        console.log('result', result);
+      });
       done();
     });
 },
-30000
+10000
 );
-*/
