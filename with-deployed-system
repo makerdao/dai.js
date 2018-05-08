@@ -28,10 +28,20 @@ if ! nc -z 127.0.0.1 2000; then
 
   # Use the Sai system's deploy scripts to start it.
   cd lib/sai
+
+  # Configure seth
+  export ETH_GAS=${ETH_GAS:-"4000000"}
+  export ETH_FROM=$(seth rpc eth_coinbase)
   export SETH_STATUS=yes
   export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
+
+  # Build & deploy the SAI contracts
   bin/deploy-fab && . load-fab-unknown
   bin/deploy     && . load-env-unknown
+
+  # Set the ETH price feed to 400 USD
+  seth send $SAI_PIP "poke(bytes32)" 0x000000000000000000000000000000000000000000000015af1d78b58c400000
+  seth send $SAI_MOM "setCap(uint256)" $(seth --to-uint256 $(seth --to-wei 1000 eth))
 
   # Save the contract addresses to a JSON file
   cat > ./out/addresses.json <<- EOM
