@@ -1,13 +1,5 @@
-//import Web3Service from '../../src/eth/Web3Service';
-//import SmartContractService from '../../src/eth/SmartContractService';
 import EthereumTokenService from '../../src/eth/EthereumTokenService';
 import tokens from '../../contracts/tokens';
-//import contracts from '../../contracts/contracts';
-import Web3ServiceList from '../../src/utils/Web3ServiceList';
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
 
 test('getTokens returns tokens', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();

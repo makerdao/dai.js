@@ -1,30 +1,26 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
-import Web3ServiceList from '../../src/utils/Web3ServiceList';
 
 let createdCdpService;
-let createdCdpId;
 
 beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
-});
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
 });
 
 function openCdp(){
   return createdCdpService.manager().authenticate()
     .then(() => createdCdpService.openCdp())
     .then(txn => txn.onMined())
-    .then(cdp => createdCdpId = cdp.getCdpId())
+    .then(cdp => cdp.getCdpId());
 }
 
+/*
 function lockEth(amount){
   return openCdp()
     .then(() => createdCdpService.lockEth(createdCdpId, amount))
     .then(txn => txn.onMined())
-    .then(cdp => cdp.getCdpInfo())
+    .then(cdp => cdp.getCdpInfo());
 }
+*/
 
 test('should open a CDP and get cdp ID', done => {
   openCdp()
@@ -33,7 +29,7 @@ test('should open a CDP and get cdp ID', done => {
     expect(id).toBeGreaterThan(0);
     done();
   });
-}, 10000);
+}, 5000);
 
 test('should check if a cdp for a specific id exists', done => {
   openCdp()
@@ -43,7 +39,7 @@ test('should check if a cdp for a specific id exists', done => {
         expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
         done();
       });
-}, 10000);
+}, 5000);
 
 test('should open and then shut a CDP', done => {
   openCdp()
@@ -64,7 +60,7 @@ test('should open and then shut a CDP', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 xtest('should open and then shut a CDP with peth locked in it', done => {
   let firstInfoCall;
@@ -73,7 +69,7 @@ xtest('should open and then shut a CDP with peth locked in it', done => {
   .then(id => {
     createdCdpService.getCdpInfo(id)
     .then(info => firstInfoCall = info)
-    .then(() => cdp.lockEth('0.1'))
+    //.then(() => cdp.lockEth('0.1'))
     .then(txn => txn.onMined())
     .then(() => {
       createdCdpService.shutCdp(id)
@@ -90,7 +86,7 @@ xtest('should open and then shut a CDP with peth locked in it', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 test('should be able to lock eth in a cdp', done => {
   let firstInfoCall;
@@ -114,7 +110,7 @@ test('should be able to lock eth in a cdp', done => {
       });
     });
   });
-}, 20000);
+}, 5000);
 
 xtest('should be able to free peth from a cdp', done => {
   let newCdp;
@@ -143,4 +139,4 @@ xtest('should be able to free peth from a cdp', done => {
       });
     });
   });
-}, 30000);
+}, 5000);

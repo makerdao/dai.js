@@ -1,5 +1,61 @@
 import networks from '../../contracts/networks';
 
+export function captureConsole(cb) {
+  // eslint-disable-next-line
+  const origConsoleLog = console.log, output = [];
+
+  // eslint-disable-next-line
+  console.log = (...args) => args.forEach(a => output.push(a));
+
+  cb();
+
+  // eslint-disable-next-line
+  console.log = origConsoleLog;
+}
+
+export function measure(cb, name, limit = 100) {
+  const start = new Date().getTime(),
+    result = cb(),
+    duration = new Date().getTime() - start;
+
+  if (duration > limit) {
+    // eslint-disable-next-line
+    console.error((name || 'Callback') + ' took ' + duration + ' ms.');
+  } else {
+    // eslint-disable-next-line
+    console.log((name || 'Callback') + ' took ' + duration + ' ms.');
+  }
+
+  return result;
+}
+
+let start = null, lastName = 'Timer';
+export const watch = {
+  start: (name = 'Timer') => {
+    start = new Date().getTime();
+    lastName = name;
+    // eslint-disable-next-line
+    console.warn(name + ' START');
+  },
+  log: (label) => {
+    // eslint-disable-next-line
+    console.warn(lastName + ' LOG: ' + (label ? label + ' ': '') + (new Date().getTime() - (start || new Date().getTime())) + 'ms.');
+  },
+  pass: (label) => {
+    return (result) => {
+      // eslint-disable-next-line
+      console.warn(lastName + ' LOG: ' + (label ? label + ' ': '') + (new Date().getTime() - (start || new Date().getTime())) + 'ms.');
+      return result;
+    };
+  },
+  end: () => {
+    // eslint-disable-next-line
+    console.warn(lastName + ' END: ' + (new Date().getTime() - (start || new Date().getTime())) + 'ms.');
+    start = undefined;
+    lastName = 'Timer';
+  }
+};
+
 export function promisifyAsync(fn) {
   return function() {
     let args = [].slice.call(arguments);

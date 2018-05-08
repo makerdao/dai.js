@@ -1,11 +1,6 @@
 import EthereumTokenService from '../../../src/eth/EthereumTokenService';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
-import Web3ServiceList from '../../../src/utils/Web3ServiceList';
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
 
 test('get WETH allowance of address', (done) => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
@@ -52,18 +47,16 @@ test('wrap and unwrap ETH', (done) => {
     })
     .then(b => {
       originalBalance = parseFloat(b);
-      const TransactionWrapper = token.deposit('0.1');
-      return TransactionWrapper.onMined();
+      return token.deposit('0.1').onMined();
     })
     .then(() => token.balanceOf(owner))
     .then(b => {
       expect(parseFloat(b)).toBeCloseTo(originalBalance + 0.1, 12);
-      const TransactionWrapper = token.withdraw('0.1');
-      return TransactionWrapper.onMined();
+      return token.withdraw('0.1').onMined();
     })
     .then(() => token.balanceOf(owner))
     .then(b => {
       expect(parseFloat(b)).toBeCloseTo(originalBalance, 12);
       done();
     });
-}, 15000);
+}, 5000);

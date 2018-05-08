@@ -1,20 +1,11 @@
 import OasisExchangeService from '../../../src/exchanges/oasis/OasisExchangeService';
-// import Web3Service from '../../../src/eth/Web3Service';
 import tokens from '../../../contracts/tokens';
-// import testAccountProvider from '../../../src/utils/TestAccountProvider';
-// import orderStyle from '../../../src/exchanges/orderStyle';
 import TransactionState from '../../../src/eth/TransactionState';
 import contracts from '../../../contracts/contracts';
 const utils = require('ethers').utils;
-import Web3ServiceList from '../../../src/utils/Web3ServiceList';
-
-afterEach(() => {
-  Web3ServiceList.disconnectAll();
-});
-
 
 beforeAll(()=>{ //can comment this out after has been run once
-    const oasisExchangeService = OasisExchangeService.buildTestService();
+    const oasisExchangeService = OasisExchangeService.buildKovanService();
     let oasisOrder = null;
     let wethToken = null;
     let ethereumTokenService = null;
@@ -36,8 +27,6 @@ beforeAll(()=>{ //can comment this out after has been run once
         return oasisOrder;
       });
 }, 30000);
-
-
 
 test('get fees sell Dai', (done) => {
   const oasisExchangeService = OasisExchangeService.buildKovanService();
@@ -92,7 +81,7 @@ test('OasisOrder event listeners work as promises, and can use business object',
       expect(OrderObject.state()).toBe(TransactionState.finalized);
       done();
     });
-},35000);
+}, 30000);
 
 
 test('get fillAmount buyDai', (done) =>  {
