@@ -66,7 +66,7 @@ test('should open and then shut a CDP', done => {
   });
 }, 5000);
 
-test('should open and then shut a CDP with peth locked in it', done => {
+xtest('should open and then shut a CDP with peth locked in it', done => {
   let firstInfoCall;
 
   openCdp()
