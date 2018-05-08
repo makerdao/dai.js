@@ -58,16 +58,29 @@ export default class SmartContractService extends PublicService {
     return null;
   }
 
-  getContractState(name, version = null, exclude = ['tag'], recursion = 0, beautify = true) {
-    const info = this._getContractInfo(name, version),
+  getContractState(name, recursion = 0, beautify = true, exclude = ['tag', 'SAI_PEP.read'], visited = []) {
+    const info = this._getContractInfo(name),
       contract = this.getContractByAddressAndAbi(info.address, info.abi),
+
       inspectableMembers = info.abi
-        .filter(m => m.constant && m.inputs.length < 1 && exclude.indexOf(m.name) < 0)
-        //.slice(0,10)
+        .filter(m => m.constant && m.inputs.length < 1)
         .map(m => {
-          //console.log('About to call ' + m.name + '();');
-          return { name: m.name, promise: contract[m.name]() };
+          const member = m.name;
+
+          if (exclude.indexOf(member) > -1 || exclude.indexOf(name + '.' + member) > -1) {
+            return {
+              name: member,
+              promise: Promise.resolve('[EXCLUDED]')
+            };
+          }
+
+          return {
+            name: member,
+            promise: contract[m.name]().catch(reason => '[ERROR: ' + reason + ']')
+          };
         });
+
+    visited = visited.concat([name]);
 
     return Promise.all(inspectableMembers.map(m => m.promise))
       .then(results => {
@@ -77,8 +90,15 @@ export default class SmartContractService extends PublicService {
             value = results[i],
             contractName = this.lookupContractName(value.toString());
 
-          if (contractName && recursion > 0) {
-            valuePromises.push(this.getContractState(contractName, null, exclude, recursion - 1, beautify));
+          if (contractName && recursion > 0 && visited.indexOf(contractName) < 0) {
+            valuePromises.push(
+              this.getContractState(contractName, recursion - 1, beautify, exclude, visited)
+                .then(childState => [key, childState])
+            );
+            visited = visited.concat([contractName]);
+
+          } else if (contractName && visited.indexOf(contractName) > -1) {
+            valuePromises.push([key, beautify ? value + '; ' + contractName + '; [VISITED]' : value]);
           } else if (contractName) {
             valuePromises.push([key, beautify ? value + '; ' + contractName : value]);
           } else {
@@ -89,7 +109,7 @@ export default class SmartContractService extends PublicService {
         return Promise.all(valuePromises);
       })
       .then(values => {
-        const result = {};
+        const result = { __self: contract.address + '; ' + name };
         values.forEach(v => result[v[0]] = v.length > 2 ? v.slice(1) : v[1]);
         return result;
       });
