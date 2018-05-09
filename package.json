@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -26,10 +26,9 @@
     "url": "https://github.com/wkampmann/makerdao-integration-poc.git"
   },
   "module": "src/index.js",
-  "main": "dist",
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
-    "build:backend": "babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles README.md package.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist",
+    "build:backend": "rm -rf dist && npm shrinkwrap && babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles README.md package.json npm-shrinkwrap.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist",
     "coverage": "jest --coverage --config=conf/jest.config.js --runInBand",
     "lint": "eslint ./web/**.js ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
     "precommit": "lint-staged",
@@ -68,7 +67,7 @@
     "husky": "^0.14.3",
     "jest": "^22.4.3",
     "lint-staged": "^7.0.0",
-    "node-sass": "^4.5.3",
+    "node-sass": "^4.9.0",
     "npm-run-all": "^4.1.3",
     "prettier": "^1.11.1",
     "sass-loader": "^6.0.6",
