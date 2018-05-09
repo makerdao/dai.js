@@ -4,6 +4,22 @@ const CommonConfig = require('./webpack.common.js');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = Merge(CommonConfig, {
+  entry: {
+    app: './src/index.js'
+  },
+  module: {
+    rules: [
+      {
+        enforce: 'pre', //to check source files, not modified by other loaders (like babel-loader)
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'eslint-loader',
+        options: {
+          "ignorePattern": "**/*.scss"
+        }
+      }
+    ]
+  },
   plugins: [
     new webpack.LoaderOptionsPlugin({
       minimize: true,

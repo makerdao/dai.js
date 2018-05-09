@@ -1,3 +1,13 @@
-.hello {
-  color: red;
+html, body {
+  font-family: Verdana, Geneva, sans-serif;
+  background-color: #f6f6f6;
+}
+
+h3 {
+  font-size: 95%;
+}
+
+ul.objectFields > li {
+  font-size: 110%;
+  font-family: monospace;
 }

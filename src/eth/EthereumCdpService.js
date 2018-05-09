@@ -83,13 +83,11 @@ export default class EthereumCdpService extends PrivateService {
 
     return this._conversionService()
       .convertEthToPeth(eth)
-      .then(txn => {
-        txn.onMined();
-        return new TransactionObject(
-          this._tubContract().lock(hexCdpId, parsedAmount),
-          this._web3Service()
-        );
-      });
+      .then(txn => txn.onMined())
+      .then(() => new TransactionObject(
+        this._tubContract().lock(hexCdpId, parsedAmount),
+        this._web3Service()
+      ));
   }
 
   freePeth(cdpId, amount) {

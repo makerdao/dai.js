@@ -112,6 +112,8 @@ export default class Web3Service extends PrivateService {
   }
 
   initialize(settings) {
+    this.get('log').info('Web3 is initializing...');
+
     settings = this._normalizeSettings(settings);
 
     this._web3 = this._createWeb3();
@@ -124,6 +126,8 @@ export default class Web3Service extends PrivateService {
   }
 
   connect() {
+    this.get('log').info('Web3 is connecting...');
+
     return Promise.all([
       _web3Promise(_ => this._web3.version.getNode(_)),
       _web3Promise(_ => this._web3.version.getNetwork(_)),
@@ -320,9 +324,13 @@ export default class Web3Service extends PrivateService {
     let web3Provider = null;
 
     if (settings.usePresetProvider && window && window.web3) {
+      this.get('log').info('Selecting preset Web3 provider...');
       web3Provider = window.web3.currentProvider;
       window.web3 = web3;
     } else {
+      if (settings.usePresetProvider) {
+        this.get('log').info('Cannot find preset Web3 provider. Creating new instance...');
+      }
       web3Provider = this._buildWeb3Provider(settings.provider);
     }
 

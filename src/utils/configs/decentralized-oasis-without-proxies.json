@@ -8,9 +8,9 @@
     "web3": [
       "Web3Service",
       {
+        "usePresetProvider": true,
         "provider": {
-          "type": "TEST",
-          "usePredefined": true
+          "type": "TEST"
         }
       }
     ],
