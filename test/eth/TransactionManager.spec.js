@@ -33,7 +33,7 @@ test('should create a Transaction object based on a Contract transaction promise
     const contractTransaction = services.contract.getContractByName(tokens.DAI)
       .approve(services.defaultAccount, '1000000000000000000'),
       businessObject = { x:1 },
-      hybrid = services.txMgr.createTransaction(contractTransaction, businessObject);
+      hybrid = services.txMgr.createTransactionHybrid(contractTransaction, businessObject);
 
     expect(contractTransaction.toString()).toEqual('[object Promise]');
     expect(hybrid.toString()).toEqual('[object Promise]');
@@ -54,11 +54,11 @@ test('should resolve the hybrid object when its implicit state is reached', done
       contractTransaction =
         contract.approve(services.defaultAccount, '1000000000000000000'),
       pendingStatehybrid =
-        services.txMgr.createTransaction(contractTransaction, null, TransactionState.pending),
+        services.txMgr.createTransactionHybrid(contractTransaction, null, TransactionState.pending),
       minedStatehybrid =
-        services.txMgr.createTransaction(contractTransaction, null, TransactionState.mined),
+        services.txMgr.createTransactionHybrid(contractTransaction, null, TransactionState.mined),
       finalizedStatehybrid =
-        services.txMgr.createTransaction(contractTransaction, null, TransactionState.finalized);
+        services.txMgr.createTransactionHybrid(contractTransaction, null, TransactionState.finalized);
 
     pendingStatehybrid
       .then(() => {
@@ -90,17 +90,84 @@ test('should reject invalid implicit states', done => {
       .approve(services.defaultAccount, '1000000000000000000');
 
     expect(() =>
-      services.txMgr.createTransaction(contractTransaction, null, TransactionState.initialized))
+      services.txMgr.createTransactionHybrid(contractTransaction, null, TransactionState.initialized))
       .toThrow('Invalid implicit transaction state: initialized');
 
     expect(() =>
-      services.txMgr.createTransaction(contractTransaction, null, TransactionState.error))
+      services.txMgr.createTransactionHybrid(contractTransaction, null, TransactionState.error))
       .toThrow('Invalid implicit transaction state: error');
 
     expect(() =>
-      services.txMgr.createTransaction(contractTransaction, null, 'NOT_A_STATE'))
+      services.txMgr.createTransactionHybrid(contractTransaction, null, 'NOT_A_STATE'))
       .toThrow('Invalid implicit transaction state: NOT_A_STATE');
 
     done();
+  });
+});
+
+test('should add businessObject functions, getters, and setters', done => {
+  buildTestServices().then(services => {
+    const contractTransaction = services.contract.getContractByName(tokens.DAI)
+        .approve(services.defaultAccount, '1000000000000000000'),
+
+      businessObject = {
+        a: 1,
+        oneTwo: 2,
+        add: function (b) {
+          return this.a + b;
+        },
+        mul: function (b, c) {
+          return this.a * b * c;
+        },
+        add2: b => 10 + b,
+        mul2: (b, c) => 10 * b * c
+      },
+
+      hybrid = services.txMgr.createTransactionHybrid(contractTransaction, businessObject);
+
+    expect(hybrid.getA()).toBe(1);
+    expect(hybrid.setA(10).setOneTwo(12).getA()).toBe(10);
+    expect(hybrid.getOneTwo()).toBe(12);
+    expect(hybrid.add(5)).toBe(15);
+    expect(hybrid.mul(2, 3)).toBe(60);
+    expect(hybrid.add2(5)).toBe(15);
+    expect(hybrid.mul2(2, 3)).toBe(60);
+    done();
+  });
+});
+
+test('should add TransactionLifeCycle functions', done => {
+  buildTestServices().then(services => {
+    const contractTransaction = services.contract.getContractByName(tokens.DAI)
+        .approve(services.defaultAccount, '1000000000000000000'),
+
+      businessObject = {
+        a: 1,
+        oneTwo: 2,
+        add: function (b) {
+          return this.a + b;
+        },
+        mul: function (b, c) {
+          return this.a * b * c;
+        },
+        add2: b => 10 + b,
+        mul2: (b, c) => 10 * b * c
+      },
+
+      hybrid = services.txMgr.createTransactionHybrid(contractTransaction, businessObject);
+
+    expect(typeof hybrid._assertBlockHashUnchanged).toBe('undefined');
+    expect(typeof hybrid.timeStampSubmitted).toBe('undefined');
+
+    hybrid
+      .onPending()
+      .then(() => {
+        expect(hybrid.isPending()).toBe(true);
+        return hybrid.onMined();
+      })
+      .then(() => {
+        expect(hybrid.isMined()).toBe(true);
+        done();
+      });
   });
 });
