@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -29,8 +29,7 @@
   "main": "dist",
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
-    "build:backend": "babel src --out-dir ./dist",
-    "prepublish": "npm run build:backend",
+    "build:backend": "babel src --out-dir ./dist && copyfiles README.md package.json dist",
     "coverage": "jest --coverage --config=conf/jest.config.js",
     "lint": "eslint ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
     "precommit": "lint-staged",
