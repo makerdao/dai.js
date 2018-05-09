@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.26",
+  "version": "0.0.33",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -29,7 +29,7 @@
   "main": "dist",
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
-    "build:backend": "babel src --out-dir ./dist && copyfiles README.md package.json dist",
+    "build:backend": "babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles README.md package.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist",
     "coverage": "jest --coverage --config=conf/jest.config.js",
     "lint": "eslint ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
     "precommit": "lint-staged",
