@@ -30,8 +30,8 @@
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
     "build:backend": "babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles README.md package.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist",
-    "coverage": "jest --coverage --config=conf/jest.config.js",
-    "lint": "eslint ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
+    "coverage": "jest --coverage --config=conf/jest.config.js --runInBand",
+    "lint": "eslint ./web/**.js ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
     "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "find ./src/**/*.js | xargs prettier --write --single-quote es5",

@@ -1,7 +1,6 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 
-let createdCdpService;
-let cdp;
+let createdCdpService, cdp;
 
 beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
@@ -13,7 +12,7 @@ function openCdp(){
     .then(txn => txn.onMined())
     .then(newCdp => {
       cdp = newCdp;
-      return cdp.getCdpId()
+      return cdp.getCdpId();
     });
 }
 
