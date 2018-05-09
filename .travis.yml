@@ -18,7 +18,8 @@ before_install:
 install:
 - sed -i '13s/DSToken.*/WETH9)/' ./lib/sai/bin/deploy
 - npm install
-- npm run build
+- npm run build:backend
+- npm run build:frontend
 before_script:
 - npm install -g codecov
 script:
