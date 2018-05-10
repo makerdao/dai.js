@@ -144,9 +144,8 @@ export default class EthereumCdpService extends PrivateService {
         .approveToken(dai)
         .then(txn => txn.onMined())
     ]).then(() => {
-      return new TransactionObject(
-        this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 }),
-        this._web3Service()
+      return this._transactionManager().createTransactionHybrid(
+        this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
       );
     });
   }
