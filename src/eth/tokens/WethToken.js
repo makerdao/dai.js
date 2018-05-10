@@ -1,9 +1,9 @@
-import TransactionObject from '../TransactionObject';
 import Erc20Token from './Erc20Token';
 
 export default class WethToken extends Erc20Token {
   constructor(contract, web3Service, decimals, transactionManager) {
     super(contract, web3Service, decimals, transactionManager);
+    this._transactionManager = transactionManager;
   }
 
   name() {
@@ -17,20 +17,18 @@ export default class WethToken extends Erc20Token {
   deposit(amount) {
     const valueInWei = this.toEthereumFormat(amount);
 
-    return new TransactionObject(
+    return this._transactionManager.createTransactionHybrid(
       this._contract.deposit({
         value: valueInWei
-      }),
-      this._web3Service
+      })
     );
   }
 
   withdraw(amount) {
     const valueInWei = this.toEthereumFormat(amount);
 
-    return new TransactionObject(
-      this._contract.withdraw(valueInWei),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.withdraw(valueInWei)
     );
   }
 }

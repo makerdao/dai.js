@@ -42,7 +42,7 @@ test('should successfully join and exit PETH', done => {
     return Promise.all([
       peth.balanceOf(owner),
       weth.approveUnlimited(tub.address),
-      depositTransaction.onMined()
+      depositTransaction
     ]);
   })
     .then(result => {
@@ -53,14 +53,13 @@ test('should successfully join and exit PETH', done => {
     .then(() => {
       const approveTransaction = peth.approveUnlimited(tub.address);
       return Promise.all([
-      peth.balanceOf(owner),
-      approveTransaction.onMined()
+        peth.balanceOf(owner),
+        approveTransaction
       ]);
     })
     .then(result => {
       expect(parseFloat(result[0])).toBeCloseTo(initialBalance + 0.1, 12);
-      const exitTransaction = peth.exit('0.1');
-      return exitTransaction.onMined();
+      return peth.exit('0.1');
     })
     .then(() => peth.balanceOf(owner))
     .then(balance => {

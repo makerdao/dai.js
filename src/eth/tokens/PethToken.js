@@ -1,4 +1,3 @@
-import TransactionObject from '../TransactionObject';
 import Erc20Token from './Erc20Token';
 
 export default class PethToken extends Erc20Token {
@@ -6,23 +5,22 @@ export default class PethToken extends Erc20Token {
     super(contract, web3Service, decimals, transactionManager);
     this._tub = tub;
     this._web3Service = web3Service;
+    this._transactionManager = transactionManager;
   }
 
   join(amount) {
     const valueInWei = this.toEthereumFormat(amount);
 
-    return new TransactionObject(
-      this._tub.join(valueInWei, { gasLimit: 200000 }),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._tub.join(valueInWei, { gasLimit: 200000 })
     );
   }
 
   exit(amount) {
     const valueInWei = this.toEthereumFormat(amount);
 
-    return new TransactionObject(
-      this._tub.exit(valueInWei, { gasLimit: 100000 }),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._tub.exit(valueInWei, { gasLimit: 100000 })
     );
   }
 }
