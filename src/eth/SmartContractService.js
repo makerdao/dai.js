@@ -8,9 +8,9 @@ import { Contract } from 'ethers';
 import '../polyfills';
 
 export default class SmartContractService extends PublicService {
-  static buildTestService(web3 = null) {
+  static buildTestService(web3 = null, suppressOutput = true) {
     const service = new SmartContractService();
-    web3 = web3 || Web3Service.buildTestService();
+    web3 = web3 || Web3Service.buildTestService(null, 5000, suppressOutput);
 
     service
       .manager()
@@ -24,13 +24,34 @@ export default class SmartContractService extends PublicService {
     super(name, ['web3', 'log']);
   }
 
-  getContractByAddressAndAbi(address, abi) {
+  getContractByAddressAndAbi(address, abi, name = null) {
     if (!address) {
       throw Error('Contract address is required');
     }
 
-    const contract = new Contract(address, abi, this.get('web3').ethersSigner());
-    return ObjectWrapper.addWrapperInterface({ _original: contract }, contract, [], true, false, false, {});
+    if (!name) {
+      name = this.lookupContractName(address);
+    }
+
+    const signer = this.get('web3').ethersSigner(),
+      contract = new Contract(address, abi, signer);
+
+    return ObjectWrapper.addWrapperInterface(
+      { _original: contract }, contract, [], true, false, false,
+      {
+        afterGet: (k, v) => this.get('log').info('GET ' + name + '.' + k + ' >> \'' + v.toString() + '\''),
+        onSet: (k, v) => this.get('log').info('SET ' + name + '.' + k + ' =\'' + v.toString() + '\''),
+        onCall: (k, args) => {
+          signer.getAddress().then(fromAddress => {
+            this.get('log').info(
+              `${fromAddress} >> ${name}.${k}(` +
+              (args.length > 0 ? '\'' : '') +
+              args.map(a => a.toString()).join('\', \'') +
+              (args.length > 0 ? '\')' : ')')
+            );
+          });
+        }
+      });
   }
 
   getContractByName(name, version = null) {

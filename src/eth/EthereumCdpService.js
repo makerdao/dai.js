@@ -10,10 +10,10 @@ import TransactionManager from './TransactionManager';
 import { utils } from 'ethers';
 
 export default class EthereumCdpService extends PrivateService {
-  static buildTestService() {
+  static buildTestService(suppressOutput = true) {
     const service = new EthereumCdpService();
-    const smartContract = SmartContractService.buildTestService();
-    const transactionManager = TransactionManager.buildTestService();
+    const smartContract = SmartContractService.buildTestService(null, suppressOutput);
+    const transactionManager = TransactionManager.buildTestService(smartContract.get('web3'));
     const tokenService = EthereumTokenService.buildTestService(
       smartContract,
       transactionManager

@@ -3,9 +3,9 @@ import ConfigFactory from '../src/utils/ConfigFactory';
 
 
 function createMaker() {
-  return new Maker(
-    ConfigFactory.create('decentralized-oasis-without-proxies')
-  );
+  const config = ConfigFactory.create('decentralized-oasis-without-proxies');
+  config.services['log'] = 'NullLogger'; // Suppress logging output
+  return new Maker(config);
 }
 
 test('openCdp should open a CDP', done => {

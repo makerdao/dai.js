@@ -6,18 +6,19 @@ import TimerService from '../utils/TimerService';
 import Web3 from 'web3';
 import TestAccountProvider from '../utils/TestAccountProvider';
 import Web3ServiceList from '../utils/Web3ServiceList';
+import ConsoleLogger from '../utils/loggers/ConsoleLogger';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
 const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
-  static buildTestService(privateKey = null, statusTimerDelay = 5000) {
+  static buildTestService(privateKey = null, statusTimerDelay = 5000, suppressOutput = true) {
     const service = new Web3Service();
 
     service
       .manager()
-      .inject('log', new NullLogger())
+      .inject('log', suppressOutput ? new NullLogger() : new ConsoleLogger())
       .inject('timer', new TimerService())
       .settings({
         usePresetProvider: true,
@@ -206,7 +207,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _updateBlockNumber(blockNumber) {
-    //console.log('new blockNumber: ', blockNumber);
+    this.get('log').info('New block: ', blockNumber);
     if (this._blockListeners[blockNumber]) {
       this._blockListeners[blockNumber].forEach(c => c(blockNumber));
       this._blockListeners[blockNumber] = undefined;

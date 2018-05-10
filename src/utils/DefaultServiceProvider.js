@@ -10,6 +10,7 @@ import ZeroExExchangeService from '../exchanges/zeroEx/ZeroExExchangeService';
 import TimerService from './TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
 import ConsoleLogger from './loggers/ConsoleLogger';
+import NullLogger from './loggers/NullLogger';
 import TransactionManager from '../eth/TransactionManager';
 
 const _services = {
@@ -24,6 +25,7 @@ const _services = {
   TimerService,
   TokenConversionService,
   ConsoleLogger,
+  NullLogger,
   TransactionManager
 };
 

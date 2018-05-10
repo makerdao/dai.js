@@ -5,8 +5,8 @@ import TransactionState from './TransactionState';
 import ObjectWrapper from '../utils/ObjectWrapper';
 
 export default class TransactionManager extends PublicService {
-  static buildTestService(web3 = null) {
-    web3 = web3 || Web3Service.buildTestService();
+  static buildTestService(web3 = null, suppressOutput = true) {
+    web3 = web3 || Web3Service.buildTestService(null, 5000, suppressOutput);
     const service = new TransactionManager();
 
     service
