@@ -9,7 +9,6 @@ beforeEach(() => {
 function openCdp(){
   return createdCdpService.manager().authenticate()
     .then(() => createdCdpService.openCdp())
-    .then(txn => txn.onMined())
     .then(newCdp => {
       cdp = newCdp;
       return cdp.getCdpId();
@@ -96,8 +95,7 @@ test('should be able to lock eth in a cdp', done => {
   let cdpId;
 
   createdCdpService.manager().authenticate().then(() => {
-    const cdp = createdCdpService.openCdp();
-    cdp._businessObject.getCdpId().then(id => {
+    cdp.getCdpId().then(id => {
       cdpId = id;
       createdCdpService.getCdpInfo(id)
       .then(result => firstInfoCall = result)
@@ -121,7 +119,7 @@ xtest('should be able to free peth from a cdp', done => {
   let cdpId;
 
   createdCdpService.manager().authenticate().then(() => {
-    createdCdpService.openCdp().onMined()
+    createdCdpService.openCdp()
     .then(cdp => {
       newCdp = cdp;
       newCdp.getCdpId().then(id => cdpId = id)

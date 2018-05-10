@@ -1,7 +1,6 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 import Cdp from '../../src/eth/Cdp';
 import tokens from '../../contracts/tokens';
-//import contracts from '../../contracts/contracts';
 
 let createdCdpService;
 
@@ -59,7 +58,6 @@ test('should be able to close a CDP', done => {
 
   createdCdpService.manager().authenticate()
   .then(() => createdCdpService.openCdp())
-  .then(txn => txn.onMined())
   .then(cdp => {
     cdp.getCdpId().then(id => cdpId = id)
     .then(() => cdp.shut())
@@ -110,10 +108,6 @@ test('should be able to draw DAI', done => {
       firstDaiBalance = parseFloat(info[1].toString());
       return newCdp.lockEth('0.1');
     })
-
-    //.then(() => createdCdpService.get('smartContract').getContractState(contracts.SAI_TUB, 5, true, []))
-    //.then(tub => console.log(tub))
-
     .then(() => newCdp.getInfo())
     .then(info => {
       expect(parseFloat(info.ink)).toBeCloseTo(firstInkBalance + 100000000000000000);

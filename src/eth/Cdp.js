@@ -4,6 +4,7 @@ import contracts from '../../contracts/contracts';
 export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
+    this._transactionManager = this._cdpService.get('transactionManager');
     this._smartContractService = this._cdpService.get('smartContract');
     if (cdpId === null) {
       this._cdpIdPromise = this._newCdpPromise();
@@ -33,9 +34,8 @@ export default class Cdp {
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
     const contractPromise = tubContract.open();
-    this._transactionObject = new TransactionObject(
+    this._transactionObject = this._transactionManager.createTransactionHybrid(
       contractPromise,
-      this._smartContractService.get('web3'),
       this
     );
 
