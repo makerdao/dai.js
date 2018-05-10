@@ -129,10 +129,10 @@ export default class ZeroExExchangeService extends PrivateService {
 	  getAccounts: (cb)=>{cb(null, [this.get('web3').ethersSigner().getAddress()]);},
 	  approveTransaction: (txParams, cb)=>{ 
 	  	console.log('in approveTransaction function');
-	  	cb() },
+	  	cb(); },
 	  signTransaction: (txParams, cb)=>{
 	  	console.log('in signTransaction function');
-	  	cb(null,'signedTx') },
+	  	cb(null,'signedTx'); },
 	}));
 	providerEngine.addProvider(new RPCSubprovider({
 		rpcUrl: this.get('web3').web3Provider().host

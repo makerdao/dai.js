@@ -10,7 +10,7 @@ export default class OasisSellOrder extends TransactionObject {
       ); //find a way to convert string to hex without web3
       const receiptEvents = receiptLogs.filter(
         e =>
-          e.topics[0] === LogTradeTopic && e.address === oasisContract.address
+          e.topics[0].toLowerCase() === LogTradeTopic.toLowerCase() && e.address.toLowerCase() === oasisContract.address.toLowerCase()
       );
       let total = utils.bigNumberify('0');
       receiptEvents.forEach(event => {

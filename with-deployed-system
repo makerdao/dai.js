@@ -90,6 +90,8 @@ EOM
 
   cd ../..
 
+  ##node test-oasis-deployment.js
+
 else
   echo "You already have a test network running on port 2000."
 

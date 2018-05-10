@@ -13,7 +13,7 @@ function openCdp(){
     .then(txn => txn.onMined())
     .then(newCdp => {
       cdp = newCdp;
-      return cdp.getCdpId()
+      return cdp.getCdpId();
     });
 }
 

@@ -62,7 +62,7 @@ const mapping = {
 
   // Oasis
   [contracts.MAKER_OTC] : [
-    { version: 1, address: '0x0aa4e9ba2d892307784c69e94f3b5d7b7aff4201', abi: makerOtc_1.interface }
+    { version: 1, address: '0x7eecf9215ed79706a656c5b4fc67b4135a4272a8', abi: makerOtc_1.interface }
   ]
 };
 

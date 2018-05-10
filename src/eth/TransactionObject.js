@@ -96,6 +96,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
+          //console.log('tx:', tx);
           this._pending(); //set state to pending
           this._hash = tx.hash;
           return Promise.any([
@@ -111,6 +112,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         tx => {
+          //console.log('tx after waiting: ', tx);
           gasPrice = tx.gasPrice;
           this._timeStampMined = new Date();
           return this._ethersProvider.getTransactionReceipt(this._hash);
@@ -122,6 +124,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         receipt => {
+          //console.log('receiptGasUsed', receipt.gasUsed.toString());
           this._logsParser(receipt.logs);
           if (!!receipt.gasUsed && !!gasPrice) {
             this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
@@ -137,7 +140,6 @@ export default class TransactionObject extends TransactionLifeCycle {
 
           //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
           const requiredConfirmations = 3;
-          //console.log('originalBlockNumber:', receipt.blockNumber);
           this._web3Service.waitForBlockNumber(
             receipt.blockNumber + requiredConfirmations,
             () => {

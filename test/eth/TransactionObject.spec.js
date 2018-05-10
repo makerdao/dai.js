@@ -44,10 +44,6 @@ test('TransactionObject event listeners work as promises', done => {
     .then(() => {
       wethToken = service.getToken(tokens.WETH);
       initialTransaction = wethToken.approveUnlimited(randomAddress);
-      initialTransaction.onFinalized(()=>{
-        expect(initialTransaction.state()).toBe(TransactionState.finalized);
-        done();
-      });
       //TransactionObject.onError(()=>{console.log('onError() triggered');});
       return initialTransaction.onPending();
     })
@@ -64,16 +60,14 @@ test('TransactionObject event listeners work as promises', done => {
     })
     .then(() =>{
       return wethToken.approveUnlimited(randomAddress).onMined();
-    });
-    /*.then(()=>{
-      console.log('calling onfinalized()');
+    })
+    .then(()=>{
       return initialTransaction.onFinalized();
     })
     .then(TransactionObject=>{
-      console.log('finalized!');
       expect(TransactionObject.state()).toBe(TransactionState.finalized);
       done();
-    });*/
+    });
 }, 5000);
 
 test('get fees from TransactionObject', done => {

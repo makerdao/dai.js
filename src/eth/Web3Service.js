@@ -206,7 +206,6 @@ export default class Web3Service extends PrivateService {
   }
 
   _updateBlockNumber(blockNumber) {
-    //console.log('new blockNumber: ', blockNumber);
     if (this._blockListeners[blockNumber]) {
       this._blockListeners[blockNumber].forEach(c => c(blockNumber));
       this._blockListeners[blockNumber] = undefined;

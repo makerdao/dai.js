@@ -4,6 +4,7 @@ import SmartContractService from '../../eth/SmartContractService';
 import EthereumTokenService from '../../eth/EthereumTokenService';
 import OasisSellOrder from './OasisSellOrder';
 import OasisBuyOrder from './OasisBuyOrder';
+import TransactionObject from '../../eth/TransactionObject';
 import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
@@ -81,7 +82,8 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
         daiAddress,
         daiAmountEVM,
         buyTokenAddress,
-        minFillAmountEVM
+        minFillAmountEVM,
+        { gasLimit: 300000 }
       ),
       this.get('web3'),
       oasisContract
@@ -109,7 +111,8 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
         daiAddress,
         daiAmountEVM,
         sellTokenAddress,
-        maxFillAmountEVM
+        maxFillAmountEVM,
+        { gasLimit: 300000 }
       ),
       this.get('web3'),
       oasisContract
@@ -128,13 +131,16 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    return oasisContract.offer(
+    return new TransactionObject(
+    oasisContract.offer(
       payAmount,
       payTokenAddress,
       buyAmount,
       buyTokenAddress,
       pos,
       overrides
+      ),
+      this.get('web3')
     );
   }
 }
