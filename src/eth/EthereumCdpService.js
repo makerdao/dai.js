@@ -5,19 +5,22 @@ import TokenConversionService from './TokenConversionService';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
+import TransactionManager from './TransactionManager';
 
 import { utils } from 'ethers';
-import TransactionManager from './TransactionManager';
 
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
     const service = new EthereumCdpService();
     const smartContract = SmartContractService.buildTestService();
-    const tokenService = EthereumTokenService.buildTestService(smartContract);
+    const transactionManager = TransactionManager.buildTestService();
+    const tokenService = EthereumTokenService.buildTestService(
+      smartContract,
+      transactionManager
+    );
     const conversionService = TokenConversionService.buildTestService(
       smartContract
     );
-    const transactionManager = TransactionManager.buildTestService();
 
     service
       .manager()

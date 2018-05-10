@@ -98,8 +98,7 @@ test('should be able to lock eth in a cdp', done => {
       createdCdpService.getCdpInfo(id)
       .then(result => firstInfoCall = result)
       .then(() => createdCdpService.lockEth(id, '0.1'))
-      .then(txn => {
-        txn.onMined();
+      .then(() => {
         createdCdpService.getCdpInfo(cdpId)
         .then(secondInfoCall => {
           expect(firstInfoCall.ink.toString()).toEqual('0');

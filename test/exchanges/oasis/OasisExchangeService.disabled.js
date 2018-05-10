@@ -60,7 +60,7 @@ test('get fillAmount sellDai', (done) =>  {
 30000
 );
 
-test('OasisOrder event listeners work as promises, and can use business object', done => {
+xtest('OasisOrder event listeners work as promises, and can use business object', done => {
   const oasisService = OasisExchangeService.buildKovanService();
   let oasisOrder = null;
   oasisService.manager().authenticate()
@@ -71,7 +71,7 @@ test('OasisOrder event listeners work as promises, and can use business object',
     })
     .then(OrderObject=>{
       expect(OrderObject.state()).toBe(TransactionState.pending);
-      return OrderObject.onMined();
+      return OrderObject;
     })
     .then(OrderObject=>{
       expect(OrderObject.state()).toBe(TransactionState.mined);

@@ -24,7 +24,6 @@ test('should create a cdp object with an authenticated service and a cdp id', do
   createdCdpService.manager().authenticate()
     .then(() => {
       createdCdpService.openCdp()
-      .onMined()
       .then(cdp => {
         expect(cdp).toBeDefined();
         expect(cdp._cdpService).toBeDefined();
@@ -42,7 +41,6 @@ test('should be able to get a CDP\'s info', done => {
   createdCdpService.manager().authenticate()
     .then(() => {
       createdCdpService.openCdp()
-      .onMined()
       .then(cdp => {
         cdp.getInfo().then(info => {
           expect(info).toBeDefined();
@@ -74,7 +72,7 @@ test('should be able to lock eth', done => {
   let firstBalance;
 
   createdCdpService.manager().authenticate()
-  .then(() => createdCdpService.openCdp().onMined())
+  .then(() => createdCdpService.openCdp())
   .then(cdp => {
     newCdp = cdp;
     newCdp.getInfo()
@@ -94,7 +92,7 @@ test('should be able to draw DAI', done => {
   let newCdp, firstInkBalance, firstDaiBalance, defaultAccount;
 
   createdCdpService.manager().authenticate()
-    .then(() => createdCdpService.openCdp().onMined())
+    .then(() => createdCdpService.openCdp())
     .then(cdp => {
       defaultAccount = createdCdpService.get('token').get('web3').defaultAccount();
       newCdp = cdp;

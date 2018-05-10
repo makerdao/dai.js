@@ -11,11 +11,15 @@ import PethToken from './tokens/PethToken';
 import TransactionManager from './TransactionManager';
 
 export default class EthereumTokenService extends PrivateService {
-  static buildTestService(smartContractService = null) {
-    const service = new EthereumTokenService();
-    const transactionManager = TransactionManager.buildTestService();
+  static buildTestService(
+    smartContractService = null,
+    transactionManager = null
+  ) {
     smartContractService =
       smartContractService || SmartContractService.buildTestService();
+    transactionManager =
+      transactionManager || TransactionManager.buildTestService();
+    const service = new EthereumTokenService();
 
     service
       .manager()
