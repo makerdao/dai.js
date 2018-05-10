@@ -48,7 +48,7 @@ export default class TransactionManager extends PublicService {
       'timeStampSubmitted'
     ]);
 
-    this._transactions = hybrid;
+    this._transactions.push(hybrid);
     return hybrid;
   }
 
