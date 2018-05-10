@@ -2,8 +2,8 @@ import TransactionObject from '../TransactionObject';
 import Erc20Token from './Erc20Token';
 
 export default class WethToken extends Erc20Token {
-  constructor(contract, web3Service, decimals) {
-    super(contract, web3Service, decimals);
+  constructor(contract, web3Service, decimals, transactionManager) {
+    super(contract, web3Service, decimals, transactionManager);
   }
 
   name() {

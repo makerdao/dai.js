@@ -8,10 +8,12 @@ import Erc20Token from './tokens/Erc20Token';
 import EtherToken from './tokens/EtherToken';
 import WethToken from './tokens/WethToken';
 import PethToken from './tokens/PethToken';
+import TransactionManager from './TransactionManager';
 
 export default class EthereumTokenService extends PrivateService {
   static buildTestService(smartContractService = null) {
     const service = new EthereumTokenService();
+    const transactionManager = TransactionManager.buildTestService();
     smartContractService =
       smartContractService || SmartContractService.buildTestService();
 
@@ -23,13 +25,24 @@ export default class EthereumTokenService extends PrivateService {
       .inject(
         'gasEstimator',
         GasEstimatorService.buildTestService(smartContractService.get('web3'))
-      );
+      )
+      .inject('transactionManager', transactionManager);
 
     return service;
   }
 
   constructor(name = 'token') {
-    super(name, ['smartContract', 'web3', 'log', 'gasEstimator']);
+    super(name, [
+      'smartContract',
+      'web3',
+      'log',
+      'gasEstimator',
+      'transactionManager'
+    ]);
+  }
+
+  _transactionManager() {
+    return this.get('transactionManager');
   }
 
   getTokens() {
@@ -65,7 +78,8 @@ export default class EthereumTokenService extends PrivateService {
         return new WethToken(
           contract,
           this.get('web3'),
-          tokenVersionData.decimals
+          tokenVersionData.decimals,
+          this._transactionManager()
         );
       }
 
@@ -75,14 +89,16 @@ export default class EthereumTokenService extends PrivateService {
           contract,
           tub,
           this.get('web3'),
-          tokenVersionData.decimals
+          tokenVersionData.decimals,
+          this._transactionManager()
         );
       }
 
       return new Erc20Token(
         contract,
         this.get('web3'),
-        tokenVersionData.decimals
+        tokenVersionData.decimals,
+        this._transactionManager()
       );
     }
   }

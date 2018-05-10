@@ -2,7 +2,7 @@ import TransactionObject from '../TransactionObject';
 import { utils } from 'ethers';
 
 export default class Erc20Token {
-  constructor(contract, web3Service, decimals = 18) {
+  constructor(contract, web3Service, decimals = 18, transactionManager) {
     this._contract = contract;
     this._web3Service = web3Service;
     this._decimals = decimals;
