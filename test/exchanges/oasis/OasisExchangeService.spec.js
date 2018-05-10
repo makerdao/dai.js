@@ -1,9 +1,10 @@
 import OasisExchangeService from '../../../src/exchanges/oasis/OasisExchangeService';
 import tokens from '../../../contracts/tokens';
 import EthereumCdpService from '../../../src/eth/EthereumCdpService';
-//import TransactionState from '../../../src/eth/TransactionState';
+import TransactionState from '../../../src/eth/TransactionState';
 import contracts from '../../../contracts/contracts';
-//import TestAccountProvider from '../../../src/utils/TestAccountProvider';
+import TestAccountProvider from '../../../src/utils/TestAccountProvider';
+import {watch} from '../../../src/utils';
 const utils = require('ethers').utils;
 
 function _placeLimitOrder(oasisExchangeService){
@@ -40,18 +41,29 @@ function _placeLimitOrder(oasisExchangeService){
       })
       .then(()=>{
         //console.log('weth balance after placing limit order: ', balance);
-      });
+      })
+      .catch(reason => {
+      console.log('limit order failed', reason);
+      //done.fail();
+      //throw reason;
+    });
 }
 
 
 beforeAll(()=>{ //can comment this out after has been run once
-
+  watch.start('beforeAll');
   let newCdp, firstInkBalance, firstDaiBalance, defaultAccount;
   const oasisExchangeService = OasisExchangeService.buildTestService();
-  const createdCdpService = oasisExchangeService.get('cdp');
-  createdCdpService.manager().authenticate()
-    .then(() => createdCdpService.openCdp().onMined())
+  let createdCdpService = null;
+  oasisExchangeService.manager().authenticate()
+    .then(() => {
+      watch.log('authenticated');
+      //console.log('isAuthenticated in beforeAll', oasisExchangeService.manager().isAuthenticated());
+      createdCdpService = oasisExchangeService.get('cdp');
+      return createdCdpService.openCdp().onMined();
+    })
     .then(cdp => {
+      watch.log('cdp created');
       defaultAccount = createdCdpService.get('token').get('web3').defaultAccount();
       newCdp = cdp;
       return Promise.all([
@@ -60,6 +72,7 @@ beforeAll(()=>{ //can comment this out after has been run once
       ]);
     })
     .then(info => {
+      watch.log('get dai balance');
       firstInkBalance = parseFloat(info[0].ink);
       firstDaiBalance = parseFloat(info[1].toString());
       return newCdp.lockEth('0.1').then(txn => txn.onMined());
@@ -67,23 +80,27 @@ beforeAll(()=>{ //can comment this out after has been run once
 
     //.then(() => createdCdpService.get('smartContract').getContractState(contracts.SAI_TUB, 5, true, []))
     //.then(tub => console.log(tub))
-
+    .then(watch.pass('after locking eth'))
     .then(() => newCdp.getInfo())
     .then(info => {
+      watch.log('after get info after locking');
       expect(parseFloat(info.ink)).toBeCloseTo(firstInkBalance + 100000000000000000);
       return newCdp.drawDai('1').then(txn => txn.onMined());
     })
+    .then(watch.pass('after draw dai'))
     .then(() => Promise.all([
       newCdp.getInfo(),
       createdCdpService.get('token').getToken(tokens.DAI).balanceOf(defaultAccount)
     ]))
     .then(result => {
+      watch.log('after final promise.all');
       expect(parseFloat(result[1].toString())).toBeCloseTo(firstDaiBalance + 1.0);
       return _placeLimitOrder(oasisExchangeService);
     })
     .catch(reason => {
-      done.fail();
-      throw reason;
+      console.log('oasis setup failed', reason);
+      //done.fail();
+      //throw reason;
     });
 });
 
@@ -205,7 +222,7 @@ test('get fees and fillAmount buy Dai', (done) =>  {
 });
 
 
-/*
+
 test('OasisOrder properly finalizes', done => {
   const oasisService = OasisExchangeService.buildTestService();
   let oasisOrder = null;
@@ -239,9 +256,6 @@ test('OasisOrder properly finalizes', done => {
     .then(() =>{
       return daiToken.approveUnlimited(randomAddress).onMined();
     })
-    .then(() =>{
-      return daiToken.approveUnlimited(randomAddress).onMined();
-    })
     .then(OrderObject=>{
       return OrderObject.onFinalized();
     })
@@ -250,6 +264,4 @@ test('OasisOrder properly finalizes', done => {
       done();
     });
 }, 10000);
-*/
-
 
