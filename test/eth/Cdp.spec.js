@@ -5,7 +5,7 @@ import tokens from '../../contracts/tokens';
 let createdCdpService;
 
 beforeAll(() => {
-  return createdCdpService = EthereumCdpService.buildTestService();
+  return createdCdpService = EthereumCdpService.buildTestService(false);
 });
 
 test('should open a new CDP and return its ID', done => {

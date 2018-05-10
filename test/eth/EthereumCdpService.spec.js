@@ -3,7 +3,7 @@ import EthereumCdpService from '../../src/eth/EthereumCdpService';
 let createdCdpService, cdp;
 
 beforeEach(() => {
-  return createdCdpService = EthereumCdpService.buildTestService();
+  return createdCdpService = EthereumCdpService.buildTestService(false);
 });
 
 function openCdp(){
@@ -63,7 +63,7 @@ test('should open and then shut a CDP', done => {
   });
 }, 5000);
 
-xtest('should open and then shut a CDP with peth locked in it', done => {
+test('should open and then shut a CDP with peth locked in it', done => {
   let firstInfoCall;
 
   openCdp()
@@ -110,7 +110,7 @@ test('should be able to lock eth in a cdp', done => {
   });
 }, 5000);
 
-xtest('should be able to free peth from a cdp', done => {
+test('should be able to free peth from a cdp', done => {
   let newCdp;
   let firstBalance;
   let cdpId;

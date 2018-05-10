@@ -12,8 +12,13 @@ import { utils } from 'ethers';
 export default class EthereumCdpService extends PrivateService {
   static buildTestService(suppressOutput = true) {
     const service = new EthereumCdpService();
-    const smartContract = SmartContractService.buildTestService(null, suppressOutput);
-    const transactionManager = TransactionManager.buildTestService(smartContract.get('web3'));
+    const smartContract = SmartContractService.buildTestService(
+      null,
+      suppressOutput
+    );
+    const transactionManager = TransactionManager.buildTestService(
+      smartContract.get('web3')
+    );
     const tokenService = EthereumTokenService.buildTestService(
       smartContract,
       transactionManager
@@ -74,15 +79,17 @@ export default class EthereumCdpService extends PrivateService {
 
   shutCdp(cdpId) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const peth = this.get('token').getToken(tokens.PETH);
     const dai = this.get('token').getToken(tokens.DAI);
+    const peth = this.get('token').getToken(tokens.PETH);
+    const weth = this.get('token').getToken(tokens.WETH);
 
     return Promise.all([
       this._conversionService().approveToken(dai),
-      this._conversionService().approveToken(peth)
+      this._conversionService().approveToken(peth),
+      this._conversionService().approveToken(weth)
     ]).then(() => {
       return this._transactionManager().createTransactionHybrid(
-        this._tubContract().shut(hexCdpId)
+        this._tubContract().shut(hexCdpId, { gasLimit: 4000000 })
       );
     });
   }
