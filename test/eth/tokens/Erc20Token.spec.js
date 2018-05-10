@@ -39,8 +39,7 @@ test('approve an ERC20 (MKR) allowance', (done) => {
 
   ethereumTokenService.manager().authenticate().then(() => {
     token = ethereumTokenService.getToken(tokens.MKR);
-    const transactionWrapper = token.approve(spender, allowance);
-    return transactionWrapper.onMined();
+    token.approve(spender, allowance);
   })
     .then(()=>{
         return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
@@ -49,7 +48,6 @@ test('approve an ERC20 (MKR) allowance', (done) => {
       expect(result.toString()).toBe(allowance);
       return token.approve(spender, '0'); //reset allowance to 0
     })
-    .then(transaction=> transaction.onMined())
     .then(()=>{
       done();
     });
@@ -63,8 +61,7 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
 
   ethereumTokenService.manager().authenticate().then(() => {
     token = ethereumTokenService.getToken(tokens.MKR);
-    const TransactionWrapper = token.approveUnlimited(spender);
-    return TransactionWrapper.onMined();
+    token.approveUnlimited(spender);
   })
     .then(() => {
       return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);

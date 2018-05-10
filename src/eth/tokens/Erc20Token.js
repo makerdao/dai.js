@@ -6,6 +6,7 @@ export default class Erc20Token {
     this._contract = contract;
     this._web3Service = web3Service;
     this._decimals = decimals;
+    this._transactionManager = transactionManager;
   }
 
   allowance(tokenOwner, spender) {
@@ -37,16 +38,14 @@ export default class Erc20Token {
 
   approve(spender, value) {
     const valueInWei = this.toEthereumFormat(value);
-    return new TransactionObject(
-      this._contract.approve(spender, valueInWei),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.approve(spender, valueInWei)
     );
   }
 
   approveUnlimited(spender) {
-    return new TransactionObject(
+    return this._transactionManager.createTransactionHybrid(
       this._contract.approve(spender, -1),
-      this._web3Service
     );
   }
 
