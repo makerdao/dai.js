@@ -17,7 +17,7 @@ beforeAll(()=>{ //can comment this out after has been run once
       })
       .then(()=>{
         const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
-        return wethToken.approveUnlimited(oasisContract.address).onPending();
+        return wethToken.approveUnlimited(oasisContract.getAddress()).onPending();
       })
       .then(()=>{
         const wethAddress = wethToken.address();
@@ -128,7 +128,7 @@ test('sell Dai on testnet', (done) => setTimeout(() => {
     })
     .then(()=>{
       const daiToken = oasisExchangeService.get('ethereumToken').getToken(tokens.DAI);
-      return daiToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).address);
+      return daiToken.approveUnlimited(oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC).getAddress());
     })
     .then(tx => {
       //console.log('dai approval tx:', tx);

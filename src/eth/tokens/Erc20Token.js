@@ -19,7 +19,7 @@ export default class Erc20Token {
   }
 
   address() {
-    return this._contract.address;
+    return this._contract.getAddress();
   }
 
   decimals() {

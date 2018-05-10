@@ -68,5 +68,7 @@ export default class ObjectWrapper {
         }
       }
     });
+
+    return wrapper;
   }
 }

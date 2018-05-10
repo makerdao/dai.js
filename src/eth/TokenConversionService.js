@@ -36,7 +36,7 @@ export default class TokenConversionService extends PrivateService {
 
     return new Promise((resolve, reject) => {
       try {
-        resolve(token.approveUnlimited(tubContract.address));
+        resolve(token.approveUnlimited(tubContract.getAddress()));
       } catch (err) {
         reject(err.message);
       }

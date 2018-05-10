@@ -41,7 +41,7 @@ test('should successfully join and exit PETH', done => {
     const depositTransaction = weth.deposit('0.1');
     return Promise.all([
       peth.balanceOf(owner),
-      weth.approveUnlimited(tub.address),
+      weth.approveUnlimited(tub.getAddress()),
       depositTransaction
     ]);
   })
@@ -51,7 +51,7 @@ test('should successfully join and exit PETH', done => {
       return joinTransaction;
     })
     .then(() => {
-      const approveTransaction = peth.approveUnlimited(tub.address);
+      const approveTransaction = peth.approveUnlimited(tub.getAddress());
       return Promise.all([
         peth.balanceOf(owner),
         approveTransaction

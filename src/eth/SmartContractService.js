@@ -3,6 +3,7 @@ import Web3Service from './Web3Service';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
+import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
 import '../polyfills';
 
@@ -16,7 +17,6 @@ export default class SmartContractService extends PublicService {
       .inject('log', web3.get('log'))
       .inject('web3', web3);
 
-    //console.log('web3 is: ', web3);
     return service;
   }
 
@@ -29,7 +29,8 @@ export default class SmartContractService extends PublicService {
       throw Error('Contract address is required');
     }
 
-    return new Contract(address, abi, this.get('web3').ethersSigner());
+    const contract = new Contract(address, abi, this.get('web3').ethersSigner());
+    return ObjectWrapper.addWrapperInterface({ _original: contract }, contract, [], true, false, false, {});
   }
 
   getContractByName(name, version = null) {
@@ -129,7 +130,7 @@ export default class SmartContractService extends PublicService {
         return Promise.all(valuePromises);
       })
       .then(values => {
-        const result = { __self: contract.address + '; ' + name };
+        const result = { __self: contract.getAddress() + '; ' + name };
         values.forEach(v => (result[v[0]] = v.length > 2 ? v.slice(1) : v[1]));
         return result;
       });
