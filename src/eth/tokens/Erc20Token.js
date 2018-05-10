@@ -51,17 +51,15 @@ export default class Erc20Token {
 
   transfer(to, value) {
     const valueInWei = this.toEthereumFormat(value);
-    return new TransactionObject(
+    return this._transactionManager.createTransactionHybrid(
       this._contract.transfer(to, valueInWei),
-      this._web3Service
     );
   }
 
   transferFrom(from, to, value) {
     const valueInWei = this.toEthereumFormat(value);
-    return new TransactionObject(
+    return this._transactionManager.createTransactionHybrid(
       this._contract.transferFrom(from, to, valueInWei),
-      this._web3Service
     );
   }
 
