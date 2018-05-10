@@ -54,7 +54,7 @@ test('should be able to get a CDP\'s info', done => {
     });
 }, 5000);
 
-test.only('should be able to close a CDP', done => {
+test('should be able to close a CDP', done => {
   let cdpId;
 
   createdCdpService.manager().authenticate()
@@ -69,8 +69,6 @@ test.only('should be able to close a CDP', done => {
       done();
     });
   })
-  // .then(txn => txn.onMined())
-
 }, 5000);
 
 test('should be able to lock eth', done => {
@@ -84,14 +82,11 @@ test('should be able to lock eth', done => {
     newCdp.getInfo()
     .then(info => firstBalance = parseFloat(info.ink))
     .then(() => newCdp.lockEth('0.1'))
-    .then(txn => {
-      txn.onMined()
-      .then(() => {
-        newCdp.getInfo()
-        .then(info => {
-          expect(parseFloat(info.ink)).toBeCloseTo(firstBalance + 100000000000000000);
-          done();
-        });
+    .then(() => {
+      newCdp.getInfo()
+      .then(info => {
+        expect(parseFloat(info.ink)).toBeCloseTo(firstBalance + 100000000000000000);
+        done();
       });
     });
   });
@@ -113,7 +108,7 @@ test('should be able to draw DAI', done => {
     .then(info => {
       firstInkBalance = parseFloat(info[0].ink);
       firstDaiBalance = parseFloat(info[1].toString());
-      return newCdp.lockEth('0.1').then(txn => txn.onMined());
+      return newCdp.lockEth('0.1');
     })
 
     //.then(() => createdCdpService.get('smartContract').getContractState(contracts.SAI_TUB, 5, true, []))
@@ -122,7 +117,7 @@ test('should be able to draw DAI', done => {
     .then(() => newCdp.getInfo())
     .then(info => {
       expect(parseFloat(info.ink)).toBeCloseTo(firstInkBalance + 100000000000000000);
-      return newCdp.drawDai('1').then(txn => txn.onMined());
+      return newCdp.drawDai('1');
     })
     .then(() => Promise.all([
       newCdp.getInfo(),
