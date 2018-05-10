@@ -1,7 +1,6 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
 
-let createdCdpService;
-let cdp;
+let createdCdpService, cdp;
 
 beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();

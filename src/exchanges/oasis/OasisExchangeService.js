@@ -8,6 +8,8 @@ import TransactionObject from '../../eth/TransactionObject';
 import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
+import EthereumCdpService from '../../eth/EthereumCdpService';
+import TokenConversionService from '../../eth/TokenConversionService';
 
 export default class OasisExchangeService extends PrivateService {
   static buildKovanService() {
@@ -34,7 +36,7 @@ export default class OasisExchangeService extends PrivateService {
 
     return service;
   }
-
+/*
   static buildTestService(privateKey = null) {
     const service = new OasisExchangeService(),
       web3 = Web3Service.buildTestService(privateKey),
@@ -55,10 +57,34 @@ export default class OasisExchangeService extends PrivateService {
       );
 
     return service;
+  }*/
+
+  static buildTestService(privateKey = null) {
+    const service = new OasisExchangeService(),
+      web3 = Web3Service.buildTestService(privateKey),
+      smartContractService = SmartContractService.buildTestService(web3),
+      ethereumTokenService = EthereumTokenService.buildTestService(
+        smartContractService
+      ),
+      cdpService = EthereumCdpService.buildTestService(smartContractService, EthereumTokenService, TokenConversionService.buildTestService(smartContractService));
+
+    service
+      .manager()
+      .inject('log', smartContractService.get('log'))
+      .inject('web3', smartContractService.get('web3'))
+      .inject('smartContract', smartContractService)
+      .inject('token', ethereumTokenService)
+      .inject(
+        'gasEstimator',
+        GasEstimatorService.buildTestService(smartContractService.get('web3'))
+      )
+      .inject('cdp', cdpService);
+
+    return service;
   }
 
   constructor(name = 'oasisExchange') {
-    super(name, ['smartContract', 'token', 'web3', 'log', 'gasEstimator']);
+    super(name, ['cdp', 'smartContract', 'token', 'web3', 'log', 'gasEstimator']);
   }
 
   /*

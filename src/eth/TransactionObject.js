@@ -115,7 +115,7 @@ export default class TransactionObject extends TransactionLifeCycle {
           //console.log('tx after waiting: ', tx);
           gasPrice = tx.gasPrice;
           this._timeStampMined = new Date();
-          return this._ethersProvider.getTransactionReceipt(this._hash);
+          return this._waitForReceipt();
         },
         reason => {
           this._error = reason;
@@ -147,10 +147,26 @@ export default class TransactionObject extends TransactionLifeCycle {
             }
           );
         },
+        // eslint-disable-next-line
         reason => {
           this._error = reason;
           console.error(reason);
         }
       );
+  }
+
+  _waitForReceipt(retries = 5) {
+    const result = Promise.resolve(this._ethersProvider.getTransactionReceipt(this._hash));
+    return retries < 1 ?
+      result :
+      result.then(receipt => {
+        if (!receipt) {
+          // eslint-disable-next-line
+          console.warn('Receipt is null. Retrying ' + retries + ' more time(s)');
+          return new Promise(resolve => setTimeout(() => resolve(), (6 - retries) * 1500)).then(() => this._waitForReceipt(retries - 1));
+        }
+
+        return receipt;
+      });
   }
 }
