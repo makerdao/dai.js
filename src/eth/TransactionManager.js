@@ -4,12 +4,12 @@ import TransactionObject from './TransactionObject';
 import TransactionState from './TransactionState';
 
 export default class TransactionManager extends PublicService {
-
   static buildTestService(web3 = null) {
     web3 = web3 || Web3Service.buildTestService();
     const service = new TransactionManager();
 
-    service.manager()
+    service
+      .manager()
       .inject('web3', web3)
       .inject('log', web3.get('log'));
 
@@ -21,13 +21,27 @@ export default class TransactionManager extends PublicService {
     this._transactions = [];
   }
 
-  createTransactionHybrid(contractTransaction, businessObject = null, implicitState = TransactionState.mined) {
-    const tx = new TransactionObject(contractTransaction, this.get('web3'), businessObject),
+  createTransactionHybrid(
+    contractTransaction,
+    businessObject = null,
+    implicitState = TransactionState.mined
+  ) {
+    const tx = new TransactionObject(
+        contractTransaction,
+        this.get('web3'),
+        businessObject
+      ),
       hybrid = this._getImplicitStatePromise(tx, implicitState);
 
     hybrid._original = tx;
     this._addWrapperInterface(hybrid, businessObject || {});
-    this._addWrapperInterface(hybrid, tx, ['logs', 'hash', 'fees', 'timeStamp', 'timeStampSubmitted']);
+    this._addWrapperInterface(hybrid, tx, [
+      'logs',
+      'hash',
+      'fees',
+      'timeStamp',
+      'timeStampSubmitted'
+    ]);
 
     this._transactions = hybrid;
     return hybrid;
@@ -54,18 +68,25 @@ export default class TransactionManager extends PublicService {
   }
 
   _collectAllPropertyNames(object, exclude = []) {
-    let result = Object.getOwnPropertyNames(object).filter(p => exclude.indexOf(p) < 0);
+    let result = Object.getOwnPropertyNames(object).filter(
+      p => exclude.indexOf(p) < 0
+    );
 
     if (object.__proto__.__proto__) {
-      result = result.concat(this._collectAllPropertyNames(object.__proto__, exclude));
+      result = result.concat(
+        this._collectAllPropertyNames(object.__proto__, exclude)
+      );
     }
 
     return result.filter(p => p !== 'constructor');
   }
 
   _accessorName(property, type) {
-    return type + property[0].toUpperCase() +
-      (property.length > 1 ? property.substr(1) : '');
+    return (
+      type +
+      property[0].toUpperCase() +
+      (property.length > 1 ? property.substr(1) : '')
+    );
   }
 
   _isFunction(value) {

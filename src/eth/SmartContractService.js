@@ -29,11 +29,7 @@ export default class SmartContractService extends PublicService {
       throw Error('Contract address is required');
     }
 
-    return new Contract(
-      address,
-      abi,
-      this.get('web3').ethersSigner()
-    );
+    return new Contract(address, abi, this.get('web3').ethersSigner());
   }
 
   getContractByName(name, version = null) {
@@ -47,8 +43,8 @@ export default class SmartContractService extends PublicService {
     const mapping = this._getCurrentNetworkMapping()[0].addresses,
       names = Object.keys(mapping);
 
-    for(let i=0; i<names.length; i++) {
-      for(let j=0; j<mapping[names[i]].length; j++) {
+    for (let i = 0; i < names.length; i++) {
+      for (let j = 0; j < mapping[names[i]].length; j++) {
         if (mapping[names[i]][j].address.toUpperCase() === address) {
           return names[i];
         }
@@ -58,16 +54,24 @@ export default class SmartContractService extends PublicService {
     return null;
   }
 
-  getContractState(name, recursion = 0, beautify = true, exclude = ['tag', 'SAI_PEP.read'], visited = []) {
+  getContractState(
+    name,
+    recursion = 0,
+    beautify = true,
+    exclude = ['tag', 'SAI_PEP.read'],
+    visited = []
+  ) {
     const info = this._getContractInfo(name),
       contract = this.getContractByAddressAndAbi(info.address, info.abi),
-
       inspectableMembers = info.abi
         .filter(m => m.constant && m.inputs.length < 1)
         .map(m => {
           const member = m.name;
 
-          if (exclude.indexOf(member) > -1 || exclude.indexOf(name + '.' + member) > -1) {
+          if (
+            exclude.indexOf(member) > -1 ||
+            exclude.indexOf(name + '.' + member) > -1
+          ) {
             return {
               name: member,
               promise: Promise.resolve('[EXCLUDED]')
@@ -76,7 +80,9 @@ export default class SmartContractService extends PublicService {
 
           return {
             name: member,
-            promise: contract[m.name]().catch(reason => '[ERROR: ' + reason + ']')
+            promise: contract[m.name]().catch(
+              reason => '[ERROR: ' + reason + ']'
+            )
           };
         });
 
@@ -85,22 +91,36 @@ export default class SmartContractService extends PublicService {
     return Promise.all(inspectableMembers.map(m => m.promise))
       .then(results => {
         const valuePromises = [];
-        for (let i=0; i<results.length; i++) {
+        for (let i = 0; i < results.length; i++) {
           const key = inspectableMembers[i].name,
             value = results[i],
             contractName = this.lookupContractName(value.toString());
 
-          if (contractName && recursion > 0 && visited.indexOf(contractName) < 0) {
+          if (
+            contractName &&
+            recursion > 0 &&
+            visited.indexOf(contractName) < 0
+          ) {
             valuePromises.push(
-              this.getContractState(contractName, recursion - 1, beautify, exclude, visited)
-                .then(childState => [key, childState])
+              this.getContractState(
+                contractName,
+                recursion - 1,
+                beautify,
+                exclude,
+                visited
+              ).then(childState => [key, childState])
             );
             visited = visited.concat([contractName]);
-
           } else if (contractName && visited.indexOf(contractName) > -1) {
-            valuePromises.push([key, beautify ? value + '; ' + contractName + '; [VISITED]' : value]);
+            valuePromises.push([
+              key,
+              beautify ? value + '; ' + contractName + '; [VISITED]' : value
+            ]);
           } else if (contractName) {
-            valuePromises.push([key, beautify ? value + '; ' + contractName : value]);
+            valuePromises.push([
+              key,
+              beautify ? value + '; ' + contractName : value
+            ]);
           } else {
             valuePromises.push([key, beautify ? value.toString() : value]);
           }
@@ -110,7 +130,7 @@ export default class SmartContractService extends PublicService {
       })
       .then(values => {
         const result = { __self: contract.address + '; ' + name };
-        values.forEach(v => result[v[0]] = v.length > 2 ? v.slice(1) : v[1]);
+        values.forEach(v => (result[v[0]] = v.length > 2 ? v.slice(1) : v[1]));
         return result;
       });
   }

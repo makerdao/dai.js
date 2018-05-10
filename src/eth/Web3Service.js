@@ -12,7 +12,6 @@ const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
 const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
-
   static buildTestService(privateKey = null, statusTimerDelay = 5000) {
     const service = new Web3Service();
 
@@ -136,7 +135,6 @@ export default class Web3Service extends PrivateService {
     ])
       .then(
         versions => {
-
           this._info.version = {
             api: this._web3.version.api,
             node: versions[0],
@@ -169,7 +167,9 @@ export default class Web3Service extends PrivateService {
         } else if (data instanceof Array && data.length > 0) {
           this._info.account = data[0];
         } else {
-          throw new Error('Expected Web3 to be authenticated, but no default account is available.');
+          throw new Error(
+            'Expected Web3 to be authenticated, but no default account is available.'
+          );
         }
 
         this._installDeauthenticationCheck();
@@ -228,7 +228,11 @@ export default class Web3Service extends PrivateService {
     const ethers = require('ethers');
     this._ethersUtils = ethers.utils;
     this._ethersProvider = this._buildEthersProvider(ethers, chainId);
-    this._ethersWallet = this._buildEthersWallet(ethers, this._privateKey, this._ethersProvider);
+    this._ethersWallet = this._buildEthersWallet(
+      ethers,
+      this._privateKey,
+      this._ethersProvider
+    );
   }
 
   _buildEthersProvider(ethers, chainId) {
@@ -329,7 +333,9 @@ export default class Web3Service extends PrivateService {
       window.web3 = web3;
     } else {
       if (settings.usePresetProvider) {
-        this.get('log').info('Cannot find preset Web3 provider. Creating new instance...');
+        this.get('log').info(
+          'Cannot find preset Web3 provider. Creating new instance...'
+        );
       }
       web3Provider = this._buildWeb3Provider(settings.provider);
     }

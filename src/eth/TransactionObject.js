@@ -158,17 +158,23 @@ export default class TransactionObject extends TransactionLifeCycle {
   }
 
   _waitForReceipt(retries = 5) {
-    const result = Promise.resolve(this._ethersProvider.getTransactionReceipt(this._hash));
-    return retries < 1 ?
-      result :
-      result.then(receipt => {
-        if (!receipt) {
-          // eslint-disable-next-line
-          console.warn('Receipt is null. Retrying ' + retries + ' more time(s)');
-          return new Promise(resolve => setTimeout(() => resolve(), (6 - retries) * 1500)).then(() => this._waitForReceipt(retries - 1));
-        }
+    const result = Promise.resolve(
+      this._ethersProvider.getTransactionReceipt(this._hash)
+    );
+    return retries < 1
+      ? result
+      : result.then(receipt => {
+          if (!receipt) {
+            // eslint-disable-next-line
+            console.warn(
+              'Receipt is null. Retrying ' + retries + ' more time(s)'
+            );
+            return new Promise(resolve =>
+              setTimeout(() => resolve(), (6 - retries) * 1500)
+            ).then(() => this._waitForReceipt(retries - 1));
+          }
 
-        return receipt;
-      });
+          return receipt;
+        });
   }
 }
