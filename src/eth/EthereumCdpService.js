@@ -8,19 +8,24 @@ import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 
 import { utils } from 'ethers';
+import TransactionManager from './TransactionManager';
 
 export default class EthereumCdpService extends PrivateService {
   static buildTestService() {
     const service = new EthereumCdpService();
     const smartContract = SmartContractService.buildTestService();
     const tokenService = EthereumTokenService.buildTestService(smartContract);
-    const conversionService = TokenConversionService.buildTestService(smartContract);
+    const conversionService = TokenConversionService.buildTestService(
+      smartContract
+    );
+    const transactionManager = TransactionManager.buildTestService();
 
     service
       .manager()
       .inject('smartContract', smartContract)
       .inject('token', tokenService)
-      .inject('conversionService', conversionService);
+      .inject('conversionService', conversionService)
+      .inject('transactionManager', transactionManager);
 
     return service;
   }
@@ -29,7 +34,12 @@ export default class EthereumCdpService extends PrivateService {
    * @param {string} name
    */
   constructor(name = 'cdp') {
-    super(name, ['smartContract', 'token', 'conversionService']);
+    super(name, [
+      'smartContract',
+      'token',
+      'conversionService',
+      'transactionManager'
+    ]);
   }
 
   _smartContract() {
@@ -42,6 +52,10 @@ export default class EthereumCdpService extends PrivateService {
 
   _web3Service() {
     return this._smartContract().get('web3');
+  }
+
+  _transactionManager() {
+    return this.get('transactionManager');
   }
 
   _conversionService() {
@@ -69,10 +83,8 @@ export default class EthereumCdpService extends PrivateService {
         .approveToken(peth)
         .then(txn => txn.onMined())
     ]).then(() => {
-      return new TransactionObject(
-        this._tubContract().shut(hexCdpId),
-        this._web3Service(),
-        cdpId
+      return this._transactionManager().createTransactionHybrid(
+        this._tubContract().shut(hexCdpId)
       );
     });
   }
@@ -84,10 +96,13 @@ export default class EthereumCdpService extends PrivateService {
     return this._conversionService()
       .convertEthToPeth(eth)
       .then(txn => txn.onMined())
-      .then(() => new TransactionObject(
-        this._tubContract().lock(hexCdpId, parsedAmount),
-        this._web3Service()
-      ));
+      .then(
+        () =>
+          new TransactionObject(
+            this._tubContract().lock(hexCdpId, parsedAmount),
+            this._web3Service()
+          )
+      );
   }
 
   freePeth(cdpId, amount) {
@@ -124,7 +139,6 @@ export default class EthereumCdpService extends PrivateService {
     const peth = this.get('token').getToken(tokens.PETH);
 
     return Promise.all([
-
       this._conversionService()
         .approveToken(peth)
         .then(txn => txn.onMined()),
@@ -132,9 +146,7 @@ export default class EthereumCdpService extends PrivateService {
       this._conversionService()
         .approveToken(dai)
         .then(txn => txn.onMined())
-
-    ])
-    .then(() => {
+    ]).then(() => {
       return new TransactionObject(
         this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 }),
         this._web3Service()

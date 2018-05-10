@@ -10,6 +10,7 @@ import ZeroExExchangeService from '../exchanges/zeroEx/ZeroExExchangeService';
 import TimerService from './TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
 import ConsoleLogger from './loggers/ConsoleLogger';
+import TransactionManager from '../eth/TransactionManager';
 
 const _services = {
   Web3Service,
@@ -22,7 +23,8 @@ const _services = {
   ZeroExExchangeService,
   TimerService,
   TokenConversionService,
-  ConsoleLogger
+  ConsoleLogger,
+  TransactionManager
 };
 
 export default class DefaultServiceProvider {
