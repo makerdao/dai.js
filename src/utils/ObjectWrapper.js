@@ -1,16 +1,32 @@
+
 function _createFunctionProxy(wrapperObject, functionName, targetObject, handlers) {
-  wrapperObject[functionName] = (...args) => targetObject[functionName].call(targetObject, ...args);
+  wrapperObject[functionName] = (...args) => {
+    handlers.onCall && handlers.onCall(functionName, args);
+    const result = targetObject[functionName].call(targetObject, ...args);
+    handlers.afterCall && handlers.afterCall(functionName, args, result);
+
+    return result;
+  };
 }
 
 function _createGetterProxy(wrapperObject, propertyName, targetObject, handlers) {
   const getterName = _accessorName(propertyName, 'get');
-  wrapperObject[getterName] = () => targetObject[propertyName];
+  wrapperObject[getterName] = () => {
+    handlers.onGet && handlers.onGet(propertyName);
+    const result = targetObject[propertyName];
+    handlers.afterGet && handlers.afterGet(propertyName, result);
+
+    return result;
+  };
 }
 
 function _createSetterProxy(wrapperObject, propertyName, targetObject, handlers) {
   const setterName = _accessorName(propertyName, 'set');
   wrapperObject[setterName] = v => {
+    handlers.onSet && handlers.onSet(propertyName, v);
     targetObject[propertyName] = v;
+    handlers.afterSet && handlers.afterSet(propertyName, v, wrapperObject);
+
     return wrapperObject;
   };
 }
