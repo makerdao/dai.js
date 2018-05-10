@@ -21,6 +21,7 @@
     "token": "EthereumTokenService",
     "conversionService": "TokenConversionService",
     "gasEstimator": "GasEstimatorService",
+    "transactionManager": "TransactionManager",
 
     "timer": "TimerService",
     "log": "ConsoleLogger"

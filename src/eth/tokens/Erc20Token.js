@@ -1,11 +1,11 @@
-import TransactionObject from '../TransactionObject';
 import { utils } from 'ethers';
 
 export default class Erc20Token {
-  constructor(contract, web3Service, decimals = 18) {
+  constructor(contract, web3Service, decimals = 18, transactionManager) {
     this._contract = contract;
     this._web3Service = web3Service;
     this._decimals = decimals;
+    this._transactionManager = transactionManager;
   }
 
   allowance(tokenOwner, spender) {
@@ -19,7 +19,7 @@ export default class Erc20Token {
   }
 
   address() {
-    return this._contract.address;
+    return this._contract.getAddress();
   }
 
   decimals() {
@@ -37,32 +37,28 @@ export default class Erc20Token {
 
   approve(spender, value) {
     const valueInWei = this.toEthereumFormat(value);
-    return new TransactionObject(
-      this._contract.approve(spender, valueInWei),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.approve(spender, valueInWei)
     );
   }
 
   approveUnlimited(spender) {
-    return new TransactionObject(
-      this._contract.approve(spender, -1),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.approve(spender, -1)
     );
   }
 
   transfer(to, value) {
     const valueInWei = this.toEthereumFormat(value);
-    return new TransactionObject(
-      this._contract.transfer(to, valueInWei),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.transfer(to, valueInWei)
     );
   }
 
   transferFrom(from, to, value) {
     const valueInWei = this.toEthereumFormat(value);
-    return new TransactionObject(
-      this._contract.transferFrom(from, to, valueInWei),
-      this._web3Service
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.transferFrom(from, to, valueInWei)
     );
   }
 

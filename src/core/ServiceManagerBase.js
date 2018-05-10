@@ -44,7 +44,9 @@ class ServiceManagerBase {
     this._auth = auth;
     this._type =
       auth === null
-        ? connect === null ? ServiceType.LOCAL : ServiceType.PUBLIC
+        ? connect === null
+          ? ServiceType.LOCAL
+          : ServiceType.PUBLIC
         : ServiceType.PRIVATE;
     this._state = new StateMachine(
       ServiceState.CREATED,

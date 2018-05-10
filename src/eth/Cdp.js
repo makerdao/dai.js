@@ -1,9 +1,9 @@
-import TransactionObject from './TransactionObject';
 import contracts from '../../contracts/contracts';
 
 export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
+    this._transactionManager = this._cdpService.get('transactionManager');
     this._smartContractService = this._cdpService.get('smartContract');
     if (cdpId === null) {
       this._cdpIdPromise = this._newCdpPromise();
@@ -17,7 +17,8 @@ export default class Cdp {
     const ethersUtils = this._smartContractService.get('web3').ethersUtils();
 
     return new Promise(resolve => {
-      tubContract.onlognewcup = function(address, cdpIdBytes32) {
+      // Event handlers need to be registered on the inner Ethers.js contract, for now
+      tubContract._original.onlognewcup = function(address, cdpIdBytes32) {
         if (ethersSigner.address.toLowerCase() == address.toLowerCase()) {
           const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
           this.removeListener();
@@ -33,9 +34,8 @@ export default class Cdp {
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
     const contractPromise = tubContract.open();
-    this._transactionObject = new TransactionObject(
+    this._transactionObject = this._transactionManager.createTransactionHybrid(
       contractPromise,
-      this._smartContractService.get('web3'),
       this
     );
 
@@ -61,12 +61,10 @@ export default class Cdp {
   }
 
   lockEth(eth) {
-    return this.getCdpId()
-      .then(id => this._cdpService.lockEth(id, eth));
+    return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
   }
 
   drawDai(amount) {
-    return this.getCdpId()
-      .then(id => this._cdpService.drawDai(id, amount));
+    return this.getCdpId().then(id => this._cdpService.drawDai(id, amount));
   }
 }

@@ -3,20 +3,20 @@ import Web3Service from './Web3Service';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
+import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
 import '../polyfills';
 
 export default class SmartContractService extends PublicService {
-  static buildTestService(web3 = null) {
+  static buildTestService(web3 = null, suppressOutput = true) {
     const service = new SmartContractService();
-    web3 = web3 || Web3Service.buildTestService();
+    web3 = web3 || Web3Service.buildTestService(null, 5000, suppressOutput);
 
     service
       .manager()
       .inject('log', web3.get('log'))
       .inject('web3', web3);
 
-    //console.log('web3 is: ', web3);
     return service;
   }
 
@@ -24,16 +24,34 @@ export default class SmartContractService extends PublicService {
     super(name, ['web3', 'log']);
   }
 
-  getContractByAddressAndAbi(address, abi) {
+  getContractByAddressAndAbi(address, abi, name = null) {
     if (!address) {
       throw Error('Contract address is required');
     }
 
-    return new Contract(
-      address,
-      abi,
-      this.get('web3').ethersSigner()
-    );
+    if (!name) {
+      name = this.lookupContractName(address);
+    }
+
+    const signer = this.get('web3').ethersSigner(),
+      contract = new Contract(address, abi, signer);
+
+    return ObjectWrapper.addWrapperInterface(
+      { _original: contract }, contract, [], true, false, false,
+      {
+        afterGet: (k, v) => this.get('log').info('GET ' + name + '.' + k + ' >> \'' + v.toString() + '\''),
+        onSet: (k, v) => this.get('log').info('SET ' + name + '.' + k + ' =\'' + v.toString() + '\''),
+        onCall: (k, args) => {
+          signer.getAddress().then(fromAddress => {
+            this.get('log').info(
+              `${fromAddress} >> ${name}.${k}(` +
+              (args.length > 0 ? '\'' : '') +
+              args.map(a => a.toString()).join('\', \'') +
+              (args.length > 0 ? '\')' : ')')
+            );
+          });
+        }
+      });
   }
 
   getContractByName(name, version = null) {
@@ -47,8 +65,8 @@ export default class SmartContractService extends PublicService {
     const mapping = this._getCurrentNetworkMapping()[0].addresses,
       names = Object.keys(mapping);
 
-    for(let i=0; i<names.length; i++) {
-      for(let j=0; j<mapping[names[i]].length; j++) {
+    for (let i = 0; i < names.length; i++) {
+      for (let j = 0; j < mapping[names[i]].length; j++) {
         if (mapping[names[i]][j].address.toUpperCase() === address) {
           return names[i];
         }
@@ -58,16 +76,24 @@ export default class SmartContractService extends PublicService {
     return null;
   }
 
-  getContractState(name, recursion = 0, beautify = true, exclude = ['tag', 'SAI_PEP.read'], visited = []) {
+  getContractState(
+    name,
+    recursion = 0,
+    beautify = true,
+    exclude = ['tag', 'SAI_PEP.read'],
+    visited = []
+  ) {
     const info = this._getContractInfo(name),
       contract = this.getContractByAddressAndAbi(info.address, info.abi),
-
       inspectableMembers = info.abi
         .filter(m => m.constant && m.inputs.length < 1)
         .map(m => {
           const member = m.name;
 
-          if (exclude.indexOf(member) > -1 || exclude.indexOf(name + '.' + member) > -1) {
+          if (
+            exclude.indexOf(member) > -1 ||
+            exclude.indexOf(name + '.' + member) > -1
+          ) {
             return {
               name: member,
               promise: Promise.resolve('[EXCLUDED]')
@@ -76,7 +102,9 @@ export default class SmartContractService extends PublicService {
 
           return {
             name: member,
-            promise: contract[m.name]().catch(reason => '[ERROR: ' + reason + ']')
+            promise: contract[m.name]().catch(
+              reason => '[ERROR: ' + reason + ']'
+            )
           };
         });
 
@@ -85,22 +113,36 @@ export default class SmartContractService extends PublicService {
     return Promise.all(inspectableMembers.map(m => m.promise))
       .then(results => {
         const valuePromises = [];
-        for (let i=0; i<results.length; i++) {
+        for (let i = 0; i < results.length; i++) {
           const key = inspectableMembers[i].name,
             value = results[i],
             contractName = this.lookupContractName(value.toString());
 
-          if (contractName && recursion > 0 && visited.indexOf(contractName) < 0) {
+          if (
+            contractName &&
+            recursion > 0 &&
+            visited.indexOf(contractName) < 0
+          ) {
             valuePromises.push(
-              this.getContractState(contractName, recursion - 1, beautify, exclude, visited)
-                .then(childState => [key, childState])
+              this.getContractState(
+                contractName,
+                recursion - 1,
+                beautify,
+                exclude,
+                visited
+              ).then(childState => [key, childState])
             );
             visited = visited.concat([contractName]);
-
           } else if (contractName && visited.indexOf(contractName) > -1) {
-            valuePromises.push([key, beautify ? value + '; ' + contractName + '; [VISITED]' : value]);
+            valuePromises.push([
+              key,
+              beautify ? value + '; ' + contractName + '; [VISITED]' : value
+            ]);
           } else if (contractName) {
-            valuePromises.push([key, beautify ? value + '; ' + contractName : value]);
+            valuePromises.push([
+              key,
+              beautify ? value + '; ' + contractName : value
+            ]);
           } else {
             valuePromises.push([key, beautify ? value.toString() : value]);
           }
@@ -109,8 +151,8 @@ export default class SmartContractService extends PublicService {
         return Promise.all(valuePromises);
       })
       .then(values => {
-        const result = { __self: contract.address + '; ' + name };
-        values.forEach(v => result[v[0]] = v.length > 2 ? v.slice(1) : v[1]);
+        const result = { __self: contract.getAddress() + '; ' + name };
+        values.forEach(v => (result[v[0]] = v.length > 2 ? v.slice(1) : v[1]));
         return result;
       });
   }

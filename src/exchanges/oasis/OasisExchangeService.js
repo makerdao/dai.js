@@ -37,12 +37,13 @@ export default class OasisExchangeService extends PrivateService {
     return service;
   }
 /*
-  static buildTestService(privateKey = null) {
+  static buildTestService(privateKey = null, suppressOutput = true) {
     const service = new OasisExchangeService(),
-      web3 = Web3Service.buildTestService(privateKey),
-      smartContractService = SmartContractService.buildTestService(web3),
+      web3 = Web3Service.buildTestService(privateKey, 5000, suppressOutput),
+      smartContractService = SmartContractService.buildTestService(web3, suppressOutput),
       ethereumTokenService = EthereumTokenService.buildTestService(
-        smartContractService
+        smartContractService,
+        suppressOutput
       );
 
     service
@@ -59,14 +60,15 @@ export default class OasisExchangeService extends PrivateService {
     return service;
   }*/
 
-  static buildTestService(privateKey = null) {
+  static buildTestService(privateKey = null, suppressOutput = true) {
     const service = new OasisExchangeService(),
-      web3 = Web3Service.buildTestService(privateKey),
-      smartContractService = SmartContractService.buildTestService(web3),
+      web3 = Web3Service.buildTestService(privateKey, suppressOutput),
+      smartContractService = SmartContractService.buildTestService(web3, suppressOutput),
       ethereumTokenService = EthereumTokenService.buildTestService(
-        smartContractService
+        smartContractService,
+        suppressOutput
       ),
-      cdpService = EthereumCdpService.buildTestService(smartContractService, EthereumTokenService, TokenConversionService.buildTestService(smartContractService));
+      cdpService = EthereumCdpService.buildTestService(smartContractService, EthereumTokenService, TokenConversionService.buildTestService(smartContractService, suppressOutput), suppressOutput);
 
     service
       .manager()

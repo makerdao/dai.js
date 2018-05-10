@@ -21,7 +21,7 @@ test('getContractByName should return a functioning contract', done => {
     service.getContractByName(contracts.SAI_TOP).gem().then(
       data => {
         expect(data.toString().toUpperCase())
-          .toEqual(service.getContractByName(tokens.WETH).address.toUpperCase());
+          .toEqual(service.getContractByName(tokens.WETH).getAddress().toUpperCase());
         done();
       }
     );

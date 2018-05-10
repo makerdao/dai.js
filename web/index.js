@@ -49,7 +49,6 @@ setTimeout(() => {
   let cdp = null;
 
   window.maker.openCdp()
-    .then(tx => tx.onMined())
     .then(x => updateInfo(cdp = x))
     .then(() => cdp.lockEth('0.1'))
     .then(() => updateInfo(cdp))

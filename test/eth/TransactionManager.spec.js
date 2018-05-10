@@ -84,6 +84,22 @@ test('should resolve the hybrid object when its implicit state is reached', done
   });
 });
 
+test('should register all created transaction hybrids', done => {
+  buildTestServices().then(services => {
+    const contractTransaction = services.contract.getContractByName(tokens.DAI)
+      .approve(services.defaultAccount, '1000000000000000000'),
+      hybrids = [
+        services.txMgr.createTransactionHybrid(contractTransaction),
+        services.txMgr.createTransactionHybrid(contractTransaction),
+        services.txMgr.createTransactionHybrid(contractTransaction)
+      ];
+
+    expect(services.txMgr.getTransactions().length).toBe(3);
+    expect(services.txMgr.getTransactions()).toEqual(hybrids);
+    Promise.all(hybrids).then(() => done());
+  });
+});
+
 test('should reject invalid implicit states', done => {
   buildTestServices().then(services => {
     const contractTransaction = services.contract.getContractByName(tokens.DAI)

@@ -47,12 +47,12 @@ test('wrap and unwrap ETH', (done) => {
     })
     .then(b => {
       originalBalance = parseFloat(b);
-      return token.deposit('0.1').onMined();
+      return token.deposit('0.1');
     })
     .then(() => token.balanceOf(owner))
     .then(b => {
       expect(parseFloat(b)).toBeCloseTo(originalBalance + 0.1, 12);
-      return token.withdraw('0.1').onMined();
+      return token.withdraw('0.1');
     })
     .then(() => token.balanceOf(owner))
     .then(b => {

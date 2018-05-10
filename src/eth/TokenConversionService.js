@@ -36,7 +36,7 @@ export default class TokenConversionService extends PrivateService {
 
     return new Promise((resolve, reject) => {
       try {
-        resolve(token.approveUnlimited(tubContract.address));
+        resolve(token.approveUnlimited(tubContract.getAddress()));
       } catch (err) {
         reject(err.message);
       }
@@ -46,22 +46,18 @@ export default class TokenConversionService extends PrivateService {
   convertEthToWeth(eth) {
     const wethToken = this._getToken(tokens.WETH);
 
-    return this.approveToken(wethToken)
-      .then(txn => txn.onMined())
-      .then(() => wethToken.deposit(eth));
+    return this.approveToken(wethToken).then(() => wethToken.deposit(eth));
   }
 
   convertWethToPeth(weth) {
     const pethToken = this._getToken(tokens.PETH);
 
-    return this.approveToken(pethToken)
-      .then(txn => txn.onMined())
-      .then(() => pethToken.join(weth));
+    return this.approveToken(pethToken).then(() => pethToken.join(weth));
   }
 
   convertEthToPeth(value) {
-    return this.convertEthToWeth(value)
-      .then(txn => txn.onMined())
-      .then(() => this.convertWethToPeth(value));
+    return this.convertEthToWeth(value).then(() =>
+      this.convertWethToPeth(value)
+    );
   }
 }

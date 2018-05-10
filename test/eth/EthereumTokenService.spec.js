@@ -24,8 +24,8 @@ test('getTokenVersions returns token versions using remote blockchain', (done) =
       expect(tokenVersions[tokens.DAI]).toEqual([1]);
       expect(tokenVersions[tokens.ETH]).toEqual([1]);
 
-      expect(ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase())
-        .toBe(ethereumTokenService.getToken(tokens.MKR, 2)._contract.address.toUpperCase());
+      expect(ethereumTokenService.getToken(tokens.MKR)._contract.getAddress().toUpperCase())
+        .toBe(ethereumTokenService.getToken(tokens.MKR, 2)._contract.getAddress().toUpperCase());
       done();
     });
 });
@@ -36,11 +36,11 @@ test('getToken returns token object of correct version', (done) => {
   ethereumTokenService.manager().authenticate()
     .then(() => {
 
-      expect(ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase())
-        .toBe(ethereumTokenService.getToken(tokens.MKR, 2)._contract.address.toUpperCase());
+      expect(ethereumTokenService.getToken(tokens.MKR)._contract.getAddress().toUpperCase())
+        .toBe(ethereumTokenService.getToken(tokens.MKR, 2)._contract.getAddress().toUpperCase());
 
-      expect(ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase())
-        .not.toBe(ethereumTokenService.getToken(tokens.MKR, 1)._contract.address.toUpperCase());
+      expect(ethereumTokenService.getToken(tokens.MKR)._contract.getAddress().toUpperCase())
+        .not.toBe(ethereumTokenService.getToken(tokens.MKR, 1)._contract.getAddress().toUpperCase());
 
       done();
     });
@@ -64,7 +64,7 @@ test('approve DAI to Oasis', (done) => setTimeout(() => {
   ethereumTokenService.manager().authenticate()
     .then(() => {
       const token = ethereumTokenService.getToken(tokens.DAI),
-        makerOtcAddress = ethereumTokenService.get('smartContract').getContractByName(contracts.MAKER_OTC).address;
+        makerOtcAddress = ethereumTokenService.get('smartContract').getContractByName(contracts.MAKER_OTC).getAddress();
       return token.approveUnlimited(makerOtcAddress);
     })
     .then(transaction =>{

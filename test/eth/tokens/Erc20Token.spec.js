@@ -39,8 +39,7 @@ test('approve an ERC20 (MKR) allowance', (done) => {
 
   ethereumTokenService.manager().authenticate().then(() => {
     token = ethereumTokenService.getToken(tokens.MKR);
-    const transactionWrapper = token.approve(spender, allowance);
-    return transactionWrapper.onMined();
+    token.approve(spender, allowance);
   })
     .then(()=>{
         return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
@@ -49,7 +48,6 @@ test('approve an ERC20 (MKR) allowance', (done) => {
       expect(result.toString()).toBe(allowance);
       return token.approve(spender, '0'); //reset allowance to 0
     })
-    .then(transaction=> transaction.onMined())
     .then(()=>{
       done();
     });
@@ -63,8 +61,7 @@ test('approveUnlimited an ERC20 (MKR) allowance', (done) => {
 
   ethereumTokenService.manager().authenticate().then(() => {
     token = ethereumTokenService.getToken(tokens.MKR);
-    const TransactionWrapper = token.approveUnlimited(spender);
-    return TransactionWrapper.onMined();
+    token.approveUnlimited(spender);
   })
     .then(() => {
       return token.allowance(ethereumTokenService.get('web3').defaultAccount(), spender);
@@ -84,14 +81,13 @@ test('ERC20 transfer should move transferValue from sender to receiver', done =>
   ethereumTokenService.manager().authenticate().then(() => {
     sender = ethereumTokenService.get('web3').defaultAccount();
     token =  ethereumTokenService.getToken(tokens.WETH);
-    return token.deposit('0.1').onMined();
+    return token.deposit('0.1');
   })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
       senderBalance = parseFloat(balances[0].toString());
       receiverBalance = parseFloat(balances[1].toString());
-      const TransactionWrapper = token.transfer(receiver, '0.1');
-      return TransactionWrapper.onMined();
+      return token.transfer(receiver, '0.1');
     })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
@@ -113,14 +109,13 @@ test('ERC20 transferFrom should move transferValue from sender to receiver', don
   ethereumTokenService.manager().authenticate().then(() => {
     sender = ethereumTokenService.get('web3').defaultAccount();
     token =  ethereumTokenService.getToken(tokens.WETH);
-    return token.deposit('0.1').onMined();
+    return token.deposit('0.1');
   })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
       senderBalance = parseFloat(balances[0].toString());
       receiverBalance = parseFloat(balances[1].toString());
-      const TransactionWrapper = token.transferFrom(sender, receiver, '0.1');
-      return TransactionWrapper.onMined();
+      return token.transferFrom(sender, receiver, '0.1');
     })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
@@ -136,18 +131,15 @@ test('ERC20 transferFrom should move transferValue from sender to receiver', don
 test('totalSupply() should increase when new tokens are minted', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
-  // eslint-disable-next-line
-  let sender = null, token = null, initialSupply = null;
+  let token, initialSupply;
 
   ethereumTokenService.manager().authenticate().then(() => {
-    sender = ethereumTokenService.get('web3').defaultAccount();
     token =  ethereumTokenService.getToken(tokens.WETH);
     return token.totalSupply();
   })
     .then(supply => {
       initialSupply = parseFloat(supply.toString());
-      const TransactionWrapper = token.deposit('0.1');
-      return TransactionWrapper.onMined();
+      return token.deposit('0.1');
     })
     .then(() => {
       return token.totalSupply();
