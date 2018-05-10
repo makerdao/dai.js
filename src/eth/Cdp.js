@@ -67,4 +67,8 @@ export default class Cdp {
   drawDai(amount) {
     return this.getCdpId().then(id => this._cdpService.drawDai(id, amount));
   }
+
+  freePeth(amount) {
+    return this.getCdpId().then(id => this._cdpService.freePeth(id, amount));
+  }
 }

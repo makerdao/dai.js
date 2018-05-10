@@ -3,7 +3,7 @@ import EthereumCdpService from '../../src/eth/EthereumCdpService';
 let createdCdpService, cdp;
 
 beforeEach(() => {
-  return createdCdpService = EthereumCdpService.buildTestService(false);
+  return createdCdpService = EthereumCdpService.buildTestService();
 });
 
 function openCdp(){

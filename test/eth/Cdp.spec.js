@@ -5,7 +5,7 @@ import tokens from '../../contracts/tokens';
 let createdCdpService;
 
 beforeAll(() => {
-  return createdCdpService = EthereumCdpService.buildTestService(false);
+  return createdCdpService = EthereumCdpService.buildTestService();
 });
 
 test('should open a new CDP and return its ID', done => {
@@ -87,6 +87,26 @@ test('should be able to lock eth', done => {
     });
   });
 }, 5000);
+
+test('should be able to free peth', done => {
+  let cdp;
+  let firstInfoCall;
+  
+  createdCdpService.manager().authenticate()
+  .then(() => createdCdpService.openCdp())
+  .then(newCdp => {
+    cdp = newCdp;
+    cdp.lockEth('0.1')
+    .then(() => cdp.getInfo())
+    .then(info => firstInfoCall = info)
+    .then(() => cdp.freePeth('0.1'))
+    .then(() => cdp.getInfo())
+    .then(secondInfoCall => {
+      expect(parseFloat(secondInfoCall.ink)).toBeCloseTo(parseFloat(firstInfoCall.ink) - 100000000000000000);
+      done();
+    });
+  });
+});
 
 test('should be able to draw DAI', done => {
   let newCdp, firstInkBalance, firstDaiBalance, defaultAccount;
