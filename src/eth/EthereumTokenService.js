@@ -60,7 +60,11 @@ export default class EthereumTokenService extends PrivateService {
     }
 
     if (symbol === tokens.ETH) {
-      return new EtherToken(this.get('web3'), this.get('gasEstimator'));
+      return new EtherToken(
+        this.get('web3'),
+        this.get('gasEstimator'),
+        this.get('transactionManager')
+      );
     } else {
       const mapping = this._getCurrentNetworkMapping(),
         tokenInfo = mapping[symbol],

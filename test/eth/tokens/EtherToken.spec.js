@@ -60,7 +60,7 @@ test('ether transfer should move transferValue from sender to receiver', done =>
     .then(balances => {
       senderBalance = parseFloat(balances[0]);
       receiverBalance = parseFloat(balances[1]);
-      return token.transfer(receiver, '0.1').onMined();
+      return token.transfer(receiver, '0.1');
     })
     .then(() => Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]))
     .then(balances => {
@@ -86,7 +86,7 @@ test('ether transferFrom should move transferValue from sender to receiver', don
     .then(balances => {
       senderBalance = parseFloat(balances[0]);
       receiverBalance = parseFloat(balances[1]);
-      return token.transferFrom(sender, receiver, '0.1').onMined();
+      return token.transferFrom(sender, receiver, '0.1');
     })
     .then(() => {
       return Promise.all([ token.balanceOf(sender), token.balanceOf(receiver) ]);

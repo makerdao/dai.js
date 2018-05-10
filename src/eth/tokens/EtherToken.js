@@ -1,10 +1,10 @@
-import TransactionObject from '../TransactionObject';
-const utils = require('ethers').utils;
+import { utils } from 'ethers';
 
 export default class EtherToken {
-  constructor(web3Service, gasEstimatorService) {
+  constructor(web3Service, gasEstimatorService, transactionManager) {
     this._web3 = web3Service;
     this._gasEstimator = gasEstimatorService;
+    this._transactionManager = transactionManager;
   }
 
   // eslint-disable-next-line
@@ -38,20 +38,22 @@ export default class EtherToken {
       value: valueInWei
       //gasPrice: 500000000
     });
-    return new TransactionObject(tx.then(tx => ({ hash: tx })), this._web3);
+
+    return this._transactionManager.createTransactionHybrid(
+      tx.then(tx => ({ hash: tx }))
+    );
   }
 
   transferFrom(fromAddress, toAddress, transferValue) {
     const valueInWei = utils.parseEther(transferValue).toString();
-    return new TransactionObject(
-      this._web3.eth
-        .sendTransaction({
-          from: fromAddress,
-          to: toAddress,
-          value: valueInWei
-        })
-        .then(tx => ({ hash: tx })),
-      this._web3
+    const tx = this._web3.eth.sendTransaction({
+      from: fromAddress,
+      to: toAddress,
+      value: valueInWei
+    });
+
+    return this._transactionManager.createTransactionHybrid(
+      tx.then(tx => ({ hash: tx }))
     );
   }
 }
