@@ -11,7 +11,7 @@ function createMaker() {
 test('openCdp should open a CDP', done => {
   const maker = createMaker();
 
-  maker.openCdp().then(tx => tx.onMined()).then(cdp => cdp.getCdpId()).then(id => {
+  maker.openCdp().then(cdp => cdp.getCdpId()).then(id => {
       expect(typeof id).toBe('number');
       expect(id).toBeGreaterThan(0);
       done();
@@ -23,7 +23,6 @@ test('should create a new CDP object for existing CDPs', done => {
   let createdCdp;
 
   maker.openCdp()
-    .then(tx => tx.onMined())
     .then(cdp => {
       createdCdp = cdp;
       cdp.getCdpId()
@@ -43,7 +42,6 @@ test('should validate the provided CDP ID', done => {
   let cdpId;
 
   maker.openCdp()
-    .then(tx => tx.onMined())
     .then(cdp => cdp.getCdpId())
     .then(id => {
       cdpId = id;
