@@ -66,7 +66,7 @@ test('should be able to close a CDP', done => {
       expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
       done();
     });
-  })
+  });
 }, 5000);
 
 test('should be able to lock eth', done => {

@@ -1,4 +1,3 @@
-import TransactionObject from '../TransactionObject';
 import { utils } from 'ethers';
 
 export default class Erc20Token {
@@ -45,21 +44,21 @@ export default class Erc20Token {
 
   approveUnlimited(spender) {
     return this._transactionManager.createTransactionHybrid(
-      this._contract.approve(spender, -1),
+      this._contract.approve(spender, -1)
     );
   }
 
   transfer(to, value) {
     const valueInWei = this.toEthereumFormat(value);
     return this._transactionManager.createTransactionHybrid(
-      this._contract.transfer(to, valueInWei),
+      this._contract.transfer(to, valueInWei)
     );
   }
 
   transferFrom(from, to, value) {
     const valueInWei = this.toEthereumFormat(value);
     return this._transactionManager.createTransactionHybrid(
-      this._contract.transferFrom(from, to, valueInWei),
+      this._contract.transferFrom(from, to, valueInWei)
     );
   }
 

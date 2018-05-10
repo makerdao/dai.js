@@ -3,7 +3,6 @@ import SmartContractService from './SmartContractService';
 import EthereumTokenService from './EthereumTokenService';
 import TokenConversionService from './TokenConversionService';
 import contracts from '../../contracts/contracts';
-import TransactionObject from './TransactionObject';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 
@@ -76,12 +75,8 @@ export default class EthereumCdpService extends PrivateService {
     const dai = this.get('token').getToken(tokens.DAI);
 
     return Promise.all([
-      this._conversionService()
-        .approveToken(dai)
-        .then(txn => txn.onMined()),
-      this._conversionService()
-        .approveToken(peth)
-        .then(txn => txn.onMined())
+      this._conversionService().approveToken(dai),
+      this._conversionService().approveToken(peth)
     ]).then(() => {
       return this._transactionManager().createTransactionHybrid(
         this._tubContract().shut(hexCdpId)
@@ -95,7 +90,6 @@ export default class EthereumCdpService extends PrivateService {
 
     return this._conversionService()
       .convertEthToPeth(eth)
-      .then(txn => txn.onMined())
       .then(() => {
         return this._transactionManager().createTransactionHybrid(
           this._tubContract().lock(hexCdpId, parsedAmount)
@@ -110,12 +104,8 @@ export default class EthereumCdpService extends PrivateService {
     const peth = this.get('token').getToken(tokens.PETH);
 
     return Promise.all([
-      this._conversionService()
-        .approveToken(weth)
-        .then(txn => txn.onMined()),
-      this._conversionService()
-        .approveToken(peth)
-        .then(txn => txn.onMined())
+      this._conversionService().approveToken(weth),
+      this._conversionService().approveToken(peth)
     ]).then(() => {
       return this._transactionManager().createTransactionHybrid(
         this._tubContract().free(hexCdpId, parsedAmount, { gasLimit: 200000 })
@@ -136,13 +126,8 @@ export default class EthereumCdpService extends PrivateService {
     const peth = this.get('token').getToken(tokens.PETH);
 
     return Promise.all([
-      this._conversionService()
-        .approveToken(peth)
-        .then(txn => txn.onMined()),
-
-      this._conversionService()
-        .approveToken(dai)
-        .then(txn => txn.onMined())
+      this._conversionService().approveToken(peth),
+      this._conversionService().approveToken(dai)
     ]).then(() => {
       return this._transactionManager().createTransactionHybrid(
         this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })

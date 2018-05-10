@@ -1,4 +1,3 @@
-import TransactionObject from './TransactionObject';
 import contracts from '../../contracts/contracts';
 
 export default class Cdp {

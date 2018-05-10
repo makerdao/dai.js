@@ -131,11 +131,9 @@ test('ERC20 transferFrom should move transferValue from sender to receiver', don
 test('totalSupply() should increase when new tokens are minted', done => {
   const ethereumTokenService = EthereumTokenService.buildTestService();
 
-  // eslint-disable-next-line
-  let sender = null, token = null, initialSupply = null;
+  let token, initialSupply;
 
   ethereumTokenService.manager().authenticate().then(() => {
-    sender = ethereumTokenService.get('web3').defaultAccount();
     token =  ethereumTokenService.getToken(tokens.WETH);
     return token.totalSupply();
   })

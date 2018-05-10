@@ -19,7 +19,6 @@ function openCdp(){
 function lockEth(amount){
   return openCdp()
     .then(() => createdCdpService.lockEth(createdCdpId, amount))
-    .then(txn => txn.onMined())
     .then(cdp => cdp.getCdpInfo());
 }
 */
@@ -52,7 +51,7 @@ test('should open and then shut a CDP', done => {
       .catch((err) => { 
         done.fail(new Error('shutting CDP had an error: ', err));
       })
-      .then(() => {  
+      .then(() => {
         createdCdpService.getCdpInfo(id)
         .then(secondInfoCall => {
           expect(firstInfoCall).not.toBe(secondInfoCall);
@@ -72,7 +71,6 @@ xtest('should open and then shut a CDP with peth locked in it', done => {
     createdCdpService.getCdpInfo(id)
     .then(info => firstInfoCall = info)
     .then(() => cdp.lockEth('0.1'))
-    .then(txn => txn.onMined())
     .then(() => {
       createdCdpService.shutCdp(id)
       .catch((err) => { 
@@ -124,13 +122,11 @@ xtest('should be able to free peth from a cdp', done => {
       newCdp = cdp;
       newCdp.getCdpId().then(id => cdpId = id)
       .then(() => createdCdpService.lockEth(cdpId, '0.1'))
-      .then(txn => txn.onMined())
-      .then(() => {
+        .then(() => {
         newCdp.getInfo().then(info => firstBalance = parseFloat(info.ink))
         .then(() => {
           createdCdpService.freePeth(cdpId, '0.1')
-          .then(txn => txn.onMined())
-          .then(() => {
+                .then(() => {
             newCdp.getInfo().then(info => {
               expect(parseFloat(info.ink)).toBeCloseTo(firstBalance - 100000000000000000);
               done();
