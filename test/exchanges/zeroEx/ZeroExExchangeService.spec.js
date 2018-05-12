@@ -3,9 +3,9 @@ import ZeroExExchangeService from '../../../src/exchanges/zeroEx/ZeroExExchangeS
 import tokens from '../../../contracts/tokens';
 // import testAccountProvider from '../../../src/utils/TestAccountProvider';
 // import orderStyle from '../../../src/exchanges/orderStyle';
-import TransactionState from '../../../src/eth/TransactionState';
-import contracts from '../../../contracts/contracts';
-const utils = require('ethers').utils;
+// import TransactionState from '../../../src/eth/TransactionState';
+// import contracts from '../../../contracts/contracts';
+// const utils = require('ethers').utils;
 import Web3ServiceList from '../../../src/utils/Web3ServiceList';
 
 afterEach(() => {
@@ -44,13 +44,8 @@ test('get fees sell Dai - kovan', (done) => {
   const apiEndpoint = 'https://api.kovan.radarrelay.com/0x/v0';
   const zeroExExchangeService = ZeroExExchangeService.buildKovanService(apiEndpoint);
   zeroExExchangeService.manager().authenticate()
-    .then(() => {
-      zeroExExchangeService.sellDai('0.01', tokens.WETH)
-      .then(result => {
-        console.log('result', result);
-      });
-      done();
-    });
+    .then(() => zeroExExchangeService.sellDai('0.01', tokens.WETH))
+    .then(() => done());
 },
 10000
 );
