@@ -22,6 +22,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._logs = null;
     this._hash = null;
     this._getTransactionData();
+    this._self = this;
   }
 
   timeStampSubmitted() {
@@ -139,7 +140,7 @@ export default class TransactionObject extends TransactionLifeCycle {
           this._mine(); //set state to mined
 
           //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
-          const requiredConfirmations = 3;
+          const requiredConfirmations = 2;
           this._web3Service.waitForBlockNumber(
             receipt.blockNumber + requiredConfirmations,
             () => {

@@ -5,14 +5,14 @@ import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 
 export default class TokenConversionService extends PrivateService {
-  static buildTestService(smartContract = null) {
+  static buildTestService(smartContract = null, token = null) {
     const service = new TokenConversionService();
-    smartContract = smartContract || SmartContractService.buildTestService();
-    const tokenService = EthereumTokenService.buildTestService(smartContract);
+    const smartContractService = smartContract || SmartContractService.buildTestService();
+    const tokenService = token || EthereumTokenService.buildTestService(smartContract);
 
     service
       .manager()
-      .inject('smartContract', smartContract)
+      .inject('smartContract', smartContractService)
       .inject('token', tokenService);
 
     return service;

@@ -60,16 +60,11 @@ export default class OasisExchangeService extends PrivateService {
     return service;
   }*/
 
-  static buildTestService(privateKey = null, suppressOutput = true) {
+  static buildTestService(suppressOutput = true) {
     const service = new OasisExchangeService(),
-      web3 = Web3Service.buildTestService(privateKey, suppressOutput),
-      smartContractService = SmartContractService.buildTestService(web3, suppressOutput),
-      ethereumTokenService = EthereumTokenService.buildTestService(
-        smartContractService,
-        suppressOutput
-      ),
-      cdpService = EthereumCdpService.buildTestService(smartContractService, EthereumTokenService, TokenConversionService.buildTestService(smartContractService, suppressOutput), suppressOutput);
-
+      cdpService = EthereumCdpService.buildTestService(suppressOutput),
+      smartContractService = cdpService.get('smartContract'),
+      ethereumTokenService = cdpService.get('token');
     service
       .manager()
       .inject('log', smartContractService.get('log'))
@@ -114,7 +109,7 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
         { gasLimit: 300000 }
       ),
       this.get('web3'),
-      oasisContract
+      oasisContract._original
     );
   }
 
@@ -143,7 +138,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
         { gasLimit: 300000 }
       ),
       this.get('web3'),
-      oasisContract
+      oasisContract._original
     );
   }
 

@@ -19,7 +19,8 @@ export default class EthereumCdpService extends PrivateService {
       transactionManager
     );
     const conversionService = TokenConversionService.buildTestService(
-      smartContract
+      smartContract,
+      tokenService
     );
 
     service
