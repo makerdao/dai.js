@@ -75,9 +75,10 @@ test('should resolve the hybrid object when its implicit state is reached', done
           done();
         });
 
-        const RequiredConfirmations = 3; // Update this when the value in TransactionObject changes!!
+        let promise = Promise.resolve(), RequiredConfirmations = 3; // Update this when the value in TransactionObject changes!!
         for (let i=0; !finished && i<RequiredConfirmations; i++) {
-          contract.approve(services.defaultAccount, '1000000000000000000');
+          promise = promise
+            .then(() => contract.approve(services.defaultAccount, '100000000000000000' + (i+1).toString()));
         }
       });
 

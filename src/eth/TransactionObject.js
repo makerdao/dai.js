@@ -97,7 +97,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._transaction
       .then(
         tx => {
-          //console.log('tx:', tx);
           this._pending(); //set state to pending
           this._hash = tx.hash;
           return Promise.any([
@@ -113,7 +112,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         tx => {
-          //console.log('tx after waiting: ', tx);
           gasPrice = tx.gasPrice;
           this._timeStampMined = new Date();
           return this._waitForReceipt();
@@ -140,7 +138,7 @@ export default class TransactionObject extends TransactionLifeCycle {
           this._mine(); //set state to mined
 
           //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
-          const requiredConfirmations = 2;
+          const requiredConfirmations = 3;
           this._web3Service.waitForBlockNumber(
             receipt.blockNumber + requiredConfirmations,
             () => {
