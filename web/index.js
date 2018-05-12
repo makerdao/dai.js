@@ -3,6 +3,8 @@ import Maker from '../src/Maker';
 import ConfigFactory from '../src/utils/ConfigFactory';
 import Web3ProviderType from '../src/eth/Web3ProviderType';
 import tokens from '../contracts/tokens';
+import Vue from 'vue';
+import MakerDebugger from '../components/MakerDebugger.vue';
 
 function updateInfo(cdp, usingMetaMask) {
   return Promise.all([
@@ -15,7 +17,7 @@ function updateInfo(cdp, usingMetaMask) {
   .then(results => {
     const id = results[0], info = {};
     Object.keys(results[1]).forEach(k => info[k] = results[1][k].toString());
-    window.document.getElementsByTagName('body')[0].innerHTML = `<div>
+    window.document.getElementById('cdp-output').innerHTML = `<div>
             <h3>CDP ${id}</h3>
             <ul class="objectFields">
                 <li><strong>lad:</strong> ${info.lad}</li>
@@ -31,7 +33,16 @@ function updateInfo(cdp, usingMetaMask) {
   });
 }
 
+window.document.getElementsByTagName('body')[0].innerHTML =
+  `<div id="cdp-output"></div><div id="maker-dbg-container"></div>`;
+
 setTimeout(() => {
+  window.vm = new Vue({
+    el: '#maker-dbg-container',
+    render: createElement => createElement('maker-debugger'),
+    components: { MakerDebugger }
+  });
+
   const config = ConfigFactory.create('decentralized-oasis-without-proxies'),
     param = new URL(window.location.href).searchParams.get('inject') || '',
     useMetaMask = param.length > 0 && param !== '0';
@@ -46,8 +57,8 @@ setTimeout(() => {
   };
 
   window.maker = new Maker(config);
-  let cdp = null;
 
+  let cdp = null;
   window.maker.openCdp()
     .then(x => updateInfo(cdp = x))
     .then(() => cdp.lockEth('0.1'))

@@ -1,5 +1,9 @@
-
-function _createFunctionProxy(wrapperObject, functionName, targetObject, handlers) {
+function _createFunctionProxy(
+  wrapperObject,
+  functionName,
+  targetObject,
+  handlers
+) {
   wrapperObject[functionName] = (...args) => {
     handlers.onCall && handlers.onCall(functionName, args);
     const result = targetObject[functionName].call(targetObject, ...args);
@@ -9,7 +13,12 @@ function _createFunctionProxy(wrapperObject, functionName, targetObject, handler
   };
 }
 
-function _createGetterProxy(wrapperObject, propertyName, targetObject, handlers) {
+function _createGetterProxy(
+  wrapperObject,
+  propertyName,
+  targetObject,
+  handlers
+) {
   const getterName = _accessorName(propertyName, 'get');
   wrapperObject[getterName] = () => {
     handlers.onGet && handlers.onGet(propertyName);
@@ -20,7 +29,12 @@ function _createGetterProxy(wrapperObject, propertyName, targetObject, handlers)
   };
 }
 
-function _createSetterProxy(wrapperObject, propertyName, targetObject, handlers) {
+function _createSetterProxy(
+  wrapperObject,
+  propertyName,
+  targetObject,
+  handlers
+) {
   const setterName = _accessorName(propertyName, 'set');
   wrapperObject[setterName] = v => {
     handlers.onSet && handlers.onSet(propertyName, v);
@@ -37,9 +51,7 @@ function _collectAllPropertyNames(object, exclude = []) {
   );
 
   if (object.__proto__.__proto__) {
-    result = result.concat(
-      _collectAllPropertyNames(object.__proto__, exclude)
-    );
+    result = result.concat(_collectAllPropertyNames(object.__proto__, exclude));
   }
 
   return result.filter(p => p !== 'constructor');
@@ -58,7 +70,6 @@ function _isFunction(value) {
 }
 
 export default class ObjectWrapper {
-
   static addWrapperInterface(
     wrapper,
     innerObject,
@@ -71,10 +82,8 @@ export default class ObjectWrapper {
     _collectAllPropertyNames(innerObject, exclude).forEach(k => {
       if (excludeSemiPrivate && k[0] === '_') {
         // do nothing
-
       } else if (_isFunction(innerObject[k])) {
         _createFunctionProxy(wrapper, k, innerObject, handlers);
-
       } else {
         if (createGetters) {
           _createGetterProxy(wrapper, k, innerObject, handlers);

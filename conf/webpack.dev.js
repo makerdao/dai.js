@@ -9,6 +9,8 @@ const extractSass = new ExtractTextPlugin({
   filename: '[name].[contenthash].css',
 });
 
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
+
 module.exports = Merge(CommonConfig, {
   entry: {
     app: './src/index.js',
@@ -18,33 +20,40 @@ module.exports = Merge(CommonConfig, {
   module: {
     rules: [
       {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+      {
+        test: /\.css/,
+        use: [
+          'vue-style-loader',
+          'css-loader'
+        ]
+      },
+      {
         test: /\.scss$/,
-        use: extractSass.extract({
-          use: [
-            {
-              loader: 'css-loader',
-              options: {
-                sourceMap: true,
-              },
+        use: [
+          'vue-style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
             },
-            {
-              loader: 'sass-loader',
-              options: {
-                sourceMap: true,
-              },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
             },
-          ],
-          // use style-loader in development
-          fallback: 'style-loader',
-        }),
+          }
+        ]
       }
     ]
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new HtmlWebpackPlugin({
-
-    }),
+    new HtmlWebpackPlugin({}),
+    new VueLoaderPlugin(),
     extractSass
   ],
   devServer: {
