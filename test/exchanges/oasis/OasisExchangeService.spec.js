@@ -132,7 +132,7 @@ test('sell Dai, dai balance decreases', (done) => {
       //console.log('dai balance before selling dai: ', balance);
       initialBalance = balance;
       const wethToken = oasisExchangeService.get('token').getToken(tokens.WETH);
-      return wethToken.balanceOf(oasisExchangeService.get('web3').defaultAccount());;
+      return wethToken.balanceOf(oasisExchangeService.get('web3').defaultAccount());
     })
     .then(balance =>{
       //console.log('weth balance before selling dai: ', balance);

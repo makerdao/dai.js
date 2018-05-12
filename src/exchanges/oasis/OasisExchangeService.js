@@ -9,7 +9,6 @@ import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import EthereumCdpService from '../../eth/EthereumCdpService';
-import TokenConversionService from '../../eth/TokenConversionService';
 
 export default class OasisExchangeService extends PrivateService {
   static buildKovanService() {

@@ -34,7 +34,7 @@ function updateInfo(cdp, usingMetaMask) {
 }
 
 window.document.getElementsByTagName('body')[0].innerHTML =
-  `<div id="cdp-output"></div><div id="maker-dbg-container"></div>`;
+  '<div id="cdp-output"></div><div id="maker-dbg-container"></div>';
 
 setTimeout(() => {
   window.vm = new Vue({

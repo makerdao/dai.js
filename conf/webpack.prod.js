@@ -15,7 +15,7 @@ module.exports = Merge(CommonConfig, {
         exclude: /node_modules/,
         loader: 'eslint-loader',
         options: {
-          "ignorePattern": "**/*.scss"
+          'ignorePattern': '**/*.scss'
         }
       }
     ]
