@@ -145,4 +145,20 @@ export default class EthereumCdpService extends PrivateService {
       );
     });
   }
+
+  wipeDai(cdpId, amount) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = utils.parseUnits(amount.toString(), 18);
+    const dai = this.get('token').getToken(tokens.DAI);
+    const peth = this.get('token').getToken(tokens.PETH);
+
+    return Promise.all([
+      this._conversionService().approveToken(peth),
+      this._conversionService().approveToken(dai)
+    ]).then(() => {
+      return this._transactionManager().createTransactionHybrid(
+        this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
+      );
+    });
+  }
 }
