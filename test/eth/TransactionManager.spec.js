@@ -82,7 +82,7 @@ test('should resolve the hybrid object when its implicit state is reached', done
       });
 
   });
-});
+}, 5000);
 
 test('should register all created transaction hybrids', done => {
   buildTestServices().then(services => {

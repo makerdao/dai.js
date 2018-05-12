@@ -1,4 +1,5 @@
 import EthereumCdpService from '../../src/eth/EthereumCdpService';
+import tokens from '../../contracts/tokens';
 
 let createdCdpService, cdp;
 
@@ -15,13 +16,12 @@ function openCdp(){
     });
 }
 
-/*
 function lockEth(amount){
   return openCdp()
-    .then(() => createdCdpService.lockEth(createdCdpId, amount))
-    .then(cdp => cdp.getCdpInfo());
+    .then((id) => createdCdpService.lockEth(id, amount))
+    .then(() => cdp.getInfo());
 }
-*/
+
 
 test('should open a CDP and get cdp ID', done => {
   openCdp()
@@ -131,6 +131,30 @@ test('should be able to free peth from a cdp', done => {
               done();
             });
           });
+        });
+      });
+    });
+  });
+}, 5000);
+
+test('should be able to draw dai', done => {
+  let cdpId, firstDaiBalance, defaultAccount, dai;
+  
+  createdCdpService.manager().authenticate().then(() => {
+    lockEth('0.1')
+    .then(() => cdp.getCdpId())
+    .then(id => {
+      dai = createdCdpService.get('token').getToken(tokens.DAI);
+      defaultAccount = createdCdpService.get('token').get('web3').defaultAccount();
+      cdpId = id;
+      dai.balanceOf(defaultAccount)
+      .then(balance => {
+        firstDaiBalance = parseFloat(balance);
+        createdCdpService.drawDai(cdpId, '1')
+        .then(() => dai.balanceOf(defaultAccount))
+        .then(secondDaiBalance => {
+          expect(parseFloat(secondDaiBalance)).toBeCloseTo(firstDaiBalance + 1);
+          done();
         });
       });
     });
