@@ -71,4 +71,8 @@ export default class Cdp {
   freePeth(amount) {
     return this.getCdpId().then(id => this._cdpService.freePeth(id, amount));
   }
+
+  wipeDai(amount) {
+    return this.getCdpId().then(id => this._cdpService.wipeDai(id, amount));
+  }
 }
