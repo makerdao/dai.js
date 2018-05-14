@@ -30,7 +30,7 @@
     "build:frontend": "webpack --env=prod --progress --profile --colors",
     "build:backend": "rm -rf dist && npm shrinkwrap && babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles README.md package.json npm-shrinkwrap.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist",
     "coverage": "jest --coverage --config=conf/jest.config.js --runInBand",
-    "lint": "eslint ./web/**.js ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js",
+    "lint": "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'",
     "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "find ./src/**/*.js | xargs prettier --write --single-quote es5",
@@ -44,7 +44,7 @@
     "./src/**/*.js": [
       "prettier --single-quote es5 --write",
       "git add",
-      "eslint ./src/**.js ./src/**/**.js ./test/**.js ./test/**/**.js"
+      "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'"
     ]
   },
   "devDependencies": {

@@ -1,0 +1,2 @@
+INTERVAL=${1:-50}
+sed -i "s/var pollingInterval = [0-9]*/var pollingInterval = $INTERVAL/" ./node_modules/ethers/providers/provider.js

@@ -3,9 +3,9 @@ import ZeroExExchangeService from '../../../src/exchanges/zeroEx/ZeroExExchangeS
 import tokens from '../../../contracts/tokens';
 // import testAccountProvider from '../../../src/utils/TestAccountProvider';
 // import orderStyle from '../../../src/exchanges/orderStyle';
-import TransactionState from '../../../src/eth/TransactionState';
-import contracts from '../../../contracts/contracts';
-const utils = require('ethers').utils;
+// import TransactionState from '../../../src/eth/TransactionState';
+// import contracts from '../../../contracts/contracts';
+// const utils = require('ethers').utils;
 import Web3ServiceList from '../../../src/utils/Web3ServiceList';
 
 afterEach(() => {
@@ -28,7 +28,7 @@ test('should correctly connect', done => {
     expect(service._firstOrder.orderHash.length).toBe(66);
     done();
   });
-});
+}, 30000);
 
 test('should correctly authenticate', done => {
   const apiEndpoint = 'https://api.kovan.radarrelay.com/0x/v0';
@@ -37,20 +37,15 @@ test('should correctly authenticate', done => {
     expect(service._availableAddress.length).toBe(42);
     done();
   });
-},10000);
+}, 30000);
 
 
-test('get fees sell Dai - kovan', (done) => {
+xtest('get fees sell Dai - kovan', (done) => {
   const apiEndpoint = 'https://api.kovan.radarrelay.com/0x/v0';
   const zeroExExchangeService = ZeroExExchangeService.buildKovanService(apiEndpoint);
   zeroExExchangeService.manager().authenticate()
-    .then(() => {
-      zeroExExchangeService.sellDai('0.01', tokens.WETH)
-      .then(result => {
-        console.log('result', result);
-      });
-      done();
-    });
+    .then(() => zeroExExchangeService.sellDai('0.01', tokens.WETH))
+    .then(() => done());
 },
 10000
 );
