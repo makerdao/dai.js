@@ -14,7 +14,7 @@ before_install:
 - nix-channel --add https://nix.dapphub.com/pkgs/dapphub
 - nix-channel --update
 - nix-env -iA dapphub.{dapp,seth,hevm,solc}
-- npm i -g npm@^5.3.0
+- npm i -g npm@latest
 install:
 - sed -i '13s/DSToken.*/WETH9)/' ./lib/sai/bin/deploy
 - npm install
