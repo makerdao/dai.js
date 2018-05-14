@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 
 let createdCdpService;
 
-beforeAll(() => {
+beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
 });
 
@@ -145,3 +145,30 @@ test('should be able to draw DAI', done => {
     });
 
 }, 5000);
+
+test('should be able to wipe dai', done => {
+  let cdp, dai, firstDaiBalance, defaultAccount;
+
+  createdCdpService.manager().authenticate().then(() => {
+    createdCdpService.openCdp()
+    .then(newCdp => {
+      cdp = newCdp;
+      cdp.lockEth('0.1')
+      .then(() => cdp.drawDai('1'))
+      .then(() => {
+        dai = createdCdpService.get('token').getToken(tokens.DAI);
+        defaultAccount = createdCdpService.get('token').get('web3').defaultAccount();
+        dai.balanceOf(defaultAccount)
+        .then(balance => {
+          firstDaiBalance = parseFloat(balance);
+          cdp.wipeDai('1')
+          .then(() => dai.balanceOf(defaultAccount))
+          .then(secondDaiBalance => {
+            expect(parseFloat(secondDaiBalance)).toBeCloseTo(firstDaiBalance - 1);
+            done();
+          });
+        });
+      });
+    });
+  });
+});

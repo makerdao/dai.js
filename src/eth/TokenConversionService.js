@@ -7,8 +7,10 @@ import tokens from '../../contracts/tokens';
 export default class TokenConversionService extends PrivateService {
   static buildTestService(smartContract = null, token = null) {
     const service = new TokenConversionService();
-    const smartContractService = smartContract || SmartContractService.buildTestService();
-    const tokenService = token || EthereumTokenService.buildTestService(smartContract);
+    const smartContractService =
+      smartContract || SmartContractService.buildTestService();
+    const tokenService =
+      token || EthereumTokenService.buildTestService(smartContract);
 
     service
       .manager()
