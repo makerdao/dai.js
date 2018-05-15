@@ -104,3 +104,49 @@ test('min allowance policy, no need to update', (done) => {
   });
 });
 
+test('removeAllowance() works, need to update', (done) => {
+  const allowanceService = AllowanceService.buildTestServiceMinAllowance();
+  allowanceService.manager().authenticate().then(() => {
+  	const randomAddress = TestAccountProvider.nextAddress();
+  	const daiToken = allowanceService.get('token').getToken(tokens.DAI);
+
+  	daiToken.approve(randomAddress, '300')
+  	.then(()=>
+  		allowanceService.removeAllowance(tokens.DAI, randomAddress)
+  	)
+  	.then(()=>{
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  	})
+  	.then(allowanceAfter=>{
+  		expect(parseInt(allowanceAfter)).toEqual(0);
+  		return daiToken.approve(randomAddress, '0');
+  	})
+  	.then(()=>{
+  		done();
+  	});
+  });
+});
+
+test('removeAllowance() works, no need to update', (done) => {
+  const allowanceService = AllowanceService.buildTestServiceMinAllowance();
+  allowanceService.manager().authenticate().then(() => {
+  	const randomAddress = TestAccountProvider.nextAddress();
+  	const daiToken = allowanceService.get('token').getToken(tokens.DAI);
+
+  	daiToken.approve(randomAddress, '0')
+  	.then(()=>
+  		allowanceService.removeAllowance(tokens.DAI, randomAddress)
+  	)
+  	.then(()=>{
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  	})
+  	.then(allowanceAfter=>{
+  		expect(parseInt(allowanceAfter)).toEqual(0);
+  		return daiToken.approve(randomAddress, '0');
+  	})
+  	.then(()=>{
+  		done();
+  	});
+  });
+});
+

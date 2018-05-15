@@ -63,8 +63,13 @@ export default class AllowanceService extends PrivateService {
     });
   }
 
-  removeAllowance(){
-    //check if allowance >0, if so, remove allowance
+  removeAllowance(tokenSymbol, spenderAddress){
+    const token = this.get('token').getToken(tokenSymbol);
+    return token.allowance(this.get('token').get('web3').ethersSigner().address, spenderAddress).then(allowance=>{
+      if (parseInt(allowance)!=0){
+        return token.approve(spenderAddress, '0');
+      }
+    });
   }
 
 }
