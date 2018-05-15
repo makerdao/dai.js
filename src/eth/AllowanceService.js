@@ -15,7 +15,7 @@ export default class AllowanceService extends PrivateService {
     return service;
   }
 
-  static buildTestServiceMinimizeAllowance() {
+  static buildTestServiceMinAllowance() {
     const service = new AllowanceService();
     const token = EthereumTokenService.buildTestService();
 
@@ -41,7 +41,7 @@ export default class AllowanceService extends PrivateService {
     }
   }
 
-  updateAllowanceIfNecessary(tokenSymbol, spenderAddress, amountEstimate = -1) {
+  requireAllowance(tokenSymbol, spenderAddress, amountEstimate = -1) {
     const token = this.get('token').getToken(tokenSymbol);
     return token.allowance(this.get('token').get('web3').ethersSigner().address, spenderAddress).then(allowance=>{
       const EVMFormat = token.toEthereumFormat(allowance);
@@ -61,8 +61,11 @@ export default class AllowanceService extends PrivateService {
       if (allowanceBigNumber.lt(amountEstimateBigNumber) && this._useMinimizeAllowancePolicy){
         return token.approve(spenderAddress, amountEstimateBigNumber.toString());
       }
-
     });
+  }
+
+  removeAllowance(){
+    //check if allowance >0, if so, remove allowance
   }
 
 }
