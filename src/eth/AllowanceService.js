@@ -47,7 +47,6 @@ export default class AllowanceService extends PrivateService {
       const EVMFormat = token.toEthereumFormat(allowance);
       const allowanceBigNumber = utils.bigNumberify(EVMFormat);
       const maxUint256 = utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
-      console.log('maxUint256', maxUint256);
       let amountEstimateBigNumber = null;
       if (amountEstimate === -1){
         amountEstimateBigNumber = maxUint256;
