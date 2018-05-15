@@ -1,5 +1,6 @@
 import EthereumTokenService from './EthereumTokenService';
 import PrivateService from '../core/PrivateService';
+const utils = require('ethers').utils;
 
 export default class AllowanceService extends PrivateService {
 
@@ -14,19 +15,53 @@ export default class AllowanceService extends PrivateService {
     return service;
   }
 
+  static buildTestServiceMinimizeAllowance() {
+    const service = new AllowanceService();
+    const token = EthereumTokenService.buildTestService();
+
+    service
+      .manager()
+      .inject('token', token)
+      .settings({
+        useMinimizeAllowancePolicy: true
+      });
+
+    return service;
+  }
+
   constructor(name = 'allowance') {
     super(name, ['token']);
+    this._useMinimizeAllowancePolicy = false;
+  }
+
+  initialize(settings){
+
+    if (settings && settings.useMinimizeAllowancePolicy){
+      this._useMinimizeAllowancePolicy = true;
+    }
   }
 
   updateAllowanceIfNecessary(tokenSymbol, spenderAddress, amountEstimate = -1) {
     const token = this.get('token').getToken(tokenSymbol);
     return token.allowance(this.get('token').get('web3').ethersSigner().address, spenderAddress).then(allowance=>{
-      console.log('allowance', allowance);
-      console.log('type', typeof allowance);
-      console.log('max safe number', Number.MAX_SAFE_INTEGER);
-      if (allowance < 100000){
+      const EVMFormat = token.toEthereumFormat(allowance);
+      const allowanceBigNumber = utils.bigNumberify(EVMFormat);
+      const maxUint256 = utils.bigNumberify('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+      console.log('maxUint256', maxUint256);
+      let amountEstimateBigNumber = null;
+      if (amountEstimate === -1){
+        amountEstimateBigNumber = maxUint256;
+      }else{
+        amountEstimateBigNumber = utils.bigNumberify(amountEstimate);
+      }
+
+      if (allowanceBigNumber.lt(maxUint256.div('2')) && !this._useMinimizeAllowancePolicy){
         return token.approveUnlimited(spenderAddress);
       }
+      if (allowanceBigNumber.lt(amountEstimateBigNumber) && this._useMinimizeAllowancePolicy){
+        return token.approve(spenderAddress, amountEstimateBigNumber.toString());
+      }
+
     });
   }
 
