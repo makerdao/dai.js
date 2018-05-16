@@ -80,7 +80,8 @@ function createDaiAndPlaceLimitOrder(oasisExchangeService, sellDai = false) {
     });
 }
 
-test('sell Dai, dai balance decreases', (done) => {
+
+test('sell Dai, console log the balances (used for debugging)', (done) => {
   const oasisExchangeService = OasisExchangeService.buildTestService();
   let oasisOrder = null;
   /* eslint-disable-next-line */

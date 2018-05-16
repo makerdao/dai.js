@@ -9,6 +9,7 @@ import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import EthereumCdpService from '../../eth/EthereumCdpService';
+import AllowanceService from '../../eth/AllowanceService';
 
 export default class OasisExchangeService extends PrivateService {
   static buildKovanService() {
@@ -61,6 +62,7 @@ export default class OasisExchangeService extends PrivateService {
 
   static buildTestService(suppressOutput = true) {
     const service = new OasisExchangeService(),
+      allowanceService = AllowanceService.buildTestServiceMaxAllowance(),
       cdpService = EthereumCdpService.buildTestService(suppressOutput),
       smartContractService = cdpService.get('smartContract'),
       ethereumTokenService = cdpService.get('token');
@@ -74,13 +76,14 @@ export default class OasisExchangeService extends PrivateService {
         'gasEstimator',
         GasEstimatorService.buildTestService(smartContractService.get('web3'))
       )
-      .inject('cdp', cdpService);
+      .inject('cdp', cdpService)
+      .inject('allowance', allowanceService);
 
     return service;
   }
 
   constructor(name = 'oasisExchange') {
-    super(name, ['cdp', 'smartContract', 'token', 'web3', 'log', 'gasEstimator']);
+    super(name, ['cdp', 'smartContract', 'token', 'web3', 'log', 'gasEstimator', 'allowance']);
   }
 
   /*
@@ -89,6 +92,7 @@ tokenSymbol: symbol of token to buy
 minFillAmount: minimum amount of token being bought required.  If this can't be met, the trade will fail
 */
   sellDai(daiAmount, tokenSymbol, minFillAmount = '0') {
+    const allowanceService = this.get('allowance');
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
