@@ -77,13 +77,14 @@ export default class OasisExchangeService extends PrivateService {
         GasEstimatorService.buildTestService(smartContractService.get('web3'))
       )
       .inject('cdp', cdpService)
-      .inject('allowance', allowanceService);
+      .inject('allowance', allowanceService)
+      .inject('transactionManager', cdpService.get('transactionManager'));
 
     return service;
   }
 
   constructor(name = 'oasisExchange') {
-    super(name, ['cdp', 'smartContract', 'token', 'web3', 'log', 'gasEstimator', 'allowance']);
+    super(name, ['cdp', 'smartContract', 'token', 'web3', 'log', 'gasEstimator', 'allowance', 'transactionManager']);
   }
 
   /*
@@ -132,7 +133,18 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-    return new OasisBuyOrder(
+
+    return OasisBuyOrder.buildOasisBuyOrder(oasisContract, oasisContract.buyAllAmount(
+        daiAddress,
+        daiAmountEVM,
+        sellTokenAddress,
+        maxFillAmountEVM,
+        { gasLimit: 300000 }
+      ),
+      this.get('transactionManager')
+    );
+
+    /*return new OasisBuyOrder(
       oasisContract.buyAllAmount(
         daiAddress,
         daiAmountEVM,
@@ -142,7 +154,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
       ),
       this.get('web3'),
       oasisContract._original
-    );
+    );*/
   }
 
   //only used to set up a limit order on the local testnet

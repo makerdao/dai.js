@@ -6,6 +6,7 @@ import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 import TransactionManager from './TransactionManager';
+import AllowanceService from './AllowanceService';
 
 import { utils } from 'ethers';
 
@@ -27,13 +28,15 @@ export default class EthereumCdpService extends PrivateService {
       smartContract,
       tokenService
     );
+    const allowanceService = AllowanceService.buildTestServiceMaxAllowance()
 
     service
       .manager()
       .inject('smartContract', smartContract)
       .inject('token', tokenService)
       .inject('conversionService', conversionService)
-      .inject('transactionManager', transactionManager);
+      .inject('transactionManager', transactionManager)
+      .inject('allowance', allowanceService);
 
     return service;
   }
@@ -46,7 +49,8 @@ export default class EthereumCdpService extends PrivateService {
       'smartContract',
       'token',
       'conversionService',
-      'transactionManager'
+      'transactionManager',
+      'allowance'
     ]);
   }
 
@@ -99,8 +103,10 @@ export default class EthereumCdpService extends PrivateService {
     const hexCdpId = this._hexCdpId(cdpId);
     const parsedAmount = utils.parseUnits(eth, 18);
 
-    return this._conversionService()
-      .convertEthToPeth(eth)
+    return Promise.all([this._conversionService()
+      .convertEthToPeth(eth),
+      this.get('allowance').requireAllowance(tokens.PETH, this._tubContract().getAddress())
+      ])
       .then(() => {
         return this._transactionManager().createTransactionHybrid(
           this._tubContract().lock(hexCdpId, parsedAmount)
@@ -111,17 +117,10 @@ export default class EthereumCdpService extends PrivateService {
   freePeth(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
     const parsedAmount = utils.parseUnits(amount, 18);
-    const weth = this.get('token').getToken(tokens.WETH);
-    const peth = this.get('token').getToken(tokens.PETH);
 
-    return Promise.all([
-      this._conversionService().approveToken(weth),
-      this._conversionService().approveToken(peth)
-    ]).then(() => {
-      return this._transactionManager().createTransactionHybrid(
+    return this._transactionManager().createTransactionHybrid(
         this._tubContract().free(hexCdpId, parsedAmount, { gasLimit: 200000 })
-      );
-    });
+    );
   }
 
   getCdpInfo(cdpId) {
@@ -133,28 +132,19 @@ export default class EthereumCdpService extends PrivateService {
   drawDai(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
     const parsedAmount = utils.parseUnits(amount.toString(), 18);
-    const dai = this.get('token').getToken(tokens.DAI);
-    const peth = this.get('token').getToken(tokens.PETH);
 
-    return Promise.all([
-      this._conversionService().approveToken(peth),
-      this._conversionService().approveToken(dai)
-    ]).then(() => {
-      return this._transactionManager().createTransactionHybrid(
+    return this._transactionManager().createTransactionHybrid(
         this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
-      );
-    });
+    );
   }
 
   wipeDai(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
     const parsedAmount = utils.parseUnits(amount.toString(), 18);
-    const dai = this.get('token').getToken(tokens.DAI);
-    const peth = this.get('token').getToken(tokens.PETH);
 
     return Promise.all([
-      this._conversionService().approveToken(peth),
-      this._conversionService().approveToken(dai)
+      this.get('allowance').requireAllowance(tokens.MKR, this._tubContract().getAddress()),
+      this.get('allowance').requireAllowance(tokens.DAI, this._tubContract().getAddress())
     ]).then(() => {
       return this._transactionManager().createTransactionHybrid(
         this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })

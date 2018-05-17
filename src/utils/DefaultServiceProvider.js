@@ -12,6 +12,7 @@ import TokenConversionService from '../eth/TokenConversionService';
 import ConsoleLogger from './loggers/ConsoleLogger';
 import NullLogger from './loggers/NullLogger';
 import TransactionManager from '../eth/TransactionManager';
+import AllowanceService from '../eth/AllowanceService';
 
 const _services = {
   Web3Service,
@@ -26,7 +27,8 @@ const _services = {
   TokenConversionService,
   ConsoleLogger,
   NullLogger,
-  TransactionManager
+  TransactionManager,
+  AllowanceService
 };
 
 export default class DefaultServiceProvider {

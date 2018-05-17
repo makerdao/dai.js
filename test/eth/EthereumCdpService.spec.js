@@ -65,27 +65,36 @@ test('should open and then shut a CDP', done => {
 
 test('should open and then shut a CDP with peth locked in it', done => {
   let firstInfoCall;
-
+  let cdpId;
   openCdp()
   .then(id => {
+    cdpId = id;
     createdCdpService.getCdpInfo(id)
+  })
     .then(info => firstInfoCall = info)
     .then(() => cdp.lockEth('0.1'))
-    .then(() => {
-      createdCdpService.shutCdp(id)
-      .catch((err) => { 
-        done.fail(new Error('shutting CDP had an error: ', err));
-      })
-      .then(() => {  
-        createdCdpService.getCdpInfo(id)
-        .then(secondInfoCall => {
-          expect(firstInfoCall).not.toBe(secondInfoCall);
-          expect(secondInfoCall.lad).toBe('0x0000000000000000000000000000000000000000');
-          done();
-        });
-      });
+    .then(() => createdCdpService.shutCdp(cdpId))
+    .then(() => createdCdpService.getCdpInfo(cdpId))
+    .then(secondInfoCall => {
+      expect(firstInfoCall).not.toBe(secondInfoCall);
+      expect(secondInfoCall.lad).toBe('0x0000000000000000000000000000000000000000');
+      const tokenService = createdCdpService.get('token');
+      const wethToken = tokenService.getToken(tokens.WETH);
+      const pethToken = tokenService.getToken(tokens.PETH);
+      const mkrToken = tokenService.getToken(tokens.MKR);
+      return Promise.all([
+        wethToken.approve(createdCdpService._tubContract().getAddress(),'0'),
+        pethToken.approve(createdCdpService._tubContract().getAddress(),'0'),
+        mkrToken.approve(createdCdpService._tubContract().getAddress(),'0')
+      ]);
+    })
+    .then(()=>{
+      done();
+    })
+    .catch((err) => { 
+      console.log('error', err);
+      done.fail(new Error('shutting CDP had an error: ', err));
     });
-  });
 }, 5000);
 
 test('should be able to lock eth in a cdp', done => {
@@ -98,13 +107,20 @@ test('should be able to lock eth in a cdp', done => {
       createdCdpService.getCdpInfo(id)
       .then(result => firstInfoCall = result)
       .then(() => createdCdpService.lockEth(id, '0.1'))
-      .then(() => {
-        createdCdpService.getCdpInfo(cdpId)
-        .then(secondInfoCall => {
-          expect(firstInfoCall.ink.toString()).toEqual('0');
-          expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
-          done();
-        });
+      .then(() => createdCdpService.getCdpInfo(cdpId))
+      .then(secondInfoCall => {
+        expect(firstInfoCall.ink.toString()).toEqual('0');
+        expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
+        const tokenService = createdCdpService.get('token');
+        const wethToken = tokenService.getToken(tokens.WETH);
+        const pethToken = tokenService.getToken(tokens.PETH);
+        return Promise.all([
+        wethToken.approve(createdCdpService._tubContract().getAddress(),'0'),
+        pethToken.approve(createdCdpService._tubContract().getAddress(),'0')
+        ]);
+      })
+      .then(()=>{
+        done();
       });
     });
   });
@@ -172,16 +188,24 @@ test('should be able to wipe dai', done => {
       defaultAccount = createdCdpService.get('token').get('web3').defaultAccount();
       cdpId = id;
       cdp.drawDai('1')
-      .then(() => dai.balanceOf(defaultAccount))
-      .then(balance => {
-        firstDaiBalance = parseFloat(balance);
-        createdCdpService.wipeDai(cdpId, '1')
-        .then(() => dai.balanceOf(defaultAccount))
-        .then(secondDaiBalance => {
-          expect(parseFloat(secondDaiBalance)).toBeCloseTo(parseFloat(firstDaiBalance) - 1);
-          done();
-        });
-      });
+    })
+    .then(() => dai.balanceOf(defaultAccount))
+    .then(balance => {
+      firstDaiBalance = parseFloat(balance);
+      createdCdpService.wipeDai(cdpId, '1')
+    })
+    .then(() => dai.balanceOf(defaultAccount))
+    .then(secondDaiBalance => {
+      expect(parseFloat(secondDaiBalance)).toBeCloseTo(parseFloat(firstDaiBalance) - 1);
+      const tokenService = createdCdpService.get('token');
+      const mkrToken = tokenService.getToken(tokens.MKR);
+      return Promise.all([
+        mkrToken.approve(createdCdpService._tubContract().getAddress(),'0'),
+        dai.approve(createdCdpService._tubContract().getAddress(),'0')
+      ]);
+    })
+    .then(()=>{
+      done();
     });
   });
 });

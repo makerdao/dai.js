@@ -25,12 +25,14 @@ export default class TransactionManager extends PublicService {
   createTransactionHybrid(
     contractTransaction,
     businessObject = null,
-    implicitState = TransactionState.mined
+    implicitState = TransactionState.mined,
+    parseLogs = null
   ) {
     const tx = new TransactionObject(
         contractTransaction,
         this.get('web3'),
-        businessObject
+        businessObject,
+        parseLogs
       ),
       hybrid = this._getImplicitStatePromise(tx, implicitState);
 

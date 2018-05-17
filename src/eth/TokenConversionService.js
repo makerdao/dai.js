@@ -48,13 +48,14 @@ export default class TokenConversionService extends PrivateService {
   convertEthToWeth(eth) {
     const wethToken = this._getToken(tokens.WETH);
 
-    return this.approveToken(wethToken).then(() => wethToken.deposit(eth));
+    return wethToken.deposit(eth);
   }
 
   convertWethToPeth(weth) {
+    const wethToken = this._getToken(tokens.WETH);
     const pethToken = this._getToken(tokens.PETH);
 
-    return this.approveToken(pethToken).then(() => pethToken.join(weth));
+    return this.approveToken(wethToken).then(() => pethToken.join(weth));
   }
 
   convertEthToPeth(value) {

@@ -14,7 +14,7 @@
         }
       }
     ],
-
+    "allowance": "AllowanceService",
     "cdp": "EthereumCdpService",
     "exchange": "OasisExchangeService",
     "smartContract": "SmartContractService",
