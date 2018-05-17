@@ -185,3 +185,13 @@ test('should be able to wipe dai', done => {
     });
   });
 });
+
+// These need better tests
+test('should return the abstracted collateral price', done => {
+  createdCdpService.manager().authenticate().then(() => {
+    createdCdpService.abstractedCollateralPrice().then(value => {
+      expect(typeof value).toBe('number');
+      done();
+    });
+  });
+});
