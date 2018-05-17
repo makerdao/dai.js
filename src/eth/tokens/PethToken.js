@@ -27,4 +27,12 @@ export default class PethToken extends Erc20Token {
   per() {
     return this._tub.per().then(ratio => parseFloat(this.toUserFormat(ratio)));
   }
+
+  ask(amount) {
+    const valueInWei = this.toEthereumFormat(amount);
+
+    return this._tub
+      .ask(valueInWei)
+      .then(value => parseFloat(this.toUserFormat(value)));
+  }
 }
