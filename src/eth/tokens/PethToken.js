@@ -23,4 +23,8 @@ export default class PethToken extends Erc20Token {
       this._tub.exit(valueInWei, { gasLimit: 100000 })
     );
   }
+
+  per() {
+    return this._tub.per().then(ratio => parseFloat(this.toUserFormat(ratio)));
+  }
 }

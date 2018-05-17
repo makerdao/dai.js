@@ -67,3 +67,18 @@ test('should successfully join and exit PETH', done => {
       done();
     });
 }, 5000);
+
+// This needs better tests
+test('should return the wrapper ratio', done => {
+  const tokenService = EthereumTokenService.buildTestService();
+  let peth;
+
+  tokenService.manager().authenticate().then(() => {
+    peth = tokenService.getToken(tokens.PETH);
+    peth.per()
+    .then(ratio => {
+      expect(typeof ratio).toBe('number');
+      done();
+    });
+  });
+});
