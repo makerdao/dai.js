@@ -175,4 +175,12 @@ export default class EthereumCdpService extends PrivateService {
 
     return this._tubContract().safe(hexCdpId);
   }
+
+  give(cdpId, newAddress) {
+    const hexCdpId = this._hexCdpId(cdpId);
+
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().give(hexCdpId, newAddress)
+    );
+  }
 }

@@ -209,3 +209,22 @@ xtest('should check if a cdp is safe', done => {
     });
   });
 });
+
+test('should be able to transfer ownership of a cdp', done => {
+  const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
+  let cdpId, firstOwner;
+
+  createdCdpService.manager().authenticate().then(() => {
+    openCdp()
+    .then(id => cdpId = id)
+    .then(() => cdp.getInfo())
+    .then(info => firstOwner = info.lad)
+    .then(() => createdCdpService.give(cdpId, newAddress))
+    .then(() => cdp.getInfo())
+    .then(info => {
+      expect(info.lad).not.toEqual(firstOwner);
+      expect(info.lad).toEqual(newAddress);
+      done();
+    });
+  });
+});
