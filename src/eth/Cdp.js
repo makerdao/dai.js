@@ -75,4 +75,8 @@ export default class Cdp {
   wipeDai(amount) {
     return this.getCdpId().then(id => this._cdpService.wipeDai(id, amount));
   }
+
+  give(newAddress) {
+    return this.getCdpId().then(id => this._cdpService.give(id, newAddress));
+  }
 }
