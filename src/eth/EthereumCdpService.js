@@ -169,4 +169,10 @@ export default class EthereumCdpService extends PrivateService {
       .tag()
       .then(value => parseFloat(token.toUserFormat(value)));
   }
+
+  safe(cdpId) {
+    const hexCdpId = this._hexCdpId(cdpId);
+
+    return this._tubContract().safe(hexCdpId);
+  }
 }

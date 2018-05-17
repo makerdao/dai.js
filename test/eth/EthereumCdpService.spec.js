@@ -195,3 +195,17 @@ test('should return the abstracted collateral price', done => {
     });
   });
 });
+
+// This may not be accessible from our library
+xtest('should check if a cdp is safe', done => {
+  createdCdpService.manager().authenticate().then(() => {
+    lockEth('0.1')
+    .then(() => cdp.getCdpId())
+    .then(id => createdCdpService.safe(id))
+    .then(result => {
+      // eslint-disable-next-line
+      console.log(result);
+      done();
+    });
+  });
+});
