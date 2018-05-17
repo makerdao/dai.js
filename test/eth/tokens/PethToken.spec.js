@@ -75,7 +75,7 @@ test('should return the wrapper ratio', done => {
 
   tokenService.manager().authenticate().then(() => {
     peth = tokenService.getToken(tokens.PETH);
-    peth.per()
+    peth.wrapperRatio()
     .then(ratio => {
       expect(typeof ratio).toBe('number');
       done();
@@ -83,16 +83,30 @@ test('should return the wrapper ratio', done => {
   });
 });
 
-test('should return the PETH price', done => {
+test('should return the join price in eth', done => {
   const tokenService = EthereumTokenService.buildTestService();
-  let peth;
   
   tokenService.manager().authenticate().then(() => {
-    peth = tokenService.getToken(tokens.PETH);
-    peth.ask('1').then(value => {
-      expect(typeof value).toBe('number');
-      expect(value).toEqual(1);
-      done();
+    tokenService.getToken(tokens.PETH)
+      .joinPrice('1')
+      .then(value => {
+        expect(typeof value).toBe('number');
+        expect(value).toEqual(1);
+        done();
     });
+  });
+});
+
+test('should return the exit price in eth', done => {
+  const tokenService = EthereumTokenService.buildTestService();
+
+  tokenService.manager().authenticate().then(() => {
+    tokenService.getToken(tokens.PETH)
+      .exitPrice('1')
+      .then(value => {
+        expect(typeof value).toBe('number');
+        expect(value).toEqual(1);
+        done();
+      });
   });
 });
