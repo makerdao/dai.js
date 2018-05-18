@@ -37,12 +37,8 @@ export default class PriceFeedService extends PrivateService {
     super(name, ['token', 'smartContract', 'transactionManager']);
   }
 
-  _tubContract() {
-    return this.get('smartContract').getContractByName(contracts.SAI_TUB);
-  }
-
-  _transactionManager() {
-    return this.get('transactionManager');
+  _getContract(contract) {
+    return this.get('smartContract').getContractByName(contract);
   }
 
   _toEthereumFormat(value) {
@@ -65,8 +61,7 @@ export default class PriceFeedService extends PrivateService {
   }
 
   getEthPrice() {
-    return this.get('smartContract')
-      .getContractByName(contracts.SAI_PIP)
+    return this._getContract(contracts.SAI_PIP)
       .read()
       .then(price => this._toUserFormat(price));
   }
@@ -74,10 +69,22 @@ export default class PriceFeedService extends PrivateService {
   setEthPrice(newPrice) {
     const adjustedPrice = this._toEthereumFormat(newPrice);
 
-    return this._transactionManager().createTransactionHybrid(
-      this.get('smartContract')
-        .getContractByName(contracts.SAI_PIP)
-        .poke(adjustedPrice)
+    return this.get('transactionManager').createTransactionHybrid(
+      this._getContract(contracts.SAI_PIP).poke(adjustedPrice)
+    );
+  }
+
+  getMkrPrice() {
+    return this._getContract(contracts.SAI_PEP)
+      .peek()
+      .then(price => this._toUserFormat(price[0]));
+  }
+
+  setMkrPrice(newPrice) {
+    const adjustedPrice = this._toEthereumFormat(newPrice);
+
+    return this.get('transactionManager').createTransactionHybrid(
+      this._getContract(contracts.SAI_PEP).poke(adjustedPrice)
     );
   }
 }
