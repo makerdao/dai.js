@@ -73,7 +73,7 @@ test('should open and then shut a CDP with peth locked in it', done => {
     .then(() => cdp.lockEth('0.1'))
     .then(() => {
       createdCdpService.shutCdp(id)
-      .catch((err) => { 
+      .catch(err => { 
         done.fail(new Error('shutting CDP had an error: ', err));
       })
       .then(() => {  
@@ -86,7 +86,7 @@ test('should open and then shut a CDP with peth locked in it', done => {
       });
     });
   });
-}, 5000);
+}, 10000);
 
 test('should be able to lock eth in a cdp', done => {
   let firstInfoCall;
