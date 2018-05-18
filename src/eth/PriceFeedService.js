@@ -5,6 +5,9 @@ import TransactionManager from './TransactionManager';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 
+import { utils } from 'ethers';
+import util from 'ethereumjs-util';
+
 export default class PriceFeedService extends PrivateService {
   static buildTestService(suppressOutput = true) {
     const service = new PriceFeedService();
@@ -43,9 +46,16 @@ export default class PriceFeedService extends PrivateService {
   }
 
   _toEthereumFormat(value) {
-    return this.get('token')
-      .getToken(tokens.WETH)
-      .toEthereumFormat(value);
+    return util.bufferToHex(
+      util.setLengthLeft(
+        utils.hexlify(
+          this.get('token')
+            .getToken(tokens.WETH)
+            .toEthereumFormat(value)
+        ),
+        32
+      )
+    );
   }
 
   _toUserFormat(value) {
