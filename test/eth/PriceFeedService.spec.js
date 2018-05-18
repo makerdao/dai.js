@@ -15,8 +15,7 @@ test('should return current eth price', done => {
 
   service.manager().authenticate().then(() => {
     service.getEthPrice().then(price => {
-      // eslint-disable-next-line
-      console.log(price);
+      expect(price).toEqual('400.0');
       done();
     });
   });

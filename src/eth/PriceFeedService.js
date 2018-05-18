@@ -49,14 +49,15 @@ export default class PriceFeedService extends PrivateService {
   }
 
   _toUserFormat(value) {
-    return this.get('smartContract')
-      .get('web3')
-      ._web3.toAscii(value);
+    return this.get('token')
+      .getToken(tokens.WETH)
+      .toUserFormat(value);
   }
 
   getEthPrice() {
-    return this._tubContract()
-      .pip()
+    return this.get('smartContract')
+      .getContractByName(contracts.SAI_PIP)
+      .read()
       .then(price => this._toUserFormat(price));
   }
 
