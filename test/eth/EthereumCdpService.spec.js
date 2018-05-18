@@ -7,7 +7,7 @@ beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
 });
 
-function openCdp(){
+function openCdp() {
   return createdCdpService.manager().authenticate()
     .then(() => createdCdpService.openCdp())
     .then(newCdp => {
@@ -16,7 +16,7 @@ function openCdp(){
     });
 }
 
-function lockEth(amount){
+function lockEth(amount) {
   return openCdp()
     .then((id) => createdCdpService.lockEth(id, amount))
     .then(() => cdp.getInfo());
@@ -125,7 +125,7 @@ test('should be able to free peth from a cdp', done => {
         newCdp.getInfo().then(info => firstBalance = parseFloat(info.ink))
         .then(() => {
           createdCdpService.freePeth(cdpId, '0.1')
-                .then(() => {
+          .then(() => {
             newCdp.getInfo().then(info => {
               expect(parseFloat(info.ink)).toBeCloseTo(firstBalance - 100000000000000000);
               done();
@@ -154,7 +154,7 @@ test('should be able to draw dai', done => {
         .then(() => dai.balanceOf(defaultAccount))
         .then(secondDaiBalance => {
           expect(parseFloat(secondDaiBalance)).toBeCloseTo(firstDaiBalance + 1);
-          done();
+          cdp.wipeDai('1').then(() => done());
         });
       });
     });
@@ -186,25 +186,10 @@ test('should be able to wipe dai', done => {
   });
 });
 
-// These need better tests
 test('should return the abstracted collateral price', done => {
   createdCdpService.manager().authenticate().then(() => {
     createdCdpService.abstractedCollateralPrice().then(value => {
       expect(typeof value).toBe('number');
-      done();
-    });
-  });
-});
-
-// This may not be accessible from our library
-xtest('should check if a cdp is safe', done => {
-  createdCdpService.manager().authenticate().then(() => {
-    lockEth('0.1')
-    .then(() => cdp.getCdpId())
-    .then(id => createdCdpService.safe(id))
-    .then(result => {
-      // eslint-disable-next-line
-      console.log(result);
       done();
     });
   });
@@ -226,5 +211,23 @@ test('should be able to transfer ownership of a cdp', done => {
       expect(info.lad).toEqual(newAddress);
       done();
     });
+  });
+});
+
+// Also test that biting a safe cdp throws an error
+test('should be able to bite an unsafe cdp', done => {
+  let id;
+
+  createdCdpService.manager().authenticate().then(() => {
+    lockEth('0.1')
+    .then(() => cdp.drawDai('13'))
+    .then(() => cdp.getCdpId())
+    .then(cdpId => id = cdpId)
+    .then(() => createdCdpService.get('priceFeed').setEthPrice('0.01'))
+    .then(() => createdCdpService.get('priceFeed').getEthPrice())
+    .then(() => createdCdpService.bite(id))
+    .then(res => expect(typeof res).toEqual('object'))
+    .then(() => createdCdpService.get('priceFeed').setEthPrice('400'))
+    .then(() => done());
   });
 });

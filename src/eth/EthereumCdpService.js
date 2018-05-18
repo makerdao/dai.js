@@ -6,6 +6,7 @@ import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 import TransactionManager from './TransactionManager';
+import PriceFeedService from './PriceFeedService';
 
 import { utils } from 'ethers';
 
@@ -27,13 +28,15 @@ export default class EthereumCdpService extends PrivateService {
       smartContract,
       tokenService
     );
+    const priceFeed = PriceFeedService.buildTestService();
 
     service
       .manager()
       .inject('smartContract', smartContract)
       .inject('token', tokenService)
       .inject('conversionService', conversionService)
-      .inject('transactionManager', transactionManager);
+      .inject('transactionManager', transactionManager)
+      .inject('priceFeed', priceFeed);
 
     return service;
   }
@@ -46,7 +49,8 @@ export default class EthereumCdpService extends PrivateService {
       'smartContract',
       'token',
       'conversionService',
-      'transactionManager'
+      'transactionManager',
+      'priceFeed'
     ]);
   }
 
@@ -170,17 +174,19 @@ export default class EthereumCdpService extends PrivateService {
       .then(value => parseFloat(token.toUserFormat(value)));
   }
 
-  safe(cdpId) {
-    const hexCdpId = this._hexCdpId(cdpId);
-
-    return this._tubContract().safe(hexCdpId);
-  }
-
   give(cdpId, newAddress) {
     const hexCdpId = this._hexCdpId(cdpId);
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().give(hexCdpId, newAddress)
+    );
+  }
+
+  bite(cdpId) {
+    const hexCdpId = this._hexCdpId(cdpId);
+
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().bite(hexCdpId, { gasLimit: 4000000 })
     );
   }
 }
