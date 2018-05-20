@@ -184,11 +184,15 @@ export default class SmartContractService extends PublicService {
     );
   }
 
+  hasContract(name) {
+    return (
+      Object.keys(contracts).indexOf(name) > -1 ||
+      Object.keys(tokens).indexOf(name) > -1
+    );
+  }
+
   _getContractInfo(name, version = null) {
-    if (
-      Object.keys(contracts).indexOf(name) < 0 &&
-      Object.keys(tokens).indexOf(name) < 0
-    ) {
+    if (!this.hasContract(name)) {
       throw new Error('Provided name "' + name + '" is not a contract');
     }
 
