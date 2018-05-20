@@ -10,7 +10,7 @@ export default class PropertyWatcher {
     return this._contract + '.' + this._property;
   }
 
-  run() {
+  run(map, watchers) {
     return [];
   }
 }

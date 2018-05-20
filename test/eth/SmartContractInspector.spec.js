@@ -1,6 +1,7 @@
 import SmartContractService from '../../src/eth/SmartContractService';
 import SmartContractInspector from '../../src/eth/SmartContractInspector';
 import contracts from '../../contracts/contracts';
+import tokens from '../../contracts/tokens';
 import ContractWatcher from '../../src/eth/inspector/ContractWatcher';
 import PropertyWatcher from '../../src/eth/inspector/PropertyWatcher';
 import MethodWatcher from '../../src/eth/inspector/MethodWatcher';
@@ -59,14 +60,30 @@ test('should register method watchers', done => {
   });
 });
 
-test('should call watchers recursively', done => {
+test('should generate contract nodes and their properties for watched contracts', done => {
   buildInspector().then(inspector => {
     inspector.watch(contracts.SAI_TUB);
-    inspector.watch(contracts.SAI_TUB, 'pit');
-    inspector.watch(contracts.SAI_TUB, 'pip');
+    inspector.watch(tokens.MKR);
 
     inspector.inspect().then(map => {
-      expect(Object.keys(map)).toEqual(['SAI_TUB', 'SAI_TUB.pit', 'SAI_TUB.pip']);
+      expect(map[contracts.SAI_TUB].getInfo()).toEqual({
+        name: 'SAI_TUB',
+        address: '0XE82CE3D6BF40F2F9414C8D01A35E3D9EB16A1761',
+        signer: '0X16FB96A5FA0427AF0C8F7CF1EB4870231C8154B6',
+        info: 'CDP record store contract.'
+      });
+
+      expect(map[contracts.SAI_TUB + '.axe']).toBeDefined();
+
+      expect(map[tokens.MKR].getInfo()).toEqual({
+        name: 'MKR',
+        address: '0X1C3AC7216250EDC5B9DAA5598DA0579688B9DBD5',
+        signer: '0X16FB96A5FA0427AF0C8F7CF1EB4870231C8154B6',
+        info: 'Maker governance token contract. Used for voting and payment of fees. Implements DSToken.'
+      });
+
+      expect(map[tokens.MKR + '.totalSupply']).toBeDefined();
+
       done();
     });
   });
