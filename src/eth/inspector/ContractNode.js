@@ -37,6 +37,7 @@ export default class ContractNode {
 
   getInfo() {
     return {
+      type: 'contract',
       name: this._name,
       address: this._address,
       signer: this._signer,

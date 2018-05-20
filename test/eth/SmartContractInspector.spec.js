@@ -60,13 +60,14 @@ test('should register method watchers', done => {
   });
 });
 
-test('should generate contract nodes and their properties for watched contracts', done => {
+test('should generate nodes for watched contracts and their properties', done => {
   buildInspector().then(inspector => {
     inspector.watch(contracts.SAI_TUB);
     inspector.watch(tokens.MKR);
 
     inspector.inspect().then(map => {
       expect(map[contracts.SAI_TUB].getInfo()).toEqual({
+        type: 'contract',
         name: 'SAI_TUB',
         address: '0XE82CE3D6BF40F2F9414C8D01A35E3D9EB16A1761',
         signer: '0X16FB96A5FA0427AF0C8F7CF1EB4870231C8154B6',
@@ -76,6 +77,7 @@ test('should generate contract nodes and their properties for watched contracts'
       expect(map[contracts.SAI_TUB + '.axe']).toBeDefined();
 
       expect(map[tokens.MKR].getInfo()).toEqual({
+        type: 'contract',
         name: 'MKR',
         address: '0X1C3AC7216250EDC5B9DAA5598DA0579688B9DBD5',
         signer: '0X16FB96A5FA0427AF0C8F7CF1EB4870231C8154B6',
@@ -84,6 +86,14 @@ test('should generate contract nodes and their properties for watched contracts'
 
       expect(map[tokens.MKR + '.totalSupply']).toBeDefined();
 
+      expect(map[contracts.SAI_TUB + '.axe'].getInfo()).toEqual({
+        type: 'property',
+        name: 'axe',
+        contract: 'SAI_TUB',
+        value: '1130000000000000000000000000',
+        info: 'Liquidation penalty'
+      });
+      
       done();
     });
   });

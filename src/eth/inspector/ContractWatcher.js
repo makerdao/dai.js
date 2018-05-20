@@ -22,14 +22,14 @@ export default class ContractWatcher {
         contract.getSigner().address.toUpperCase()),
 
       allWatchers = Object.values(watchers[this._contract] || [])
-        .concat(this._getPropertyWatchers(info.abi));
+        .concat(this._getPropertyWatchers(info.abi, contract));
 
     return [node, allWatchers];
   }
 
-  _getPropertyWatchers(abi) {
+  _getPropertyWatchers(abi, contract) {
     return abi
       .filter(m => m.constant && m.inputs.length < 1)
-      .map(m => new PropertyWatcher(this._contract, m.name, this._service));
+      .map(m => new PropertyWatcher(this._contract, m.name, this._service, contract));
   }
 }
