@@ -37,12 +37,6 @@ window.document.getElementsByTagName('body')[0].innerHTML =
   '<div id="cdp-output"></div><div id="maker-dbg-container"></div>';
 
 setTimeout(() => {
-  window.vm = new Vue({
-    el: '#maker-dbg-container',
-    render: createElement => createElement('maker-debugger'),
-    components: { MakerDebugger }
-  });
-
   const config = ConfigFactory.create('decentralized-oasis-without-proxies'),
     param = new URL(window.location.href).searchParams.get('inject') || '',
     useMetaMask = param.length > 0 && param !== '0';
@@ -57,6 +51,16 @@ setTimeout(() => {
   };
 
   window.maker = new Maker(config);
+
+  window.vm = new Vue({
+    el: '#maker-dbg-container',
+    render: createElement => createElement('maker-debugger', {
+      props: {
+        maker: window.maker
+      }
+    }),
+    components: { MakerDebugger }
+  });
 
   let cdp = null;
   window.maker.openCdp()

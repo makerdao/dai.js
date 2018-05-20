@@ -9,10 +9,21 @@
 <script>
   export default {
     name: "MakerDebugger",
+    created: function() {
+      this.maker.service('smartContract')
+        .getContractState('SAI_TUB', 0, true, [])
+        .then(s => Object.keys(s).forEach(k => this.logItems.push(`${k}: ${s[k]}`)));
+    },
     data: function() {
       return {
-        logItems: ['item 1', 'item 2', 'item 3']
+        logItems: []
       };
+    },
+    props: {
+      maker: {
+        type: Object,
+        required: true
+      }
     }
   }
 </script>
