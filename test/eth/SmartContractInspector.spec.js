@@ -6,11 +6,11 @@ import ContractWatcher from '../../src/eth/inspector/ContractWatcher';
 import PropertyWatcher from '../../src/eth/inspector/PropertyWatcher';
 import MethodWatcher from '../../src/eth/inspector/MethodWatcher';
 
-function buildInspector() {
-  const service = SmartContractService.buildTestService(null, true),
-    inspector = new SmartContractInspector(service);
+let service = null;
 
-  return service.manager().authenticate().then(() => inspector);
+function buildInspector() {
+  service = SmartContractService.buildTestService(null, true);
+  return service.manager().authenticate().then(() => new SmartContractInspector(service));
 }
 
 test('should register contract watchers', done => {
@@ -63,6 +63,7 @@ test('should register method watchers', done => {
 test('should generate nodes for watched contracts and their properties', done => {
   buildInspector().then(inspector => {
     inspector.watch(contracts.SAI_TUB);
+    inspector.watch(contracts.SAI_TUB, ['cups', service.numberToBytes32(1)]);
     inspector.watch(tokens.MKR);
 
     inspector.inspect().then(map => {
@@ -93,7 +94,9 @@ test('should generate nodes for watched contracts and their properties', done =>
         value: '1130000000000000000000000000',
         info: 'Liquidation penalty'
       });
-      
+
+      //console.log(Object.keys(map).map(k => [map[k].getInfo(), map[k].children]));
+
       done();
     });
   });

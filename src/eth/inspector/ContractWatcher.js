@@ -1,5 +1,5 @@
-import ContractNode from "./ContractNode";
-import PropertyWatcher from "./PropertyWatcher";
+import ContractNode from './ContractNode';
+import PropertyWatcher from './PropertyWatcher';
 
 export default class ContractWatcher {
 
@@ -21,8 +21,8 @@ export default class ContractWatcher {
         contract.getAddress().toUpperCase(),
         contract.getSigner().address.toUpperCase()),
 
-      allWatchers = Object.values(watchers[this._contract] || [])
-        .concat(this._getPropertyWatchers(info.abi, contract));
+      allWatchers = this._getPropertyWatchers(info.abi, contract)
+        .concat(Object.values(watchers[this._contract] || []));
 
     return [node, allWatchers];
   }

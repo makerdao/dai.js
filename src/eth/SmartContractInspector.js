@@ -45,6 +45,8 @@ export default class SmartContractInspector {
         .then(prevMap => w.run(prevMap, this._watchers))
         .then(runResult => {
           const [value, nextWatchers] = runResult;
+
+          value.children = (nextWatchers || []).map(nw => nw.id());
           map[w.id()] = value || null;
 
           (nextWatchers || [])

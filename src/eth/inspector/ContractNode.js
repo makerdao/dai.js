@@ -42,6 +42,6 @@ export default class ContractNode {
       address: this._address,
       signer: this._signer,
       info: contractInfo[this._name] || 'No additional info available for this contract.'
-    }
+    };
   }
 }
