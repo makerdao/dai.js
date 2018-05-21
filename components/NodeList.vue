@@ -6,7 +6,8 @@
                 <span v-else-if="collapsible(node)" v-on:click="collapse(node)" class="nodeList__nodeState nodeList__nodeState--expanded">-</span>
                 <span v-else class="nodeList__nodeState nodeList__nodeState--leaf">&nbsp;</span>
                 <div class="nodeList__nodeName" :title="node.info">
-                    <span v-on:click="toggle(node)">{{node.name}}</span> : {{node.value}}
+                    <span class="nodeList__nodeName" v-on:click="toggle(node)">{{node.name}}</span> :
+                    <observable-value :value="node.value"></observable-value>
                     <div v-if="!!getSingleContractChild(node)" class="nodeList__nodeTag">
                         {{getSingleContractChild(node)}}
                     </div>
@@ -22,8 +23,10 @@
 </template>
 
 <script>
+  import ObservableValue from "./ObservableValue.vue";
   export default {
     name: "NodeList",
+    components: {ObservableValue},
     data: function() {
       return {
         expanded: this.selected.length === 1 ? this.selected : []
@@ -106,7 +109,7 @@
         display: inline-block;
     }
 
-    .nodeList__nodeName > span {
+    span.nodeList__nodeName {
         font-weight: bold;
         cursor: pointer;
     }
