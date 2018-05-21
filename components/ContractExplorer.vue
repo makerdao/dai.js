@@ -2,7 +2,7 @@
     <div class="contractExplorer">
         <div class="contractExplorer__header">
             <strong>Smart Contract Explorer</strong> &ndash;
-            <div class="contractExplorer__blockNumber">
+            <div v-if="!!blockNumber" class="contractExplorer__blockNumber">
                 <span class="contractExplorer__blockNumberLabel">block </span>
                 <span class="contractExplorer__blockNumberValue">{{blockNumber}}</span>
             </div>
@@ -31,7 +31,7 @@
       },
       blockNumber: {
         type: Number,
-        required: true
+        required: false
       },
       roots: {
         type: Array,

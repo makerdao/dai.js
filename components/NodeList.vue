@@ -2,16 +2,19 @@
     <div class="nodeList" :style="marginLeft">
         <div v-for="node in selectedNodes" class="nodeList__node">
             <div class="nodeList__nodeInfo">
-                <span v-if="expandable(node)" v-on:click="expand()" class="nodeList__nodeState nodeList__nodeState--collapsed">+</span>
-                <span v-else-if="collapsible(node)" v-on:click="collapse()" class="nodeList__nodeState nodeList__nodeState--expanded">-</span>
+                <span v-if="expandable(node)" v-on:click="expand(node)" class="nodeList__nodeState nodeList__nodeState--collapsed">+</span>
+                <span v-else-if="collapsible(node)" v-on:click="collapse(node)" class="nodeList__nodeState nodeList__nodeState--expanded">-</span>
                 <span v-else class="nodeList__nodeState nodeList__nodeState--leaf">&nbsp;</span>
                 <div class="nodeList__nodeName" :title="node.info">
                     <span v-on:click="toggle(node)">{{node.name}}</span> : {{node.value}}
+                    <div v-if="!!getSingleContractChild(node)" class="nodeList__nodeTag">
+                        {{getSingleContractChild(node)}}
+                    </div>
                 </div>
             </div>
-            <node-list v-if="expanded"
+            <node-list v-if="isExpanded(node)"
                :node-map="nodeMap"
-               :selected="node.children"
+               :selected="getChildren(node)"
                :indentation="childIndentation">
             </node-list>
         </div>
@@ -23,7 +26,7 @@
     name: "NodeList",
     data: function() {
       return {
-        expanded: (this.indentation === 0)
+        expanded: this.selected.length === 1 ? this.selected : []
       };
     },
     props: {
@@ -52,24 +55,38 @@
       }
     },
     methods: {
-      expand: function() {
-        this.expanded = true;
+      expand: function(node) {
+        this.expanded.push(node.name);
       },
-      collapse: function() {
-        this.expanded = false;
+      collapse: function(node) {
+        this.expanded = this.expanded.filter(exp => exp !== node.name);
       },
       toggle: function(node) {
         if (this.expandable(node)) {
-          this.expand();
+          this.expand(node);
         } else if (this.collapsible(node)) {
-          this.collapse();
+          this.collapse(node);
         }
       },
       expandable: function(node) {
-        return node.children.length > 0 && !this.expanded;
+        return node.children.length > 0 && this.expanded.indexOf(node.name) < 0;
       },
       collapsible: function(node) {
-        return node.children.length > 0 && this.expanded;
+        return node.children.length > 0 && this.expanded.indexOf(node.name) > -1;
+      },
+      isExpanded: function(node) {
+        return this.expanded.indexOf(node.name) > -1;
+      },
+      getSingleContractChild: function(node) {
+        if (node.children.length === 1) {
+          const info = this.nodeMap[node.children[0]].getInfo();
+          return (info.type === 'contract' ? info.name : null);
+        }
+        return null;
+      },
+      getChildren(node) {
+        return !!this.getSingleContractChild(node) ?
+          this.nodeMap[node.children[0]].children : node.children;
       }
     }
   }
@@ -99,6 +116,18 @@
         font-size: 13px;
         font-weight: bold;
         cursor: pointer;
+    }
+
+    .nodeList__nodeTag {
+        font-size: 10px;
+        display: inline-block;
+        font-weight: bold;
+        vertical-align: center;
+        background-color: #999;
+        color: white;
+        margin-left: 1em;
+        padding: 1px 3px;
+        border-radius: 3px;
     }
 
     @keyframes highlight {
