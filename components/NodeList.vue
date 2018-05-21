@@ -44,11 +44,21 @@
       indentation: {
         type: Number,
         default: 0
+      },
+      sortContractsFirst: {
+        type: Boolean,
+        default: false
       }
     },
     computed: {
       selectedNodes: function() {
-        return this.selected.map(id => ({ ...this.nodeMap[id].getInfo(), children: this.nodeMap[id].children }));
+        let result = this.selected.map(id => ({ ...this.nodeMap[id].getInfo(), children: this.nodeMap[id].children }));
+        result.sort((a, b) => {
+          let scoreA = (this.sortContractsFirst && a.children.length > 0 ? 2 : 0) + (a.name < b.name ? 1 : 0);
+          let scoreB = (this.sortContractsFirst && b.children.length > 0 ? 2 : 0) + (a.name > b.name ? 1 : 0);
+          return scoreB - scoreA;
+        });
+        return result;
       },
       marginLeft: function() {
         return `margin-left: ${this.indentation > 0 ? 1 : 0}em;`;
