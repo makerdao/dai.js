@@ -6,6 +6,7 @@ import networks from '../../contracts/networks';
 import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
 import '../polyfills';
+import SmartContractInspector from "./SmartContractInspector";
 
 export default class SmartContractService extends PublicService {
   static buildTestService(web3 = null, suppressOutput = true) {
@@ -155,6 +156,12 @@ export default class SmartContractService extends PublicService {
         values.forEach(v => (result[v[0]] = v.length > 2 ? v.slice(1) : v[1]));
         return result;
       });
+  }
+
+  inspect(contractNames = [contracts.SAI_TUB]) {
+    const inspector = new SmartContractInspector(this);
+    contractNames.forEach(n => inspector.watch(n));
+    return inspector.inspect();
   }
 
   stringToBytes32(text) {

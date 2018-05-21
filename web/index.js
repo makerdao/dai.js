@@ -17,6 +17,8 @@ function updateInfo(cdp, usingMetaMask) {
   .then(results => {
     const id = results[0], info = {};
     Object.keys(results[1]).forEach(k => info[k] = results[1][k].toString());
+
+    /*
     window.document.getElementById('cdp-output').innerHTML = `<div>
             <h3>CDP ${id}</h3>
             <ul class="objectFields">
@@ -28,6 +30,7 @@ function updateInfo(cdp, usingMetaMask) {
             <h3>DAI: ${results[2].toString()}</h3>
             <a href="/?inject=${usingMetaMask ? '0' : '1'}">${usingMetaMask ? 'disable' : 'enable'} metamask</a>
         </div>`;
+    */
 
     return cdp;
   });
@@ -52,22 +55,24 @@ setTimeout(() => {
 
   window.maker = new Maker(config);
 
-  window.vm = new Vue({
-    el: '#maker-dbg-container',
-    render: createElement => createElement('maker-debugger', {
-      props: {
-        maker: window.maker
-      }
-    }),
-    components: { MakerDebugger }
-  });
+  window.maker.authenticate().then(() => {
+    window.vm = new Vue({
+      el: '#maker-dbg-container',
+      render: createElement => createElement('maker-debugger', {
+        props: {
+          maker: window.maker
+        }
+      }),
+      components: { MakerDebugger }
+    });
 
-  let cdp = null;
-  window.maker.openCdp()
-    .then(x => updateInfo(cdp = x))
-    .then(() => cdp.lockEth('0.1'))
-    .then(() => updateInfo(cdp))
-    .then(() => cdp.drawDai(20))
-    .then(() => updateInfo(cdp));
+    let cdp = null;
+    window.maker.openCdp()
+      .then(x => updateInfo(cdp = x))
+      .then(() => cdp.lockEth('0.1'))
+      .then(() => updateInfo(cdp))
+      .then(() => cdp.drawDai(20))
+      .then(() => updateInfo(cdp));
+  });
 
 }, 500);
