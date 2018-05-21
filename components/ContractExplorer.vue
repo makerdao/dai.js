@@ -4,7 +4,9 @@
             <strong>Smart Contract Explorer</strong> &ndash;
             <div v-if="!!blockNumber" class="contractExplorer__blockNumber">
                 <span class="contractExplorer__blockNumberLabel">block </span>
-                <span class="contractExplorer__blockNumberValue">{{blockNumber}}</span>
+                <span class="contractExplorer__blockNumberValue">
+                    <observable-value :value="blockNumber"></observable-value>
+                </span>
             </div>
             <div v-if="reloading" class="contractExplorer__reloadIndicator">reloading...</div>
         </div>
@@ -21,6 +23,7 @@
 
 <script>
   import NodeList from "./NodeList.vue";
+  import ObservableValue from "./ObservableValue.vue";
 
   export default {
     name: "ContractExplorer",
@@ -48,6 +51,7 @@
       }
     },
     components: {
+      ObservableValue,
       NodeList
     }
   }
@@ -61,18 +65,16 @@
     }
 
     .contractExplorer__header {
-        padding: 0.5em 0 0.25em 0;
-        margin: 0 0 0.25em 0;
-        height: 20px;
+        box-sizing: border-box;
+        padding: 0.5em;
         border-bottom: 1px solid #AAA;
-        position: fixed;
-        top: 0;
         background-color: rgba(256, 256, 256, 0.9);
         width: 100%;
+        height: 2.5em;
     }
 
     .contractExplorer__nodeList {
-        margin-top: 28px
+        margin-top: 0.5em;
     }
 
     .contractExplorer__blockNumber {

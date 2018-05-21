@@ -7,17 +7,20 @@
             :reloading="reloading"
             class="contractExplorer"
         ></contract-explorer>
+        <transaction-list :transactions="transactions"></transaction-list>
     </div>
 </template>
 
 <script>
   import ContractExplorer from './ContractExplorer.vue';
+  import TransactionList from "./TransactionList.vue";
 
   let timerId = null;
 
   export default {
     name: "MakerDebugger",
     created: function() {
+
       this.maker.service('web3').onNewBlock(blockNumber => {
         this.blockNumber = blockNumber;
 
@@ -36,7 +39,10 @@
         }, 2500);
 
         this.reloading = true;
+      });
 
+      this.maker.service('transactionManager').onNewTransaction(tx => {
+        this.transactions = [tx].concat(this.transactions);
       });
     },
     data: function() {
@@ -44,6 +50,7 @@
         blockNumber: this.maker.service('web3').blockNumber(),
         logItems: [],
         nodeMap: null,
+        transactions: [],
         reloading: false
       };
     },
@@ -54,6 +61,7 @@
       }
     },
     components: {
+      TransactionList,
       ContractExplorer
     }
   }
@@ -69,6 +77,12 @@
 
     .contractExplorer {
         float: right;
+        width: 50%;
+    }
+
+    .transactionList {
+        display: block;
+        position: relative;
         width: 50%;
     }
 </style>

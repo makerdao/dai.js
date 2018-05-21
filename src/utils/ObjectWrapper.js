@@ -7,9 +7,13 @@ function _createFunctionProxy(
   wrapperObject[functionName] = (...args) => {
     handlers.onCall && handlers.onCall(functionName, args);
     const result = targetObject[functionName].call(targetObject, ...args);
-    handlers.afterCall && handlers.afterCall(functionName, args, result);
 
-    return result;
+    let modifiedResult = false;
+    if (handlers.afterCall) {
+       modifiedResult = handlers.afterCall(functionName, args, result);
+    }
+
+    return modifiedResult || result;
   };
 }
 

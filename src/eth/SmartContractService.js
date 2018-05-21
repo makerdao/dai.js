@@ -40,17 +40,15 @@ export default class SmartContractService extends PublicService {
     return ObjectWrapper.addWrapperInterface(
       { _original: contract }, contract, [], true, false, false,
       {
-        afterGet: (k, v) => this.get('log').info('GET ' + name + '.' + k + ' >> \'' + v.toString() + '\''),
-        onSet: (k, v) => this.get('log').info('SET ' + name + '.' + k + ' =\'' + v.toString() + '\''),
-        onCall: (k, args) => {
-          signer.getAddress().then(fromAddress => {
-            this.get('log').info(
-              `${fromAddress} >> ${name}.${k}(` +
-              (args.length > 0 ? '\'' : '') +
-              args.map(a => a.toString()).join('\', \'') +
-              (args.length > 0 ? '\')' : ')')
-            );
-          });
+        afterCall: (k, args, result) => {
+          if (typeof result === 'object') {
+            result._callInfo = {
+              contract: name,
+              call: k,
+              args: args
+            };
+          }
+          return result;
         }
       });
   }
