@@ -6,7 +6,7 @@ import tokens from '../contracts/tokens';
 import Vue from 'vue';
 import MakerDebugger from '../components/MakerDebugger.vue';
 
-function updateInfo(cdp, usingMetaMask) {
+function updateInfo(cdp) {
   return Promise.all([
     cdp.getCdpId(),
     cdp.getInfo(),
