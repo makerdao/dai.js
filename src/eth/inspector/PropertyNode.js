@@ -27,11 +27,12 @@ const propertiesInfo = {
 
 export default class PropertyNode {
 
-  constructor(name, contract, id, value) {
+  constructor(name, contract, id, value, isError = false) {
     this._name = name;
     this._contract = contract;
     this._id = id;
     this._rawValue = value;
+    this._isError = isError;
   }
 
   getInfo() {
@@ -40,7 +41,8 @@ export default class PropertyNode {
       contract: this._contract,
       name: this._name,
       value: this._rawValue.toString(),
-      info: propertiesInfo[this._id] || 'No additional info available.'
+      info: propertiesInfo[this._id] || 'No additional info available.',
+      isError: this._isError
     };
   }
 }

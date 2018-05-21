@@ -15,12 +15,24 @@ export default class PropertyWatcher {
   }
 
   run() {
-    const parentContract = this._getParentContract();
-    return parentContract[this._property]()
-      .then(value => [
-        new PropertyNode(this._property, this._contract, this.id(), value),
-        this._getWatchersForValue(value)
+    try {
+      const parentContract = this._getParentContract();
+      return parentContract[this._property]()
+        .then(value => [
+          new PropertyNode(this._property, this._contract, this.id(), value),
+          this._getWatchersForValue(value)
+        ])
+        .catch(reason => [
+          new PropertyNode(this._property, this._contract, this.id(), reason, true),
+          []
+        ]);
+
+    } catch(error) {
+      return Promise.resolve([
+        new PropertyNode(this._property, this._contract, this.id(), error, true),
+        []
       ]);
+    }
   }
 
   _getParentContract() {

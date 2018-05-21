@@ -73,6 +73,7 @@
         color: darkslategrey;
         padding: 0;
         margin: 0;
+        min-height: 100%;
     }
 
     .contractExplorer {

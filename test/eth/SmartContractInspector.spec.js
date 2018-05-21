@@ -92,6 +92,7 @@ test('should generate nodes for watched contracts and their properties', done =>
         name: 'axe',
         contract: 'SAI_TUB',
         value: '1130000000000000000000000000',
+        isError: false,
         info: 'Liquidation penalty'
       });
 

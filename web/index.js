@@ -14,11 +14,11 @@ function updateInfo(cdp, usingMetaMask) {
       window.maker.service('web3').defaultAccount()
     )
   ])
-  .then(results => {
+  .then(() => {
+    /*
     const id = results[0], info = {};
     Object.keys(results[1]).forEach(k => info[k] = results[1][k].toString());
 
-    /*
     window.document.getElementById('cdp-output').innerHTML = `<div>
             <h3>CDP ${id}</h3>
             <ul class="objectFields">

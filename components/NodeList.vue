@@ -7,7 +7,8 @@
                 <span v-else class="nodeList__nodeState nodeList__nodeState--leaf">&nbsp;</span>
                 <div class="nodeList__nodeName" :title="node.info">
                     <span class="nodeList__nodeName" v-on:click="toggle(node)">{{node.name}}</span> :
-                    <observable-value :value="node.value"></observable-value>
+                    <observable-value v-if="!node.isError" :value="node.value"></observable-value>
+                    <div v-else class="nodeList__nodeError">{{node.value}}</div>
                     <div v-if="!!getSingleContractChild(node)" class="nodeList__nodeTag">
                         {{getSingleContractChild(node)}}
                     </div>
@@ -141,6 +142,11 @@
         margin-left: 1em;
         padding: 1px 3px;
         border-radius: 3px;
+    }
+
+    .nodeList__nodeError {
+        display: inline;
+        color: red;
     }
 
     @keyframes highlight {
