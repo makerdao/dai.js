@@ -133,7 +133,6 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-
     return OasisBuyOrder.buildOasisBuyOrder(oasisContract, oasisContract.buyAllAmount(
         daiAddress,
         daiAmountEVM,

@@ -6,7 +6,7 @@ export default class OasisBuyOrder {
 
   static buildOasisBuyOrder(oasisContract, transaction, transactionService){
     const order = new OasisBuyOrder();
-    return transactionService.createTransactionHybrid(transaction, order, TransactionState.mined, receiptLogs => {
+    order._hybrid = transactionService.createTransactionHybrid(transaction, order, TransactionState.mined, receiptLogs => {
       const LogTradeEvent = oasisContract.getInterface().events.LogTrade;
       const LogTradeTopic = utils.keccak256(
         transactionService.get('web3')._web3.toHex(LogTradeEvent.signature)
@@ -22,13 +22,23 @@ export default class OasisBuyOrder {
       });
       order._fillAmount = utils.formatEther(total.toString());
     });
+    return order._hybrid;
   }
 
-  constructor(transaction, web3Service, oasisContract) {
+  constructor() {
     this._fillAmount = null;
+    this._hybrid = null;
   }
 
   fillAmount() {
     return this._fillAmount;
+  }
+
+  fees() {
+    return this._hybrid.getOriginalTransaction().fees();
+  }
+
+  created() {
+    return this._hybrid.getOriginalTransaction().timestamp();
   }
 }

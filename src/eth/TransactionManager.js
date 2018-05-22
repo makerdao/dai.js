@@ -37,6 +37,7 @@ export default class TransactionManager extends PublicService {
       hybrid = this._getImplicitStatePromise(tx, implicitState);
 
     hybrid._original = tx;
+    hybrid.getOriginalTransaction = () => tx;
 
     if (businessObject) {
       ObjectWrapper.addWrapperInterface(hybrid, businessObject);

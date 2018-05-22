@@ -159,7 +159,7 @@ test('get fees and fillAmount sell Dai', (done) => {
     });
 });
 
-xtest('get fees and fillAmount buy Dai', (done) => {
+test('get fees and fillAmount buy Dai', (done) => {
   const oasisService = OasisExchangeService.buildTestService();
   oasisService.manager().authenticate()
     .then(() => {

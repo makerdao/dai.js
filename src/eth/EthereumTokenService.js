@@ -13,12 +13,13 @@ import TransactionManager from './TransactionManager';
 export default class EthereumTokenService extends PrivateService {
   static buildTestService(
     smartContractService = null,
-    transactionManager = null
+    transactionManager = null,
+    suppressOutput = true
   ) {
     smartContractService =
-      smartContractService || SmartContractService.buildTestService();
+      smartContractService || SmartContractService.buildTestService(null, suppressOutput);
     transactionManager =
-      transactionManager || TransactionManager.buildTestService();
+      transactionManager || TransactionManager.buildTestService(null, suppressOutput);
     const service = new EthereumTokenService();
 
     service

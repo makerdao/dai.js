@@ -181,18 +181,19 @@ test('should be able to wipe dai', done => {
   let cdpId, firstDaiBalance, defaultAccount, dai;
   
   createdCdpService.manager().authenticate().then(() => {
-    lockEth('0.1')
+    return lockEth('0.1');
+    })
     .then(() => cdp.getCdpId())
     .then(id => {
       dai = createdCdpService.get('token').getToken(tokens.DAI);
       defaultAccount = createdCdpService.get('token').get('web3').defaultAccount();
       cdpId = id;
-      cdp.drawDai('1')
+      return cdp.drawDai('1');
     })
     .then(() => dai.balanceOf(defaultAccount))
     .then(balance => {
       firstDaiBalance = parseFloat(balance);
-      createdCdpService.wipeDai(cdpId, '1')
+      return createdCdpService.wipeDai(cdpId, '1');
     })
     .then(() => dai.balanceOf(defaultAccount))
     .then(secondDaiBalance => {
@@ -207,5 +208,4 @@ test('should be able to wipe dai', done => {
     .then(()=>{
       done();
     });
-  });
 });
