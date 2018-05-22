@@ -13,6 +13,7 @@ import ConsoleLogger from './loggers/ConsoleLogger';
 import NullLogger from './loggers/NullLogger';
 import TransactionManager from '../eth/TransactionManager';
 import AllowanceService from '../eth/AllowanceService';
+import PriceFeedService from '../eth/PriceFeedService';
 
 const _services = {
   Web3Service,
@@ -28,7 +29,8 @@ const _services = {
   ConsoleLogger,
   NullLogger,
   TransactionManager,
-  AllowanceService
+  AllowanceService,
+  PriceFeedService
 };
 
 export default class DefaultServiceProvider {

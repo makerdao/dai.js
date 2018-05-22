@@ -36,6 +36,10 @@ export default class Maker {
     });
   }
 
+  authenticate() {
+    return this._authenticatedPromise;
+  }
+
   service(service) {
     return this._container.service(service);
   }

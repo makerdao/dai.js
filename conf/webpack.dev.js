@@ -52,7 +52,9 @@ module.exports = Merge(CommonConfig, {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new HtmlWebpackPlugin({}),
+    new HtmlWebpackPlugin({
+      title: 'Maker.js demo'
+    }),
     new VueLoaderPlugin(),
     extractSass
   ],

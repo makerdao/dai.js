@@ -201,6 +201,18 @@ export default class Web3Service extends PrivateService {
     };
   }
 
+  blockNumber() {
+    return this._currentBlock;
+  }
+
+  onNewBlock(callback) {
+    if (!this._blockListeners['*']) {
+      this._blockListeners['*'] = [];
+    }
+
+    this._blockListeners['*'].push(callback);
+  }
+
   waitForBlockNumber(blockNumber, callback) {
     if (blockNumber < this._currentBlock) {
       throw new Error('Cannot wait for past block ' + blockNumber);
@@ -216,11 +228,16 @@ export default class Web3Service extends PrivateService {
 
   _updateBlockNumber(blockNumber) {
     this.get('log').info('New block: ', blockNumber);
+    this._currentBlock = blockNumber;
+
     if (this._blockListeners[blockNumber]) {
       this._blockListeners[blockNumber].forEach(c => c(blockNumber));
       this._blockListeners[blockNumber] = undefined;
     }
-    this._currentBlock = blockNumber;
+
+    if (this._blockListeners['*']) {
+      this._blockListeners['*'].forEach(c => c(blockNumber));
+    }
   }
 
   _installCleanUpHooks() {

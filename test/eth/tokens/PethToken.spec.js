@@ -67,3 +67,46 @@ test('should successfully join and exit PETH', done => {
       done();
     });
 }, 5000);
+
+// These need better tests
+test('should return the wrapper ratio', done => {
+  const tokenService = EthereumTokenService.buildTestService();
+  let peth;
+
+  tokenService.manager().authenticate().then(() => {
+    peth = tokenService.getToken(tokens.PETH);
+    peth.wrapperRatio()
+    .then(ratio => {
+      expect(typeof ratio).toBe('number');
+      done();
+    });
+  });
+});
+
+test('should return the join price in eth', done => {
+  const tokenService = EthereumTokenService.buildTestService();
+  
+  tokenService.manager().authenticate().then(() => {
+    tokenService.getToken(tokens.PETH)
+      .joinPrice('1')
+      .then(value => {
+        expect(typeof value).toBe('number');
+        expect(value).toEqual(1);
+        done();
+    });
+  });
+});
+
+test('should return the exit price in eth', done => {
+  const tokenService = EthereumTokenService.buildTestService();
+
+  tokenService.manager().authenticate().then(() => {
+    tokenService.getToken(tokens.PETH)
+      .exitPrice('1')
+      .then(value => {
+        expect(typeof value).toBe('number');
+        expect(value).toEqual(1);
+        done();
+      });
+  });
+});

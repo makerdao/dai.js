@@ -230,7 +230,7 @@ test ('should connect to the right network when using the INFURA provider type',
     expect(service.networkId()).toBe(42);
     done();
   });
-});
+}, 10000);
 
 test ('should reject invalid private key formats', (done) => {
 

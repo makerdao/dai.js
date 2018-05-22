@@ -7,6 +7,7 @@ import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 import TransactionManager from './TransactionManager';
 import AllowanceService from './AllowanceService';
+import PriceFeedService from './PriceFeedService';
 
 import { utils } from 'ethers';
 
@@ -28,7 +29,8 @@ export default class EthereumCdpService extends PrivateService {
       smartContract,
       tokenService
     );
-    const allowanceService = AllowanceService.buildTestServiceMaxAllowance()
+    const allowanceService = AllowanceService.buildTestServiceMaxAllowance();
+    const priceFeed = PriceFeedService.buildTestService();
 
     service
       .manager()
@@ -36,7 +38,8 @@ export default class EthereumCdpService extends PrivateService {
       .inject('token', tokenService)
       .inject('conversionService', conversionService)
       .inject('transactionManager', transactionManager)
-      .inject('allowance', allowanceService);
+      .inject('allowance', allowanceService)
+      .inject('priceFeed', priceFeed);
 
     return service;
   }
@@ -50,7 +53,8 @@ export default class EthereumCdpService extends PrivateService {
       'token',
       'conversionService',
       'transactionManager',
-      'allowance'
+      'allowance',
+      'priceFeed'
     ]);
   }
 
@@ -150,5 +154,29 @@ export default class EthereumCdpService extends PrivateService {
         this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
       );
     });
+  }
+
+  abstractedCollateralPrice() {
+    const token = this.get('token').getToken(tokens.PETH);
+
+    return this._tubContract()
+      .tag()
+      .then(value => parseFloat(token.toUserFormat(value)));
+  }
+
+  give(cdpId, newAddress) {
+    const hexCdpId = this._hexCdpId(cdpId);
+
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().give(hexCdpId, newAddress)
+    );
+  }
+
+  bite(cdpId) {
+    const hexCdpId = this._hexCdpId(cdpId);
+
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().bite(hexCdpId, { gasLimit: 4000000 })
+    );
   }
 }

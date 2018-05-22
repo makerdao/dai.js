@@ -7,7 +7,7 @@ beforeEach(() => {
   return createdCdpService = EthereumCdpService.buildTestService();
 });
 
-function openCdp(){
+function openCdp() {
   return createdCdpService.manager().authenticate()
     .then(() => createdCdpService.openCdp())
     .then(newCdp => {
@@ -16,7 +16,7 @@ function openCdp(){
     });
 }
 
-function lockEth(amount){
+function lockEth(amount) {
   return openCdp()
     .then((id) => createdCdpService.lockEth(id, amount))
     .then(() => cdp.getInfo());
@@ -97,6 +97,7 @@ test('should open and then shut a CDP with peth locked in it', done => {
     });
 }, 5000);
 
+
 test('should be able to lock eth in a cdp', done => {
   let firstInfoCall;
   let cdpId;
@@ -141,7 +142,7 @@ test('should be able to free peth from a cdp', done => {
         newCdp.getInfo().then(info => firstBalance = parseFloat(info.ink))
         .then(() => {
           createdCdpService.freePeth(cdpId, '0.1')
-                .then(() => {
+          .then(() => {
             newCdp.getInfo().then(info => {
               expect(parseFloat(info.ink)).toBeCloseTo(firstBalance - 100000000000000000);
               done();
@@ -170,7 +171,7 @@ test('should be able to draw dai', done => {
         .then(() => dai.balanceOf(defaultAccount))
         .then(secondDaiBalance => {
           expect(parseFloat(secondDaiBalance)).toBeCloseTo(firstDaiBalance + 1);
-          done();
+          cdp.wipeDai('1').then(() => done());
         });
       });
     });
@@ -208,4 +209,50 @@ test('should be able to wipe dai', done => {
     .then(()=>{
       done();
     });
+});
+
+test('should return the abstracted collateral price', done => {
+  createdCdpService.manager().authenticate().then(() => {
+    createdCdpService.abstractedCollateralPrice().then(value => {
+      expect(typeof value).toBe('number');
+      done();
+    });
+  });
+});
+
+test('should be able to transfer ownership of a cdp', done => {
+  const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
+  let cdpId, firstOwner;
+
+  createdCdpService.manager().authenticate().then(() => {
+    openCdp()
+    .then(id => cdpId = id)
+    .then(() => cdp.getInfo())
+    .then(info => firstOwner = info.lad)
+    .then(() => createdCdpService.give(cdpId, newAddress))
+    .then(() => cdp.getInfo())
+    .then(info => {
+      expect(info.lad).not.toEqual(firstOwner);
+      expect(info.lad).toEqual(newAddress);
+      done();
+    });
+  });
+});
+
+// Also test that biting a safe cdp throws an error
+test('should be able to bite an unsafe cdp', done => {
+  let id;
+
+  createdCdpService.manager().authenticate().then(() => {
+    lockEth('0.1')
+    .then(() => cdp.drawDai('13'))
+    .then(() => cdp.getCdpId())
+    .then(cdpId => id = cdpId)
+    .then(() => createdCdpService.get('priceFeed').setEthPrice('0.01'))
+    .then(() => createdCdpService.get('priceFeed').getEthPrice())
+    .then(() => createdCdpService.bite(id))
+    .then(res => expect(typeof res).toEqual('object'))
+    .then(() => createdCdpService.get('priceFeed').setEthPrice('400'))
+    .then(() => done());
+  });
 });

@@ -17,7 +17,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
     this._timeStampMined = null;
-    this._error = null;
+    this._errorMessage = null;
     this._fees = null;
     this._logs = null;
     this._hash = null;
@@ -42,7 +42,7 @@ export default class TransactionObject extends TransactionLifeCycle {
   }
 
   error() {
-    return this._error;
+    return this._errorMessage;
   }
 
   /*
@@ -59,12 +59,12 @@ export default class TransactionObject extends TransactionLifeCycle {
             if (newReceipt.blockHash === originalBlockHash) {
               this._finalize(); //set state to finalized
             } else {
-              this._error = "transaction block hash changed";
+              this._errorMessage = "transaction block hash changed";
               console.error(reason);
             }
           },
           reason => {
-            this._error = reason;
+            this._errorMessage = reason;
             console.error(reason);
           }
         );
@@ -81,12 +81,14 @@ export default class TransactionObject extends TransactionLifeCycle {
         if (newReceipt.blockHash === originalBlockHash) {
           this._finalize(); //set state to finalized
         } else {
-          this._error = 'transaction block hash changed';
-          console.error(this._error);
+          this._errorMessage = 'transaction block hash changed';
+          this._error();
+          console.error(this._errorMessage);
         }
       },
       reason => {
-        this._error = reason;
+        this._errorMessage = reason;
+        this._error();
         console.error(reason);
       }
     );
@@ -106,7 +108,8 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         // eslint-disable-next-line
         reason => {
-          this._error = reason;
+          this._errorMessage = reason;
+          this._error();
           console.error(reason);
         }
       )
@@ -117,7 +120,8 @@ export default class TransactionObject extends TransactionLifeCycle {
           return this._waitForReceipt();
         },
         reason => {
-          this._error = reason;
+          this._errorMessage = reason;
+          this._error();
           console.error(reason);
         }
       )
@@ -149,7 +153,8 @@ export default class TransactionObject extends TransactionLifeCycle {
         },
         // eslint-disable-next-line
         reason => {
-          this._error = reason;
+          this._errorMessage = reason;
+          this._error();
           console.error(reason);
         }
       );

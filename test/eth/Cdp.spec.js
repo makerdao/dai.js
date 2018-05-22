@@ -172,3 +172,22 @@ test('should be able to wipe dai', done => {
     });
   });
 });
+
+test('should be able to transfer ownership of a cdp', done => {
+  const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
+  let cdp, firstOwner;
+
+  createdCdpService.manager().authenticate().then(() => {
+    createdCdpService.openCdp()
+    .then(newCdp => cdp = newCdp)
+    .then(() => cdp.getInfo())
+    .then(info => firstOwner = info.lad)
+    .then(() => cdp.give(newAddress))
+    .then(() => cdp.getInfo())
+    .then(info => {
+      expect(info.lad).not.toEqual(firstOwner);
+      expect(info.lad).toEqual(newAddress);
+      done();
+    });
+  });
+});

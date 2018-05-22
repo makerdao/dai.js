@@ -6,6 +6,7 @@ import networks from '../../contracts/networks';
 import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
 import '../polyfills';
+import SmartContractInspector from './SmartContractInspector';
 
 export default class SmartContractService extends PublicService {
   static buildTestService(web3 = null, suppressOutput = true) {
@@ -39,17 +40,15 @@ export default class SmartContractService extends PublicService {
     return ObjectWrapper.addWrapperInterface(
       { _original: contract }, contract, [], true, false, false,
       {
-        afterGet: (k, v) => this.get('log').info('GET ' + name + '.' + k + ' >> \'' + v.toString() + '\''),
-        onSet: (k, v) => this.get('log').info('SET ' + name + '.' + k + ' =\'' + v.toString() + '\''),
-        onCall: (k, args) => {
-          signer.getAddress().then(fromAddress => {
-            this.get('log').info(
-              `${fromAddress} >> ${name}.${k}(` +
-              (args.length > 0 ? '\'' : '') +
-              args.map(a => a.toString()).join('\', \'') +
-              (args.length > 0 ? '\')' : ')')
-            );
-          });
+        afterCall: (k, args, result) => {
+          if (typeof result === 'object') {
+            result._callInfo = {
+              contract: name,
+              call: k,
+              args: args
+            };
+          }
+          return result;
         }
       });
   }
@@ -157,6 +156,12 @@ export default class SmartContractService extends PublicService {
       });
   }
 
+  inspect(contractNames = [contracts.SAI_TUB]) {
+    const inspector = new SmartContractInspector(this);
+    contractNames.forEach(n => inspector.watch(n));
+    return inspector.inspect();
+  }
+
   stringToBytes32(text) {
     const ethersUtils = this.get('web3').ethersUtils();
     var data = ethersUtils.toUtf8Bytes(text);
@@ -184,11 +189,15 @@ export default class SmartContractService extends PublicService {
     );
   }
 
+  hasContract(name) {
+    return (
+      Object.keys(contracts).indexOf(name) > -1 ||
+      Object.keys(tokens).indexOf(name) > -1
+    );
+  }
+
   _getContractInfo(name, version = null) {
-    if (
-      Object.keys(contracts).indexOf(name) < 0 &&
-      Object.keys(tokens).indexOf(name) < 0
-    ) {
+    if (!this.hasContract(name)) {
       throw new Error('Provided name "' + name + '" is not a contract');
     }
 

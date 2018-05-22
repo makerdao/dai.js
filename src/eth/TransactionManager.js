@@ -4,6 +4,8 @@ import TransactionObject from './TransactionObject';
 import TransactionState from './TransactionState';
 import ObjectWrapper from '../utils/ObjectWrapper';
 
+let txId = 1;
+
 export default class TransactionManager extends PublicService {
   static buildTestService(web3 = null, suppressOutput = true) {
     web3 = web3 || Web3Service.buildTestService(null, 5000, suppressOutput);
@@ -20,6 +22,7 @@ export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
     super(name, ['web3', 'log']);
     this._transactions = [];
+    this._listeners = [];
   }
 
   createTransactionHybrid(
@@ -38,6 +41,7 @@ export default class TransactionManager extends PublicService {
 
     hybrid._original = tx;
     hybrid.getOriginalTransaction = () => tx;
+    hybrid._txId = txId++;
 
     if (businessObject) {
       ObjectWrapper.addWrapperInterface(hybrid, businessObject);
@@ -52,11 +56,17 @@ export default class TransactionManager extends PublicService {
     ]);
 
     this._transactions.push(hybrid);
+    this._listeners.forEach(cb => cb(hybrid));
+
     return hybrid;
   }
 
   getTransactions() {
     return this._transactions;
+  }
+
+  onNewTransaction(callback) {
+    this._listeners.push(callback);
   }
 
   _getImplicitStatePromise(transaction, state) {
