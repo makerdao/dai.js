@@ -127,7 +127,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       )
       .then(
         receipt => {
-          if (typeof this._logsParser === "function"){
+          if (typeof this._logsParser === 'function'){
             this._logsParser(receipt.logs);
           }
           if (!!receipt.gasUsed && !!gasPrice) {

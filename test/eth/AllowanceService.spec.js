@@ -14,7 +14,7 @@ test('max allowance policy, no need to update', (done) => {
   		allowanceService.requireAllowance(tokens.DAI, randomAddress)
   	)
   	.then(()=>{
-  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress);
   	})
   	.then(allowanceAfter=>{
   		const EVMFormat = daiToken.toEthereumFormat(allowanceAfter);
@@ -40,7 +40,7 @@ test('max allowance policy, need to update', (done) => {
   		allowanceService.requireAllowance(tokens.DAI, randomAddress)
   	)
   	.then(()=>{
-  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress);
   	})
   	.then(allowanceAfter=>{
   		const EVMFormat = daiToken.toEthereumFormat(allowanceAfter);
@@ -67,7 +67,7 @@ test('min allowance policy, need to update', (done) => {
   		allowanceService.requireAllowance(tokens.DAI, randomAddress, estimate)
   	)
   	.then(()=>{
-  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress);
   	})
   	.then(allowanceAfter=>{
   		expect(parseInt(allowanceAfter)).toEqual(estimate);
@@ -92,7 +92,7 @@ test('min allowance policy, no need to update', (done) => {
   		allowanceService.requireAllowance(tokens.DAI, randomAddress, estimate)
   	)
   	.then(()=>{
-  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress);
   	})
   	.then(allowanceAfter=>{
   		expect(parseInt(allowanceAfter)).toEqual(parseInt(initialAllowance));
@@ -115,7 +115,7 @@ test('removeAllowance() works, need to update', (done) => {
   		allowanceService.removeAllowance(tokens.DAI, randomAddress)
   	)
   	.then(()=>{
-  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress);
   	})
   	.then(allowanceAfter=>{
   		expect(parseInt(allowanceAfter)).toEqual(0);
@@ -138,7 +138,7 @@ test('removeAllowance() works, no need to update', (done) => {
   		allowanceService.removeAllowance(tokens.DAI, randomAddress)
   	)
   	.then(()=>{
-  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress)
+  		return daiToken.allowance(allowanceService.get('token').get('web3').ethersSigner().address, randomAddress);
   	})
   	.then(allowanceAfter=>{
   		expect(parseInt(allowanceAfter)).toEqual(0);

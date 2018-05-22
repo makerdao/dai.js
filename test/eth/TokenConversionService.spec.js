@@ -1,5 +1,4 @@
 import TokenConversionService from '../../src/eth/TokenConversionService';
-import EthereumTokenService from '../../src/eth/EthereumTokenService';
 import tokens from '../../contracts/tokens';
 
 test('should convert eth to weth', done => {
@@ -18,7 +17,7 @@ test('should convert eth to weth', done => {
   })
   .then(balance => {
     initialBalance = parseFloat(balance);
-    return conversionService.convertEthToWeth('0.1')
+    return conversionService.convertEthToWeth('0.1');
   })
   .then(() => eth.balanceOf(owner))
   .then(newEthBalance => {

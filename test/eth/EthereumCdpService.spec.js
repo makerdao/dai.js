@@ -69,7 +69,7 @@ test('should open and then shut a CDP with peth locked in it', done => {
   openCdp()
   .then(id => {
     cdpId = id;
-    createdCdpService.getCdpInfo(id)
+    createdCdpService.getCdpInfo(id);
   })
     .then(info => firstInfoCall = info)
     .then(() => cdp.lockEth('0.1'))
@@ -92,7 +92,6 @@ test('should open and then shut a CDP with peth locked in it', done => {
       done();
     })
     .catch((err) => { 
-      console.log('error', err);
       done.fail(new Error('shutting CDP had an error: ', err));
     });
 }, 5000);

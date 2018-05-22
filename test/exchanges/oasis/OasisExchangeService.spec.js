@@ -85,9 +85,9 @@ test('sell Dai, console log the balances (used for debugging)', (done) => {
   const oasisExchangeService = OasisExchangeService.buildTestService();
   let oasisOrder = null;
   /* eslint-disable-next-line */
-  let initialBalance = 0;
+  let initialBalance;
   /* eslint-disable-next-line */
-  let finalBalance = 0;
+  let finalBalance;
   let daiToken = null;
 
   oasisExchangeService.manager().authenticate()

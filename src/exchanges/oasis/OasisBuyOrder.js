@@ -1,4 +1,3 @@
-import TransactionObject from '../../eth/TransactionObject';
 import TransactionState from '../../eth/TransactionState';
 import { utils } from 'ethers';
 
@@ -13,7 +12,7 @@ export default class OasisBuyOrder {
       ); //find a way to convert string to hex without web3
       const receiptEvents = receiptLogs.filter(
         e => {
-          return e.topics[0].toLowerCase() === LogTradeTopic.toLowerCase() && e.address.toLowerCase() === oasisContract.getAddress().toLowerCase()
+          return e.topics[0].toLowerCase() === LogTradeTopic.toLowerCase() && e.address.toLowerCase() === oasisContract.getAddress().toLowerCase();
       });
       let total = utils.bigNumberify('0');
       receiptEvents.forEach(event => {
