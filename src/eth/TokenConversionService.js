@@ -1,20 +1,23 @@
 import PrivateService from '../core/PrivateService';
 import EthereumTokenService from './EthereumTokenService';
 import SmartContractService from './SmartContractService';
+import AllowanceService from './AllowanceService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 
 export default class TokenConversionService extends PrivateService {
-  static buildTestService(smartContract = null, token = null, suppressOutput = true) {
+  static buildTestService(smartContract = null, token = null, maxAllowance = true, suppressOutput = true) {
     const service = new TokenConversionService();
     const smartContractService =
       smartContract || SmartContractService.buildTestService(null, suppressOutput);
     const tokenService =
       token || EthereumTokenService.buildTestService(smartContract, null, suppressOutput);
+    const allowanceService = maxAllowance ? AllowanceService.buildTestServiceMaxAllowance() : AllowanceService.buildTestServiceMinAllowance();
 
     service
       .manager()
       .inject('smartContract', smartContractService)
+      .inject('allowance', allowanceService)
       .inject('token', tokenService);
 
     return service;
@@ -24,25 +27,11 @@ export default class TokenConversionService extends PrivateService {
    * @param {string} name
    */
   constructor(name = 'conversionService') {
-    super(name, ['smartContract', 'token']);
+    super(name, ['smartContract', 'token', 'allowance']);
   }
 
   _getToken(token) {
     return this.get('token').getToken(token);
-  }
-
-  approveToken(token) {
-    const tubContract = this.get('smartContract').getContractByName(
-      contracts.SAI_TUB
-    );
-
-    return new Promise((resolve, reject) => {
-      try {
-        resolve(token.approveUnlimited(tubContract.getAddress()));
-      } catch (err) {
-        reject(err.message);
-      }
-    });
   }
 
   convertEthToWeth(eth) {
@@ -55,7 +44,8 @@ export default class TokenConversionService extends PrivateService {
     const wethToken = this._getToken(tokens.WETH);
     const pethToken = this._getToken(tokens.PETH);
 
-    return this.approveToken(wethToken).then(() => pethToken.join(weth));
+    return this.get('allowance').requireAllowance(tokens.WETH, this.get('smartContract').getContractByName(contracts.SAI_TUB).getAddress())
+    .then(() => pethToken.join(weth));
   }
 
   convertEthToPeth(value) {

@@ -93,9 +93,8 @@ export default class EthereumCdpService extends PrivateService {
     const weth = this.get('token').getToken(tokens.WETH);
 
     return Promise.all([
-      this._conversionService().approveToken(dai),
-      this._conversionService().approveToken(peth),
-      this._conversionService().approveToken(weth)
+      this.get('allowance').requireAllowance(tokens.MKR, this._tubContract().getAddress()),
+      this.get('allowance').requireAllowance(tokens.DAI, this._tubContract().getAddress())
     ]).then(() => {
       return this._transactionManager().createTransactionHybrid(
         this._tubContract().shut(hexCdpId, { gasLimit: 4000000 })
