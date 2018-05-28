@@ -3,12 +3,13 @@ sudo: required
 language: node_js
 node_js:
 - '8'
+before_cache:
+- sudo mkdir -m 0755 /nix && sudo chown travis /nix
 cache:
   directories:
   - node_modules
   - /nix
 before_install:
-- sudo mkdir -m 0755 /nix && sudo chown travis /nix
 - curl https://nixos.org/nix/install | sh 
 - . /home/travis/.nix-profile/etc/profile.d/nix.sh
 - nix-channel --add https://nix.dapphub.com/pkgs/dapphub
