@@ -47,7 +47,7 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   /*
   _waitForConfirmations(originalBlockNumber, originalBlockHash, requiredConfirmations = 3){
-    
+
     let assertBlockHashUnchanged = newBlockNumber => {
       if (newBlockNumber < originalBlockNumber + requiredConfirmations) {
         console.log('reregistering handler: newBlockNumber: ', newBlockNumber, ' is lower than required blockNumber: ', originalBlockNumber + requiredConfirmations);
@@ -97,66 +97,48 @@ export default class TransactionObject extends TransactionLifeCycle {
   _getTransactionData() {
     let gasPrice = null;
     this._transaction
-      .then(
-        tx => {
-          this._pending(); //set state to pending
-          this._hash = tx.hash;
-          return Promise.any([
-            this._ethersProvider.getTransaction(this._hash),
-            this._ethersProvider.waitForTransaction(this._hash)
-          ]);
-        },
-        // eslint-disable-next-line
-        reason => {
-          this._errorMessage = reason;
-          this._error();
-          console.error(reason);
-        }
-      )
-      .then(
-        tx => {
-          gasPrice = tx.gasPrice;
-          this._timeStampMined = new Date();
-          return this._waitForReceipt();
-        },
-        reason => {
-          this._errorMessage = reason;
-          this._error();
-          console.error(reason);
-        }
-      )
-      .then(
-        receipt => {
-          //console.log('receiptGasUsed', receipt.gasUsed.toString());
-          this._logsParser(receipt.logs);
-          if (!!receipt.gasUsed && !!gasPrice) {
-            this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
-          } else {
-            /*
+      .then(tx => {
+        this._pending(); //set state to pending
+        this._hash = tx.hash;
+        return Promise.any([
+          this._ethersProvider.getTransaction(this._hash),
+          this._ethersProvider.waitForTransaction(this._hash)
+        ]);
+      })
+      .then(tx => {
+        gasPrice = tx.gasPrice;
+        this._timeStampMined = new Date();
+        return this._waitForReceipt();
+      })
+      .then(receipt => {
+        //console.log('receiptGasUsed', receipt.gasUsed.toString());
+        this._logsParser(receipt.logs);
+        if (!!receipt.gasUsed && !!gasPrice) {
+          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+        } else {
+          /*
               console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
                 receipt.gasUsed ? receipt.gasUsed.toString() : '<not set>',
                 'Price = ', gasPrice ? gasPrice.toString() : '<not set>'
               );
             */
-          }
-          this._mine(); //set state to mined
-
-          //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
-          const requiredConfirmations = 3;
-          this._web3Service.waitForBlockNumber(
-            receipt.blockNumber + requiredConfirmations,
-            () => {
-              this._assertBlockHashUnchanged(receipt.blockHash);
-            }
-          );
-        },
-        // eslint-disable-next-line
-        reason => {
-          this._errorMessage = reason;
-          this._error();
-          console.error(reason);
         }
-      );
+        this._mine(); //set state to mined
+
+        //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
+        const requiredConfirmations = 3;
+        this._web3Service.waitForBlockNumber(
+          receipt.blockNumber + requiredConfirmations,
+          () => {
+            this._assertBlockHashUnchanged(receipt.blockHash);
+          }
+        );
+      })
+      .catch(reason => {
+        this._errorMessage = reason;
+        this._error();
+        console.error(reason);
+      });
   }
 
   _waitForReceipt(retries = 5) {
