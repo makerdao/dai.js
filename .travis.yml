@@ -6,7 +6,7 @@ node_js:
 cache:
   directories:
   - node_modules
-  - nix
+  - /nix
 before_install:
 - sudo mkdir -m 0755 /nix && sudo chown travis /nix
 - curl https://nixos.org/nix/install | sh 
