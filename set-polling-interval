@@ -1,2 +1,9 @@
+#!/usr/bin/env bash
+
+function sed_inplace {
+  # sed's -i argument behaves differently on macOS, hence this hack
+  sed -i.bak "$1" $2 && rm $2.bak
+}
+
 INTERVAL=${1:-50}
-sed -i "s/var pollingInterval = [0-9]*/var pollingInterval = $INTERVAL/" ./node_modules/ethers/providers/provider.js
+sed_inplace "s/var pollingInterval = [0-9]*/var pollingInterval = $INTERVAL/" ./node_modules/ethers/providers/provider.js
