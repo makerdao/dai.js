@@ -7,6 +7,7 @@ cache:
   directories:
   - node_modules
   - nix
+  timeout: 9000
 before_install:
 - sudo mkdir -m 0755 /nix && sudo chown travis /nix
 - sudo mount -o bind /home/travis/build/makerdao/makerdao-integration-poc/nix /nix
