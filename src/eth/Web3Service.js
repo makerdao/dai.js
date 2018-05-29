@@ -353,7 +353,11 @@ export default class Web3Service extends PrivateService {
   _getWeb3Provider(settings, web3) {
     let web3Provider = null;
 
-    if (settings.usePresetProvider && window && window.web3) {
+    if (
+      settings.usePresetProvider &&
+      typeof window != 'undefined' &&
+      window.web3
+    ) {
       this.get('log').info('Selecting preset Web3 provider...');
       web3Provider = window.web3.currentProvider;
       window.web3 = web3;
