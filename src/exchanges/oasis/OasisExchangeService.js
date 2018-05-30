@@ -132,7 +132,9 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-    return OasisBuyOrder.buildOasisBuyOrder(oasisContract, oasisContract.buyAllAmount(
+    return this.get('allowance').requireAllowance(tokens.WETH, oasisContract.getAddress())
+    .then(()=>
+    OasisBuyOrder.buildOasisBuyOrder(oasisContract, oasisContract.buyAllAmount(
         daiAddress,
         daiAmountEVM,
         sellTokenAddress,
@@ -140,19 +142,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
         { gasLimit: 300000 }
       ),
       this.get('transactionManager')
-    );
-
-    /*return new OasisBuyOrder(
-      oasisContract.buyAllAmount(
-        daiAddress,
-        daiAmountEVM,
-        sellTokenAddress,
-        maxFillAmountEVM,
-        { gasLimit: 300000 }
-      ),
-      this.get('web3'),
-      oasisContract._original
-    );*/
+    ));
   }
 
   //only used to set up a limit order on the local testnet
