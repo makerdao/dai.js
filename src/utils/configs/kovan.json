@@ -1,0 +1,30 @@
+{
+  "global": {
+    "enableProxies": false
+  },
+
+  "services": {
+
+    "web3": [
+      "Web3Service",
+      {
+        "usePresetProvider": true,
+        "provider": {
+          "type": "INFURA"
+        }
+      }
+    ],
+    "allowance": "AllowanceService",
+    "cdp": "EthereumCdpService",
+    "exchange": "OasisExchangeService",
+    "smartContract": "SmartContractService",
+    "token": "EthereumTokenService",
+    "conversionService": "TokenConversionService",
+    "gasEstimator": "GasEstimatorService",
+    "transactionManager": "TransactionManager",
+    "priceFeed": "PriceFeedService",
+
+    "timer": "TimerService",
+    "log": "ConsoleLogger"
+  }
+}
