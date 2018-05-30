@@ -103,7 +103,9 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
       .address();
     const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
     const minFillAmountEVM = daiToken.toEthereumFormat(minFillAmount);
-    return OasisSellOrder.buildOasisSellOrder(oasisContract, oasisContract.sellAllAmount(
+    return this.get('allowance').requireAllowance(tokens.DAI, oasisContract.getAddress())
+    .then(()=>
+    OasisSellOrder.buildOasisSellOrder(oasisContract, oasisContract.sellAllAmount(
         daiAddress,
         daiAmountEVM,
         buyTokenAddress,
@@ -111,7 +113,7 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
         { gasLimit: 300000 }
       ),
       this.get('transactionManager')
-    );
+    ));
   }
 
   /*
