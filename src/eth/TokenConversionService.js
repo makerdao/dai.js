@@ -41,7 +41,6 @@ export default class TokenConversionService extends PrivateService {
   }
 
   convertWethToPeth(weth) {
-    const wethToken = this._getToken(tokens.WETH);
     const pethToken = this._getToken(tokens.PETH);
 
     return this.get('allowance').requireAllowance(tokens.WETH, this.get('smartContract').getContractByName(contracts.SAI_TUB).getAddress())

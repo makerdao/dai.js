@@ -88,9 +88,6 @@ export default class EthereumCdpService extends PrivateService {
 
   shutCdp(cdpId) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const dai = this.get('token').getToken(tokens.DAI);
-    const peth = this.get('token').getToken(tokens.PETH);
-    const weth = this.get('token').getToken(tokens.WETH);
 
     return Promise.all([
       this.get('allowance').requireAllowance(tokens.MKR, this._tubContract().getAddress()),

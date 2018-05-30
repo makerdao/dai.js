@@ -93,7 +93,6 @@ tokenSymbol: symbol of token to buy
 minFillAmount: minimum amount of token being bought required.  If this can't be met, the trade will fail
 */
   sellDai(daiAmount, tokenSymbol, minFillAmount = '0') {
-    const allowanceService = this.get('allowance');
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );

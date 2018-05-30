@@ -133,6 +133,7 @@ export default class TransactionObject extends TransactionLifeCycle {
           if (!!receipt.gasUsed && !!gasPrice) {
             this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
           } else {
+            // eslint-disable-next-line
             console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
               receipt.gasUsed ? receipt.gasUsed.toString() : '<not set>',
               'Price = ', gasPrice ? gasPrice.toString() : '<not set>'
