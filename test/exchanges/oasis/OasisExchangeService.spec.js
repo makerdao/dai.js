@@ -202,11 +202,11 @@ test('OasisOrder properly finalizes', done => {
       return oasisOrder.onPending();
     })
     .then(OrderObject => {
-      expect(OrderObject.state()).toBe(TransactionState.pending);
-      return OrderObject.onMined();
+      expect(OrderObject._hybrid.getOriginalTransaction().state()).toBe(TransactionState.pending);
+      return OrderObject._hybrid.onMined();
     })
     .then(OrderObject => {
-      expect(OrderObject.state()).toBe(TransactionState.mined);
+      expect(OrderObject._hybrid.getOriginalTransaction().state()).toBe(TransactionState.mined);
       daiToken = oasisService.get('token').getToken(tokens.DAI);
       return daiToken.approveUnlimited(randomAddress).onMined();
     })
@@ -223,7 +223,7 @@ test('OasisOrder properly finalizes', done => {
       return order.onFinalized();
     })
     .then(OrderObject => {
-      expect(OrderObject.state()).toBe(TransactionState.finalized);
+      expect(OrderObject._hybrid.getOriginalTransaction().state()).toBe(TransactionState.finalized);
       done();
     });
 });
