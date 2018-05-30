@@ -42,7 +42,7 @@
     "test:net": "./with-deployed-system"
   },
   "lint-staged": {
-    "./src/**/*.js": [
+    "./{src,web,test}/**/*.js": [
       "prettier --single-quote es5 --write",
       "git add",
       "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'"
