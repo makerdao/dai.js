@@ -58,3 +58,13 @@ test('should validate the provided CDP ID', done => {
       done();
     });
 });
+
+test('should throw an error for an invalid id', async () => {
+  const maker = createMaker();
+  expect.assertions(1);
+  try {
+    await maker.getCdp(99999);
+  } catch (err) {
+    expect(err.message).toMatch(/CDP doesn't exist/);
+  }
+});
