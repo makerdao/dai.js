@@ -9,31 +9,20 @@ export default class Maker {
     this._authenticatedPromise = this._container.authenticate();
   }
 
-  _validateCdp(cdpId) {
-    return this._authenticatedPromise.then(() => {
-      return new Promise((resolve, reject) => {
-        if (typeof cdpId !== 'number') {
-          reject(new Error('ID must be a number.'));
-        }
+  async _validateCdp(cdpId) {
+    await this._authenticatedPromise;
 
-        this._container
-          .service('cdp')
-          .getCdpInfo(cdpId)
-          .then(info => {
-            if (
-              info.lad.toString() ===
-              '0x0000000000000000000000000000000000000000'
-            ) {
-              reject(
-                // eslint-disable-next-line
-                new Error("That CDP doesn't exist--try opening a new one.")
-              );
-            } else {
-              resolve(true);
-            }
-          });
-      });
-    });
+    if (typeof cdpId !== 'number') {
+      throw new Error('ID must be a number.');
+    }
+
+    const info = await this._container.service('cdp').getCdpInfo(cdpId);
+
+    if (info.lad.toString() === '0x0000000000000000000000000000000000000000') {
+      // eslint-disable-next-line
+      throw new Error("That CDP doesn't exist--try opening a new one.");
+    }
+    return true;
   }
 
   authenticate() {
@@ -50,17 +39,9 @@ export default class Maker {
     );
   }
 
-  getCdp(cdpId) {
-    return this._authenticatedPromise.then(() => {
-      return new Promise((resolve, reject) => {
-        try {
-          this._validateCdp(cdpId).then(() => {
-            resolve(new Cdp(this._container.service('cdp'), cdpId));
-          });
-        } catch (error) {
-          reject(error.message);
-        }
-      });
-    });
+  async getCdp(cdpId) {
+    await this._authenticatedPromise;
+    await this._validateCdp(cdpId);
+    return new Cdp(this._container.service('cdp'), cdpId);
   }
 }
