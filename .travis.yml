@@ -18,7 +18,6 @@ before_install:
 - nix-env -iA dapphub.{dapp,seth,hevm,solc}
 - npm i -g npm@latest
 install:
-- sed -i '13s/DSToken.*/WETH9)/' ./lib/sai/bin/deploy
 - npm install
 - npm run build:backend
 - npm run build:frontend
