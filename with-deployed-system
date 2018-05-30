@@ -12,11 +12,19 @@
 
 set -ex
 
+function sed_inplace {
+  # sed's -i argument behaves differently on macOS, hence this hack
+  sed -i.bak "$1" $2 && rm $2.bak
+}
+
 # Check if a testnet is already running on port 2000.
 if ! nc -z 127.0.0.1 2000; then
 
+  # Fix Sai deploy script
+  sed_inplace '13s/DSToken.*/WETH9)/' ./lib/sai/bin/deploy
+
   # Speed up ethers.js polling
-  sed -i 's/var pollingInterval = [0-9]*/var pollingInterval = 50/' ./node_modules/ethers/providers/provider.js
+  sed_inplace 's/var pollingInterval = [0-9]*/var pollingInterval = 50/' ./node_modules/ethers/providers/provider.js
 
   # Start a local testnet on port 2000; set to stop on exit.
   ./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >./ganache.out 2>&1 & netpid=$!

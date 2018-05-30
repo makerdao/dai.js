@@ -8,7 +8,7 @@ module.exports = {
     path: path.join(process.cwd(), 'dist'),
     filename: '[name].[hash].js',
     sourceMapFilename: '[name].map',
-    library: '@makerdao/makerdao-integration-poc',
+    library: '@makerdao/makerdao-exchange-integration',
     libraryTarget: 'umd',
   },
   resolve: {
