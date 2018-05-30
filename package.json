@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.36",
+  "version": "0.0.37",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -26,6 +26,7 @@
     "url": "https://github.com/wkampmann/makerdao-integration-poc.git"
   },
   "module": "src/index.js",
+  "main": "src/index.js",
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
     "build:backend": "rm -rf dist && npm shrinkwrap && babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles README.md package.json npm-shrinkwrap.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist",
