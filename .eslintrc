@@ -7,12 +7,14 @@
     },
     "extends": "eslint:recommended",
     "parserOptions": {
+        "ecmaVersion": 8,
         "sourceType": "module",
         "ecmaFeatures": {
             "experimentalObjectRestSpread": true
         }
     },
     "rules": {
+        "no-console": "off",
         "linebreak-style": [
             "error",
             "unix"
