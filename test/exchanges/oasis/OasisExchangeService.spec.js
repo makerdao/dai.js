@@ -144,8 +144,6 @@ test('get fees and fillAmount sell Dai', (done) => {
       return createDaiAndPlaceLimitOrder(oasisExchangeService);
     })
     .then(() => {
-      const daiToken = oasisExchangeService.get('token').getToken(tokens.DAI);
-      const oasisContract = oasisExchangeService.get('smartContract').getContractByName(contracts.MAKER_OTC);
       return oasisExchangeService.sellDai('0.01', tokens.WETH);
     })
     .then(order => {
@@ -162,8 +160,6 @@ test('get fees and fillAmount buy Dai', (done) => {
       return createDaiAndPlaceLimitOrder(oasisService, true);
     })
     .then(() => {
-      const wethToken = oasisService.get('token').getToken(tokens.WETH);
-      const oasisContract = oasisService.get('smartContract').getContractByName(contracts.MAKER_OTC);
       return oasisService.buyDai('0.01', tokens.WETH);
     })
     .then(oasisOrder=>{
