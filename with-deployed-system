@@ -44,8 +44,8 @@ if ! nc -z 127.0.0.1 2000; then
   export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
 
   # Build & deploy the SAI contracts
-  bin/deploy-fab && . load-fab-unknown
-  bin/deploy     && . load-env-unknown
+  bin/deploy-fab 2> /dev/null && . load-fab-unknown
+  bin/deploy 2> /dev/null     && . load-env-unknown
 
   # Set the ETH price feed to 400 USD
   seth send $SAI_PIP "poke(bytes32)" 0x000000000000000000000000000000000000000000000015af1d78b58c400000
@@ -86,7 +86,7 @@ EOM
   export SETH_STATUS=yes
   export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
 
-  dapp build
+  dapp build 2> /dev/null
   OTC=$(dapp create MatchingMarket 1577836800) ##this is some random date in 2020
   addr1="0xc226f3cd13d508bc319f4f4290172748199d6612"
   addr2="0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238"
