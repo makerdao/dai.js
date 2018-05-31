@@ -149,10 +149,10 @@ export default class EthereumCdpService extends PrivateService {
 
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     return new Promise((resolve, reject) =>
-      contract.tab.call(hexCdpId, (err, value) => {
-        if (err) reject(err);
-        resolve(value);
-      })
+      contract.tab.call(
+        hexCdpId,
+        (err, val) => (err ? reject(err) : resolve(val))
+      )
     );
 
     // the lines below don't work because ethers.js doesn't support calling a
