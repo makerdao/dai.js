@@ -10,7 +10,7 @@
 ##
 ## When the script exits, the Geth testnet is stopped and deleted.
 
-set -ex
+# set -ex
 
 function sed_inplace {
   # sed's -i argument behaves differently on macOS, hence this hack
@@ -31,8 +31,9 @@ if ! nc -z 127.0.0.1 2000; then
   trap "kill $netpid" EXIT
 
   # Wait until it's up, then use it for the deployment.
+  echo "Waiting for ganache-cli to start up..."
   export ETH_RPC_URL=http://127.1:2000
-  until curl -s "$ETH_RPC_URL"; do sleep 2; done
+  until curl -s -o/dev/null "$ETH_RPC_URL"; do sleep 2; done
 
   # Use the Sai system's deploy scripts to start it.
   cd lib/sai
@@ -44,6 +45,7 @@ if ! nc -z 127.0.0.1 2000; then
   export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
 
   # Build & deploy the SAI contracts
+  echo "Building and deploying contracts..."
   bin/deploy-fab 2> /dev/null && . load-fab-unknown
   bin/deploy 2> /dev/null     && . load-env-unknown
 
