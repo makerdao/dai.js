@@ -97,48 +97,32 @@ export default class TransactionObject extends TransactionLifeCycle {
   _getTransactionData() {
     let gasPrice = null;
     this._transaction
-      .then(
-        tx => {
-          this._pending(); //set state to pending
-          this._hash = tx.hash;
-          return Promise.any([
-            this._ethersProvider.getTransaction(this._hash),
-            this._ethersProvider.waitForTransaction(this._hash)
-          ]);
-        },
-        // eslint-disable-next-line
-        reason => {
-          this._errorMessage = reason;
-          this._error();
-          console.error(reason);
+      .then(tx => {
+        this._pending(); //set state to pending
+        this._hash = tx.hash;
+        return Promise.any([
+          this._ethersProvider.getTransaction(this._hash),
+          this._ethersProvider.waitForTransaction(this._hash)
+        ]);
+      })
+      .then(tx => {
+        gasPrice = tx.gasPrice;
+        this._timeStampMined = new Date();
+        return this._waitForReceipt();
+      })
+      .then(receipt => {
+        //console.log('receiptGasUsed', receipt.gasUsed.toString());
+        this._logsParser(receipt.logs);
+        if (!!receipt.gasUsed && !!gasPrice) {
+          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+        } else {
+          /*
+              console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
+                receipt.gasUsed ? receipt.gasUsed.toString() : '<not set>',
+                'Price = ', gasPrice ? gasPrice.toString() : '<not set>'
+              );
+            */
         }
-      )
-      .then(
-        tx => {
-          gasPrice = tx.gasPrice;
-          this._timeStampMined = new Date();
-          return this._waitForReceipt();
-        },
-        reason => {
-          this._errorMessage = reason;
-          this._error();
-          console.error(reason);
-        }
-      )
-      .then(
-        receipt => {
-          if (typeof this._logsParser === 'function'){
-            this._logsParser(receipt.logs);
-          }
-          if (!!receipt.gasUsed && !!gasPrice) {
-            this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
-          } else {
-            // eslint-disable-next-line
-            console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
-              receipt.gasUsed ? receipt.gasUsed.toString() : '<not set>',
-              'Price = ', gasPrice ? gasPrice.toString() : '<not set>'
-            );
-          }
         this._mine(); //set state to mined
 
         //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
