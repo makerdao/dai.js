@@ -112,7 +112,9 @@ export default class TransactionObject extends TransactionLifeCycle {
       })
       .then(receipt => {
         //console.log('receiptGasUsed', receipt.gasUsed.toString());
-        if (this._logsParser) this._logsParser(receipt.logs);
+        if (typeof this._logsParser === 'function') {
+          this._logsParser(receipt.logs);
+        }
         if (!!receipt.gasUsed && !!gasPrice) {
           this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
         } else {
