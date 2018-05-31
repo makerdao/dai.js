@@ -9,7 +9,8 @@ import TransactionManager from './TransactionManager';
 import AllowanceService from './AllowanceService';
 import PriceFeedService from './PriceFeedService';
 import { utils } from 'ethers';
-import Web3 from 'web3';
+import BigNumber from 'bignumber.js';
+import { WAD } from '../utils/constants';
 
 export default class EthereumCdpService extends PrivateService {
   static buildTestService(suppressOutput = true) {
@@ -138,27 +139,19 @@ export default class EthereumCdpService extends PrivateService {
 
   getCdpCollateral(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
-    return this._tubContract().ink(hexCdpId);
+    return this._tubContract()
+      .ink(hexCdpId)
+      .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
   getCdpDebt(cdpId) {
-    const web3 = new Web3();
-    web3.setProvider(this._web3Service().web3Provider());
-    const info = this._smartContract()._getContractInfo(contracts.SAI_TUB);
-    const contract = web3.eth.contract(info.abi).at(info.address);
-
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    // we need to use the Web3.js contract interface to get the return value
+    // from the non-constant function `tab`
+    const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
     return new Promise((resolve, reject) =>
-      contract.tab.call(
-        hexCdpId,
-        (err, val) => (err ? reject(err) : resolve(val))
-      )
-    );
-
-    // the lines below don't work because ethers.js doesn't support calling a
-    // non-constant function (as opposed to sending a transaction for it)
-    // const hexCdpId = this._smartContract().numberToBytes32(cdpId);
-    // return this._tubContract().tab(hexCdpId);
+      tub.tab.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
+    ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
   drawDai(cdpId, amount) {

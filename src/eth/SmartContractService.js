@@ -38,7 +38,12 @@ export default class SmartContractService extends PublicService {
       contract = new Contract(address, abi, signer);
 
     return ObjectWrapper.addWrapperInterface(
-      { _original: contract }, contract, [], true, false, false,
+      { _original: contract },
+      contract,
+      [],
+      true,
+      false,
+      false,
       {
         afterCall: (k, args, result) => {
           if (typeof result === 'object') {
@@ -50,7 +55,8 @@ export default class SmartContractService extends PublicService {
           }
           return result;
         }
-      });
+      }
+    );
   }
 
   getContractByName(name, version = null) {
@@ -194,6 +200,14 @@ export default class SmartContractService extends PublicService {
       Object.keys(contracts).indexOf(name) > -1 ||
       Object.keys(tokens).indexOf(name) > -1
     );
+  }
+
+  // generally we should be using the ethers contract interface. this is only
+  // for edge cases that the ethers contract interface doesn't support, like
+  // calling (but not sending) a non-constant function
+  getWeb3ContractByName(name) {
+    const { abi, address } = this._getContractInfo(name);
+    return this.get('web3').web3Contract(abi, address);
   }
 
   _getContractInfo(name, version = null) {

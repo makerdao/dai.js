@@ -1,6 +1,4 @@
 import contracts from '../../contracts/contracts';
-import BigNumber from 'bignumber.js';
-import { WAD } from '../utils/constants';
 
 export default class Cdp {
   constructor(cdpService, cdpId = null) {
@@ -63,15 +61,11 @@ export default class Cdp {
   }
 
   getCollateralAmount() {
-    return this.getCdpId()
-      .then(id => this._cdpService.getCdpCollateral(id))
-      .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+    return this.getCdpId().then(id => this._cdpService.getCdpCollateral(id));
   }
 
   getDebtAmount() {
-    return this.getCdpId()
-      .then(id => this._cdpService.getCdpDebt(id))
-      .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+    return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
   }
 
   lockEth(eth) {

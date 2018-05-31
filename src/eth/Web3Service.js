@@ -102,6 +102,10 @@ export default class Web3Service extends PrivateService {
     return this._web3.currentProvider;
   }
 
+  web3Contract(abi, address) {
+    return this._web3.eth.contract(abi).at(address);
+  }
+
   ethersSigner() {
     if (this._ethersWallet === null && this._ethersProvider === null) {
       throw new Error(

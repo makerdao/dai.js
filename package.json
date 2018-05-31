@@ -93,5 +93,16 @@
     "ethers": "^3.0.15",
     "ethers-web3-bridge": "0.0.1",
     "web3": "^0.20.6"
+  },
+  "jest": {
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text-summary"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "src-old/**/*.js"
+    ]
   }
 }
