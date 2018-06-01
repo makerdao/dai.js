@@ -1,8 +1,5 @@
 # MakerDAO Exchange Integration
 
-[![tests][tests]][tests-url]
-[![coverage][cover]][cover-url]
-
 **MakerDAO Exchange Integration** is a JavaScript library that makes it easy to build applications on top of MakerDAO's platform of smart contracts. You can use Maker's contracts to open Collateralized Debt Positions, withdraw loans in Dai, trade tokens on OasisDEX, and more.
 
 The library features a pluggable, service-based architecture, which allows users maximal control when integrating the Maker functionality into existing infrastructures. It also includes convenient configuration presets for out-of-the-box usability, a powerful smart contract state inspector, and support for both front-end and back-end applications.
@@ -19,10 +16,8 @@ Maker's entire suite of contracts will eventually be accessible through this lib
 
 ## Prerequisites
 
-[![node][node]][node-url]
-[![npm][npm]][npm-url]
-      
 - [Node.js](http://es6-features.org)
+
 
 ## How to Install
 
@@ -42,6 +37,7 @@ UMD:
 ```
 <script src="./maker-exchange-integration.js"/>
 ```
+
 
 ## How to Use
 
