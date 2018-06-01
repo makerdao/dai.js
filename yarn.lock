@@ -47,8 +47,8 @@
     lodash "^4.17.4"
 
 "@0xproject/connect@^0.6.12":
-  version "0.6.13"
-  resolved "https://registry.yarnpkg.com/@0xproject/connect/-/connect-0.6.13.tgz#32e2e82b8574b59ade8f8c1613f16d51fcfd67b3"
+  version "0.6.14"
+  resolved "https://registry.yarnpkg.com/@0xproject/connect/-/connect-0.6.14.tgz#138f1a91be01bf01150f89c575a44294bb5def37"
   dependencies:
     "@0xproject/assert" "^0.2.10"
     "@0xproject/json-schemas" "^0.7.24"
@@ -579,7 +579,7 @@ async-eventemitter@^0.2.2:
   dependencies:
     async "^2.4.0"
 
-"async-eventemitter@github:ahultgren/async-eventemitter#fa06e39e56786ba541c180061dbf2c0a5bbf951c":
+async-eventemitter@ahultgren/async-eventemitter#fa06e39e56786ba541c180061dbf2c0a5bbf951c:
   version "0.2.3"
   resolved "https://codeload.github.com/ahultgren/async-eventemitter/tar.gz/fa06e39e56786ba541c180061dbf2c0a5bbf951c"
   dependencies:
@@ -3521,7 +3521,14 @@ ethereumjs-blockstream@^2.0.6:
     source-map-support "0.4.14"
     uuid "3.0.1"
 
-ethereumjs-tx@^1.0.0, ethereumjs-tx@^1.1.1, ethereumjs-tx@^1.2.0, ethereumjs-tx@^1.2.2, ethereumjs-tx@^1.3.0, ethereumjs-tx@^1.3.3:
+ethereumjs-tx@0xProject/ethereumjs-tx#fake-tx-include-signature-by-default:
+  version "1.3.4"
+  resolved "https://codeload.github.com/0xProject/ethereumjs-tx/tar.gz/5f0a610849de09f922f8ccee5af1aae4bec36e51"
+  dependencies:
+    ethereum-common "^0.0.18"
+    ethereumjs-util "^5.0.0"
+
+ethereumjs-tx@^1.0.0, ethereumjs-tx@^1.1.1, ethereumjs-tx@^1.2.0, ethereumjs-tx@^1.2.2, ethereumjs-tx@^1.3.3:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/ethereumjs-tx/-/ethereumjs-tx-1.3.4.tgz#c2304912f6c07af03237ad8675ac036e290dad48"
   dependencies:
@@ -4258,7 +4265,7 @@ ganache-core@0xProject/ganache-core:
     clone "^2.1.1"
     ethereumjs-account "~2.0.4"
     ethereumjs-block "~1.2.2"
-    ethereumjs-tx "^1.3.0"
+    ethereumjs-tx "0xProject/ethereumjs-tx#fake-tx-include-signature-by-default"
     ethereumjs-util "^5.1.5"
     ethereumjs-vm "2.3.3"
     ethereumjs-wallet "~0.6.0"

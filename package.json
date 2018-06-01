@@ -49,9 +49,6 @@
     ]
   },
   "devDependencies": {
-    "0x.js": "^0.37.2",
-    "@0xproject/connect": "^0.6.12",
-    "@0xproject/subproviders": "^0.10.1",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^7.2.3",
@@ -81,18 +78,21 @@
     "vue": "^2.5.16",
     "vue-loader": "^15.0.9",
     "vue-template-compiler": "^2.5.16",
-    "web3-provider-engine": "^14.0.5",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.2",
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
+    "0x.js": "^0.37.2",
+    "@0xproject/connect": "^0.6.12",
+    "@0xproject/subproviders": "^0.10.1",
     "bignumber.js": "^5.0.0",
     "bunyan": "^1.8.12",
     "ethereumjs-util": "^5.2.0",
     "ethers": "^3.0.15",
     "ethers-web3-bridge": "0.0.1",
-    "web3": "^0.20.6"
+    "web3": "^0.20.6",
+    "web3-provider-engine": "^14.0.5"
   },
   "jest": {
     "coverageReporters": [
