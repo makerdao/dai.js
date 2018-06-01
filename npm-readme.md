@@ -21,55 +21,51 @@ Maker's entire suite of contracts will eventually be accessible through this lib
 
 [![node][node]][node-url]
 [![npm][npm]][npm-url]
-      
+
 - [Node.js](http://es6-features.org)
 
 
-## Setup
+## How to Install
 
-1. `git clone https://github.com/makerdao/makerdao-integration-poc`
-2. Run `npm install`
-3. Start the dev server using `npm start`
-3. Open [http://localhost:9000](http://localhost:9000)
+Use NPM to install the library: 
+```
+npm install @makerdao/makerdao-exchange-integration
+```
 
+You can then include it using either the CommonJS or the UMD standard.
 
-## Run the tests
+CommonJS:
+```
+import { ConfigFactory, Maker } from '@makerdao/makerdao-exchange-integration';
+```
 
-The test suite is configured to run on a Ganache test chain. Before running the tests (`npm test`), the test chain will start, and the script will deploy all the Maker contracts to the chain.
-
-To avoid waiting for this process every time you run the tests, use the command `npm run test:watch`.
-
-If you want to deploy the contracts to a test chain independently from the test suite, use `npm run test:net`.
-
-
-## Documentation
-
-For the full library documentation, please reference https://makerdao.com/documentation/
+UMD:
+```
+<script src="./maker-exchange-integration.js"/>
+```
 
 
-## Commands
+## How to Use
 
-- `npm start` - start the dev server
-- `npm run build:backend` - create backend build in `dist` folder
-- `npm run build:frontend` - create frontend build in `dist` folder
-- `npm run lint` - run an ESLint check
-- `npm run coverage` - run code coverage and generate report in the `coverage` folder
-- `npm test` - run all tests
-- `npm run test:watch` - run all tests in watch mode
-- `npm run test:net` - launch a Ganache test chain and deploy MakerDAO's contracts on it
+Once imported, you can use these objects to create a new instance of the Maker class and to access Maker functionality.
+
+For full documentation, please reference https://makerdao.com/documentation/
+
+Example:
+```
+import { Maker, ConfigFactory } from '@makerdao/makerdao-exchange-integration';
 
 
-## Features
+const config = ConfigFactory.create('decentralized-oasis-without-proxies');
+const maker = new Maker(config);
 
-- [Webpack](https://webpack.js.org/guides) (v3.5.5)
-    - [Webpack Dev Server](https://github.com/webpack/webpack-dev-server) (v2.7.1)
-    - [Hot Module Replacement](https://webpack.js.org/concepts/hot-module-replacement)
-    - [Clean Webpack Plugin](https://github.com/johnagan/clean-webpack-plugin) (v0.1.16)
-- [ECMAScript 6](http://es6-features.org)
-- [Babel](https://babeljs.io/docs/setup/#installation) (v6.26.0)
-- [ESLint](https://eslint.org/docs/user-guide/getting-started) (v4.5.0)
-- [Jest](https://facebook.github.io/jest/docs/en/getting-started.html) (v20.0.4)
-- [Sass](http://sass-lang.com/guide)
+
+const cdp = await maker.openCdp();
+const info = await cdp.getInfo();
+
+
+console.log(info);
+```
 
 
 ## License

@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.41",
+  "version": "0.0.43",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -29,7 +29,7 @@
   "main": "src/index.js",
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
-    "build:backend": "rm -rf dist && npm shrinkwrap && babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles README.md LICENSE package.json npm-shrinkwrap.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist",
+    "build:backend": "rm -rf dist && npm shrinkwrap && babel contracts --out-dir ./dist/contracts && babel src --out-dir ./dist/src && copyfiles npm-readme.md LICENSE package.json npm-shrinkwrap.json contracts/abi/**/* contracts/abi/dai/**/* src/utils/configs/* dist && mv dist/npm-readme.md dist/README.md",
     "coverage": "jest --coverage --config=conf/jest.config.js --runInBand",
     "lint": "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'",
     "precommit": "lint-staged",
