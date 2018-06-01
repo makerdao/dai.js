@@ -35,7 +35,7 @@ Maker's entire suite of contracts will eventually be accessible through this lib
 
 ## Run the tests
 
-The test suite is configured to run on a Ganache test chain. Before running the tests (`npm run test`), the test chain will start, and the script will deploy all the Maker contracts to the chain.
+The test suite is configured to run on a Ganache test chain. Before running the tests (`npm test`), the test chain will start, and the script will deploy all the Maker contracts to the chain.
 
 To avoid waiting for this process every time you run the tests, use the command `npm run test:watch`.
 
