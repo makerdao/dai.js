@@ -3,15 +3,19 @@
 [![tests][tests]][tests-url]
 [![coverage][cover]][cover-url]
 
-A toolkit for easy integration of MakerDAO smart contract functionality with 
-external platforms. 
+**MakerDAO Exchange Integration** is a JavaScript library that makes it easy to build applications on top of MakerDAO's platform of smart contracts. You can use Maker's contracts to open Collateralized Debt Positions, withdraw loans in Dai, trade tokens on OasisDEX, and more.
 
-If you're a cryptocurrency exchange looking to add leveraged ETH positions through 
-distributed DAI lending to your platform, you're in the right place. 
+The library features a pluggable, service-based architecture, which allows users maximal control when integrating the Maker functionality into existing infrastructures. It also includes convenient configuration presets for out-of-the-box usability, a powerful smart contract state inspector, and support for both front-end and back-end applications.
 
-This library aims to support a wide range of platform architectures; from fully 
-decentralized with immediate on-chain settlement, to centralized exchange architectures 
-with internal settlement services.
+Maker's entire suite of contracts will eventually be accessible through this library—including the DAO governance and the upcoming multi-collateral release—but functionality is limited in the current alpha version to the following areas:
+
+* Opening and shutting CDPs
+* Locking and unlocking collateral
+* Withdrawing and repaying Dai
+* Automated token conversions
+* Token contract functionality for WETH, PETH, MKR, Dai, and ETH
+* Buying and selling MKR and Dai with built-in DEX integration
+
 
 ## Prerequisites
 
@@ -22,9 +26,12 @@ with internal settlement services.
 
 ## How to Install
 
-Use NPM to install the library (`npm install @makerdao/makerdao-exchange-integration`).
+Use NPM to install the library: 
+```
+npm install @makerdao/makerdao-exchange-integration
+```
 
-You can then include it using either the CommonJS or UMD standards.
+You can then include it using either the CommonJS or the UMD standard.
 
 CommonJS:
 ```
@@ -58,6 +65,7 @@ const info = await cdp.getInfo();
 console.log(info);
 ```
 
+
 ## Features
 
 - [Webpack](https://webpack.js.org/guides) (v3.5.5)
@@ -70,6 +78,7 @@ console.log(info);
 - [Jest](https://facebook.github.io/jest/docs/en/getting-started.html) (v20.0.4)
 - [Sass](http://sass-lang.com/guide)
 
+
 ## License
 
-*makerdao-exchange-integration* is availble under the MIT license included with the code.
+**MakerDAO Exchange Integration** is available under the MIT license included with the code.
