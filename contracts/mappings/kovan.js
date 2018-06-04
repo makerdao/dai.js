@@ -1,6 +1,6 @@
 import tokens from '../tokens';
 import contracts from '../contracts';
-import * as abiMap from '../abi'
+import * as abiMap from '../abi';
 import { kovan as kovanAddresses } from '../addresses';
 
 const mapping = {

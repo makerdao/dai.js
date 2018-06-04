@@ -24,7 +24,7 @@ const daiV1 = {
     vox,
     mom,
     pit
-}
+};
 
 const dappHub = {
     dsValue,
@@ -33,15 +33,15 @@ const dappHub = {
     dsChief,
     dsSpell,
     dsSpellBook
-}
+};
 
 const exchangesV1 = {
     zeroExExchange,
     makerOtc
-}
+};
 
 const general = {
     erc20
-}
+};
 
 export { daiV1, dappHub, exchangesV1, general };

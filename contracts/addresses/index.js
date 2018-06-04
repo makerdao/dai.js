@@ -14,6 +14,6 @@ const kovan = {
 const mainnet = {
     ...daiV1.mainnet,
     ...exchanges.mainnet
-}
+};
 
 export { testnet, kovan, mainnet };

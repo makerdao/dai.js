@@ -1,4 +1,4 @@
-import { mainnetMapping, kovanMapping, testnetMapping } from './mappings'
+import { mainnetMapping, kovanMapping, testnetMapping } from './mappings';
 
 const mapping = [
   { name: 'mainnet', networkId: 1, addresses: mainnetMapping },
