@@ -10,7 +10,7 @@ import AllowanceService from './AllowanceService';
 import PriceFeedService from './PriceFeedService';
 import { utils } from 'ethers';
 import BigNumber from 'bignumber.js';
-import { WAD } from '../utils/constants';
+import { WAD, RAY } from '../utils/constants';
 
 export default class EthereumCdpService extends PrivateService {
   static buildTestService(suppressOutput = true) {
@@ -152,6 +152,12 @@ export default class EthereumCdpService extends PrivateService {
     return new Promise((resolve, reject) =>
       tub.tab.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+  }
+
+  getLiquidationRatio() {
+    return this._tubContract()
+      .mat()
+      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
   drawDai(cdpId, amount) {
