@@ -1,6 +1,4 @@
-import mainnetMapping from './addresses/mainnet';
-import kovanMapping from './addresses/kovan';
-import testMapping from './addresses/test';
+import { mainnetMapping, kovanMapping, testnetMapping } from './mappings'
 
 const mapping = [
   { name: 'mainnet', networkId: 1, addresses: mainnetMapping },
@@ -8,7 +6,7 @@ const mapping = [
   { name: 'ropsten', networkId: 3, addresses: null },
   { name: 'rinkeby', networkId: 4, addresses: null },
   { name: 'kovan', networkId: 42, addresses: kovanMapping },
-  { name: 'test', networkId: 999, addresses: testMapping }
+  { name: 'test', networkId: 999, addresses: testnetMapping }
 ];
 
 export default mapping;

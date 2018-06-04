@@ -1,0 +1,13 @@
+{
+    "testnet": {
+        "MAKER_OTC": "0x7eecf9215ed79706a656c5b4fc67b4135a4272a8"
+    },
+    "kovan": {
+        "MAKER_OTC": "0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9",
+        "ZERO_EX_EXCHANGE": "0x90Fe2Af704B34E0224bF2299C838E04d4Dcf1364"
+    },
+    "mainnet": {
+        "MAKER_OTC": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        "ZERO_EX_EXCHANGE": "0x12459c951127e0c374ff9105dda097662a027093"
+    }
+}
