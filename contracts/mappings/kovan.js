@@ -15,7 +15,7 @@ const mapping = {
         { version: 1, address: kovanAddresses.SKR, abi: abiMap.general.erc20, decimals: 18 }
     ],
     [tokens.MKR]: [
-        { version: 1, address: kovanAddresses.GOV_NEW, abi: abiMap.general.erc20, decimals: 18 }
+        { version: 1, address: kovanAddresses.GOV, abi: abiMap.general.erc20, decimals: 18 }
     ],
 
     // SAI

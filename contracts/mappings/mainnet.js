@@ -15,7 +15,7 @@ const mapping = {
         { version: 1, address: mainnetAddresses.SKR, abi: abiMap.general.erc20, decimals: 18 },
     ],
     [tokens.MKR]: [
-        { version: 1, address: mainnetAddresses.GOV_OLD, abi: abiMap.general.erc20, decimals: 18 },
+        { version: 1, address: '0xC66eA802717bFb9833400264Dd12c2bCeAa34a6d', abi: abiMap.general.erc20, decimals: 18 },
         { version: 2, address: mainnetAddresses.GOV_NEW, abi: abiMap.general.erc20, decimals: 18 },
     ],
 
