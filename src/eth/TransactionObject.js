@@ -100,10 +100,16 @@ export default class TransactionObject extends TransactionLifeCycle {
       .then(tx => {
         this._pending(); //set state to pending
         this._hash = tx.hash;
-        return Promise.any([
-          this._ethersProvider.getTransaction(this._hash),
-          this._ethersProvider.waitForTransaction(this._hash)
-        ]);
+        if (this._ethersProvider.chainId === 999) {
+          return Promise.any([
+            this._ethersProvider.getTransaction(this._hash),
+            this._ethersProvider.waitForTransaction(this._hash)
+          ]);
+        } else {
+          return this._ethersProvider
+            .waitForTransaction(this._hash)
+            .then(hash => hash);
+        }
       })
       .then(tx => {
         gasPrice = tx.gasPrice;
