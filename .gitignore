@@ -4,9 +4,7 @@ node_modules/
 .idea/
 *.iml
 npm-debug.log
-package-lock.json
 *.sw*
 /out
 .DS_Store
 ganache.out
-npm-shrinkwrap.json
