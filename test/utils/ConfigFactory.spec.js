@@ -51,3 +51,13 @@ test('it merges url and web3 options', () => {
     }
   ]);
 });
+
+test('it overwrites a service name', () => {
+  const config = ConfigFactory.create('http', { cdp: 'OtherService' });
+  expect(config.services.cdp).toEqual('OtherService');
+});
+
+test('it merges service options', () => {
+  const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
+  expect(config.services.cdp).toEqual(['EthereumCdpService', { foo: 'bar' }]);
+});

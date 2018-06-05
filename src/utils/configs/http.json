@@ -17,7 +17,6 @@
     "gasEstimator": "GasEstimatorService",
     "transactionManager": "TransactionManager",
     "priceFeed": "PriceFeedService",
-
     "timer": "TimerService",
     "log": "ConsoleLogger"
   }

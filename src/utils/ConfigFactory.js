@@ -9,6 +9,21 @@ class ConfigPresetNotFoundError extends Error {
   }
 }
 
+const serviceNames = [
+  'allowance',
+  'cdp',
+  'conversionService',
+  'exchange',
+  'gasEstimator',
+  'log',
+  'priceFeed',
+  'smartContract',
+  'timer',
+  'token',
+  'transactionManager',
+  'web3'
+];
+
 export default class ConfigFactory {
   /**
    * @param {string} presetName
@@ -20,28 +35,45 @@ export default class ConfigFactory {
       presetName = options.preset;
     }
 
-    let config;
+    let baseConfig;
     switch (presetName) {
       case 'test':
       case 'decentralized-oasis-without-proxies':
-        config = decentralizedOasisWithoutProxies;
+        baseConfig = decentralizedOasisWithoutProxies;
         break;
       case 'http':
-        config = http;
+        baseConfig = http;
         break;
       case 'kovan':
-        config = kovan;
+        baseConfig = kovan;
         break;
       default:
         throw new ConfigPresetNotFoundError(presetName);
     }
 
-    if (options.log === false) {
-      config.services.log = 'NullLogger';
+    // make a copy so we don't overwrite the original values
+    const config = merge({}, baseConfig);
+
+    // add/merge any service-specific settings
+    for (let service of serviceNames) {
+      const serviceOptions = options[service];
+
+      if (typeof serviceOptions === 'string') {
+        config.services[service] = serviceOptions;
+      } else if (typeof serviceOptions === 'object') {
+        // convert service name to a name/settings pair
+        if (typeof config.services[service] === 'string') {
+          config.services[service] = [config.services[service], {}];
+        }
+
+        merge(config.services[service][1], serviceOptions);
+      }
     }
 
-    if (options.web3) {
-      merge(config.services.web3[1], options.web3);
+    // convenience options
+
+    if (options.log === false) {
+      config.services.log = 'NullLogger';
     }
 
     if (options.url) {
