@@ -38,7 +38,6 @@ window.document.getElementsByTagName('body')[0].innerHTML =
   '<div id="cdp-output"></div><div id="maker-dbg-container"></div>';
 
 setTimeout(() => {
-  // TODO stop using ConfigFactory
   const param = new URL(window.location.href).searchParams.get('inject') || '',
     useMetaMask = param.length > 0 && param !== '0';
 

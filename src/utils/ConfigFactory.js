@@ -76,8 +76,18 @@ export default class ConfigFactory {
       config.services.log = 'NullLogger';
     }
 
+    // web3-specific convenience options
+
     if (options.url) {
       config.services.web3[1].provider.url = options.url;
+    }
+
+    if (options.privateKey) {
+      config.services.web3[1].privateKey = options.privateKey;
+    }
+
+    if (options.provider) {
+      merge(config.services.web3[1].provider, options.provider);
     }
 
     return config;

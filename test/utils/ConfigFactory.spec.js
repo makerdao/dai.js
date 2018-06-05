@@ -30,9 +30,13 @@ test('can take an options object as first argument', () => {
   expect(config.services.log).toEqual('NullLogger');
 });
 
-test('it merges url and web3 options', () => {
+test('it merges url, privateKey, provider, and web3 options', () => {
   const config = ConfigFactory.create('http', {
     url: 'http://foo.net',
+    privateKey: '0xf00',
+    provider: {
+      type: 'INFURA'
+    },
     web3: {
       statusTimerDelay: 10000,
       usePresetProvider: true
@@ -44,8 +48,9 @@ test('it merges url and web3 options', () => {
     {
       statusTimerDelay: 10000,
       usePresetProvider: true,
+      privateKey: '0xf00',
       provider: {
-        type: 'HTTP',
+        type: 'INFURA',
         url: 'http://foo.net'
       }
     }
