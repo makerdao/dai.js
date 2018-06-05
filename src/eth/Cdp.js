@@ -82,6 +82,10 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
   }
 
+  lockWeth(weth) {
+    return this.getCdpId().then(id => this._cdpService.lockWeth(id, weth));
+  }
+
   drawDai(amount) {
     return this.getCdpId().then(id => this._cdpService.drawDai(id, amount));
   }

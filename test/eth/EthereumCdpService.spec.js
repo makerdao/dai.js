@@ -159,6 +159,31 @@ test(
   5000
 );
 
+test('should be able to lock weth in a cdp', async () => {
+  const id = await openCdp();
+  const tokenService = createdCdpService.get('token');
+  const wethToken = tokenService.getToken(tokens.WETH);
+  const pethToken = tokenService.getToken(tokens.PETH);
+  const defaultAccount = createdCdpService
+    .get('token')
+    .get('web3')
+    .defaultAccount();
+
+  await wethToken.deposit('0.1');
+  const balancePre = await wethToken.balanceOf(defaultAccount);
+  const cdpInfoPre = await createdCdpService.getCdpInfo(id);
+  await createdCdpService.lockWeth(id, '0.1');
+  const cdpInfoPost = await createdCdpService.getCdpInfo(id);
+  const balancePost = await wethToken.balanceOf(defaultAccount);
+
+  expect(cdpInfoPre.ink.toString()).toEqual('0');
+  expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+  expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+
+  await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+  await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+});
+
 test(
   'should be able to free peth from a cdp',
   done => {
