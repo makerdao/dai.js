@@ -343,3 +343,9 @@ test('can read the debt for a cdp', async () => {
   const debt = await createdCdpService.getCdpDebt(id);
   expect(debt.toString()).toEqual('5');
 });
+
+test('can read the liquidation ratio', async () => {
+  await createdCdpService.manager().authenticate();
+  const liquidationRatio = await createdCdpService.getLiquidationRatio();
+  expect(liquidationRatio.toString()).toEqual('1.5');
+});
