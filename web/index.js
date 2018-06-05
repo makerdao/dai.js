@@ -1,7 +1,5 @@
 import './index.scss';
 import Maker from '../src/Maker';
-import ConfigFactory from '../src/utils/ConfigFactory';
-import Web3ProviderType from '../src/eth/Web3ProviderType';
 import tokens from '../contracts/tokens';
 import Vue from 'vue';
 import MakerDebugger from '../components/MakerDebugger.vue';
@@ -41,20 +39,16 @@ window.document.getElementsByTagName('body')[0].innerHTML =
 
 setTimeout(() => {
   // TODO stop using ConfigFactory
-  const config = ConfigFactory.create('decentralized-oasis-without-proxies'),
-    param = new URL(window.location.href).searchParams.get('inject') || '',
+  const param = new URL(window.location.href).searchParams.get('inject') || '',
     useMetaMask = param.length > 0 && param !== '0';
 
-  config.services.web3[1] = {
-    statusTimerDelay: useMetaMask ? 30000 : 5000,
-    usePresetProvider: useMetaMask,
-    provider: {
-      type: Web3ProviderType.HTTP,
-      url: window.location.protocol + '//' + window.location.hostname + ':2000'
+  window.maker = new Maker('http', {
+    url: window.location.protocol + '//' + window.location.hostname + ':2000',
+    web3: {
+      statusTimerDelay: useMetaMask ? 30000 : 5000,
+      usePresetProvider: useMetaMask
     }
-  };
-
-  window.maker = new Maker(config);
+  });
 
   window.maker.authenticate().then(() => {
     window.vm = new Vue({

@@ -29,3 +29,25 @@ test('can take an options object as first argument', () => {
   expect(config.global.enableProxies).toEqual(false);
   expect(config.services.log).toEqual('NullLogger');
 });
+
+test('it merges url and web3 options', () => {
+  const config = ConfigFactory.create('http', {
+    url: 'http://foo.net',
+    web3: {
+      statusTimerDelay: 10000,
+      usePresetProvider: true
+    }
+  });
+
+  expect(config.services.web3).toEqual([
+    'Web3Service',
+    {
+      statusTimerDelay: 10000,
+      usePresetProvider: true,
+      provider: {
+        type: 'HTTP',
+        url: 'http://foo.net'
+      }
+    }
+  ]);
+});

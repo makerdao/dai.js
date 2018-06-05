@@ -1,5 +1,7 @@
 import decentralizedOasisWithoutProxies from './configs/decentralized-oasis-without-proxies.json';
 import kovan from './configs/kovan.json';
+import http from './configs/http.json';
+import merge from 'lodash.merge';
 
 class ConfigPresetNotFoundError extends Error {
   constructor(message) {
@@ -24,6 +26,9 @@ export default class ConfigFactory {
       case 'decentralized-oasis-without-proxies':
         config = decentralizedOasisWithoutProxies;
         break;
+      case 'http':
+        config = http;
+        break;
       case 'kovan':
         config = kovan;
         break;
@@ -33,6 +38,14 @@ export default class ConfigFactory {
 
     if (options.log === false) {
       config.services.log = 'NullLogger';
+    }
+
+    if (options.web3) {
+      merge(config.services.web3[1], options.web3);
+    }
+
+    if (options.url) {
+      config.services.web3[1].provider.url = options.url;
     }
 
     return config;
