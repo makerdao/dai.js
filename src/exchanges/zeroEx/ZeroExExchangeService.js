@@ -4,25 +4,11 @@ import SmartContractService from '../../eth/SmartContractService';
 import EthereumTokenService from '../../eth/EthereumTokenService';
 import GasEstimatorService from '../../eth/GasEstimatorService';
 import TimerService from '../../utils/TimerService';
-//import * as Web3ProviderEngine  from 'web3-provider-engine';
-
-const Web3ProviderEngine = require('web3-provider-engine');
-const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet.js');
-const RPCSubprovider = require('web3-provider-engine/subproviders/rpc.js');
-//import * as RpcSource  from 'web3-provider-engine/subproviders/rpc';
-//import * as HookedWalletSubprovider from 'web3-provider-engine/subproviders/hooked-wallet';
-//import * as RPCSubprovider from 'web3-provider-engine/subproviders/rpc';
-//import { PrivateKeySubprovider } from '@0xproject/subproviders';
-import { ZeroEx, /*ZeroExConfig*/ } from '0x.js';
-import {
-//    FeesRequest,
-//    FeesResponse,
-  HttpClient,
-//    Order,
-//    OrderbookRequest,
-//    OrderbookResponse,
-//    SignedOrder,
-} from '@0xproject/connect';
+import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
+import HookedWalletSubprovider from 'web3-provider-engine/dist/es5/subproviders/hooked-wallet.js';
+import RPCSubprovider from 'web3-provider-engine/dist/es5/subproviders/rpc.js';
+import { ZeroEx } from '0x.js';
+import { HttpClient } from '@0xproject/connect';
 import tokens from '../../../contracts/tokens';
 //import contracts from '../../../contracts/contracts';
 
@@ -94,55 +80,64 @@ export default class ZeroExExchangeService extends PrivateService {
     this._zeroEx = null;
   }
 
-
   initialize(settings) {
     const relayerApiUrl = settings.relayerApi;
     this._relayerClient = new HttpClient(relayerApiUrl);
   }
 
-  connect() { //TODO, find a better way to test this
-    return this._relayerClient.getOrdersAsync({page: 1, perPage: 1})
-      .then(
-        orders => {
-          this._firstOrder = orders[0];
-          this.get('timer').createTimer(
-            'zeroExCheckConnectionStatus',
-            30000,
-            true,
-            () => this._isStillConnected().then(connected => {
+  connect() {
+    //TODO, find a better way to test this
+    return this._relayerClient.getOrdersAsync({ page: 1, perPage: 1 }).then(
+      orders => {
+        this._firstOrder = orders[0];
+        this.get('timer').createTimer(
+          'zeroExCheckConnectionStatus',
+          30000,
+          true,
+          () =>
+            this._isStillConnected().then(connected => {
               if (!connected) {
                 this.disconnect();
               }
             })
-          );
-        },
-        reason => {
-          this.get('log').error(reason);
-        });
+        );
+      },
+      reason => {
+        this.get('log').error(reason);
+      }
+    );
   }
 
   authenticate() {
     const providerEngine = new Web3ProviderEngine();
-    providerEngine.addProvider(new HookedWalletSubprovider({
-      getAccounts: (cb) => {
-        cb(null, [this.get('web3').ethersSigner().getAddress()]);
-      },
-      approveTransaction: (txParams, cb) => {
-        //console.log('in approveTransaction function');
-        cb();
-      },
-      signTransaction: (txParams, cb) => {
-        //console.log('in signTransaction function');
-        cb(null, 'signedTx');
-      },
-    }));
-    providerEngine.addProvider(new RPCSubprovider({
-      rpcUrl: this.get('web3').web3Provider().host
-    }));
+    providerEngine.addProvider(
+      new HookedWalletSubprovider({
+        getAccounts: cb => {
+          cb(null, [
+            this.get('web3')
+              .ethersSigner()
+              .getAddress()
+          ]);
+        },
+        approveTransaction: (txParams, cb) => {
+          //console.log('in approveTransaction function');
+          cb();
+        },
+        signTransaction: (txParams, cb) => {
+          //console.log('in signTransaction function');
+          cb(null, 'signedTx');
+        }
+      })
+    );
+    providerEngine.addProvider(
+      new RPCSubprovider({
+        rpcUrl: this.get('web3').web3Provider().host
+      })
+    );
     providerEngine.start();
 
     const zeroExConfig = {
-      networkId: this.get('web3').networkId(),
+      networkId: this.get('web3').networkId()
     };
     this._zeroEx = new ZeroEx(providerEngine, zeroExConfig);
     return this._zeroEx.getAvailableAddressesAsync().then(address => {
@@ -151,12 +146,9 @@ export default class ZeroExExchangeService extends PrivateService {
   }
 
   _isStillConnected() {
-    return this._relayerClient.getOrdersAsync({page: 1, perPage: 1})
-      .then(
-        orders =>
-          orders[0].orderHash != null,
-        () => false
-      );
+    return this._relayerClient
+      .getOrdersAsync({ page: 1, perPage: 1 })
+      .then(orders => orders[0].orderHash != null, () => false);
   }
 
   /*
@@ -166,7 +158,6 @@ export default class ZeroExExchangeService extends PrivateService {
   */
 
   sellDai(/*daiAmount, tokenSymbol, minFillAmount = '0'*/) {
-
     const daiToken = this.get('ethereumToken').getToken(tokens.DAI);
     const daiAddress = daiToken.address();
     //const wethToken = this.get('ethereumToken').getToken(tokens.WETH);
@@ -177,10 +168,11 @@ export default class ZeroExExchangeService extends PrivateService {
     //const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
     //const minFillAmountEVM = daiToken.toEthereumFormat(minFillAmount);
 
-    return this._zeroEx.token.setUnlimitedProxyAllowanceAsync(daiAddress, this.get('web3').ethersSigner().address)
+    return this._zeroEx.token
+      .setUnlimitedProxyAllowanceAsync(
+        daiAddress,
+        this.get('web3').ethersSigner().address
+      )
       .then(val => val);
-
   }
 }
-
-
