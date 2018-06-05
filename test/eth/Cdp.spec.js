@@ -8,19 +8,23 @@ beforeEach(() => {
   return (createdCdpService = EthereumCdpService.buildTestService());
 });
 
-test('should open a new CDP and return its ID', done => {
-  createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const newCdp = new Cdp(createdCdpService);
-      newCdp.getCdpId().then(id => {
-        expect(typeof id).toBe('number');
-        expect(id).toBeGreaterThan(0);
-        done();
+test(
+  'should open a new CDP and return its ID',
+  done => {
+    createdCdpService
+      .manager()
+      .authenticate()
+      .then(() => {
+        const newCdp = new Cdp(createdCdpService);
+        newCdp.getCdpId().then(id => {
+          expect(typeof id).toBe('number');
+          expect(id).toBeGreaterThan(0);
+          done();
+        });
       });
-    });
-});
+  },
+  5000
+);
 
 test(
   'should create a cdp object with an authenticated service and a cdp id',
