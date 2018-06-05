@@ -139,6 +139,7 @@ test(
           .get('token')
           .get('web3')
           .defaultAccount();
+        wethToken.deposit('0.1');
         wethToken.balanceOf(defaultAccount).then(balancePre => {
           newCdp = cdp;
           newCdp
@@ -161,6 +162,58 @@ test(
               });
             });
         });
+      });
+  },
+  5000
+);
+
+test(
+  'should be able to lock peth',
+  done => {
+    let newCdp;
+    let firstInk;
+
+    createdCdpService
+      .manager()
+      .authenticate()
+      .then(() => createdCdpService.openCdp())
+      .then(cdp => {
+        const tokenService = createdCdpService.get('token');
+        const pethToken = tokenService.getToken(tokens.PETH);
+        const wethToken = tokenService.getToken(tokens.WETH);
+        const defaultAccount = createdCdpService
+          .get('token')
+          .get('web3')
+          .defaultAccount();
+        wethToken.deposit('0.1');
+        wethToken
+          .approve(createdCdpService._tubContract().getAddress(), '0.1')
+          .then(() => {
+            pethToken.join('0.1').then(() => {
+              pethToken.balanceOf(defaultAccount).then(balancePre => {
+                newCdp = cdp;
+                newCdp
+                  .getInfo()
+                  .then(info => (firstInk = parseFloat(info.ink)))
+                  .then(() => newCdp.lockPeth('0.1'))
+                  .then(() => {
+                    pethToken.balanceOf(defaultAccount).then(balancePost => {
+                      newCdp.getInfo().then(info => {
+                        expect(parseFloat(info.ink)).toBeCloseTo(
+                          firstInk + 100000000000000000,
+                          5
+                        );
+                        expect(parseFloat(balancePost)).toBeCloseTo(
+                          balancePre - 0.1,
+                          5
+                        );
+                        done();
+                      });
+                    });
+                  });
+              });
+            });
+          });
       });
   },
   5000
