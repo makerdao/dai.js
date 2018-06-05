@@ -123,6 +123,23 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
+  lockWeth(cdpId, weth) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = utils.parseUnits(weth, 18);
+
+    return Promise.all([
+      this._conversionService().convertWethToPeth(weth),
+      this.get('allowance').requireAllowance(
+        tokens.PETH,
+        this._tubContract().getAddress()
+      )
+    ]).then(() => {
+      return this._transactionManager().createTransactionHybrid(
+        this._tubContract().lock(hexCdpId, parsedAmount)
+      );
+    });
+  }
+
   freePeth(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
     const parsedAmount = utils.parseUnits(amount, 18);
