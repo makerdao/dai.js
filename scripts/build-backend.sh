@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-rm -rf dist && \
-npm shrinkwrap && \
-babel contracts --out-dir ./dist/contracts && \
-babel contracts/addresses --out-dir ./dist/contracts/addresses && \
-babel src --out-dir ./dist/src && \
+set -e
+
+rm -rf dist
+babel contracts --out-dir ./dist/contracts
+babel contracts/addresses --out-dir ./dist/contracts/addresses
+babel src --out-dir ./dist/src
 copyfiles \
   npm-readme.md \
   LICENSE \
@@ -15,5 +16,6 @@ copyfiles \
   src/utils/configs/* \
   contracts/addresses/daiV1.json \
   contracts/addresses/exchanges.json \
-  dist && \
+  dist
 mv dist/npm-readme.md dist/README.md
+cp package-lock.json dist/npm-shrinkwrap.json
