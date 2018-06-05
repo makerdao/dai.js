@@ -10,11 +10,11 @@ function updateInfo(cdp) {
   return Promise.all([
     cdp.getCdpId(),
     cdp.getInfo(),
-    window.maker.service('token').getToken(tokens.DAI).balanceOf(
-      window.maker.service('web3').defaultAccount()
-    )
-  ])
-  .then(() => {
+    window.maker
+      .service('token')
+      .getToken(tokens.DAI)
+      .balanceOf(window.maker.service('web3').defaultAccount())
+  ]).then(() => {
     /*
     const id = results[0], info = {};
     Object.keys(results[1]).forEach(k => info[k] = results[1][k].toString());
@@ -40,6 +40,7 @@ window.document.getElementsByTagName('body')[0].innerHTML =
   '<div id="cdp-output"></div><div id="maker-dbg-container"></div>';
 
 setTimeout(() => {
+  // TODO stop using ConfigFactory
   const config = ConfigFactory.create('decentralized-oasis-without-proxies'),
     param = new URL(window.location.href).searchParams.get('inject') || '',
     useMetaMask = param.length > 0 && param !== '0';
@@ -58,21 +59,22 @@ setTimeout(() => {
   window.maker.authenticate().then(() => {
     window.vm = new Vue({
       el: '#maker-dbg-container',
-      render: createElement => createElement('maker-debugger', {
-        props: {
-          maker: window.maker
-        }
-      }),
+      render: createElement =>
+        createElement('maker-debugger', {
+          props: {
+            maker: window.maker
+          }
+        }),
       components: { MakerDebugger }
     });
 
     let cdp = null;
-    window.maker.openCdp()
-      .then(x => updateInfo(cdp = x))
+    window.maker
+      .openCdp()
+      .then(x => updateInfo((cdp = x)))
       .then(() => cdp.lockEth('0.1'))
       .then(() => updateInfo(cdp))
       .then(() => cdp.drawDai(20))
       .then(() => updateInfo(cdp));
   });
-
 }, 500);

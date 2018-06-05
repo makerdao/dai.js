@@ -10,15 +10,31 @@ class ConfigPresetNotFoundError extends Error {
 export default class ConfigFactory {
   /**
    * @param {string} presetName
+   * @param {object} options
    */
-  static create(presetName) {
+  static create(presetName, options = {}) {
+    if (typeof presetName !== 'string') {
+      options = presetName;
+      presetName = options.preset;
+    }
+
+    let config;
     switch (presetName) {
+      case 'test':
       case 'decentralized-oasis-without-proxies':
-        return decentralizedOasisWithoutProxies;
+        config = decentralizedOasisWithoutProxies;
+        break;
       case 'kovan':
-        return kovan;
+        config = kovan;
+        break;
       default:
         throw new ConfigPresetNotFoundError(presetName);
     }
+
+    if (options.log === false) {
+      config.services.log = 'NullLogger';
+    }
+
+    return config;
   }
 }
