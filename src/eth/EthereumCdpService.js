@@ -154,6 +154,22 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
+  getCollateralizationRatio(cdpId) {
+    return this.getCdpCollateral(cdpId).then(pethCollateral =>
+      this.getCdpDebt(cdpId).then(daiDebt =>
+        this.get('priceFeed')
+          .getEthPrice()
+          .then(ethPrice =>
+            this.get('conversionService')
+              .getEthPerPeth()
+              .then(
+                ethPerPeth => pethCollateral * ethPerPeth * ethPrice / daiDebt
+              )
+          )
+      )
+    );
+  }
+
   getLiquidationRatio() {
     return this._tubContract()
       .mat()

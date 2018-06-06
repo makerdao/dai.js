@@ -349,3 +349,16 @@ test('can read the liquidation ratio', async () => {
   const liquidationRatio = await createdCdpService.getLiquidationRatio();
   expect(liquidationRatio.toString()).toEqual('1.5');
 });
+
+test('can calculate the collateralization ratio', async () => {
+  await createdCdpService.manager().authenticate();
+  await createdCdpService.get('priceFeed').setEthPrice('500');
+  await lockEth('0.1');
+  await cdp.drawDai('20');
+  const ethPerPeth = await createdCdpService
+    .get('conversionService')
+    .getEthPerPeth();
+  const collateralizationRatio = await cdp.getCollateralizationRatio();
+  await createdCdpService.get('priceFeed').setEthPrice('400');
+  expect(collateralizationRatio).toBeCloseTo(2.5 * ethPerPeth);
+});

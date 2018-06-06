@@ -68,6 +68,12 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
   }
 
+  getCollateralizationRatio() {
+    return this.getCdpId().then(id =>
+      this._cdpService.getCollateralizationRatio(id)
+    );
+  }
+
   lockEth(eth) {
     return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
   }
