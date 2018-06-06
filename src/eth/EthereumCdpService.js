@@ -176,6 +176,18 @@ export default class EthereumCdpService extends PrivateService {
       .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
+  getLiquidationPrice(cdpId) {
+    return this.getLiquidationRatio().then(ratio =>
+      this.getCdpDebt(cdpId).then(daiDebt =>
+        this.getCdpCollateral(cdpId).then(pethCollateral =>
+          this.get('conversionService')
+            .getEthPerPeth()
+            .then(ethPerPeth => ratio * daiDebt / pethCollateral * ethPerPeth)
+        )
+      )
+    );
+  }
+
   drawDai(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
     const parsedAmount = utils.parseUnits(amount.toString(), 18);

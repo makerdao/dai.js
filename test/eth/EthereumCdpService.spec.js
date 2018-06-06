@@ -362,3 +362,11 @@ test('can calculate the collateralization ratio', async () => {
   await createdCdpService.get('priceFeed').setEthPrice('400');
   expect(collateralizationRatio).toBeCloseTo(2.5 * ethPerPeth);
 });
+
+test('can calculate the liquidation price', async () => {
+  await createdCdpService.manager().authenticate();
+  await lockEth('0.1');
+  await cdp.drawDai('20');
+  const liquidationPrice = await cdp.getLiquidationPrice();
+  expect(liquidationPrice.toString()).toEqual('300');
+});
