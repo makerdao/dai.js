@@ -68,6 +68,10 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
   }
 
+  getLiquidationPriceForPeth() {
+    return this.getCdpId().then(id => this._cdpService.getLiquidationPriceForPeth(id));
+  }
+
   lockEth(eth) {
     return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
   }

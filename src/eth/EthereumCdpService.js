@@ -166,6 +166,29 @@ export default class EthereumCdpService extends PrivateService {
       .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).minus(1).toNumber());
   }
 
+  isInt(n){
+    return Number(n) === n && n % 1 === 0;
+  }
+
+  isFloat(n){
+    return Number(n) === n && n % 1 !== 0;
+  }
+
+  getLiquidationPriceForPeth(cdpId){
+    return Promise.all([
+      this.getCdpDebt(cdpId),
+      this.getLiquidationRatio(),
+      this.getCdpCollateralInPeth(cdpId)
+    ])
+    .then(vals=>{
+      const debt = vals[0];
+      const liqRatio = vals[1];
+      const collateral = vals[2];
+      const price = debt * liqRatio / collateral;
+      return price;
+    });
+  }
+
   getGovernanceFee() {
     return this._tubContract()
       .fee()

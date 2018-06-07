@@ -368,6 +368,14 @@ test('can read the weth to peth ratio', async () => {
   expect(ratio).toBeGreaterThan(0);
 });
 
+test('can read the liquidation price in peth for a cdp', async () => {
+  const id = await openCdp();
+  await cdp.lockEth('0.1');
+  await cdp.drawDai('5');
+  const price = await createdCdpService.getLiquidationPriceForPeth(id);
+  expect(price.toString()).toEqual('75');
+});
+
 
 
 
