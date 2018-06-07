@@ -362,4 +362,13 @@ test('can read the governance fee', async () => {
   expect(governanceFee.toString()).toEqual('1.000000000158154');
 });
 
+test('can read the weth to peth ratio', async () => {
+  await createdCdpService.manager().authenticate();
+  const ratio = await createdCdpService.getWethToPethRatio();
+  console.log(ratio);
+  expect(ratio).toBeGreaterThan(0);
+});
+
+
+
 
