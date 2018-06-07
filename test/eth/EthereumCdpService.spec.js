@@ -349,3 +349,11 @@ test('can read the liquidation ratio', async () => {
   const liquidationRatio = await createdCdpService.getLiquidationRatio();
   expect(liquidationRatio.toString()).toEqual('1.5');
 });
+
+test('can read the liquidation penalty', async () => {
+  await createdCdpService.manager().authenticate();
+  const liquidationPenalty = await createdCdpService.getLiquidationPenalty();
+  expect(liquidationPenalty.toString()).toEqual('0.13');
+});
+
+
