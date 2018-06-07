@@ -137,7 +137,7 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().cups(hexCdpId);
   }
 
-  getCdpCollateral(cdpId) {
+  getCdpCollateralInPeth(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     return this._tubContract()
       .ink(hexCdpId)

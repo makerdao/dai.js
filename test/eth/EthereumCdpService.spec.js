@@ -332,7 +332,7 @@ test('should be able to bite an unsafe cdp', done => {
 test('can read the locked collateral for a cdp', async () => {
   const id = await openCdp();
   await cdp.lockEth('0.2');
-  const debt = await createdCdpService.getCdpCollateral(id);
+  const debt = await createdCdpService.getCdpCollateralInPeth(id);
   expect(debt.toString()).toEqual('0.2');
 });
 
