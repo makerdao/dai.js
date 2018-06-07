@@ -356,4 +356,10 @@ test('can read the liquidation penalty', async () => {
   expect(liquidationPenalty.toString()).toEqual('0.13');
 });
 
+test('can read the governance fee', async () => {
+  await createdCdpService.manager().authenticate();
+  const governanceFee = await createdCdpService.getGovernanceFee();
+  expect(governanceFee.toString()).toEqual('1.000000000158154');
+});
+
 
