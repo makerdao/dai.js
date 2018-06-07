@@ -207,7 +207,7 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  abstractedCollateralPrice() {
+  getPethPriceInUSD() {
     const token = this.get('token').getToken(tokens.PETH);
 
     return this._tubContract()

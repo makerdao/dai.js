@@ -274,12 +274,12 @@ test('should be able to wipe dai', done => {
     });
 });
 
-test('should return the abstracted collateral price', done => {
+test('should return the \'abstracted collateral price\'', done => {
   createdCdpService
     .manager()
     .authenticate()
     .then(() => {
-      createdCdpService.abstractedCollateralPrice().then(value => {
+      createdCdpService.getPethPriceInUSD().then(value => {
         expect(typeof value).toBe('number');
         done();
       });
@@ -365,7 +365,6 @@ test('can read the governance fee', async () => {
 test('can read the weth to peth ratio', async () => {
   await createdCdpService.manager().authenticate();
   const ratio = await createdCdpService.getWethToPethRatio();
-  console.log(ratio);
   expect(ratio).toBeGreaterThan(0);
 });
 
