@@ -174,7 +174,7 @@ export default class EthereumCdpService extends PrivateService {
     return Number(n) === n && n % 1 !== 0;
   }
 
-  getLiquidationPriceForPeth(cdpId){
+  _getLiquidationPriceForPeth(cdpId){
     return Promise.all([
       this.getCdpDebt(cdpId),
       this.getLiquidationRatio(),
@@ -186,6 +186,16 @@ export default class EthereumCdpService extends PrivateService {
       const collateral = vals[2];
       const price = debt * liqRatio / collateral;
       return price;
+    });
+  }
+
+  getLiquidationPriceForEth(cdpId){
+    return Promise.all([
+      this._getLiquidationPriceForPeth(cdpId),
+      this.getWethToPethRatio()
+    ])
+    .then(vals=>{
+      return vals[0] / vals[1];
     });
   }
 
