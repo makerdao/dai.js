@@ -36,7 +36,7 @@ export default class OasisExchangeService extends PrivateService {
 
     return service;
   }
-/*
+  /*
   static buildTestService(privateKey = null, suppressOutput = true) {
     const service = new OasisExchangeService(),
       web3 = Web3Service.buildTestService(privateKey, 5000, suppressOutput),
@@ -83,8 +83,17 @@ export default class OasisExchangeService extends PrivateService {
     return service;
   }
 
-  constructor(name = 'oasisExchange') {
-    super(name, ['cdp', 'smartContract', 'token', 'web3', 'log', 'gasEstimator', 'allowance', 'transactionManager']);
+  constructor(name = 'exchange') {
+    super(name, [
+      'cdp',
+      'smartContract',
+      'token',
+      'web3',
+      'log',
+      'gasEstimator',
+      'allowance',
+      'transactionManager'
+    ]);
   }
 
   /*
@@ -103,17 +112,21 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
       .address();
     const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
     const minFillAmountEVM = daiToken.toEthereumFormat(minFillAmount);
-    return this.get('allowance').requireAllowance(tokens.DAI, oasisContract.getAddress())
-    .then(()=>
-    OasisSellOrder.buildOasisSellOrder(oasisContract, oasisContract.sellAllAmount(
-        daiAddress,
-        daiAmountEVM,
-        buyTokenAddress,
-        minFillAmountEVM,
-        { gasLimit: 300000 }
-      ),
-      this.get('transactionManager')
-    ));
+    return this.get('allowance')
+      .requireAllowance(tokens.DAI, oasisContract.getAddress())
+      .then(() =>
+        OasisSellOrder.buildOasisSellOrder(
+          oasisContract,
+          oasisContract.sellAllAmount(
+            daiAddress,
+            daiAmountEVM,
+            buyTokenAddress,
+            minFillAmountEVM,
+            { gasLimit: 300000 }
+          ),
+          this.get('transactionManager')
+        )
+      );
   }
 
   /*
@@ -132,17 +145,21 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-    return this.get('allowance').requireAllowance(tokens.WETH, oasisContract.getAddress())
-    .then(()=>
-    OasisBuyOrder.buildOasisBuyOrder(oasisContract, oasisContract.buyAllAmount(
-        daiAddress,
-        daiAmountEVM,
-        sellTokenAddress,
-        maxFillAmountEVM,
-        { gasLimit: 300000 }
-      ),
-      this.get('transactionManager')
-    ));
+    return this.get('allowance')
+      .requireAllowance(tokens.WETH, oasisContract.getAddress())
+      .then(() =>
+        OasisBuyOrder.buildOasisBuyOrder(
+          oasisContract,
+          oasisContract.buyAllAmount(
+            daiAddress,
+            daiAmountEVM,
+            sellTokenAddress,
+            maxFillAmountEVM,
+            { gasLimit: 300000 }
+          ),
+          this.get('transactionManager')
+        )
+      );
   }
 
   //only used to set up a limit order on the local testnet
@@ -158,13 +175,13 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
       contracts.MAKER_OTC
     );
     return new TransactionObject(
-    oasisContract.offer(
-      payAmount,
-      payTokenAddress,
-      buyAmount,
-      buyTokenAddress,
-      pos,
-      overrides
+      oasisContract.offer(
+        payAmount,
+        payTokenAddress,
+        buyAmount,
+        buyTokenAddress,
+        pos,
+        overrides
       ),
       this.get('web3')
     );
