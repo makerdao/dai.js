@@ -1,4 +1,6 @@
+import values from 'lodash.values';
 import ServiceManager, { InvalidServiceError } from './ServiceManager';
+import toposort from 'toposort';
 
 class ServiceAlreadyRegisteredError extends Error {
   constructor(name) {
@@ -56,63 +58,30 @@ class Container {
     return this._services[name];
   }
 
-  getServices() {
-    const result = [];
-    const processed = {};
-    let nextStack = [];
-    let currentStack = Object.keys(this._services)
-      .filter(k => this._services.hasOwnProperty(k))
-      .map(k => this._services[k]);
+  getRegisteredServiceNames() {
+    return Object.keys(this._services);
+  }
 
-    // Check if all dependencies are registered.
-    currentStack.forEach(service =>
-      service
-        .manager()
-        .dependencies()
-        .forEach(d => {
-          if (!this._services[d]) {
-            throw new ServiceNotFoundError(d);
-          }
-        })
-    );
-
-    // Sort services in load order
-    while (currentStack.length > 0) {
-      currentStack.forEach(s => {
-        let postponed = false;
-
-        s
-          .manager()
-          .dependencies()
-          .forEach(d => {
-            if (!postponed && !processed[d]) {
-              nextStack.push(s);
-              postponed = true;
-            }
-          });
-
-        if (!postponed) {
-          s
-            .manager()
-            .dependencies()
-            .forEach(d => s.manager().inject(d, this._services[d]));
-          result.push(s);
-          processed[s.manager().name()] = true;
-        }
-      });
-
-      if (nextStack.length === currentStack.length) {
-        throw new ServiceDependencyLoopError(
-          currentStack.map(s => s.manager().name())
-        );
+  injectDependencies() {
+    const services = values(this._services);
+    for (let service of services) {
+      const manager = service.manager();
+      for (let name of manager.dependencies()) {
+        const dep = this._services[name];
+        if (!dep) throw new ServiceNotFoundError(name);
+        manager.inject(name, this._services[name]);
       }
-
-      currentStack = nextStack;
-      nextStack = [];
     }
+  }
 
-    // Return the resulting list
-    return result;
+  _orderServices(services) {
+    const edges = [];
+    for (let service of services) {
+      const name = service.manager().name();
+      const depNames = service.manager().dependencies();
+      depNames.forEach(dn => edges.push([dn, name]));
+    }
+    return toposort(edges);
   }
 
   initialize() {
@@ -127,8 +96,17 @@ class Container {
     return this._waitForServices(s => s.manager().authenticate());
   }
 
-  _waitForServices(callback) {
-    return Promise.all(this.getServices().map(s => callback(s)));
+  async _waitForServices(callback) {
+    if (!this._orderedServiceNames) {
+      this._orderedServiceNames = this._orderServices(values(this._services));
+    }
+    for (let name of this._orderedServiceNames) {
+      const service = this._services[name];
+      if (!service) {
+        throw new Error(`No service for ${name}`);
+      }
+      await callback(this._services[name]);
+    }
   }
 }
 
