@@ -13,6 +13,7 @@ const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
 const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
+  // DEPRECATED (WIP)
   static buildTestService(
     privateKey = null,
     statusTimerDelay = 5000,

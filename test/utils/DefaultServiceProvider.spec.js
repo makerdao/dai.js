@@ -20,9 +20,10 @@ test('Should configure the settings of a created service', done => {
 */
 
 test('Should correctly create a container with all services when passed a service configuration', done => {
-  const container = new DefaultServiceProvider(
-    config.services
-  ).buildContainer();
+  const container = new DefaultServiceProvider({
+    ...config.services,
+    log: false
+  }).buildContainer();
   expect(
     Object.keys(container._services).indexOf('smartContract')
   ).toBeGreaterThan(-1);
