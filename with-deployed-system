@@ -12,6 +12,8 @@
 
 # set -ex
 
+START_TIME=`date +%s`
+
 function sed_inplace {
   # sed's -i argument behaves differently on macOS, hence this hack
   sed -i.bak "$1" $2 && rm $2.bak
@@ -102,6 +104,10 @@ EOM
   export OTC=$OTC
 
   cd ../..
+
+  END_TIME=`date +%s`
+  ELAPSED=`echo $END_TIME - $START_TIME | bc`
+  echo "Created testnet in" $ELAPSED "seconds."
 
 else
   echo "You already have a test network running on port 2000."
