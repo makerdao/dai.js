@@ -174,6 +174,15 @@ export default class EthereumCdpService extends PrivateService {
     return Number(n) === n && n % 1 !== 0;
   }
 
+  getTargetPrice(){
+    // we need to use the Web3.js contract interface to get the return value
+    // from the non-constant function `par()`
+    const vox = this._smartContract().getWeb3ContractByName(contracts.SAI_VOX);
+    return new Promise((resolve, reject) =>
+      vox.par.call((err, val) => (err ? reject(err) : resolve(val)))
+    ).then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  }
+
   _getLiquidationPriceForPeth(cdpId){
     return Promise.all([
       this.getCdpDebt(cdpId),

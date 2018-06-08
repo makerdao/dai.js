@@ -376,6 +376,12 @@ test('can read the liquidation price in eth for a cdp', async () => {
   expect(price.toString()).toEqual('75');
 });
 
+test('can read the target price', async () => {
+  await createdCdpService.manager().authenticate();
+  const tp = await createdCdpService.getTargetPrice();
+  expect(tp).toBe(1);
+});
+
 
 
 
