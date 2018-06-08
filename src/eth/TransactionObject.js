@@ -96,20 +96,36 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionData() {
     let gasPrice = null;
-    this._transaction
+    let promise;
+    return this._transaction
       .then(tx => {
         this._pending(); //set state to pending
         this._hash = tx.hash;
-        if (this._ethersProvider.chainId === 999) {
-          return Promise.any([
-            this._ethersProvider.getTransaction(this._hash),
-            this._ethersProvider.waitForTransaction(this._hash)
-          ]);
-        } else {
-          return this._ethersProvider
-            .waitForTransaction(this._hash)
-            .then(hash => hash);
-        }
+        return Promise.any([
+          this._ethersProvider.getTransaction(this._hash),
+          this._ethersProvider.waitForTransaction(this._hash)
+        ])
+          .then(result => (promise = result))
+          .then(() => {
+            if (promise === null) {
+              this._ethersProvider
+                .getTransaction(this._hash)
+                .then(result => (promise = result));
+            }
+
+            return promise;
+          });
+
+        //   if (this._ethersProvider.chainId === 999) {
+        //     return Promise.any([
+        //       this._ethersProvider.getTransaction(this._hash),
+        //       this._ethersProvider.waitForTransaction(this._hash)
+        //     ]);
+        //   } else {
+        //     return this._ethersProvider
+        //       .waitForTransaction(this._hash)
+        //       .then(hash => hash);
+        //   }
       })
       .then(tx => {
         gasPrice = tx.gasPrice;
