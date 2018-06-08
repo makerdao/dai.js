@@ -1,13 +1,10 @@
 {
   "services": {
-    "web3": [
-      "Web3Service",
-      {
-        "provider": {
-          "type": "HTTP"
-        }
+    "web3": {
+      "provider": {
+        "type": "HTTP"
       }
-    ],
+    },
     "exchange": "OasisExchangeService"
   }
 }
