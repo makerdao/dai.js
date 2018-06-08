@@ -175,7 +175,7 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
-  _getLiquidationPriceForPeth(cdpId){
+  _getLiquidationPricePethUSD(cdpId){
     return Promise.all([
       this.getCdpDebt(cdpId),
       this.getTargetPrice(),
@@ -192,9 +192,9 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  getLiquidationPriceForEth(cdpId){
+  getLiquidationPriceEthUSD(cdpId){
     return Promise.all([
-      this._getLiquidationPriceForPeth(cdpId),
+      this._getLiquidationPricePethUSD(cdpId),
       this.getWethToPethRatio()
     ])
     .then(vals=>{

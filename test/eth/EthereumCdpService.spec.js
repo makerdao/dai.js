@@ -372,7 +372,7 @@ test('can read the liquidation price in eth for a cdp', async () => {
   const id = await openCdp();
   await cdp.lockEth('0.1');
   await cdp.drawDai('5');
-  const price = await createdCdpService.getLiquidationPriceForEth(id);
+  const price = await createdCdpService.getLiquidationPriceEthUSD(id);
   expect(price.toString()).toEqual('75');
 });
 
