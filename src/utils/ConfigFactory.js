@@ -61,12 +61,15 @@ export default class ConfigFactory {
       if (typeof serviceOptions === 'string') {
         config.services[service] = serviceOptions;
       } else if (typeof serviceOptions === 'object') {
-        // convert service name to a name/settings pair
-        if (typeof config.services[service] === 'string') {
-          config.services[service] = [config.services[service], {}];
+        if (!config.services[service]) {
+          config.services[service] = serviceOptions;
+        } else {
+          if (typeof config.services[service] === 'string') {
+            // convert service name to a name/settings pair
+            config.services[service] = [config.services[service], {}];
+          }
+          merge(config.services[service][1], serviceOptions);
         }
-
-        merge(config.services[service][1], serviceOptions);
       }
     }
 

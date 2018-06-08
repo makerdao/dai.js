@@ -62,7 +62,15 @@ test('it overwrites a service name', () => {
   expect(config.services.cdp).toEqual('OtherService');
 });
 
-test('it merges service options', () => {
+test('it adds service options', () => {
+  const config = ConfigFactory.create('http', { exchange: { foo: 'bar' } });
+  expect(config.services.exchange).toEqual([
+    'OasisExchangeService',
+    { foo: 'bar' }
+  ]);
+});
+
+test('it passes service options for an omitted service', () => {
   const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
-  expect(config.services.cdp).toEqual(['EthereumCdpService', { foo: 'bar' }]);
+  expect(config.services.cdp).toEqual({ foo: 'bar' });
 });
