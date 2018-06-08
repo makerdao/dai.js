@@ -1,88 +1,11 @@
 import PrivateService from '../../core/PrivateService';
-import Web3Service from '../../eth/Web3Service';
-import SmartContractService from '../../eth/SmartContractService';
-import EthereumTokenService from '../../eth/EthereumTokenService';
 import OasisSellOrder from './OasisSellOrder';
 import OasisBuyOrder from './OasisBuyOrder';
 import TransactionObject from '../../eth/TransactionObject';
-import GasEstimatorService from '../../eth/GasEstimatorService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
-import EthereumCdpService from '../../eth/EthereumCdpService';
-import AllowanceService from '../../eth/AllowanceService';
 
 export default class OasisExchangeService extends PrivateService {
-  static buildKovanService() {
-    const service = new OasisExchangeService(),
-      web3 = Web3Service.buildInfuraService(
-        'kovan',
-        '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700'
-      ),
-      smartContractService = SmartContractService.buildTestService(web3),
-      ethereumTokenService = EthereumTokenService.buildTestService(
-        smartContractService
-      );
-
-    service
-      .manager()
-      .inject('log', smartContractService.get('log'))
-      .inject('web3', smartContractService.get('web3'))
-      .inject('smartContract', smartContractService)
-      .inject('token', ethereumTokenService)
-      .inject(
-        'gasEstimator',
-        GasEstimatorService.buildTestService(smartContractService.get('web3'))
-      );
-
-    return service;
-  }
-  /*
-  static buildTestService(privateKey = null, suppressOutput = true) {
-    const service = new OasisExchangeService(),
-      web3 = Web3Service.buildTestService(privateKey, 5000, suppressOutput),
-      smartContractService = SmartContractService.buildTestService(web3, suppressOutput),
-      ethereumTokenService = EthereumTokenService.buildTestService(
-        smartContractService,
-        suppressOutput
-      );
-
-    service
-      .manager()
-      .inject('log', smartContractService.get('log'))
-      .inject('web3', smartContractService.get('web3'))
-      .inject('smartContract', smartContractService)
-      .inject('token', ethereumTokenService)
-      .inject(
-        'gasEstimator',
-        GasEstimatorService.buildTestService(smartContractService.get('web3'))
-      );
-
-    return service;
-  }*/
-
-  static buildTestService(suppressOutput = true) {
-    const service = new OasisExchangeService(),
-      allowanceService = AllowanceService.buildTestServiceMaxAllowance(),
-      cdpService = EthereumCdpService.buildTestService(suppressOutput),
-      smartContractService = cdpService.get('smartContract'),
-      ethereumTokenService = cdpService.get('token');
-    service
-      .manager()
-      .inject('log', smartContractService.get('log'))
-      .inject('web3', smartContractService.get('web3'))
-      .inject('smartContract', smartContractService)
-      .inject('token', ethereumTokenService)
-      .inject(
-        'gasEstimator',
-        GasEstimatorService.buildTestService(smartContractService.get('web3'))
-      )
-      .inject('cdp', cdpService)
-      .inject('allowance', allowanceService)
-      .inject('transactionManager', cdpService.get('transactionManager'));
-
-    return service;
-  }
-
   constructor(name = 'exchange') {
     super(name, [
       'cdp',

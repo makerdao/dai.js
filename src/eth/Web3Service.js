@@ -1,60 +1,15 @@
 import PrivateService from '../core/PrivateService';
 import Web3ProviderType from './Web3ProviderType';
 import { promisifyAsyncMethods, getNetworkName } from '../utils';
-import NullLogger from '../utils/loggers/NullLogger';
-import TimerService from '../utils/TimerService';
 import Web3 from 'web3';
 import TestAccountProvider from '../utils/TestAccountProvider';
 import Web3ServiceList from '../utils/Web3ServiceList';
-import ConsoleLogger from '../utils/loggers/ConsoleLogger';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
 const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
-  // DEPRECATED (WIP)
-  static buildTestService(
-    privateKey = null,
-    statusTimerDelay = 5000,
-    suppressOutput = true
-  ) {
-    const service = new Web3Service();
-
-    service
-      .manager()
-      .inject('log', suppressOutput ? new NullLogger() : new ConsoleLogger())
-      .inject('timer', new TimerService())
-      .settings({
-        usePresetProvider: true,
-        privateKey: privateKey,
-        provider: { type: Web3ProviderType.TEST },
-        statusTimerDelay: statusTimerDelay
-      });
-
-    return service;
-  }
-
-  static buildInfuraService(network, privateKey = null) {
-    const service = new Web3Service();
-
-    service
-      .manager()
-      .inject('log', new NullLogger())
-      .inject('timer', new TimerService())
-      .settings({
-        usePresetProvider: false,
-        privateKey: privateKey,
-        provider: {
-          type: Web3ProviderType.INFURA,
-          network: network,
-          infuraApiKey: 'ihagQOzC3mkRXYuCivDN'
-        }
-      });
-
-    return service;
-  }
-
   constructor(name = 'web3') {
     super(name, ['log', 'timer']);
 

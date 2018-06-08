@@ -1,23 +1,8 @@
 /*eslint no-console: ['error', { 'allow': ['error'] }] */
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
-import Web3Service from '../../src/eth/Web3Service';
+import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
 import Web3ProviderType from '../../src/eth/Web3ProviderType';
 import { captureConsole } from '../../src/utils';
-import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
-
-function buildTestService(privateKey, statusTimerDelay = 5000) {
-  const provider = new DefaultServiceProvider({
-    web3: {
-      usePresetProvider: true,
-      privateKey,
-      provider: { type: Web3ProviderType.TEST },
-      statusTimerDelay
-    },
-    log: false
-  });
-  const container = provider.buildContainer();
-  return container.service('web3');
-}
 
 function buildDisconnectingService(disconnectAfter = 25) {
   const service = buildTestService(null, disconnectAfter + 25);
@@ -70,6 +55,32 @@ function buildAccountChangingService(changeAccountAfter = 25) {
       });
   });
   return service;
+}
+
+function buildTestService(privateKey, statusTimerDelay = 5000) {
+  return new DefaultServiceProvider({
+    web3: {
+      privateKey,
+      statusTimerDelay,
+      usePresetProvider: true,
+      provider: { type: Web3ProviderType.TEST }
+    },
+    log: false
+  }).service('web3');
+}
+
+function buildInfuraService(network, privateKey = null) {
+  return new DefaultServiceProvider({
+    web3: {
+      privateKey,
+      provider: {
+        type: Web3ProviderType.INFURA,
+        network,
+        infuraApiKey: 'ihagQOzC3mkRXYuCivDN'
+      }
+    },
+    log: false
+  }).service('web3');
 }
 
 test('should fetch version info on connect', done => {
@@ -264,7 +275,7 @@ test('should have a balance of 100 ETH in test account', done => {
 test(
   'should connect to the right network when using the INFURA provider type',
   done => {
-    const service = Web3Service.buildInfuraService('kovan');
+    const service = buildInfuraService('kovan');
     service
       .manager()
       .connect()

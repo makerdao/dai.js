@@ -1,36 +1,55 @@
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import SmartContractService from '../../src/eth/SmartContractService';
+import { buildTestSmartContractService } from '../helpers/serviceBuilders';
 
 test('getContractByName should have proper error checking', done => {
-  const service = SmartContractService.buildTestService();
+  const service = buildTestSmartContractService();
 
-  expect(() => service.getContractByName('NOT_A_CONTRACT')).toThrow('Provided name "NOT_A_CONTRACT" is not a contract');
-  expect(() => service.getContractByName(contracts.SAI_TOP, 999)).toThrow('Cannot resolve network ID. Are you connected?');
+  expect(() => service.getContractByName('NOT_A_CONTRACT')).toThrow(
+    'Provided name "NOT_A_CONTRACT" is not a contract'
+  );
+  expect(() => service.getContractByName(contracts.SAI_TOP, 999)).toThrow(
+    'Cannot resolve network ID. Are you connected?'
+  );
 
-  service.manager().authenticate().then(() => {
-    expect(() => service.getContractByName(contracts.SAI_TOP, 999)).toThrow('Cannot find version 999 of contract SAI_TOP');
-    done();
-  });
+  service
+    .manager()
+    .authenticate()
+    .then(() => {
+      expect(() => service.getContractByName(contracts.SAI_TOP, 999)).toThrow(
+        'Cannot find version 999 of contract SAI_TOP'
+      );
+      done();
+    });
 });
 
 test('getContractByName should return a functioning contract', done => {
-  const service = SmartContractService.buildTestService();
-  service.manager().authenticate().then(() => {
-    // Read the PETH address by calling TOP.skr(). Confirm that it's the same as the configured address.
-    service.getContractByName(contracts.SAI_TOP).gem().then(
-      data => {
-        expect(data.toString().toUpperCase())
-          .toEqual(service.getContractByName(tokens.WETH).getAddress().toUpperCase());
-        done();
-      }
-    );
-  });
+  const service = buildTestSmartContractService();
+  service
+    .manager()
+    .authenticate()
+    .then(() => {
+      // Read the PETH address by calling TOP.skr(). Confirm that it's the same as the configured address.
+      service
+        .getContractByName(contracts.SAI_TOP)
+        .gem()
+        .then(data => {
+          expect(data.toString().toUpperCase()).toEqual(
+            service
+              .getContractByName(tokens.WETH)
+              .getAddress()
+              .toUpperCase()
+          );
+          done();
+        });
+    });
 });
 
-test('should get a contract\'s public constant member values in a state object', done => {
-  const service = SmartContractService.buildTestService();
-  service.manager().authenticate()
+test("should get a contract's public constant member values in a state object", done => {
+  const service = buildTestSmartContractService();
+  service
+    .manager()
+    .authenticate()
     .then(() => service.getContractState(contracts.SAI_MOM))
     .then(r => {
       expect(r).toEqual({
@@ -46,8 +65,10 @@ test('should get a contract\'s public constant member values in a state object',
 });
 
 test('should support recursive smart contract state inspection', done => {
-  const service = SmartContractService.buildTestService();
-  service.manager().authenticate()
+  const service = buildTestSmartContractService();
+  service
+    .manager()
+    .authenticate()
     .then(() => service.getContractState(contracts.SAI_TOP, 5, true, []))
     .then(top => {
       expect(top.tub.gem.symbol).toEqual('WETH');
@@ -56,20 +77,28 @@ test('should support recursive smart contract state inspection', done => {
 });
 
 test('should convert from bytes32 to a javascript number', () => {
-  const bytes32 = '0x000000000000000000000000000000000000000000000000000000000000005c';
-  const service = SmartContractService.buildTestService();
-  
-  service.manager().authenticate().then(() => {
-    expect(service.bytes32ToNumber(bytes32)).toBe(92);
-  });
+  const bytes32 =
+    '0x000000000000000000000000000000000000000000000000000000000000005c';
+  const service = buildTestSmartContractService();
+
+  service
+    .manager()
+    .authenticate()
+    .then(() => {
+      expect(service.bytes32ToNumber(bytes32)).toBe(92);
+    });
 });
 
 test('should convert from a javascript number to bytes32', () => {
   const num = 92;
-  const service = SmartContractService.buildTestService();
+  const service = buildTestSmartContractService();
 
-  service.manager().authenticate().then(() => {
-    expect(service.numberToBytes32(num)).toBe('0x000000000000000000000000000000000000000000000000000000000000005c');
-  });
+  service
+    .manager()
+    .authenticate()
+    .then(() => {
+      expect(service.numberToBytes32(num)).toBe(
+        '0x000000000000000000000000000000000000000000000000000000000000005c'
+      );
+    });
 });
-
