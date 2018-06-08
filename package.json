@@ -91,6 +91,7 @@
     "ethereumjs-util": "^5.2.0",
     "ethers": "^3.0.15",
     "ethers-web3-bridge": "0.0.1",
+    "lodash.merge": "^4.6.1",
     "web3": "^0.20.6",
     "web3-provider-engine": "14.0.4"
   },
