@@ -202,6 +202,18 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
+  isCdpSafe(cdpId){
+    return Promise.all([
+      this.getLiquidationPriceEthUSD(cdpId),
+      this.get('priceFeed').getEthPrice()
+    ])
+    .then(vals=>{
+      const liqPrice = vals[0];
+      const ethPrice = vals[1];
+      return parseFloat(ethPrice) >= liqPrice;
+    });
+  }
+
   getGovernanceFee() {
     return this._tubContract()
       .fee()

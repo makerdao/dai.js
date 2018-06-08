@@ -372,7 +372,7 @@ test('can read the liquidation price in eth for a cdp', async () => {
   const id = await openCdp();
   await cdp.lockEth('0.1');
   await cdp.drawDai('5');
-  const price = await createdCdpService.getLiquidationPriceEthUSD(id);
+  const price = await cdp.getLiquidationPriceEthUSD();
   expect(price.toString()).toEqual('75');
 });
 
@@ -380,6 +380,14 @@ test('can read the target price', async () => {
   await createdCdpService.manager().authenticate();
   const tp = await createdCdpService.getTargetPrice();
   expect(tp).toBe(1);
+});
+
+test('can check if cdp is safe', async () => {
+  const id = await openCdp();
+  await cdp.lockEth('0.1');
+  await cdp.drawDai('5');
+  const safe = await cdp.isSafe();
+  expect(safe).toBe(true);
 });
 
 

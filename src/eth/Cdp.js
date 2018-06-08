@@ -72,6 +72,10 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.getLiquidationPriceEthUSD(id));
   }
 
+  isSafe() {
+    return this.getCdpId().then(id => this._cdpService.isCdpSafe(id));
+  }
+
   lockEth(eth) {
     return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
   }
