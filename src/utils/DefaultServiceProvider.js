@@ -63,6 +63,43 @@ function _disabledService(role) {
   throw new Error(`It's not possible to disable the "${role}" service.`);
 }
 
+function processConfig(role, config) {
+  let className, settings;
+  switch (typeof config) {
+    case 'string':
+      // handle a string that refers to a class name
+      className = config;
+      settings = {};
+      break;
+    case 'object':
+      if (config instanceof Array) {
+        // handle a [class name, settings object] pair
+        className = config[0];
+        settings = config[1];
+      } else {
+        // handle a settings object -- use the default version
+        className = _defaultServices[role];
+        settings = config;
+      }
+      // TODO could also handle a service instance here
+      break;
+    case 'boolean':
+      // handle a boolean, either disabling the service or indicating that its
+      // default version should be used
+      if (config) {
+        className = _defaultServices[role];
+      } else {
+        className = _disabledService(role);
+      }
+      settings = {};
+      break;
+    default:
+      throw new Error(`could not parse settings for ${role}:`, config);
+  }
+
+  return [className, settings];
+}
+
 export default class DefaultServiceProvider {
   constructor(servicesConfig) {
     this._config = servicesConfig;
@@ -84,37 +121,7 @@ export default class DefaultServiceProvider {
     const container = new Container();
 
     for (let role in this._config) {
-      const serviceSettings = this._config[role];
-      let className, settings;
-      switch (typeof serviceSettings) {
-        case 'string':
-          className = serviceSettings;
-          settings = {};
-          break;
-        case 'object':
-          // TODO could also handle a service instance here
-          if (serviceSettings instanceof Array) {
-            className = serviceSettings[0];
-            settings = serviceSettings[1];
-          } else {
-            className = _defaultServices[role];
-            settings = serviceSettings;
-          }
-          break;
-        case 'boolean':
-          if (serviceSettings) {
-            className = _defaultServices[role];
-          } else {
-            className = _disabledService(role);
-          }
-          settings = {};
-          break;
-        default:
-          throw new Error(
-            `could not parse settings for ${role}:`,
-            serviceSettings
-          );
-      }
+      const [className, settings] = processConfig(role, this._config[role]);
 
       if (!this.supports(className)) {
         throw new Error('Unsupported service in configuration: ' + className);
