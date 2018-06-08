@@ -61,15 +61,25 @@ export default class Cdp {
   }
 
   getCollateralAmountInPeth() {
-    return this.getCdpId().then(id => this._cdpService.getCdpCollateralInPeth(id));
+    return this.getCdpId().then(id =>
+      this._cdpService.getCdpCollateralInPeth(id)
+    );
   }
 
   getDebtAmount() {
     return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
   }
 
+  getCollateralizationRatio() {
+    return this.getCdpId().then(id =>
+      this._cdpService.getCollateralizationRatio(id)
+    );
+  }
+
   getLiquidationPriceEthUSD() {
-    return this.getCdpId().then(id => this._cdpService.getLiquidationPriceEthUSD(id));
+    return this.getCdpId().then(id =>
+      this._cdpService.getLiquidationPriceEthUSD(id)
+    );
   }
 
   isSafe() {
@@ -78,6 +88,14 @@ export default class Cdp {
 
   lockEth(eth) {
     return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
+  }
+
+  lockWeth(weth) {
+    return this.getCdpId().then(id => this._cdpService.lockWeth(id, weth));
+  }
+
+  lockPeth(eth) {
+    return this.getCdpId().then(id => this._cdpService.lockPeth(id, eth));
   }
 
   drawDai(amount) {
