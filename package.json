@@ -30,14 +30,14 @@
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
     "build:backend": "./scripts/build-backend.sh",
-    "coverage": "jest --coverage --config=conf/jest.config.js --runInBand",
+    "coverage": "jest --coverage --runInBand",
     "lint": "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'",
     "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "find ./src/**/*.js | xargs prettier --write --single-quote es5",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
-    "test": "./with-deployed-system --ci jest --config=conf/jest.config.js --runInBand",
-    "test:watch": "./with-deployed-system jest --config=conf/jest.config.js --watch --runInBand",
+    "test": "./with-deployed-system --ci jest --runInBand",
+    "test:watch": "./with-deployed-system jest --watch --runInBand",
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
     "test:net": "./with-deployed-system"
   },
@@ -102,8 +102,13 @@
       "text-summary"
     ],
     "collectCoverageFrom": [
-      "src/**/*.js",
-      "src-old/**/*.js"
-    ]
+      "src/**/*.js"
+    ],
+    "globalSetup": "<rootDir>/test/setup-global.js",
+    "roots": [
+      "src",
+      "test"
+    ],
+    "setupTestFrameworkScriptFile": "<rootDir>/test/setup-test.js"
   }
 }
