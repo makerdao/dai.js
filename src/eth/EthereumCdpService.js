@@ -166,14 +166,6 @@ export default class EthereumCdpService extends PrivateService {
       .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).minus(1).toNumber());
   }
 
-  isInt(n){
-    return Number(n) === n && n % 1 === 0;
-  }
-
-  isFloat(n){
-    return Number(n) === n && n % 1 !== 0;
-  }
-
   getTargetPrice(){
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `par()`
@@ -186,14 +178,16 @@ export default class EthereumCdpService extends PrivateService {
   _getLiquidationPriceForPeth(cdpId){
     return Promise.all([
       this.getCdpDebt(cdpId),
+      this.getTargetPrice(),
       this.getLiquidationRatio(),
       this.getCdpCollateralInPeth(cdpId)
     ])
     .then(vals=>{
       const debt = vals[0];
-      const liqRatio = vals[1];
-      const collateral = vals[2];
-      const price = debt * liqRatio / collateral;
+      const targetPrice = vals[1]
+      const liqRatio = vals[2];
+      const collateral = vals[3];
+      const price = debt * targetPrice * liqRatio / collateral;
       return price;
     });
   }
