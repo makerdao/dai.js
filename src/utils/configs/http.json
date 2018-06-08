@@ -1,17 +1,10 @@
 {
-  "global": {
-    "enableProxies": false
-  },
-
   "services": {
-
     "web3": [
       "Web3Service",
       {
-        "usePresetProvider": true,
         "provider": {
-          "type": "INFURA",
-          "network": "kovan"
+          "type": "HTTP"
         }
       }
     ],
@@ -24,7 +17,6 @@
     "gasEstimator": "GasEstimatorService",
     "transactionManager": "TransactionManager",
     "priceFeed": "PriceFeedService",
-
     "timer": "TimerService",
     "log": "ConsoleLogger"
   }

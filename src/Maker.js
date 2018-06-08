@@ -1,8 +1,10 @@
 import DefaultServiceProvider from './utils/DefaultServiceProvider';
 import Cdp from './eth/Cdp';
+import ConfigFactory from './utils/ConfigFactory';
 
 export default class Maker {
-  constructor(config) {
+  constructor(preset, options = {}) {
+    const config = ConfigFactory.create(preset, options);
     this._container = new DefaultServiceProvider().buildContainer(
       config.services
     );

@@ -1,39 +1,42 @@
-import Maker from '../src/Maker';
-import ConfigFactory from '../src/utils/ConfigFactory';
-
+import Maker from '../src/index';
 
 function createMaker() {
-  const config = ConfigFactory.create('decentralized-oasis-without-proxies');
-  config.services['log'] = 'NullLogger'; // Suppress logging output
-  return new Maker(config);
+  return new Maker('test', { log: false });
 }
 
-test('openCdp should open a CDP', done => {
-  const maker = createMaker();
+test(
+  'openCdp should open a CDP',
+  done => {
+    const maker = createMaker();
 
-  maker.openCdp().then(cdp => cdp.getCdpId()).then(id => {
-      expect(typeof id).toBe('number');
-      expect(id).toBeGreaterThan(0);
-      done();
-    });
-}, 5000);
+    maker
+      .openCdp()
+      .then(cdp => cdp.getCdpId())
+      .then(id => {
+        expect(typeof id).toBe('number');
+        expect(id).toBeGreaterThan(0);
+        done();
+      });
+  },
+  5000
+);
 
 test('should create a new CDP object for existing CDPs', done => {
   const maker = createMaker();
   let createdCdp;
 
-  maker.openCdp()
-    .then(cdp => {
-      createdCdp = cdp;
-      cdp.getCdpId()
-      .then(id => {
-        maker.getCdp(id).then(newCdpObject => {
-          expect(createdCdp.getCdpId()).toEqual(newCdpObject.getCdpId());
-          expect(createdCdp._cdpService).toEqual(newCdpObject._cdpService);
-          expect(createdCdp._smartContractService).toEqual(newCdpObject._smartContractService);
-          done();
-        });
+  maker.openCdp().then(cdp => {
+    createdCdp = cdp;
+    cdp.getCdpId().then(id => {
+      maker.getCdp(id).then(newCdpObject => {
+        expect(createdCdp.getCdpId()).toEqual(newCdpObject.getCdpId());
+        expect(createdCdp._cdpService).toEqual(newCdpObject._cdpService);
+        expect(createdCdp._smartContractService).toEqual(
+          newCdpObject._smartContractService
+        );
+        done();
       });
+    });
   });
 });
 
@@ -41,7 +44,8 @@ test('should validate the provided CDP ID', done => {
   const maker = createMaker();
   let cdpId;
 
-  maker.openCdp()
+  maker
+    .openCdp()
     .then(cdp => cdp.getCdpId())
     .then(id => {
       cdpId = id;

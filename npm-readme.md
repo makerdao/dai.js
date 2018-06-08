@@ -27,7 +27,7 @@ Maker's entire suite of contracts will eventually be accessible through this lib
 
 ## How to Install
 
-Use NPM to install the library: 
+Use NPM to install the library:
 ```
 npm install @makerdao/makerdao-exchange-integration
 ```
@@ -36,7 +36,7 @@ You can then include it using either the CommonJS or the UMD standard.
 
 CommonJS:
 ```
-import { ConfigFactory, Maker } from '@makerdao/makerdao-exchange-integration';
+import Maker from '@makerdao/makerdao-exchange-integration';
 ```
 
 UMD:
@@ -53,20 +53,12 @@ For full documentation, please reference https://makerdao.com/documentation/
 
 Example:
 ```
-import { Maker, ConfigFactory } from '@makerdao/makerdao-exchange-integration';
-
-
-const config = ConfigFactory.create('decentralized-oasis-without-proxies');
-const maker = new Maker(config);
-
-
+import Maker from '@makerdao/makerdao-exchange-integration';
+const maker = new Maker('test');
 const cdp = await maker.openCdp();
 const info = await cdp.getInfo();
-
-
 console.log(info);
 ```
-
 
 ## License
 
