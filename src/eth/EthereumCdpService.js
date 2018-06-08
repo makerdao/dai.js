@@ -106,21 +106,30 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  lockEth(cdpId, eth) {
-    const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(eth, 18);
+  async lockEth(cdpId, eth) {
+    await this._conversionService().convertEthToWeth(eth);
+    return this.lockWeth(cdpId, eth);
+  }
 
-    return Promise.all([
-      this._conversionService().convertEthToPeth(eth),
-      this.get('allowance').requireAllowance(
-        tokens.PETH,
-        this._tubContract().getAddress()
-      )
-    ]).then(() => {
-      return this._transactionManager().createTransactionHybrid(
-        this._tubContract().lock(hexCdpId, parsedAmount)
-      );
-    });
+  async lockWeth(cdpId, weth) {
+    const wethperPeth = await this.getWethToPethRatio();
+    const peth = new BigNumber(weth).div(wethperPeth).toString();
+
+    await this._conversionService().convertWethToPeth(weth);
+    return this.lockPeth(cdpId, peth);
+  }
+
+  async lockPeth(cdpId, peth) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = utils.parseUnits(peth, 18);
+
+    await this.get('allowance').requireAllowance(
+      tokens.PETH,
+      this._tubContract().getAddress()
+    );
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().lock(hexCdpId, parsedAmount)
+    );
   }
 
   freePeth(cdpId, amount) {
@@ -154,6 +163,15 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
+  async getCollateralizationRatio(cdpId) {
+    const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
+      this.getCdpDebt(cdpId),
+      this.getPethPriceInUSD(),
+      this.getCdpCollateralInPeth(cdpId)
+    ]);
+    return pethCollateral * pethPrice / daiDebt;
+  }
+
   getLiquidationRatio() {
     return this._tubContract()
       .mat()
@@ -163,10 +181,15 @@ export default class EthereumCdpService extends PrivateService {
   getLiquidationPenalty() {
     return this._tubContract()
       .axe()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).minus(1).toNumber());
+      .then(bn =>
+        new BigNumber(bn.toString())
+          .dividedBy(RAY)
+          .minus(1)
+          .toNumber()
+      );
   }
 
-  getTargetPrice(){
+  getTargetPrice() {
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `par()`
     const vox = this._smartContract().getWeb3ContractByName(contracts.SAI_VOX);
@@ -175,14 +198,13 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
-  _getLiquidationPricePethUSD(cdpId){
+  _getLiquidationPricePethUSD(cdpId) {
     return Promise.all([
       this.getCdpDebt(cdpId),
       this.getTargetPrice(),
       this.getLiquidationRatio(),
       this.getCdpCollateralInPeth(cdpId)
-    ])
-    .then(vals=>{
+    ]).then(vals => {
       const debt = vals[0];
       const targetPrice = vals[1];
       const liqRatio = vals[2];
@@ -192,22 +214,20 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  getLiquidationPriceEthUSD(cdpId){
+  getLiquidationPriceEthUSD(cdpId) {
     return Promise.all([
       this._getLiquidationPricePethUSD(cdpId),
       this.getWethToPethRatio()
-    ])
-    .then(vals=>{
+    ]).then(vals => {
       return vals[0] / vals[1];
     });
   }
 
-  isCdpSafe(cdpId){
+  isCdpSafe(cdpId) {
     return Promise.all([
       this.getLiquidationPriceEthUSD(cdpId),
       this.get('priceFeed').getEthPrice()
-    ])
-    .then(vals=>{
+    ]).then(vals => {
       const liqPrice = vals[0];
       const ethPrice = vals[1];
       return parseFloat(ethPrice) >= liqPrice;
@@ -256,11 +276,13 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   getPethPriceInUSD() {
-    const token = this.get('token').getToken(tokens.PETH);
-
     return this._tubContract()
       .tag()
-      .then(value => parseFloat(token.toUserFormat(value)));
+      .then(value =>
+        BigNumber(value)
+          .dividedBy(RAY)
+          .toNumber()
+      );
   }
 
   give(cdpId, newAddress) {
