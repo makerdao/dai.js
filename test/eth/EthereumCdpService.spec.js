@@ -369,7 +369,7 @@ test('can read the weth to peth ratio', async () => {
 });
 
 test('can read the liquidation price in eth for a cdp', async () => {
-  const id = await openCdp();
+  await openCdp();
   await cdp.lockEth('0.1');
   await cdp.drawDai('5');
   const price = await cdp.getLiquidationPriceEthUSD();
@@ -383,7 +383,7 @@ test('can read the target price', async () => {
 });
 
 test('can check if cdp is safe', async () => {
-  const id = await openCdp();
+  await openCdp();
   await cdp.lockEth('0.1');
   await cdp.drawDai('5');
   const safe = await cdp.isSafe();
