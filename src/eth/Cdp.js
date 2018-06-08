@@ -68,8 +68,26 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
   }
 
+  getCollateralizationRatio() {
+    return this.getCdpId().then(id =>
+      this._cdpService.getCollateralizationRatio(id)
+    );
+  }
+
+  getLiquidationPrice() {
+    return this.getCdpId().then(id => this._cdpService.getLiquidationPrice(id));
+  }
+
   lockEth(eth) {
     return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
+  }
+
+  lockWeth(weth) {
+    return this.getCdpId().then(id => this._cdpService.lockWeth(id, weth));
+  }
+
+  lockPeth(peth) {
+    return this.getCdpId().then(id => this._cdpService.lockPeth(id, peth));
   }
 
   drawDai(amount) {

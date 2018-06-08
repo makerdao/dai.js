@@ -160,6 +160,70 @@ test(
 );
 
 test(
+  'should be able to lock weth in a cdp',
+  async () => {
+    const id = await openCdp();
+    const tokenService = createdCdpService.get('token');
+    const wethToken = tokenService.getToken(tokens.WETH);
+    const pethToken = tokenService.getToken(tokens.PETH);
+    const defaultAccount = createdCdpService
+      .get('token')
+      .get('web3')
+      .defaultAccount();
+
+    await wethToken.deposit('0.1');
+    const balancePre = await wethToken.balanceOf(defaultAccount);
+    const cdpInfoPre = await createdCdpService.getCdpInfo(id);
+    await createdCdpService.lockWeth(id, '0.1');
+    const cdpInfoPost = await createdCdpService.getCdpInfo(id);
+    const balancePost = await wethToken.balanceOf(defaultAccount);
+
+    expect(cdpInfoPre.ink.toString()).toEqual('0');
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+
+    await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+    await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+  },
+  5000
+);
+
+test(
+  'should be able to lock peth in a cdp',
+  async () => {
+    const id = await openCdp();
+    const tokenService = createdCdpService.get('token');
+    const wethToken = tokenService.getToken(tokens.WETH);
+    const pethToken = tokenService.getToken(tokens.PETH);
+    const defaultAccount = createdCdpService
+      .get('token')
+      .get('web3')
+      .defaultAccount();
+
+    await wethToken.deposit('0.1');
+    await wethToken.approve(
+      createdCdpService._tubContract().getAddress(),
+      '0.1'
+    );
+    await pethToken.join('0.1');
+
+    const balancePre = await pethToken.balanceOf(defaultAccount);
+    const cdpInfoPre = await createdCdpService.getCdpInfo(id);
+    await createdCdpService.lockPeth(id, '0.1');
+    const cdpInfoPost = await createdCdpService.getCdpInfo(id);
+    const balancePost = await pethToken.balanceOf(defaultAccount);
+
+    expect(cdpInfoPre.ink.toString()).toEqual('0');
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+
+    await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+    await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+  },
+  5000
+);
+
+test(
   'should be able to free peth from a cdp',
   done => {
     let newCdp;
@@ -348,4 +412,25 @@ test('can read the liquidation ratio', async () => {
   await createdCdpService.manager().authenticate();
   const liquidationRatio = await createdCdpService.getLiquidationRatio();
   expect(liquidationRatio.toString()).toEqual('1.5');
+});
+
+test('can calculate the collateralization ratio', async () => {
+  await createdCdpService.manager().authenticate();
+  await createdCdpService.get('priceFeed').setEthPrice('500');
+  await lockEth('0.1');
+  await cdp.drawDai('20');
+  const ethPerPeth = await createdCdpService
+    .get('conversionService')
+    .getEthPerPeth();
+  const collateralizationRatio = await cdp.getCollateralizationRatio();
+  await createdCdpService.get('priceFeed').setEthPrice('400');
+  expect(collateralizationRatio).toBeCloseTo(2.5 * ethPerPeth);
+});
+
+test('can calculate the liquidation price', async () => {
+  await createdCdpService.manager().authenticate();
+  await lockEth('0.1');
+  await cdp.drawDai('20');
+  const liquidationPrice = await cdp.getLiquidationPrice();
+  expect(liquidationPrice.toString()).toEqual('300');
 });

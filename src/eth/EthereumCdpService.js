@@ -106,21 +106,30 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  lockEth(cdpId, eth) {
-    const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(eth, 18);
+  async lockEth(cdpId, eth) {
+    await this._conversionService().convertEthToWeth(eth);
+    return this.lockWeth(cdpId, eth);
+  }
 
-    return Promise.all([
-      this._conversionService().convertEthToPeth(eth),
-      this.get('allowance').requireAllowance(
-        tokens.PETH,
-        this._tubContract().getAddress()
-      )
-    ]).then(() => {
-      return this._transactionManager().createTransactionHybrid(
-        this._tubContract().lock(hexCdpId, parsedAmount)
-      );
-    });
+  async lockWeth(cdpId, weth) {
+    const ethperPeth = await this._conversionService().getEthPerPeth();
+    const peth = new BigNumber(weth).div(ethperPeth).toString();
+
+    await this._conversionService().convertWethToPeth(weth);
+    return this.lockPeth(cdpId, peth);
+  }
+
+  async lockPeth(cdpId, peth) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = utils.parseUnits(peth, 18);
+
+    await this.get('allowance').requireAllowance(
+      tokens.PETH,
+      this._tubContract().getAddress()
+    );
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().lock(hexCdpId, parsedAmount)
+    );
   }
 
   freePeth(cdpId, amount) {
@@ -137,11 +146,19 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().cups(hexCdpId);
   }
 
+  // get amount of cdp's peth collateral
   getCdpCollateral(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     return this._tubContract()
       .ink(hexCdpId)
       .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+  }
+
+  // get amount of eth redeemable for a cdp's peth collateral
+  async getCdpCollateralEth(cdpId) {
+    const ethPerPeth = await this._conversionService().getEthPerPeth();
+    const pethCollateral = await this.getCdpCollateral(cdpId);
+    return new BigNumber(pethCollateral).times(ethPerPeth).toNumber();
   }
 
   getCdpDebt(cdpId) {
@@ -154,10 +171,24 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
+  async getCollateralizationRatio(cdpId) {
+    const ethCollateral = await this.getCdpCollateralEth(cdpId);
+    const daiDebt = await this.getCdpDebt(cdpId);
+    const ethPrice = await this.get('priceFeed').getEthPrice();
+    return ethCollateral * ethPrice / daiDebt;
+  }
+
   getLiquidationRatio() {
     return this._tubContract()
       .mat()
       .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  }
+
+  async getLiquidationPrice(cdpId) {
+    const ethCollateral = await this.getCdpCollateralEth(cdpId);
+    const ratio = await this.getLiquidationRatio();
+    const daiDebt = await this.getCdpDebt(cdpId);
+    return ratio * daiDebt / ethCollateral;
   }
 
   drawDai(cdpId, amount) {

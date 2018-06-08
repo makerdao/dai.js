@@ -4,15 +4,32 @@ import SmartContractService from './SmartContractService';
 import AllowanceService from './AllowanceService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
+import BigNumber from 'bignumber.js';
+import { RAY } from '../utils/constants';
+
+BigNumber.config({ DECIMAL_PLACES: 5 });
 
 export default class TokenConversionService extends PrivateService {
-  static buildTestService(smartContract = null, token = null, maxAllowance = true, suppressOutput = true) {
+  static buildTestService(
+    smartContract = null,
+    token = null,
+    maxAllowance = true,
+    suppressOutput = true
+  ) {
     const service = new TokenConversionService();
     const smartContractService =
-      smartContract || SmartContractService.buildTestService(null, suppressOutput);
+      smartContract ||
+      SmartContractService.buildTestService(null, suppressOutput);
     const tokenService =
-      token || EthereumTokenService.buildTestService(smartContract, null, suppressOutput);
-    const allowanceService = maxAllowance ? AllowanceService.buildTestServiceMaxAllowance() : AllowanceService.buildTestServiceMinAllowance();
+      token ||
+      EthereumTokenService.buildTestService(
+        smartContract,
+        null,
+        suppressOutput
+      );
+    const allowanceService = maxAllowance
+      ? AllowanceService.buildTestServiceMaxAllowance()
+      : AllowanceService.buildTestServiceMinAllowance();
 
     service
       .manager()
@@ -34,6 +51,16 @@ export default class TokenConversionService extends PrivateService {
     return this.get('token').getToken(token);
   }
 
+  _tubContract() {
+    return this.get('smartContract').getContractByName(contracts.SAI_TUB);
+  }
+
+  getEthPerPeth() {
+    return this._tubContract()
+      .per()
+      .then(per => new BigNumber(per).div(RAY).toNumber());
+  }
+
   convertEthToWeth(eth) {
     const wethToken = this._getToken(tokens.WETH);
 
@@ -43,8 +70,14 @@ export default class TokenConversionService extends PrivateService {
   convertWethToPeth(weth) {
     const pethToken = this._getToken(tokens.PETH);
 
-    return this.get('allowance').requireAllowance(tokens.WETH, this.get('smartContract').getContractByName(contracts.SAI_TUB).getAddress())
-    .then(() => pethToken.join(weth));
+    return this.get('allowance')
+      .requireAllowance(
+        tokens.WETH,
+        this.get('smartContract')
+          .getContractByName(contracts.SAI_TUB)
+          .getAddress()
+      )
+      .then(() => pethToken.join(weth));
   }
 
   convertEthToPeth(value) {
