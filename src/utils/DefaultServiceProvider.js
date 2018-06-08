@@ -92,6 +92,7 @@ export default class DefaultServiceProvider {
           settings = {};
           break;
         case 'object':
+          // TODO could also handle a service instance here
           if (serviceSettings instanceof Array) {
             className = serviceSettings[0];
             settings = serviceSettings[1];
@@ -126,6 +127,7 @@ export default class DefaultServiceProvider {
 
     this._registerDependencies(container);
     container.injectDependencies();
+    this._container = container;
     return container;
   }
 
@@ -146,11 +148,17 @@ export default class DefaultServiceProvider {
     // register any remaining ones
     for (let name of newDeps) {
       const className = _defaultServices[name];
-      const service = new _services[className]();
-      container.register(service, name);
+      const ctor = _services[className];
+      if (!ctor) throw new Error(`No service found for "${name}"`);
+      container.register(new ctor(), name);
     }
 
     // repeat, to find any dependencies for services that were just added
     this._registerDependencies(container);
+  }
+
+  service(name) {
+    if (!this._container) this.buildContainer();
+    return this._container.service(name);
   }
 }
