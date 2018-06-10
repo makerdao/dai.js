@@ -243,6 +243,27 @@ export default class EthereumCdpService extends PrivateService {
       .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
+  async systemCollateralization() {
+    const dai = this.get('token').getToken(tokens.DAI);
+    const [_wethBalance, wethPrice, daiSupply, targetPrice] = await Promise.all(
+      [
+        this._tubContract().pie(),
+        this.get('priceFeed').getEthPrice(),
+        dai.totalSupply(),
+        this.getTargetPrice()
+      ]
+    );
+
+    const totalCollateralValue = new BigNumber(_wethBalance)
+      .div(WAD)
+      .times(wethPrice);
+    const systemDaiDebt = new BigNumber(daiSupply).times(targetPrice);
+    return new BigNumber(totalCollateralValue)
+      .div(systemDaiDebt)
+      .round(6)
+      .toNumber();
+  }
+
   getWethToPethRatio() {
     return this._tubContract()
       .per()

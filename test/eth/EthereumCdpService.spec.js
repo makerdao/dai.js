@@ -454,7 +454,7 @@ test('can check if cdp is safe', async () => {
   expect(safe).toBe(true);
 });
 
-test('can calculate the collateralization ratio', async () => {
+test('can calculate the collateralization ratio of a specific CDP', async () => {
   await createdCdpService.manager().authenticate();
   await createdCdpService.get('priceFeed').setEthPrice('500');
   await lockEth('0.1');
@@ -463,4 +463,17 @@ test('can calculate the collateralization ratio', async () => {
   const collateralizationRatio = await cdp.getCollateralizationRatio();
   await createdCdpService.get('priceFeed').setEthPrice('400');
   expect(collateralizationRatio).toBeCloseTo(2.5 * ethPerPeth);
+});
+
+test('can calculate system collateralization', async () => {
+  await createdCdpService.manager().authenticate();
+  const collateralizatoinA = await createdCdpService.systemCollateralization();
+  await lockEth('0.1');
+
+  const collateralizatoinB = await createdCdpService.systemCollateralization();
+  expect(collateralizatoinB).toBeGreaterThan(collateralizatoinA);
+  await cdp.drawDai('10');
+
+  const collateralizatoinC = await createdCdpService.systemCollateralization();
+  expect(collateralizatoinB).toBeGreaterThan(collateralizatoinC);
 });
