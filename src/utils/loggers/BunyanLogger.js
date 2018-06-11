@@ -8,13 +8,28 @@ import bunyan from 'bunyan';
  */
 function _guid() {
   function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
   }
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  return (
+    s4() +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    s4() +
+    s4()
+  );
 }
 
 function _appendState(service) {
-  return (args) => {
+  return args => {
     if (typeof args[0] === 'object') {
       args[0].state = service.manager().state();
     } else {
@@ -35,7 +50,7 @@ export default class BunyanLogger extends PrivateService {
     this._logger = bunyan.createLogger({
       name: 'makerdao',
       level: 'debug',
-      serializers: {err: bunyan.stdSerializers.err},
+      serializers: { err: bunyan.stdSerializers.err },
       client: _guid()
     });
   }
@@ -45,8 +60,7 @@ export default class BunyanLogger extends PrivateService {
       throw new Error('Invalid service object');
     }
 
-    const
-      log = this._logger.child({ svc: name || service.manager().name() }),
+    const log = this._logger.child({ svc: name || service.manager().name() }),
       append = _appendState(service),
       wrapper = {
         trace: (...args) => log.trace.apply(log, append(args)),
@@ -88,11 +102,7 @@ export default class BunyanLogger extends PrivateService {
     this._logger.fatal.apply(this._logger, args);
   }
 
-  connect() {
+  connect() {}
 
-  }
-
-  authenticate() {
-
-  }
+  authenticate() {}
 }

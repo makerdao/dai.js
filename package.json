@@ -31,10 +31,10 @@
     "build:frontend": "webpack --env=prod --progress --profile --colors",
     "build:backend": "./scripts/build-backend.sh",
     "coverage": "jest --coverage --runInBand",
-    "lint": "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'",
+    "lint": "eslint web src test",
     "precommit": "lint-staged",
     "prepush": "npm run test",
-    "prettier": "find ./src/**/*.js | xargs prettier --write --single-quote es5",
+    "prettier": "prettier --write --single-quote '{src,test}/**/*.js'",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
     "test": "./with-deployed-system --ci jest --runInBand",
     "test:watch": "./with-deployed-system jest --watch --runInBand",
@@ -43,9 +43,9 @@
   },
   "lint-staged": {
     "./{src,web,test}/**/*.js": [
-      "prettier --single-quote es5 --write",
+      "prettier --single-quote --write",
       "git add",
-      "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'"
+      "eslint web src test"
     ]
   },
   "devDependencies": {

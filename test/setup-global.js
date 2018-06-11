@@ -4,5 +4,5 @@ module.exports = function() {
     console.error('Unhandled rejection is:', err);
   });
 
-  console.log("\nInstalled unhandledRejection logger.");
+  console.log('\nInstalled unhandledRejection logger.');
 };

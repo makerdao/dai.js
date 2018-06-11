@@ -6,7 +6,9 @@ import ServiceState from '../../src/core/ServiceState';
 const serviceName = 'MyService';
 
 test('constructor() should reject invalid type names', () => {
-  expect(() => new ServiceBase('INVALID_TYPE', serviceName)).toThrow('Invalid ServiceType: INVALID_TYPE');
+  expect(() => new ServiceBase('INVALID_TYPE', serviceName)).toThrow(
+    'Invalid ServiceType: INVALID_TYPE'
+  );
 });
 
 test('constructor() should define the right lifecycle methods', () => {
@@ -43,24 +45,32 @@ test('get() should return injected services', () => {
   expect(svc.get('dep')).toBe(dep);
 });
 
-test('initialize(), connect(), authenticate() should throw when called directly instead of by the manager', (done) => {
+test('initialize(), connect(), authenticate() should throw when called directly instead of by the manager', done => {
   const svc = new ServiceBase(ServiceType.PRIVATE, 'svc');
 
-  expect(() => svc.initialize())
-    .toThrow('Expected state INITIALIZING, but got CREATED. Did you mean to call service.manager().initialize() instead of service.initialize()?');
+  expect(() => svc.initialize()).toThrow(
+    'Expected state INITIALIZING, but got CREATED. Did you mean to call service.manager().initialize() instead of service.initialize()?'
+  );
 
-  svc.manager().initialize().then(() => {
-    expect(() => svc.connect())
-      .toThrow('Expected state CONNECTING, but got OFFLINE. Did you mean to call service.manager().connect() instead of service.connect()?');
+  svc
+    .manager()
+    .initialize()
+    .then(() => {
+      expect(() => svc.connect()).toThrow(
+        'Expected state CONNECTING, but got OFFLINE. Did you mean to call service.manager().connect() instead of service.connect()?'
+      );
 
-    svc.manager().connect().then(() => {
-      expect(() => svc.authenticate())
-        .toThrow('Expected state AUTHENTICATING, but got ONLINE. Did you mean to call service.manager().authenticate() instead of service.authenticate()?');
+      svc
+        .manager()
+        .connect()
+        .then(() => {
+          expect(() => svc.authenticate()).toThrow(
+            'Expected state AUTHENTICATING, but got ONLINE. Did you mean to call service.manager().authenticate() instead of service.authenticate()?'
+          );
 
-      done();
+          done();
+        });
     });
-  });
-
 });
 
 test('manager() should return the service manager', () => {
@@ -78,8 +88,14 @@ test('manager() should return the service manager', () => {
 test('manager() should have the right service type, name, and dependencies', () => {
   const s = {
     LOCAL: new ServiceBase(ServiceType.LOCAL, 'LocalService', ['L1', 'L2']),
-    PUBLIC: new ServiceBase(ServiceType.PUBLIC, 'PublicService', ['PUB1', 'PUB2']),
-    PRIVATE: new ServiceBase(ServiceType.PRIVATE, 'PrivateService', ['PRV1', 'PRV2'])
+    PUBLIC: new ServiceBase(ServiceType.PUBLIC, 'PublicService', [
+      'PUB1',
+      'PUB2'
+    ]),
+    PRIVATE: new ServiceBase(ServiceType.PRIVATE, 'PrivateService', [
+      'PRV1',
+      'PRV2'
+    ])
   };
 
   expect(s.LOCAL.manager().type()).toBe(ServiceType.LOCAL);
@@ -95,7 +111,7 @@ test('manager() should have the right service type, name, and dependencies', () 
   expect(s.PRIVATE.manager().dependencies()).toEqual(['PRV1', 'PRV2']);
 });
 
-test('manager().initialize() should call the initialize() method of the service and its dependencies', (done) => {
+test('manager().initialize() should call the initialize() method of the service and its dependencies', done => {
   let checkpoint = 0;
   const dep = new ServiceBase(ServiceType.LOCAL, 'dep'),
     svc = new ServiceBase(ServiceType.LOCAL, 'svc', ['dep']);
@@ -103,7 +119,8 @@ test('manager().initialize() should call the initialize() method of the service 
   dep.initialize = () => checkpoint++;
   svc.initialize = () => checkpoint++;
 
-  svc.manager()
+  svc
+    .manager()
     .inject('dep', dep)
     .initialize()
     .then(() => {
@@ -112,10 +129,9 @@ test('manager().initialize() should call the initialize() method of the service 
       expect(checkpoint).toBe(2);
       done();
     });
-
 });
 
-test('manager().connect() should call the connect() method of the service and its dependencies', (done) => {
+test('manager().connect() should call the connect() method of the service and its dependencies', done => {
   let checkpoint = 0;
   const dep = new ServiceBase(ServiceType.PUBLIC, 'dep'),
     svc = new ServiceBase(ServiceType.PUBLIC, 'svc', ['dep']);
@@ -125,7 +141,8 @@ test('manager().connect() should call the connect() method of the service and it
   dep.connect = () => checkpoint++;
   svc.connect = () => checkpoint++;
 
-  svc.manager()
+  svc
+    .manager()
     .inject('dep', dep)
     .connect()
     .then(() => {
@@ -136,7 +153,7 @@ test('manager().connect() should call the connect() method of the service and it
     });
 });
 
-test('manager().authenticate() should call the authenticate() method of the service and its dependencies', (done) => {
+test('manager().authenticate() should call the authenticate() method of the service and its dependencies', done => {
   let checkpoint = 0;
   const dep = new ServiceBase(ServiceType.PRIVATE, 'dep'),
     svc = new ServiceBase(ServiceType.PRIVATE, 'svc', ['dep']);
@@ -148,7 +165,8 @@ test('manager().authenticate() should call the authenticate() method of the serv
   dep.authenticate = () => checkpoint++;
   svc.authenticate = () => checkpoint++;
 
-  svc.manager()
+  svc
+    .manager()
     .inject('dep', dep)
     .authenticate()
     .then(() => {
@@ -159,7 +177,7 @@ test('manager().authenticate() should call the authenticate() method of the serv
     });
 });
 
-test('disconnecting a dependency should disconnect the dependency and all its depending services', (done) => {
+test('disconnecting a dependency should disconnect the dependency and all its depending services', done => {
   const dep = new ServiceBase(ServiceType.PUBLIC, 'dep'),
     svc = new ServiceBase(ServiceType.PUBLIC, 'svc', ['dep']),
     svc2 = new ServiceBase(ServiceType.PUBLIC, 'svc2', ['dep']);
@@ -167,11 +185,7 @@ test('disconnecting a dependency should disconnect the dependency and all its de
   svc.manager().inject('dep', dep);
   svc2.manager().inject('dep', dep);
 
-  Promise.all([
-    svc.manager().connect(),
-    svc2.manager().connect()
-
-  ]).then(() => {
+  Promise.all([svc.manager().connect(), svc2.manager().connect()]).then(() => {
     expect(dep.manager().state()).toBe(ServiceState.READY);
     expect(svc.manager().state()).toBe(ServiceState.READY);
     expect(svc2.manager().state()).toBe(ServiceState.READY);
@@ -186,18 +200,20 @@ test('disconnecting a dependency should disconnect the dependency and all its de
     expect(svc2.manager().state()).toBe(ServiceState.OFFLINE);
 
     // Check that reconnecting one service will reconnect the dependency, but not the second depending service
-    svc.manager().connect().then(() => {
-      expect(dep.manager().state()).toBe(ServiceState.READY);
-      expect(svc.manager().state()).toBe(ServiceState.READY);
-      expect(svc2.manager().state()).toBe(ServiceState.OFFLINE);
+    svc
+      .manager()
+      .connect()
+      .then(() => {
+        expect(dep.manager().state()).toBe(ServiceState.READY);
+        expect(svc.manager().state()).toBe(ServiceState.READY);
+        expect(svc2.manager().state()).toBe(ServiceState.OFFLINE);
 
-      done();
-    });
+        done();
+      });
   });
-
 });
 
-test('deauthenticating a dependency should deauthenticate the dependency and all its depending services', (done) => {
+test('deauthenticating a dependency should deauthenticate the dependency and all its depending services', done => {
   const dep = new ServiceBase(ServiceType.PRIVATE, 'dep'),
     svc = new ServiceBase(ServiceType.PRIVATE, 'svc', ['dep']),
     svc2 = new ServiceBase(ServiceType.PRIVATE, 'svc2', ['dep']);
@@ -208,7 +224,6 @@ test('deauthenticating a dependency should deauthenticate the dependency and all
   Promise.all([
     svc.manager().authenticate(),
     svc2.manager().authenticate()
-
   ]).then(() => {
     expect(dep.manager().state()).toBe(ServiceState.READY);
     expect(svc.manager().state()).toBe(ServiceState.READY);
@@ -224,20 +239,22 @@ test('deauthenticating a dependency should deauthenticate the dependency and all
     expect(svc2.manager().state()).toBe(ServiceState.ONLINE);
 
     // Check that reconnecting one service will reconnect the dependency, but not the second depending service
-    svc.manager().authenticate().then(() => {
-      expect(dep.manager().state()).toBe(ServiceState.READY);
-      expect(svc.manager().state()).toBe(ServiceState.READY);
-      expect(svc2.manager().state()).toBe(ServiceState.ONLINE);
+    svc
+      .manager()
+      .authenticate()
+      .then(() => {
+        expect(dep.manager().state()).toBe(ServiceState.READY);
+        expect(svc.manager().state()).toBe(ServiceState.READY);
+        expect(svc2.manager().state()).toBe(ServiceState.ONLINE);
 
-      done();
-    });
+        done();
+      });
   });
 });
 /**
  *
  */
 class DummyService extends ServiceBase {
-
   /**
    * @param {string} name
    * @param {string[]} dependencies
@@ -250,11 +267,12 @@ class DummyService extends ServiceBase {
   }
 }
 
-test('settings defined on ServiceManager need to be passed to initialize() correctly', (done) => {
+test('settings defined on ServiceManager need to be passed to initialize() correctly', done => {
   const s = new DummyService('DummyService');
   s.manager()
-    .settings({ type : 1})
-    .initialize().then(() => {
+    .settings({ type: 1 })
+    .initialize()
+    .then(() => {
       expect(s._type).toBe(1);
       done();
     });

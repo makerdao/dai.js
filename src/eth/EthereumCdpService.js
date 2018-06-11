@@ -134,7 +134,7 @@ export default class EthereumCdpService extends PrivateService {
       this.getPethPriceInUSD(),
       this.getCdpCollateralInPeth(cdpId)
     ]);
-    return pethCollateral * pethPrice / daiDebt;
+    return (pethCollateral * pethPrice) / daiDebt;
   }
 
   getLiquidationRatio() {
@@ -174,7 +174,7 @@ export default class EthereumCdpService extends PrivateService {
       const targetPrice = vals[1];
       const liqRatio = vals[2];
       const collateral = vals[3];
-      const price = debt * targetPrice * liqRatio / collateral;
+      const price = (debt * targetPrice * liqRatio) / collateral;
       return price;
     });
   }
