@@ -143,9 +143,19 @@ export default class Web3Service extends PrivateService {
     return Promise.all([
       _web3Promise(_ => this._web3.version.getNode(_)),
       _web3Promise(_ => this._web3.version.getNetwork(_)),
-      _web3Promise(_ => this._web3.version.getEthereum(_)),
-      _web3Promise(_ => this._web3.version.getWhisper(_), null)
+      _web3Promise(_ => this._web3.version.getEthereum(_))
     ])
+      .then(versions => {
+        if (!versions[0].includes('MetaMask')) {
+          return _web3Promise(_ => this._web3.version.getWhisper(_), null)
+            .then(whisperVersion => versions.push(whisperVersion))
+            .then(() => {
+              return versions;
+            });
+        } else {
+          return versions;
+        }
+      })
       .then(
         versions => {
           this._info.version = {
