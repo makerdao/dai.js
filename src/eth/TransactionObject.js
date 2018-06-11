@@ -108,12 +108,15 @@ export default class TransactionObject extends TransactionLifeCycle {
           .then(result => (transactionPromise = result))
           .then(() => {
             if (transactionPromise === null) {
-              this._ethersProvider
+              return this._ethersProvider
                 .getTransaction(this._hash)
-                .then(result => (transactionPromise = result));
+                .then(result => (transactionPromise = result))
+                .then(() => {
+                  return transactionPromise;
+                });
+            } else {
+              return transactionPromise;
             }
-
-            return transactionPromise;
           });
       })
       .then(tx => {
