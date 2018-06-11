@@ -169,7 +169,7 @@ export default class EthereumCdpService extends PrivateService {
   async getCollateralizationRatio(cdpId) {
     const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
       this.getCdpDebt(cdpId),
-      this.getPethPriceInUSD(),
+      this.get('priceFeed').getPethPrice(),
       this.getCdpCollateralInPeth(cdpId)
     ]);
     return pethCollateral * pethPrice / daiDebt;
@@ -243,25 +243,25 @@ export default class EthereumCdpService extends PrivateService {
       .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
-  async systemCollateralization() {
+  async getSystemCollateralization() {
     const dai = this.get('token').getToken(tokens.DAI);
-    const [_wethBalance, wethPrice, daiSupply, targetPrice] = await Promise.all(
-      [
-        this._tubContract().pie(),
-        this.get('priceFeed').getEthPrice(),
-        dai.totalSupply(),
-        this.getTargetPrice()
-      ]
-    );
+    const [
+      _totalWethLocked,
+      wethPrice,
+      daiSupply,
+      targetPrice
+    ] = await Promise.all([
+      this._tubContract().pie(),
+      this.get('priceFeed').getEthPrice(),
+      dai.totalSupply(),
+      this.getTargetPrice()
+    ]);
 
-    const totalCollateralValue = new BigNumber(_wethBalance)
+    const totalCollateralValue = new BigNumber(_totalWethLocked)
       .div(WAD)
       .times(wethPrice);
     const systemDaiDebt = new BigNumber(daiSupply).times(targetPrice);
-    return new BigNumber(totalCollateralValue)
-      .div(systemDaiDebt)
-      .round(6)
-      .toNumber();
+    return new BigNumber(totalCollateralValue).div(systemDaiDebt).toNumber();
   }
 
   getWethToPethRatio() {
@@ -297,16 +297,6 @@ export default class EthereumCdpService extends PrivateService {
         this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
       );
     });
-  }
-
-  getPethPriceInUSD() {
-    return this._tubContract()
-      .tag()
-      .then(value =>
-        BigNumber(value)
-          .dividedBy(RAY)
-          .toNumber()
-      );
   }
 
   give(cdpId, newAddress) {

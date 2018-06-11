@@ -338,18 +338,6 @@ test('should be able to wipe dai', done => {
     });
 });
 
-test('should return the "abstracted collateral price"', done => {
-  createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => {
-      createdCdpService.getPethPriceInUSD().then(value => {
-        expect(typeof value).toBe('number');
-        done();
-      });
-    });
-});
-
 test('should be able to transfer ownership of a cdp', done => {
   const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
   let cdpId, firstOwner;
@@ -467,13 +455,13 @@ test('can calculate the collateralization ratio of a specific CDP', async () => 
 
 test('can calculate system collateralization', async () => {
   await createdCdpService.manager().authenticate();
-  const collateralizatoinA = await createdCdpService.systemCollateralization();
+  const collateralizatoinA = await createdCdpService.getSystemCollateralization();
   await lockEth('0.1');
 
-  const collateralizatoinB = await createdCdpService.systemCollateralization();
+  const collateralizatoinB = await createdCdpService.getSystemCollateralization();
   expect(collateralizatoinB).toBeGreaterThan(collateralizatoinA);
   await cdp.drawDai('10');
 
-  const collateralizatoinC = await createdCdpService.systemCollateralization();
+  const collateralizatoinC = await createdCdpService.getSystemCollateralization();
   expect(collateralizatoinB).toBeGreaterThan(collateralizatoinC);
 });

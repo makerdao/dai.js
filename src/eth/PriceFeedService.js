@@ -4,7 +4,9 @@ import SmartContractService from './SmartContractService';
 import TransactionManager from './TransactionManager';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
+import { RAY } from '../utils/constants';
 
+import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
 
@@ -64,6 +66,12 @@ export default class PriceFeedService extends PrivateService {
     return this._getContract(contracts.SAI_PIP)
       .read()
       .then(price => this._toUserFormat(price));
+  }
+
+  getPethPrice() {
+    return this._getContract(contracts.SAI_TUB)
+      .tag()
+      .then(value => new BigNumber(value).dividedBy(RAY).toNumber());
   }
 
   setEthPrice(newPrice) {
