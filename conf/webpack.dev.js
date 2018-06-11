@@ -13,8 +13,8 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = Merge(CommonConfig, {
   entry: {
-    app: './src/index.js',
-    web: './web/index.js'
+    app: ['babel-polyfill', './src/index.js'],
+    web: ['babel-polyfill', './web/index.js']
   },
   devtool: 'inline-source-map', // enhance debugging by adding meta info for the browser devtools
   module: {
