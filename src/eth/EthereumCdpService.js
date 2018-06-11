@@ -1,50 +1,12 @@
 import PrivateService from '../core/PrivateService';
-import SmartContractService from './SmartContractService';
-import EthereumTokenService from './EthereumTokenService';
-import TokenConversionService from './TokenConversionService';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
-import TransactionManager from './TransactionManager';
-import AllowanceService from './AllowanceService';
-import PriceFeedService from './PriceFeedService';
 import { utils } from 'ethers';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
 
 export default class EthereumCdpService extends PrivateService {
-  static buildTestService(suppressOutput = true) {
-    const service = new EthereumCdpService();
-    const smartContract = SmartContractService.buildTestService(
-      null,
-      suppressOutput
-    );
-    const transactionManager = TransactionManager.buildTestService(
-      smartContract.get('web3')
-    );
-    const tokenService = EthereumTokenService.buildTestService(
-      smartContract,
-      transactionManager
-    );
-    const conversionService = TokenConversionService.buildTestService(
-      smartContract,
-      tokenService
-    );
-    const allowanceService = AllowanceService.buildTestServiceMaxAllowance();
-    const priceFeed = PriceFeedService.buildTestService();
-
-    service
-      .manager()
-      .inject('smartContract', smartContract)
-      .inject('token', tokenService)
-      .inject('conversionService', conversionService)
-      .inject('transactionManager', transactionManager)
-      .inject('allowance', allowanceService)
-      .inject('priceFeed', priceFeed);
-
-    return service;
-  }
-
   /**
    * @param {string} name
    */

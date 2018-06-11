@@ -1,6 +1,10 @@
-import OasisExchangeService from '../../../src/exchanges/oasis/OasisExchangeService';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
+import { buildTestService } from '../../helpers/serviceBuilders';
+
+function buildTestOasisExchangeService() {
+  return buildTestService('exchange', { exchange: 'OasisExchangeService' });
+}
 
 const utils = require('ethers').utils;
 
@@ -127,7 +131,7 @@ function createDaiAndPlaceLimitOrder(oasisExchangeService, sellDai = false) {
 }
 
 test('sell Dai, console log the balances (used for debugging)', done => {
-  const oasisExchangeService = OasisExchangeService.buildTestService();
+  const oasisExchangeService = buildTestOasisExchangeService();
   let oasisOrder = null;
   /* eslint-disable-next-line */
   let initialBalance;
@@ -200,7 +204,7 @@ test('sell Dai, console log the balances (used for debugging)', done => {
 });
 
 test('get fees and fillAmount sell Dai', done => {
-  const oasisExchangeService = OasisExchangeService.buildTestService();
+  const oasisExchangeService = buildTestOasisExchangeService();
   oasisExchangeService
     .manager()
     .authenticate()
@@ -218,7 +222,7 @@ test('get fees and fillAmount sell Dai', done => {
 });
 
 test('get fees and fillAmount buy Dai', done => {
-  const oasisService = OasisExchangeService.buildTestService();
+  const oasisService = buildTestOasisExchangeService();
   oasisService
     .manager()
     .authenticate()
@@ -237,7 +241,7 @@ test('get fees and fillAmount buy Dai', done => {
 
 /* commenting out until we fix explicit state transations for oasisOrder objects
 test('OasisOrder properly finalizes', done => {
-  const oasisService = OasisExchangeService.buildTestService();
+  const oasisService = buildTestOasisExchangeService();
   let oasisOrder = null;
   let daiToken = null;
   let randomAddress = TestAccountProvider.nextAddress();

@@ -5,9 +5,9 @@ import ConfigFactory from './utils/ConfigFactory';
 export default class Maker {
   constructor(preset, options = {}) {
     const config = ConfigFactory.create(preset, options);
-    this._container = new DefaultServiceProvider().buildContainer(
+    this._container = new DefaultServiceProvider(
       config.services
-    );
+    ).buildContainer();
     this._authenticatedPromise = this._container.authenticate();
   }
 

@@ -1,10 +1,10 @@
-import EthereumCdpService from '../../src/eth/EthereumCdpService';
+import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 
 let createdCdpService, cdp;
 
 beforeEach(() => {
-  return (createdCdpService = EthereumCdpService.buildTestService());
+  return (createdCdpService = buildTestEthereumCdpService());
 });
 
 function openCdp() {

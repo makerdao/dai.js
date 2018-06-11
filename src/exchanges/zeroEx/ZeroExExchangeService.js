@@ -1,9 +1,4 @@
 import PrivateService from '../../core/PrivateService';
-import Web3Service from '../../eth/Web3Service';
-import SmartContractService from '../../eth/SmartContractService';
-import EthereumTokenService from '../../eth/EthereumTokenService';
-import GasEstimatorService from '../../eth/GasEstimatorService';
-import TimerService from '../../utils/TimerService';
 import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
 import HookedWalletSubprovider from 'web3-provider-engine/dist/es5/subproviders/hooked-wallet.js';
 import RPCSubprovider from 'web3-provider-engine/dist/es5/subproviders/rpc.js';
@@ -13,62 +8,10 @@ import tokens from '../../../contracts/tokens';
 //import contracts from '../../../contracts/contracts';
 
 export default class ZeroExExchangeService extends PrivateService {
-  static buildKovanService(relayerApiEndpoint) {
-    const service = new ZeroExExchangeService(),
-      web3 = Web3Service.buildInfuraService(
-        'kovan',
-        '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700'
-      ),
-      smartContractService = SmartContractService.buildTestService(web3),
-      ethereumTokenService = EthereumTokenService.buildTestService(
-        smartContractService
-      );
-
-    service
-      .manager()
-      .inject('timer', new TimerService())
-      .inject('log', smartContractService.get('log'))
-      .inject('web3', smartContractService.get('web3'))
-      .inject('smartContract', smartContractService)
-      .inject('ethereumToken', ethereumTokenService)
-      .inject(
-        'gasEstimator',
-        GasEstimatorService.buildTestService(smartContractService.get('web3'))
-      )
-      .settings({
-        relayerApi: relayerApiEndpoint
-      });
-
-    return service;
-  }
-
-  static buildTestService(privateKey = null) {
-    const service = new ZeroExExchangeService(),
-      web3 = Web3Service.buildTestService(privateKey),
-      smartContractService = SmartContractService.buildTestService(web3),
-      ethereumTokenService = EthereumTokenService.buildTestService(
-        smartContractService
-      );
-
-    service
-      .manager()
-      .inject('timer', new TimerService())
-      .inject('log', smartContractService.get('log'))
-      .inject('web3', smartContractService.get('web3'))
-      .inject('smartContract', smartContractService)
-      .inject('ethereumToken', ethereumTokenService)
-      .inject(
-        'gasEstimator',
-        GasEstimatorService.buildTestService(smartContractService.get('web3'))
-      );
-
-    return service;
-  }
-
   constructor(name = 'zeroExExchange') {
     super(name, [
       'smartContract',
-      'ethereumToken',
+      'token',
       'web3',
       'log',
       'gasEstimator',
