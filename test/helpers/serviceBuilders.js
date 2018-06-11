@@ -8,11 +8,15 @@ const defaultProviderConfig = {
   log: false
 };
 
-export function buildTestService(name, settings) {
+export function buildTestContainer(settings) {
   return new DefaultServiceProvider({
     ...defaultProviderConfig,
     ...settings
-  }).service(name);
+  });
+}
+
+export function buildTestService(name, settings) {
+  return buildTestContainer(settings).service(name);
 }
 
 export function buildTestEthereumCdpService() {

@@ -1,4 +1,4 @@
-import DefaultServiceProvider from '../../../src/utils/DefaultServiceProvider';
+import { buildTestService } from '../../helpers/serviceBuilders';
 import Web3ProviderType from '../../../src/eth/Web3ProviderType';
 // import Web3Service from '../../../src/eth/Web3Service';
 import tokens from '../../../contracts/tokens';
@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 function buildKovanService(relayerApi) {
-  return new DefaultServiceProvider({
+  return buildTestService('exchange', {
     exchange: ['ZeroExExchangeService', { relayerApi }],
     web3: {
       usePresetProvider: false,
@@ -27,7 +27,7 @@ function buildKovanService(relayerApi) {
       }
     },
     log: false
-  }).service('exchange');
+  });
 }
 
 test('should correctly initialize', done => {

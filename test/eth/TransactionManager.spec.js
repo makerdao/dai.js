@@ -1,14 +1,12 @@
-import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
+import { buildTestContainer } from '../helpers/serviceBuilders';
 import TransactionState from '../../src/eth/TransactionState';
 import tokens from '../../contracts/tokens';
 
 function buildTestServices() {
-  const container = new DefaultServiceProvider({
+  const container = buildTestContainer({
     smartContract: true,
-    transactionManager: true,
-    web3: { provider: { type: 'TEST' } },
-    log: false
-  }).buildContainer();
+    transactionManager: true
+  });
   const smartContract = container.service('smartContract');
   const transactionManager = container.service('transactionManager');
 

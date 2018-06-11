@@ -1,8 +1,7 @@
-/*eslint no-console: ['error', { 'allow': ['error'] }] */
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
-import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
 import Web3ProviderType from '../../src/eth/Web3ProviderType';
 import { captureConsole } from '../../src/utils';
+import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 
 function buildDisconnectingService(disconnectAfter = 25) {
   const service = buildTestService(null, disconnectAfter + 25);
@@ -58,19 +57,18 @@ function buildAccountChangingService(changeAccountAfter = 25) {
 }
 
 function buildTestService(privateKey, statusTimerDelay = 5000) {
-  return new DefaultServiceProvider({
+  return buildTestServiceCore('web3', {
     web3: {
       privateKey,
       statusTimerDelay,
       usePresetProvider: true,
       provider: { type: Web3ProviderType.TEST }
-    },
-    log: false
-  }).service('web3');
+    }
+  });
 }
 
 function buildInfuraService(network, privateKey = null) {
-  return new DefaultServiceProvider({
+  return buildTestServiceCore('web3', {
     web3: {
       privateKey,
       provider: {
@@ -78,9 +76,8 @@ function buildInfuraService(network, privateKey = null) {
         network,
         infuraApiKey: 'ihagQOzC3mkRXYuCivDN'
       }
-    },
-    log: false
-  }).service('web3');
+    }
+  });
 }
 
 test('should fetch version info on connect', done => {
