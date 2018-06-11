@@ -12,7 +12,9 @@ test('should have a valid logger interface', () => {
 });
 
 test('serviceLogger() should return a valid logger interface', () => {
-  const logger = new NullLogger().serviceLogger(new ServiceManager('MyService').createService());
+  const logger = new NullLogger().serviceLogger(
+    new ServiceManager('MyService').createService()
+  );
   expect(logger.trace({}, '')).toBeFalsy();
   expect(logger.debug({}, '')).toBeFalsy();
   expect(logger.info({}, '')).toBeFalsy();
@@ -22,8 +24,16 @@ test('serviceLogger() should return a valid logger interface', () => {
 });
 
 test('serviceLogger() should throw when given an invalid service object', () => {
-  expect(() => new NullLogger().serviceLogger()).toThrow('Invalid service object');
-  expect(() => new NullLogger().serviceLogger({})).toThrow('Invalid service object');
-  expect(() => new NullLogger().serviceLogger({ manager: null })).toThrow('Invalid service object');
-  expect(() => new NullLogger().serviceLogger({ manager: () => ({}) })).toThrow('Invalid service object');
+  expect(() => new NullLogger().serviceLogger()).toThrow(
+    'Invalid service object'
+  );
+  expect(() => new NullLogger().serviceLogger({})).toThrow(
+    'Invalid service object'
+  );
+  expect(() => new NullLogger().serviceLogger({ manager: null })).toThrow(
+    'Invalid service object'
+  );
+  expect(() => new NullLogger().serviceLogger({ manager: () => ({}) })).toThrow(
+    'Invalid service object'
+  );
 });

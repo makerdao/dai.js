@@ -34,7 +34,7 @@
     "lint": "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'",
     "precommit": "lint-staged",
     "prepush": "npm run test",
-    "prettier": "find ./src/**/*.js | xargs prettier --write --single-quote es5",
+    "prettier": "prettier --write --single-quote '{src,test}/**/*.js'",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
     "test": "./with-deployed-system --ci jest --runInBand",
     "test:watch": "./with-deployed-system jest --watch --runInBand",
