@@ -234,10 +234,15 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  getGovernanceFee() {
+  getAnnualGovernanceFee() {
     return this._tubContract()
       .fee()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+      .then(bn => {
+        const fee = new BigNumber(bn.toString()).dividedBy(RAY);
+        const secondsPerYear = 60*60*24*365;
+        BigNumber.config({ POW_PRECISION: 100 });
+        return fee.pow(secondsPerYear).minus(1).toNumber();
+      });
   }
 
   getWethToPethRatio() {
