@@ -24,11 +24,17 @@ function lockEth(amount) {
     .then(() => cdp.getInfo());
 }
 
-test('should open a CDP and get cdp ID', async () => {
-  const id = await openCdp();
-  expect(typeof id).toBe('number');
-  expect(id).toBeGreaterThan(0);
-});
+test(
+  'should open a CDP and get cdp ID',
+  done => {
+    openCdp().then(id => {
+      expect(typeof id).toBe('number');
+      expect(id).toBeGreaterThan(0);
+      done();
+    });
+  },
+  5000
+);
 
 test(
   'should check if a cdp for a specific id exists',
