@@ -30,14 +30,14 @@
   "scripts": {
     "build:frontend": "webpack --env=prod --progress --profile --colors",
     "build:backend": "./scripts/build-backend.sh",
-    "coverage": "jest --coverage --config=conf/jest.config.js --runInBand",
+    "coverage": "jest --coverage --runInBand",
     "lint": "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'",
     "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "find ./src/**/*.js | xargs prettier --write --single-quote es5",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
-    "test": "./with-deployed-system --ci jest --config=conf/jest.config.js --runInBand",
-    "test:watch": "./with-deployed-system jest --config=conf/jest.config.js --watch --runInBand",
+    "test": "./with-deployed-system --ci jest --runInBand",
+    "test:watch": "./with-deployed-system jest --watch --runInBand",
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
     "test:net": "./with-deployed-system"
   },
@@ -54,6 +54,9 @@
     "babel-eslint": "^7.2.3",
     "babel-jest": "^22.4.3",
     "babel-loader": "^7.1.4",
+    "babel-plugin-syntax-async-functions": "^6.13.0",
+    "babel-plugin-transform-regenerator": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
@@ -102,8 +105,13 @@
       "text-summary"
     ],
     "collectCoverageFrom": [
-      "src/**/*.js",
-      "src-old/**/*.js"
-    ]
+      "src/**/*.js"
+    ],
+    "globalSetup": "<rootDir>/test/setup-global.js",
+    "roots": [
+      "src",
+      "test"
+    ],
+    "setupTestFrameworkScriptFile": "<rootDir>/test/setup-test.js"
   }
 }
