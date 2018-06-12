@@ -1,7 +1,20 @@
 import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
 import Web3ProviderType from '../../src/eth/Web3ProviderType';
 
-const defaultProviderConfig = {
+export const kovanProviderConfig = {
+  web3: {
+    privateKey:
+      '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700',
+    provider: {
+      type: Web3ProviderType.INFURA,
+      network: 'kovan',
+      infuraApiKey: 'ihagQOzC3mkRXYuCivDN'
+    }
+  },
+  log: false
+};
+
+export const defaultProviderConfig = {
   web3: {
     provider: { type: Web3ProviderType.TEST }
   },
@@ -10,7 +23,8 @@ const defaultProviderConfig = {
 
 export function buildTestContainer(settings) {
   return new DefaultServiceProvider({
-    ...defaultProviderConfig,
+    ...kovanProviderConfig,
+    // ...defaultProviderConfig,
     ...settings
   });
 }
