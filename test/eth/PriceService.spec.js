@@ -1,7 +1,7 @@
-import PriceFeedService from '../../src/eth/PriceFeedService';
+import PriceService from '../../src/eth/PriceService';
 
 test('should return current eth price', done => {
-  const service = PriceFeedService.buildTestService();
+  const service = PriceService.buildTestService();
 
   service
     .manager()
@@ -15,7 +15,7 @@ test('should return current eth price', done => {
 });
 
 test('should be able to set eth price', done => {
-  const service = PriceFeedService.buildTestService();
+  const service = PriceService.buildTestService();
 
   service
     .manager()
@@ -32,7 +32,7 @@ test('should be able to set eth price', done => {
 });
 
 test('should be able to get mkr price', done => {
-  const service = PriceFeedService.buildTestService();
+  const service = PriceService.buildTestService();
 
   service
     .manager()
@@ -46,7 +46,7 @@ test('should be able to get mkr price', done => {
 });
 
 test('should be able to set mkr price', done => {
-  const service = PriceFeedService.buildTestService();
+  const service = PriceService.buildTestService();
 
   service
     .manager()
@@ -63,7 +63,7 @@ test('should be able to set mkr price', done => {
 });
 
 test('should return the peth price', done => {
-  const service = PriceFeedService.buildTestService();
+  const service = PriceService.buildTestService();
 
   service
     .manager()

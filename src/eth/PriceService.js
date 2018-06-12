@@ -10,9 +10,9 @@ import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
 
-export default class PriceFeedService extends PrivateService {
+export default class PriceService extends PrivateService {
   static buildTestService(suppressOutput = true) {
-    const service = new PriceFeedService();
+    const service = new PriceService();
     const tokenService = EthereumTokenService.buildTestService();
     const smartContractService = SmartContractService.buildTestService(
       null,
@@ -35,7 +35,7 @@ export default class PriceFeedService extends PrivateService {
    * @param {string} name
    */
 
-  constructor(name = 'priceFeed') {
+  constructor(name = 'price') {
     super(name, ['token', 'smartContract', 'transactionManager']);
   }
 

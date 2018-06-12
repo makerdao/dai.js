@@ -7,7 +7,7 @@ import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 import TransactionManager from './TransactionManager';
 import AllowanceService from './AllowanceService';
-import PriceFeedService from './PriceFeedService';
+import PriceService from './PriceService';
 import { utils } from 'ethers';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
@@ -31,7 +31,7 @@ export default class EthereumCdpService extends PrivateService {
       tokenService
     );
     const allowanceService = AllowanceService.buildTestServiceMaxAllowance();
-    const priceFeed = PriceFeedService.buildTestService();
+    const price = PriceService.buildTestService();
 
     service
       .manager()
@@ -40,7 +40,7 @@ export default class EthereumCdpService extends PrivateService {
       .inject('conversionService', conversionService)
       .inject('transactionManager', transactionManager)
       .inject('allowance', allowanceService)
-      .inject('priceFeed', priceFeed);
+      .inject('price', price);
 
     return service;
   }
@@ -55,7 +55,7 @@ export default class EthereumCdpService extends PrivateService {
       'conversionService',
       'transactionManager',
       'allowance',
-      'priceFeed'
+      'price'
     ]);
   }
 
@@ -158,16 +158,16 @@ export default class EthereumCdpService extends PrivateService {
 
   async getCdpCollateralInEth(cdpId) {
     const [pethCollateral, ratio] = await Promise.all([
-        this.getCdpCollateralInPeth(cdpId),
-        this.getWethToPethRatio()
+      this.getCdpCollateralInPeth(cdpId),
+      this.getWethToPethRatio()
     ]);
     return pethCollateral * ratio;
   }
 
   async getCdpCollateralInUSD(cdpId) {
     const [ethCollateral, ethPrice] = await Promise.all([
-        this.getCdpCollateralInEth(cdpId),
-        this.get('priceFeed').getEthPrice()
+      this.getCdpCollateralInEth(cdpId),
+      this.get('price').getEthPrice()
     ]);
     return ethCollateral * ethPrice;
   }
@@ -185,7 +185,7 @@ export default class EthereumCdpService extends PrivateService {
   async getCollateralizationRatio(cdpId) {
     const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
       this.getCdpDebt(cdpId),
-      this.get('priceFeed').getPethPrice(),
+      this.get('price').getPethPrice(),
       this.getCdpCollateralInPeth(cdpId)
     ]);
     return pethCollateral * pethPrice / daiDebt;
@@ -245,7 +245,7 @@ export default class EthereumCdpService extends PrivateService {
   isCdpSafe(cdpId) {
     return Promise.all([
       this.getLiquidationPriceEthUSD(cdpId),
-      this.get('priceFeed').getEthPrice()
+      this.get('price').getEthPrice()
     ]).then(vals => {
       const liqPrice = vals[0];
       const ethPrice = vals[1];
@@ -258,9 +258,12 @@ export default class EthereumCdpService extends PrivateService {
       .fee()
       .then(bn => {
         const fee = new BigNumber(bn.toString()).dividedBy(RAY);
-        const secondsPerYear = 60*60*24*365;
+        const secondsPerYear = 60 * 60 * 24 * 365;
         BigNumber.config({ POW_PRECISION: 100 });
-        return fee.pow(secondsPerYear).minus(1).toNumber();
+        return fee
+          .pow(secondsPerYear)
+          .minus(1)
+          .toNumber();
       });
   }
 
@@ -273,7 +276,7 @@ export default class EthereumCdpService extends PrivateService {
       targetPrice
     ] = await Promise.all([
       this._tubContract().pie(),
-      this.get('priceFeed').getEthPrice(),
+      this.get('price').getEthPrice(),
       dai.totalSupply(),
       this.getTargetPrice()
     ]);

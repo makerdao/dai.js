@@ -16,7 +16,7 @@ const serviceNames = [
   'exchange',
   'gasEstimator',
   'log',
-  'priceFeed',
+  'price',
   'smartContract',
   'timer',
   'token',

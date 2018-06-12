@@ -2,9 +2,7 @@
   "global": {
     "enableProxies": false
   },
-
   "services": {
-
     "web3": [
       "Web3Service",
       {
@@ -22,8 +20,7 @@
     "conversionService": "TokenConversionService",
     "gasEstimator": "GasEstimatorService",
     "transactionManager": "TransactionManager",
-    "priceFeed": "PriceFeedService",
-
+    "price": "PriceService",
     "timer": "TimerService",
     "log": "ConsoleLogger"
   }

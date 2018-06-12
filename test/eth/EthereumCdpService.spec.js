@@ -372,31 +372,31 @@ test('should be able to bite an unsafe cdp', done => {
         .then(() => cdp.drawDai('13'))
         .then(() => cdp.getCdpId())
         .then(cdpId => (id = cdpId))
-        .then(() => createdCdpService.get('priceFeed').setEthPrice('0.01'))
-        .then(() => createdCdpService.get('priceFeed').getEthPrice())
+        .then(() => createdCdpService.get('price').setEthPrice('0.01'))
+        .then(() => createdCdpService.get('price').getEthPrice())
         .then(() => createdCdpService.bite(id))
         .then(res => expect(typeof res).toEqual('object'))
-        .then(() => createdCdpService.get('priceFeed').setEthPrice('400'))
+        .then(() => createdCdpService.get('price').setEthPrice('400'))
         .then(() => done());
     });
 });
 
 test('can read the locked collateral in peth for a cdp ', async () => {
-  const id = await openCdp();
+  await openCdp();
   await cdp.lockEth('0.2');
   const debt = await cdp.getCollateralAmountInPeth();
   expect(debt.toString()).toEqual('0.2');
 });
 
 test('can read the locked collateral in eth for a cdp ', async () => {
-  const id = await openCdp();
+  await openCdp();
   await cdp.lockEth('0.2');
   const debt = await cdp.getCollateralAmountInEth();
   expect(debt.toString()).toEqual('0.2');
 });
 
 test('can read the locked collateral in USD for a cdp ', async () => {
-  const id = await openCdp();
+  await openCdp();
   await cdp.lockEth('0.2');
   const debt = await cdp.getCollateralAmountInUSD();
   expect(debt.toString()).toEqual('80');
@@ -423,7 +423,6 @@ test('can read the liquidation penalty', async () => {
 });
 
 test('can read the annual governance fee', async () => {
-  const d1 = Date.now();
   await createdCdpService.manager().authenticate();
   const governanceFee = await createdCdpService.getAnnualGovernanceFee();
   expect(governanceFee.toFixed(3)).toEqual('0.005');
@@ -459,12 +458,12 @@ test('can check if cdp is safe', async () => {
 
 test('can calculate the collateralization ratio of a specific CDP', async () => {
   await createdCdpService.manager().authenticate();
-  await createdCdpService.get('priceFeed').setEthPrice('500');
+  await createdCdpService.get('price').setEthPrice('500');
   await lockEth('0.1');
   await cdp.drawDai('20');
   const ethPerPeth = await createdCdpService.getWethToPethRatio();
   const collateralizationRatio = await cdp.getCollateralizationRatio();
-  await createdCdpService.get('priceFeed').setEthPrice('400');
+  await createdCdpService.get('price').setEthPrice('400');
   expect(collateralizationRatio).toBeCloseTo(2.5 * ethPerPeth);
 });
 
