@@ -395,6 +395,13 @@ test('can read the locked collateral in eth for a cdp ', async () => {
   expect(debt.toString()).toEqual('0.2');
 });
 
+test('can read the locked collateral in USD for a cdp ', async () => {
+  const id = await openCdp();
+  await cdp.lockEth('0.2');
+  const debt = await cdp.getCollateralAmountInUSD();
+  expect(debt.toString()).toEqual('80');
+});
+
 test('can read the debt for a cdp', async () => {
   const id = await openCdp();
   await cdp.lockEth('0.1');

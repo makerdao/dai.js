@@ -164,6 +164,14 @@ export default class EthereumCdpService extends PrivateService {
     return pethCollateral * ratio;
   }
 
+  async getCdpCollateralInUSD(cdpId) {
+    const [ethCollateral, ethPrice] = await Promise.all([
+        this.getCdpCollateralInEth(cdpId),
+        this.get('priceFeed').getEthPrice()
+    ]);
+    return ethCollateral * ethPrice;
+  }
+
   getCdpDebt(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
