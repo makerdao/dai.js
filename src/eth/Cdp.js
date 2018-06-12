@@ -66,6 +66,12 @@ export default class Cdp {
     );
   }
 
+  getCollateralAmountInEth() {
+    return this.getCdpId().then(id =>
+      this._cdpService.getCdpCollateralInEth(id)
+    );
+  }
+
   getDebtAmount() {
     return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
   }

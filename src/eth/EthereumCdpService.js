@@ -156,6 +156,14 @@ export default class EthereumCdpService extends PrivateService {
       .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
+  async getCdpCollateralInEth(cdpId) {
+    const [pethCollateral, ratio] = await Promise.all([
+        this.getCdpCollateralInPeth(cdpId),
+        this.getWethToPethRatio()
+    ]);
+    return pethCollateral * ratio;
+  }
+
   getCdpDebt(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
