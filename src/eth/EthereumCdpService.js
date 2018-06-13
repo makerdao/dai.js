@@ -106,16 +106,45 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
+  drawDai(cdpId, amount) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
+    );
+  }
+
+  wipeDai(cdpId, amount) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+
+    return Promise.all([
+      this.get('allowance').requireAllowance(
+        tokens.MKR,
+        this._tubContract().getAddress()
+      ),
+      this.get('allowance').requireAllowance(
+        tokens.DAI,
+        this._tubContract().getAddress()
+      )
+    ]).then(() => {
+      return this._transactionManager().createTransactionHybrid(
+        this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
+      );
+    });
+  }
+
   getCdpInfo(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     return this._tubContract().cups(hexCdpId);
   }
 
-  getCdpCollateralInPeth(cdpId) {
+  async getCdpCollateralInPeth(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
-    return this._tubContract()
-      .ink(hexCdpId)
-      .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+    const value = await this._tubContract().ink(hexCdpId);
+
+    return new BigNumber(value.toString()).dividedBy(WAD).toNumber();
   }
 
   async getCdpCollateralInEth(cdpId) {
@@ -153,21 +182,19 @@ export default class EthereumCdpService extends PrivateService {
     return (pethCollateral * pethPrice) / daiDebt;
   }
 
-  getLiquidationRatio() {
-    return this._tubContract()
-      .mat()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  async getLiquidationRatio() {
+    const value = await this._tubContract().mat();
+
+    return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
-  getLiquidationPenalty() {
-    return this._tubContract()
-      .axe()
-      .then(bn =>
-        new BigNumber(bn.toString())
-          .dividedBy(RAY)
-          .minus(1)
-          .toNumber()
-      );
+  async getLiquidationPenalty() {
+    const value = await this._tubContract().axe();
+
+    return new BigNumber(value.toString())
+      .dividedBy(RAY)
+      .minus(1)
+      .toNumber();
   }
 
   getTargetPrice() {
@@ -250,33 +277,10 @@ export default class EthereumCdpService extends PrivateService {
     return new BigNumber(totalCollateralValue).div(systemDaiDebt).toNumber();
   }
 
-  drawDai(cdpId, amount) {
-    const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+  async getWethToPethRatio() {
+    const value = await this._tubContract().per();
 
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
-    );
-  }
-
-  wipeDai(cdpId, amount) {
-    const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
-
-    return Promise.all([
-      this.get('allowance').requireAllowance(
-        tokens.MKR,
-        this._tubContract().getAddress()
-      ),
-      this.get('allowance').requireAllowance(
-        tokens.DAI,
-        this._tubContract().getAddress()
-      )
-    ]).then(() => {
-      return this._transactionManager().createTransactionHybrid(
-        this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
-      );
-    });
+    return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
   give(cdpId, newAddress) {
