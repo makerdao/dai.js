@@ -106,111 +106,6 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  getCdpInfo(cdpId) {
-    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
-    return this._tubContract().cups(hexCdpId);
-  }
-
-  getCdpCollateralInPeth(cdpId) {
-    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
-    return this._tubContract()
-      .ink(hexCdpId)
-      .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
-  }
-
-  getCdpDebt(cdpId) {
-    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
-    // we need to use the Web3.js contract interface to get the return value
-    // from the non-constant function `tab`
-    const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
-    return new Promise((resolve, reject) =>
-      tub.tab.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
-    ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
-  }
-
-  async getCollateralizationRatio(cdpId) {
-    const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
-      this.getCdpDebt(cdpId),
-      this.getPethPriceInUSD(),
-      this.getCdpCollateralInPeth(cdpId)
-    ]);
-    return pethCollateral * pethPrice / daiDebt;
-  }
-
-  getLiquidationRatio() {
-    return this._tubContract()
-      .mat()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
-  }
-
-  getLiquidationPenalty() {
-    return this._tubContract()
-      .axe()
-      .then(bn =>
-        new BigNumber(bn.toString())
-          .dividedBy(RAY)
-          .minus(1)
-          .toNumber()
-      );
-  }
-
-  getTargetPrice() {
-    // we need to use the Web3.js contract interface to get the return value
-    // from the non-constant function `par()`
-    const vox = this._smartContract().getWeb3ContractByName(contracts.SAI_VOX);
-    return new Promise((resolve, reject) =>
-      vox.par.call((err, val) => (err ? reject(err) : resolve(val)))
-    ).then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
-  }
-
-  _getLiquidationPricePethUSD(cdpId) {
-    return Promise.all([
-      this.getCdpDebt(cdpId),
-      this.getTargetPrice(),
-      this.getLiquidationRatio(),
-      this.getCdpCollateralInPeth(cdpId)
-    ]).then(vals => {
-      const debt = vals[0];
-      const targetPrice = vals[1];
-      const liqRatio = vals[2];
-      const collateral = vals[3];
-      const price = debt * targetPrice * liqRatio / collateral;
-      return price;
-    });
-  }
-
-  getLiquidationPriceEthUSD(cdpId) {
-    return Promise.all([
-      this._getLiquidationPricePethUSD(cdpId),
-      this.getWethToPethRatio()
-    ]).then(vals => {
-      return vals[0] / vals[1];
-    });
-  }
-
-  isCdpSafe(cdpId) {
-    return Promise.all([
-      this.getLiquidationPriceEthUSD(cdpId),
-      this.get('priceFeed').getEthPrice()
-    ]).then(vals => {
-      const liqPrice = vals[0];
-      const ethPrice = vals[1];
-      return parseFloat(ethPrice) >= liqPrice;
-    });
-  }
-
-  getGovernanceFee() {
-    return this._tubContract()
-      .fee()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
-  }
-
-  getWethToPethRatio() {
-    return this._tubContract()
-      .per()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
-  }
-
   drawDai(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
     const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
@@ -240,14 +135,114 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  getPethPriceInUSD() {
-    return this._tubContract()
-      .tag()
-      .then(value =>
-        BigNumber(value)
-          .dividedBy(RAY)
-          .toNumber()
-      );
+  getCdpInfo(cdpId) {
+    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    return this._tubContract().cups(hexCdpId);
+  }
+
+  async getCdpCollateralInPeth(cdpId) {
+    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    const value = await this._tubContract().ink(hexCdpId);
+
+    return new BigNumber(value.toString()).dividedBy(WAD).toNumber();
+  }
+
+  getCdpDebt(cdpId) {
+    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    // we need to use the Web3.js contract interface to get the return value
+    // from the non-constant function `tab`
+    const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
+    return new Promise((resolve, reject) =>
+      tub.tab.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
+    ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+  }
+
+  async getCollateralizationRatio(cdpId) {
+    const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
+      this.getCdpDebt(cdpId),
+      this.getPethPriceInUSD(),
+      this.getCdpCollateralInPeth(cdpId)
+    ]);
+    return (pethCollateral * pethPrice) / daiDebt;
+  }
+
+  async getLiquidationRatio() {
+    const value = await this._tubContract().mat();
+
+    return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
+  }
+
+  async getLiquidationPenalty() {
+    const value = await this._tubContract().axe();
+
+    return new BigNumber(value.toString())
+      .dividedBy(RAY)
+      .minus(1)
+      .toNumber();
+  }
+
+  getTargetPrice() {
+    // we need to use the Web3.js contract interface to get the return value
+    // from the non-constant function `par()`
+    const vox = this._smartContract().getWeb3ContractByName(contracts.SAI_VOX);
+    return new Promise((resolve, reject) =>
+      vox.par.call((err, val) => (err ? reject(err) : resolve(val)))
+    ).then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  }
+
+  _getLiquidationPricePethUSD(cdpId) {
+    return Promise.all([
+      this.getCdpDebt(cdpId),
+      this.getTargetPrice(),
+      this.getLiquidationRatio(),
+      this.getCdpCollateralInPeth(cdpId)
+    ]).then(vals => {
+      const debt = vals[0];
+      const targetPrice = vals[1];
+      const liqRatio = vals[2];
+      const collateral = vals[3];
+      const price = (debt * targetPrice * liqRatio) / collateral;
+      return price;
+    });
+  }
+
+  getLiquidationPriceEthUSD(cdpId) {
+    return Promise.all([
+      this._getLiquidationPricePethUSD(cdpId),
+      this.getWethToPethRatio()
+    ]).then(vals => {
+      return vals[0] / vals[1];
+    });
+  }
+
+  isCdpSafe(cdpId) {
+    return Promise.all([
+      this.getLiquidationPriceEthUSD(cdpId),
+      this.get('priceFeed').getEthPrice()
+    ]).then(vals => {
+      const liqPrice = vals[0];
+      const ethPrice = vals[1];
+      return parseFloat(ethPrice) >= liqPrice;
+    });
+  }
+
+  async getGovernanceFee() {
+    const value = await this._tubContract().fee();
+
+    return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
+  }
+
+  async getWethToPethRatio() {
+    const value = await this._tubContract().per();
+
+    return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
+  }
+
+  async getPethPriceInUSD() {
+    const value = await this._tubContract().tag();
+    return BigNumber(value)
+      .dividedBy(RAY)
+      .toNumber();
   }
 
   give(cdpId, newAddress) {
