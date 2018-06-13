@@ -24,10 +24,10 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['env', 'stage-2'],
-            plugins: [
-              "syntax-async-functions",
-              "transform-regenerator"
-            ]
+            // plugins: [
+            //   "syntax-async-functions",
+            //   "transform-regenerator"
+            // ]
           },
         },
       },

@@ -1,6 +1,4 @@
 import PrivateService from '../core/PrivateService';
-import SmartContractService from './SmartContractService';
-import GasEstimatorService from './GasEstimatorService';
 import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
 import networks from '../../contracts/networks';
@@ -8,34 +6,8 @@ import Erc20Token from './tokens/Erc20Token';
 import EtherToken from './tokens/EtherToken';
 import WethToken from './tokens/WethToken';
 import PethToken from './tokens/PethToken';
-import TransactionManager from './TransactionManager';
 
 export default class EthereumTokenService extends PrivateService {
-  static buildTestService(
-    smartContractService = null,
-    transactionManager = null,
-    suppressOutput = true
-  ) {
-    smartContractService =
-      smartContractService || SmartContractService.buildTestService(null, suppressOutput);
-    transactionManager =
-      transactionManager || TransactionManager.buildTestService(null, suppressOutput);
-    const service = new EthereumTokenService();
-
-    service
-      .manager()
-      .inject('log', smartContractService.get('log'))
-      .inject('web3', smartContractService.get('web3'))
-      .inject('smartContract', smartContractService)
-      .inject(
-        'gasEstimator',
-        GasEstimatorService.buildTestService(smartContractService.get('web3'))
-      )
-      .inject('transactionManager', transactionManager);
-
-    return service;
-  }
-
   constructor(name = 'token') {
     super(name, [
       'smartContract',

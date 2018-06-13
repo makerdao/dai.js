@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.0.49",
+  "version": "0.0.56",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -31,10 +31,10 @@
     "build:frontend": "webpack --env=prod --progress --profile --colors",
     "build:backend": "./scripts/build-backend.sh",
     "coverage": "jest --coverage --runInBand",
-    "lint": "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'",
+    "lint": "eslint web src test",
     "precommit": "lint-staged",
     "prepush": "npm run test",
-    "prettier": "find ./src/**/*.js | xargs prettier --write --single-quote es5",
+    "prettier": "prettier --write --single-quote '{src,test}/**/*.js'",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
     "test": "./with-deployed-system --ci jest --runInBand",
     "test:watch": "./with-deployed-system jest --watch --runInBand",
@@ -43,9 +43,9 @@
   },
   "lint-staged": {
     "./{src,web,test}/**/*.js": [
-      "prettier --single-quote es5 --write",
+      "prettier --single-quote --write",
       "git add",
-      "eslint './web/**.js' './src/**.js' './src/**/**.js' './test/**.js' './test/**/**.js'"
+      "eslint web src test"
     ]
   },
   "devDependencies": {
@@ -54,9 +54,7 @@
     "babel-eslint": "^7.2.3",
     "babel-jest": "^22.4.3",
     "babel-loader": "^7.1.4",
-    "babel-plugin-syntax-async-functions": "^6.13.0",
     "babel-plugin-transform-regenerator": "^6.26.0",
-    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
@@ -89,12 +87,16 @@
     "0x.js": "^0.37.2",
     "@0xproject/connect": "^0.6.12",
     "@0xproject/subproviders": "^0.10.1",
+    "babel-polyfill": "^6.26.0",
     "bignumber.js": "^5.0.0",
     "bunyan": "^1.8.12",
     "ethereumjs-util": "^5.2.0",
     "ethers": "^3.0.15",
     "ethers-web3-bridge": "0.0.1",
     "lodash.merge": "^4.6.1",
+    "lodash.uniq": "^4.5.0",
+    "lodash.values": "^4.3.0",
+    "toposort": "^2.0.2",
     "web3": "^0.20.6",
     "web3-provider-engine": "14.0.4"
   },

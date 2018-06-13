@@ -1,7 +1,11 @@
-import PriceService from '../../src/eth/PriceService';
+import { buildTestService } from '../helpers/serviceBuilders';
+
+function buildTestPriceService() {
+  return buildTestService('price', { price: true });
+}
 
 test('should return current eth price', done => {
-  const service = PriceService.buildTestService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -15,7 +19,7 @@ test('should return current eth price', done => {
 });
 
 test('should be able to set eth price', done => {
-  const service = PriceService.buildTestService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -32,7 +36,7 @@ test('should be able to set eth price', done => {
 });
 
 test('should be able to get mkr price', done => {
-  const service = PriceService.buildTestService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -46,7 +50,7 @@ test('should be able to get mkr price', done => {
 });
 
 test('should be able to set mkr price', done => {
-  const service = PriceService.buildTestService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -63,7 +67,7 @@ test('should be able to set mkr price', done => {
 });
 
 test('should return the peth price', done => {
-  const service = PriceService.buildTestService();
+  const service = buildTestPriceService();
 
   service
     .manager()

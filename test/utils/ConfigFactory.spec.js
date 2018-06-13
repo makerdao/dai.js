@@ -21,13 +21,14 @@ test('throws an error when requesting a non-existing preset', () => {
 
 test('can take an options object in addition to a preset name', () => {
   const config = ConfigFactory.create('test', { log: false });
-  expect(config.services.log).toEqual('NullLogger');
+  expect(config.global.enableProxies).toEqual(false);
+  expect(config.services.log).toEqual(false);
 });
 
 test('can take an options object as first argument', () => {
   const config = ConfigFactory.create({ preset: 'test', log: false });
   expect(config.global.enableProxies).toEqual(false);
-  expect(config.services.log).toEqual('NullLogger');
+  expect(config.services.log).toEqual(false);
 });
 
 test('it merges url, privateKey, provider, and web3 options', () => {
@@ -58,11 +59,25 @@ test('it merges url, privateKey, provider, and web3 options', () => {
 });
 
 test('it overwrites a service name', () => {
-  const config = ConfigFactory.create('http', { cdp: 'OtherService' });
-  expect(config.services.cdp).toEqual('OtherService');
+  const config = ConfigFactory.create('http', { exchange: 'OtherService' });
+  expect(config.services.exchange).toEqual(['OtherService', {}]);
 });
 
-test('it merges service options', () => {
+test('it adds service options', () => {
+  const config = ConfigFactory.create('http', { exchange: { foo: 'bar' } });
+  expect(config.services.exchange).toEqual([
+    'OasisExchangeService',
+    { foo: 'bar' }
+  ]);
+});
+
+test('it passes service options for an omitted service', () => {
   const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
-  expect(config.services.cdp).toEqual(['EthereumCdpService', { foo: 'bar' }]);
+  expect(config.services.cdp).toEqual({ foo: 'bar' });
+});
+
+test('it preserves the preset service name', () => {
+  const preset = { services: { log: 'BunyanLogger' } };
+  const config = ConfigFactory.create({ preset, log: { verbose: true } });
+  expect(config.services.log).toEqual(['BunyanLogger', { verbose: true }]);
 });

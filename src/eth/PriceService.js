@@ -1,7 +1,4 @@
 import PrivateService from '../core/PrivateService';
-import EthereumTokenService from '../eth/EthereumTokenService';
-import SmartContractService from './SmartContractService';
-import TransactionManager from './TransactionManager';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import { RAY } from '../utils/constants';
@@ -11,26 +8,6 @@ import { utils } from 'ethers';
 import util from 'ethereumjs-util';
 
 export default class PriceService extends PrivateService {
-  static buildTestService(suppressOutput = true) {
-    const service = new PriceService();
-    const tokenService = EthereumTokenService.buildTestService();
-    const smartContractService = SmartContractService.buildTestService(
-      null,
-      suppressOutput
-    );
-    const transactionManager = TransactionManager.buildTestService(
-      smartContractService.get('web3')
-    );
-
-    service
-      .manager()
-      .inject('token', tokenService)
-      .inject('smartContract', smartContractService)
-      .inject('transactionManager', transactionManager);
-
-    return service;
-  }
-
   /**
    * @param {string} name
    */

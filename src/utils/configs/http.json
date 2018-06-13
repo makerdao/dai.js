@@ -1,23 +1,10 @@
 {
   "services": {
-    "web3": [
-      "Web3Service",
-      {
-        "provider": {
-          "type": "HTTP"
-        }
+    "web3": {
+      "provider": {
+        "type": "HTTP"
       }
-    ],
-    "allowance": "AllowanceService",
-    "cdp": "EthereumCdpService",
-    "exchange": "OasisExchangeService",
-    "smartContract": "SmartContractService",
-    "token": "EthereumTokenService",
-    "conversionService": "TokenConversionService",
-    "gasEstimator": "GasEstimatorService",
-    "transactionManager": "TransactionManager",
-    "price": "PriceService",
-    "timer": "TimerService",
-    "log": "ConsoleLogger"
+    },
+    "exchange": "OasisExchangeService"
   }
 }

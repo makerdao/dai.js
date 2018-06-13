@@ -1,11 +1,11 @@
-import EthereumCdpService from '../../src/eth/EthereumCdpService';
 import Cdp from '../../src/eth/Cdp';
 import tokens from '../../contracts/tokens';
+import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 
 let createdCdpService;
 
 beforeEach(() => {
-  return (createdCdpService = EthereumCdpService.buildTestService());
+  return (createdCdpService = buildTestEthereumCdpService());
 });
 
 test('should open a new CDP and return its ID', done => {
@@ -47,7 +47,7 @@ test(
 );
 
 test(
-  'should be able to get a CDPs info',
+  "should be able to get a CDP's info",
   done => {
     createdCdpService
       .manager()

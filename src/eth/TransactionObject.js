@@ -1,4 +1,3 @@
-/*eslint no-console: ['error', { 'allow': ['error'] }] */
 import '../polyfills';
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../eth/TransactionLifeCycle';
@@ -96,25 +95,25 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _getTransactionData() {
     let gasPrice = null;
-    let transactionPromise;
     return this._transaction
       .then(tx => {
         this._pending(); //set state to pending
         this._hash = tx.hash;
-        return Promise.any([
-          this._ethersProvider.getTransaction(this._hash),
-          this._ethersProvider.waitForTransaction(this._hash)
-        ])
-          .then(result => (transactionPromise = result))
-          .then(() => {
-            if (transactionPromise === null) {
-              this._ethersProvider
-                .getTransaction(this._hash)
-                .then(result => (transactionPromise = result));
-            }
 
-            return transactionPromise;
-          });
+        const getWithRetry = () =>
+          this._ethersProvider
+            .getTransaction(this._hash)
+            .then(tx => tx || retry());
+
+        const retry = () =>
+          new Promise((resolve, reject) =>
+            setTimeout(() => getWithRetry().then(resolve, reject), 200)
+          );
+
+        return Promise.any([
+          getWithRetry(),
+          this._ethersProvider.waitForTransaction(this._hash)
+        ]);
       })
       .then(tx => {
         gasPrice = tx.gasPrice;

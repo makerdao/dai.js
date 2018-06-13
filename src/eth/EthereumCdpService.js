@@ -1,50 +1,12 @@
 import PrivateService from '../core/PrivateService';
-import SmartContractService from './SmartContractService';
-import EthereumTokenService from './EthereumTokenService';
-import TokenConversionService from './TokenConversionService';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
-import TransactionManager from './TransactionManager';
-import AllowanceService from './AllowanceService';
-import PriceService from './PriceService';
-import { utils } from 'ethers';
+import Validator from '../utils/Validator';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
 
 export default class EthereumCdpService extends PrivateService {
-  static buildTestService(suppressOutput = true) {
-    const service = new EthereumCdpService();
-    const smartContract = SmartContractService.buildTestService(
-      null,
-      suppressOutput
-    );
-    const transactionManager = TransactionManager.buildTestService(
-      smartContract.get('web3')
-    );
-    const tokenService = EthereumTokenService.buildTestService(
-      smartContract,
-      transactionManager
-    );
-    const conversionService = TokenConversionService.buildTestService(
-      smartContract,
-      tokenService
-    );
-    const allowanceService = AllowanceService.buildTestServiceMaxAllowance();
-    const price = PriceService.buildTestService();
-
-    service
-      .manager()
-      .inject('smartContract', smartContract)
-      .inject('token', tokenService)
-      .inject('conversionService', conversionService)
-      .inject('transactionManager', transactionManager)
-      .inject('allowance', allowanceService)
-      .inject('price', price);
-
-    return service;
-  }
-
   /**
    * @param {string} name
    */
@@ -124,7 +86,7 @@ export default class EthereumCdpService extends PrivateService {
 
   async lockPeth(cdpId, peth) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(peth, 18);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(peth)); // default is 18 decimals, so parsedAmount is in wei
 
     await this.get('allowance').requireAllowance(
       tokens.PETH,
@@ -137,7 +99,7 @@ export default class EthereumCdpService extends PrivateService {
 
   freePeth(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(amount, 18);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().free(hexCdpId, parsedAmount, { gasLimit: 200000 })
@@ -188,7 +150,7 @@ export default class EthereumCdpService extends PrivateService {
       this.get('price').getPethPrice(),
       this.getCdpCollateralInPeth(cdpId)
     ]);
-    return pethCollateral * pethPrice / daiDebt;
+    return (pethCollateral * pethPrice) / daiDebt;
   }
 
   getLiquidationRatio() {
@@ -228,7 +190,7 @@ export default class EthereumCdpService extends PrivateService {
       const targetPrice = vals[1];
       const liqRatio = vals[2];
       const collateral = vals[3];
-      const price = debt * targetPrice * liqRatio / collateral;
+      const price = (debt * targetPrice * liqRatio) / collateral;
       return price;
     });
   }
@@ -296,7 +258,7 @@ export default class EthereumCdpService extends PrivateService {
 
   drawDai(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(amount.toString(), 18);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
@@ -305,7 +267,7 @@ export default class EthereumCdpService extends PrivateService {
 
   wipeDai(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(amount.toString(), 18);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
 
     return Promise.all([
       this.get('allowance').requireAllowance(

@@ -2,7 +2,6 @@ import PropertyNode from './PropertyNode';
 import ContractWatcher from './ContractWatcher';
 
 export default class PropertyWatcher {
-
   constructor(contract, property, smartContractService, parentContract = null) {
     this._contract = contract;
     this._property = property;
@@ -23,20 +22,33 @@ export default class PropertyWatcher {
           this._getWatchersForValue(value)
         ])
         .catch(reason => [
-          new PropertyNode(this._property, this._contract, this.id(), reason, true),
+          new PropertyNode(
+            this._property,
+            this._contract,
+            this.id(),
+            reason,
+            true
+          ),
           []
         ]);
-
-    } catch(error) {
+    } catch (error) {
       return Promise.resolve([
-        new PropertyNode(this._property, this._contract, this.id(), error, true),
+        new PropertyNode(
+          this._property,
+          this._contract,
+          this.id(),
+          error,
+          true
+        ),
         []
       ]);
     }
   }
 
   _getParentContract() {
-    return this._parentContract || this._service.getContractByName(this._contract);
+    return (
+      this._parentContract || this._service.getContractByName(this._contract)
+    );
   }
 
   _getWatchersForValue(value) {
