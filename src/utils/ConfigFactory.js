@@ -17,7 +17,7 @@ const serviceRoles = [
   'exchange',
   'gasEstimator',
   'log',
-  'priceFeed',
+  'price',
   'smartContract',
   'timer',
   'token',

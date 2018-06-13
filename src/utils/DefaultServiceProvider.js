@@ -14,7 +14,7 @@ import ConsoleLogger from './loggers/ConsoleLogger';
 import NullLogger from './loggers/NullLogger';
 import TransactionManager from '../eth/TransactionManager';
 import AllowanceService from '../eth/AllowanceService';
-import PriceFeedService from '../eth/PriceFeedService';
+import PriceService from '../eth/PriceService';
 import { defaultServices, standardizeConfig } from './config';
 
 // maps all possible services to string names, so that configs can refer to them
@@ -31,7 +31,7 @@ const _services = {
   GasEstimatorService,
   NullLogger,
   OasisExchangeService,
-  PriceFeedService,
+  PriceService,
   SmartContractService,
   TimerService,
   TokenConversionService,

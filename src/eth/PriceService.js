@@ -1,16 +1,18 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
+import { RAY } from '../utils/constants';
 
+import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
 
-export default class PriceFeedService extends PrivateService {
+export default class PriceService extends PrivateService {
   /**
    * @param {string} name
    */
 
-  constructor(name = 'priceFeed') {
+  constructor(name = 'price') {
     super(name, ['token', 'smartContract', 'transactionManager']);
   }
 
@@ -37,10 +39,22 @@ export default class PriceFeedService extends PrivateService {
       .toUserFormat(value);
   }
 
+  getWethToPethRatio() {
+    return this._getContract(contracts.SAI_TUB)
+      .per()
+      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  }
+
   getEthPrice() {
     return this._getContract(contracts.SAI_PIP)
       .read()
       .then(price => this._toUserFormat(price));
+  }
+
+  getPethPrice() {
+    return this._getContract(contracts.SAI_TUB)
+      .tag()
+      .then(value => new BigNumber(value).dividedBy(RAY).toNumber());
   }
 
   setEthPrice(newPrice) {

@@ -7,7 +7,7 @@ export const defaultServices = {
   // exchange: intentionally omitted
   gasEstimator: 'GasEstimatorService',
   log: 'ConsoleLogger',
-  priceFeed: 'PriceFeedService',
+  price: 'PriceService',
   smartContract: 'SmartContractService',
   timer: 'TimerService',
   token: 'EthereumTokenService',
