@@ -428,12 +428,6 @@ test('can read the annual governance fee', async () => {
   expect(governanceFee.toFixed(3)).toEqual('0.005');
 });
 
-test('can read the weth to peth ratio', async () => {
-  await createdCdpService.manager().authenticate();
-  const ratio = await createdCdpService.getWethToPethRatio();
-  expect(ratio).toBeGreaterThan(0);
-});
-
 test('can read the liquidation price in eth for a cdp', async () => {
   await openCdp();
   await cdp.lockEth('0.1');
@@ -461,7 +455,7 @@ test('can calculate the collateralization ratio of a specific CDP', async () => 
   await createdCdpService.get('price').setEthPrice('500');
   await lockEth('0.1');
   await cdp.drawDai('20');
-  const ethPerPeth = await createdCdpService.getWethToPethRatio();
+  const ethPerPeth = await createdCdpService.get('price').getWethToPethRatio();
   const collateralizationRatio = await cdp.getCollateralizationRatio();
   await createdCdpService.get('price').setEthPrice('400');
   expect(collateralizationRatio).toBeCloseTo(2.5 * ethPerPeth);

@@ -79,3 +79,10 @@ test('should return the peth price', done => {
       });
     });
 });
+
+test('can read the weth to peth ratio', async () => {
+  const service = buildTestPriceService();
+  await service.manager().authenticate();
+  const ratio = await service.getWethToPethRatio();
+  expect(ratio).toBeGreaterThan(0);
+});

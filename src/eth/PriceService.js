@@ -39,6 +39,12 @@ export default class PriceService extends PrivateService {
       .toUserFormat(value);
   }
 
+  getWethToPethRatio() {
+    return this._getContract(contracts.SAI_TUB)
+      .per()
+      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  }
+
   getEthPrice() {
     return this._getContract(contracts.SAI_PIP)
       .read()
