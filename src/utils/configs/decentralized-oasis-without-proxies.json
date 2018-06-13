@@ -3,20 +3,12 @@
     "enableProxies": false
   },
   "services": {
-    "web3": [
-      "Web3Service",
-      {
-        "usePresetProvider": true,
-        "provider": {
-          "type": "TEST"
-        }
+    "web3": {
+      "usePresetProvider": true,
+      "provider": {
+        "type": "TEST"
       }
-    ],
-    "allowance": "AllowanceService",
-    "exchange": "OasisExchangeService",
-    "token": "EthereumTokenService",
-    "conversionService": "TokenConversionService",
-    "gasEstimator": "GasEstimatorService",
-    "price": "PriceService"
+    },
+    "exchange": "OasisExchangeService"
   }
 }
