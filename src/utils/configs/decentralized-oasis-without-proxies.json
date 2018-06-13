@@ -2,9 +2,7 @@
   "global": {
     "enableProxies": false
   },
-
   "services": {
-
     "web3": [
       "Web3Service",
       {
@@ -19,6 +17,6 @@
     "token": "EthereumTokenService",
     "conversionService": "TokenConversionService",
     "gasEstimator": "GasEstimatorService",
-    "priceFeed": "PriceFeedService"
+    "price": "PriceService"
   }
 }

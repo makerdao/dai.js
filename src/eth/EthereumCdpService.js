@@ -2,7 +2,7 @@ import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
-import { utils } from 'ethers';
+import Validator from '../utils/Validator';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
 
@@ -17,7 +17,7 @@ export default class EthereumCdpService extends PrivateService {
       'conversionService',
       'transactionManager',
       'allowance',
-      'priceFeed'
+      'price'
     ]);
   }
 
@@ -74,7 +74,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async lockWeth(cdpId, weth) {
-    const wethperPeth = await this.getWethToPethRatio();
+    const wethperPeth = await this.get('price').getWethToPethRatio();
     const peth = new BigNumber(weth)
       .div(wethperPeth.toString())
       .round(18)
@@ -86,7 +86,7 @@ export default class EthereumCdpService extends PrivateService {
 
   async lockPeth(cdpId, peth) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(peth, 18);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(peth)); // default is 18 decimals, so parsedAmount is in wei
 
     await this.get('allowance').requireAllowance(
       tokens.PETH,
@@ -99,11 +99,40 @@ export default class EthereumCdpService extends PrivateService {
 
   freePeth(cdpId, amount) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(amount, 18);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().free(hexCdpId, parsedAmount, { gasLimit: 200000 })
     );
+  }
+
+  drawDai(cdpId, amount) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
+    );
+  }
+
+  wipeDai(cdpId, amount) {
+    const hexCdpId = this._hexCdpId(cdpId);
+    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+
+    return Promise.all([
+      this.get('allowance').requireAllowance(
+        tokens.MKR,
+        this._tubContract().getAddress()
+      ),
+      this.get('allowance').requireAllowance(
+        tokens.DAI,
+        this._tubContract().getAddress()
+      )
+    ]).then(() => {
+      return this._transactionManager().createTransactionHybrid(
+        this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
+      );
+    });
   }
 
   getCdpInfo(cdpId) {
@@ -111,11 +140,27 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().cups(hexCdpId);
   }
 
-  getCdpCollateralInPeth(cdpId) {
+  async getCdpCollateralInPeth(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
-    return this._tubContract()
-      .ink(hexCdpId)
-      .then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+    const value = await this._tubContract().ink(hexCdpId);
+
+    return new BigNumber(value.toString()).dividedBy(WAD).toNumber();
+  }
+
+  async getCdpCollateralInEth(cdpId) {
+    const [pethCollateral, ratio] = await Promise.all([
+      this.getCdpCollateralInPeth(cdpId),
+      this.get('price').getWethToPethRatio()
+    ]);
+    return pethCollateral * ratio;
+  }
+
+  async getCdpCollateralInUSD(cdpId) {
+    const [ethCollateral, ethPrice] = await Promise.all([
+      this.getCdpCollateralInEth(cdpId),
+      this.get('price').getEthPrice()
+    ]);
+    return ethCollateral * ethPrice;
   }
 
   getCdpDebt(cdpId) {
@@ -131,27 +176,25 @@ export default class EthereumCdpService extends PrivateService {
   async getCollateralizationRatio(cdpId) {
     const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
       this.getCdpDebt(cdpId),
-      this.getPethPriceInUSD(),
+      this.get('price').getPethPrice(),
       this.getCdpCollateralInPeth(cdpId)
     ]);
     return (pethCollateral * pethPrice) / daiDebt;
   }
 
-  getLiquidationRatio() {
-    return this._tubContract()
-      .mat()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  async getLiquidationRatio() {
+    const value = await this._tubContract().mat();
+
+    return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
-  getLiquidationPenalty() {
-    return this._tubContract()
-      .axe()
-      .then(bn =>
-        new BigNumber(bn.toString())
-          .dividedBy(RAY)
-          .minus(1)
-          .toNumber()
-      );
+  async getLiquidationPenalty() {
+    const value = await this._tubContract().axe();
+
+    return new BigNumber(value.toString())
+      .dividedBy(RAY)
+      .minus(1)
+      .toNumber();
   }
 
   getTargetPrice() {
@@ -182,7 +225,7 @@ export default class EthereumCdpService extends PrivateService {
   getLiquidationPriceEthUSD(cdpId) {
     return Promise.all([
       this._getLiquidationPricePethUSD(cdpId),
-      this.getWethToPethRatio()
+      this.get('price').getWethToPethRatio()
     ]).then(vals => {
       return vals[0] / vals[1];
     });
@@ -191,7 +234,7 @@ export default class EthereumCdpService extends PrivateService {
   isCdpSafe(cdpId) {
     return Promise.all([
       this.getLiquidationPriceEthUSD(cdpId),
-      this.get('priceFeed').getEthPrice()
+      this.get('price').getEthPrice()
     ]).then(vals => {
       const liqPrice = vals[0];
       const ethPrice = vals[1];
@@ -199,55 +242,45 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  getGovernanceFee() {
+  getAnnualGovernanceFee() {
     return this._tubContract()
       .fee()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+      .then(bn => {
+        const fee = new BigNumber(bn.toString()).dividedBy(RAY);
+        const secondsPerYear = 60 * 60 * 24 * 365;
+        BigNumber.config({ POW_PRECISION: 100 });
+        return fee
+          .pow(secondsPerYear)
+          .minus(1)
+          .toNumber();
+      });
   }
 
-  getWethToPethRatio() {
-    return this._tubContract()
-      .per()
-      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+  async getSystemCollateralization() {
+    const dai = this.get('token').getToken(tokens.DAI);
+    const [
+      _totalWethLocked,
+      wethPrice,
+      daiSupply,
+      targetPrice
+    ] = await Promise.all([
+      this._tubContract().pie(),
+      this.get('price').getEthPrice(),
+      dai.totalSupply(),
+      this.getTargetPrice()
+    ]);
+
+    const totalCollateralValue = new BigNumber(_totalWethLocked)
+      .div(WAD)
+      .times(wethPrice);
+    const systemDaiDebt = new BigNumber(daiSupply).times(targetPrice);
+    return new BigNumber(totalCollateralValue).div(systemDaiDebt).toNumber();
   }
 
-  drawDai(cdpId, amount) {
-    const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(amount.toString(), 18);
+  async getWethToPethRatio() {
+    const value = await this._tubContract().per();
 
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
-    );
-  }
-
-  wipeDai(cdpId, amount) {
-    const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = utils.parseUnits(amount.toString(), 18);
-
-    return Promise.all([
-      this.get('allowance').requireAllowance(
-        tokens.MKR,
-        this._tubContract().getAddress()
-      ),
-      this.get('allowance').requireAllowance(
-        tokens.DAI,
-        this._tubContract().getAddress()
-      )
-    ]).then(() => {
-      return this._transactionManager().createTransactionHybrid(
-        this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
-      );
-    });
-  }
-
-  getPethPriceInUSD() {
-    return this._tubContract()
-      .tag()
-      .then(value =>
-        BigNumber(value)
-          .dividedBy(RAY)
-          .toNumber()
-      );
+    return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
   give(cdpId, newAddress) {

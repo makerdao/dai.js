@@ -1,11 +1,11 @@
 import { buildTestService } from '../helpers/serviceBuilders';
 
-function buildTestPriceFeedService() {
-  return buildTestService('priceFeed', { priceFeed: true });
+function buildTestPriceService() {
+  return buildTestService('price', { price: true });
 }
 
 test('should return current eth price', done => {
-  const service = buildTestPriceFeedService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -19,7 +19,7 @@ test('should return current eth price', done => {
 });
 
 test('should be able to set eth price', done => {
-  const service = buildTestPriceFeedService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -36,7 +36,7 @@ test('should be able to set eth price', done => {
 });
 
 test('should be able to get mkr price', done => {
-  const service = buildTestPriceFeedService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -50,7 +50,7 @@ test('should be able to get mkr price', done => {
 });
 
 test('should be able to set mkr price', done => {
-  const service = buildTestPriceFeedService();
+  const service = buildTestPriceService();
 
   service
     .manager()
@@ -64,4 +64,25 @@ test('should be able to set mkr price', done => {
           service.setMkrPrice('0.0').then(() => done());
         });
     });
+});
+
+test('should return the peth price', done => {
+  const service = buildTestPriceService();
+
+  service
+    .manager()
+    .authenticate()
+    .then(() => {
+      service.getPethPrice().then(value => {
+        expect(typeof value).toBe('number');
+        done();
+      });
+    });
+});
+
+test('can read the weth to peth ratio', async () => {
+  const service = buildTestPriceService();
+  await service.manager().authenticate();
+  const ratio = await service.getWethToPethRatio();
+  expect(ratio).toBeGreaterThan(0);
 });

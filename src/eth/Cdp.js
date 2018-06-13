@@ -52,17 +52,30 @@ export default class Cdp {
     return this._cdpIdPromise;
   }
 
-  shut() {
-    return this.getCdpId().then(id => this._cdpService.shutCdp(id));
+  async shut() {
+    const id = await this.getCdpId();
+    return this._cdpService.shutCdp(id);
   }
 
-  getInfo() {
-    return this.getCdpId().then(id => this._cdpService.getCdpInfo(id));
+  async getInfo() {
+    const id = await this.getCdpId();
+    return this._cdpService.getCdpInfo(id);
   }
 
-  getCollateralAmountInPeth() {
+  async getCollateralAmountInPeth() {
+    const id = await this.getCdpId();
+    return this._cdpService.getCdpCollateralInPeth(id);
+  }
+
+  getCollateralAmountInEth() {
     return this.getCdpId().then(id =>
-      this._cdpService.getCdpCollateralInPeth(id)
+      this._cdpService.getCdpCollateralInEth(id)
+    );
+  }
+
+  getCollateralAmountInUSD() {
+    return this.getCdpId().then(id =>
+      this._cdpService.getCdpCollateralInUSD(id)
     );
   }
 
@@ -70,47 +83,53 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
   }
 
-  getCollateralizationRatio() {
-    return this.getCdpId().then(id =>
-      this._cdpService.getCollateralizationRatio(id)
-    );
+  async getCollateralizationRatio() {
+    const id = await this.getCdpId();
+    return this._cdpService.getCollateralizationRatio(id);
   }
 
-  getLiquidationPriceEthUSD() {
-    return this.getCdpId().then(id =>
-      this._cdpService.getLiquidationPriceEthUSD(id)
-    );
+  async getLiquidationPriceEthUSD() {
+    const id = await this.getCdpId();
+    return this._cdpService.getLiquidationPriceEthUSD(id);
   }
 
-  isSafe() {
-    return this.getCdpId().then(id => this._cdpService.isCdpSafe(id));
+  async isSafe() {
+    const id = await this.getCdpId();
+    return this._cdpService.isCdpSafe(id);
   }
 
-  lockEth(eth) {
-    return this.getCdpId().then(id => this._cdpService.lockEth(id, eth));
+  async lockEth(eth) {
+    const id = await this.getCdpId();
+    return this._cdpService.lockEth(id, eth);
   }
 
-  lockWeth(weth) {
-    return this.getCdpId().then(id => this._cdpService.lockWeth(id, weth));
+  async lockWeth(weth) {
+    const id = await this.getCdpId();
+    return this._cdpService.lockWeth(id, weth);
   }
 
-  lockPeth(eth) {
-    return this.getCdpId().then(id => this._cdpService.lockPeth(id, eth));
+  async lockPeth(eth) {
+    const id = await this.getCdpId();
+    return this._cdpService.lockPeth(id, eth);
   }
 
-  drawDai(amount) {
-    return this.getCdpId().then(id => this._cdpService.drawDai(id, amount));
+  async drawDai(amount) {
+    const id = await this.getCdpId();
+    return this._cdpService.drawDai(id, amount);
   }
 
-  freePeth(amount) {
-    return this.getCdpId().then(id => this._cdpService.freePeth(id, amount));
+  async freePeth(amount) {
+    const id = await this.getCdpId();
+    return this._cdpService.freePeth(id, amount);
   }
 
-  wipeDai(amount) {
-    return this.getCdpId().then(id => this._cdpService.wipeDai(id, amount));
+  async wipeDai(amount) {
+    const id = await this.getCdpId();
+    return this._cdpService.wipeDai(id, amount);
   }
 
-  give(newAddress) {
-    return this.getCdpId().then(id => this._cdpService.give(id, newAddress));
+  async give(newAddress) {
+    const id = await this.getCdpId();
+    return this._cdpService.give(id, newAddress);
   }
 }
