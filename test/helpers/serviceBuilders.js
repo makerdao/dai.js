@@ -1,16 +1,23 @@
 import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
 import Web3ProviderType from '../../src/eth/Web3ProviderType';
 
-const defaultProviderConfig = {
+export const defaultProviderConfig = {
   web3: {
     provider: { type: Web3ProviderType.TEST }
   },
   log: false
 };
 
+const cache = { storage: {} };
+
+export function resetCache() {
+  cache.storage = {};
+}
+
 export function buildTestContainer(settings) {
   return new DefaultServiceProvider({
     ...defaultProviderConfig,
+    cache,
     ...settings
   });
 }

@@ -15,6 +15,7 @@ import NullLogger from './loggers/NullLogger';
 import TransactionManager from '../eth/TransactionManager';
 import AllowanceService from '../eth/AllowanceService';
 import PriceService from '../eth/PriceService';
+import CacheService from '../utils/CacheService';
 import { defaultServices, standardizeConfig } from './config';
 
 // maps all possible services to string names, so that configs can refer to them
@@ -25,6 +26,7 @@ import { defaultServices, standardizeConfig } from './config';
 // could pull in just the ones they want to use, keeping build size down.
 const _services = {
   AllowanceService,
+  CacheService,
   ConsoleLogger,
   EthereumCdpService,
   EthereumTokenService,

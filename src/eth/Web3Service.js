@@ -11,7 +11,7 @@ const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
-    super(name, ['log', 'timer']);
+    super(name, ['log', 'timer', 'cache']);
 
     this._web3 = null;
     this._ethersProvider = null;
@@ -343,21 +343,31 @@ export default class Web3Service extends PrivateService {
     return web3Provider;
   }
 
-  _buildWeb3Provider(settings) {
-    switch (settings.type) {
+  _buildWeb3Provider(providerSettings) {
+    let provider;
+    const { url, network, infuraApiKey, type } = providerSettings;
+    const cacheKey = 'provider:' + JSON.stringify(providerSettings);
+    const cache = this.get('cache');
+    if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
+
+    switch (type) {
       case Web3ProviderType.HTTP:
-        return new Web3.providers.HttpProvider(settings.url);
+        provider = new Web3.providers.HttpProvider(url);
+        break;
       case Web3ProviderType.INFURA:
-        return new Web3.providers.HttpProvider(
-          'https://' + settings.network + '.infura.io/' + settings.infuraApiKey
+        provider = new Web3.providers.HttpProvider(
+          'https://' + network + '.infura.io/' + infuraApiKey
         );
+        break;
       case Web3ProviderType.TEST:
-        return new Web3.providers.HttpProvider('http://127.1:2000');
+        provider = new Web3.providers.HttpProvider('http://127.1:2000');
+        break;
       default:
-        throw new Error(
-          'Illegal web3 provider type: ' + settings.provider.type
-        );
+        throw new Error('Illegal web3 provider type: ' + type);
     }
+
+    if (cache) cache.store(cacheKey, provider);
+    return provider;
   }
 
   _setStatusTimerDelay(delay) {

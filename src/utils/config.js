@@ -1,7 +1,9 @@
 import merge from 'lodash.merge';
 
+// TODO this should probably move to DefaultServiceProvider
 export const defaultServices = {
   allowance: 'AllowanceService',
+  cache: 'CacheService',
   cdp: 'EthereumCdpService',
   conversionService: 'TokenConversionService',
   // exchange: intentionally omitted
