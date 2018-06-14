@@ -163,7 +163,7 @@ export default class EthereumCdpService extends PrivateService {
     return ethCollateral * ethPrice;
   }
 
-  getCdpDebt(cdpId) {
+  getCdpDebtInDai(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `tab`
@@ -173,9 +173,17 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
+  async getCdpDebtInUSD(cdpId) {
+    const [daiDebt, tp] = await Promise.all([
+      this.getCdpDebtInDai(cdpId),
+      this.getTargetPrice()
+    ]);
+    return daiDebt * tp;
+  }
+
   async getCollateralizationRatio(cdpId) {
     const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
-      this.getCdpDebt(cdpId),
+      this.getCdpDebtInUSD(cdpId),
       this.get('price').getPethPrice(),
       this.getCdpCollateralInPeth(cdpId)
     ]);
@@ -208,7 +216,7 @@ export default class EthereumCdpService extends PrivateService {
 
   _getLiquidationPricePethUSD(cdpId) {
     return Promise.all([
-      this.getCdpDebt(cdpId),
+      this.getCdpDebtInUSD(cdpId),
       this.getTargetPrice(),
       this.getLiquidationRatio(),
       this.getCdpCollateralInPeth(cdpId)

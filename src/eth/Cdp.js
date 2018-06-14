@@ -62,25 +62,29 @@ export default class Cdp {
     return this._cdpService.getCdpInfo(id);
   }
 
-  async getCollateralAmountInPeth() {
+  async getCollateralValueInPeth() {
     const id = await this.getCdpId();
     return this._cdpService.getCdpCollateralInPeth(id);
   }
 
-  getCollateralAmountInEth() {
+  getCollateralValueInEth() {
     return this.getCdpId().then(id =>
       this._cdpService.getCdpCollateralInEth(id)
     );
   }
 
-  getCollateralAmountInUSD() {
+  getCollateralValueInUSD() {
     return this.getCdpId().then(id =>
       this._cdpService.getCdpCollateralInUSD(id)
     );
   }
 
-  getDebtAmount() {
-    return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
+  getDebtValueInDai() {
+    return this.getCdpId().then(id => this._cdpService.getCdpDebtInDai(id));
+  }
+
+  getDebtValueInUSD() {
+    return this.getCdpId().then(id => this._cdpService.getCdpDebtInUSD(id));
   }
 
   async getCollateralizationRatio() {
