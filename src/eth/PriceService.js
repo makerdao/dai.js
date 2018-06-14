@@ -1,5 +1,4 @@
 import PrivateService from '../core/PrivateService';
-import { registerMakerEvents } from '../utils/EventService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import { RAY } from '../utils/constants';
@@ -14,10 +13,11 @@ export default class PriceService extends PrivateService {
    */
 
   constructor(name = 'price') {
-    super(name, ['token', 'smartContract', 'transactionManager']);
+    super(name, ['token', 'smartContract', 'transactionManager', 'event']);
+  }
 
-    // polled for changes every block
-    registerMakerEvents({
+  initialize() {
+    this.get('event').registerPollEvents({
       'price/ETH_USD': {
         price: () => this.getEthPrice()
       },

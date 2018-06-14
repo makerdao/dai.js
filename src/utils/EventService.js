@@ -3,21 +3,8 @@ import { eventIndexer } from './index';
 import isEqual from 'lodash.isequal';
 import EventEmitterObj from 'eventemitter2';
 
-const EventEmitter = EventEmitterObj.EventEmitter2;
+const { EventEmitter2 } = EventEmitterObj;
 
-let makerRegistry = {};
-
-export const registerMakerEvents = eventGetterHash => {
-  makerRegistry = { ...makerRegistry, ...eventGetterHash };
-};
-
-let cdpRegistry = {};
-
-export const registerCdpEvents = eventGetterHash => {
-  cdpRegistry = { ...cdpRegistry, ...eventGetterHash };
-};
-
-// TODO: hide event service from maker api
 export default class EventService extends LocalService {
   /**
    * @param {string} name
@@ -25,53 +12,125 @@ export default class EventService extends LocalService {
   constructor(name = 'event') {
     super(name);
 
-    this.hotEmitters = [];
+    this.pipelines = {};
 
-    const makerPipeline = this.createPipeline();
-    this.makerPipeline = () => makerPipeline;
+    // this is our default pipeline, it will be attached to our maker object
+    this.createPipeline({ name: 'default' });
 
-    const cdpPipeline = this.createPipeline();
-    this.cdpPipeline = () => cdpPipeline;
+    // i want to see that this new pipline is assigned to this.pipelines.default
 
     this.ping = this.ping.bind(this);
   }
 
-  // called on every new block from the web3service
+  registerPollEvents(eventGetterHash, pipeline = this.pipelines.default) {
+    pipeline.registerPollEvents(eventGetterHash);
+  }
+
+  // add a listener to our default pipeline
+  on(event, listener, pipeline = this.pipelines.default) {
+    pipeline.on(event, listener);
+  }
+
+  // push an event through our default pipeline
+  pump(event, payload, block, pipeline = this.pipelines.default) {
+    pipeline.pump(event, payload, block);
+  }
+
   ping(block) {
-    for (let emitter of this.hotEmitters) {
+    for (let pipeline of Object.values(this.pipelines)) {
+      this._pingEmitters(pipeline, block);
+    }
+  }
+
+  _pingEmitters(pipeline, block) {
+    for (let emitter of pipeline.getHotEmitters()) {
       emitter.ping(block);
     }
   }
 
-  pollAll() {
-    const makerPipeline = this.makerPipeline();
-    this.createPolls(makerRegistry, makerPipeline);
-
-    const cdpPipeline = this.cdpPipeline();
-    this.createPolls(cdpRegistry, cdpPipeline);
+  startPollingAllRegisteredEvents(pipeline = this.pipelines.default) {
+    pipeline.startPollingAllRegisteredEvents();
   }
 
-  createPolls(eventPayloadRegistry, pipeline) {
-    for (let [event, payloadSchema] of Object.entries(eventPayloadRegistry)) {
-      this.createPoll(event, payloadSchema, pipeline);
-    }
+  createPipeline({
+    server = new EventEmitter2({
+      wildcard: true,
+      delimiter: '/'
+    }),
+    indexer = eventIndexer(),
+    name = 'bob'
+  } = {}) {
+    // I'd rather assign the default pipeline directly in the constructor
+    const newPipeline = this._createPipeline({ server, indexer, name });
+    this.pipelines[name] = newPipeline;
+    return newPipeline;
   }
 
-  async createPoll(event, payloadSchema, pipeline) {
-    // const [service] = event;
-    // if (!availableService(service)) {
-    //     throw new Error(`no service called ${service}`);
-    // }
-    const selector = this.createPayloadSelector(payloadSchema);
-    const memoizedEmitter = await this.createMemoizedEmitter({
-      type: event,
-      pull: selector,
-      pipe: pipeline
-    });
-    this.hotEmitters.push(memoizedEmitter);
+  _createPipeline({ server, indexer } = {}) {
+    let pollEventRegistry = {};
+    const hotEmitters = [];
+
+    // multiple emits because we keep calling startPollingAllRegisteredEvents
+    return {
+      pump(event, payload, block) {
+        const eventObj = {
+          block,
+          payload,
+          type: event,
+          index: indexer()
+        };
+        server.emit(event, eventObj);
+      },
+      on(event, listener) {
+        // const [service] = event;
+        // if (!availableService(service)) {
+        //     throw new Error(`no service called ${service}`);
+        // }
+        server.on(event, listener);
+      },
+      registerPollEvents(eventGetterHash) {
+        pollEventRegistry = { ...pollEventRegistry, ...eventGetterHash };
+      },
+      getPollEventRegistry() {
+        return pollEventRegistry;
+      },
+      getHotEmitters() {
+        return hotEmitters;
+      },
+      // this doesn't return anything, maybe a vanilla promise is better
+      async startPollingAllRegisteredEvents() {
+        const eventPayloadRegistry = this.getPollEventRegistry();
+        for (let [type, payloadSchema] of Object.entries(
+          eventPayloadRegistry
+        )) {
+          const payloadSelector = EventService._createPayloadSelector(
+            payloadSchema
+          );
+          const memoizedEmitter = await EventService._createMemoizedEmitter({
+            type,
+            pull: payloadSelector,
+            pipe: this
+          });
+          hotEmitters.push(memoizedEmitter);
+          // this.createPoll(type, payloadSchema, pipeline);
+        }
+      }
+    };
   }
 
-  createPayloadSelector(payloadSchema) {
+  // async createPoll(type, payloadSchema, pipeline) {
+  //     const payloadSelector = this._createPayloadSelector(payloadSchema);
+  //     const memoizedEmitter = await this._createMemoizedEmitter({
+  //         type,
+  //         pull: payloadSelector,
+  //         pipe: pipeline
+  //     });
+  //     // pipe these together
+  //     this.hotEmitters.push(memoizedEmitter);
+  // }
+
+  // could be optimized with promise.all, might be premature
+  static _createPayloadSelector(payloadSchema) {
     return async () => {
       const payload = {};
       for (let [name, getter] of Object.entries(payloadSchema)) {
@@ -81,30 +140,7 @@ export default class EventService extends LocalService {
     };
   }
 
-  createPipeline({
-    emitter = new EventEmitter({
-      wildcard: true,
-      delimiter: '/'
-    }),
-    indexer = eventIndexer()
-  } = {}) {
-    return {
-      pump(event, payload, block) {
-        const eventObj = {
-          block,
-          payload,
-          type: event,
-          index: indexer()
-        };
-        emitter.emit(event, eventObj);
-      },
-      on(event, listener) {
-        emitter.on(event, listener);
-      }
-    };
-  }
-
-  async createMemoizedEmitter({ type, pull, pipe }) {
+  static async _createMemoizedEmitter({ type, pull, pipe }) {
     let curr = await pull();
     return {
       async ping(block) {
