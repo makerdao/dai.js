@@ -78,8 +78,12 @@ export default class Cdp {
     );
   }
 
-  getDebtAmount() {
-    return this.getCdpId().then(id => this._cdpService.getCdpDebt(id));
+  getDebtValueInDai() {
+    return this.getCdpId().then(id => this._cdpService.getCdpDebtInDai(id));
+  }
+
+  getDebtValueInUSD() {
+    return this.getCdpId().then(id => this._cdpService.getCdpDebtInUSD(id));
   }
 
   getCollateralizationRatio() {
