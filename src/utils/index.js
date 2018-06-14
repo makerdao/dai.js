@@ -111,3 +111,7 @@ export function getNetworkName(networkId) {
 
   return result[0].name;
 }
+
+export function promiseWait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
