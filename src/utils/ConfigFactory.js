@@ -91,6 +91,10 @@ export default class ConfigFactory {
       if (options.provider) {
         merge(web3Settings.provider, options.provider);
       }
+
+      if (options.overrideMetamask) {
+        web3Settings.usePresetProvider = !options.overrideMetamask;
+      }
     }
 
     return config;
