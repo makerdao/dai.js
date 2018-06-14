@@ -93,6 +93,8 @@
     "ethereumjs-util": "^5.2.0",
     "ethers": "^3.0.15",
     "ethers-web3-bridge": "0.0.1",
+    "eventemitter2": "^5.0.1",
+    "lodash.isequal": "^4.5.0",
     "lodash.merge": "^4.6.1",
     "lodash.uniq": "^4.5.0",
     "lodash.values": "^4.3.0",

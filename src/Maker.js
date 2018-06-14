@@ -32,6 +32,13 @@ export default class Maker {
     });
   }
 
+  on(event, listener) {
+    this._container
+      .service('event')
+      .makerPipeline()
+      .on(event, listener);
+  }
+
   authenticate() {
     return this._authenticatedPromise;
   }

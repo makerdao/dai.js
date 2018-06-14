@@ -15,6 +15,7 @@
     ],
     "allowance": "AllowanceService",
     "cdp": "EthereumCdpService",
+    "event": "EventService",
     "exchange": "OasisExchangeService",
     "smartContract": "SmartContractService",
     "token": "EthereumTokenService",

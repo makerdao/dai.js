@@ -17,7 +17,8 @@ export default class EthereumCdpService extends PrivateService {
       'conversionService',
       'transactionManager',
       'allowance',
-      'price'
+      'price',
+      'event'
     ]);
   }
 

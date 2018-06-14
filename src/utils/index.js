@@ -111,3 +111,11 @@ export function getNetworkName(networkId) {
 
   return result[0].name;
 }
+
+export function eventIndexer() {
+  let index = 0;
+  return function() {
+    index++;
+    return index;
+  };
+}

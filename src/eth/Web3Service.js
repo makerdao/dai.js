@@ -11,7 +11,7 @@ const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
-    super(name, ['log', 'timer']);
+    super(name, ['log', 'timer', 'event']);
 
     this._web3 = null;
     this._ethersProvider = null;
@@ -124,6 +124,7 @@ export default class Web3Service extends PrivateService {
 
           this._setUpEthers(this.networkId());
           this._installDisconnectCheck();
+          this._initEventPolling();
         },
 
         reason => {
@@ -208,6 +209,10 @@ export default class Web3Service extends PrivateService {
     if (this._blockListeners['*']) {
       this._blockListeners['*'].forEach(c => c(blockNumber));
     }
+  }
+
+  _initEventPolling() {
+    this.onNewBlock(this.get('event').ping);
   }
 
   _installCleanUpHooks() {

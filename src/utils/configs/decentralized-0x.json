@@ -2,9 +2,7 @@
   "global": {
     "enableProxies": false
   },
-
   "services": {
-
     "web3": [
       "Web3Service",
       {
@@ -14,17 +12,18 @@
         }
       }
     ],
-
     "cdp": "EthereumCdpService",
-    "exchange": ["ZeroExExchangeService",
+    "exchange": [
+      "ZeroExExchangeService",
       {
         "relay": /*insert relayer url*/
-    }],
+      }
+    ],
     "smartContract": "SmartContractService",
     "token": "EthereumTokenService",
     "conversionService": "TokenConversionService",
+    "event": "EventService",
     "gasEstimator": "GasEstimatorService",
-
     "timer": "TimerService",
     "log": "ConsoleLogger"
   }

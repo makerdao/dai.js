@@ -4,6 +4,7 @@ export const defaultServices = {
   allowance: 'AllowanceService',
   cdp: 'EthereumCdpService',
   conversionService: 'TokenConversionService',
+  event: 'EventService',
   // exchange: intentionally omitted
   gasEstimator: 'GasEstimatorService',
   log: 'ConsoleLogger',
