@@ -2,6 +2,7 @@ import decentralizedOasisWithoutProxies from './configs/decentralized-oasis-with
 import kovan from './configs/kovan.json';
 import http from './configs/http.json';
 import merge from 'lodash.merge';
+import { mergeServiceConfig } from './config';
 
 class ConfigPresetNotFoundError extends Error {
   constructor(message) {
@@ -9,14 +10,14 @@ class ConfigPresetNotFoundError extends Error {
   }
 }
 
-const serviceNames = [
+const serviceRoles = [
   'allowance',
   'cdp',
   'conversionService',
   'exchange',
   'gasEstimator',
   'log',
-  'priceFeed',
+  'price',
   'smartContract',
   'timer',
   'token',
@@ -24,70 +25,72 @@ const serviceNames = [
   'web3'
 ];
 
+function loadPreset(name) {
+  if (typeof name == 'object') {
+    return name; // for testing
+  }
+
+  let preset;
+  switch (name) {
+    case 'test':
+    case 'decentralized-oasis-without-proxies':
+      preset = decentralizedOasisWithoutProxies;
+      break;
+    case 'http':
+      preset = http;
+      break;
+    case 'kovan':
+      preset = kovan;
+      break;
+    default:
+      throw new ConfigPresetNotFoundError(name);
+  }
+  // make a copy so we don't overwrite the original values
+  return merge({}, preset);
+}
+
 export default class ConfigFactory {
   /**
-   * @param {string} presetName
+   * @param {string} preset
    * @param {object} options
    */
-  static create(presetName, options = {}) {
-    if (typeof presetName !== 'string') {
-      options = presetName;
-      presetName = options.preset;
+  static create(preset, options = {}) {
+    if (typeof preset !== 'string') {
+      options = preset;
+      preset = options.preset;
     }
 
-    let baseConfig;
-    switch (presetName) {
-      case 'test':
-      case 'decentralized-oasis-without-proxies':
-        baseConfig = decentralizedOasisWithoutProxies;
-        break;
-      case 'http':
-        baseConfig = http;
-        break;
-      case 'kovan':
-        baseConfig = kovan;
-        break;
-      default:
-        throw new ConfigPresetNotFoundError(presetName);
-    }
+    const config = loadPreset(preset);
 
-    // make a copy so we don't overwrite the original values
-    const config = merge({}, baseConfig);
-
-    // add/merge any service-specific settings
-    for (let service of serviceNames) {
-      const serviceOptions = options[service];
-
-      if (typeof serviceOptions === 'string') {
-        config.services[service] = serviceOptions;
-      } else if (typeof serviceOptions === 'object') {
-        // convert service name to a name/settings pair
-        if (typeof config.services[service] === 'string') {
-          config.services[service] = [config.services[service], {}];
-        }
-
-        merge(config.services[service][1], serviceOptions);
+    for (let role of serviceRoles) {
+      if (!(role in options)) continue;
+      if (!(role in config.services)) {
+        config.services[role] = options[role];
+        continue;
       }
-    }
-
-    // convenience options
-
-    if (options.log === false) {
-      config.services.log = 'NullLogger';
+      config.services[role] = mergeServiceConfig(
+        role,
+        config.services[role],
+        options[role]
+      );
     }
 
     // web3-specific convenience options
+    if (config.services.web3) {
+      const web3Settings = config.services.web3[1] || config.services.web3;
+      if (!web3Settings.provider) web3Settings.provider = {};
 
-    if (options.url) {
-      config.services.web3[1].provider.url = options.url;
-    }
+      if (options.url) {
+        web3Settings.provider.url = options.url;
+      }
 
-    if (options.privateKey) {
-      config.services.web3[1].privateKey = options.privateKey;
-    }
+      if (options.privateKey) {
+        web3Settings.privateKey = options.privateKey;
+      }
 
-    if (options.provider) {
-      merge(config.services.web3[1].provider, options.provider);
+      if (options.provider) {
+        merge(web3Settings.provider, options.provider);
+      }
     }
 
     return config;

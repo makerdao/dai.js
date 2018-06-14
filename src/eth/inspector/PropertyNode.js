@@ -22,11 +22,10 @@ const propertiesInfo = {
   'SAI_TUB._chi': 'Accumulated Tax Rates',
   'SAI_TUB._rhi': 'Accumulated Tax + Fee Rates',
   'SAI_TUB.rum': 'Total normalised debt',
-  'SAI_TUB.cupi': 'CDP ID counter.',
+  'SAI_TUB.cupi': 'CDP ID counter.'
 };
 
 export default class PropertyNode {
-
   constructor(name, contract, id, value, isError = false) {
     this._name = name;
     this._contract = contract;

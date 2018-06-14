@@ -10,7 +10,7 @@ function _createFunctionProxy(
 
     let modifiedResult = false;
     if (handlers.afterCall) {
-       modifiedResult = handlers.afterCall(functionName, args, result);
+      modifiedResult = handlers.afterCall(functionName, args, result);
     }
 
     return modifiedResult || result;

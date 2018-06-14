@@ -1,10 +1,20 @@
-import AllowanceService from '../../src/eth/AllowanceService';
 import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
 const utils = require('ethers').utils;
+import { buildTestService } from '../helpers/serviceBuilders';
+
+function buildTestAllowanceServiceMax() {
+  return buildTestService('allowance', { allowance: true });
+}
+
+function buildTestAllowanceServiceMin() {
+  return buildTestService('allowance', {
+    allowance: { useMinimizeAllowancePolicy: true }
+  });
+}
 
 test('max allowance policy, no need to update', done => {
-  const allowanceService = AllowanceService.buildTestServiceMaxAllowance();
+  const allowanceService = buildTestAllowanceServiceMax();
   allowanceService
     .manager()
     .authenticate()
@@ -44,7 +54,7 @@ test('max allowance policy, no need to update', done => {
 });
 
 test('max allowance policy, need to update', done => {
-  const allowanceService = AllowanceService.buildTestServiceMaxAllowance();
+  const allowanceService = buildTestAllowanceServiceMax();
   allowanceService
     .manager()
     .authenticate()
@@ -84,7 +94,7 @@ test('max allowance policy, need to update', done => {
 });
 
 test('min allowance policy, need to update', done => {
-  const allowanceService = AllowanceService.buildTestServiceMinAllowance();
+  const allowanceService = buildTestAllowanceServiceMin();
   const estimate = 100;
   allowanceService
     .manager()
@@ -118,7 +128,7 @@ test('min allowance policy, need to update', done => {
 });
 
 test('min allowance policy, no need to update', done => {
-  const allowanceService = AllowanceService.buildTestServiceMinAllowance();
+  const allowanceService = buildTestAllowanceServiceMin();
   const estimate = 100;
   const initialAllowance = '200';
   allowanceService
@@ -153,7 +163,7 @@ test('min allowance policy, no need to update', done => {
 });
 
 test('removeAllowance() works, need to update', done => {
-  const allowanceService = AllowanceService.buildTestServiceMinAllowance();
+  const allowanceService = buildTestAllowanceServiceMin();
   allowanceService
     .manager()
     .authenticate()
@@ -184,7 +194,7 @@ test('removeAllowance() works, need to update', done => {
 });
 
 test('removeAllowance() works, no need to update', done => {
-  const allowanceService = AllowanceService.buildTestServiceMinAllowance();
+  const allowanceService = buildTestAllowanceServiceMin();
   allowanceService
     .manager()
     .authenticate()

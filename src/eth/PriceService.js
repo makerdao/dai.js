@@ -1,7 +1,4 @@
 import PrivateService from '../core/PrivateService';
-import EthereumTokenService from '../eth/EthereumTokenService';
-import SmartContractService from './SmartContractService';
-import TransactionManager from './TransactionManager';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import { RAY } from '../utils/constants';
@@ -10,32 +7,12 @@ import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
 
-export default class PriceFeedService extends PrivateService {
-  static buildTestService(suppressOutput = true) {
-    const service = new PriceFeedService();
-    const tokenService = EthereumTokenService.buildTestService();
-    const smartContractService = SmartContractService.buildTestService(
-      null,
-      suppressOutput
-    );
-    const transactionManager = TransactionManager.buildTestService(
-      smartContractService.get('web3')
-    );
-
-    service
-      .manager()
-      .inject('token', tokenService)
-      .inject('smartContract', smartContractService)
-      .inject('transactionManager', transactionManager);
-
-    return service;
-  }
-
+export default class PriceService extends PrivateService {
   /**
    * @param {string} name
    */
 
-  constructor(name = 'priceFeed') {
+  constructor(name = 'price') {
     super(name, ['token', 'smartContract', 'transactionManager']);
   }
 
@@ -60,6 +37,12 @@ export default class PriceFeedService extends PrivateService {
     return this.get('token')
       .getToken(tokens.WETH)
       .toUserFormat(value);
+  }
+
+  getWethToPethRatio() {
+    return this._getContract(contracts.SAI_TUB)
+      .per()
+      .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
   getEthPrice() {

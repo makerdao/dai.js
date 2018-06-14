@@ -1,5 +1,4 @@
 export default class MethodNode {
-
   constructor(name, args, contract, id, value, isError = false) {
     this._name = name;
     this._args = args;

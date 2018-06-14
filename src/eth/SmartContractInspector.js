@@ -3,7 +3,6 @@ import PropertyWatcher from './inspector/PropertyWatcher';
 import MethodWatcher from './inspector/MethodWatcher';
 
 export default class SmartContractInspector {
-
   constructor(smartContractService) {
     this._service = smartContractService;
     this._watchers = { _contracts: [] };
@@ -18,15 +17,17 @@ export default class SmartContractInspector {
 
     if (expression === null) {
       this._watchContract(contract);
-
-    } else if (typeof expression === 'string' && expression.match(/^[_a-zA-Z][_a-zA-Z0-9]+$/)) {
+    } else if (
+      typeof expression === 'string' &&
+      expression.match(/^[_a-zA-Z][_a-zA-Z0-9]+$/)
+    ) {
       this._watchProperty(contract, expression);
-
     } else if (Array.isArray(expression) && expression.length > 0) {
       this._watchMethod(contract, expression[0], expression.slice(1));
-
     } else {
-      throw new Error(`Illegal watch expression for ${contract}: '${expression.toString()}'`);
+      throw new Error(
+        `Illegal watch expression for ${contract}: '${expression.toString()}'`
+      );
     }
 
     return this;
@@ -39,7 +40,7 @@ export default class SmartContractInspector {
 
     const newWatchers = [];
     let result = Promise.resolve(map);
-    
+
     watchers.forEach(w => {
       result = result
         .then(prevMap => w.run(prevMap, this._watchers))
@@ -57,11 +58,16 @@ export default class SmartContractInspector {
         });
     });
 
-    return result.then(prevMap => this._callWatchers(newWatchers, prevMap, maxDepth - 1));
+    return result.then(prevMap =>
+      this._callWatchers(newWatchers, prevMap, maxDepth - 1)
+    );
   }
 
   _watchContract(contractName) {
-    this._watchers._contracts[contractName] = new ContractWatcher(contractName, this._service);
+    this._watchers._contracts[contractName] = new ContractWatcher(
+      contractName,
+      this._service
+    );
   }
 
   _watchProperty(contractName, propertyName) {
@@ -69,7 +75,11 @@ export default class SmartContractInspector {
       this._watchers[contractName] = {};
     }
 
-    const watcher = new PropertyWatcher(contractName, propertyName, this._service);
+    const watcher = new PropertyWatcher(
+      contractName,
+      propertyName,
+      this._service
+    );
     this._watchers[contractName][watcher.id()] = watcher;
   }
 
@@ -78,7 +88,12 @@ export default class SmartContractInspector {
       this._watchers[contractName] = {};
     }
 
-    const watcher = new MethodWatcher(contractName, methodName, args, this._service);
+    const watcher = new MethodWatcher(
+      contractName,
+      methodName,
+      args,
+      this._service
+    );
     this._watchers[contractName][watcher.id()] = watcher;
   }
 

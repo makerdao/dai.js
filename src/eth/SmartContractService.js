@@ -1,5 +1,4 @@
 import PublicService from '../core/PublicService';
-import Web3Service from './Web3Service';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
@@ -9,18 +8,6 @@ import '../polyfills';
 import SmartContractInspector from './SmartContractInspector';
 
 export default class SmartContractService extends PublicService {
-  static buildTestService(web3 = null, suppressOutput = true) {
-    const service = new SmartContractService();
-    web3 = web3 || Web3Service.buildTestService(null, 5000, suppressOutput);
-
-    service
-      .manager()
-      .inject('log', web3.get('log'))
-      .inject('web3', web3);
-
-    return service;
-  }
-
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log']);
   }
