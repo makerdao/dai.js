@@ -62,18 +62,18 @@ export default class Cdp {
     return this._cdpService.getCdpInfo(id);
   }
 
-  async getCollateralAmountInPeth() {
+  async getCollateralValueInPeth() {
     const id = await this.getCdpId();
     return this._cdpService.getCdpCollateralInPeth(id);
   }
 
-  getCollateralAmountInEth() {
+  getCollateralValueInEth() {
     return this.getCdpId().then(id =>
       this._cdpService.getCdpCollateralInEth(id)
     );
   }
 
-  getCollateralAmountInUSD() {
+  getCollateralValueInUSD() {
     return this.getCdpId().then(id =>
       this._cdpService.getCdpCollateralInUSD(id)
     );

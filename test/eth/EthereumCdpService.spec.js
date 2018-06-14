@@ -384,21 +384,21 @@ test('should be able to bite an unsafe cdp', done => {
 test('can read the locked collateral in peth for a cdp ', async () => {
   await openCdp();
   await cdp.lockEth('0.2');
-  const debt = await cdp.getCollateralAmountInPeth();
+  const debt = await cdp.getCollateralValueInPeth();
   expect(debt.toString()).toEqual('0.2');
 });
 
 test('can read the locked collateral in eth for a cdp ', async () => {
   await openCdp();
   await cdp.lockEth('0.2');
-  const debt = await cdp.getCollateralAmountInEth();
+  const debt = await cdp.getCollateralValueInEth();
   expect(debt.toString()).toEqual('0.2');
 });
 
 test('can read the locked collateral in USD for a cdp ', async () => {
   await openCdp();
   await cdp.lockEth('0.2');
-  const debt = await cdp.getCollateralAmountInUSD();
+  const debt = await cdp.getCollateralValueInUSD();
   expect(debt.toString()).toEqual('80');
 });
 
