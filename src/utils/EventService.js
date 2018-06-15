@@ -25,13 +25,17 @@ export default class EventService extends LocalService {
   }
 
   // add a listener to an emitter
-  on(event, listener, emitter = this.emitters.default) {
+  on(event, listener, emitter = this._defaultEmitter()) {
     emitter.on(event, listener);
   }
 
   // push an event through an emitter
-  emit(event, payload, block, emitter = this.emitters.default) {
+  emit(event, payload, block, emitter = this._defaultEmitter()) {
     emitter.emit(event, payload, block);
+  }
+
+  removeListener(event, listener, emitter = this._defaultEmitter()) {
+    emitter.removeListener(event, listener);
   }
 
   // checks all of the state we are watching for updates
@@ -49,8 +53,12 @@ export default class EventService extends LocalService {
     }
   }
 
-  registerPollEvents(eventPayloadHash, emitter = this.emitters.default) {
+  registerPollEvents(eventPayloadHash, emitter = this._defaultEmitter()) {
     emitter.registerPollEvents(eventPayloadHash);
+  }
+
+  _defaultEmitter() {
+    return this.emitters.default;
   }
 
   watchAllRegisteredEvents() {
@@ -94,7 +102,12 @@ export default class EventService extends LocalService {
         // if (!EventService._isValidService(service)) {
         //     throw new Error(`no service called ${service}`);
         // }
+        // start watching if we're not currently watching it?
         _emitter.on(event, listener);
+      },
+      removeListener(event, listener) {
+        // stop watching if we're currently watching it?
+        _emitter.removeListener(event, listener);
       },
       async registerPollEvents(eventPayloadHash) {
         for (let [eventType, payloadSchema] of Object.entries(
@@ -129,6 +142,10 @@ export default class EventService extends LocalService {
   //   static _isValidService(service) {
   //     return true;
   //   }
+
+  //////////////////////////////
+  /////  Polling Helpers  //////
+  //////////////////////////////
 
   // this could be optimized with promise.all, but that
   // might be premature

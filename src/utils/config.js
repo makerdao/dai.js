@@ -17,6 +17,7 @@ export const defaultServices = {
 };
 
 const disabledServices = {
+  event: 'NullEventService',
   log: 'NullLogger'
 };
 

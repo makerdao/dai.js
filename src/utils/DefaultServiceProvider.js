@@ -16,6 +16,7 @@ import TransactionManager from '../eth/TransactionManager';
 import AllowanceService from '../eth/AllowanceService';
 import PriceService from '../eth/PriceService';
 import EventService from './EventService';
+import NullEventService from './NullEventService';
 import { defaultServices, standardizeConfig } from './config';
 
 // maps all possible services to string names, so that configs can refer to them
@@ -30,6 +31,7 @@ const _services = {
   EthereumCdpService,
   EthereumTokenService,
   EventService,
+  NullEventService,
   GasEstimatorService,
   NullLogger,
   OasisExchangeService,
