@@ -44,36 +44,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._errorMessage;
   }
 
-  /*
-  _waitForConfirmations(originalBlockNumber, originalBlockHash, requiredConfirmations = 3){
-
-    let assertBlockHashUnchanged = newBlockNumber => {
-      if (newBlockNumber < originalBlockNumber + requiredConfirmations) {
-        console.log('reregistering handler: newBlockNumber: ', newBlockNumber, ' is lower than required blockNumber: ', originalBlockNumber + requiredConfirmations);
-        this._ethersProvider.once('block', b=>{console.log(b)});
-      } else {
-        console.log('required block number ', originalBlockNumber + requiredConfirmations, ' reached, refreshing transaction receipt', this._hash);
-        this._ethersProvider.getTransactionReceipt(this._hash).then(
-          newReceipt => {
-            if (newReceipt.blockHash === originalBlockHash) {
-              this._finalize(); //set state to finalized
-            } else {
-              this._errorMessage = "transaction block hash changed";
-              console.error(reason);
-            }
-          },
-          reason => {
-            this._errorMessage = reason;
-            console.error(reason);
-          }
-        );
-      }
-    };
-    console.log('registering handler.  original block number: ', originalBlockNumber, ' required block number: ', originalBlockNumber + requiredConfirmations);
-    this._ethersProvider.once('block', assertBlockHashUnchanged);
-  }
-  */
-
   _assertBlockHashUnchanged(originalBlockHash) {
     this._ethersProvider.getTransactionReceipt(this._hash).then(
       newReceipt => {

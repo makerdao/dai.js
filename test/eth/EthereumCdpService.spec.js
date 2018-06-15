@@ -24,278 +24,224 @@ function lockEth(amount) {
     .then(() => cdp.getInfo());
 }
 
-test(
-  'should open a CDP and get cdp ID',
-  done => {
-    openCdp().then(id => {
-      expect(typeof id).toBe('number');
-      expect(id).toBeGreaterThan(0);
+test('should open a CDP and get cdp ID', done => {
+  openCdp().then(id => {
+    expect(typeof id).toBe('number');
+    expect(id).toBeGreaterThan(0);
+    done();
+  });
+});
+
+test('should check if a cdp for a specific id exists', done => {
+  openCdp()
+    .then(cdpId => createdCdpService.getCdpInfo(cdpId))
+    .then(result => {
+      expect(result).toBeTruthy();
+      expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
       done();
     });
-  },
-  5000
-);
+});
 
-test(
-  'should check if a cdp for a specific id exists',
-  done => {
-    openCdp()
-      .then(cdpId => createdCdpService.getCdpInfo(cdpId))
-      .then(result => {
-        expect(result).toBeTruthy();
-        expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-        done();
-      });
-  },
-  5000
-);
+test('should open and then shut a CDP', done => {
+  openCdp().then(id => {
+    createdCdpService.getCdpInfo(id).then(firstInfoCall => {
+      createdCdpService
+        .shutCdp(id)
+        .catch(err => {
+          done.fail(new Error('shutting CDP had an error: ', err));
+        })
+        .then(() => {
+          createdCdpService.getCdpInfo(id).then(secondInfoCall => {
+            expect(firstInfoCall).not.toBe(secondInfoCall);
+            expect(secondInfoCall.lad).toBe(
+              '0x0000000000000000000000000000000000000000'
+            );
+            done();
+          });
+        });
+    });
+  });
+});
 
-test(
-  'should open and then shut a CDP',
-  done => {
-    openCdp().then(id => {
-      createdCdpService.getCdpInfo(id).then(firstInfoCall => {
+test('should open and then shut a CDP with peth locked in it', done => {
+  let firstInfoCall;
+  let cdpId;
+  openCdp()
+    .then(id => {
+      cdpId = id;
+      createdCdpService.getCdpInfo(id);
+    })
+    .then(info => (firstInfoCall = info))
+    .then(() => cdp.lockEth('0.1'))
+    .then(() => createdCdpService.shutCdp(cdpId))
+    .then(() => createdCdpService.getCdpInfo(cdpId))
+    .then(secondInfoCall => {
+      expect(firstInfoCall).not.toBe(secondInfoCall);
+      expect(secondInfoCall.lad).toBe(
+        '0x0000000000000000000000000000000000000000'
+      );
+    })
+    .then(() => done())
+    .catch(err => done.fail(err));
+});
+
+test('should be able to lock eth in a cdp', done => {
+  let firstInfoCall;
+  let cdpId;
+
+  createdCdpService
+    .manager()
+    .authenticate()
+    .then(() => {
+      cdp.getCdpId().then(id => {
+        cdpId = id;
         createdCdpService
-          .shutCdp(id)
-          .catch(err => {
-            done.fail(new Error('shutting CDP had an error: ', err));
+          .getCdpInfo(id)
+          .then(result => (firstInfoCall = result))
+          .then(() => createdCdpService.lockEth(id, '0.1'))
+          .then(() => createdCdpService.getCdpInfo(cdpId))
+          .then(secondInfoCall => {
+            expect(firstInfoCall.ink.toString()).toEqual('0');
+            expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
+            const tokenService = createdCdpService.get('token');
+            const wethToken = tokenService.getToken(tokens.WETH);
+            const pethToken = tokenService.getToken(tokens.PETH);
+            return Promise.all([
+              wethToken.approve(
+                createdCdpService._tubContract().getAddress(),
+                '0'
+              ),
+              pethToken.approve(
+                createdCdpService._tubContract().getAddress(),
+                '0'
+              )
+            ]);
           })
           .then(() => {
-            createdCdpService.getCdpInfo(id).then(secondInfoCall => {
-              expect(firstInfoCall).not.toBe(secondInfoCall);
-              expect(secondInfoCall.lad).toBe(
-                '0x0000000000000000000000000000000000000000'
-              );
-              done();
-            });
+            done();
           });
       });
     });
-  },
-  5000
-);
+});
 
-test(
-  'should open and then shut a CDP with peth locked in it',
-  done => {
-    let firstInfoCall;
-    let cdpId;
-    openCdp()
-      .then(id => {
-        cdpId = id;
-        createdCdpService.getCdpInfo(id);
-      })
-      .then(info => (firstInfoCall = info))
-      .then(() => cdp.lockEth('0.1'))
-      .then(() => createdCdpService.shutCdp(cdpId))
-      .then(() => createdCdpService.getCdpInfo(cdpId))
-      .then(secondInfoCall => {
-        expect(firstInfoCall).not.toBe(secondInfoCall);
-        expect(secondInfoCall.lad).toBe(
-          '0x0000000000000000000000000000000000000000'
-        );
-        const tokenService = createdCdpService.get('token');
-        const wethToken = tokenService.getToken(tokens.WETH);
-        const pethToken = tokenService.getToken(tokens.PETH);
-        const mkrToken = tokenService.getToken(tokens.MKR);
-        return Promise.all([
-          wethToken.approve(createdCdpService._tubContract().getAddress(), '0'),
-          pethToken.approve(createdCdpService._tubContract().getAddress(), '0'),
-          mkrToken.approve(createdCdpService._tubContract().getAddress(), '0')
-        ]);
-      })
-      .then(() => {
-        done();
-      })
-      .catch(err => {
-        done.fail(new Error('shutting CDP had an error: ', err));
-      });
-  },
-  5000
-);
+test('should be able to lock weth in a cdp', async () => {
+  const id = await openCdp();
+  const tokenService = createdCdpService.get('token');
+  const wethToken = tokenService.getToken(tokens.WETH);
+  const pethToken = tokenService.getToken(tokens.PETH);
+  const defaultAccount = createdCdpService
+    .get('token')
+    .get('web3')
+    .defaultAccount();
 
-test(
-  'should be able to lock eth in a cdp',
-  done => {
-    let firstInfoCall;
-    let cdpId;
+  await wethToken.deposit('0.1');
+  const balancePre = await wethToken.balanceOf(defaultAccount);
+  const cdpInfoPre = await createdCdpService.getCdpInfo(id);
+  await createdCdpService.lockWeth(id, '0.1');
+  const cdpInfoPost = await createdCdpService.getCdpInfo(id);
+  const balancePost = await wethToken.balanceOf(defaultAccount);
 
-    createdCdpService
-      .manager()
-      .authenticate()
-      .then(() => {
-        cdp.getCdpId().then(id => {
-          cdpId = id;
-          createdCdpService
-            .getCdpInfo(id)
-            .then(result => (firstInfoCall = result))
-            .then(() => createdCdpService.lockEth(id, '0.1'))
-            .then(() => createdCdpService.getCdpInfo(cdpId))
-            .then(secondInfoCall => {
-              expect(firstInfoCall.ink.toString()).toEqual('0');
-              expect(secondInfoCall.ink.toString()).toEqual(
-                '100000000000000000'
-              );
-              const tokenService = createdCdpService.get('token');
-              const wethToken = tokenService.getToken(tokens.WETH);
-              const pethToken = tokenService.getToken(tokens.PETH);
-              return Promise.all([
-                wethToken.approve(
-                  createdCdpService._tubContract().getAddress(),
-                  '0'
-                ),
-                pethToken.approve(
-                  createdCdpService._tubContract().getAddress(),
-                  '0'
-                )
-              ]);
-            })
-            .then(() => {
-              done();
-            });
-        });
-      });
-  },
-  5000
-);
+  expect(cdpInfoPre.ink.toString()).toEqual('0');
+  expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+  expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
 
-test(
-  'should be able to lock weth in a cdp',
-  async () => {
-    const id = await openCdp();
-    const tokenService = createdCdpService.get('token');
-    const wethToken = tokenService.getToken(tokens.WETH);
-    const pethToken = tokenService.getToken(tokens.PETH);
-    const defaultAccount = createdCdpService
-      .get('token')
-      .get('web3')
-      .defaultAccount();
+  await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+  await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+});
 
-    await wethToken.deposit('0.1');
-    const balancePre = await wethToken.balanceOf(defaultAccount);
-    const cdpInfoPre = await createdCdpService.getCdpInfo(id);
-    await createdCdpService.lockWeth(id, '0.1');
-    const cdpInfoPost = await createdCdpService.getCdpInfo(id);
-    const balancePost = await wethToken.balanceOf(defaultAccount);
+test('should be able to lock peth in a cdp', async () => {
+  const id = await openCdp();
+  const tokenService = createdCdpService.get('token');
+  const wethToken = tokenService.getToken(tokens.WETH);
+  const pethToken = tokenService.getToken(tokens.PETH);
+  const defaultAccount = createdCdpService
+    .get('token')
+    .get('web3')
+    .defaultAccount();
 
-    expect(cdpInfoPre.ink.toString()).toEqual('0');
-    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+  await wethToken.deposit('0.1');
+  await wethToken.approve(createdCdpService._tubContract().getAddress(), '0.1');
+  await pethToken.join('0.1');
 
-    await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-    await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-  },
-  5000
-);
+  const balancePre = await pethToken.balanceOf(defaultAccount);
+  const cdpInfoPre = await createdCdpService.getCdpInfo(id);
+  await createdCdpService.lockPeth(id, '0.1');
+  const cdpInfoPost = await createdCdpService.getCdpInfo(id);
+  const balancePost = await pethToken.balanceOf(defaultAccount);
 
-test(
-  'should be able to lock peth in a cdp',
-  async () => {
-    const id = await openCdp();
-    const tokenService = createdCdpService.get('token');
-    const wethToken = tokenService.getToken(tokens.WETH);
-    const pethToken = tokenService.getToken(tokens.PETH);
-    const defaultAccount = createdCdpService
-      .get('token')
-      .get('web3')
-      .defaultAccount();
+  expect(cdpInfoPre.ink.toString()).toEqual('0');
+  expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+  expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
 
-    await wethToken.deposit('0.1');
-    await wethToken.approve(
-      createdCdpService._tubContract().getAddress(),
-      '0.1'
-    );
-    await pethToken.join('0.1');
+  await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+  await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
+});
 
-    const balancePre = await pethToken.balanceOf(defaultAccount);
-    const cdpInfoPre = await createdCdpService.getCdpInfo(id);
-    await createdCdpService.lockPeth(id, '0.1');
-    const cdpInfoPost = await createdCdpService.getCdpInfo(id);
-    const balancePost = await pethToken.balanceOf(defaultAccount);
+test('should be able to free peth from a cdp', done => {
+  let newCdp;
+  let firstBalance;
+  let cdpId;
 
-    expect(cdpInfoPre.ink.toString()).toEqual('0');
-    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
-
-    await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-    await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-  },
-  5000
-);
-
-test(
-  'should be able to free peth from a cdp',
-  done => {
-    let newCdp;
-    let firstBalance;
-    let cdpId;
-
-    createdCdpService
-      .manager()
-      .authenticate()
-      .then(() => {
-        createdCdpService.openCdp().then(cdp => {
-          newCdp = cdp;
-          newCdp
-            .getCdpId()
-            .then(id => (cdpId = id))
-            .then(() => createdCdpService.lockEth(cdpId, '0.1'))
-            .then(() => {
-              newCdp
-                .getInfo()
-                .then(info => (firstBalance = parseFloat(info.ink)))
-                .then(() => {
-                  createdCdpService.freePeth(cdpId, '0.1').then(() => {
-                    newCdp.getInfo().then(info => {
-                      expect(parseFloat(info.ink)).toBeCloseTo(
-                        firstBalance - 100000000000000000
-                      );
-                      done();
-                    });
+  createdCdpService
+    .manager()
+    .authenticate()
+    .then(() => {
+      createdCdpService.openCdp().then(cdp => {
+        newCdp = cdp;
+        newCdp
+          .getCdpId()
+          .then(id => (cdpId = id))
+          .then(() => createdCdpService.lockEth(cdpId, '0.1'))
+          .then(() => {
+            newCdp
+              .getInfo()
+              .then(info => (firstBalance = parseFloat(info.ink)))
+              .then(() => {
+                createdCdpService.freePeth(cdpId, '0.1').then(() => {
+                  newCdp.getInfo().then(info => {
+                    expect(parseFloat(info.ink)).toBeCloseTo(
+                      firstBalance - 100000000000000000
+                    );
+                    done();
                   });
                 });
-            });
-        });
-      });
-  },
-  5000
-);
-
-test(
-  'should be able to draw dai',
-  done => {
-    let cdpId, firstDaiBalance, defaultAccount, dai;
-
-    createdCdpService
-      .manager()
-      .authenticate()
-      .then(() => {
-        lockEth('0.1')
-          .then(() => cdp.getCdpId())
-          .then(id => {
-            dai = createdCdpService.get('token').getToken(tokens.DAI);
-            defaultAccount = createdCdpService
-              .get('token')
-              .get('web3')
-              .defaultAccount();
-            cdpId = id;
-            dai.balanceOf(defaultAccount).then(balance => {
-              firstDaiBalance = parseFloat(balance);
-              createdCdpService
-                .drawDai(cdpId, '1')
-                .then(() => dai.balanceOf(defaultAccount))
-                .then(secondDaiBalance => {
-                  expect(parseFloat(secondDaiBalance)).toBeCloseTo(
-                    firstDaiBalance + 1
-                  );
-                  cdp.wipeDai('1').then(() => done());
-                });
-            });
+              });
           });
       });
-  },
-  5000
-);
+    });
+});
+
+test('should be able to draw dai', done => {
+  let cdpId, firstDaiBalance, defaultAccount, dai;
+
+  createdCdpService
+    .manager()
+    .authenticate()
+    .then(() => {
+      lockEth('0.1')
+        .then(() => cdp.getCdpId())
+        .then(id => {
+          dai = createdCdpService.get('token').getToken(tokens.DAI);
+          defaultAccount = createdCdpService
+            .get('token')
+            .get('web3')
+            .defaultAccount();
+          cdpId = id;
+          dai.balanceOf(defaultAccount).then(balance => {
+            firstDaiBalance = parseFloat(balance);
+            createdCdpService
+              .drawDai(cdpId, '1')
+              .then(() => dai.balanceOf(defaultAccount))
+              .then(secondDaiBalance => {
+                expect(parseFloat(secondDaiBalance)).toBeCloseTo(
+                  firstDaiBalance + 1
+                );
+                cdp.wipeDai('1').then(() => done());
+              });
+          });
+        });
+    });
+});
 
 test('should be able to wipe dai', done => {
   let cdpId, firstDaiBalance, defaultAccount, dai;
