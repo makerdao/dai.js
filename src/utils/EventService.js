@@ -12,35 +12,18 @@ export default class EventService extends LocalService {
   constructor(name = 'event') {
     super(name);
 
+    // all of our emitters – we can have many of these
+    // e.g. one for our maker object, a couple on some cdp objects, a few more for transaction objects, etc
     this.emitters = {};
 
-    // this is our default emitter, this will be the maker object's emitter in all likelihood
+    // this is our default emitter, it will likely be the maker object's personal emitter
     this.createEmitter({ defaultEmitter: true });
-    // I'd rather assign the default pipeline directly in the constructor
 
     this.ping = this.ping.bind(this);
-    // null service
-    // pub sub
-    // cast
   }
 
-  // add a listener to an emitter
-  on(event, listener, emitter = this._defaultEmitter()) {
-    emitter.on(event, listener);
-  }
-
-  // push an event through an emitter
-  emit(event, payload, block, emitter = this._defaultEmitter()) {
-    emitter.emit(event, payload, block);
-  }
-
-  removeListener(event, listener, emitter = this._defaultEmitter()) {
-    emitter.removeListener(event, listener);
-  }
-
-  // checks all of the state we are watching for updates
-  // this is called on every new block from the web3service
-  // but it could be called anytime we want to check for state changes
+  // checks all of our active polls for new state
+  // this is currently called on every new block from Web3Service
   ping(block) {
     for (const emitter of Object.values(this.emitters)) {
       this._pingEmitter(emitter, block);
@@ -53,20 +36,37 @@ export default class EventService extends LocalService {
     }
   }
 
-  registerPollEvents(eventPayloadHash, emitter = this._defaultEmitter()) {
-    emitter.registerPollEvents(eventPayloadHash);
+  // add a event listener to an emitter
+  on(event, listener, emitter = this._defaultEmitter()) {
+    emitter.on(event, listener);
+  }
+
+  // push an event through an emitter
+  emit(event, payload, block, emitter = this._defaultEmitter()) {
+    emitter.emit(event, payload, block);
+  }
+
+  // remove a listener from an emitter
+  removeListener(event, listener, emitter = this._defaultEmitter()) {
+    emitter.removeListener(event, listener);
+  }
+
+  registerPollEvents(eventPayloadMap, emitter = this._defaultEmitter()) {
+    return emitter.registerPollEvents(eventPayloadMap);
   }
 
   _defaultEmitter() {
     return this.emitters.default;
   }
 
+  // start polling for all of the events that have been registered (regardless of emitter)
   watchAllRegisteredEvents() {
     for (const emitter of Object.values(this.emitters)) {
       emitter.watchAll();
     }
   }
 
+  // decorated emitter factory
   createEmitter({
     _emitter = new EventEmitter2({
       wildcard: true,
@@ -77,9 +77,11 @@ export default class EventService extends LocalService {
     defaultEmitter = false
   } = {}) {
     const newEmitter = this._createEmitter({ _emitter, indexer, name });
+
     if (defaultEmitter) {
       this.emitters.default = newEmitter;
     } else this.emitters[name] = newEmitter;
+
     return newEmitter;
   }
 
@@ -102,26 +104,27 @@ export default class EventService extends LocalService {
         // if (!EventService._isValidService(service)) {
         //     throw new Error(`no service called ${service}`);
         // }
-        // start watching if we're not currently watching it?
+        // start watching if we're not currently watching {event}?
         _emitter.on(event, listener);
       },
       removeListener(event, listener) {
-        // stop watching if we're currently watching it?
+        // stop watching if we're currently watching {event}?
         _emitter.removeListener(event, listener);
       },
-      async registerPollEvents(eventPayloadHash) {
-        for (let [eventType, payloadSchema] of Object.entries(
-          eventPayloadHash
+      async registerPollEvents(eventPayloadMap) {
+        for (const [eventType, payloadGetterMap] of Object.entries(
+          eventPayloadMap
         )) {
           const payloadFetcher = EventService._createPayloadFetcher(
-            payloadSchema
+            payloadGetterMap
           );
           const memoizedPoll = await EventService._createMemoizedPoll({
             type: eventType,
             emit: this.emit,
             getState: payloadFetcher
           });
-          coldPolls.push(memoizedPoll);
+          // right now we push straight into hot polls for convenience while testing
+          hotPolls.push(memoizedPoll);
         }
       },
       watchAll() {
@@ -147,12 +150,11 @@ export default class EventService extends LocalService {
   /////  Polling Helpers  //////
   //////////////////////////////
 
-  // this could be optimized with promise.all, but that
-  // might be premature
+  // this could be made more efficient with promise.all
   static _createPayloadFetcher(payloadSchema) {
     return async () => {
       const payload = {};
-      for (let [key, getter] of Object.entries(payloadSchema)) {
+      for (const [key, getter] of Object.entries(payloadSchema)) {
         payload[key] = await getter();
       }
       return payload;

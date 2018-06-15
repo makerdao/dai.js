@@ -5,13 +5,22 @@ export default class Cdp {
     this._cdpService = cdpService;
     this._transactionManager = this._cdpService.get('transactionManager');
     this._smartContractService = this._cdpService.get('smartContract');
-    this._eventService = this._cdpService.get('event');
-    this._eventPipeline = this._eventService.createEmitter({ name: cdpId });
     if (cdpId === null) {
       this._cdpIdPromise = this._newCdpPromise();
     } else {
       this._cdpIdPromise = Promise.resolve(cdpId);
     }
+    this._eventService = this._cdpService.get('event');
+    this._eventEmitter = this._eventService.createEmitter({ name: cdpId });
+    this._eventEmitter.registerPollEvents({
+      COLLATERAL: {
+        USD: () => this.getCollateralAmountInUSD(),
+        ETH: () => this.getCollateralAmountInEth()
+      },
+      DEBT: {
+        dai: () => this.getDebtAmount()
+      }
+    });
   }
 
   _captureCdpIdPromise(tubContract) {
@@ -47,7 +56,7 @@ export default class Cdp {
   }
 
   on(event, listener) {
-    this._eventPipeline.on(event, listener);
+    this._eventEmitter.on(event, listener);
   }
 
   transactionObject() {
