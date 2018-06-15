@@ -20,8 +20,10 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._fees = null;
     this._logs = null;
     this._hash = null;
-    this._getTransactionData();
-    this._self = this;
+  }
+
+  execute() {
+    return this._getTransactionData().then(() => this);
   }
 
   timeStampSubmitted() {

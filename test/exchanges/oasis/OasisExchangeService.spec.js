@@ -37,27 +37,23 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
       const daiAddress = ethereumTokenService.getToken(tokens.DAI).address();
       const overrideOptions = { gasLimit: 5500000 };
       if (sellDai) {
-        return oasisExchangeService
-          .offer(
-            utils.parseEther('0.5'),
-            daiAddress,
-            utils.parseEther('2.0'),
-            wethAddress,
-            0,
-            overrideOptions
-          )
-          .onMined();
+        return oasisExchangeService.offer(
+          utils.parseEther('0.5'),
+          daiAddress,
+          utils.parseEther('2.0'),
+          wethAddress,
+          0,
+          overrideOptions
+        );
       } else {
-        return oasisExchangeService
-          .offer(
-            utils.parseEther('0.5'),
-            wethAddress,
-            utils.parseEther('10.0'),
-            daiAddress,
-            1,
-            overrideOptions
-          )
-          .onMined();
+        return oasisExchangeService.offer(
+          utils.parseEther('0.5'),
+          wethAddress,
+          utils.parseEther('10.0'),
+          daiAddress,
+          1,
+          overrideOptions
+        );
       }
     })
     .then(() => {

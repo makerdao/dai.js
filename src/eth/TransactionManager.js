@@ -1,6 +1,5 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
-import TransactionState from './TransactionState';
 import ObjectWrapper from '../utils/ObjectWrapper';
 
 let txId = 1;
@@ -12,20 +11,22 @@ export default class TransactionManager extends PublicService {
     this._listeners = [];
   }
 
+  // FIXME: having a method that returns one thing when it's called in a promise
+  // chain and something else when it's not (besides a promise that resolves to
+  // the first thing) makes it pretty difficult to work with.
   createTransactionHybrid(
     contractTransaction,
     businessObject = null,
-    implicitState = TransactionState.mined,
     parseLogs = null
   ) {
     const tx = new TransactionObject(
-        contractTransaction,
-        this.get('web3'),
-        businessObject,
-        parseLogs
-      ),
-      hybrid = this._getImplicitStatePromise(tx, implicitState);
+      contractTransaction,
+      this.get('web3'),
+      businessObject,
+      parseLogs
+    );
 
+    const hybrid = tx.execute().then(() => tx.onMined());
     hybrid._original = tx;
     hybrid.getOriginalTransaction = () => tx;
     hybrid._txId = txId++;
@@ -54,21 +55,5 @@ export default class TransactionManager extends PublicService {
 
   onNewTransaction(callback) {
     this._listeners.push(callback);
-  }
-
-  _getImplicitStatePromise(transaction, state) {
-    switch (state) {
-      case TransactionState.pending:
-        return transaction.onPending();
-
-      case TransactionState.mined:
-        return transaction.onMined();
-
-      case TransactionState.finalized:
-        return transaction.onFinalized();
-
-      default:
-        throw new Error('Invalid implicit transaction state: ' + state);
-    }
   }
 }

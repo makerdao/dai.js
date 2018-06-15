@@ -86,7 +86,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
   }
 
   //only used to set up a limit order on the local testnet
-  offer(
+  async offer(
     payAmount,
     payTokenAddress,
     buyAmount,
@@ -97,7 +97,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    return new TransactionObject(
+    const tx = new TransactionObject(
       oasisContract.offer(
         payAmount,
         payTokenAddress,
@@ -108,5 +108,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
       ),
       this.get('web3')
     );
+    await tx.execute();
+    return tx;
   }
 }

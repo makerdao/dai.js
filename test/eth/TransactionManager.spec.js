@@ -57,61 +57,22 @@ test('should create a Transaction object based on a Contract transaction promise
   });
 });
 
-test(
-  'should resolve the hybrid object when its implicit state is reached',
-  done => {
-    buildTestServices().then(services => {
-      const contract = services.contract.getContractByName(tokens.DAI),
-        contractTransaction = contract.approve(
-          services.defaultAccount,
-          '1000000000000000000'
-        ),
-        pendingStatehybrid = services.txMgr.createTransactionHybrid(
-          contractTransaction,
-          null,
-          TransactionState.pending
-        ),
-        minedStatehybrid = services.txMgr.createTransactionHybrid(
-          contractTransaction,
-          null,
-          TransactionState.mined
-        ),
-        finalizedStatehybrid = services.txMgr.createTransactionHybrid(
-          contractTransaction,
-          null,
-          TransactionState.finalized
-        );
+test('should resolve the hybrid object when it is mined', async () => {
+  const services = await buildTestServices();
+  const contract = services.contract.getContractByName(tokens.DAI),
+    contractTransaction = contract.approve(
+      services.defaultAccount,
+      '1000000000000000000'
+    ),
+    hybrid = services.txMgr.createTransactionHybrid(
+      contractTransaction,
+      null,
+      TransactionState.mined
+    );
 
-      pendingStatehybrid
-        .then(() => {
-          expect(pendingStatehybrid._original.isPending()).toBe(true);
-          return minedStatehybrid;
-        })
-        .then(() => {
-          expect(pendingStatehybrid._original.isMined()).toBe(true);
-
-          let finished = false;
-          finalizedStatehybrid.then(() => {
-            expect(finalizedStatehybrid._original.isFinalized()).toBe(true);
-            finished = true;
-            done();
-          });
-
-          let promise = Promise.resolve(),
-            RequiredConfirmations = 3; // Update this when the value in TransactionObject changes!!
-          for (let i = 0; !finished && i < RequiredConfirmations; i++) {
-            promise = promise.then(() =>
-              contract.approve(
-                services.defaultAccount,
-                '100000000000000000' + (i + 1).toString()
-              )
-            );
-          }
-        });
-    });
-  },
-  5000
-);
+  await hybrid;
+  expect(hybrid._original.isMined()).toBe(true);
+});
 
 test('should register all created transaction hybrids', done => {
   buildTestServices().then(services => {
@@ -127,40 +88,6 @@ test('should register all created transaction hybrids', done => {
     expect(services.txMgr.getTransactions().length).toBe(3);
     expect(services.txMgr.getTransactions()).toEqual(hybrids);
     Promise.all(hybrids).then(() => done());
-  });
-});
-
-test('should reject invalid implicit states', done => {
-  buildTestServices().then(services => {
-    const contractTransaction = services.contract
-      .getContractByName(tokens.DAI)
-      .approve(services.defaultAccount, '1000000000000000000');
-
-    expect(() =>
-      services.txMgr.createTransactionHybrid(
-        contractTransaction,
-        null,
-        TransactionState.initialized
-      )
-    ).toThrow('Invalid implicit transaction state: initialized');
-
-    expect(() =>
-      services.txMgr.createTransactionHybrid(
-        contractTransaction,
-        null,
-        TransactionState.error
-      )
-    ).toThrow('Invalid implicit transaction state: error');
-
-    expect(() =>
-      services.txMgr.createTransactionHybrid(
-        contractTransaction,
-        null,
-        'NOT_A_STATE'
-      )
-    ).toThrow('Invalid implicit transaction state: NOT_A_STATE');
-
-    done();
   });
 });
 
