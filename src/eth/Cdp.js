@@ -6,7 +6,7 @@ export default class Cdp {
     this._transactionManager = this._cdpService.get('transactionManager');
     this._smartContractService = this._cdpService.get('smartContract');
     this._eventService = this._cdpService.get('event');
-    this._eventPipeline = this._eventService.createPipeline({ name: cdpId });
+    this._eventPipeline = this._eventService.createEmitter({ name: cdpId });
     if (cdpId === null) {
       this._cdpIdPromise = this._newCdpPromise();
     } else {
