@@ -12,7 +12,8 @@ export default class EventService extends LocalService {
   constructor(name = 'event') {
     super(name);
 
-    // all of our emitters – we can have many of these
+    // all of our emitters
+    // we can have many of these
     // e.g. one for our maker object, a couple on some cdp objects, a few more for transaction objects, etc
     this.emitters = {};
 

@@ -17,17 +17,17 @@ export default class PriceService extends PrivateService {
   }
 
   initialize() {
-    this.get('event').registerPollEvents({
-      'price/ETH_USD': {
-        price: () => this.getEthPrice()
-      },
-      'price/MKR_USD': {
-        price: () => this.getMkrPrice()
-      },
-      'price/WETH_PETH': {
-        ratio: () => this.getWethToPethRatio()
-      }
-    });
+    // this.get('event').registerPollEvents({
+    //   'price/ETH_USD': {
+    //     price: () => this.getEthPrice()
+    //   },
+    //   'price/MKR_USD': {
+    //     price: () => this.getMkrPrice()
+    //   },
+    //   'price/WETH_PETH': {
+    //     ratio: () => this.getWethToPethRatio()
+    //   }
+    // });
   }
 
   _getContract(contract) {
