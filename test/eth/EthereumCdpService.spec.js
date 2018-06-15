@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 let createdCdpService, cdp;
 
 beforeEach(() => {
-  return (createdCdpService = buildTestEthereumCdpService());
+  createdCdpService = buildTestEthereumCdpService();
 });
 
 function openCdp() {
@@ -24,52 +24,52 @@ function lockEth(amount) {
     .then(() => cdp.getInfo());
 }
 
-test('should open a CDP and get cdp ID', done => {
-  openCdp().then(id => {
+test('should open a CDP and get cdp ID', () => {
+  return openCdp().then(id => {
     expect(typeof id).toBe('number');
     expect(id).toBeGreaterThan(0);
-    done();
   });
 });
 
-test('should check if a cdp for a specific id exists', done => {
-  openCdp()
+test('should check if a cdp for a specific id exists', () => {
+  expect.assertions(2);
+  return openCdp()
     .then(cdpId => createdCdpService.getCdpInfo(cdpId))
     .then(result => {
       expect(result).toBeTruthy();
       expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-      done();
     });
 });
 
-test('should open and then shut a CDP', done => {
-  openCdp().then(id => {
-    createdCdpService.getCdpInfo(id).then(firstInfoCall => {
-      createdCdpService
-        .shutCdp(id)
-        .catch(err => {
-          done.fail(new Error('shutting CDP had an error: ', err));
-        })
-        .then(() => {
-          createdCdpService.getCdpInfo(id).then(secondInfoCall => {
-            expect(firstInfoCall).not.toBe(secondInfoCall);
-            expect(secondInfoCall.lad).toBe(
-              '0x0000000000000000000000000000000000000000'
-            );
-            done();
-          });
-        });
-    });
-  });
-});
-
-test('should open and then shut a CDP with peth locked in it', done => {
-  let firstInfoCall;
-  let cdpId;
-  openCdp()
+test('should open and then shut a CDP', () => {
+  expect.assertions(2);
+  let cdpId, firstInfoCall;
+  return openCdp()
     .then(id => {
       cdpId = id;
-      createdCdpService.getCdpInfo(id);
+      return createdCdpService.getCdpInfo(id);
+    })
+    .then(info => {
+      firstInfoCall = info;
+      return createdCdpService.shutCdp(cdpId);
+    })
+    .then(() => createdCdpService.getCdpInfo(cdpId))
+    .then(secondInfoCall => {
+      expect(firstInfoCall).not.toBe(secondInfoCall);
+      expect(secondInfoCall.lad).toBe(
+        '0x0000000000000000000000000000000000000000'
+      );
+    });
+});
+
+test('should open and then shut a CDP with peth locked in it', () => {
+  expect.assertions(2);
+  let firstInfoCall;
+  let cdpId;
+  return openCdp()
+    .then(id => {
+      cdpId = id;
+      return createdCdpService.getCdpInfo(id);
     })
     .then(info => (firstInfoCall = info))
     .then(() => cdp.lockEth('0.1'))
@@ -80,47 +80,25 @@ test('should open and then shut a CDP with peth locked in it', done => {
       expect(secondInfoCall.lad).toBe(
         '0x0000000000000000000000000000000000000000'
       );
-    })
-    .then(() => done())
-    .catch(err => done.fail(err));
+    });
 });
 
-test('should be able to lock eth in a cdp', done => {
-  let firstInfoCall;
-  let cdpId;
+test('should be able to lock eth in a cdp', () => {
+  expect.assertions(2);
+  let firstInfoCall, cdpId;
 
-  createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => {
-      cdp.getCdpId().then(id => {
-        cdpId = id;
-        createdCdpService
-          .getCdpInfo(id)
-          .then(result => (firstInfoCall = result))
-          .then(() => createdCdpService.lockEth(id, '0.1'))
-          .then(() => createdCdpService.getCdpInfo(cdpId))
-          .then(secondInfoCall => {
-            expect(firstInfoCall.ink.toString()).toEqual('0');
-            expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
-            const tokenService = createdCdpService.get('token');
-            const wethToken = tokenService.getToken(tokens.WETH);
-            const pethToken = tokenService.getToken(tokens.PETH);
-            return Promise.all([
-              wethToken.approve(
-                createdCdpService._tubContract().getAddress(),
-                '0'
-              ),
-              pethToken.approve(
-                createdCdpService._tubContract().getAddress(),
-                '0'
-              )
-            ]);
-          })
-          .then(() => {
-            done();
-          });
-      });
+  return openCdp()
+    .then(() => cdp.getCdpId())
+    .then(id => {
+      cdpId = id;
+      return createdCdpService.getCdpInfo(id);
+    })
+    .then(result => (firstInfoCall = result))
+    .then(() => createdCdpService.lockEth(cdpId, '0.1'))
+    .then(() => createdCdpService.getCdpInfo(cdpId))
+    .then(secondInfoCall => {
+      expect(firstInfoCall.ink.toString()).toEqual('0');
+      expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
     });
 });
 
@@ -177,81 +155,71 @@ test('should be able to lock peth in a cdp', async () => {
   await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
 });
 
-test('should be able to free peth from a cdp', done => {
+test('should be able to free peth from a cdp', () => {
+  expect.assertions(1);
   let newCdp;
   let firstBalance;
   let cdpId;
 
-  createdCdpService
+  return createdCdpService
     .manager()
     .authenticate()
-    .then(() => {
-      createdCdpService.openCdp().then(cdp => {
-        newCdp = cdp;
-        newCdp
-          .getCdpId()
-          .then(id => (cdpId = id))
-          .then(() => createdCdpService.lockEth(cdpId, '0.1'))
-          .then(() => {
-            newCdp
-              .getInfo()
-              .then(info => (firstBalance = parseFloat(info.ink)))
-              .then(() => {
-                createdCdpService.freePeth(cdpId, '0.1').then(() => {
-                  newCdp.getInfo().then(info => {
-                    expect(parseFloat(info.ink)).toBeCloseTo(
-                      firstBalance - 100000000000000000
-                    );
-                    done();
-                  });
-                });
-              });
-          });
-      });
-    });
-});
-
-test('should be able to draw dai', done => {
-  let cdpId, firstDaiBalance, defaultAccount, dai;
-
-  createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => {
-      lockEth('0.1')
-        .then(() => cdp.getCdpId())
-        .then(id => {
-          dai = createdCdpService.get('token').getToken(tokens.DAI);
-          defaultAccount = createdCdpService
-            .get('token')
-            .get('web3')
-            .defaultAccount();
-          cdpId = id;
-          dai.balanceOf(defaultAccount).then(balance => {
-            firstDaiBalance = parseFloat(balance);
-            createdCdpService
-              .drawDai(cdpId, '1')
-              .then(() => dai.balanceOf(defaultAccount))
-              .then(secondDaiBalance => {
-                expect(parseFloat(secondDaiBalance)).toBeCloseTo(
-                  firstDaiBalance + 1
-                );
-                cdp.wipeDai('1').then(() => done());
-              });
-          });
-        });
-    });
-});
-
-test('should be able to wipe dai', done => {
-  let cdpId, firstDaiBalance, defaultAccount, dai;
-
-  createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => {
-      return lockEth('0.1');
+    .then(() => createdCdpService.openCdp())
+    .then(cdp => {
+      newCdp = cdp;
+      return newCdp.getCdpId();
     })
+    .then(id => (cdpId = id))
+    .then(() => createdCdpService.lockEth(cdpId, '0.1'))
+    .then(() => newCdp.getInfo())
+    .then(info => (firstBalance = parseFloat(info.ink)))
+    .then(() => createdCdpService.freePeth(cdpId, '0.1'))
+    .then(() => newCdp.getInfo())
+    .then(info => {
+      expect(parseFloat(info.ink)).toBeCloseTo(
+        firstBalance - 100000000000000000
+      );
+    });
+});
+
+test('should be able to draw dai', () => {
+  expect.assertions(1);
+  let cdpId, firstDaiBalance, defaultAccount, dai;
+
+  return createdCdpService
+    .manager()
+    .authenticate()
+    .then(() => lockEth('0.1'))
+    .then(() => cdp.getCdpId())
+    .then(id => {
+      dai = createdCdpService.get('token').getToken(tokens.DAI);
+      defaultAccount = createdCdpService
+        .get('token')
+        .get('web3')
+        .defaultAccount();
+      cdpId = id;
+      return dai.balanceOf(defaultAccount);
+    })
+    .then(balance => {
+      firstDaiBalance = parseFloat(balance);
+      return createdCdpService
+        .drawDai(cdpId, '1')
+        .then(() => dai.balanceOf(defaultAccount));
+    })
+    .then(secondDaiBalance => {
+      expect(parseFloat(secondDaiBalance)).toBeCloseTo(firstDaiBalance + 1);
+      return cdp.wipeDai('1');
+    });
+});
+
+test('should be able to wipe dai', () => {
+  expect.assertions(1);
+  let cdpId, firstDaiBalance, defaultAccount, dai;
+
+  return createdCdpService
+    .manager()
+    .authenticate()
+    .then(() => lockEth('0.1'))
     .then(() => cdp.getCdpId())
     .then(id => {
       dai = createdCdpService.get('token').getToken(tokens.DAI);
@@ -272,59 +240,45 @@ test('should be able to wipe dai', done => {
       expect(parseFloat(secondDaiBalance)).toBeCloseTo(
         parseFloat(firstDaiBalance) - 1
       );
-      const tokenService = createdCdpService.get('token');
-      const mkrToken = tokenService.getToken(tokens.MKR);
-      return Promise.all([
-        mkrToken.approve(createdCdpService._tubContract().getAddress(), '0'),
-        dai.approve(createdCdpService._tubContract().getAddress(), '0')
-      ]);
-    })
-    .then(() => {
-      done();
     });
 });
 
-test('should be able to transfer ownership of a cdp', done => {
+test('should be able to transfer ownership of a cdp', () => {
+  expect.assertions(2);
   const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
   let cdpId, firstOwner;
-
-  createdCdpService
+  return createdCdpService
     .manager()
     .authenticate()
-    .then(() => {
-      openCdp()
-        .then(id => (cdpId = id))
-        .then(() => cdp.getInfo())
-        .then(info => (firstOwner = info.lad))
-        .then(() => createdCdpService.give(cdpId, newAddress))
-        .then(() => cdp.getInfo())
-        .then(info => {
-          expect(info.lad).not.toEqual(firstOwner);
-          expect(info.lad).toEqual(newAddress);
-          done();
-        });
+    .then(() => openCdp())
+    .then(id => (cdpId = id))
+    .then(() => cdp.getInfo())
+    .then(info => (firstOwner = info.lad))
+    .then(() => createdCdpService.give(cdpId, newAddress))
+    .then(() => cdp.getInfo())
+    .then(info => {
+      expect(info.lad).not.toEqual(firstOwner);
+      expect(info.lad).toEqual(newAddress);
     });
 });
 
 // Also test that biting a safe cdp throws an error
-test('should be able to bite an unsafe cdp', done => {
+test('should be able to bite an unsafe cdp', () => {
+  expect.assertions(1);
   let id;
 
-  createdCdpService
+  return createdCdpService
     .manager()
     .authenticate()
-    .then(() => {
-      lockEth('0.1')
-        .then(() => cdp.drawDai('13'))
-        .then(() => cdp.getCdpId())
-        .then(cdpId => (id = cdpId))
-        .then(() => createdCdpService.get('price').setEthPrice('0.01'))
-        .then(() => createdCdpService.get('price').getEthPrice())
-        .then(() => createdCdpService.bite(id))
-        .then(res => expect(typeof res).toEqual('object'))
-        .then(() => createdCdpService.get('price').setEthPrice('400'))
-        .then(() => done());
-    });
+    .then(() => lockEth('0.1'))
+    .then(() => cdp.drawDai('13'))
+    .then(() => cdp.getCdpId())
+    .then(cdpId => (id = cdpId))
+    .then(() => createdCdpService.get('price').setEthPrice('0.01'))
+    .then(() => createdCdpService.get('price').getEthPrice())
+    .then(() => createdCdpService.bite(id))
+    .then(res => expect(typeof res).toEqual('object'))
+    .then(() => createdCdpService.get('price').setEthPrice('400'));
 });
 
 test('can read the locked collateral in peth for a cdp ', async () => {
