@@ -10,17 +10,19 @@ export default class Cdp {
     } else {
       this._cdpIdPromise = Promise.resolve(cdpId);
     }
-    // this._eventService = this._cdpService.get('event');
-    // this._eventEmitter = this._eventService.createEmitter({ name: cdpId });
-    // this._eventEmitter.registerPollEvents({
-    //   COLLATERAL: {
-    //     USD: () => this.getCollateralAmountInUSD(),
-    //     ETH: () => this.getCollateralAmountInEth()
-    //   },
-    //   DEBT: {
-    //     dai: () => this.getDebtAmount()
-    //   }
-    // });
+    this._emitterInstance = this._cdpService.get('event').buildEmitter();
+    this.on = this._emitterInstance.on;
+    this._emitterInstance
+      .registerPollEvents({
+        COLLATERAL: {
+          USD: () => this.getCollateralAmountInUSD(),
+          ETH: () => this.getCollateralAmountInEth()
+        },
+        DEBT: {
+          dai: () => this.getDebtAmount()
+        }
+      })
+      .activatePolls();
   }
 
   _captureCdpIdPromise(tubContract) {
@@ -53,10 +55,6 @@ export default class Cdp {
     return Promise.all([captureCdpIdPromise, contractPromise]).then(
       result => result[0]
     );
-  }
-
-  on(event, listener) {
-    this._eventEmitter.on(event, listener);
   }
 
   transactionObject() {

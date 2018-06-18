@@ -1,40 +1,47 @@
-import LocalService from '../core/LocalService';
+import PrivateService from '../core/PrivateService';
 import { eventIndexer, slug } from './index';
 import isEqual from 'lodash.isequal';
 import EventEmitterObj from 'eventemitter2';
 
 const { EventEmitter2 } = EventEmitterObj;
 
-export default class EventService extends LocalService {
+export default class EventService extends PrivateService {
   /**
    * @param {string} name
    */
   constructor(name = 'event') {
-    super(name);
+    super(name, ['log']);
 
+    this.block = null;
     // all of our emitters
     // we can have many of these
-    // e.g. one for our maker object, a couple on some cdp objects, a few more for transaction objects, etc
+    // e.g. one for our maker object, a couple on some cdp objects, a few more on transaction objects, etc
     this.emitters = {};
 
     // this is our default emitter, it will likely be the maker object's personal emitter
-    this.createEmitter({ defaultEmitter: true });
-
+    this.buildEmitter({ defaultEmitter: true });
     this.ping = this.ping.bind(this);
   }
 
-  // checks all of our active polls for new state
+  // check all of our active polls for new state
   // this is currently called on every new block from Web3Service
   ping(block) {
+    this._setBlock(block);
     for (const emitter of Object.values(this.emitters)) {
       this._pingEmitter(emitter, block);
     }
   }
 
   _pingEmitter(emitter, block) {
-    for (const poll of emitter.getHotPolls()) {
-      poll.ping(block);
-    }
+    return Promise.all(emitter.getPolls().map(poll => poll.ping(block)));
+  }
+
+  _setBlock(block) {
+    this.block = block;
+  }
+
+  _getBlock() {
+    return this.block;
   }
 
   // add a event listener to an emitter
@@ -52,46 +59,55 @@ export default class EventService extends LocalService {
     emitter.removeListener(event, listener);
   }
 
+  disposeEmitter(name) {
+    if (name === 'default') {
+      this._logError(name, 'cannot dispose default emitter');
+    } else delete this.emitters[name];
+  }
+
   registerPollEvents(eventPayloadMap, emitter = this._defaultEmitter()) {
     return emitter.registerPollEvents(eventPayloadMap);
+  }
+
+  activatePollsForAllEmitters() {
+    Object.values(this.emitters).forEach(emitter => emitter.activatePolls());
   }
 
   _defaultEmitter() {
     return this.emitters.default;
   }
 
-  // start polling for all of the events that have been registered (regardless of emitter)
-  watchAllRegisteredEvents() {
-    for (const emitter of Object.values(this.emitters)) {
-      emitter.watchAll();
-    }
+  _logError(name, msg) {
+    this.get('log').error(`Problem encountered in emitter ${name}: ${msg}`);
   }
 
-  // decorated emitter factory
-  createEmitter({
+  // emitter factory
+  buildEmitter({
     _emitter = new EventEmitter2({
       wildcard: true,
       delimiter: '/'
     }),
+    _name = slug(),
     indexer = eventIndexer(),
-    name = slug(),
     defaultEmitter = false
   } = {}) {
-    const newEmitter = this._createEmitter({ _emitter, indexer, name });
-
-    if (defaultEmitter) {
-      this.emitters.default = newEmitter;
-    } else this.emitters[name] = newEmitter;
-
+    const name = defaultEmitter ? 'default' : _name;
+    const disposer = this.disposeEmitter.bind(this, name);
+    const _getBlock = this._getBlock.bind(this);
+    const newEmitter = this._buildEmitter({
+      _emitter,
+      indexer,
+      disposer,
+      _getBlock
+    });
+    newEmitter.on('error', msg => this._logError(name, msg));
+    this.emitters[name] = newEmitter;
     return newEmitter;
   }
 
-  _createEmitter({ _emitter, indexer }) {
-    let hotPolls = [];
-    let coldPolls = [];
-
+  _buildEmitter({ _emitter, indexer, disposer, _getBlock, polls = [] }) {
     return {
-      emit(event, payload, block) {
+      emit(event, payload = {}, block = _getBlock()) {
         const eventObj = {
           block,
           payload,
@@ -101,10 +117,6 @@ export default class EventService extends LocalService {
         _emitter.emit(event, eventObj);
       },
       on(event, listener) {
-        // const service = event.split('/')[0];
-        // if (!EventService._isValidService(service)) {
-        //     throw new Error(`no service called ${service}`);
-        // }
         // start watching if we're not currently watching {event}?
         _emitter.on(event, listener);
       },
@@ -112,68 +124,87 @@ export default class EventService extends LocalService {
         // stop watching if we're currently watching {event}?
         _emitter.removeListener(event, listener);
       },
-      async registerPollEvents(eventPayloadMap) {
+      registerPollEvents(eventPayloadMap) {
         for (const [eventType, payloadGetterMap] of Object.entries(
           eventPayloadMap
         )) {
           const payloadFetcher = EventService._createPayloadFetcher(
             payloadGetterMap
           );
-          const memoizedPoll = await EventService._createMemoizedPoll({
+          const memoizedPoll = EventService._createMemoizedPoll({
             type: eventType,
             emit: this.emit,
             getState: payloadFetcher
           });
-          // right now we push straight into hot polls for convenience while testing
-          hotPolls.push(memoizedPoll);
+          polls.push(memoizedPoll);
         }
+        return this;
       },
-      watchAll() {
-        hotPolls = [...coldPolls, ...hotPolls];
-        coldPolls = [];
+      activatePolls() {
+        polls.forEach(poll => poll.heat());
       },
-      watch(type) {
-        const staged = coldPolls.filter(poll => poll.type() === type);
-        coldPolls = coldPolls.filter(poll => poll.type() !== type);
-        hotPolls = [...hotPolls, ...staged];
+      activatePoll(type) {
+        const staged = polls.filter(poll => poll.type() === type);
+        staged.forEach(poll => poll.heat());
       },
-      getHotPolls() {
-        return hotPolls;
+      getPolls() {
+        return polls;
+      },
+      dispose() {
+        disposer();
       }
     };
   }
-
-  //   static _isValidService(service) {
-  //     return true;
-  //   }
 
   //////////////////////////////
   /////  Polling Helpers  //////
   //////////////////////////////
 
-  // this could be made more efficient with promise.all
   static _createPayloadFetcher(payloadSchema) {
-    return async () => {
-      const payload = {};
-      for (const [key, getter] of Object.entries(payloadSchema)) {
-        payload[key] = await getter();
-      }
-      return payload;
+    return () => {
+      return Promise.all(
+        Object.entries(payloadSchema).map(([key, getter]) =>
+          getter().then(state => [key, state])
+        )
+      ).then(states => {
+        const payload = {};
+        for (const [key, state] of states) {
+          payload[key] = state;
+        }
+        return payload;
+      });
     };
   }
 
-  static async _createMemoizedPoll({ type, getState, emit }) {
-    let curr = await getState();
+  static _createMemoizedPoll({
+    type,
+    getState,
+    emit,
+    curr = {},
+    live = false
+  }) {
     return {
       async ping(block) {
-        const next = await getState();
-        if (!isEqual(curr, next)) {
-          emit(type, next, block);
-          curr = next;
+        if (!live) return;
+        try {
+          const next = await getState();
+          if (!isEqual(curr, next)) {
+            emit(type, next, block);
+            curr = next;
+          }
+        } catch (err) {
+          const msg = `failed to get latest ${type} state: ${err}`;
+          emit('error', msg, block);
         }
       },
       type() {
         return type;
+      },
+      heat() {
+        if (!live) live = true;
+      },
+      cool() {
+        if (live) live = false;
       }
     };
   }

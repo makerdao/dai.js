@@ -15,16 +15,18 @@ export default class NullEventService extends LocalService {
   ping() {}
   removeListener() {}
   registerPollEvents() {}
-  watchAllRegisteredEvents() {}
+  disposeEmitter() {}
+  activatePollsForAllEmitters() {}
   createEmitter() {
     return {
       emit: _,
       on: _,
       removeListener: _,
       registerPollEvents: _,
-      watchAll: _,
-      watch: _,
-      getHotPolls: _
+      activatePolls: _,
+      activatePoll: _,
+      getPolls: _,
+      dispose: _
     };
   }
 }

@@ -24,6 +24,7 @@ export default class Web3Service extends PrivateService {
       account: null
     };
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
+    this._makerEmitter = null;
 
     Web3ServiceList.push(this);
   }
@@ -82,6 +83,8 @@ export default class Web3Service extends PrivateService {
   initialize(settings) {
     this.get('log').info('Web3 is initializing...');
 
+    this._defaultEmitter = this.get('event');
+
     settings = this._normalizeSettings(settings);
 
     this._web3 = this._createWeb3();
@@ -91,6 +94,7 @@ export default class Web3Service extends PrivateService {
     this._setPrivateKey(settings.privateKey);
 
     this._installCleanUpHooks();
+    this._defaultEmitter.emit('web3/INITIALIZED', { ...settings });
   }
 
   connect() {
@@ -132,7 +136,12 @@ export default class Web3Service extends PrivateService {
         }
       )
       .then(
-        () => this.get('log').info('Web3 version: ', this._info.version),
+        () => {
+          this._defaultEmitter.emit('web3/CONNECTED', {
+            ...this._info.version
+          });
+          this.get('log').info('Web3 version: ', this._info.version);
+        },
         reason => this.get('log').error(reason)
       );
   }
@@ -151,7 +160,9 @@ export default class Web3Service extends PrivateService {
             'Expected Web3 to be authenticated, but no default account is available.'
           );
         }
-
+        this._defaultEmitter.emit('web3/AUTHENTICATED', {
+          account: this._info.account
+        });
         this._installDeauthenticationCheck();
       },
       reason => {
@@ -377,6 +388,7 @@ export default class Web3Service extends PrivateService {
       () =>
         this._isStillConnected().then(connected => {
           if (!connected) {
+            this._defaultEmitter.emit('web3/DISCONNECTED');
             this.disconnect();
           }
         })
@@ -403,6 +415,7 @@ export default class Web3Service extends PrivateService {
       () =>
         this._isStillAuthenticated().then(authenticated => {
           if (!authenticated) {
+            this._defaultEmitter.emit('web3/DEAUTHENTICATED');
             this.deauthenticate();
           }
         })
