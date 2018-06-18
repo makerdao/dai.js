@@ -1,5 +1,5 @@
 import PrivateService from '../core/PrivateService';
-import { eventIndexer, slug } from './index';
+import { indexerFactory, slug } from './index';
 import isEqual from 'lodash.isequal';
 import EventEmitterObj from 'eventemitter2';
 
@@ -70,7 +70,7 @@ export default class EventService extends PrivateService {
   }
 
   _setBlock(block) {
-    this.block = block;
+    if (block !== undefined) this.block = block;
   }
 
   _getBlock() {
@@ -89,7 +89,7 @@ export default class EventService extends PrivateService {
     }),
     name = slug(),
     group = '',
-    indexer = eventIndexer(),
+    indexer = indexerFactory(),
     defaultEmitter = false
   } = {}) {
     const id = defaultEmitter ? 'default' : group + name;
@@ -112,8 +112,8 @@ export default class EventService extends PrivateService {
         // if nobody's listening for this event, don't actually emit it
         if (_emitter.listeners(event).length === 0) return;
         const eventObj = {
-          block,
           payload,
+          block,
           type: event,
           index: indexer()
         };
@@ -159,8 +159,8 @@ export default class EventService extends PrivateService {
         return polls;
       },
       dispose() {
-        this.emit = null;
-        this.on = null;
+        this.emit = () => {};
+        this.on = () => {};
         disposer();
       }
     };

@@ -24,7 +24,7 @@ export default class Web3Service extends PrivateService {
       account: null
     };
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
-    this._makerEmitter = null;
+    this._defaultEmitter = null;
 
     Web3ServiceList.push(this);
   }
