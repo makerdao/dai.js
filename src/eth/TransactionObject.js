@@ -1,6 +1,10 @@
 import '../polyfills';
+import { promiseWait } from '../utils';
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../eth/TransactionLifeCycle';
+import debug from 'debug';
+
+const log = debug('makerjs:transactionObject');
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(
@@ -20,8 +24,10 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._fees = null;
     this._logs = null;
     this._hash = null;
-    this._getTransactionData();
-    this._self = this;
+  }
+
+  execute() {
+    return this._getTransactionData().then(() => this);
   }
 
   timeStampSubmitted() {
@@ -44,36 +50,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._errorMessage;
   }
 
-  /*
-  _waitForConfirmations(originalBlockNumber, originalBlockHash, requiredConfirmations = 3){
-
-    let assertBlockHashUnchanged = newBlockNumber => {
-      if (newBlockNumber < originalBlockNumber + requiredConfirmations) {
-        console.log('reregistering handler: newBlockNumber: ', newBlockNumber, ' is lower than required blockNumber: ', originalBlockNumber + requiredConfirmations);
-        this._ethersProvider.once('block', b=>{console.log(b)});
-      } else {
-        console.log('required block number ', originalBlockNumber + requiredConfirmations, ' reached, refreshing transaction receipt', this._hash);
-        this._ethersProvider.getTransactionReceipt(this._hash).then(
-          newReceipt => {
-            if (newReceipt.blockHash === originalBlockHash) {
-              this._finalize(); //set state to finalized
-            } else {
-              this._errorMessage = "transaction block hash changed";
-              console.error(reason);
-            }
-          },
-          reason => {
-            this._errorMessage = reason;
-            console.error(reason);
-          }
-        );
-      }
-    };
-    console.log('registering handler.  original block number: ', originalBlockNumber, ' required block number: ', originalBlockNumber + requiredConfirmations);
-    this._ethersProvider.once('block', assertBlockHashUnchanged);
-  }
-  */
-
   _assertBlockHashUnchanged(originalBlockHash) {
     this._ethersProvider.getTransactionReceipt(this._hash).then(
       newReceipt => {
@@ -93,64 +69,58 @@ export default class TransactionObject extends TransactionLifeCycle {
     );
   }
 
-  _getTransactionData() {
+  async _getTransactionData() {
     let gasPrice = null;
-    return this._transaction
-      .then(tx => {
-        this._pending(); //set state to pending
-        this._hash = tx.hash;
+    let tx = await this._transaction;
 
-        const getWithRetry = () =>
-          this._ethersProvider
-            .getTransaction(this._hash)
-            .then(tx => tx || retry());
+    this._pending(); // set state to pending
+    this._hash = tx.hash;
 
-        const retry = () =>
-          new Promise((resolve, reject) =>
-            setTimeout(() => getWithRetry().then(resolve, reject), 200)
-          );
+    // when you're on a local testnet, a single call to getTransaction should be
+    // enough. but on a remote net, it may take multiple calls.
+    const getWithRetry = () =>
+      this._ethersProvider
+        .getTransaction(this._hash)
+        .then(tx => tx || promiseWait(500).then(getWithRetry));
 
-        return Promise.any([
-          getWithRetry(),
-          this._ethersProvider.waitForTransaction(this._hash)
-        ]);
-      })
-      .then(tx => {
-        gasPrice = tx.gasPrice;
-        this._timeStampMined = new Date();
-        return this._waitForReceipt();
-      })
-      .then(receipt => {
-        //console.log('receiptGasUsed', receipt.gasUsed.toString());
-        if (typeof this._logsParser === 'function') {
-          this._logsParser(receipt.logs);
-        }
-        if (!!receipt.gasUsed && !!gasPrice) {
-          this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
-        } else {
-          /*
-              console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
-                receipt.gasUsed ? receipt.gasUsed.toString() : '<not set>',
-                'Price = ', gasPrice ? gasPrice.toString() : '<not set>'
-              );
-            */
-        }
-        this._mine(); //set state to mined
+    tx = await getWithRetry();
 
-        //this._waitForConfirmations(receipt.blockNumber, receipt.blockHash);
-        const requiredConfirmations = 3;
-        this._web3Service.waitForBlockNumber(
-          receipt.blockNumber + requiredConfirmations,
-          () => {
-            this._assertBlockHashUnchanged(receipt.blockHash);
-          }
+    // when you're on a local testnet, the transaction will probably already be
+    // mined by this point. but on other nets, you still have to wait for it to
+    // be mined.
+    if (!tx.blockHash) {
+      const startTime = new Date();
+      log(`waitForTransaction ${this._hash}`);
+      tx = await this._ethersProvider.waitForTransaction(this._hash);
+      const elapsed = (new Date() - startTime) / 1000;
+      log(`waitForTransaction ${this._hash} done in ${elapsed}s`);
+    }
+
+    gasPrice = tx.gasPrice;
+    this._timeStampMined = new Date();
+    const receipt = await this._waitForReceipt();
+
+    if (typeof this._logsParser === 'function') {
+      this._logsParser(receipt.logs);
+    }
+
+    if (!!receipt.gasUsed && !!gasPrice) {
+      this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+    } else {
+      /*
+        console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
+          receipt.gasUsed ? receipt.gasUsed.toString() : '<not set>',
+          'Price = ', gasPrice ? gasPrice.toString() : '<not set>'
         );
-      })
-      .catch(reason => {
-        this._errorMessage = reason;
-        this._error();
-        console.error(reason);
-      });
+      */
+    }
+    this._mine(); // set state to mined
+
+    const requiredConfirmations = 3;
+    this._web3Service.waitForBlockNumber(
+      receipt.blockNumber + requiredConfirmations,
+      () => this._assertBlockHashUnchanged(receipt.blockHash)
+    );
   }
 
   _waitForReceipt(retries = 5) {
@@ -160,17 +130,12 @@ export default class TransactionObject extends TransactionLifeCycle {
     return retries < 1
       ? result
       : result.then(receipt => {
-          if (!receipt) {
-            // eslint-disable-next-line
-            console.warn(
-              'Receipt is null. Retrying ' + retries + ' more time(s)'
-            );
-            return new Promise(resolve =>
-              setTimeout(() => resolve(), (6 - retries) * 1500)
-            ).then(() => this._waitForReceipt(retries - 1));
-          }
+          if (receipt) return receipt;
 
-          return receipt;
+          // console.warn(`Receipt is null. Retrying ${retries} more time(s)`);
+          return promiseWait((6 - retries) * 1500).then(() =>
+            this._waitForReceipt(retries - 1)
+          );
         });
   }
 }

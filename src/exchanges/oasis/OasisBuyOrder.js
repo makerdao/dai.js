@@ -1,4 +1,3 @@
-import TransactionState from '../../eth/TransactionState';
 import { utils } from 'ethers';
 
 export default class OasisBuyOrder {
@@ -7,7 +6,6 @@ export default class OasisBuyOrder {
     order._hybrid = transactionService.createTransactionHybrid(
       transaction,
       order,
-      TransactionState.mined,
       receiptLogs => {
         const LogTradeEvent = oasisContract.getInterface().events.LogTrade;
         const LogTradeTopic = utils.keccak256(

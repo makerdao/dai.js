@@ -43,10 +43,10 @@ export const watch = {
     // eslint-disable-next-line
     console.warn(
       lastName +
-        ' LOG: ' +
-        (label ? label + ' ' : '') +
-        (new Date().getTime() - (start || new Date().getTime())) +
-        'ms.'
+      ' LOG: ' +
+      (label ? label + ' ' : '') +
+      (new Date().getTime() - (start || new Date().getTime())) +
+      'ms.'
     );
   },
   pass: label => {
@@ -54,10 +54,10 @@ export const watch = {
       // eslint-disable-next-line
       console.warn(
         lastName +
-          ' LOG: ' +
-          (label ? label + ' ' : '') +
-          (new Date().getTime() - (start || new Date().getTime())) +
-          'ms.'
+        ' LOG: ' +
+        (label ? label + ' ' : '') +
+        (new Date().getTime() - (start || new Date().getTime())) +
+        'ms.'
       );
       return result;
     };
@@ -66,9 +66,9 @@ export const watch = {
     // eslint-disable-next-line
     console.warn(
       lastName +
-        ' END: ' +
-        (new Date().getTime() - (start || new Date().getTime())) +
-        'ms.'
+      ' END: ' +
+      (new Date().getTime() - (start || new Date().getTime())) +
+      'ms.'
     );
     start = undefined;
     lastName = 'Timer';
@@ -76,7 +76,7 @@ export const watch = {
 };
 
 export function promisifyAsync(fn) {
-  return function() {
+  return function () {
     let args = [].slice.call(arguments);
 
     return new Promise((resolve, reject) => {
@@ -114,7 +114,7 @@ export function getNetworkName(networkId) {
 
 export function eventIndexer() {
   let index = 0;
-  return function() {
+  return function () {
     index++;
     return index;
   };
@@ -129,4 +129,8 @@ export function slug() {
       .toString(36)
       .substring(2, 15)
   );
+}
+
+export function promiseWait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

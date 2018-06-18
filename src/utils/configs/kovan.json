@@ -3,27 +3,13 @@
     "enableProxies": false
   },
   "services": {
-    "web3": [
-      "Web3Service",
-      {
-        "usePresetProvider": true,
-        "provider": {
-          "type": "INFURA",
-          "network": "kovan"
-        }
+    "web3": {
+      "usePresetProvider": true,
+      "provider": {
+        "type": "INFURA",
+        "network": "kovan"
       }
-    ],
-    "allowance": "AllowanceService",
-    "cdp": "EthereumCdpService",
-    "event": "EventService",
-    "exchange": "OasisExchangeService",
-    "smartContract": "SmartContractService",
-    "token": "EthereumTokenService",
-    "conversionService": "TokenConversionService",
-    "gasEstimator": "GasEstimatorService",
-    "transactionManager": "TransactionManager",
-    "price": "PriceService",
-    "timer": "TimerService",
-    "log": "ConsoleLogger"
+    },
+    "exchange": "OasisExchangeService"
   }
 }

@@ -100,7 +100,7 @@ export default class EventService extends PrivateService {
       disposer,
       _getBlock
     });
-    newEmitter.on('error', msg => this._logError(name, msg));
+    newEmitter.on('error', msg => this._logError(name, JSON.stringify(msg)));
     this.emitters[name] = newEmitter;
     return newEmitter;
   }
@@ -193,7 +193,7 @@ export default class EventService extends PrivateService {
             curr = next;
           }
         } catch (err) {
-          const msg = `failed to get latest ${type} state: ${err}`;
+          const msg = `failed to get latest ${type} state -> message: ${err}`;
           emit('error', msg, block);
         }
       },
