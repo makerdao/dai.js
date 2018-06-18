@@ -26,22 +26,10 @@ export default class EventService extends PrivateService {
   // check all of our active polls for new state
   // this is currently called on every new block from Web3Service
   ping(block) {
+    Object.values(this.emitters).forEach(emitter =>
+      this._pingEmitter(emitter, block)
+    );
     this._setBlock(block);
-    for (const emitter of Object.values(this.emitters)) {
-      this._pingEmitter(emitter, block);
-    }
-  }
-
-  _pingEmitter(emitter, block) {
-    return Promise.all(emitter.getPolls().map(poll => poll.ping(block)));
-  }
-
-  _setBlock(block) {
-    this.block = block;
-  }
-
-  _getBlock() {
-    return this.block;
   }
 
   // add a event listener to an emitter
@@ -69,12 +57,24 @@ export default class EventService extends PrivateService {
     return emitter.registerPollEvents(eventPayloadMap);
   }
 
-  activatePollsForAllEmitters() {
-    Object.values(this.emitters).forEach(emitter => emitter.activatePolls());
+  _startAllPolls() {
+    Object.values(this.emitters).forEach(emitter => emitter.startPolls());
+  }
+
+  _pingEmitter(emitter, block) {
+    emitter.getPolls().forEach(poll => poll.ping(block));
   }
 
   _defaultEmitter() {
     return this.emitters.default;
+  }
+
+  _setBlock(block) {
+    this.block = block;
+  }
+
+  _getBlock() {
+    return this.block;
   }
 
   _logError(name, msg) {
@@ -87,27 +87,30 @@ export default class EventService extends PrivateService {
       wildcard: true,
       delimiter: '/'
     }),
-    _name = slug(),
+    name = slug(),
+    group = '',
     indexer = eventIndexer(),
     defaultEmitter = false
   } = {}) {
-    const name = defaultEmitter ? 'default' : _name;
-    const disposer = this.disposeEmitter.bind(this, name);
+    const id = defaultEmitter ? 'default' : group + name;
+    const disposer = this.disposeEmitter.bind(this, id);
     const _getBlock = this._getBlock.bind(this);
     const newEmitter = this._buildEmitter({
       _emitter,
+      _getBlock,
       indexer,
-      disposer,
-      _getBlock
+      disposer
     });
-    newEmitter.on('error', msg => this._logError(name, JSON.stringify(msg)));
-    this.emitters[name] = newEmitter;
+    newEmitter.on('error', msg => this._logError(id, JSON.stringify(msg)));
+    this.emitters[id] = newEmitter;
     return newEmitter;
   }
 
-  _buildEmitter({ _emitter, indexer, disposer, _getBlock, polls = [] }) {
+  _buildEmitter({ _emitter, _getBlock, indexer, disposer, polls = [] }) {
     return {
       emit(event, payload = {}, block = _getBlock()) {
+        // if nobody's listening for this event, don't actually emit it
+        if (_emitter.listeners(event).length === 0) return;
         const eventObj = {
           block,
           payload,
@@ -117,12 +120,18 @@ export default class EventService extends PrivateService {
         _emitter.emit(event, eventObj);
       },
       on(event, listener) {
-        // start watching if we're not currently watching {event}?
         _emitter.on(event, listener);
+        // start polling for state changes if the associated event now has a listener
+        polls.forEach(
+          poll => _emitter.listeners(poll.type()).length > 0 && poll.heat()
+        );
       },
       removeListener(event, listener) {
-        // stop watching if we're currently watching {event}?
         _emitter.removeListener(event, listener);
+        // stop polling for state changes if the associated event no longer has a listener
+        polls.forEach(
+          poll => _emitter.listeners(poll.type()).length === 0 && poll.cool()
+        );
       },
       registerPollEvents(eventPayloadMap) {
         for (const [eventType, payloadGetterMap] of Object.entries(
@@ -140,12 +149,11 @@ export default class EventService extends PrivateService {
         }
         return this;
       },
-      activatePolls() {
+      startPolls() {
         polls.forEach(poll => poll.heat());
       },
-      activatePoll(type) {
-        const staged = polls.filter(poll => poll.type() === type);
-        staged.forEach(poll => poll.heat());
+      stopPolls() {
+        polls.forEach(poll => poll.cool());
       },
       getPolls() {
         return polls;
@@ -193,18 +201,21 @@ export default class EventService extends PrivateService {
             curr = next;
           }
         } catch (err) {
-          const msg = `failed to get latest ${type} state -> message: ${err}`;
+          const msg = `Failed to get latest ${type} state. Message: ${err}`;
           emit('error', msg, block);
         }
-      },
-      type() {
-        return type;
       },
       heat() {
         if (!live) live = true;
       },
       cool() {
         if (live) live = false;
+      },
+      type() {
+        return type;
+      },
+      live() {
+        return live;
       }
     };
   }
