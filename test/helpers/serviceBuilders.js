@@ -49,3 +49,7 @@ export function buildTestEthereumTokenService() {
 export function buildTestSmartContractService() {
   return buildTestService('smartContract', { smartContract: true });
 }
+
+export function buildTestEventService() {
+  return buildTestService('event', { event: true });
+}

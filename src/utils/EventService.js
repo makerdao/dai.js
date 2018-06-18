@@ -159,6 +159,8 @@ export default class EventService extends PrivateService {
         return polls;
       },
       dispose() {
+        this.emit = null;
+        this.on = null;
         disposer();
       }
     };
@@ -205,8 +207,14 @@ export default class EventService extends PrivateService {
           emit('error', msg, block);
         }
       },
-      heat() {
-        if (!live) live = true;
+      async heat() {
+        try {
+          curr = await getState();
+          if (!live) live = true;
+        } catch (err) {
+          const msg = `Failed to get initial ${type} state. Message: ${err}`;
+          emit('error', msg);
+        }
       },
       cool() {
         if (live) live = false;
