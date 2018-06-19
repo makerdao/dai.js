@@ -8,6 +8,9 @@ export default class Validator {
   }
 
   static amountToBigNumber(amount) {
+    if (amount < 0) {
+      throw 'amount can not be less than 0';
+    }
     return BigNumber(amount);
   }
 
