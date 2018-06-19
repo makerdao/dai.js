@@ -13,7 +13,21 @@ export default class PriceService extends PrivateService {
    */
 
   constructor(name = 'price') {
-    super(name, ['token', 'smartContract', 'transactionManager']);
+    super(name, ['token', 'smartContract', 'transactionManager', 'event']);
+  }
+
+  initialize() {
+    this.get('event').registerPollEvents({
+      'price/ETH_USD': {
+        price: () => this.getEthPrice()
+      },
+      'price/MKR_USD': {
+        price: () => this.getMkrPrice()
+      },
+      'price/WETH_PETH': {
+        ratio: () => this.getWethToPethRatio()
+      }
+    });
   }
 
   _getContract(contract) {

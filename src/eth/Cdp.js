@@ -10,6 +10,17 @@ export default class Cdp {
     } else {
       this._cdpIdPromise = Promise.resolve(cdpId);
     }
+    this._emitterInstance = this._cdpService.get('event').buildEmitter();
+    this.on = this._emitterInstance.on;
+    this._emitterInstance.registerPollEvents({
+      COLLATERAL: {
+        USD: () => this.getCollateralValueInUSD(),
+        ETH: () => this.getCollateralValueInEth()
+      },
+      DEBT: {
+        dai: () => this.getDebtValueInDai()
+      }
+    });
   }
 
   _captureCdpIdPromise(tubContract) {

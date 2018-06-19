@@ -32,6 +32,10 @@ export default class Maker {
     });
   }
 
+  on(event, listener) {
+    this._container.service('event').on(event, listener);
+  }
+
   authenticate() {
     return this._authenticatedPromise;
   }

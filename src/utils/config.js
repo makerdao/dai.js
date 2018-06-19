@@ -6,6 +6,7 @@ export const defaultServices = {
   cache: 'CacheService',
   cdp: 'EthereumCdpService',
   conversionService: 'TokenConversionService',
+  event: 'EventService',
   // exchange: intentionally omitted
   gasEstimator: 'GasEstimatorService',
   log: 'ConsoleLogger',
@@ -18,6 +19,7 @@ export const defaultServices = {
 };
 
 const disabledServices = {
+  event: 'NullEventService',
   log: 'NullLogger'
 };
 
