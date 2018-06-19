@@ -7,7 +7,7 @@ beforeEach(() => {
   eventService = buildTestEventService();
 });
 
-test('can use the default emitter to emit and listen for an event', done => {
+test('can use the default emitter to emit and listen for events', done => {
   eventService.on('music', eventObj => {
     expect(eventObj.payload).toBe('dance');
     done();
@@ -41,11 +41,13 @@ test('should emit an event when some state that is being polled changes', done =
   const getNumPromise = () => {
     return promiseWait(50).then(() => num);
   };
+
   eventService.registerPollEvents({
     'real/int': {
       num: () => getNumPromise()
     }
   });
+
   eventService.on('real/int', eventObj => {
     expect(eventObj.payload.num).toBe(2);
     clearInterval(interval);
@@ -55,7 +57,7 @@ test('should emit an event when some state that is being polled changes', done =
   setTimeout(incrementNum, 100);
 });
 
-test('should emit an event from a non-default emitter when some state that is being polled changes', done => {
+test('should emit an event from a non-default emitter when some state that is being polled for that instance changes', done => {
   const interval = setInterval(eventService.ping, 250);
   const otherEmitter = eventService.buildEmitter();
 
@@ -80,7 +82,7 @@ test('should emit an event from a non-default emitter when some state that is be
   setTimeout(incrementNum, 100);
 });
 
-test('can listen for set of events using wildcards', done => {
+test('can listen for a set of events using wildcards', done => {
   expect.assertions(2);
 
   eventService.on('real/*', eventObj => {
@@ -150,34 +152,31 @@ test('should check the state of active polls when ping is called', done => {
         _: () => poll()
       }
     })
-    .startPolls();
+    ._startPolls();
 
   eventService.ping();
 });
 
 test('can remove an event listener', done => {
   const callback = () => {
-    throw new Error('This listener should have been removed');
+    throw new Error('This listeners emitter should have been removed');
   };
-
   eventService.on('event', callback);
   eventService.removeListener('event', callback);
   eventService.emit('event');
   done();
 });
 
-test('should only poll for state changes if the relevant event is being listened for', done => {
+test('should only poll for state changes if the associated event is being listened for', done => {
   let num = 1;
   let timesPolled = 0;
   const incrementNum = () => {
     num++;
   };
-
   const getNumPromise = () => {
     timesPolled++;
     return promiseWait(50).then(() => num);
   };
-
   eventService.registerPollEvents({
     event: {
       num: () => getNumPromise()
@@ -220,15 +219,14 @@ test('should emit an error event if a poll has a problem', done => {
         _: () => poll()
       }
     })
-    .startPolls();
-  // ^ this starts all of the polls w/o worrying whether somebody is listening
+    ._startPolls();
 
+  // ^ this starts all of the polls w/o worrying whether somebody is listening
   eventService.ping();
 });
 
 test('can dispose emitter instances', done => {
   const emitterInstance = eventService.buildEmitter();
-
   let num = 1;
   const poll = () => {
     num++;
@@ -241,14 +239,12 @@ test('can dispose emitter instances', done => {
         _: () => poll()
       }
     })
-    .startPolls();
+    ._startPolls();
 
   emitterInstance.dispose();
-
   emitterInstance.on('**', () => {
     throw new Error('This emitter should be disposed');
   });
-
   // polling should have stopped for that emitter
   eventService.ping();
   // and normal emits should not work either
@@ -276,7 +272,7 @@ test('can register event payloads with multiple elements', done => {
         three: () => three()
       }
     })
-    .startPolls();
+    ._startPolls();
 
   eventService.on('nums', arg => {
     const { one, two, three } = arg.payload;
@@ -285,7 +281,6 @@ test('can register event payloads with multiple elements', done => {
     expect(three).toBeDefined();
     done();
   });
-
   setTimeout(() => num++, 100);
   setTimeout(eventService.ping, 200);
 });
@@ -294,7 +289,6 @@ test('can create multiple polls on multiple emitters and the correct events will
   expect.assertions(2);
   let num = 0;
   const otherEmitterInstance = eventService.buildEmitter();
-
   const pollA = () => {
     return promiseWait(50).then(() => num);
   };
@@ -308,7 +302,7 @@ test('can create multiple polls on multiple emitters and the correct events will
         a: () => pollA()
       }
     })
-    .startPolls();
+    ._startPolls();
 
   otherEmitterInstance
     .registerPollEvents({
@@ -316,7 +310,7 @@ test('can create multiple polls on multiple emitters and the correct events will
         b: () => pollB()
       }
     })
-    .startPolls();
+    ._startPolls();
 
   eventService.on('event', eventObj => {
     expect(eventObj.payload.a).toBeDefined();

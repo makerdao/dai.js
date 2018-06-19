@@ -22,9 +22,6 @@ export default class NullEventService extends LocalService {
       on: _,
       removeListener: _,
       registerPollEvents: _,
-      startPolls: _,
-      stopPolls: _,
-      getPolls: _,
       dispose: _
     };
   }

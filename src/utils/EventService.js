@@ -14,9 +14,8 @@ export default class EventService extends PrivateService {
 
     this._block = null;
 
-    // all of our emitters
-    // we can have many of these
-    // e.g. one for our maker object, a couple on some cdp objects, a few more on transaction objects, etc
+    // all of our emitters – we can have many of these
+    // e.g. one for our maker object, a couple for some cdp objects, a few more on transaction objects, etc
     this.emitters = {};
 
     // this is our default emitter, it will likely be the maker object's personal emitter
@@ -46,22 +45,22 @@ export default class EventService extends PrivateService {
     emitter.removeListener(event, listener);
   }
 
-  disposeEmitter(name) {
-    if (name === 'default') {
-      this._logError(name, 'cannot dispose default emitter');
-    } else delete this.emitters[name];
-  }
-
   registerPollEvents(eventPayloadMap, emitter = this._defaultEmitter()) {
     return emitter.registerPollEvents(eventPayloadMap);
   }
 
-  _startAllPolls() {
-    Object.values(this.emitters).forEach(emitter => emitter.startPolls());
+  _pingEmitter(emitter) {
+    emitter._getPolls().forEach(poll => poll.ping());
   }
 
-  _pingEmitter(emitter) {
-    emitter.getPolls().forEach(poll => poll.ping());
+  _disposeEmitter(id) {
+    if (id === 'default') {
+      this._logError(id, 'cannot dispose default emitter');
+    } else delete this.emitters[id];
+  }
+
+  _startAllPolls() {
+    Object.values(this.emitters).forEach(emitter => emitter._startPolls());
   }
 
   _defaultEmitter() {
@@ -86,13 +85,12 @@ export default class EventService extends PrivateService {
       wildcard: true,
       delimiter: '/'
     }),
-    name = slug(),
-    group = '',
+    _slug = slug(),
     indexer = indexerFactory(),
     defaultEmitter = false
   } = {}) {
-    const id = defaultEmitter ? 'default' : group + name;
-    const disposer = this.disposeEmitter.bind(this, id);
+    const id = defaultEmitter ? 'default' : _slug;
+    const disposer = this._disposeEmitter.bind(this, id);
     const _getBlock = this._getBlock.bind(this);
     const newEmitter = this._buildEmitter({
       _emitter,
@@ -100,7 +98,7 @@ export default class EventService extends PrivateService {
       indexer,
       disposer
     });
-    newEmitter.on('error', msg => this._logError(id, JSON.stringify(msg)));
+    newEmitter.on('error', eventObj => this._logError(id, eventObj.payload));
     this.emitters[id] = newEmitter;
     return newEmitter;
   }
@@ -148,19 +146,19 @@ export default class EventService extends PrivateService {
         }
         return this;
       },
-      startPolls() {
-        polls.forEach(poll => poll.heat());
-      },
-      stopPolls() {
-        polls.forEach(poll => poll.cool());
-      },
-      getPolls() {
-        return polls;
-      },
       dispose() {
         this.emit = () => {};
         this.on = () => {};
         disposer();
+      },
+      _startPolls() {
+        polls.forEach(poll => poll.heat());
+      },
+      _stopPolls() {
+        polls.forEach(poll => poll.cool());
+      },
+      _getPolls() {
+        return polls;
       }
     };
   }
