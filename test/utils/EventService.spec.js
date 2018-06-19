@@ -7,9 +7,9 @@ beforeEach(() => {
   eventService = buildTestEventService();
 });
 
-test('can use the default emitter to emit and listen to a basic event', done => {
-  eventService.on('music', arg => {
-    expect(arg.payload).toBe('dance');
+test('can use the default emitter to emit and listen for an event', done => {
+  eventService.on('music', eventObj => {
+    expect(eventObj.payload).toBe('dance');
     done();
   });
   eventService.emit('music', 'dance');
@@ -19,79 +19,75 @@ test('can create additional emitter instances', done => {
   const cdpEmitter = eventService.buildEmitter({ group: 'cdp' });
   const txEmitter = eventService.buildEmitter({ group: 'tx' });
 
-  cdpEmitter.on('a', arg => {
-    expect(arg.payload).toBe('cdp');
+  cdpEmitter.on('a', eventObj => {
+    expect(eventObj.payload).toBe('cdp');
     done();
   });
-  txEmitter.on('a', arg => {
-    expect(arg.payload).toBe('tx');
+  txEmitter.on('a', eventObj => {
+    expect(eventObj.payload).toBe('tx');
     cdpEmitter.emit('a', 'cdp');
   });
 
   txEmitter.emit('a', 'tx');
 });
 
-test('can emit an event when some state that is being polled for, changes', done => {
+test('should emit an event when some state that is being polled changes', done => {
   const interval = setInterval(eventService.ping, 250);
 
   let num = 1;
   const incrementNum = () => {
     num += 1;
   };
-  setTimeout(incrementNum, 100);
-
   const getNumPromise = () => {
     return promiseWait(50).then(() => num);
   };
-
   eventService.registerPollEvents({
     'real/int': {
       num: () => getNumPromise()
     }
   });
-
-  eventService.on('real/int', arg => {
-    expect(arg.payload.num).toBe(2);
+  eventService.on('real/int', eventObj => {
+    expect(eventObj.payload.num).toBe(2);
     clearInterval(interval);
     done();
   });
+
+  setTimeout(incrementNum, 100);
 });
 
-test('can emit an event from a non-default emitter when some state that is being polled for, changes', done => {
-  const otherEmitter = eventService.buildEmitter({ group: 'other' });
+test('should emit an event from a non-default emitter when some state that is being polled changes', done => {
   const interval = setInterval(eventService.ping, 250);
+  const otherEmitter = eventService.buildEmitter();
 
   let num = 1;
   const incrementNum = () => {
     num++;
   };
-  setTimeout(incrementNum, 100);
-
   const getNumPromise = () => {
     return promiseWait(50).then(() => num);
   };
-
   otherEmitter.registerPollEvents({
-    'real/rational/int': {
+    'real/int': {
       num: () => getNumPromise()
     }
   });
-
-  otherEmitter.on('real/rational/int', arg => {
-    expect(arg.payload.num).toBe(2);
+  otherEmitter.on('real/int', eventObj => {
+    expect(eventObj.payload.num).toBe(2);
     clearInterval(interval);
     done();
   });
+
+  setTimeout(incrementNum, 100);
 });
 
-test('can listen to a category of events using wildcards', done => {
+test('can listen for set of events using wildcards', done => {
   expect.assertions(2);
 
-  eventService.on('real/*', arg => {
-    if (arg.type === 'real/rational') {
-      expect(arg.payload).toBe(1);
-    } else if (arg.type === 'real/irrational') {
-      expect(arg.payload).toBe(Math.PI);
+  eventService.on('real/*', eventObj => {
+    if (eventObj.type === 'real/rational') {
+      expect(eventObj.payload).toBe(1);
+    } else if (eventObj.type === 'real/irrational') {
+      expect(eventObj.payload).toBe(Math.PI);
       done();
     }
   });
@@ -100,57 +96,57 @@ test('can listen to a category of events using wildcards', done => {
   eventService.emit('real/irrational', Math.PI);
 });
 
-test('can use a wildcard that will match all levels', done => {
-  eventService.on('real/**', arg => {
-    expect(arg.payload).toBe(1);
+test('can listen for events at any level of depth with a ** wildcard', done => {
+  eventService.on('real/**', eventObj => {
+    expect(eventObj.payload).toBe(1);
     done();
   });
 
   eventService.emit('real/rational/int', 1);
 });
 
-test('can use a wildcard that will match everything', done => {
-  eventService.on('**', arg => {
-    expect(arg.payload).toBe(1);
+test('can listen all events with a ** wildcard', done => {
+  eventService.on('**', eventObj => {
+    expect(eventObj.payload).toBe(1);
     done();
   });
 
   eventService.emit('real/rational/int', 1);
 });
 
-test('can have event sequence numbers', done => {
-  eventService.on('first', arg => {
-    expect(arg.index).toBe(1);
+test('should add an event sequence number to the event object', done => {
+  eventService.on('first', eventObj => {
+    expect(eventObj.index).toBe(1);
     eventService.emit('second');
   });
 
-  eventService.on('second', arg => {
-    expect(arg.index).toBe(2);
+  eventService.on('second', eventObj => {
+    expect(eventObj.index).toBe(2);
     done();
   });
 
   eventService.emit('first');
 });
 
-test('can have the latest block number', done => {
+test('should have the latest block number in the event object', done => {
   eventService.ping(100);
 
-  eventService.on('event', arg => {
-    expect(arg.block).toBe(100);
+  eventService.on('event', eventObj => {
+    expect(eventObj.block).toBe(100);
     done();
   });
 
   eventService.emit('event');
 });
 
-test('will check state of active polls on ping', done => {
+test('should check the state of active polls when ping is called', done => {
   const poll = () => {
     done();
   };
 
   eventService
     .registerPollEvents({
-      'real/rational/int': {
+      event: {
         _: () => poll()
       }
     })
@@ -160,8 +156,6 @@ test('will check state of active polls on ping', done => {
 });
 
 test('can remove an event listener', done => {
-  eventService.ping(100);
-
   const callback = () => {
     throw new Error('This listener should have been removed');
   };
@@ -172,7 +166,7 @@ test('can remove an event listener', done => {
   done();
 });
 
-test('will only poll for state changes if somebody is listening to the relevant event', done => {
+test('should only poll for state changes if the relevant event is being listened for', done => {
   let num = 1;
   let timesPolled = 0;
   const incrementNum = () => {
@@ -185,7 +179,7 @@ test('will only poll for state changes if somebody is listening to the relevant 
   };
 
   eventService.registerPollEvents({
-    'real/rational/int': {
+    event: {
       num: () => getNumPromise()
     }
   });
@@ -199,9 +193,9 @@ test('will only poll for state changes if somebody is listening to the relevant 
   }, 100);
 
   setTimeout(() => {
-    eventService.on('real/rational/int', () => {
-      // polled once when this listener was added & once when the ping below was called
-      // should not reflect the pings that happen above (which were called before this listener was added)
+    eventService.on('event', () => {
+      // polled once when this listener was added & once when the ping below is called
+      // should not reflect the above pings (which were called before this listener was added)
       expect(timesPolled).toBe(2);
       done();
     });
@@ -211,7 +205,7 @@ test('will only poll for state changes if somebody is listening to the relevant 
   setTimeout(eventService.ping, 400);
 });
 
-test('will emit an error event', done => {
+test('should emit an error event if a poll has a problem', done => {
   const poll = () => {
     throw new Error();
   };
@@ -222,17 +216,18 @@ test('will emit an error event', done => {
 
   eventService
     .registerPollEvents({
-      'real/rational/int': {
+      event: {
         _: () => poll()
       }
     })
     .startPolls();
+  // ^ this starts all of the polls w/o worrying whether somebody is listening
 
   eventService.ping();
 });
 
 test('can dispose emitter instances', done => {
-  const dummyEmitter = eventService.buildEmitter({ group: 'dummy' });
+  const emitterInstance = eventService.buildEmitter();
 
   let num = 1;
   const poll = () => {
@@ -240,23 +235,98 @@ test('can dispose emitter instances', done => {
     return promiseWait(50).then(() => num);
   };
 
-  dummyEmitter
+  emitterInstance
     .registerPollEvents({
-      'real/rational/int': {
+      event: {
         _: () => poll()
       }
     })
     .startPolls();
 
-  dummyEmitter.dispose();
+  emitterInstance.dispose();
 
-  dummyEmitter.on('**', () => {
-    throw new Error('This emitter should have been disposed');
+  emitterInstance.on('**', () => {
+    throw new Error('This emitter should be disposed');
   });
 
-  // polling events should have stopped
+  // polling should have stopped for that emitter
   eventService.ping();
-  // and normal emits should not work anymore either
-  dummyEmitter.emit('event');
+  // and normal emits should not work either
+  emitterInstance.emit('event');
   setTimeout(done, 100);
+});
+
+test('can register event payloads with multiple elements', done => {
+  let num = 0;
+  const one = () => {
+    return promiseWait(50).then(() => num + 1);
+  };
+  const two = () => {
+    return promiseWait(50).then(() => num + 2);
+  };
+  const three = () => {
+    return promiseWait(50).then(() => num + 3);
+  };
+
+  eventService
+    .registerPollEvents({
+      nums: {
+        one: () => one(),
+        two: () => two(),
+        three: () => three()
+      }
+    })
+    .startPolls();
+
+  eventService.on('nums', arg => {
+    const { one, two, three } = arg.payload;
+    expect(one).toBeDefined();
+    expect(two).toBeDefined();
+    expect(three).toBeDefined();
+    done();
+  });
+
+  setTimeout(() => num++, 100);
+  setTimeout(eventService.ping, 200);
+});
+
+test('can create multiple polls on multiple emitters and the correct events will be emitted', done => {
+  expect.assertions(2);
+  let num = 0;
+  const otherEmitterInstance = eventService.buildEmitter();
+
+  const pollA = () => {
+    return promiseWait(50).then(() => num);
+  };
+  const pollB = () => {
+    return promiseWait(50).then(() => num);
+  };
+
+  eventService
+    .registerPollEvents({
+      event: {
+        a: () => pollA()
+      }
+    })
+    .startPolls();
+
+  otherEmitterInstance
+    .registerPollEvents({
+      event: {
+        b: () => pollB()
+      }
+    })
+    .startPolls();
+
+  eventService.on('event', eventObj => {
+    expect(eventObj.payload.a).toBeDefined();
+  });
+
+  otherEmitterInstance.on('event', eventObj => {
+    expect(eventObj.payload.b).toBeDefined();
+  });
+
+  setTimeout(() => num++, 100);
+  setTimeout(eventService.ping, 200);
+  setTimeout(done, 500);
 });

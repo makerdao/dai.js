@@ -14,7 +14,7 @@ export default class Cdp {
       .get('event')
       .buildEmitter({ group: 'cdp' });
     this.on = this._emitterInstance.on;
-    this._emitterInstance.registerPollEvents({
+    this._emitterInstance.registerEventsPolledOnNewBlock({
       COLLATERAL: {
         USD: () => this.getCollateralValueInUSD(),
         ETH: () => this.getCollateralValueInEth()

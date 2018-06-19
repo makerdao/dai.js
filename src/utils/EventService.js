@@ -12,7 +12,8 @@ export default class EventService extends PrivateService {
   constructor(name = 'event') {
     super(name, ['log']);
 
-    this.block = null;
+    this._block = null;
+
     // all of our emitters
     // we can have many of these
     // e.g. one for our maker object, a couple on some cdp objects, a few more on transaction objects, etc
@@ -26,10 +27,8 @@ export default class EventService extends PrivateService {
   // check all of our active polls for new state
   // this is currently called on every new block from Web3Service
   ping(block) {
-    Object.values(this.emitters).forEach(emitter =>
-      this._pingEmitter(emitter, block)
-    );
     this._setBlock(block);
+    Object.values(this.emitters).forEach(emitter => this._pingEmitter(emitter));
   }
 
   // add a event listener to an emitter
@@ -61,8 +60,8 @@ export default class EventService extends PrivateService {
     Object.values(this.emitters).forEach(emitter => emitter.startPolls());
   }
 
-  _pingEmitter(emitter, block) {
-    emitter.getPolls().forEach(poll => poll.ping(block));
+  _pingEmitter(emitter) {
+    emitter.getPolls().forEach(poll => poll.ping());
   }
 
   _defaultEmitter() {
@@ -70,11 +69,11 @@ export default class EventService extends PrivateService {
   }
 
   _setBlock(block) {
-    if (block !== undefined) this.block = block;
+    if (block !== undefined) this._block = block;
   }
 
   _getBlock() {
-    return this.block;
+    return this._block;
   }
 
   _logError(name, msg) {
@@ -194,17 +193,17 @@ export default class EventService extends PrivateService {
     live = false
   }) {
     return {
-      async ping(block) {
+      async ping() {
         if (!live) return;
         try {
           const next = await getState();
           if (!isEqual(curr, next)) {
-            emit(type, next, block);
+            emit(type, next);
             curr = next;
           }
         } catch (err) {
           const msg = `Failed to get latest ${type} state. Message: ${err}`;
-          emit('error', msg, block);
+          emit('error', msg);
         }
       },
       async heat() {

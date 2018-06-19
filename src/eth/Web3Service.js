@@ -94,7 +94,9 @@ export default class Web3Service extends PrivateService {
     this._setPrivateKey(settings.privateKey);
 
     this._installCleanUpHooks();
-    this._defaultEmitter.emit('web3/INITIALIZED', { ...settings });
+    this._defaultEmitter.emit('web3/INITIALIZED', {
+      provider: { ...settings.provider }
+    });
   }
 
   connect() {
