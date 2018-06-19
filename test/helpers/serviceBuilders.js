@@ -29,7 +29,7 @@ export function buildTestContainer(settings) {
   return new DefaultServiceProvider({
     ...defaultProviderConfig,
     // ...kovanProviderConfig,
-    cache,
+    // cache,
     ...settings
   });
 }
