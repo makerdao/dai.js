@@ -17,7 +17,7 @@ export default class PriceService extends PrivateService {
   }
 
   initialize() {
-    this.get('event').registerEventsPolledOnNewBlock({
+    this.get('event').registerPollEvents({
       'price/ETH_USD': {
         price: () => this.getEthPrice()
       },
