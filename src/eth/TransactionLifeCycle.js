@@ -4,29 +4,32 @@ import TransactionType, {
   transactionTypeTransitions
 } from './TransactionTransitions';
 
+const { initialized, pending, mined, finalized, error } = transactionState;
+const stateOrder = [initialized, pending, mined, finalized];
+
 class TransactionLifeCycle {
   constructor(businessObject = null) {
     this._state = new StateMachine(
-      transactionState.initialized,
+      initialized,
       transactionTypeTransitions[TransactionType.transaction]
     );
     this._businessObject = businessObject;
   }
 
-  _pending() {
-    this._state.transitionTo(transactionState.pending);
+  setPending() {
+    this._state.transitionTo(pending);
   }
 
-  _mine() {
-    this._state.transitionTo(transactionState.mined);
+  setMined() {
+    this._state.transitionTo(mined);
   }
 
-  _finalize() {
-    this._state.transitionTo(transactionState.finalized);
+  setFinalized() {
+    this._state.transitionTo(finalized);
   }
 
-  _error() {
-    this._state.transitionTo(transactionState.error);
+  setError() {
+    this._state.transitionTo(error);
   }
 
   state() {
@@ -37,121 +40,83 @@ class TransactionLifeCycle {
    * @returns {boolean}
    */
   isInitialized() {
-    return this._state.inState(transactionState.initialized);
+    return this._state.inState(initialized);
   }
 
   /**
    * @returns {boolean}
    */
   isPending() {
-    return this._state.inState(transactionState.pending);
+    return this._state.inState(pending);
   }
 
   /**
    * @returns {boolean|null}
    */
   isMined() {
-    return this._state.inState(transactionState.mined);
+    return this._state.inState(mined);
   }
 
   /**
    * @returns {boolean|null}
    */
   isFinalized() {
-    return this._state.inState(transactionState.finalized);
+    return this._state.inState(finalized);
   }
 
   /**
    * @returns {boolean}
    */
   isError() {
-    return this._state.inState(transactionState.error);
+    return this._state.inState(error);
   }
 
-  onPending(handler = () => {}) {
-    if (
-      this._state.inState(transactionState.pending) ||
-      this._state.inState(transactionState.mined) ||
-      this._state.inState(transactionState.finalized)
-    ) {
-      return Promise.resolve(this._businessObject || this);
-    } else if (this._state.inState(transactionState.error)) {
-      return Promise.reject();
+  _returnValue() {
+    return this._businessObject || this;
+  }
+
+  _inOrPastState(state) {
+    const currentIndex = stateOrder.indexOf(this.state());
+    const targetIndex = stateOrder.indexOf(state);
+    if (currentIndex === -1 || targetIndex === -1) {
+      throw new Error('invalid state');
     }
+    return currentIndex >= targetIndex;
+  }
+
+  _onStateChange(from, to, handler) {
+    if (this.isError()) return Promise.reject();
+    if (this._inOrPastState(to)) return Promise.resolve(this._returnValue());
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
-        if (
-          oldState === transactionState.initialized &&
-          newState === transactionState.pending
-        ) {
-          handler(this._businessObject || this);
-          resolve(this._businessObject || this);
+        if (oldState === from && newState === to) {
+          if (handler) handler(this._returnValue());
+          resolve(this._returnValue());
         }
-        if (newState === transactionState.error) {
-          reject();
-        }
+        if (newState === error) reject();
       });
     });
   }
 
-  onMined(handler = () => {}) {
-    if (
-      this._state.inState(transactionState.mined) ||
-      this._state.inState(transactionState.finalized)
-    ) {
-      return Promise.resolve(this._businessObject || this);
-    } else if (this._state.inState(transactionState.error)) {
-      return Promise.reject();
-    }
-    return new Promise((resolve, reject) => {
-      this._state.onStateChanged((oldState, newState) => {
-        if (
-          oldState === transactionState.pending &&
-          newState === transactionState.mined
-        ) {
-          handler(this._businessObject || this);
-          resolve(this._businessObject || this);
-        }
-        if (newState === transactionState.error) {
-          reject();
-        }
-      });
-    });
+  onPending(handler) {
+    return this._onStateChange(initialized, pending, handler);
   }
 
-  onFinalized(handler = () => {}) {
-    if (this._state.inState(transactionState.finalized)) {
-      return Promise.resolve(this._businessObject || this);
-    } else if (this._state.inState(transactionState.error)) {
-      return Promise.reject();
-    }
-    return new Promise((resolve, reject) => {
-      //if this._state.inState(transactionState.finalized)
-
-      this._state.onStateChanged((oldState, newState) => {
-        if (
-          oldState === transactionState.mined &&
-          newState === transactionState.finalized
-        ) {
-          handler(this._businessObject || this);
-          resolve(this._businessObject || this);
-        }
-        if (newState === transactionState.error) {
-          reject();
-        }
-      });
-    });
+  onMined(handler) {
+    return this._onStateChange(pending, mined, handler);
   }
 
-  onError(handler = () => {}) {
-    if (this._state.inState(transactionState.error)) {
-      return Promise.reject();
-    }
+  onFinalized(handler) {
+    return this._onStateChange(mined, finalized, handler);
+  }
+
+  onError(handler) {
+    if (this.isError()) return Promise.reject();
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
-        if (newState === transactionState.error) {
-          handler(this.error(), this._businessObject || this);
-          reject(this.error(), this._businessObject || this);
+        if (newState === error) {
+          if (handler) handler(this.error(), this._returnValue());
+          reject(this.error(), this._returnValue());
         }
       });
     });

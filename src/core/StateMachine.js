@@ -1,6 +1,6 @@
-class IllegalStateError extends Error {}
+export class IllegalStateError extends Error {}
 
-class StateMachine {
+export default class StateMachine {
   constructor(initialState, transitions) {
     if (typeof transitions !== 'object') {
       throw new Error('StateMachine transitions parameter must be an object.');
@@ -83,5 +83,3 @@ class StateMachine {
     return this;
   }
 }
-
-export { StateMachine as default, IllegalStateError };
