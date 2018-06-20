@@ -65,11 +65,18 @@ export default class DefaultServiceProvider {
     for (let role in this._config) {
       const [className, settings] = standardizeConfig(role, this._config[role]);
 
-      if (!this.supports(className)) {
-        throw new Error('Unsupported service in configuration: ' + className);
+      let service;
+      if (typeof className == 'object') {
+        // assume an already-instantiated service is being passed in
+        service = className;
+      } else {
+        if (!this.supports(className)) {
+          throw new Error('Unsupported service in configuration: ' + className);
+        }
+
+        service = new _services[className]();
       }
 
-      const service = new _services[className]();
       service.manager().settings(settings);
       container.register(service, role);
     }

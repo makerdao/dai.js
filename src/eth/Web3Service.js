@@ -183,17 +183,22 @@ export default class Web3Service extends PrivateService {
     this._blockListeners['*'].push(callback);
   }
 
-  waitForBlockNumber(blockNumber, callback) {
+  async waitForBlockNumber(blockNumber) {
     if (blockNumber < this._currentBlock) {
       throw new Error('Cannot wait for past block ' + blockNumber);
-    } else if (blockNumber === this._currentBlock) {
-      callback(blockNumber);
-    } else {
-      if (!this._blockListeners[blockNumber]) {
-        this._blockListeners[blockNumber] = [];
-      }
-      this._blockListeners[blockNumber].push(callback);
     }
+
+    if (blockNumber === this._currentBlock) {
+      return Promise.resolve(blockNumber);
+    }
+
+    if (!this._blockListeners[blockNumber]) {
+      this._blockListeners[blockNumber] = [];
+    }
+
+    return new Promise(resolve => {
+      this._blockListeners[blockNumber].push(resolve);
+    });
   }
 
   _updateBlockNumber(blockNumber) {
