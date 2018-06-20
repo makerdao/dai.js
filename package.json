@@ -32,6 +32,7 @@
     "build:backend": "./scripts/build-backend.sh",
     "coverage": "jest --coverage --runInBand",
     "lint": "eslint web src test",
+    "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "prettier --write --single-quote '{src,test}/**/*.js'",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
