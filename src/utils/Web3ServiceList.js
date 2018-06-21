@@ -9,8 +9,9 @@ class Web3ServiceList {
   }
 
   disconnectAll() {
-    return Promise.all(this._list, s => s.manager()._disconnect())
-      .then(() => this._list = []);
+    return Promise.all(this._list, s => s.manager()._disconnect()).then(
+      () => (this._list = [])
+    );
   }
 }
 

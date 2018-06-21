@@ -34,7 +34,7 @@
     "lint": "eslint web src test",
     "precommit": "lint-staged",
     "prepush": "npm run test",
-    "prettier": "prettier --write --single-quote '{src,test}/**/*.js'",
+    "prettier": "prettier --write --single-quote '{src,web,test,contracts}/**/*.js'",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
     "test": "./with-deployed-system --ci jest --runInBand",
     "test:watch": "./with-deployed-system jest --watch --runInBand",
@@ -42,7 +42,7 @@
     "test:net": "./with-deployed-system"
   },
   "lint-staged": {
-    "./{src,web,test}/**/*.js": [
+    "./{src,web,test,contracts}/**/*.js": [
       "prettier --single-quote --write",
       "git add",
       "eslint web src test"
