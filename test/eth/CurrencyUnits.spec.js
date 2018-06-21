@@ -1,4 +1,5 @@
 import CurrencyUnits from '../../src/eth/CurrencyUnits';
+import { RAY } from '../../src/utils/constants';
 
 test('parses an amount and currency symbol', () => {
   expect(CurrencyUnits.getCurrency(1, 'dai').toString()).toBe('1.00 DAI');
@@ -29,7 +30,18 @@ test('throws an error if amount is negative', () => {
   }).toThrowError('amount cannot be negative');
 });
 
-test('converts wei', () => {
-  const value = CurrencyUnits.convertWei('2110000000000000000', 'peth');
+test('converts wei/wad', () => {
+  const value = CurrencyUnits.convert('2110000000000000000', 'peth');
   expect(value.toString()).toBe('2.11 PETH');
+});
+
+test('converts ray', () => {
+  const rayValue = '5130000000000000000000000000';
+  const value = CurrencyUnits.convert(rayValue, 'eth', RAY);
+  expect(value.toString()).toBe('5.13 ETH');
+});
+
+test('prints the specified number of decimals', () => {
+  const n = CurrencyUnits.MKR('1000.5447123');
+  expect(n.toString(3)).toBe('1000.545 MKR');
 });

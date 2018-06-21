@@ -161,7 +161,7 @@ export default class EthereumCdpService extends PrivateService {
       this.getCdpCollateralInEth(cdpId),
       this.get('price').getEthPrice()
     ]);
-    return ethCollateral * ethPrice;
+    return ethCollateral * ethPrice.toNumber();
   }
 
   getCdpDebtInDai(cdpId) {
@@ -188,7 +188,7 @@ export default class EthereumCdpService extends PrivateService {
       this.get('price').getPethPrice(),
       this.getCdpCollateralInPeth(cdpId)
     ]);
-    return (pethCollateral * pethPrice) / daiDebt;
+    return (pethCollateral * pethPrice.toNumber()) / daiDebt;
   }
 
   async getLiquidationRatio() {
@@ -281,7 +281,7 @@ export default class EthereumCdpService extends PrivateService {
 
     const totalCollateralValue = new BigNumber(_totalWethLocked)
       .div(WAD)
-      .times(wethPrice);
+      .times(wethPrice.toBigNumber());
     const systemDaiDebt = new BigNumber(daiSupply).times(targetPrice);
     return new BigNumber(totalCollateralValue).div(systemDaiDebt).toNumber();
   }

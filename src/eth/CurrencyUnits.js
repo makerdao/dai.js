@@ -8,12 +8,16 @@ export class Currency {
     this.symbol = '???';
   }
 
-  toString() {
-    return `${this._amount.toFixed(2)} ${this.symbol}`;
+  toString(decimals = 2) {
+    return `${this._amount.toFixed(decimals)} ${this.symbol}`;
   }
 
   toBigNumber() {
     return this._amount;
+  }
+
+  toNumber() {
+    return this._amount.toNumber();
   }
 }
 
@@ -39,9 +43,9 @@ const currencies = symbols.reduce((output, symbol) => {
 }, {});
 
 const functions = {
-  convertWei(amount, unit) {
-    const unwei = new BigNumber(amount).dividedBy(WEI).toNumber();
-    return functions.getCurrency(unwei, unit);
+  convert(amount, unit, divisor = WEI) {
+    const shifted = new BigNumber(amount).dividedBy(divisor).toNumber();
+    return functions.getCurrency(shifted, unit);
   },
 
   getCurrency(amount, unit) {

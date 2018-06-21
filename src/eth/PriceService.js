@@ -7,6 +7,7 @@ import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
 import CurrencyUnits from './CurrencyUnits';
+const { ETH, PETH, MKR } = CurrencyUnits;
 
 export default class PriceService extends PrivateService {
   /**
@@ -63,15 +64,13 @@ export default class PriceService extends PrivateService {
   getEthPrice() {
     return this._getContract(contracts.SAI_PIP)
       .read()
-      .then(price => this._toUserFormat(price))
-      .then(CurrencyUnits.getCurrency(price, 'eth'));
+      .then(value => CurrencyUnits.convert(value, ETH));
   }
 
   getPethPrice() {
     return this._getContract(contracts.SAI_TUB)
       .tag()
-      .then(value => new BigNumber(value).dividedBy(RAY).toNumber())
-      .then(CurrencyUnits.getCurrency(value, 'peth'));
+      .then(value => CurrencyUnits.convert(value, PETH, RAY));
   }
 
   setEthPrice(newPrice) {
@@ -85,8 +84,7 @@ export default class PriceService extends PrivateService {
   getMkrPrice() {
     return this._getContract(contracts.SAI_PEP)
       .peek()
-      .then(price => this._toUserFormat(price[0]))
-      .then(CurrencyUnits.getCurrency(price, 'mkr'));
+      .then(([price]) => CurrencyUnits.convert(price, MKR));
   }
 
   setMkrPrice(newPrice) {
