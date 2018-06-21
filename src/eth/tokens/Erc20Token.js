@@ -32,7 +32,7 @@ export default class Erc20Token {
   }
 
   toEthereumFormat(value) {
-    return utils.parseUnits(value, this._decimals);
+    return utils.parseUnits(value.toString(), this._decimals);
   }
 
   approve(spender, value) {
