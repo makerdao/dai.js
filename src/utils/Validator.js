@@ -7,16 +7,16 @@ export default class Validator {
     return amount.toString();
   }
 
-  static stringToBigNumber(str){
-    if (_isString(str)) {
+  static stringToBigNumber(str) {
+    if (Validator.isString(str)) {
       let bytesAmount = this.stringToBytes32(str);
       let bigNum = this.bytes32ToBigNumber(bytesAmount);
-      return bigNum
+      return bigNum;
     }
   }
 
-  static stringToNumber(str){
-    if (_isString(str)) {
+  static stringToNumber(str) {
+    if (Validator.isString(str)) {
       let bytesAmount = this.stringToBytes32(str);
       let num = this.bytes32ToNumber(bytesAmount);
       return num;
@@ -24,11 +24,10 @@ export default class Validator {
   }
 
   static amountToBigNumber(amount) {
-    if (amount < 0) {
-      throw 'amount can not be less than 0';
-    }
     // TODO: add guard for address, and if it's over a trillion
-    return BigNumber(amount);
+    const value = BigNumber(amount);
+    if (value.lt(0)) throw new Error('amount cannot be negative');
+    return value;
   }
 
   static parseUnits(amount, decimalsOrString = 18) {

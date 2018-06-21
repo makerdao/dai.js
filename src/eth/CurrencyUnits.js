@@ -1,82 +1,71 @@
 import Validator from '../utils/Validator';
+import BigNumber from 'bignumber.js';
+import { WEI } from '../utils/constants';
 
-export default class Currency extends Validator{
-  static create(amount, unit) {
-    if (unit === ETH) {
-      return ETH(amount);
-    }
-    if (unit === WETH) {
-      return WETH(amount);
-    }
-    if (unit === PETH) {
-      return PETH(amount);
-    }
-    if (unit === DAI) {
-      return DAI(amount);
-    }
-    if (unit === MKR) {
-      return MKR(amount);
-    }
-  }
-  
+class Currency {
   constructor(amount) {
-    super(amount);
     this._amount = Validator.amountToBigNumber(amount);
-    this._unitLabel = 'undefined';
-  }
-  
-  static toString() {
-    return `${this._amount} ${this._unitLabel}`;
+    this.symbol = '???';
   }
 
-  static getCurrency(amount, unit) {
-    if (amount instanceof Currency) return amount
-    return Currency.create(amount, unit)
+  toString() {
+    return `${this._amount} ${this.symbol}`;
+  }
+}
+
+const symbols = ['DAI', 'ETH', 'WETH', 'PETH', 'MKR'];
+
+const currencies = symbols.reduce((output, symbol) => {
+  class CurrencyX extends Currency {
+    constructor(amount) {
+      super(amount);
+      this.symbol = symbol;
+    }
   }
 
-  static toNumber(amount){
+  // This wraps so we can use short syntax, e.g. ETH(6),
+  // since you can't define a class and then call it without `new`
+  function makeCurrencyX(amount) {
+    return new CurrencyX(amount);
+  }
+  makeCurrencyX.symbol = symbol;
+
+  output[symbol] = makeCurrencyX;
+  return output;
+}, {});
+
+const functions = {
+  convertWei(amount, unit) {
+    const unwei = new BigNumber(amount).dividedBy(WEI).toNumber();
+    return functions.getCurrency(unwei, unit);
+  },
+
+  getCurrency(amount, unit) {
+    if (amount instanceof Currency) return amount;
+    if (!unit) throw new Error('Unit not specified');
+    const key = typeof unit === 'string' ? unit.toUpperCase() : unit.symbol;
+    return currencies[key](amount);
+  },
+
+  toNumber(amount) {
     if (Validator.isString(amount)) {
       return Validator.stringToNumber(amount);
     } else if (Validator.isNumber(amount)) {
-      return amount
+      return amount;
     } else {
-      return new Error("unrecognized type of amount")
+      return new Error('unrecognized type of amount');
     }
-  }
+  },
 
-  static toBigNumber(amount){
+  toBigNumber(amount) {
     if (Validator.isString(amount)) {
       return Validator.stringToBigNumber(amount);
     } else if (Validator.isNumber(amount)) {
       return Validator.amountToBigNumber(amount);
     } else {
-      return new Error("unrecognized type of amount")
+      return new Error('unrecognized type of amount');
     }
   }
-}
+};
 
-class ETHClass extends Currency {
-  constructor(amount) {
-    super(amount);
-    this._unitLabel = 'eth';
-  }
-}
-
-// This wraps so we can use short syntax, e.g. ETH(6),
-// since you can't define a class and then call it without `new`
-function ETH(amount) {
-  return new ETHClass(amount);
-}
-
-class WETHClass extends Currency {
-  constructor(amount) {
-    super(amount);
-    this._unitLabel = 'weth';
-  }
-}
-
-//need to use reflection for this?
-function WETH(amount) {
-  return new WETHClass(amount);
-}
-
+export default Object.assign({}, currencies, functions);
