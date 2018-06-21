@@ -1,5 +1,5 @@
-import { buildTestEventService } from '../helpers/serviceBuilders';
-import { promiseWait } from '../../src/utils';
+import { buildTestEventService } from '../../helpers/serviceBuilders';
+import { promiseWait } from '../../../src/utils';
 
 let eventService;
 
@@ -118,12 +118,12 @@ test('can listen all events with a ** wildcard', done => {
 
 test('should add an event sequence number to the event object', done => {
   eventService.on('first', eventObj => {
-    expect(eventObj.index).toBe(1);
+    expect(eventObj.sequence).toBe(1);
     eventService.emit('second');
   });
 
   eventService.on('second', eventObj => {
-    expect(eventObj.index).toBe(2);
+    expect(eventObj.sequence).toBe(2);
     done();
   });
 
