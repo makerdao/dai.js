@@ -1,4 +1,4 @@
-import NullEventService from '../../src/utils/NullEventService';
+import NullEventService from '../../../src/utils/events/NullEventService';
 
 test('should have a valid event service interface', () => {
   const nullEventService = new NullEventService();

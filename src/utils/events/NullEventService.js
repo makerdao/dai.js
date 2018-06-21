@@ -1,4 +1,4 @@
-import LocalService from '../core/LocalService';
+import LocalService from '../../core/LocalService';
 
 const _ = () => {};
 
@@ -15,13 +15,13 @@ export default class NullEventService extends LocalService {
   ping() {}
   removeListener() {}
   registerPollEvents() {}
-  disposeEmitter() {}
   buildEmitter() {
     return {
       emit: _,
       on: _,
       removeListener: _,
       registerPollEvents: _,
+      ping: _,
       dispose: _
     };
   }
