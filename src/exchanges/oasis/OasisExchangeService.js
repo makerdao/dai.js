@@ -97,7 +97,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    const tx = new TransactionObject(
+    return new TransactionObject(
       oasisContract.offer(
         payAmount,
         payTokenAddress,
@@ -108,7 +108,5 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
       ),
       this.get('web3')
     );
-    await tx.execute();
-    return tx;
   }
 }

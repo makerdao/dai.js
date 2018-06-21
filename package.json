@@ -32,8 +32,9 @@
     "build:backend": "./scripts/build-backend.sh",
     "coverage": "jest --coverage --runInBand",
     "lint": "eslint web src test",
+    "precommit": "lint-staged",
     "prepush": "npm run test",
-    "prettier": "prettier --write --single-quote '{src,test}/**/*.js'",
+    "prettier": "prettier --write --single-quote '{src,web,test,contracts}/**/*.js'",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
     "test": "./with-deployed-system --ci jest --runInBand",
     "test:watch": "./with-deployed-system jest --watch --runInBand",
@@ -41,7 +42,7 @@
     "test:net": "./with-deployed-system"
   },
   "lint-staged": {
-    "./{src,web,test}/**/*.js": [
+    "./{src,web,test,contracts}/**/*.js": [
       "prettier --single-quote --write",
       "git add",
       "eslint web src test"
@@ -93,6 +94,8 @@
     "ethereumjs-util": "^5.2.0",
     "ethers": "^3.0.15",
     "ethers-web3-bridge": "0.0.1",
+    "eventemitter2": "^5.0.1",
+    "lodash.isequal": "^4.5.0",
     "lodash.merge": "^4.6.1",
     "lodash.uniq": "^4.5.0",
     "lodash.values": "^4.3.0",

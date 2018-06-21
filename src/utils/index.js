@@ -112,6 +112,18 @@ export function getNetworkName(networkId) {
   return result[0].name;
 }
 
+export function slug() {
+  return (
+    '-' +
+    Math.random()
+      .toString(36)
+      .substring(2, 7) +
+    Math.random()
+      .toString(36)
+      .substring(2, 7)
+  );
+}
+
 export function promiseWait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

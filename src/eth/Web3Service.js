@@ -11,7 +11,7 @@ const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
-    super(name, ['log', 'timer', 'cache']);
+    super(name, ['log', 'timer', 'cache', 'event']);
 
     this._web3 = null;
     this._ethersProvider = null;
@@ -24,6 +24,7 @@ export default class Web3Service extends PrivateService {
       account: null
     };
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
+    this._defaultEmitter = null;
 
     Web3ServiceList.push(this);
   }
@@ -82,6 +83,8 @@ export default class Web3Service extends PrivateService {
   initialize(settings) {
     this.get('log').info('Web3 is initializing...');
 
+    this._defaultEmitter = this.get('event');
+
     settings = this._normalizeSettings(settings);
 
     this._web3 = this._createWeb3();
@@ -91,6 +94,9 @@ export default class Web3Service extends PrivateService {
     this._setPrivateKey(settings.privateKey);
 
     this._installCleanUpHooks();
+    this._defaultEmitter.emit('web3/INITIALIZED', {
+      provider: { ...settings.provider }
+    });
   }
 
   connect() {
@@ -124,6 +130,7 @@ export default class Web3Service extends PrivateService {
 
           this._setUpEthers(this.networkId());
           this._installDisconnectCheck();
+          this._initEventPolling();
         },
 
         reason => {
@@ -131,7 +138,12 @@ export default class Web3Service extends PrivateService {
         }
       )
       .then(
-        () => this.get('log').info('Web3 version: ', this._info.version),
+        () => {
+          this._defaultEmitter.emit('web3/CONNECTED', {
+            ...this._info.version
+          });
+          this.get('log').info('Web3 version: ', this._info.version);
+        },
         reason => this.get('log').error(reason)
       );
   }
@@ -150,7 +162,9 @@ export default class Web3Service extends PrivateService {
             'Expected Web3 to be authenticated, but no default account is available.'
           );
         }
-
+        this._defaultEmitter.emit('web3/AUTHENTICATED', {
+          account: this._info.account
+        });
         this._installDeauthenticationCheck();
       },
       reason => {
@@ -183,17 +197,22 @@ export default class Web3Service extends PrivateService {
     this._blockListeners['*'].push(callback);
   }
 
-  waitForBlockNumber(blockNumber, callback) {
+  async waitForBlockNumber(blockNumber) {
     if (blockNumber < this._currentBlock) {
       throw new Error('Cannot wait for past block ' + blockNumber);
-    } else if (blockNumber === this._currentBlock) {
-      callback(blockNumber);
-    } else {
-      if (!this._blockListeners[blockNumber]) {
-        this._blockListeners[blockNumber] = [];
-      }
-      this._blockListeners[blockNumber].push(callback);
     }
+
+    if (blockNumber === this._currentBlock) {
+      return Promise.resolve(blockNumber);
+    }
+
+    if (!this._blockListeners[blockNumber]) {
+      this._blockListeners[blockNumber] = [];
+    }
+
+    return new Promise(resolve => {
+      this._blockListeners[blockNumber].push(resolve);
+    });
   }
 
   _updateBlockNumber(blockNumber) {
@@ -208,6 +227,10 @@ export default class Web3Service extends PrivateService {
     if (this._blockListeners['*']) {
       this._blockListeners['*'].forEach(c => c(blockNumber));
     }
+  }
+
+  _initEventPolling() {
+    this.onNewBlock(this.get('event').ping);
   }
 
   _installCleanUpHooks() {
@@ -382,6 +405,7 @@ export default class Web3Service extends PrivateService {
       () =>
         this._isStillConnected().then(connected => {
           if (!connected) {
+            this._defaultEmitter.emit('web3/DISCONNECTED');
             this.disconnect();
           }
         })
@@ -408,6 +432,7 @@ export default class Web3Service extends PrivateService {
       () =>
         this._isStillAuthenticated().then(authenticated => {
           if (!authenticated) {
+            this._defaultEmitter.emit('web3/DEAUTHENTICATED');
             this.deauthenticate();
           }
         })

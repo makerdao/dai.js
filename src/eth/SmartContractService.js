@@ -149,7 +149,8 @@ export default class SmartContractService extends PublicService {
       });
   }
 
-  inspect(contractNames = [contracts.SAI_TUB]) {
+  inspect() {
+    const contractNames = [contracts.SAI_TUB];
     const inspector = new SmartContractInspector(this);
     contractNames.forEach(n => inspector.watch(n));
     return inspector.inspect();

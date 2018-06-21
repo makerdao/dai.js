@@ -18,30 +18,30 @@ import mom from './dai/v1/SaiMom.json';
 import pit from './dai/v1/GemPit.json';
 
 const daiV1 = {
-    saiTop,
-    tub,
-    tap,
-    vox,
-    mom,
-    pit
+  saiTop,
+  tub,
+  tap,
+  vox,
+  mom,
+  pit
 };
 
 const dappHub = {
-    dsValue,
-    dsEthToken,
-    dsGuard,
-    dsChief,
-    dsSpell,
-    dsSpellBook
+  dsValue,
+  dsEthToken,
+  dsGuard,
+  dsChief,
+  dsSpell,
+  dsSpellBook
 };
 
 const exchangesV1 = {
-    zeroExExchange,
-    makerOtc
+  zeroExExchange,
+  makerOtc
 };
 
 const general = {
-    erc20
+  erc20
 };
 
 export { daiV1, dappHub, exchangesV1, general };

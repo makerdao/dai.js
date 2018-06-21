@@ -4,35 +4,13 @@ function buildTestPriceService() {
   return buildTestService('price', { price: true });
 }
 
-test('should return current eth price', done => {
+test('should be able to set eth price', async () => {
   const service = buildTestPriceService();
-
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      service.getEthPrice().then(price => {
-        expect(price).toEqual('400.0');
-        done();
-      });
-    });
-});
-
-test('should be able to set eth price', done => {
-  const service = buildTestPriceService();
-
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      service
-        .setEthPrice('100')
-        .then(() => service.getEthPrice())
-        .then(price => {
-          expect(price).toEqual('100.0');
-          service.setEthPrice('400.0').then(() => done());
-        });
-    });
+  await service.manager().authenticate();
+  await service.setEthPrice('100');
+  expect(await service.getEthPrice()).toEqual('100.0');
+  await service.setEthPrice('400.0');
+  expect(await service.getEthPrice()).toEqual('400.0');
 });
 
 test('should be able to get mkr price', done => {
