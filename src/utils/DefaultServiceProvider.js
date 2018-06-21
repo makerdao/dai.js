@@ -16,7 +16,7 @@ import TransactionManager from '../eth/TransactionManager';
 import AllowanceService from '../eth/AllowanceService';
 import PriceService from '../eth/PriceService';
 import EventService from './events/EventService';
-import NullEventService from './NullEventService';
+import NullEventService from './events/NullEventService';
 import CacheService from '../utils/CacheService';
 import { defaultServices, standardizeConfig } from './config';
 
