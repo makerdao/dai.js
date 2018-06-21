@@ -2,14 +2,18 @@ import Validator from '../utils/Validator';
 import BigNumber from 'bignumber.js';
 import { WEI } from '../utils/constants';
 
-class Currency {
+export class Currency {
   constructor(amount) {
     this._amount = Validator.amountToBigNumber(amount);
     this.symbol = '???';
   }
 
   toString() {
-    return `${this._amount} ${this.symbol}`;
+    return `${this._amount.toFixed(2)} ${this.symbol}`;
+  }
+
+  toBigNumber() {
+    return this._amount;
   }
 }
 
