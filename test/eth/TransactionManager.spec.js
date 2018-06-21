@@ -1,5 +1,4 @@
 import { buildTestContainer } from '../helpers/serviceBuilders';
-import TransactionState from '../../src/eth/TransactionState';
 import tokens from '../../contracts/tokens';
 
 function buildTestServices() {
@@ -57,23 +56,6 @@ test('should create a Transaction object based on a Contract transaction promise
   });
 });
 
-test('should resolve the hybrid object when it is mined', async () => {
-  const services = await buildTestServices();
-  const contract = services.contract.getContractByName(tokens.DAI),
-    contractTransaction = contract.approve(
-      services.defaultAccount,
-      '1000000000000000000'
-    ),
-    hybrid = services.txMgr.createTransactionHybrid(
-      contractTransaction,
-      null,
-      TransactionState.mined
-    );
-
-  await hybrid;
-  expect(hybrid._original.isMined()).toBe(true);
-});
-
 test('should register all created transaction hybrids', done => {
   buildTestServices().then(services => {
     const contractTransaction = services.contract
@@ -129,40 +111,33 @@ test('should add businessObject functions, getters, and setters', done => {
   });
 });
 
-test('should add TransactionLifeCycle functions', done => {
-  buildTestServices().then(services => {
-    const contractTransaction = services.contract
-        .getContractByName(tokens.DAI)
-        .approve(services.defaultAccount, '1000000000000000000'),
-      businessObject = {
-        a: 1,
-        oneTwo: 2,
-        add: function(b) {
-          return this.a + b;
-        },
-        mul: function(b, c) {
-          return this.a * b * c;
-        },
-        add2: b => 10 + b,
-        mul2: (b, c) => 10 * b * c
+test('should add TransactionLifeCycle functions', async () => {
+  const services = await buildTestServices();
+  const contractTransaction = services.contract
+      .getContractByName(tokens.DAI)
+      .approve(services.defaultAccount, '1000000000000000000'),
+    businessObject = {
+      a: 1,
+      oneTwo: 2,
+      add: function(b) {
+        return this.a + b;
       },
-      hybrid = services.txMgr.createTransactionHybrid(
-        contractTransaction,
-        businessObject
-      );
+      mul: function(b, c) {
+        return this.a * b * c;
+      },
+      add2: b => 10 + b,
+      mul2: (b, c) => 10 * b * c
+    },
+    hybrid = services.txMgr.createTransactionHybrid(
+      contractTransaction,
+      businessObject
+    );
 
-    expect(typeof hybrid._assertBlockHashUnchanged).toBe('undefined');
-    expect(typeof hybrid.timeStampSubmitted).toBe('undefined');
+  expect(typeof hybrid._assertBlockHashUnchanged).toBe('undefined');
+  expect(typeof hybrid.timeStampSubmitted).toBe('undefined');
 
-    hybrid
-      .onPending()
-      .then(() => {
-        expect(hybrid.isPending()).toBe(true);
-        return hybrid.onMined();
-      })
-      .then(() => {
-        expect(hybrid.isMined()).toBe(true);
-        done();
-      });
-  });
+  await hybrid.onPending();
+  expect(hybrid.isPending()).toBe(true);
+  await hybrid.onMined();
+  expect(hybrid.isMined()).toBe(true);
 });

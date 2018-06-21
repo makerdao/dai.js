@@ -1,128 +1,103 @@
-import { buildTestEthereumTokenService } from '../helpers/serviceBuilders';
+import {
+  buildTestEthereumTokenService,
+  buildTestService
+} from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import TransactionState from '../../src/eth/TransactionState';
+import Web3Service from '../../src/eth/Web3Service';
 
-test(
-  'TransactionObject event listeners work as promises',
-  done => {
-    const service = buildTestEthereumTokenService();
-    let wethToken = null;
-    let randomAddress = TestAccountProvider.nextAddress();
-    let initialTransaction = null;
-    service
-      .manager()
-      .authenticate()
-      .then(() => {
-        wethToken = service.getToken(tokens.WETH);
-        initialTransaction = wethToken.approveUnlimited(randomAddress);
-        //TransactionObject.onError(()=>{console.log('onError() triggered');});
-        return initialTransaction.onPending();
-      })
-      .then(TransactionObject => {
-        expect(TransactionObject.state()).toBe(TransactionState.pending);
-        return TransactionObject.onMined();
-      })
-      .then(TransactionObject => {
-        expect(TransactionObject.state()).toBe(TransactionState.mined);
-        return wethToken.approveUnlimited(randomAddress).onMined();
-      })
-      .then(() => {
-        return wethToken.approveUnlimited(randomAddress).onMined();
-      })
-      .then(() => {
-        return wethToken.approveUnlimited(randomAddress).onMined();
-      })
-      .then(() => {
-        return initialTransaction.onFinalized();
-      })
-      .then(TransactionObject => {
-        expect(TransactionObject.state()).toBe(TransactionState.finalized);
-        done();
-      });
-  },
-  5000
-);
+let service;
 
-test(
-  'get fees from TransactionObject',
-  done => {
-    const service = buildTestEthereumTokenService();
-    service
-      .manager()
-      .authenticate()
-      .then(() => {
-        const wethToken = service.getToken(tokens.WETH);
-        const randomAddress = TestAccountProvider.nextAddress();
-        const TransactionObject = wethToken.approveUnlimited(randomAddress);
-        //TransactionObject.onError(()=>{console.log('onError() triggered');});
-        return TransactionObject.onMined();
-      })
-      .then(TransactionObject => {
-        expect(TransactionObject.state()).toBe(TransactionState.mined);
-        expect(parseFloat(TransactionObject.fees())).toBeGreaterThan(0);
-        done();
-      });
-  },
-  5000
-);
+beforeAll(() => {
+  service = buildTestEthereumTokenService();
+  return service.manager().authenticate();
+});
 
-test(
-  'TransactionObject event listeners work as callbacks',
-  done => {
-    //const oasisService = OasisExchangeService.buildKovanService();
-    //let service = null;
-    const service = buildTestEthereumTokenService();
-    service
-      .manager()
-      .authenticate()
-      //oasisService.manager().authenticate()
-      .then(() => {
-        //service = oasisService.get('ethereumToken');
-        const wethToken = service.getToken(tokens.WETH);
-        const randomAddress = TestAccountProvider.nextAddress();
-        const TransactionObject = wethToken.approveUnlimited(randomAddress);
-        TransactionObject.onError(() => {
-          //console.log('onError() triggered');
-          expect(TransactionObject.state()).toBe(TransactionState.error);
-        });
-        TransactionObject.onPending(() => {
-          expect(TransactionObject.state()).toBe(TransactionState.pending);
-        });
-        TransactionObject.onMined(() => {
-          expect(TransactionObject.state()).toBe(TransactionState.mined);
-          wethToken.approveUnlimited(randomAddress).onMined(() => {
-            wethToken.approveUnlimited(randomAddress).onMined(() => {
-              wethToken.approveUnlimited(randomAddress);
+function createTestTransaction(srv = service) {
+  const wethToken = srv.getToken(tokens.WETH);
+  return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
+}
+
+test('TransactionObject event listeners work as promises', async () => {
+  expect.assertions(3);
+  const tx = createTestTransaction();
+
+  tx.onPending().then(tx => {
+    expect(tx.state()).toBe(TransactionState.pending);
+  });
+
+  tx.onMined().then(tx => {
+    expect(tx.state()).toBe(TransactionState.mined);
+
+    // create more blocks so that the original tx gets confirmed
+    for (let i = 0; i < 3; i++) {
+      createTestTransaction();
+    }
+  });
+
+  tx.onFinalized().then(tx => {
+    expect(tx.state()).toBe(TransactionState.finalized);
+  });
+
+  await tx.confirm();
+});
+
+test('get fees from TransactionObject', async () => {
+  const tx = await createTestTransaction().mine();
+  expect(parseFloat(tx.fees())).toBeGreaterThan(0);
+});
+
+test('TransactionObject event listeners work as callbacks', async () => {
+  expect.assertions(3);
+  const tx = createTestTransaction();
+  tx.onPending(() => {
+    expect(tx.state()).toBe(TransactionState.pending);
+  });
+  tx.onMined(() => {
+    expect(tx.state()).toBe(TransactionState.mined);
+
+    // create more blocks so that the original tx gets confirmed
+    for (let i = 0; i < 3; i++) {
+      createTestTransaction();
+    }
+  });
+  tx.onFinalized(() => {
+    expect(tx.state()).toBe(TransactionState.finalized);
+  });
+
+  await tx.confirm();
+});
+
+class FailingWeb3Service extends Web3Service {
+  ethersProvider() {
+    return new Proxy(super.ethersProvider(), {
+      get(target, key) {
+        if (key === 'getTransaction') {
+          return () =>
+            new Promise(() => {
+              throw new Error('test error');
             });
-          });
-        });
-        TransactionObject.onFinalized(() => {
-          //console.log('finalized callback');
-          expect(TransactionObject.state()).toBe(TransactionState.finalized);
-          done();
-        });
-      });
-  },
-  5000
-);
-
-/* need to figure out a way to induce error state
-test('TransactionObject error event listeners works', done => {
-  //const oasisService = OasisExchangeService.buildKovanService();
-  //let service = null;
-  const service = buildTestEthereumTokenService();
-  service.manager().authenticate()
-  //oasisService.manager().authenticate()
-    .then(() => {
-      //service = oasisService.get('ethereumToken');
-      const wethToken = service.getToken(tokens.WETH);
-      const randomAddress = TestAccountProvider.nextAddress();
-      const TransactionObject = wethToken.approveUnlimited(randomAddress);
-      TransactionObject.onError(()=>{
-        //console.log('onError() triggered');
-        done();
-      });
+        }
+        return target[key];
+      }
     });
-}, 5000);
-*/
+  }
+}
+
+test('TransactionObject error event listener works', async () => {
+  expect.assertions(1);
+  const service = buildTestService('token', {
+    token: true,
+    web3: [new FailingWeb3Service(), { provider: { type: 'TEST' } }]
+  });
+  await service.manager().authenticate();
+  const tx = createTestTransaction(service);
+  tx.onError(error => expect(error).toEqual('test error'));
+  try {
+    await tx;
+  } catch (err) {
+    // FIXME not sure why this try/catch is necessary...
+    // console.log('hmm.', err);
+  }
+});

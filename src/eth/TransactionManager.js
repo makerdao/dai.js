@@ -26,7 +26,7 @@ export default class TransactionManager extends PublicService {
       parseLogs
     );
 
-    const hybrid = tx.execute().then(() => tx.onMined());
+    const hybrid = tx.mine().then(() => tx.onMined());
     hybrid._original = tx;
     hybrid.getOriginalTransaction = () => tx;
     hybrid._txId = txId++;
