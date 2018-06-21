@@ -50,14 +50,14 @@ export default class PriceService extends PrivateService {
     return this._getContract(contracts.SAI_PIP)
       .read()
       .then(price => this._toUserFormat(price))
-      .then(CurrencyUnits.setCurrency(price, 'eth'));
+      .then(CurrencyUnits.getCurrency(price, 'eth'));
   }
 
   getPethPrice() {
     return this._getContract(contracts.SAI_TUB)
       .tag()
       .then(value => new BigNumber(value).dividedBy(RAY).toNumber())
-      .then(CurrencyUnits.setCurrency(value, 'peth'));
+      .then(CurrencyUnits.getCurrency(value, 'peth'));
   }
 
   setEthPrice(newPrice) {
@@ -72,7 +72,7 @@ export default class PriceService extends PrivateService {
     return this._getContract(contracts.SAI_PEP)
       .peek()
       .then(price => this._toUserFormat(price[0]))
-      .then(CurrencyUnits.setCurrency(price, 'mkr'));
+      .then(CurrencyUnits.getCurrency(price, 'mkr'));
   }
 
   setMkrPrice(newPrice) {

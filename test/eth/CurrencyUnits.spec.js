@@ -26,7 +26,7 @@ test('should parse a negative amount and return an error', done => {
   try {
     let curr = CurrencyUnits.getCurrency(amount, unit);
   } catch (error) {
-    let err = error;
+    let err = new Error('negative amounts not allowed');
   }
   expect(err).toContain('negative');
 });
@@ -35,26 +35,26 @@ test('should parse a negative amount and return an error', done => {
   test('should parse and output a CurrencyUnits object for all currency types', done => {
     let amountDai = 1;
     let unitDai = 'dai';
-    let curr = CurrencyUnits.getCurrency(amountDai, unitDai);
-    expect(curr.toString()).toBe('DAI(1)');
+    let curr1 = CurrencyUnits.getCurrency(amountDai, unitDai);
+    expect(curr1.toString()).toBe('DAI(1)');
 
     let amountMkr = 1;
     let unitMkr = 'mkr';
-    let curr = CurrencyUnits.getCurrency(amountMkr, unitMkr);
-    expect(curr.toString()).toBe('MKR(1)');
+    let curr2 = CurrencyUnits.getCurrency(amountMkr, unitMkr);
+    expect(curr2.toString()).toBe('MKR(1)');
 
     let amountWeth = 1;
     let unitWeth = 'weth';
-    let curr = CurrencyUnits.getCurrency(amountWeth, unitWeth);
-    expect(curr.toString()).toBe('WETH(1)');
+    let curr3 = CurrencyUnits.getCurrency(amountWeth, unitWeth);
+    expect(curr3.toString()).toBe('WETH(1)');
 
     let amountPeth = 1;
     let unitPeth = 'peth';
-    let curr = CurrencyUnits.getCurrency(amountPeth, unitPeth);
-    expect(curr.toString()).toBe('PETH(1)');
+    let curr4 = CurrencyUnits.getCurrency(amountPeth, unitPeth);
+    expect(curr4.toString()).toBe('PETH(1)');
 
     let amountEth = 1;
     let unitEth = 'eth';
-    let curr = CurrencyUnits.getCurrency(amountEth, unitEth);
-    expect(curr.toString()).toBe('ETH(1)');
+    let curr5 = CurrencyUnits.getCurrency(amountEth, unitEth);
+    expect(curr5.toString()).toBe('ETH(1)');
   });
