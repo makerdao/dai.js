@@ -1,12 +1,12 @@
 import Validator from '../utils/Validator';
-import BigNumber from 'bignumber.js';
-import { WEI } from '../utils/constants';
+import { WEI, RAY } from '../utils/constants';
 import enums from '../../contracts/tokens';
 import values from 'lodash.values';
 
 export class Currency {
-  constructor(amount) {
-    this._amount = Validator.amountToBigNumber(amount);
+  constructor(amount, divisor) {
+    let number = Validator.amountToBigNumber(amount);
+    this._amount = divisor ? number.dividedBy(divisor) : number;
     this.symbol = '???';
   }
 
@@ -25,8 +25,8 @@ export class Currency {
 
 const currencies = values(enums).reduce((output, symbol) => {
   class CurrencyX extends Currency {
-    constructor(amount) {
-      super(amount);
+    constructor(amount, divisor) {
+      super(amount, divisor);
       this.symbol = symbol;
     }
   }
@@ -34,26 +34,18 @@ const currencies = values(enums).reduce((output, symbol) => {
   // this changes the name of the class in stack traces
   Object.defineProperty(CurrencyX, 'name', { value: symbol });
 
-  // This wraps so we can use short syntax, e.g. ETH(6),
-  // since you can't define a class and then call it without `new`
-  output[symbol] = amount => new CurrencyX(amount);
-  output[symbol].symbol = symbol;
+  // This provides short syntax, e.g. ETH(6). We need a wrapper function because
+  // you can't call an ES6 class consructor without `new`
+  const creator = amount => new CurrencyX(amount);
+  creator.fromWei = amount => new CurrencyX(amount, WEI);
+  creator.fromRay = amount => new CurrencyX(amount, RAY);
+  creator.symbol = symbol;
+
+  output[symbol] = creator;
   return output;
 }, {});
 
 const functions = {
-  convert(amount, unit, divisor = WEI) {
-    // allow passing in an integer to support arbitrary place-shifting. this is
-    // somewhat overkill at the moment, but the number of decimals for a token
-    // is parameterized (see e.g. the Erc20Token constructor) so if that is ever
-    // a number other than 18 or 27, this code would have to follow suit.
-    if (typeof divisor === 'number') {
-      divisor = BigNumber('1e' + divisor);
-    }
-    const shifted = BigNumber(amount).dividedBy(divisor);
-    return functions.getCurrency(shifted, unit);
-  },
-
   getCurrency(amount, unit) {
     if (amount instanceof Currency) return amount;
     if (!unit) throw new Error('Unit not specified');

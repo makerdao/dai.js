@@ -49,12 +49,6 @@ export default class PriceService extends PrivateService {
     );
   }
 
-  _toUserFormat(value) {
-    return this.get('token')
-      .getToken(tokens.WETH)
-      .toUserFormat(value);
-  }
-
   getWethToPethRatio() {
     return this._getContract(contracts.SAI_TUB)
       .per()
@@ -64,13 +58,13 @@ export default class PriceService extends PrivateService {
   getEthPrice() {
     return this._getContract(contracts.SAI_PIP)
       .read()
-      .then(value => CurrencyUnits.convert(value, ETH));
+      .then(value => ETH.fromWei(value));
   }
 
   getPethPrice() {
     return this._getContract(contracts.SAI_TUB)
       .tag()
-      .then(value => CurrencyUnits.convert(value, PETH, RAY));
+      .then(value => PETH.fromRay(value));
   }
 
   setEthPrice(newPrice) {
@@ -84,7 +78,7 @@ export default class PriceService extends PrivateService {
   getMkrPrice() {
     return this._getContract(contracts.SAI_PEP)
       .peek()
-      .then(([price]) => CurrencyUnits.convert(price, MKR));
+      .then(([price]) => MKR.fromWei(price));
   }
 
   setMkrPrice(newPrice) {

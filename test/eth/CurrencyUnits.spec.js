@@ -1,5 +1,4 @@
 import CurrencyUnits from '../../src/eth/CurrencyUnits';
-import { RAY } from '../../src/utils/constants';
 
 test('parses an amount and currency symbol', () => {
   expect(CurrencyUnits.getCurrency(1, 'dai').toString()).toBe('1.00 DAI');
@@ -30,15 +29,23 @@ test('throws an error if amount is negative', () => {
   }).toThrowError('amount cannot be negative');
 });
 
-test('converts wei/wad', () => {
-  const value = CurrencyUnits.convert('2110000000000000000', 'peth');
-  expect(value.toString()).toBe('2.11 PETH');
+test('has a short syntax', () => {
+  const { ETH, PETH, WETH, DAI, MKR } = CurrencyUnits;
+  expect(ETH(1).toString()).toBe('1.00 ETH');
+  expect(PETH(2).toString()).toBe('2.00 PETH');
+  expect(WETH(3).toString()).toBe('3.00 WETH');
+  expect(DAI(4).toString()).toBe('4.00 DAI');
+  expect(MKR(5).toString()).toBe('5.00 MKR');
 });
 
-test('converts ray', () => {
-  const rayValue = '5130000000000000000000000000';
-  const value = CurrencyUnits.convert(rayValue, 'eth', RAY);
-  expect(value.toString()).toBe('5.13 ETH');
+test('has a short syntax for wei (1e18) amounts', () => {
+  const n = CurrencyUnits.MKR.fromWei('2110000000000000000');
+  expect(n.toString()).toBe('2.11 MKR');
+});
+
+test('has a short syntax for ray (1e27) amounts', () => {
+  const n = CurrencyUnits.PETH.fromRay('5130000000000000000000000000');
+  expect(n.toString()).toBe('5.13 PETH');
 });
 
 test('prints the specified number of decimals', () => {
