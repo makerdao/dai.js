@@ -1,6 +1,8 @@
 import Validator from '../utils/Validator';
 import BigNumber from 'bignumber.js';
 import { WEI } from '../utils/constants';
+import enums from '../../contracts/tokens';
+import values from 'lodash.values';
 
 export class Currency {
   constructor(amount) {
@@ -21,9 +23,7 @@ export class Currency {
   }
 }
 
-const symbols = ['DAI', 'ETH', 'WETH', 'PETH', 'MKR'];
-
-const currencies = symbols.reduce((output, symbol) => {
+const currencies = values(enums).reduce((output, symbol) => {
   class CurrencyX extends Currency {
     constructor(amount) {
       super(amount);
@@ -31,20 +31,26 @@ const currencies = symbols.reduce((output, symbol) => {
     }
   }
 
+  // this changes the name of the class in stack traces
+  Object.defineProperty(CurrencyX, 'name', { value: symbol });
+
   // This wraps so we can use short syntax, e.g. ETH(6),
   // since you can't define a class and then call it without `new`
-  function makeCurrencyX(amount) {
-    return new CurrencyX(amount);
-  }
-  makeCurrencyX.symbol = symbol;
-
-  output[symbol] = makeCurrencyX;
+  output[symbol] = amount => new CurrencyX(amount);
+  output[symbol].symbol = symbol;
   return output;
 }, {});
 
 const functions = {
   convert(amount, unit, divisor = WEI) {
-    const shifted = new BigNumber(amount).dividedBy(divisor).toNumber();
+    // allow passing in an integer to support arbitrary place-shifting. this is
+    // somewhat overkill at the moment, but the number of decimals for a token
+    // is parameterized (see e.g. the Erc20Token constructor) so if that is ever
+    // a number other than 18 or 27, this code would have to follow suit.
+    if (typeof divisor === 'number') {
+      divisor = BigNumber('1e' + divisor);
+    }
+    const shifted = BigNumber(amount).dividedBy(divisor);
     return functions.getCurrency(shifted, unit);
   },
 
@@ -52,7 +58,11 @@ const functions = {
     if (amount instanceof Currency) return amount;
     if (!unit) throw new Error('Unit not specified');
     const key = typeof unit === 'string' ? unit.toUpperCase() : unit.symbol;
-    return currencies[key](amount);
+    const ctor = currencies[key];
+    if (!ctor) {
+      throw new Error(`Couldn't find currency for "${key}" (${unit})`);
+    }
+    return ctor(amount);
   },
 
   toNumber(amount) {
