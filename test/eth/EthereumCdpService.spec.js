@@ -1,383 +1,232 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 
-let createdCdpService, cdp;
+let cdpService, cdp, defaultAccount, dai;
 
-beforeEach(() => {
-  createdCdpService = buildTestEthereumCdpService();
+beforeAll(async () => {
+  cdpService = buildTestEthereumCdpService();
+  await cdpService.manager().authenticate();
+  defaultAccount = cdpService
+    .get('token')
+    .get('web3')
+    .defaultAccount();
+  dai = cdpService.get('token').getToken(tokens.DAI);
 });
 
-function openCdp() {
-  return createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => createdCdpService.openCdp())
-    .then(newCdp => {
-      cdp = newCdp;
-      return cdp.getCdpId();
-    });
+afterAll(async () => {
+  // other tests expect this to be the case
+  await cdpService.get('price').setEthPrice('400');
+});
+
+async function openCdp() {
+  cdp = await cdpService.openCdp();
+  return cdp.getCdpId();
 }
 
-function lockEth(amount) {
-  return openCdp()
-    .then(id => createdCdpService.lockEth(id, amount))
-    .then(() => cdp.getInfo());
-}
+describe('basic checks', () => {
+  let id;
 
-test('should open a CDP and get cdp ID', () => {
-  return openCdp().then(id => {
+  beforeAll(async () => {
+    id = await openCdp();
+  });
+
+  test('check ID', () => {
     expect(typeof id).toBe('number');
     expect(id).toBeGreaterThan(0);
   });
+
+  test('lookup by ID', async () => {
+    expect.assertions(2);
+    const info = await cdpService.getCdpInfo(id);
+    expect(info).toBeTruthy();
+    expect(info.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test('shut', async () => {
+    await cdp.shut(id);
+    const info = await cdp.getInfo();
+    expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+  });
 });
 
-test('should check if a cdp for a specific id exists', () => {
-  expect.assertions(2);
-  return openCdp()
-    .then(cdpId => createdCdpService.getCdpInfo(cdpId))
-    .then(result => {
-      expect(result).toBeTruthy();
-      expect(result.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-    });
+describe('weth and peth', () => {
+  let wethToken, pethToken;
+
+  beforeAll(() => {
+    const tokenService = cdpService.get('token');
+    wethToken = tokenService.getToken(tokens.WETH);
+    pethToken = tokenService.getToken(tokens.PETH);
+  });
+
+  afterAll(async () => {
+    await wethToken.approve(cdpService._tubContract().getAddress(), '0');
+    await pethToken.approve(cdpService._tubContract().getAddress(), '0');
+  });
+
+  test('lock weth in a cdp', async () => {
+    const id = await openCdp();
+
+    await wethToken.deposit('0.1');
+    const balancePre = await wethToken.balanceOf(defaultAccount);
+    const cdpInfoPre = await cdpService.getCdpInfo(id);
+    await cdpService.lockWeth(id, '0.1');
+    const cdpInfoPost = await cdpService.getCdpInfo(id);
+    const balancePost = await wethToken.balanceOf(defaultAccount);
+
+    expect(cdpInfoPre.ink.toString()).toEqual('0');
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+  });
+
+  test('lock peth in a cdp', async () => {
+    const id = await openCdp();
+
+    await wethToken.deposit('0.1');
+    await wethToken.approve(cdpService._tubContract().getAddress(), '0.1');
+    await pethToken.join('0.1');
+
+    const balancePre = await pethToken.balanceOf(defaultAccount);
+    const cdpInfoPre = await cdpService.getCdpInfo(id);
+    await cdpService.lockPeth(id, '0.1');
+    const cdpInfoPost = await cdpService.getCdpInfo(id);
+    const balancePost = await pethToken.balanceOf(defaultAccount);
+
+    expect(cdpInfoPre.ink.toString()).toEqual('0');
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+  });
 });
 
-test('should open and then shut a CDP', () => {
-  expect.assertions(2);
-  let cdpId, firstInfoCall;
-  return openCdp()
-    .then(id => {
-      cdpId = id;
-      return createdCdpService.getCdpInfo(id);
-    })
-    .then(info => {
-      firstInfoCall = info;
-      return createdCdpService.shutCdp(cdpId);
-    })
-    .then(() => createdCdpService.getCdpInfo(cdpId))
-    .then(secondInfoCall => {
-      expect(firstInfoCall).not.toBe(secondInfoCall);
-      expect(secondInfoCall.lad).toBe(
-        '0x0000000000000000000000000000000000000000'
-      );
-    });
-});
-
-test('should open and then shut a CDP with peth locked in it', () => {
-  expect.assertions(2);
-  let firstInfoCall;
-  let cdpId;
-  return openCdp()
-    .then(id => {
-      cdpId = id;
-      return createdCdpService.getCdpInfo(id);
-    })
-    .then(info => (firstInfoCall = info))
-    .then(() => cdp.lockEth('0.1'))
-    .then(() => createdCdpService.shutCdp(cdpId))
-    .then(() => createdCdpService.getCdpInfo(cdpId))
-    .then(secondInfoCall => {
-      expect(firstInfoCall).not.toBe(secondInfoCall);
-      expect(secondInfoCall.lad).toBe(
-        '0x0000000000000000000000000000000000000000'
-      );
-    });
-});
-
-test('should be able to lock eth in a cdp', () => {
-  expect.assertions(2);
-  let firstInfoCall, cdpId;
-
-  return openCdp()
-    .then(() => cdp.getCdpId())
-    .then(id => {
-      cdpId = id;
-      return createdCdpService.getCdpInfo(id);
-    })
-    .then(result => (firstInfoCall = result))
-    .then(() => createdCdpService.lockEth(cdpId, '0.1'))
-    .then(() => createdCdpService.getCdpInfo(cdpId))
-    .then(secondInfoCall => {
-      expect(firstInfoCall.ink.toString()).toEqual('0');
-      expect(secondInfoCall.ink.toString()).toEqual('100000000000000000');
-    });
-});
-
-test('should be able to lock weth in a cdp', async () => {
-  const id = await openCdp();
-  const tokenService = createdCdpService.get('token');
-  const wethToken = tokenService.getToken(tokens.WETH);
-  const pethToken = tokenService.getToken(tokens.PETH);
-  const defaultAccount = createdCdpService
-    .get('token')
-    .get('web3')
-    .defaultAccount();
-
-  await wethToken.deposit('0.1');
-  const balancePre = await wethToken.balanceOf(defaultAccount);
-  const cdpInfoPre = await createdCdpService.getCdpInfo(id);
-  await createdCdpService.lockWeth(id, '0.1');
-  const cdpInfoPost = await createdCdpService.getCdpInfo(id);
-  const balancePost = await wethToken.balanceOf(defaultAccount);
-
-  expect(cdpInfoPre.ink.toString()).toEqual('0');
-  expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-  expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
-
-  await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-  await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-});
-
-test('should be able to lock peth in a cdp', async () => {
-  const id = await openCdp();
-  const tokenService = createdCdpService.get('token');
-  const wethToken = tokenService.getToken(tokens.WETH);
-  const pethToken = tokenService.getToken(tokens.PETH);
-  const defaultAccount = createdCdpService
-    .get('token')
-    .get('web3')
-    .defaultAccount();
-
-  await wethToken.deposit('0.1');
-  await wethToken.approve(createdCdpService._tubContract().getAddress(), '0.1');
-  await pethToken.join('0.1');
-
-  const balancePre = await pethToken.balanceOf(defaultAccount);
-  const cdpInfoPre = await createdCdpService.getCdpInfo(id);
-  await createdCdpService.lockPeth(id, '0.1');
-  const cdpInfoPost = await createdCdpService.getCdpInfo(id);
-  const balancePost = await pethToken.balanceOf(defaultAccount);
-
-  expect(cdpInfoPre.ink.toString()).toEqual('0');
-  expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-  expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
-
-  await wethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-  await pethToken.approve(createdCdpService._tubContract().getAddress(), '0');
-});
-
-test('should be able to free peth from a cdp', () => {
-  expect.assertions(1);
-  let newCdp;
-  let firstBalance;
-  let cdpId;
-
-  return createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => createdCdpService.openCdp())
-    .then(cdp => {
-      newCdp = cdp;
-      return newCdp.getCdpId();
-    })
-    .then(id => (cdpId = id))
-    .then(() => createdCdpService.lockEth(cdpId, '0.1'))
-    .then(() => newCdp.getInfo())
-    .then(info => (firstBalance = parseFloat(info.ink)))
-    .then(() => createdCdpService.freePeth(cdpId, '0.1'))
-    .then(() => newCdp.getInfo())
-    .then(info => {
-      expect(parseFloat(info.ink)).toBeCloseTo(
-        firstBalance - 100000000000000000
-      );
-    });
-});
-
-test('should be able to draw dai', () => {
-  expect.assertions(1);
-  let cdpId, firstDaiBalance, defaultAccount, dai;
-
-  return createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => lockEth('0.1'))
-    .then(() => cdp.getCdpId())
-    .then(id => {
-      dai = createdCdpService.get('token').getToken(tokens.DAI);
-      defaultAccount = createdCdpService
-        .get('token')
-        .get('web3')
-        .defaultAccount();
-      cdpId = id;
-      return dai.balanceOf(defaultAccount);
-    })
-    .then(balance => {
-      firstDaiBalance = parseFloat(balance);
-      return createdCdpService
-        .drawDai(cdpId, '1')
-        .then(() => dai.balanceOf(defaultAccount));
-    })
-    .then(secondDaiBalance => {
-      expect(parseFloat(secondDaiBalance)).toBeCloseTo(firstDaiBalance + 1);
-      return cdp.wipeDai('1');
-    });
-});
-
-test('should be able to wipe dai', () => {
-  expect.assertions(1);
-  let cdpId, firstDaiBalance, defaultAccount, dai;
-
-  return createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => lockEth('0.1'))
-    .then(() => cdp.getCdpId())
-    .then(id => {
-      dai = createdCdpService.get('token').getToken(tokens.DAI);
-      defaultAccount = createdCdpService
-        .get('token')
-        .get('web3')
-        .defaultAccount();
-      cdpId = id;
-      return cdp.drawDai('1');
-    })
-    .then(() => dai.balanceOf(defaultAccount))
-    .then(balance => {
-      firstDaiBalance = parseFloat(balance);
-      return createdCdpService.wipeDai(cdpId, '1');
-    })
-    .then(() => dai.balanceOf(defaultAccount))
-    .then(secondDaiBalance => {
-      expect(parseFloat(secondDaiBalance)).toBeCloseTo(
-        parseFloat(firstDaiBalance) - 1
-      );
-    });
-});
-
-test('should be able to transfer ownership of a cdp', () => {
-  expect.assertions(2);
+test('transfer ownership', async () => {
   const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
-  let cdpId, firstOwner;
-  return createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => openCdp())
-    .then(id => (cdpId = id))
-    .then(() => cdp.getInfo())
-    .then(info => (firstOwner = info.lad))
-    .then(() => createdCdpService.give(cdpId, newAddress))
-    .then(() => cdp.getInfo())
-    .then(info => {
-      expect(info.lad).not.toEqual(firstOwner);
-      expect(info.lad).toEqual(newAddress);
-    });
+  await openCdp();
+  const info = await cdp.getInfo();
+  await cdp.give(newAddress);
+  const info2 = await cdp.getInfo();
+  expect(info2.lad).not.toEqual(info.lad);
+  expect(info2.lad).toEqual(newAddress);
 });
 
 // Also test that biting a safe cdp throws an error
-test('should be able to bite an unsafe cdp', () => {
-  expect.assertions(1);
+test('bite', async () => {
+  await openCdp();
+  await cdp.lockEth('0.1');
+  await cdp.drawDai('13');
+  const id = await cdp.getCdpId();
+  await cdpService.get('price').setEthPrice('0.01');
+  const result = await cdpService.bite(id);
+  await cdpService.get('price').setEthPrice('400'); // for other tests in this file
+  expect(typeof result).toEqual('object');
+});
+
+describe('a cdp with collateral', () => {
   let id;
 
-  return createdCdpService
-    .manager()
-    .authenticate()
-    .then(() => lockEth('0.1'))
-    .then(() => cdp.drawDai('13'))
-    .then(() => cdp.getCdpId())
-    .then(cdpId => (id = cdpId))
-    .then(() => createdCdpService.get('price').setEthPrice('0.01'))
-    .then(() => createdCdpService.get('price').getEthPrice())
-    .then(() => createdCdpService.bite(id))
-    .then(res => expect(typeof res).toEqual('object'))
-    .then(() => createdCdpService.get('price').setEthPrice('400'));
-});
+  beforeAll(async () => {
+    id = await openCdp();
+    await cdp.lockEth('0.2');
+  });
 
-test('can read the locked collateral in peth for a cdp ', async () => {
-  await openCdp();
-  await cdp.lockEth('0.2');
-  const debt = await cdp.getCollateralValueInPeth();
-  expect(debt.toString()).toEqual('0.2');
-});
+  test('read ink', async () => {
+    const info = await cdpService.getCdpInfo(id);
+    expect(info.ink.toString()).toBe('200000000000000000');
+  });
 
-test('can read the locked collateral in eth for a cdp ', async () => {
-  await openCdp();
-  await cdp.lockEth('0.2');
-  const debt = await cdp.getCollateralValueInEth();
-  expect(debt.toString()).toEqual('0.2');
-});
+  test('read locked collateral in peth', async () => {
+    const debt = await cdp.getCollateralValueInPeth();
+    expect(debt.toString()).toEqual('0.2');
+  });
 
-test('can read the locked collateral in USD for a cdp ', async () => {
-  await openCdp();
-  await cdp.lockEth('0.2');
-  const debt = await cdp.getCollateralValueInUSD();
-  expect(debt.toString()).toEqual('80');
-});
+  test('read locked collateral in eth', async () => {
+    const debt = await cdp.getCollateralValueInEth();
+    expect(debt.toString()).toEqual('0.2');
+  });
 
-test('can read the debt in dai for a cdp', async () => {
-  const id = await openCdp();
-  await cdp.lockEth('0.1');
-  await cdp.drawDai('5');
-  const debt = await cdp.getDebtValueInDai(id);
-  expect(debt.toString()).toEqual('5');
-});
+  test('read locked collateral in USD', async () => {
+    const debt = await cdp.getCollateralValueInUSD();
+    expect(debt.toString()).toEqual('80');
+  });
 
-test('can read the debt in usd for a cdp', async () => {
-  const id = await openCdp();
-  await cdp.lockEth('0.1');
-  await cdp.drawDai('5');
-  const debt = await cdp.getDebtValueInUSD(id);
-  expect(debt.toString()).toEqual('5');
+  describe('with debt', () => {
+    beforeAll(() => cdp.drawDai('5'));
+
+    test('read debt in dai', async () => {
+      const debt = await cdp.getDebtValueInDai();
+      expect(debt.toString()).toEqual('5');
+    });
+
+    test('read debt in usd', async () => {
+      const debt = await cdp.getDebtValueInUSD();
+      expect(debt.toString()).toEqual('5');
+    });
+
+    test('read liquidation price', async () => {
+      const price = await cdp.getLiquidationPriceEthUSD();
+      expect(price.toString()).toEqual('37.5');
+    });
+
+    test('check if cdp is safe', async () => {
+      expect(await cdp.isSafe()).toBe(true);
+    });
+
+    test('read collateralization ratio', async () => {
+      const ethPerPeth = await cdpService.get('price').getWethToPethRatio();
+      const collateralizationRatio = await cdp.getCollateralizationRatio();
+      expect(collateralizationRatio).toBeCloseTo(16 * ethPerPeth);
+    });
+
+    test('wipe', async () => {
+      const balance1 = parseFloat(await dai.balanceOf(defaultAccount));
+      await cdp.wipeDai('5');
+      const balance2 = parseFloat(await dai.balanceOf(defaultAccount));
+      expect(balance2 - balance1).toBeCloseTo(-5);
+      const debt = await cdp.getDebtValueInDai();
+      expect(debt.toString()).toEqual('0');
+    });
+
+    test('free', async () => {
+      await cdp.freePeth('0.1');
+      const info = await cdp.getInfo();
+      expect(info.ink.toString()).toEqual('100000000000000000');
+    });
+
+    test('shut', async () => {
+      await cdp.shut();
+      const info = await cdp.getInfo();
+      expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+    });
+  });
 });
 
 test('can read the liquidation ratio', async () => {
-  await createdCdpService.manager().authenticate();
-  const liquidationRatio = await createdCdpService.getLiquidationRatio();
+  const liquidationRatio = await cdpService.getLiquidationRatio();
   expect(liquidationRatio.toString()).toEqual('1.5');
 });
 
 test('can read the liquidation penalty', async () => {
-  await createdCdpService.manager().authenticate();
-  const liquidationPenalty = await createdCdpService.getLiquidationPenalty();
+  const liquidationPenalty = await cdpService.getLiquidationPenalty();
   expect(liquidationPenalty.toString()).toEqual('0.13');
 });
 
 test('can read the annual governance fee', async () => {
-  await createdCdpService.manager().authenticate();
-  const governanceFee = await createdCdpService.getAnnualGovernanceFee();
+  const governanceFee = await cdpService.getAnnualGovernanceFee();
   expect(governanceFee.toFixed(3)).toEqual('0.005');
 });
 
-test('can read the liquidation price in eth for a cdp', async () => {
-  await openCdp();
-  await cdp.lockEth('0.1');
-  await cdp.drawDai('5');
-  const price = await cdp.getLiquidationPriceEthUSD();
-  expect(price.toString()).toEqual('75');
-});
-
 test('can read the target price', async () => {
-  await createdCdpService.manager().authenticate();
-  const tp = await createdCdpService.getTargetPrice();
+  const tp = await cdpService.getTargetPrice();
   expect(tp).toBe(1);
 });
 
-test('can check if cdp is safe', async () => {
-  await openCdp();
-  await cdp.lockEth('0.1');
-  await cdp.drawDai('5');
-  const safe = await cdp.isSafe();
-  expect(safe).toBe(true);
-});
-
-test('can calculate the collateralization ratio of a specific CDP', async () => {
-  await createdCdpService.manager().authenticate();
-  await createdCdpService.get('price').setEthPrice('500');
-  await lockEth('0.1');
-  await cdp.drawDai('20');
-  const ethPerPeth = await createdCdpService.get('price').getWethToPethRatio();
-  const collateralizationRatio = await cdp.getCollateralizationRatio();
-  await createdCdpService.get('price').setEthPrice('400');
-  expect(collateralizationRatio).toBeCloseTo(2.5 * ethPerPeth);
-});
-
 test('can calculate system collateralization', async () => {
-  await createdCdpService.manager().authenticate();
-  const collateralizatoinA = await createdCdpService.getSystemCollateralization();
-  await lockEth('0.1');
+  await openCdp();
+  const scA = await cdpService.getSystemCollateralization();
 
-  const collateralizatoinB = await createdCdpService.getSystemCollateralization();
-  expect(collateralizatoinB).toBeGreaterThan(collateralizatoinA);
+  await cdp.lockEth('0.1');
+  const scB = await cdpService.getSystemCollateralization();
+  expect(scB).toBeGreaterThan(scA);
+
   await cdp.drawDai('10');
-
-  const collateralizatoinC = await createdCdpService.getSystemCollateralization();
-  expect(collateralizatoinB).toBeGreaterThan(collateralizatoinC);
+  const scC = await cdpService.getSystemCollateralization();
+  expect(scB).toBeGreaterThan(scC);
 });
