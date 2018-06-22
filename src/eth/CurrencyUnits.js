@@ -45,7 +45,7 @@ const currencies = values(enums).reduce((output, symbol) => {
   return output;
 }, {});
 
-const functions = {
+const statics = {
   getCurrency(amount, unit) {
     if (amount instanceof Currency) return amount;
     if (!unit) throw new Error('Unit not specified');
@@ -55,27 +55,8 @@ const functions = {
       throw new Error(`Couldn't find currency for "${key}" (${unit})`);
     }
     return ctor(amount);
-  },
-
-  toNumber(amount) {
-    if (Validator.isString(amount)) {
-      return Validator.stringToNumber(amount);
-    } else if (Validator.isNumber(amount)) {
-      return amount;
-    } else {
-      return new Error('unrecognized type of amount');
-    }
-  },
-
-  toBigNumber(amount) {
-    if (Validator.isString(amount)) {
-      return Validator.stringToBigNumber(amount);
-    } else if (Validator.isNumber(amount)) {
-      return Validator.amountToBigNumber(amount);
-    } else {
-      return new Error('unrecognized type of amount');
-    }
   }
 };
 
-export default Object.assign({}, currencies, functions);
+Object.assign(statics, currencies);
+export default statics;
