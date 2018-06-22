@@ -6,6 +6,8 @@ import { RAY } from '../utils/constants';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
+import CurrencyUnits from './CurrencyUnits';
+const { ETH, PETH, MKR } = CurrencyUnits;
 
 export default class PriceService extends PrivateService {
   /**
@@ -47,12 +49,6 @@ export default class PriceService extends PrivateService {
     );
   }
 
-  _toUserFormat(value) {
-    return this.get('token')
-      .getToken(tokens.WETH)
-      .toUserFormat(value);
-  }
-
   getWethToPethRatio() {
     return this._getContract(contracts.SAI_TUB)
       .per()
@@ -62,13 +58,13 @@ export default class PriceService extends PrivateService {
   getEthPrice() {
     return this._getContract(contracts.SAI_PIP)
       .read()
-      .then(price => this._toUserFormat(price));
+      .then(value => ETH.fromWei(value));
   }
 
   getPethPrice() {
     return this._getContract(contracts.SAI_TUB)
       .tag()
-      .then(value => new BigNumber(value).dividedBy(RAY).toNumber());
+      .then(value => PETH.fromRay(value));
   }
 
   setEthPrice(newPrice) {
@@ -82,7 +78,7 @@ export default class PriceService extends PrivateService {
   getMkrPrice() {
     return this._getContract(contracts.SAI_PEP)
       .peek()
-      .then(price => this._toUserFormat(price[0]));
+      .then(([price]) => MKR.fromWei(price));
   }
 
   setMkrPrice(newPrice) {

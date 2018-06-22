@@ -7,12 +7,30 @@ export default class Validator {
     return amount.toString();
   }
 
+  static stringToBigNumber(str) {
+    if (Validator.isString(str)) {
+      let bytesAmount = this.stringToBytes32(str);
+      let bigNum = this.bytes32ToBigNumber(bytesAmount);
+      return bigNum;
+    }
+  }
+
+  static stringToNumber(str) {
+    if (Validator.isString(str)) {
+      let bytesAmount = this.stringToBytes32(str);
+      let num = this.bytes32ToNumber(bytesAmount);
+      return num;
+    }
+  }
+
   static amountToBigNumber(amount) {
-    return BigNumber(amount);
+    // TODO: add guard for address, and if it's over a trillion
+    const value = BigNumber(amount);
+    if (value.lt(0)) throw new Error('amount cannot be negative');
+    return value;
   }
 
   static parseUnits(amount, decimalsOrString = 18) {
-    // TODO: throw if decimalsOrString='ether' it's not working
     const stringAmount = amount.toString();
     return this.BNToBigNumber(utils.parseUnits(stringAmount, decimalsOrString));
   }
@@ -66,15 +84,15 @@ export default class Validator {
     );
   }
 
-  _isString(value) {
+  static isString(value) {
     return typeof value === 'string' || value instanceof String;
   }
 
-  _isNumber(value) {
+  static isNumber(value) {
     return typeof value === 'number' && isFinite(value);
   }
 
-  _isNullOrUndefined(value) {
+  static isNullOrUndefined(value) {
     return value === null || typeof value === 'undefined';
   }
 }
