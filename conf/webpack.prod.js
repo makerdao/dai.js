@@ -2,6 +2,8 @@ const webpack = require('webpack');
 const Merge = require('webpack-merge');
 const CommonConfig = require('./webpack.common.js');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 
 module.exports = Merge(CommonConfig, {
   entry: {
@@ -21,6 +23,9 @@ module.exports = Merge(CommonConfig, {
     ]
   },
   plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Maker.js demo'
+    }),
     new webpack.LoaderOptionsPlugin({
       minimize: true,
       debug: false
