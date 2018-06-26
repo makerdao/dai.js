@@ -31,10 +31,13 @@ script:
 - codecov
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
+before_deploy: "npm version from-git && npm run build:backend && cd dist"
 deploy:
   provider: npm
+  email: ebennett19@gmail.com
+  api_key:
+    secure: "05LnYn4SIg9N6zngVM1QFRz0Yw+66TmKTC2HPZVhxshk3Of1Ry+Kk4wlUnH/o/o3KrZvJiJvriJHXrioJyD21OOjuPfTVg+o69Gwq9CMtbWWsWZN9OXe+Z/N4Vdw3nnA9pdqmaKt9XlrPE+BEK97zXTWsSkc4SO8NHGjME0TV38t3gJjCPLRGRceT54kS6FkU0E+tnEaVYZuqHchoGiV5lIAzYjNBLjbaPi3+r9L3r5BP8eWMAbYJmmpt9H3/ZNt1XsZtvwFcuEcXyC/9W/Oe0d0n90HIyss40jJDrWur+fIS3yEZ9ersxLvDL8/Q9zOL1O9ltbO6o/mfgTFIA7FUIbOVkYw3QnvV9fVpOIShm4kHIQ/3Xbt5X8XyawxRAAkpbjSnKx651NJ89ckzEZr1LJZsDhycb6ZG4Q/ZgU7Ff5dC00iFpyVGkTGqsP7+CsBJSFlcB4m/YLGeX2ZoEruMHWMbbZ4NVx1rFH/lR0Z67lD1OhgDCPRjcHkxMSBUHkMIkAKLhKNb9uRXeA/huO9efKXvZf1V+Ch20VUneOdAny7Lmk6GVfdkvnskf4NeO2D230hqVV53E5aey8KlVn5sCqCP8nr3w1TU9vao5i0d+6SALmU2BTH+FJJ6GOtpnSiIORoSgbGzEk9XHIYmoVxt4c+ZGTt4CxAt6Ah/YVnGEg="
   skip_cleanup: true
   on:
+    branch: dev
     tags: true
-  api_key:
-    secure: L/41Xcy55Sa9ee5aEj/63HZELFua+qC7swY56xYcYTTimo71dLhNzvh2DD0pGLAALAb2euC/7i/3zt7DJfGFPMZMipc2efZwDUhl/X4IlCXJyqlEf/gogGa+OoKBnA/9UyDeAAToqU5taBvQwhIedGB9uHpwHwrzRasilpjlbEk4hZZQskwBRJODHEmojZpQVWzeosSozY7sVPZN8mbG+BMu7+bUE4HeUVX8UQ+jbO59WGWDQ5QO+cAC6npA4ipCAFm/udQlXikCxNmGMGf1zzbqe3Be04loZwYPvJG2VlhjRaLUA8QEi865+aEPbZFhpdyFS93CfHQJvJAOvDEA2gjkXCyc9HgLa/Gvq+p6InqVG2iBvegFlmRrx7IN/aJYRwtwma/q06V5ueA73jPkOhyd9kshOIPOL5sXmLk9F6UleETt60zTzUqtm4SShm7YRR4Z9yxQvIwBteCDJzy6OAgVAUAdb92srLardyKARVmLqKzaPw5KR3NIDz4iRSU9IlVCKKJ9O4zQQSf3qvARc0XmGOzdT9E86MsbdEzO9a9bAmxCGtmXDCBDbgjY5XkMpCxhN3a7iflEn4vLhNuGLqFyF6XHD2nTnKAktT7AHi+O4K3l4XbaQCM0iKD0yW5U/9VIzLjhlzHbu0byTmZJfHrB7xKklQWUBVl327hZvb0=
