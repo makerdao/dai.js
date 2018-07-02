@@ -2,7 +2,7 @@ import './index.scss';
 import Maker from '../src/Maker';
 import tokens from '../contracts/tokens';
 import Vue from 'vue';
-import MakerDebugger from '../components/MakerDebugger.vue';
+import MakerDebugger from './components/MakerDebugger.vue';
 
 function updateInfo(cdp) {
   return Promise.all([
