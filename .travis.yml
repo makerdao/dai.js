@@ -27,8 +27,8 @@ before_script:
 - npm install -g codecov
 script:
 - chmod +x with-deployed-system update-abis
-- npm run test
-- codecov
+- npm run coverage
+- codecov -f coverage
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
 before_deploy: "npm version from-git && npm run build:backend && cd dist"
