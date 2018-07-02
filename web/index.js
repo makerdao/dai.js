@@ -1,7 +1,7 @@
 import './index.scss';
 import Maker, { DAI } from '../src';
 import Vue from 'vue';
-import MakerDebugger from '../components/MakerDebugger.vue';
+import MakerDebugger from './components/MakerDebugger.vue';
 
 function updateInfo(cdp) {
   return Promise.all([
