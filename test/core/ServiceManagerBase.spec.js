@@ -75,21 +75,24 @@ test('initialize() should correctly transition to READY/OFFLINE after successful
   s2.initialize().then(() => expect(s2.state()).toBe(ServiceState.OFFLINE));
 });
 
-test('initialize() should correctly revert back to CREATED after unsuccessfully INITIALIZING', () => {
+test('initialize() should correctly revert back to CREATED after unsuccessfully INITIALIZING', async () => {
   expect.assertions(2);
 
   const s = new ServiceManagerBase(() => {
     throw new Error('InitError');
   });
-  s.initialize().then(() => {
+  try {
+    await s.initialize();
+  } catch (err) {
     expect(s.state()).toBe(ServiceState.CREATED);
-  });
-  const s2 = new ServiceManagerBase(() => {
-    return Promise.reject('InitError');
-  });
-  s2.initialize().then(() => {
+  }
+
+  const s2 = new ServiceManagerBase(() => Promise.reject('InitError'));
+  try {
+    await s2.initialize();
+  } catch (err) {
     expect(s2.state()).toBe(ServiceState.CREATED);
-  });
+  }
 });
 
 test('initialize() should call onInitialized handlers and reflect state through the is* methods', done => {
