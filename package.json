@@ -7,7 +7,8 @@
     "Tyler Sorensen <tyler@makerdao.com>",
     "Ethan Bennett <ethan@makerdao.com>",
     "Lawrence Wang <lawrence@makerdao.com>",
-    "Joshua Levine <joshua@makerdao.com>"
+    "Joshua Levine <joshua@makerdao.com>",
+    "Michael Elliot <mike@makerdao.com>"
   ],
   "description": "MakerDAO exchange integration library.",
   "license": "MIT",
