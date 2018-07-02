@@ -24,27 +24,37 @@
       this.maker.service('web3').onNewBlock(blockNumber => {
         this.blockNumber = blockNumber;
 
-        if (timerId !== null) {
-          clearTimeout(timerId);
-        }
-
+        if (timerId !== null) clearTimeout(timerId);
         timerId = setTimeout(() => {
-          this.maker.service('smartContract').inspect().then(debugInfo => {
-            this.nodeMap = debugInfo;
-            this.logItems = [];
-            Object.values(debugInfo).forEach(i => this.logItems.push(i.getInfo()));
-            this.reloading = (timerId !== null);
-          });
           timerId = null;
+          this.inspectContractInfo();
         }, 2500);
 
-        this.reloading = true;
       });
 
       this.maker.service('transactionManager').onNewTransaction(tx => {
         this.transactions = [tx].concat(this.transactions);
       });
+      this.inspectContractInfo();
     },
+    methods: {
+      inspectContractInfo() {
+        this.reloading = true;
+        console.log("Getting smartContract service info...")
+        this.maker.service('smartContract').inspect().then(debugInfo => {
+          console.log('got debugInfo!',debugInfo)
+          this.nodeMap = debugInfo;
+          this.logItems = [];
+          Object.values(debugInfo).forEach(i => this.logItems.push(i.getInfo()));
+          this.reloading = false;
+        });
+      }
+    },
+    // computed: {
+    //   reloading() {
+    //     return timerId !== null;
+    //   }
+    // }
     data: function() {
       return {
         blockNumber: this.maker.service('web3').blockNumber(),
