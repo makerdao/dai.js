@@ -20,7 +20,7 @@ afterAll(async () => {
 
 async function openCdp() {
   cdp = await cdpService.openCdp();
-  return cdp.getCdpId();
+  return cdp.getId();
 }
 
 describe('basic checks', () => {
@@ -112,7 +112,7 @@ test('bite', async () => {
   await openCdp();
   await cdp.lockEth('0.1');
   await cdp.drawDai('13');
-  const id = await cdp.getCdpId();
+  const id = await cdp.getId();
   await cdpService.get('price').setEthPrice('0.01');
   const result = await cdpService.bite(id);
   await cdpService.get('price').setEthPrice('400'); // for other tests in this file

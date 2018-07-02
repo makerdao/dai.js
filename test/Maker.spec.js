@@ -11,7 +11,7 @@ test(
 
     maker
       .openCdp()
-      .then(cdp => cdp.getCdpId())
+      .then(cdp => cdp.getId())
       .then(id => {
         expect(typeof id).toBe('number');
         expect(id).toBeGreaterThan(0);
@@ -27,9 +27,9 @@ test('should create a new CDP object for existing CDPs', done => {
 
   maker.openCdp().then(cdp => {
     createdCdp = cdp;
-    cdp.getCdpId().then(id => {
+    cdp.getId().then(id => {
       maker.getCdp(id).then(newCdpObject => {
-        expect(createdCdp.getCdpId()).toEqual(newCdpObject.getCdpId());
+        expect(createdCdp.getId()).toEqual(newCdpObject.getId());
         expect(createdCdp._cdpService).toEqual(newCdpObject._cdpService);
         expect(createdCdp._smartContractService).toEqual(
           newCdpObject._smartContractService
@@ -46,12 +46,12 @@ test('should validate the provided CDP ID', done => {
 
   maker
     .openCdp()
-    .then(cdp => cdp.getCdpId())
+    .then(cdp => cdp.getId())
     .then(id => {
       cdpId = id;
       return maker.getCdp(cdpId);
     })
-    .then(cdp => cdp.getCdpId())
+    .then(cdp => cdp.getId())
     .then(fetchedId => {
       expect(fetchedId).toEqual(cdpId);
 
