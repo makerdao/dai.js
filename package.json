@@ -5,7 +5,8 @@
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
     "Tyler Sorensen <tyler@makerdao.com>",
-    "Ethan Bennett <ethan@makerdao.com>"
+    "Ethan Bennett <ethan@makerdao.com>",
+    "Michael Elliot <mike@makerdao.com>"
   ],
   "description": "MakerDAO exchange integration library.",
   "license": "MIT",
