@@ -37,6 +37,7 @@
     "prepush": "npm run test",
     "prettier": "prettier --write --single-quote '{src,web,test,contracts}/**/*.js'",
     "start": "webpack-dev-server --config conf/webpack.dev.js",
+    "start:https": "webpack-dev-server --https --config conf/webpack.dev.js",
     "test": "./with-deployed-system --ci jest --runInBand",
     "test:watch": "./with-deployed-system jest --watch --runInBand",
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
