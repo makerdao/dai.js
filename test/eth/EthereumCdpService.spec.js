@@ -37,7 +37,7 @@ describe('basic checks', () => {
 
   test('lookup by ID', async () => {
     expect.assertions(2);
-    const info = await cdpService.getCdpInfo(id);
+    const info = await cdpService.getInfo(id);
     expect(info).toBeTruthy();
     expect(info.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
@@ -68,9 +68,9 @@ describe('weth and peth', () => {
 
     await wethToken.deposit('0.1');
     const balancePre = await wethToken.balanceOf(defaultAccount);
-    const cdpInfoPre = await cdpService.getCdpInfo(id);
+    const cdpInfoPre = await cdpService.getInfo(id);
     await cdpService.lockWeth(id, '0.1');
-    const cdpInfoPost = await cdpService.getCdpInfo(id);
+    const cdpInfoPost = await cdpService.getInfo(id);
     const balancePost = await wethToken.balanceOf(defaultAccount);
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
@@ -86,9 +86,9 @@ describe('weth and peth', () => {
     await pethToken.join('0.1');
 
     const balancePre = await pethToken.balanceOf(defaultAccount);
-    const cdpInfoPre = await cdpService.getCdpInfo(id);
+    const cdpInfoPre = await cdpService.getInfo(id);
     await cdpService.lockPeth(id, '0.1');
-    const cdpInfoPost = await cdpService.getCdpInfo(id);
+    const cdpInfoPost = await cdpService.getInfo(id);
     const balancePost = await pethToken.balanceOf(defaultAccount);
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
@@ -128,7 +128,7 @@ describe('a cdp with collateral', () => {
   });
 
   test('read ink', async () => {
-    const info = await cdpService.getCdpInfo(id);
+    const info = await cdpService.getInfo(id);
     expect(info.ink.toString()).toBe('200000000000000000');
   });
 

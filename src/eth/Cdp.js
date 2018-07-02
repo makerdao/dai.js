@@ -62,85 +62,37 @@ export default class Cdp {
   getId() {
     return this._cdpIdPromise;
   }
-
-  async shut() {
-    const id = await this.getId();
-    return this._cdpService.shutCdp(id);
-  }
-
-  async getInfo() {
-    const id = await this.getId();
-    return this._cdpService.getCdpInfo(id);
-  }
-
-  async getCollateralValueInPeth() {
-    const id = await this.getId();
-    return this._cdpService.getCdpCollateralInPeth(id);
-  }
-
-  getCollateralValueInEth() {
-    return this.getId().then(id => this._cdpService.getCdpCollateralInEth(id));
-  }
-
-  getCollateralValueInUSD() {
-    return this.getId().then(id => this._cdpService.getCdpCollateralInUSD(id));
-  }
-
-  getDebtValueInDai() {
-    return this.getId().then(id => this._cdpService.getCdpDebtInDai(id));
-  }
-
-  getDebtValueInUSD() {
-    return this.getId().then(id => this._cdpService.getCdpDebtInUSD(id));
-  }
-
-  async getCollateralizationRatio() {
-    const id = await this.getId();
-    return this._cdpService.getCollateralizationRatio(id);
-  }
-
-  async getLiquidationPriceEthUSD() {
-    const id = await this.getId();
-    return this._cdpService.getLiquidationPriceEthUSD(id);
-  }
-
-  async isSafe() {
-    const id = await this.getId();
-    return this._cdpService.isCdpSafe(id);
-  }
-
-  async lockEth(eth) {
-    const id = await this.getId();
-    return this._cdpService.lockEth(id, eth);
-  }
-
-  async lockWeth(weth) {
-    const id = await this.getId();
-    return this._cdpService.lockWeth(id, weth);
-  }
-
-  async lockPeth(eth) {
-    const id = await this.getId();
-    return this._cdpService.lockPeth(id, eth);
-  }
-
-  async drawDai(amount) {
-    const id = await this.getId();
-    return this._cdpService.drawDai(id, amount);
-  }
-
-  async freePeth(amount) {
-    const id = await this.getId();
-    return this._cdpService.freePeth(id, amount);
-  }
-
-  async wipeDai(amount) {
-    const id = await this.getId();
-    return this._cdpService.wipeDai(id, amount);
-  }
-
-  async give(newAddress) {
-    const id = await this.getId();
-    return this._cdpService.give(id, newAddress);
-  }
 }
+
+// each of these methods just calls the method of the same name on the service
+// with the cdp's id as the first argument
+const passthroughMethods = [
+  'drawDai',
+  'freePeth',
+  'getCollateralValueInEth',
+  'getCollateralValueInPeth',
+  'getCollateralValueInUSD',
+  'getCollateralizationRatio',
+  'getDebtValueInDai',
+  'getDebtValueInUSD',
+  'getInfo',
+  'getLiquidationPriceEthUSD',
+  'give',
+  'isSafe',
+  'lockEth',
+  'lockPeth',
+  'lockWeth',
+  'shut',
+  'wipeDai'
+];
+
+Object.assign(
+  Cdp.prototype,
+  passthroughMethods.reduce((acc, name) => {
+    const newName = name.replace('Value', '');
+    acc[name] = async function(...args) {
+      return this._cdpService[newName](await this.getId(), ...args);
+    };
+    return acc;
+  }, {})
+);

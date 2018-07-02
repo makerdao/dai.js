@@ -79,7 +79,7 @@ test(
           .getId()
           .then(id => (cdpId = id))
           .then(() => cdp.shut())
-          .then(() => createdCdpService.getCdpInfo(cdpId))
+          .then(() => createdCdpService.getInfo(cdpId))
           .then(info => {
             expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
             done();

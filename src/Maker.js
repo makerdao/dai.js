@@ -19,7 +19,7 @@ export default class Maker {
 
       return this._container
         .service('cdp')
-        .getCdpInfo(cdpId)
+        .getInfo(cdpId)
         .then(info => {
           if (
             info.lad.toString() === '0x0000000000000000000000000000000000000000'
