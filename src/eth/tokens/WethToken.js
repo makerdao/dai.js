@@ -1,34 +1,26 @@
 import Erc20Token from './Erc20Token';
+import { ETH } from '../CurrencyUnits';
 
 export default class WethToken extends Erc20Token {
   constructor(contract, web3Service, decimals, transactionManager) {
-    super(contract, web3Service, decimals, transactionManager);
-    this._transactionManager = transactionManager;
+    super(contract, web3Service, decimals, transactionManager, 'WETH');
   }
 
   name() {
     return this._contract.name();
   }
 
-  symbol() {
-    return this._contract.symbol();
-  }
-
-  deposit(amount) {
-    const valueInWei = this.toEthereumFormat(amount);
-
+  deposit(amount, unit = ETH) {
     return this._transactionManager.createTransactionHybrid(
       this._contract.deposit({
-        value: valueInWei
+        value: this.valueForContract(amount, unit)
       })
     );
   }
 
-  withdraw(amount) {
-    const valueInWei = this.toEthereumFormat(amount);
-
+  withdraw(amount, unit = ETH) {
     return this._transactionManager.createTransactionHybrid(
-      this._contract.withdraw(valueInWei)
+      this._contract.withdraw(this.valueForContract(amount, unit))
     );
   }
 }

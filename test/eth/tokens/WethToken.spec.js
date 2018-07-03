@@ -31,7 +31,7 @@ test('token name and symbol are correct', done => {
     .authenticate()
     .then(() => {
       token = ethereumTokenService.getToken(tokens.WETH);
-      return token.symbol();
+      return token._contract.symbol();
     })
     .then(symbol => {
       expect(symbol).toEqual('WETH');

@@ -5,6 +5,7 @@ import tokens from '../../contracts/tokens';
 import Validator from '../utils/Validator';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
+import { ETH } from './CurrencyUnits';
 
 export default class EthereumCdpService extends PrivateService {
   /**
@@ -69,17 +70,14 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  async lockEth(cdpId, amount) {
-    await this._conversionService().convertEthToWeth(amount);
+  async lockEth(cdpId, amount, unit = ETH) {
+    await this._conversionService().convertEthToWeth(amount, unit);
     return this.lockWeth(cdpId, amount);
   }
 
   async lockWeth(cdpId, weth) {
     const wethPerPeth = await this.get('price').getWethToPethRatio();
-    const peth = new BigNumber(weth)
-      .div(wethPerPeth.toString())
-      .round(18)
-      .toString();
+    const peth = new BigNumber(weth).div(wethPerPeth.toString()).toFixed(18);
 
     await this._conversionService().convertWethToPeth(weth);
     return this.lockPeth(cdpId, peth);

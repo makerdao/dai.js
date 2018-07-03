@@ -2,6 +2,8 @@ import Validator from '../utils/Validator';
 import { WEI, RAY } from '../utils/constants';
 import enums from '../../contracts/tokens';
 import values from 'lodash.values';
+import { utils } from 'ethers';
+const { bigNumberify } = utils;
 
 export class Currency {
   constructor(amount, divisor) {
@@ -21,9 +23,13 @@ export class Currency {
   toNumber() {
     return this._amount.toNumber();
   }
+
+  toEthersBigNumber(shift = 0) {
+    return bigNumberify(this._amount.shiftedBy(shift).toFixed());
+  }
 }
 
-const currencies = values(enums).reduce((output, symbol) => {
+export const currencies = values(enums).reduce((output, symbol) => {
   class CurrencyX extends Currency {
     constructor(amount, divisor) {
       super(amount, divisor);
@@ -45,18 +51,24 @@ const currencies = values(enums).reduce((output, symbol) => {
   return output;
 }, {});
 
-const statics = {
-  getCurrency(amount, unit) {
-    if (amount instanceof Currency) return amount;
-    if (!unit) throw new Error('Unit not specified');
-    const key = typeof unit === 'string' ? unit.toUpperCase() : unit.symbol;
-    const ctor = currencies[key];
-    if (!ctor) {
-      throw new Error(`Couldn't find currency for "${key}" (${unit})`);
-    }
-    return ctor(amount);
-  }
-};
+// we export both the currencies object above and the individual currencies
+// below because the latter is convenient when you know what you want to use,
+// and the former is convenient when you are picking a currency based on a
+// symbol from input
 
-Object.assign(statics, currencies);
-export default statics;
+export const DAI = currencies.DAI;
+export const ETH = currencies.ETH;
+export const MKR = currencies.MKR;
+export const PETH = currencies.PETH;
+export const WETH = currencies.WETH;
+
+export function getCurrency(amount, unit) {
+  if (amount instanceof Currency) return amount;
+  if (!unit) throw new Error('Unit not specified');
+  const key = typeof unit === 'string' ? unit.toUpperCase() : unit.symbol;
+  const ctor = currencies[key];
+  if (!ctor) {
+    throw new Error(`Couldn't find currency for "${key}" (${unit})`);
+  }
+  return ctor(amount);
+}

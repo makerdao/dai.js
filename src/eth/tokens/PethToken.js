@@ -2,10 +2,8 @@ import Erc20Token from './Erc20Token';
 
 export default class PethToken extends Erc20Token {
   constructor(contract, tub, web3Service, decimals, transactionManager) {
-    super(contract, web3Service, decimals, transactionManager);
+    super(contract, web3Service, decimals, transactionManager, 'PETH');
     this._tub = tub;
-    this._web3Service = web3Service;
-    this._transactionManager = transactionManager;
   }
 
   join(amount) {

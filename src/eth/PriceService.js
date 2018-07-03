@@ -6,8 +6,7 @@ import { RAY } from '../utils/constants';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
-import CurrencyUnits from './CurrencyUnits';
-const { ETH, PETH, MKR } = CurrencyUnits;
+import { ETH, PETH, MKR } from './CurrencyUnits';
 
 export default class PriceService extends PrivateService {
   /**
