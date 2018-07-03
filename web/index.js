@@ -2,7 +2,7 @@ import './index.scss';
 import Maker from '../src/Maker';
 import tokens from '../contracts/tokens';
 import Vue from 'vue';
-import MakerDebugger from '../components/MakerDebugger.vue';
+import MakerDebugger from './components/MakerDebugger.vue';
 
 function updateInfo(cdp) {
   return Promise.all([
@@ -41,15 +41,19 @@ setTimeout(() => {
   const param = new URL(window.location.href).searchParams.get('inject') || '',
     useMetaMask = param.length > 0 && param !== '0';
 
-  window.maker = new Maker('http', {
-    url: window.location.protocol + '//' + window.location.hostname + ':2000',
+  // window.maker = new Maker('kovan', {
+  // window.maker = new Maker('http', {
+  window.maker = new Maker('test', {
+    // url: window.location.protocol + '//' + window.location.hostname + ':' + (window.location.protocol === 'https:' ? '9000/web3' : '2000'),
     web3: {
       statusTimerDelay: useMetaMask ? 30000 : 5000,
-      usePresetProvider: useMetaMask
+      usePresetProvider: useMetaMask,
+      useHardwareWallet: 'ledger'
     }
   });
 
   window.maker.authenticate().then(() => {
+    console.log('Authenticated!');
     window.vm = new Vue({
       el: '#maker-dbg-container',
       render: createElement =>
@@ -60,6 +64,10 @@ setTimeout(() => {
         }),
       components: { MakerDebugger }
     });
+
+    let web3Service = window.maker.service('web3');
+    let checkHWWalletFirstAccount = web3Service.defaultAccount();
+    console.log('checkHWWalletFirstAccount', checkHWWalletFirstAccount);
 
     let cdp = null;
     window.maker

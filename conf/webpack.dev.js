@@ -67,6 +67,12 @@ module.exports = Merge(CommonConfig, {
     historyApiFallback: true, // true for index.html upon 404, object for multiple paths
     noInfo: false,
     //stats: 'minimal',
-    hot: true  // hot module replacement. Depends on HotModuleReplacementPlugin
+    hot: true,  // hot module replacement. Depends on HotModuleReplacementPlugin
+    // Allow web3 requests to route through webpack dev server (for HTTPS support)
+    proxy: {
+      '/web3/*': {
+        target: 'http://localhost:2000'
+      }
+    }
   }
 });

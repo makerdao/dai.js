@@ -4,6 +4,12 @@ import { promisifyAsyncMethods, getNetworkName } from '../utils';
 import Web3 from 'web3';
 import TestAccountProvider from '../utils/TestAccountProvider';
 import Web3ServiceList from '../utils/Web3ServiceList';
+import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
+import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
+import WebsocketSubprovider from 'web3-provider-engine/dist/es5/subproviders/websocket';
+import Transport from '@ledgerhq/hw-transport-u2f';
+import LedgerSubProvider from '../vendor/ledger-subprovider';
+import TrezorSubProvider from '../vendor/trezor-subprovider';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -80,6 +86,34 @@ export default class Web3Service extends PrivateService {
     return this._ethersUtils;
   }
 
+  setHWProvider(device) {
+    const derivationPath =
+      device === 'ledger' ? "m/44'/60'/0'" : "m/44'/60'/0'/0";
+    const path = `${derivationPath.replace('m/', '')}/0`;
+    const accountsOffset = 0;
+    const accountsLength = 50;
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        this._web3.setProvider(new Web3ProviderEngine());
+        const hwWalletSubProvider =
+          device === 'ledger'
+            ? LedgerSubProvider(async () => await Transport.create(), {
+                path,
+                accountsOffset,
+                accountsLength
+              })
+            : TrezorSubProvider({ path, accountsOffset, accountsLength });
+        this._web3.currentProvider.name = device;
+        this._web3.currentProvider.addProvider(hwWalletSubProvider);
+        this._web3.useLogs = false;
+        resolve(true);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
   initialize(settings) {
     this.get('log').info('Web3 is initializing...');
 
@@ -88,15 +122,34 @@ export default class Web3Service extends PrivateService {
     settings = this._normalizeSettings(settings);
 
     this._web3 = this._createWeb3();
-    this._web3.setProvider(this._getWeb3Provider(settings, this._web3));
 
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._setPrivateKey(settings.privateKey);
-
     this._installCleanUpHooks();
-    this._defaultEmitter.emit('web3/INITIALIZED', {
-      provider: { ...settings.provider }
-    });
+
+    // If using a hardware wallet
+    if (typeof settings.useHardwareWallet === 'string') {
+      console.log(`Using hardware wallet: ${settings.useHardwareWallet}`);
+      if (
+        this.currentProvider &&
+        typeof this.currentProvider.stop === 'function'
+      )
+        this.currentProvider.stop();
+      this.setHWProvider(settings.useHardwareWallet).then(success => {
+        this._web3.currentProvider.addProvider(
+          this._getWeb3Provider(settings, this._web3)
+        );
+        this._web3.currentProvider.start();
+        this._defaultEmitter.emit('web3/INITIALIZED', {
+          provider: { ...settings.provider }
+        });
+      });
+    } else {
+      this._web3.setProvider(this._getWeb3Provider(settings, this._web3));
+      this._defaultEmitter.emit('web3/INITIALIZED', {
+        provider: { ...settings.provider }
+      });
+    }
   }
 
   connect() {
@@ -360,30 +413,48 @@ export default class Web3Service extends PrivateService {
           'Cannot find preset Web3 provider. Creating new instance...'
         );
       }
-      web3Provider = this._buildWeb3Provider(settings.provider);
+      web3Provider = this._buildWeb3Provider(settings);
     }
 
     return web3Provider;
   }
 
-  _buildWeb3Provider(providerSettings) {
+  _buildWeb3Provider(settings) {
     let provider;
-    const { url, network, infuraApiKey, type } = providerSettings;
-    const cacheKey = 'provider:' + JSON.stringify(providerSettings);
+    const { useHardwareWallet } = settings;
+    const { url, network, infuraApiKey, type } = settings.provider;
+    const cacheKey = 'provider:' + JSON.stringify(settings.provider);
     const cache = this.get('cache');
     if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
-
+    console.log(
+      'Building web3 provider. useHardwareWallet?',
+      useHardwareWallet
+    );
     switch (type) {
       case Web3ProviderType.HTTP:
-        provider = new Web3.providers.HttpProvider(url);
+        provider =
+          typeof useHardwareWallet === 'string'
+            ? new RpcSource({ rpcUrl: url })
+            : new Web3.providers.HttpProvider(url);
         break;
       case Web3ProviderType.INFURA:
-        provider = new Web3.providers.HttpProvider(
-          'https://' + network + '.infura.io/' + infuraApiKey
-        );
+        provider =
+          typeof useHardwareWallet === 'string'
+            ? new RpcSource({
+                rpcUrl: `https://${network}.infura.io/${infuraApiKey}`
+              })
+            : new Web3.providers.HttpProvider(
+                `https://${network}.infura.io/${infuraApiKey}`
+              );
         break;
       case Web3ProviderType.TEST:
-        provider = new Web3.providers.HttpProvider('http://127.1:2000');
+        // Route through the webpack dev server for HTTPS support
+        provider =
+          typeof useHardwareWallet === 'string'
+            ? new RpcSource({ rpcUrl: 'https://localhost:9000/web3' })
+            : new Web3.providers.HttpProvider('https://localhost:9000/web3');
+        // Alternatively, websocket would work
+        // provider = new WebsocketSubprovider({ rpcUrl: 'ws://127.1:2000' })
         break;
       default:
         throw new Error('Illegal web3 provider type: ' + type);
