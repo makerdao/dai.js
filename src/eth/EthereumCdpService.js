@@ -199,6 +199,14 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
+  async getMKRFeeInMKR(cdpId) {
+    const [fee, mkrPrice] = await Promise.all([
+      this.getMKRFeeInUSD(cdpId),
+      this.get('price').getMkrPrice()
+    ]);
+    return fee / mkrPrice.toNumber();
+  }
+
   async getCollateralizationRatio(cdpId) {
     const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
       this.getCdpDebtInUSD(cdpId),

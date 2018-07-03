@@ -163,11 +163,23 @@ describe('a cdp with collateral', () => {
     test('read MKR fee in USD', async done => {
       //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
       setTimeout(async () => {
-        await cdpService._drip(); //rhi() calls drip(), which updates _rhi and thus all cdp fees
+        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
         const fee = await cdp.getFeeInUSD();
         expect(fee).toBeGreaterThan(0);
         done();
-      }, 2000);
+      }, 1500);
+    });
+
+    test('read MKR fee in MKR', async done => {
+      await cdpService.get('price').setMkrPrice('600');
+      //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
+      setTimeout(async () => {
+        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+        const fee = await cdp.getFeeInMKR();
+        expect(fee).toBeGreaterThan(0);
+        await cdpService.get('price').setMkrPrice('0');
+        done();
+      }, 1500);
     });
 
     test('read liquidation price', async () => {

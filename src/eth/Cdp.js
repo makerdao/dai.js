@@ -102,6 +102,10 @@ export default class Cdp {
     return this.getCdpId().then(id => this._cdpService.getMKRFeeInUSD(id));
   }
 
+  getFeeInMKR() {
+    return this.getCdpId().then(id => this._cdpService.getMKRFeeInMKR(id));
+  }
+
   async getCollateralizationRatio() {
     const id = await this.getCdpId();
     return this._cdpService.getCollateralizationRatio(id);
