@@ -20,7 +20,7 @@ afterAll(async () => {
 
 async function openCdp() {
   cdp = await cdpService.openCdp();
-  return cdp.getCdpId();
+  return cdp.getId();
 }
 
 describe('basic checks', () => {
@@ -37,7 +37,7 @@ describe('basic checks', () => {
 
   test('lookup by ID', async () => {
     expect.assertions(2);
-    const info = await cdpService.getCdpInfo(id);
+    const info = await cdpService.getInfo(id);
     expect(info).toBeTruthy();
     expect(info.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
@@ -68,9 +68,9 @@ describe('weth and peth', () => {
 
     await wethToken.deposit('0.1');
     const balancePre = await wethToken.balanceOf(defaultAccount);
-    const cdpInfoPre = await cdpService.getCdpInfo(id);
+    const cdpInfoPre = await cdpService.getInfo(id);
     await cdpService.lockWeth(id, '0.1');
-    const cdpInfoPost = await cdpService.getCdpInfo(id);
+    const cdpInfoPost = await cdpService.getInfo(id);
     const balancePost = await wethToken.balanceOf(defaultAccount);
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
@@ -86,9 +86,9 @@ describe('weth and peth', () => {
     await pethToken.join('0.1');
 
     const balancePre = await pethToken.balanceOf(defaultAccount);
-    const cdpInfoPre = await cdpService.getCdpInfo(id);
+    const cdpInfoPre = await cdpService.getInfo(id);
     await cdpService.lockPeth(id, '0.1');
-    const cdpInfoPost = await cdpService.getCdpInfo(id);
+    const cdpInfoPost = await cdpService.getInfo(id);
     const balancePost = await pethToken.balanceOf(defaultAccount);
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
@@ -112,7 +112,7 @@ test('bite', async () => {
   await openCdp();
   await cdp.lockEth('0.1');
   await cdp.drawDai('13');
-  const id = await cdp.getCdpId();
+  const id = await cdp.getId();
   await cdpService.get('price').setEthPrice('0.01');
   const result = await cdpService.bite(id);
   await cdpService.get('price').setEthPrice('400'); // for other tests in this file
@@ -128,7 +128,7 @@ describe('a cdp with collateral', () => {
   });
 
   test('read ink', async () => {
-    const info = await cdpService.getCdpInfo(id);
+    const info = await cdpService.getInfo(id);
     expect(info.ink.toString()).toBe('200000000000000000');
   });
 
@@ -164,7 +164,7 @@ describe('a cdp with collateral', () => {
       //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
       setTimeout(async () => {
         await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-        const fee = await cdp.getFeeInUSD();
+        const fee = await cdp.getMkrFeeInUSD();
         expect(fee).toBeGreaterThan(0);
         done();
       }, 1500);
@@ -175,7 +175,7 @@ describe('a cdp with collateral', () => {
       //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
       setTimeout(async () => {
         await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-        const fee = await cdp.getFeeInMKR();
+        const fee = await cdp.getMkrFeeInMkr();
         expect(fee).toBeGreaterThan(0);
         await cdpService.get('price').setMkrPrice('0');
         done();

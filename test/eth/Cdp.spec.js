@@ -14,7 +14,7 @@ test('should open a new CDP and return its ID', done => {
     .authenticate()
     .then(() => {
       const newCdp = new Cdp(createdCdpService);
-      newCdp.getCdpId().then(id => {
+      newCdp.getId().then(id => {
         expect(typeof id).toBe('number');
         expect(id).toBeGreaterThan(0);
         done();
@@ -35,7 +35,7 @@ test(
             expect(cdp).toBeDefined();
             expect(cdp._cdpService).toBeDefined();
             expect(cdp._smartContractService).toBeDefined();
-            return cdp.getCdpId();
+            return cdp.getId();
           })
           .then(id => {
             expect(id).toBeGreaterThan(0);
@@ -76,10 +76,10 @@ test(
       .then(() => createdCdpService.openCdp())
       .then(cdp => {
         cdp
-          .getCdpId()
+          .getId()
           .then(id => (cdpId = id))
           .then(() => cdp.shut())
-          .then(() => createdCdpService.getCdpInfo(cdpId))
+          .then(() => createdCdpService.getInfo(cdpId))
           .then(info => {
             expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
             done();

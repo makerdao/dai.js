@@ -50,7 +50,7 @@ export default class EthereumCdpService extends PrivateService {
     return new Cdp(this).transactionObject();
   }
 
-  shutCdp(cdpId) {
+  shut(cdpId) {
     const hexCdpId = this._hexCdpId(cdpId);
 
     return Promise.all([
@@ -136,35 +136,35 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  getCdpInfo(cdpId) {
+  getInfo(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     return this._tubContract().cups(hexCdpId);
   }
 
-  async getCdpCollateralInPeth(cdpId) {
+  async getCollateralInPeth(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     const value = await this._tubContract().ink(hexCdpId);
 
     return new BigNumber(value.toString()).dividedBy(WAD).toNumber();
   }
 
-  async getCdpCollateralInEth(cdpId) {
+  async getCollateralInEth(cdpId) {
     const [pethCollateral, ratio] = await Promise.all([
-      this.getCdpCollateralInPeth(cdpId),
+      this.getCollateralInPeth(cdpId),
       this.get('price').getWethToPethRatio()
     ]);
     return pethCollateral * ratio;
   }
 
-  async getCdpCollateralInUSD(cdpId) {
+  async getCollateralInUSD(cdpId) {
     const [ethCollateral, ethPrice] = await Promise.all([
-      this.getCdpCollateralInEth(cdpId),
+      this.getCollateralInEth(cdpId),
       this.get('price').getEthPrice()
     ]);
     return ethCollateral * ethPrice.toNumber();
   }
 
-  getCdpDebtInDai(cdpId) {
+  getDebtInDai(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `tab`
@@ -174,22 +174,22 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
-  async getCdpDebtInUSD(cdpId) {
+  async getDebtInUSD(cdpId) {
     const [daiDebt, tp] = await Promise.all([
-      this.getCdpDebtInDai(cdpId),
+      this.getDebtInDai(cdpId),
       this.getTargetPrice()
     ]);
     return daiDebt * tp;
   }
 
-  //updates compound interest calculations for all CDPs
+  //updates compound interest calculations for all CDPs.  Used by tests that depend on a fee
   async _drip() {
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().drip()
     );
   }
 
-  getMKRFeeInUSD(cdpId) {
+  getMkrFeeInUSD(cdpId) {
     const hexCdpId = this._smartContract().numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `tab`
@@ -199,9 +199,9 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
   }
 
-  async getMKRFeeInMKR(cdpId) {
+  async getMkrFeeInMkr(cdpId) {
     const [fee, mkrPrice] = await Promise.all([
-      this.getMKRFeeInUSD(cdpId),
+      this.getMkrFeeInUSD(cdpId),
       this.get('price').getMkrPrice()
     ]);
     return fee / mkrPrice.toNumber();
@@ -209,9 +209,9 @@ export default class EthereumCdpService extends PrivateService {
 
   async getCollateralizationRatio(cdpId) {
     const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
-      this.getCdpDebtInUSD(cdpId),
+      this.getDebtInUSD(cdpId),
       this.get('price').getPethPrice(),
-      this.getCdpCollateralInPeth(cdpId)
+      this.getCollateralInPeth(cdpId)
     ]);
     return (pethCollateral * pethPrice.toNumber()) / daiDebt;
   }
@@ -242,10 +242,10 @@ export default class EthereumCdpService extends PrivateService {
 
   _getLiquidationPricePethUSD(cdpId) {
     return Promise.all([
-      this.getCdpDebtInUSD(cdpId),
+      this.getDebtInUSD(cdpId),
       this.getTargetPrice(),
       this.getLiquidationRatio(),
-      this.getCdpCollateralInPeth(cdpId)
+      this.getCollateralInPeth(cdpId)
     ]).then(vals => {
       const debt = vals[0];
       const targetPrice = vals[1];
@@ -265,7 +265,7 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  isCdpSafe(cdpId) {
+  isSafe(cdpId) {
     return Promise.all([
       this.getLiquidationPriceEthUSD(cdpId),
       this.get('price').getEthPrice()

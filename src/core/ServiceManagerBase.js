@@ -1,6 +1,9 @@
 import StateMachine from './StateMachine';
 import ServiceState from './ServiceState';
 import ServiceType, { serviceTypeTransitions } from './ServiceType';
+import debug from 'debug';
+
+const log = debug('makerjs:ServiceManagerBase');
 
 function _promisify(unsafeCallback) {
   return new Promise((resolve, reject) => {
@@ -81,9 +84,9 @@ class ServiceManagerBase {
               : ServiceState.OFFLINE
           ),
         reason => {
-          // eslint-disable-next-line
-          console.error(reason);
-          return this._state.transitionTo(ServiceState.CREATED);
+          log(reason);
+          this._state.transitionTo(ServiceState.CREATED);
+          throw reason;
         }
       );
     }
@@ -127,8 +130,7 @@ class ServiceManagerBase {
             }
           },
           reason => {
-            // eslint-disable-next-line
-            console.error('connect error: ', reason);
+            log('connect error: ' + reason);
             // Check if we are still CONNECTING, because another process might have come in between
             if (this._state.inState(ServiceState.CONNECTING)) {
               this._state.transitionTo(ServiceState.OFFLINE);
@@ -176,8 +178,7 @@ class ServiceManagerBase {
             }
           },
           reason => {
-            // eslint-disable-next-line
-            console.error('authenticate error: ', reason);
+            log('authenticate error: ' + reason);
             // Check if we are still AUTHENTICATING, because another process might have come in between
             if (this._state.inState(ServiceState.AUTHENTICATING)) {
               this._state.transitionTo(ServiceState.ONLINE);

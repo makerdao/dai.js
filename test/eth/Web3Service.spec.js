@@ -285,7 +285,7 @@ test(
   10000
 );
 
-test('should reject invalid private key formats', done => {
+test('should reject invalid private key formats', async () => {
   const service1 = buildTestService(TestAccountProvider.nextAccount()),
     service2 = buildTestService(
       TestAccountProvider.nextAccount().key.substr(2)
@@ -296,18 +296,16 @@ test('should reject invalid private key formats', done => {
     service4 = buildTestService(TestAccountProvider.nextAddress()),
     service5 = buildTestService(TestAccountProvider.nextAccount().key);
 
-  Promise.all([
-    service1.manager().initialize(),
-    service2.manager().initialize(),
-    service3.manager().initialize(),
-    service4.manager().initialize(),
-    service5.manager().initialize()
-  ]).then(() => {
-    expect(service1.manager().isInitialized()).toBe(false);
-    expect(service2.manager().isInitialized()).toBe(false);
-    expect(service3.manager().isInitialized()).toBe(false);
-    expect(service4.manager().isInitialized()).toBe(false);
-    expect(service5.manager().isInitialized()).toBe(true);
-    done();
-  });
+  expect.assertions(5);
+
+  for (let s of [service1, service2, service3, service4]) {
+    try {
+      await s.manager().initialize();
+    } catch (err) {
+      expect(err).toBe('Invalid private key format');
+    }
+  }
+
+  await service5.manager().initialize();
+  expect(service5.manager().isInitialized()).toBeTruthy();
 });

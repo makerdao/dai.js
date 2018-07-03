@@ -6,7 +6,7 @@ import MakerDebugger from '../components/MakerDebugger.vue';
 
 function updateInfo(cdp) {
   return Promise.all([
-    cdp.getCdpId(),
+    cdp.getId(),
     cdp.getInfo(),
     window.maker
       .service('token')
