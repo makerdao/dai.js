@@ -57,13 +57,13 @@ export default class PriceService extends PrivateService {
   getEthPrice() {
     return this._getContract(contracts.SAI_PIP)
       .read()
-      .then(value => ETH.fromWei(value));
+      .then(value => ETH.wei(value));
   }
 
   getPethPrice() {
     return this._getContract(contracts.SAI_TUB)
       .tag()
-      .then(value => PETH.fromRay(value));
+      .then(value => PETH.ray(value));
   }
 
   setEthPrice(newPrice) {
@@ -77,7 +77,7 @@ export default class PriceService extends PrivateService {
   getMkrPrice() {
     return this._getContract(contracts.SAI_PEP)
       .peek()
-      .then(([price]) => MKR.fromWei(price));
+      .then(([price]) => MKR.wei(price));
   }
 
   setMkrPrice(newPrice) {

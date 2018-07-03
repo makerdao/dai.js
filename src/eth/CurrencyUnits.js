@@ -29,7 +29,7 @@ export class Currency {
   }
 }
 
-export const currencies = values(enums).reduce((output, symbol) => {
+function setupWrapper(symbol) {
   class CurrencyX extends Currency {
     constructor(amount, divisor) {
       super(amount, divisor);
@@ -42,12 +42,27 @@ export const currencies = values(enums).reduce((output, symbol) => {
 
   // This provides short syntax, e.g. ETH(6). We need a wrapper function because
   // you can't call an ES6 class consructor without `new`
-  const creator = amount => new CurrencyX(amount);
-  creator.fromWei = amount => new CurrencyX(amount, WEI);
-  creator.fromRay = amount => new CurrencyX(amount, RAY);
-  creator.symbol = symbol;
+  const creatorFn = (amount, divisor) => new CurrencyX(amount, divisor);
 
-  output[symbol] = creator;
+  const makeCreatorFnWithDivisor = divisor => {
+    const fn = amount => creatorFn(amount, divisor);
+    // these two properties are used by getCurrency
+    fn.symbol = symbol;
+    fn.divisor = divisor;
+    return fn;
+  };
+
+  Object.assign(creatorFn, {
+    wei: makeCreatorFnWithDivisor(WEI),
+    ray: makeCreatorFnWithDivisor(RAY),
+    symbol
+  });
+
+  return creatorFn;
+}
+
+export const currencies = values(enums).reduce((output, symbol) => {
+  output[symbol] = setupWrapper(symbol);
   return output;
 }, {});
 
@@ -68,7 +83,7 @@ export function getCurrency(amount, unit) {
   const key = typeof unit === 'string' ? unit.toUpperCase() : unit.symbol;
   const ctor = currencies[key];
   if (!ctor) {
-    throw new Error(`Couldn't find currency for "${key}" (${unit})`);
+    throw new Error(`Couldn't find currency for "${key}"`);
   }
-  return ctor(amount);
+  return ctor(amount, unit.divisor);
 }

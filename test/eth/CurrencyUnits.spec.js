@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import {
   getCurrency,
   ETH,
@@ -23,6 +24,24 @@ test('parses an amount + currency class', () => {
   expect(getCurrency(1, MKR).toString()).toBe('1.00 MKR');
 });
 
+test('parses an amount + currency as wei', () => {
+  const val = 10000000000000000;
+  expect(getCurrency(val, ETH.wei).toString()).toBe('0.01 ETH');
+  expect(getCurrency(val, PETH.wei).toString()).toBe('0.01 PETH');
+  expect(getCurrency(val, WETH.wei).toString()).toBe('0.01 WETH');
+  expect(getCurrency(val, DAI.wei).toString()).toBe('0.01 DAI');
+  expect(getCurrency(val, MKR.wei).toString()).toBe('0.01 MKR');
+});
+
+test('parses an amount + currency as ray', () => {
+  const val = 10000000000000000000000000;
+  expect(getCurrency(val, ETH.ray).toString()).toBe('0.01 ETH');
+  expect(getCurrency(val, PETH.ray).toString()).toBe('0.01 PETH');
+  expect(getCurrency(val, WETH.ray).toString()).toBe('0.01 WETH');
+  expect(getCurrency(val, DAI.ray).toString()).toBe('0.01 DAI');
+  expect(getCurrency(val, MKR.ray).toString()).toBe('0.01 MKR');
+});
+
 test('throws an error if there is no unit', () => {
   expect(() => {
     getCurrency(1);
@@ -43,13 +62,17 @@ test('has a short syntax', () => {
   expect(MKR(5).toString()).toBe('5.00 MKR');
 });
 
+test('has an optional divisor argument', () => {
+  expect(ETH(100, BigNumber('1e2')).toString()).toBe('1.00 ETH');
+});
+
 test('has a short syntax for wei (1e18) amounts', () => {
-  const n = MKR.fromWei('2110000000000000000');
+  const n = MKR.wei('2110000000000000000');
   expect(n.toString()).toBe('2.11 MKR');
 });
 
 test('has a short syntax for ray (1e27) amounts', () => {
-  const n = PETH.fromRay('5130000000000000000000000000');
+  const n = PETH.ray('5130000000000000000000000000');
   expect(n.toString()).toBe('5.13 PETH');
 });
 
