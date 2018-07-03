@@ -133,18 +133,18 @@ describe('a cdp with collateral', () => {
   });
 
   test('read locked collateral in peth', async () => {
-    const debt = await cdp.getCollateralValueInPeth();
-    expect(debt.toString()).toEqual('0.2');
+    const collateral = await cdp.getCollateralValueInPeth();
+    expect(collateral.toString()).toEqual('0.2');
   });
 
   test('read locked collateral in eth', async () => {
-    const debt = await cdp.getCollateralValueInEth();
-    expect(debt.toString()).toEqual('0.2');
+    const collateral = await cdp.getCollateralValueInEth();
+    expect(collateral.toString()).toEqual('0.2');
   });
 
   test('read locked collateral in USD', async () => {
-    const debt = await cdp.getCollateralValueInUSD();
-    expect(debt.toString()).toEqual('80');
+    const collateral = await cdp.getCollateralValueInUSD();
+    expect(collateral.toString()).toEqual('80');
   });
 
   describe('with debt', () => {
