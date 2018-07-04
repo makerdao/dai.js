@@ -178,6 +178,31 @@ export default class EthereumCdpService extends PrivateService {
     return daiDebt * tp;
   }
 
+  //updates compound interest calculations for all CDPs.  Used by tests that depend on a fee
+  async _drip() {
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().drip()
+    );
+  }
+
+  getMkrFeeInUSD(cdpId) {
+    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    // we need to use the Web3.js contract interface to get the return value
+    // from the non-constant function `tab`
+    const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
+    return new Promise((resolve, reject) =>
+      tub.rap.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
+    ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
+  }
+
+  async getMkrFeeInMkr(cdpId) {
+    const [fee, mkrPrice] = await Promise.all([
+      this.getMkrFeeInUSD(cdpId),
+      this.get('price').getMkrPrice()
+    ]);
+    return fee / mkrPrice.toNumber();
+  }
+
   async getCollateralizationRatio(cdpId) {
     const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
       this.getDebtInUSD(cdpId),

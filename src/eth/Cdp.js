@@ -75,6 +75,8 @@ const passthroughMethods = [
   'getCollateralizationRatio',
   'getDebtValueInDai',
   'getDebtValueInUSD',
+  'getMkrFeeInUSD',
+  'getMkrFeeInMkr',
   'getInfo',
   'getLiquidationPriceEthUSD',
   'give',

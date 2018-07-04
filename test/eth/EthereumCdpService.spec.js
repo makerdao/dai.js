@@ -133,18 +133,18 @@ describe('a cdp with collateral', () => {
   });
 
   test('read locked collateral in peth', async () => {
-    const debt = await cdp.getCollateralValueInPeth();
-    expect(debt.toString()).toEqual('0.2');
+    const collateral = await cdp.getCollateralValueInPeth();
+    expect(collateral.toString()).toEqual('0.2');
   });
 
   test('read locked collateral in eth', async () => {
-    const debt = await cdp.getCollateralValueInEth();
-    expect(debt.toString()).toEqual('0.2');
+    const collateral = await cdp.getCollateralValueInEth();
+    expect(collateral.toString()).toEqual('0.2');
   });
 
   test('read locked collateral in USD', async () => {
-    const debt = await cdp.getCollateralValueInUSD();
-    expect(debt.toString()).toEqual('80');
+    const collateral = await cdp.getCollateralValueInUSD();
+    expect(collateral.toString()).toEqual('80');
   });
 
   describe('with debt', () => {
@@ -158,6 +158,28 @@ describe('a cdp with collateral', () => {
     test('read debt in usd', async () => {
       const debt = await cdp.getDebtValueInUSD();
       expect(debt.toString()).toEqual('5');
+    });
+
+    test('read MKR fee in USD', async done => {
+      //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
+      setTimeout(async () => {
+        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+        const fee = await cdp.getMkrFeeInUSD();
+        expect(fee).toBeGreaterThan(0);
+        done();
+      }, 1500);
+    });
+
+    test('read MKR fee in MKR', async done => {
+      await cdpService.get('price').setMkrPrice('600');
+      //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
+      setTimeout(async () => {
+        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+        const fee = await cdp.getMkrFeeInMkr();
+        expect(fee).toBeGreaterThan(0);
+        await cdpService.get('price').setMkrPrice('0');
+        done();
+      }, 1500);
     });
 
     test('read liquidation price', async () => {
