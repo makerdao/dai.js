@@ -13,11 +13,7 @@ cache:
 before_install:
 - sudo mkdir -m 0755 /nix && sudo chown travis /nix
 - sudo mount -o bind /home/travis/build/makerdao/makerdao-integration-poc/nix /nix
-- curl https://nixos.org/nix/install | sh
-- . /home/travis/.nix-profile/etc/profile.d/nix.sh
-- nix-channel --add https://nix.dapphub.com/pkgs/dapphub
-- nix-channel --update
-- nix-env -iA dapphub.{dapp,seth,hevm,solc}
+- source ./scripts/install-dapptools.sh
 - npm i -g npm@latest
 install:
 - npm install
@@ -26,7 +22,6 @@ install:
 before_script:
 - npm install -g codecov
 script:
-- chmod +x with-deployed-system update-abis
 - npm run coverage
 - codecov
 after_install:
