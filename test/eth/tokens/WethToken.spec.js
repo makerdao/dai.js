@@ -1,36 +1,79 @@
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../../src/utils/TestAccountProvider';
-import { WETH } from '../../../src/eth/CurrencyUnits';
 
-let tokenService, weth;
+test('get WETH allowance of address', done => {
+  const ethereumTokenService = buildTestEthereumTokenService();
 
-beforeAll(async () => {
-  tokenService = buildTestEthereumTokenService();
-  await tokenService.manager().authenticate();
-  weth = tokenService.getToken(tokens.WETH);
+  ethereumTokenService
+    .manager()
+    .authenticate()
+    .then(() => {
+      const token = ethereumTokenService.getToken(tokens.WETH);
+      return token.allowance(
+        TestAccountProvider.nextAddress(),
+        TestAccountProvider.nextAddress()
+      );
+    })
+    .then(allowance => {
+      expect(allowance.toString()).toBe('0.0');
+      done();
+    });
 });
 
-test('get WETH allowance of address', async () => {
-  const allowance = await weth.allowance(
-    TestAccountProvider.nextAddress(),
-    TestAccountProvider.nextAddress()
-  );
-  expect(allowance).toEqual(WETH(0));
+test('token name and symbol are correct', done => {
+  const ethereumTokenService = buildTestEthereumTokenService();
+
+  let token = null;
+
+  ethereumTokenService
+    .manager()
+    .authenticate()
+    .then(() => {
+      token = ethereumTokenService.getToken(tokens.WETH);
+      return token.symbol();
+    })
+    .then(symbol => {
+      expect(symbol).toEqual('WETH');
+      return token.name();
+    })
+    .then(name => {
+      expect(name).toBe('Wrapped Ether');
+      done();
+    });
 });
 
-test('token name and symbol are correct', async () => {
-  expect(await weth._contract.symbol()).toBe('WETH');
-  expect(await weth.name()).toBe('Wrapped Ether');
-});
+test(
+  'wrap and unwrap ETH',
+  done => {
+    const ethereumTokenService = buildTestEthereumTokenService();
 
-test('wrap and unwrap ETH', async () => {
-  const owner = tokenService.get('web3').defaultAccount();
-  const balance1 = await weth.balanceOf(owner);
-  await weth.deposit(0.1);
-  const balance2 = await weth.balanceOf(owner);
-  expect(balance1.plus(0.1)).toEqual(balance2);
-  await weth.withdraw(0.1);
-  const balance3 = await weth.balanceOf(owner);
-  expect(balance2.minus(0.1)).toEqual(balance3);
-});
+    let token = null,
+      originalBalance = null,
+      owner = null;
+
+    ethereumTokenService
+      .manager()
+      .authenticate()
+      .then(() => {
+        owner = ethereumTokenService.get('web3').defaultAccount();
+        token = ethereumTokenService.getToken(tokens.WETH);
+        return token.balanceOf(owner);
+      })
+      .then(b => {
+        originalBalance = parseFloat(b);
+        return token.deposit('0.1');
+      })
+      .then(() => token.balanceOf(owner))
+      .then(b => {
+        expect(parseFloat(b)).toBeCloseTo(originalBalance + 0.1, 12);
+        return token.withdraw('0.1');
+      })
+      .then(() => token.balanceOf(owner))
+      .then(b => {
+        expect(parseFloat(b)).toBeCloseTo(originalBalance, 12);
+        done();
+      });
+  },
+  5000
+);

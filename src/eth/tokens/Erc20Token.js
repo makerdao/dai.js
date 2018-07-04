@@ -1,75 +1,68 @@
-import { currencies, getCurrency } from '../CurrencyUnits';
+import { utils } from 'ethers';
 
 export default class Erc20Token {
-  constructor(
-    contract,
-    web3Service,
-    decimals = 18,
-    transactionManager,
-    symbol
-  ) {
+  constructor(contract, web3Service, decimals = 18, transactionManager) {
     this._contract = contract;
     this._web3Service = web3Service;
     this._decimals = decimals;
     this._transactionManager = transactionManager;
-    this.symbol = symbol;
-    this._currency = currencies[symbol];
   }
 
-  async allowance(tokenOwner, spender) {
-    return this._valueFromContract(
-      await this._contract.allowance(tokenOwner, spender)
-    );
+  allowance(tokenOwner, spender) {
+    return this._contract
+      .allowance(tokenOwner, spender)
+      .then(_ => this.toUserFormat(_));
   }
 
-  async balanceOf(owner) {
-    return this._valueFromContract(await this._contract.balanceOf(owner));
-  }
-
-  async totalSupply() {
-    return this._valueFromContract(await this._contract.totalSupply());
+  balanceOf(owner) {
+    return this._contract.balanceOf(owner).then(_ => this.toUserFormat(_));
   }
 
   address() {
     return this._contract.getAddress();
   }
 
-  _valueForContract(value, unit = this._currency) {
-    return getCurrency(value, unit).toEthersBigNumber(this._decimals);
+  decimals() {
+    return this._decimals;
   }
 
-  _valueFromContract(value) {
-    return this._currency(value, -1 * this._decimals);
+  //think of name ToDecimal?
+  toUserFormat(value) {
+    return utils.formatUnits(value, this._decimals);
   }
 
-  approve(spender, value, unit = this._currency) {
-    return this._transact(
-      'approve',
-      spender,
-      this._valueForContract(value, unit)
+  toEthereumFormat(value) {
+    return utils.parseUnits(value.toString(), this._decimals);
+  }
+
+  approve(spender, value) {
+    const valueInWei = this.toEthereumFormat(value);
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.approve(spender, valueInWei)
     );
   }
 
   approveUnlimited(spender) {
-    return this._transact('approve', spender, -1);
-  }
-
-  transfer(to, value, unit = currencies[this.symbol]) {
-    return this._transact('transfer', to, this._valueForContract(value, unit));
-  }
-
-  transferFrom(from, to, value, unit = currencies[this.symbol]) {
-    return this._transact(
-      'transferFrom',
-      from,
-      to,
-      this._valueForContract(value, unit)
-    );
-  }
-
-  _transact(method, ...args) {
     return this._transactionManager.createTransactionHybrid(
-      this._contract[method](...args)
+      this._contract.approve(spender, -1)
     );
+  }
+
+  transfer(to, value) {
+    const valueInWei = this.toEthereumFormat(value);
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.transfer(to, valueInWei)
+    );
+  }
+
+  transferFrom(from, to, value) {
+    const valueInWei = this.toEthereumFormat(value);
+    return this._transactionManager.createTransactionHybrid(
+      this._contract.transferFrom(from, to, valueInWei)
+    );
+  }
+
+  totalSupply() {
+    return this._contract.totalSupply().then(_ => this.toUserFormat(_));
   }
 }
