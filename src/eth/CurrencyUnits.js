@@ -28,7 +28,15 @@ export class Currency {
   toEthersBigNumber(shift = 0) {
     if (shift === 'wei') shift = 18;
     if (shift === 'ray') shift = 27;
-    return bigNumberify(this._amount.shiftedBy(shift).toFixed());
+    const val = this._amount
+      .shiftedBy(shift)
+      .integerValue()
+      .toFixed();
+    try {
+      return bigNumberify(val);
+    } catch (err) {
+      throw new Error(`couldn't bigNumberify ${val}`);
+    }
   }
 
   isSameType(other) {
