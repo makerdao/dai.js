@@ -84,7 +84,7 @@ export default class EthereumCdpService extends PrivateService {
 
   async lockPeth(cdpId, amount, unit = PETH) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber(18);
+    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     await this.get('allowance').requireAllowance(
       tokens.PETH,
@@ -97,7 +97,7 @@ export default class EthereumCdpService extends PrivateService {
 
   freePeth(cdpId, amount, unit = PETH) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber(18);
+    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().free(hexCdpId, value, { gasLimit: 200000 })
@@ -106,7 +106,7 @@ export default class EthereumCdpService extends PrivateService {
 
   drawDai(cdpId, amount, unit = DAI) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber(18);
+    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().draw(hexCdpId, value, { gasLimit: 4000000 })
@@ -115,7 +115,7 @@ export default class EthereumCdpService extends PrivateService {
 
   async wipeDai(cdpId, amount, unit = DAI) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber(18);
+    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     await Promise.all([
       this.get('allowance').requireAllowance(

@@ -106,3 +106,21 @@ test('equality of different instances', () => {
   expect(MKR('2')).not.toEqual(MKR('2.1'));
   expect(MKR('2')).not.toEqual(DAI('2'));
 });
+
+test('convert to ethers.js BigNumber with optional shifting', () => {
+  expect(
+    DAI(500)
+      .toEthersBigNumber()
+      .toString()
+  ).toEqual('500');
+  expect(
+    DAI(500)
+      .toEthersBigNumber(2)
+      .toString()
+  ).toEqual('50000');
+  expect(
+    DAI(5)
+      .toEthersBigNumber('wei')
+      .toString()
+  ).toEqual('5000000000000000000');
+});

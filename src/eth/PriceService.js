@@ -36,7 +36,7 @@ export default class PriceService extends PrivateService {
   _valueForContract(value, unit) {
     return util.bufferToHex(
       util.setLengthLeft(
-        utils.hexlify(getCurrency(value, unit).toEthersBigNumber(18)),
+        utils.hexlify(getCurrency(value, unit).toEthersBigNumber('wei')),
         32
       )
     );

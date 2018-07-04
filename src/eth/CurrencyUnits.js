@@ -26,6 +26,8 @@ export class Currency {
   }
 
   toEthersBigNumber(shift = 0) {
+    if (shift === 'wei') shift = 18;
+    if (shift === 'ray') shift = 27;
     return bigNumberify(this._amount.shiftedBy(shift).toFixed());
   }
 

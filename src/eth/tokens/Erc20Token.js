@@ -34,10 +34,6 @@ export default class Erc20Token {
     return this._contract.getAddress();
   }
 
-  decimals() {
-    return this._decimals;
-  }
-
   _valueForContract(value, unit = this._currency) {
     return getCurrency(value, unit).toEthersBigNumber(this._decimals);
   }
