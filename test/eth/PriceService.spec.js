@@ -1,5 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
-import { Currency } from '../../src/eth/CurrencyUnits';
+import { Currency, ETH } from '../../src/eth/CurrencyUnits';
 
 function buildTestPriceService() {
   return buildTestService('price', { price: true });
@@ -72,4 +72,13 @@ test('can read the weth to peth ratio', async () => {
   await service.manager().authenticate();
   const ratio = await service.getWethToPethRatio();
   expect(ratio).toBeGreaterThan(0);
+});
+
+test('_valueForContract', async () => {
+  const service = buildTestPriceService();
+  await service.manager().authenticate();
+  const value = service._valueForContract('43', ETH);
+  expect(value).toBe(
+    '0x00000000000000000000000000000000000000000000000254beb02d1dcc0000'
+  );
 });

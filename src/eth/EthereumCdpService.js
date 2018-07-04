@@ -2,10 +2,9 @@ import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
-import Validator from '../utils/Validator';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
-import { ETH } from './CurrencyUnits';
+import { getCurrency, DAI, ETH, PETH, WETH } from './CurrencyUnits';
 
 export default class EthereumCdpService extends PrivateService {
   /**
@@ -75,50 +74,50 @@ export default class EthereumCdpService extends PrivateService {
     return this.lockWeth(cdpId, amount);
   }
 
-  async lockWeth(cdpId, weth) {
+  async lockWeth(cdpId, amount, unit = WETH) {
     const wethPerPeth = await this.get('price').getWethToPethRatio();
-    const peth = new BigNumber(weth).div(wethPerPeth.toString()).toFixed(18);
+    const weth = getCurrency(amount, unit);
 
     await this._conversionService().convertWethToPeth(weth);
-    return this.lockPeth(cdpId, peth);
+    return this.lockPeth(cdpId, weth.div(wethPerPeth));
   }
 
-  async lockPeth(cdpId, peth) {
+  async lockPeth(cdpId, amount, unit = PETH) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(peth)); // default is 18 decimals, so parsedAmount is in wei
+    const value = getCurrency(amount, unit).toEthersBigNumber(18);
 
     await this.get('allowance').requireAllowance(
       tokens.PETH,
       this._tubContract().getAddress()
     );
     return this._transactionManager().createTransactionHybrid(
-      this._tubContract().lock(hexCdpId, parsedAmount)
+      this._tubContract().lock(hexCdpId, value)
     );
   }
 
-  freePeth(cdpId, amount) {
+  freePeth(cdpId, amount, unit = PETH) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+    const value = getCurrency(amount, unit).toEthersBigNumber(18);
 
     return this._transactionManager().createTransactionHybrid(
-      this._tubContract().free(hexCdpId, parsedAmount, { gasLimit: 200000 })
+      this._tubContract().free(hexCdpId, value, { gasLimit: 200000 })
     );
   }
 
-  drawDai(cdpId, amount) {
+  drawDai(cdpId, amount, unit = DAI) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+    const value = getCurrency(amount, unit).toEthersBigNumber(18);
 
     return this._transactionManager().createTransactionHybrid(
-      this._tubContract().draw(hexCdpId, parsedAmount, { gasLimit: 4000000 })
+      this._tubContract().draw(hexCdpId, value, { gasLimit: 4000000 })
     );
   }
 
-  wipeDai(cdpId, amount) {
+  async wipeDai(cdpId, amount, unit = DAI) {
     const hexCdpId = this._hexCdpId(cdpId);
-    const parsedAmount = Validator.bigNumberToBN(Validator.parseUnits(amount)); // default is 18 decimals, so parsedAmount is in wei
+    const value = getCurrency(amount, unit).toEthersBigNumber(18);
 
-    return Promise.all([
+    await Promise.all([
       this.get('allowance').requireAllowance(
         tokens.MKR,
         this._tubContract().getAddress()
@@ -127,11 +126,10 @@ export default class EthereumCdpService extends PrivateService {
         tokens.DAI,
         this._tubContract().getAddress()
       )
-    ]).then(() => {
-      return this._transactionManager().createTransactionHybrid(
-        this._tubContract().wipe(hexCdpId, parsedAmount, { gasLimit: 4000000 })
-      );
-    });
+    ]);
+    return this._transactionManager().createTransactionHybrid(
+      this._tubContract().wipe(hexCdpId, value, { gasLimit: 4000000 })
+    );
   }
 
   getInfo(cdpId) {
@@ -280,8 +278,8 @@ export default class EthereumCdpService extends PrivateService {
     const totalCollateralValue = new BigNumber(_totalWethLocked)
       .div(WAD)
       .times(wethPrice.toBigNumber());
-    const systemDaiDebt = new BigNumber(daiSupply).times(targetPrice);
-    return new BigNumber(totalCollateralValue).div(systemDaiDebt).toNumber();
+    const systemDaiDebt = daiSupply.times(targetPrice);
+    return totalCollateralValue.div(systemDaiDebt.toBigNumber()).toNumber();
   }
 
   async getWethToPethRatio() {

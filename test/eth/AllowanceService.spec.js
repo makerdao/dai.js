@@ -1,225 +1,84 @@
 import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
-const utils = require('ethers').utils;
 import { buildTestService } from '../helpers/serviceBuilders';
+import { DAI } from '../../src/eth/CurrencyUnits';
+import { UINT256_MAX } from '../../src/utils/constants';
 
-function buildTestAllowanceServiceMax() {
-  return buildTestService('allowance', { allowance: true });
-}
+let dai, testAddress, allowanceService, owner;
 
-function buildTestAllowanceServiceMin() {
-  return buildTestService('allowance', {
-    allowance: { useMinimizeAllowancePolicy: true }
+async function buildTestAllowanceService(max = true) {
+  allowanceService = buildTestService('allowance', {
+    allowance: max ? true : { useMinimizeAllowancePolicy: true }
   });
+  await allowanceService.manager().authenticate();
+  dai = allowanceService.get('token').getToken(tokens.DAI);
+  owner = allowanceService
+    .get('token')
+    .get('web3')
+    .ethersSigner().address;
 }
 
-test('max allowance policy, no need to update', done => {
-  const allowanceService = buildTestAllowanceServiceMax();
-  allowanceService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const randomAddress = TestAccountProvider.nextAddress();
-      const daiToken = allowanceService.get('token').getToken(tokens.DAI);
-
-      daiToken
-        .approveUnlimited(randomAddress)
-        .then(() =>
-          allowanceService.requireAllowance(tokens.DAI, randomAddress)
-        )
-        .then(() => {
-          return daiToken.allowance(
-            allowanceService
-              .get('token')
-              .get('web3')
-              .ethersSigner().address,
-            randomAddress
-          );
-        })
-        .then(allowanceAfter => {
-          const EVMFormat = daiToken.toEthereumFormat(allowanceAfter);
-          const allowanceAfterBigNumber = utils.bigNumberify(EVMFormat);
-          const maxUint256 = utils.bigNumberify(
-            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-          );
-          expect(maxUint256.toString()).toEqual(
-            allowanceAfterBigNumber.toString()
-          );
-          return daiToken.approve(randomAddress, '0');
-        })
-        .then(() => {
-          done();
-        });
-    });
+beforeEach(() => {
+  testAddress = TestAccountProvider.nextAddress();
 });
 
-test('max allowance policy, need to update', done => {
-  const allowanceService = buildTestAllowanceServiceMax();
-  allowanceService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const randomAddress = TestAccountProvider.nextAddress();
-      const daiToken = allowanceService.get('token').getToken(tokens.DAI);
-
-      daiToken
-        .approve(randomAddress, '0')
-        .then(() =>
-          allowanceService.requireAllowance(tokens.DAI, randomAddress)
-        )
-        .then(() => {
-          return daiToken.allowance(
-            allowanceService
-              .get('token')
-              .get('web3')
-              .ethersSigner().address,
-            randomAddress
-          );
-        })
-        .then(allowanceAfter => {
-          const EVMFormat = daiToken.toEthereumFormat(allowanceAfter);
-          const allowanceAfterBigNumber = utils.bigNumberify(EVMFormat);
-          const maxUint256 = utils.bigNumberify(
-            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-          );
-          expect(maxUint256.toString()).toEqual(
-            allowanceAfterBigNumber.toString()
-          );
-          return daiToken.approve(randomAddress, '0');
-        })
-        .then(() => {
-          done();
-        });
-    });
+afterEach(async () => {
+  await dai.approve(testAddress, 0);
 });
 
-test('min allowance policy, need to update', done => {
-  const allowanceService = buildTestAllowanceServiceMin();
-  const estimate = 100;
-  allowanceService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const randomAddress = TestAccountProvider.nextAddress();
-      const daiToken = allowanceService.get('token').getToken(tokens.DAI);
+test('max allowance policy, no need to update', async () => {
+  await buildTestAllowanceService();
+  await dai.approveUnlimited(testAddress);
+  await allowanceService.requireAllowance(tokens.DAI, testAddress);
 
-      daiToken
-        .approve(randomAddress, '0')
-        .then(() =>
-          allowanceService.requireAllowance(tokens.DAI, randomAddress, estimate)
-        )
-        .then(() => {
-          return daiToken.allowance(
-            allowanceService
-              .get('token')
-              .get('web3')
-              .ethersSigner().address,
-            randomAddress
-          );
-        })
-        .then(allowanceAfter => {
-          expect(parseInt(allowanceAfter)).toEqual(estimate);
-          return daiToken.approve(randomAddress, '0');
-        })
-        .then(() => {
-          done();
-        });
-    });
+  const allowance = await dai.allowance(owner, testAddress);
+  expect(allowance).toEqual(DAI.wei(UINT256_MAX));
 });
 
-test('min allowance policy, no need to update', done => {
-  const allowanceService = buildTestAllowanceServiceMin();
-  const estimate = 100;
-  const initialAllowance = '200';
-  allowanceService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const randomAddress = TestAccountProvider.nextAddress();
-      const daiToken = allowanceService.get('token').getToken(tokens.DAI);
+test('max allowance policy, need to update', async () => {
+  await buildTestAllowanceService();
+  await dai.approve(testAddress, 0);
+  await allowanceService.requireAllowance(tokens.DAI, testAddress);
 
-      daiToken
-        .approve(randomAddress, initialAllowance)
-        .then(() =>
-          allowanceService.requireAllowance(tokens.DAI, randomAddress, estimate)
-        )
-        .then(() => {
-          return daiToken.allowance(
-            allowanceService
-              .get('token')
-              .get('web3')
-              .ethersSigner().address,
-            randomAddress
-          );
-        })
-        .then(allowanceAfter => {
-          expect(parseInt(allowanceAfter)).toEqual(parseInt(initialAllowance));
-          return daiToken.approve(randomAddress, '0');
-        })
-        .then(() => {
-          done();
-        });
-    });
+  const allowance = await dai.allowance(owner, testAddress);
+  expect(allowance).toEqual(DAI.wei(UINT256_MAX));
 });
 
-test('removeAllowance() works, need to update', done => {
-  const allowanceService = buildTestAllowanceServiceMin();
-  allowanceService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const randomAddress = TestAccountProvider.nextAddress();
-      const daiToken = allowanceService.get('token').getToken(tokens.DAI);
+test('min allowance policy, need to update', async () => {
+  buildTestAllowanceService(false);
+  const estimate = DAI(100);
+  await dai.approve(testAddress, DAI(50));
+  await allowanceService.requireAllowance(tokens.DAI, testAddress, estimate);
 
-      daiToken
-        .approve(randomAddress, '300')
-        .then(() => allowanceService.removeAllowance(tokens.DAI, randomAddress))
-        .then(() => {
-          return daiToken.allowance(
-            allowanceService
-              .get('token')
-              .get('web3')
-              .ethersSigner().address,
-            randomAddress
-          );
-        })
-        .then(allowanceAfter => {
-          expect(parseInt(allowanceAfter)).toEqual(0);
-          return daiToken.approve(randomAddress, '0');
-        })
-        .then(() => {
-          done();
-        });
-    });
+  const allowance = await dai.allowance(owner, testAddress);
+  expect(allowance).toEqual(estimate);
 });
 
-test('removeAllowance() works, no need to update', done => {
-  const allowanceService = buildTestAllowanceServiceMin();
-  allowanceService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const randomAddress = TestAccountProvider.nextAddress();
-      const daiToken = allowanceService.get('token').getToken(tokens.DAI);
+test('min allowance policy, no need to update', async () => {
+  await buildTestAllowanceService(false);
+  const estimate = DAI(100);
+  const initialAllowance = DAI(200);
+  await dai.approve(testAddress, initialAllowance);
+  await allowanceService.requireAllowance(tokens.DAI, testAddress, estimate);
 
-      daiToken
-        .approve(randomAddress, '0')
-        .then(() => allowanceService.removeAllowance(tokens.DAI, randomAddress))
-        .then(() => {
-          return daiToken.allowance(
-            allowanceService
-              .get('token')
-              .get('web3')
-              .ethersSigner().address,
-            randomAddress
-          );
-        })
-        .then(allowanceAfter => {
-          expect(parseInt(allowanceAfter)).toEqual(0);
-          return daiToken.approve(randomAddress, '0');
-        })
-        .then(() => {
-          done();
-        });
-    });
+  const allowance = await dai.allowance(owner, testAddress);
+  expect(allowance).toEqual(initialAllowance);
+});
+
+test('removeAllowance() works, need to update', async () => {
+  await buildTestAllowanceService(false);
+  await dai.approve(testAddress, 300);
+  await allowanceService.removeAllowance(tokens.DAI, testAddress);
+
+  const allowance = await dai.allowance(owner, testAddress);
+  expect(allowance).toEqual(DAI(0));
+});
+
+test('removeAllowance() works, no need to update', async () => {
+  await buildTestAllowanceService(false);
+  await dai.approve(testAddress, 0);
+  await allowanceService.removeAllowance(tokens.DAI, testAddress);
+
+  const allowance = await dai.allowance(owner, testAddress);
+  expect(allowance).toEqual(DAI(0));
 });

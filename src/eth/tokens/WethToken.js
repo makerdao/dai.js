@@ -13,14 +13,14 @@ export default class WethToken extends Erc20Token {
   deposit(amount, unit = ETH) {
     return this._transactionManager.createTransactionHybrid(
       this._contract.deposit({
-        value: this.valueForContract(amount, unit)
+        value: this._valueForContract(amount, unit)
       })
     );
   }
 
   withdraw(amount, unit = ETH) {
     return this._transactionManager.createTransactionHybrid(
-      this._contract.withdraw(this.valueForContract(amount, unit))
+      this._contract.withdraw(this._valueForContract(amount, unit))
     );
   }
 }

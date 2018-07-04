@@ -1,4 +1,3 @@
-import { utils } from 'ethers';
 import { currencies, getCurrency } from '../CurrencyUnits';
 
 export default class Erc20Token {
@@ -14,16 +13,21 @@ export default class Erc20Token {
     this._decimals = decimals;
     this._transactionManager = transactionManager;
     this.symbol = symbol;
+    this._currency = currencies[symbol];
   }
 
-  allowance(tokenOwner, spender) {
-    return this._contract
-      .allowance(tokenOwner, spender)
-      .then(_ => this.toUserFormat(_));
+  async allowance(tokenOwner, spender) {
+    return this._valueFromContract(
+      await this._contract.allowance(tokenOwner, spender)
+    );
   }
 
-  balanceOf(owner) {
-    return this._contract.balanceOf(owner).then(_ => this.toUserFormat(_));
+  async balanceOf(owner) {
+    return this._valueFromContract(await this._contract.balanceOf(owner));
+  }
+
+  async totalSupply() {
+    return this._valueFromContract(await this._contract.totalSupply());
   }
 
   address() {
@@ -34,25 +38,19 @@ export default class Erc20Token {
     return this._decimals;
   }
 
-  // TODO replace all uses of this with Currency methods
-  toUserFormat(value) {
-    return utils.formatUnits(value, this._decimals);
-  }
-
-  // TODO replace all uses of this with valueForContract
-  toEthereumFormat(value) {
-    return utils.parseUnits(value.toString(), this._decimals);
-  }
-
-  valueForContract(value, unit) {
+  _valueForContract(value, unit = this._currency) {
     return getCurrency(value, unit).toEthersBigNumber(this._decimals);
   }
 
-  approve(spender, value, unit = currencies[this.symbol]) {
+  _valueFromContract(value) {
+    return this._currency(value, -1 * this._decimals);
+  }
+
+  approve(spender, value, unit = this._currency) {
     return this._transact(
       'approve',
       spender,
-      this.valueForContract(value, unit)
+      this._valueForContract(value, unit)
     );
   }
 
@@ -61,7 +59,7 @@ export default class Erc20Token {
   }
 
   transfer(to, value, unit = currencies[this.symbol]) {
-    return this._transact('transfer', to, this.valueForContract(value, unit));
+    return this._transact('transfer', to, this._valueForContract(value, unit));
   }
 
   transferFrom(from, to, value, unit = currencies[this.symbol]) {
@@ -69,12 +67,8 @@ export default class Erc20Token {
       'transferFrom',
       from,
       to,
-      this.valueForContract(value, unit)
+      this._valueForContract(value, unit)
     );
-  }
-
-  totalSupply() {
-    return this._contract.totalSupply().then(_ => this.toUserFormat(_));
   }
 
   _transact(method, ...args) {

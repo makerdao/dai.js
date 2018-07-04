@@ -1,12 +1,10 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
-import tokens from '../../contracts/tokens';
 import { RAY } from '../utils/constants';
-
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
-import { ETH, PETH, MKR } from './CurrencyUnits';
+import { getCurrency, ETH, PETH, MKR } from './CurrencyUnits';
 
 export default class PriceService extends PrivateService {
   /**
@@ -35,14 +33,10 @@ export default class PriceService extends PrivateService {
     return this.get('smartContract').getContractByName(contract);
   }
 
-  _toEthereumFormat(value) {
+  _valueForContract(value, unit) {
     return util.bufferToHex(
       util.setLengthLeft(
-        utils.hexlify(
-          this.get('token')
-            .getToken(tokens.WETH)
-            .toEthereumFormat(value)
-        ),
+        utils.hexlify(getCurrency(value, unit).toEthersBigNumber(18)),
         32
       )
     );
@@ -57,20 +51,20 @@ export default class PriceService extends PrivateService {
   getEthPrice() {
     return this._getContract(contracts.SAI_PIP)
       .read()
-      .then(value => ETH.wei(value));
+      .then(ETH.wei);
   }
 
   getPethPrice() {
     return this._getContract(contracts.SAI_TUB)
       .tag()
-      .then(value => PETH.ray(value));
+      .then(PETH.ray);
   }
 
-  setEthPrice(newPrice) {
-    const adjustedPrice = this._toEthereumFormat(newPrice);
+  setEthPrice(newPrice, unit = ETH) {
+    const value = this._valueForContract(newPrice, unit);
 
     return this.get('transactionManager').createTransactionHybrid(
-      this._getContract(contracts.SAI_PIP).poke(adjustedPrice)
+      this._getContract(contracts.SAI_PIP).poke(value)
     );
   }
 
@@ -80,11 +74,11 @@ export default class PriceService extends PrivateService {
       .then(([price]) => MKR.wei(price));
   }
 
-  setMkrPrice(newPrice) {
-    const adjustedPrice = this._toEthereumFormat(newPrice);
+  setMkrPrice(newPrice, unit = MKR) {
+    const value = this._valueForContract(newPrice, unit);
 
     return this.get('transactionManager').createTransactionHybrid(
-      this._getContract(contracts.SAI_PEP).poke(adjustedPrice)
+      this._getContract(contracts.SAI_PEP).poke(value)
     );
   }
 }

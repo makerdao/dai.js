@@ -1,14 +1,15 @@
 import Validator from '../utils/Validator';
-import { WEI, RAY } from '../utils/constants';
 import enums from '../../contracts/tokens';
 import values from 'lodash.values';
 import { utils } from 'ethers';
 const { bigNumberify } = utils;
 
 export class Currency {
-  constructor(amount, divisor) {
+  constructor(amount, shift = 0) {
     let number = Validator.amountToBigNumber(amount);
-    this._amount = divisor ? number.dividedBy(divisor) : number;
+    if (shift === 'wei') shift = -18;
+    if (shift === 'ray') shift = -27;
+    this._amount = shift ? number.shiftedBy(shift) : number;
     this.symbol = '???';
   }
 
@@ -27,12 +28,64 @@ export class Currency {
   toEthersBigNumber(shift = 0) {
     return bigNumberify(this._amount.shiftedBy(shift).toFixed());
   }
+
+  isSameType(other) {
+    return this.symbol === other.symbol;
+  }
 }
+
+const mathFunctions = [
+  'plus',
+  'minus',
+  'times',
+  'multipliedBy',
+  'div',
+  'dividedBy'
+];
+
+const booleanFunctions = [
+  'isLessThan',
+  'lt',
+  'isLessThanOrEqualTo',
+  'lte',
+  'isGreaterThan',
+  'gt',
+  'isGreaterThanOrEqualTo',
+  'gte'
+];
+
+function bigNumberFnWrapper(method, isBoolean) {
+  return function(other) {
+    if (other instanceof Currency && !this.isSameType(other)) {
+      throw new Error(
+        `Mismatched currency types: ${this.symbol}, ${other.symbol}`
+      );
+    }
+
+    const otherBigNumber =
+      other instanceof Currency ? other.toBigNumber() : other;
+
+    const value = this.toBigNumber()[method](otherBigNumber);
+    return isBoolean ? value : this.constructor(value);
+  };
+}
+
+Object.assign(
+  Currency.prototype,
+  mathFunctions.reduce((output, method) => {
+    output[method] = bigNumberFnWrapper(method);
+    return output;
+  }, {}),
+  booleanFunctions.reduce((output, method) => {
+    output[method] = bigNumberFnWrapper(method, true);
+    return output;
+  }, {})
+);
 
 function setupWrapper(symbol) {
   class CurrencyX extends Currency {
-    constructor(amount, divisor) {
-      super(amount, divisor);
+    constructor(amount, shift) {
+      super(amount, shift);
       this.symbol = symbol;
     }
   }
@@ -42,19 +95,19 @@ function setupWrapper(symbol) {
 
   // This provides short syntax, e.g. ETH(6). We need a wrapper function because
   // you can't call an ES6 class consructor without `new`
-  const creatorFn = (amount, divisor) => new CurrencyX(amount, divisor);
+  const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
 
-  const makeCreatorFnWithDivisor = divisor => {
-    const fn = amount => creatorFn(amount, divisor);
+  const makeCreatorFnWithShift = shift => {
+    const fn = amount => creatorFn(amount, shift);
     // these two properties are used by getCurrency
     fn.symbol = symbol;
-    fn.divisor = divisor;
+    fn.shift = shift;
     return fn;
   };
 
   Object.assign(creatorFn, {
-    wei: makeCreatorFnWithDivisor(WEI),
-    ray: makeCreatorFnWithDivisor(RAY),
+    wei: makeCreatorFnWithShift('wei'),
+    ray: makeCreatorFnWithShift('ray'),
     symbol
   });
 
@@ -85,5 +138,5 @@ export function getCurrency(amount, unit) {
   if (!ctor) {
     throw new Error(`Couldn't find currency for "${key}"`);
   }
-  return ctor(amount, unit.divisor);
+  return ctor(amount, unit.shift);
 }

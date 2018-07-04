@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import {
   getCurrency,
   ETH,
@@ -62,8 +61,8 @@ test('has a short syntax', () => {
   expect(MKR(5).toString()).toBe('5.00 MKR');
 });
 
-test('has an optional divisor argument', () => {
-  expect(ETH(100, BigNumber('1e2')).toString()).toBe('1.00 ETH');
+test('has an optional shift argument', () => {
+  expect(ETH(100, -2).toString()).toBe('1.00 ETH');
 });
 
 test('has a short syntax for wei (1e18) amounts', () => {
@@ -79,4 +78,31 @@ test('has a short syntax for ray (1e27) amounts', () => {
 test('prints the specified number of decimals', () => {
   const n = MKR('1000.5447123');
   expect(n.toString(3)).toBe('1000.545 MKR');
+});
+
+test('can do math', () => {
+  const a = MKR('1.2');
+  const b = MKR('3.4');
+  expect(a.plus(b).toString()).toBe('4.60 MKR');
+});
+
+test('can do comparisons', () => {
+  const a = MKR('1.2');
+  const b = MKR('3.4');
+  expect(a.lt(b)).toBe(true);
+  expect(a.gt(b)).toBe(false);
+});
+
+test('throws an error if trying to do math with different types', () => {
+  const a = MKR('1.2');
+  const b = DAI('3.4');
+  expect(() => {
+    a.plus(b);
+  }).toThrow('Mismatched currency types: MKR, DAI');
+});
+
+test('equality of different instances', () => {
+  expect(MKR('2')).toEqual(MKR('2'));
+  expect(MKR('2')).not.toEqual(MKR('2.1'));
+  expect(MKR('2')).not.toEqual(DAI('2'));
 });
