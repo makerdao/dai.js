@@ -48,16 +48,16 @@ export default class PriceService extends PrivateService {
       .then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
-  getEthPrice() {
-    return this._getContract(contracts.SAI_PIP)
-      .read()
-      .then(ETH.wei);
+  async getEthPrice() {
+    return ETH.wei(await this._getContract(contracts.SAI_PIP).read());
   }
 
-  getPethPrice() {
-    return this._getContract(contracts.SAI_TUB)
-      .tag()
-      .then(PETH.ray);
+  async getPethPrice() {
+    return PETH.ray(await this._getContract(contracts.SAI_TUB).tag());
+  }
+
+  async getMkrPrice() {
+    return MKR.wei((await this._getContract(contracts.SAI_PEP).peek())[0]);
   }
 
   setEthPrice(newPrice, unit = ETH) {
@@ -66,12 +66,6 @@ export default class PriceService extends PrivateService {
     return this.get('transactionManager').createTransactionHybrid(
       this._getContract(contracts.SAI_PIP).poke(value)
     );
-  }
-
-  getMkrPrice() {
-    return this._getContract(contracts.SAI_PEP)
-      .peek()
-      .then(([price]) => MKR.wei(price));
   }
 
   setMkrPrice(newPrice, unit = MKR) {
