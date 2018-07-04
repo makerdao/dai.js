@@ -4,6 +4,8 @@ import OasisBuyOrder from './OasisBuyOrder';
 import TransactionObject from '../../eth/TransactionObject';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
+import { UINT256_MAX } from '../../utils/constants';
+import { DAI } from '../../eth/CurrencyUnits';
 
 export default class OasisExchangeService extends PrivateService {
   constructor(name = 'exchange') {
@@ -33,8 +35,8 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
     const buyTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-    const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
-    const minFillAmountEVM = daiToken.toEthereumFormat(minFillAmount);
+    const daiAmountEVM = DAI(daiAmount).toEthersBigNumber('wei');
+    const minFillAmountEVM = DAI(minFillAmount).toEthersBigNumber('wei');
     return this.get('allowance')
       .requireAllowance(tokens.DAI, oasisContract.getAddress())
       .then(() =>
@@ -57,14 +59,14 @@ daiAmount: amount of Dai to buy
 tokenSymbol: symbol of token to sell
 maxFillAmount: If the trade can't be done without selling more than the maxFillAmount of selling token, it will fail
 */
-  buyDai(daiAmount, tokenSymbol, maxFillAmount = '-1') {
+  buyDai(daiAmount, tokenSymbol, maxFillAmount = UINT256_MAX) {
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
     const daiToken = this.get('token').getToken(tokens.DAI);
     const daiAddress = daiToken.address();
-    const daiAmountEVM = daiToken.toEthereumFormat(daiAmount);
-    const maxFillAmountEVM = daiToken.toEthereumFormat(maxFillAmount);
+    const daiAmountEVM = DAI(daiAmount).toEthersBigNumber('wei');
+    const maxFillAmountEVM = DAI(maxFillAmount).toEthersBigNumber('wei');
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();

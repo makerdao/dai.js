@@ -1,11 +1,9 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
+import { getCurrency, ETH, WETH } from './CurrencyUnits';
 
 export default class TokenConversionService extends PrivateService {
-  /**
-   * @param {string} name
-   */
   constructor(name = 'conversionService') {
     super(name, ['smartContract', 'token', 'allowance']);
   }
@@ -14,28 +12,24 @@ export default class TokenConversionService extends PrivateService {
     return this.get('token').getToken(token);
   }
 
-  convertEthToWeth(eth) {
-    const wethToken = this._getToken(tokens.WETH);
-
-    return wethToken.deposit(eth);
+  convertEthToWeth(amount, unit = ETH) {
+    return this._getToken(tokens.WETH).deposit(getCurrency(amount, unit));
   }
 
-  convertWethToPeth(weth) {
+  async convertWethToPeth(amount, unit = WETH) {
     const pethToken = this._getToken(tokens.PETH);
 
-    return this.get('allowance')
-      .requireAllowance(
-        tokens.WETH,
-        this.get('smartContract')
-          .getContractByName(contracts.SAI_TUB)
-          .getAddress()
-      )
-      .then(() => pethToken.join(weth));
+    await this.get('allowance').requireAllowance(
+      tokens.WETH,
+      this.get('smartContract')
+        .getContractByName(contracts.SAI_TUB)
+        .getAddress()
+    );
+    return pethToken.join(amount, unit);
   }
 
-  convertEthToPeth(value) {
-    return this.convertEthToWeth(value).then(() =>
-      this.convertWethToPeth(value)
-    );
+  async convertEthToPeth(value) {
+    await this.convertEthToWeth(value);
+    return this.convertWethToPeth(value);
   }
 }
