@@ -75,7 +75,7 @@ describe('weth and peth', () => {
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+    expect(balancePre.minus(0.1)).toEqual(balancePost);
   });
 
   test('lock peth in a cdp', async () => {
@@ -93,7 +93,7 @@ describe('weth and peth', () => {
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-    expect(parseFloat(balancePost)).toBeCloseTo(balancePre - 0.1, 5);
+    expect(balancePre.minus(0.1)).toEqual(balancePost);
   });
 });
 
