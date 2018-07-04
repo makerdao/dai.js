@@ -65,15 +65,13 @@ export default class EthereumTokenService extends PrivateService {
       }
 
       if (symbol === tokens.PETH) {
-        if (tokenVersionData.decimals !== 18) {
-          throw new Error('PethToken code hardcodes 18 decimal places.');
-        }
         const tub = smartContractService.getContractByName(contracts.SAI_TUB);
         return new PethToken(
           contract,
+          tub,
           this.get('web3'),
-          this._transactionManager(),
-          tub
+          tokenVersionData.decimals,
+          this._transactionManager()
         );
       }
 
@@ -81,8 +79,7 @@ export default class EthereumTokenService extends PrivateService {
         contract,
         this.get('web3'),
         tokenVersionData.decimals,
-        this._transactionManager(),
-        symbol
+        this._transactionManager()
       );
     }
   }
