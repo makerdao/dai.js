@@ -67,6 +67,7 @@ export default class Cdp {
 // each of these methods just calls the method of the same name on the service
 // with the cdp's id as the first argument
 const passthroughMethods = [
+  'bite',
   'drawDai',
   'freePeth',
   'getCollateralValueInEth',
