@@ -1,15 +1,22 @@
-import Validator from '../utils/Validator';
 import enums from '../../contracts/tokens';
 import values from 'lodash.values';
 import { utils } from 'ethers';
 const { bigNumberify } = utils;
+import BigNumber from 'bignumber.js';
+
+function amountToBigNumber(amount) {
+  const value = BigNumber(amount);
+  if (value.lt(0)) throw new Error('amount cannot be negative');
+  return value;
+}
 
 export class Currency {
   constructor(amount, shift = 0) {
-    let number = Validator.amountToBigNumber(amount);
     if (shift === 'wei') shift = -18;
     if (shift === 'ray') shift = -27;
-    this._amount = shift ? number.shiftedBy(shift) : number;
+    this._amount = shift
+      ? amountToBigNumber(amount).shiftedBy(shift)
+      : amountToBigNumber(amount);
     this.symbol = '???';
   }
 
@@ -50,7 +57,8 @@ const mathFunctions = [
   'times',
   'multipliedBy',
   'div',
-  'dividedBy'
+  'dividedBy',
+  'shiftedBy'
 ];
 
 const booleanFunctions = [

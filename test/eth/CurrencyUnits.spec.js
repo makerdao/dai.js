@@ -133,3 +133,7 @@ test('convert to ethers.js BigNumber with optional shifting', () => {
       .toString()
   ).toEqual('2');
 });
+
+test('wrap BigNumber methods', () => {
+  expect(DAI(4).shiftedBy(2)).toEqual(DAI(400));
+});
