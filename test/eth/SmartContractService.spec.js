@@ -75,30 +75,3 @@ test('should support recursive smart contract state inspection', done => {
       done();
     });
 });
-
-test('should convert from bytes32 to a javascript number', () => {
-  const bytes32 =
-    '0x000000000000000000000000000000000000000000000000000000000000005c';
-  const service = buildTestSmartContractService();
-
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      expect(service.bytes32ToNumber(bytes32)).toBe(92);
-    });
-});
-
-test('should convert from a javascript number to bytes32', () => {
-  const num = 92;
-  const service = buildTestSmartContractService();
-
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      expect(service.numberToBytes32(num)).toBe(
-        '0x000000000000000000000000000000000000000000000000000000000000005c'
-      );
-    });
-});

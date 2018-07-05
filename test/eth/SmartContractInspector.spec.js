@@ -5,6 +5,7 @@ import tokens from '../../contracts/tokens';
 import ContractWatcher from '../../src/eth/inspector/ContractWatcher';
 import PropertyWatcher from '../../src/eth/inspector/PropertyWatcher';
 import MethodWatcher from '../../src/eth/inspector/MethodWatcher';
+import { numberToBytes32 } from '../../src/utils/conversion';
 
 let service = null;
 
@@ -85,7 +86,7 @@ test('should register method watchers', done => {
 test('should generate nodes for watched contracts and their properties', done => {
   buildInspector().then(inspector => {
     inspector.watch(contracts.SAI_TUB);
-    inspector.watch(contracts.SAI_TUB, ['cups', service.numberToBytes32(1)]);
+    inspector.watch(contracts.SAI_TUB, ['cups', numberToBytes32(1)]);
     inspector.watch(tokens.MKR);
 
     inspector.inspect().then(map => {

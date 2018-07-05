@@ -5,6 +5,7 @@ import tokens from '../../contracts/tokens';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
 import { getCurrency, DAI, ETH, PETH, WETH } from './CurrencyUnits';
+import { numberToBytes32 } from '../utils/conversion';
 
 export default class EthereumCdpService extends PrivateService {
   /**
@@ -42,16 +43,12 @@ export default class EthereumCdpService extends PrivateService {
     return this.get('conversionService');
   }
 
-  _hexCdpId(cdpId) {
-    return this._smartContract().numberToBytes32(cdpId);
-  }
-
   openCdp() {
     return new Cdp(this).transactionObject();
   }
 
   shut(cdpId) {
-    const hexCdpId = this._hexCdpId(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
 
     return Promise.all([
       this.get('allowance').requireAllowance(
@@ -83,7 +80,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async lockPeth(cdpId, amount, unit = PETH) {
-    const hexCdpId = this._hexCdpId(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     await this.get('allowance').requireAllowance(
@@ -96,7 +93,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   freePeth(cdpId, amount, unit = PETH) {
-    const hexCdpId = this._hexCdpId(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     return this._transactionManager().createTransactionHybrid(
@@ -105,7 +102,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   drawDai(cdpId, amount, unit = DAI) {
-    const hexCdpId = this._hexCdpId(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     return this._transactionManager().createTransactionHybrid(
@@ -114,7 +111,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async wipeDai(cdpId, amount, unit = DAI) {
-    const hexCdpId = this._hexCdpId(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     await Promise.all([
@@ -133,12 +130,12 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   getInfo(cdpId) {
-    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     return this._tubContract().cups(hexCdpId);
   }
 
   async getCollateralInPeth(cdpId) {
-    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     const value = await this._tubContract().ink(hexCdpId);
 
     return new BigNumber(value.toString()).dividedBy(WAD).toNumber();
@@ -161,7 +158,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   getDebtInDai(cdpId) {
-    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `tab`
     const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
@@ -186,7 +183,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   getMkrFeeInUSD(cdpId) {
-    const hexCdpId = this._smartContract().numberToBytes32(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `tab`
     const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
@@ -314,7 +311,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   give(cdpId, newAddress) {
-    const hexCdpId = this._hexCdpId(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().give(hexCdpId, newAddress)
@@ -322,7 +319,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   bite(cdpId) {
-    const hexCdpId = this._hexCdpId(cdpId);
+    const hexCdpId = numberToBytes32(cdpId);
 
     return this._transactionManager().createTransactionHybrid(
       this._tubContract().bite(hexCdpId, { gasLimit: 4000000 })

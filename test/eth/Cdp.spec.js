@@ -117,7 +117,7 @@ describe('bite', () => {
 
   // FIXME this breaks other tests, possibly because it leaves the test chain in
   // a broken state
-  xtest('when safe', async () => {
+  test.skip('when safe', async () => {
     await expect(cdp.bite()).rejects;
   });
 
@@ -167,26 +167,29 @@ describe('a cdp with collateral', () => {
       expect(debt.toString()).toEqual('5');
     });
 
-    test('read MKR fee in USD', async done => {
-      //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
-      setTimeout(async () => {
-        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-        const fee = await cdp.getMkrFeeInUSD();
-        expect(fee).toBeGreaterThan(0);
-        done();
-      }, 1500);
-    });
+    describe('with drip', () => {
+      afterAll(() => cdpService.get('price').setMkrPrice(0));
 
-    test('read MKR fee in MKR', async done => {
-      await cdpService.get('price').setMkrPrice(600);
-      //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
-      setTimeout(async () => {
-        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-        const fee = await cdp.getMkrFeeInMkr();
-        expect(fee).toBeGreaterThan(0);
-        await cdpService.get('price').setMkrPrice(0);
-        done();
-      }, 1500);
+      test('read MKR fee in USD', async done => {
+        //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
+        setTimeout(async () => {
+          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+          const fee = await cdp.getMkrFeeInUSD();
+          expect(fee).toBeGreaterThan(0);
+          done();
+        }, 1500);
+      });
+
+      test('read MKR fee in MKR', async done => {
+        await cdpService.get('price').setMkrPrice(600);
+        //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
+        setTimeout(async () => {
+          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+          const fee = await cdp.getMkrFeeInMkr();
+          expect(fee).toBeGreaterThan(0);
+          done();
+        }, 1500);
+      });
     });
 
     test('read liquidation price', async () => {

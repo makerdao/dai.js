@@ -156,33 +156,6 @@ export default class SmartContractService extends PublicService {
     return inspector.inspect();
   }
 
-  stringToBytes32(text) {
-    const ethersUtils = this.get('web3').ethersUtils();
-    var data = ethersUtils.toUtf8Bytes(text);
-    if (data.length > 32) {
-      throw new Error('too long');
-    }
-    data = ethersUtils.padZeros(data, 32);
-    return ethersUtils.hexlify(data);
-  }
-
-  bytes32ToNumber(bytes32) {
-    const ethersUtils = this.get('web3').ethersUtils();
-    return ethersUtils.bigNumberify(bytes32).toNumber();
-  }
-
-  numberToBytes32(num) {
-    const ethersUtils = this.get('web3').ethersUtils();
-    return (
-      '0x' +
-      ethersUtils
-        .bigNumberify(num)
-        .toHexString()
-        .substring(2)
-        .padStart(64, '0')
-    );
-  }
-
   hasContract(name) {
     return (
       Object.keys(contracts).indexOf(name) > -1 ||

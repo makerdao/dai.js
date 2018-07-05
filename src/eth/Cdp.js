@@ -1,4 +1,5 @@
 import contracts from '../../contracts/contracts';
+import { utils as ethersUtils } from 'ethers';
 
 export default class Cdp {
   constructor(cdpService, cdpId = null) {
@@ -25,7 +26,6 @@ export default class Cdp {
 
   _captureCdpIdPromise(tubContract) {
     const ethersSigner = this._smartContractService.get('web3').ethersSigner();
-    const ethersUtils = this._smartContractService.get('web3').ethersUtils();
 
     return new Promise(resolve => {
       // Event handlers need to be registered on the inner Ethers.js contract, for now

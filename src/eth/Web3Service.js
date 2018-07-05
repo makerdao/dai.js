@@ -17,7 +17,6 @@ export default class Web3Service extends PrivateService {
     this._blockListeners = {};
     this._currentBlock = null;
     this._ethersWallet = null;
-    this._ethersUtils = null;
     this._info = {
       version: { api: null, node: null, network: null, ethereum: null },
       account: null
@@ -73,10 +72,6 @@ export default class Web3Service extends PrivateService {
       this._ethersWallet ||
       this._ethersProvider.getSigner(this.defaultAccount())
     );
-  }
-
-  ethersUtils() {
-    return this._ethersUtils;
   }
 
   initialize(settings) {
@@ -236,7 +231,6 @@ export default class Web3Service extends PrivateService {
 
   _setUpEthers(chainId) {
     const ethers = require('ethers');
-    this._ethersUtils = ethers.utils;
     this._ethersProvider = this._buildEthersProvider(ethers, chainId);
     this._ethersWallet = this._buildEthersWallet(
       ethers,
