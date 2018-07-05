@@ -72,3 +72,7 @@ test('should throw an error for an invalid id', async () => {
     expect(err.message).toMatch(/CDP doesn't exist/);
   }
 });
+
+test('exports currency types', () => {
+  expect(Maker.ETH(1).toString()).toEqual('1.00 ETH');
+});
