@@ -2,7 +2,6 @@ import PrivateService from '../core/PrivateService';
 import Web3ProviderType from './Web3ProviderType';
 import { promisifyAsyncMethods, getNetworkName } from '../utils';
 import Web3 from 'web3';
-import TestAccountProvider from '../utils/TestAccountProvider';
 import Web3ServiceList from '../utils/Web3ServiceList';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
@@ -175,14 +174,6 @@ export default class Web3Service extends PrivateService {
 
   getNetwork() {
     return this._info.version['network'];
-  }
-
-  getDummyTransaction() {
-    return {
-      from: TestAccountProvider.nextAddress(),
-      to: TestAccountProvider.nextAddress(),
-      amount: this._web3.toWei('0.01')
-    };
   }
 
   blockNumber() {
