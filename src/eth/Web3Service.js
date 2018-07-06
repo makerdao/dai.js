@@ -129,16 +129,9 @@ export default class Web3Service extends PrivateService {
 
     // If using a hardware wallet
     if (typeof settings.useHardwareWallet === 'string') {
-      console.log(`Using hardware wallet: ${settings.useHardwareWallet}`);
-      if (
-        this.currentProvider &&
-        typeof this.currentProvider.stop === 'function'
-      )
-        this.currentProvider.stop();
+      if (this.currentProvider && typeof this.currentProvider.stop === 'function') this.currentProvider.stop();
       this.setHWProvider(settings.useHardwareWallet).then(success => {
-        this._web3.currentProvider.addProvider(
-          this._getWeb3Provider(settings, this._web3)
-        );
+        this._web3.currentProvider.addProvider(this._getWeb3Provider(settings, this._web3));
         this._web3.currentProvider.start();
         this._defaultEmitter.emit('web3/INITIALIZED', {
           provider: { ...settings.provider }
@@ -426,33 +419,22 @@ export default class Web3Service extends PrivateService {
     const cacheKey = 'provider:' + JSON.stringify(settings.provider);
     const cache = this.get('cache');
     if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
-    console.log(
-      'Building web3 provider. useHardwareWallet?',
-      useHardwareWallet
-    );
     switch (type) {
       case Web3ProviderType.HTTP:
-        provider =
-          typeof useHardwareWallet === 'string'
-            ? new RpcSource({ rpcUrl: url })
-            : new Web3.providers.HttpProvider(url);
+        provider = typeof useHardwareWallet === 'string'
+          ? new RpcSource({ rpcUrl: url })
+          : new Web3.providers.HttpProvider(url);
         break;
       case Web3ProviderType.INFURA:
-        provider =
-          typeof useHardwareWallet === 'string'
-            ? new RpcSource({
-                rpcUrl: `https://${network}.infura.io/${infuraApiKey}`
-              })
-            : new Web3.providers.HttpProvider(
-                `https://${network}.infura.io/${infuraApiKey}`
-              );
+        provider = typeof useHardwareWallet === 'string'
+          ? new RpcSource({ rpcUrl: `https://${network}.infura.io/${infuraApiKey}` })
+          : new Web3.providers.HttpProvider(`https://${network}.infura.io/${infuraApiKey}`);
         break;
       case Web3ProviderType.TEST:
         // Route through the webpack dev server for HTTPS support
-        provider =
-          typeof useHardwareWallet === 'string'
-            ? new RpcSource({ rpcUrl: 'https://localhost:9000/web3' })
-            : new Web3.providers.HttpProvider('https://localhost:9000/web3');
+        provider = typeof useHardwareWallet === 'string'
+          ? new RpcSource({ rpcUrl: 'https://localhost:9000/web3' })
+          : new Web3.providers.HttpProvider('http://127.1:2000');
         // Alternatively, websocket would work
         // provider = new WebsocketSubprovider({ rpcUrl: 'ws://127.1:2000' })
         break;
@@ -539,7 +521,6 @@ export function _web3Promise(cb, onErrorValue) {
       });
     } catch (e) {
       if (typeof onErrorValue === 'undefined') {
-        //console.log(e);
         reject(e);
       } else {
         resolve(onErrorValue);
