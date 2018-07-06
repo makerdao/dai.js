@@ -6,6 +6,7 @@ import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../../src/utils/TestAccountProvider';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
+import { promiseWait } from '../../src/utils';
 
 let service;
 
@@ -19,7 +20,7 @@ function createTestTransaction(srv = service) {
   return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
 }
 
-test('TransactionObject event listeners work as promises', async () => {
+test('event listeners work as promises', async () => {
   expect.assertions(3);
   const tx = createTestTransaction();
 
@@ -43,12 +44,12 @@ test('TransactionObject event listeners work as promises', async () => {
   await tx.confirm();
 });
 
-test('get fees from TransactionObject', async () => {
+test('get fees', async () => {
   const tx = await createTestTransaction().mine();
   expect(parseFloat(tx.fees())).toBeGreaterThan(0);
 });
 
-test('TransactionObject event listeners work as callbacks', async () => {
+test('event listeners work as callbacks', async () => {
   expect.assertions(3);
   const tx = createTestTransaction();
   tx.onPending(() => {
@@ -69,15 +70,49 @@ test('TransactionObject event listeners work as callbacks', async () => {
   await tx.confirm();
 });
 
+class DelayingWeb3Service extends Web3Service {
+  ethersProvider() {
+    return new Proxy(super.ethersProvider(), {
+      get(target, key) {
+        if (key === 'getTransaction') {
+          return async hash => {
+            const tx = await target.getTransaction(hash);
+            if (!tx) return;
+            this._originalTx = tx;
+            return { ...tx, blockHash: null };
+          };
+        }
+
+        if (key === 'waitForTransaction') {
+          return () => promiseWait(1000).then(() => this._originalTx);
+        }
+
+        return target[key];
+      }
+    });
+  }
+}
+
+test('waitForTransaction', async () => {
+  const service = buildTestService('token', {
+    token: true,
+    web3: [new DelayingWeb3Service(), { provider: { type: 'TEST' } }]
+  });
+  await service.manager().authenticate();
+
+  const tx = createTestTransaction(service);
+  await tx.mine();
+  expect(tx.state()).toBe('mined');
+});
+
 class FailingWeb3Service extends Web3Service {
   ethersProvider() {
     return new Proxy(super.ethersProvider(), {
       get(target, key) {
         if (key === 'getTransaction') {
-          return () =>
-            new Promise(() => {
-              throw new Error('test error');
-            });
+          return async () => {
+            throw new Error('test error');
+          };
         }
         return target[key];
       }
@@ -85,7 +120,7 @@ class FailingWeb3Service extends Web3Service {
   }
 }
 
-test('TransactionObject error event listener works', async () => {
+test('error event listener works', async () => {
   expect.assertions(1);
   const service = buildTestService('token', {
     token: true,

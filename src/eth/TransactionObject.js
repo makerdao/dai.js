@@ -77,7 +77,8 @@ export default class TransactionObject extends TransactionLifeCycle {
       // be enough. but on a remote net, it may take multiple calls.
       for (let i = 0; i < 10; i++) {
         tx = await this._ethersProvider.getTransaction(this._hash);
-        if (!tx) await promiseWait(500);
+        if (tx) break;
+        await promiseWait(500);
       }
 
       if (!tx) {
