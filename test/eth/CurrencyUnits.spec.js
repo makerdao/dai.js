@@ -126,12 +126,12 @@ test('convert to ethers.js BigNumber with optional shifting', () => {
       .toString()
   ).toEqual('5000000000000000000');
 
-  // round amounts smaller than 1 wei
+  // round amounts smaller than 1 wei -- always round down
   expect(
     DAI.wei(1.5)
       .toEthersBigNumber('wei')
       .toString()
-  ).toEqual('2');
+  ).toEqual('1');
 });
 
 test('wrap BigNumber methods', () => {

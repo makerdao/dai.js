@@ -35,10 +35,13 @@ export class Currency {
   toEthersBigNumber(shift = 0) {
     if (shift === 'wei') shift = 18;
     if (shift === 'ray') shift = 27;
+
+    // always round down so that we never attempt to spend more than we have
     const val = this._amount
       .shiftedBy(shift)
-      .integerValue()
+      .integerValue(BigNumber.ROUND_DOWN)
       .toFixed();
+
     try {
       return bigNumberify(val);
     } catch (err) {
