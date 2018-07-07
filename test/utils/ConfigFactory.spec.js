@@ -1,5 +1,5 @@
-import decentralizedOasisWithoutProxies from '../../src/utils/configs/decentralized-oasis-without-proxies';
-import ConfigFactory from '../../src/utils/ConfigFactory';
+import decentralizedOasisWithoutProxies from '../../src/config/presets/decentralized-oasis-without-proxies';
+import ConfigFactory from '../../src/config/ConfigFactory';
 
 test('returns a preset by name', () => {
   expect(ConfigFactory.create('decentralized-oasis-without-proxies')).toEqual(

@@ -1,8 +1,8 @@
-import decentralizedOasisWithoutProxies from './configs/decentralized-oasis-without-proxies.json';
-import kovan from './configs/kovan.json';
-import http from './configs/http.json';
+import decentralizedOasisWithoutProxies from './presets/decentralized-oasis-without-proxies.json';
+import kovan from './presets/kovan.json';
+import http from './presets/http.json';
 import merge from 'lodash.merge';
-import { mergeServiceConfig } from './config';
+import { mergeServiceConfig } from './index';
 
 class ConfigPresetNotFoundError extends Error {
   constructor(message) {

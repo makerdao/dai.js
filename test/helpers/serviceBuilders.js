@@ -1,4 +1,4 @@
-import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
+import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import Web3ProviderType from '../../src/eth/Web3ProviderType';
 
 export const kovanProviderConfig = {

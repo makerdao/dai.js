@@ -1,5 +1,5 @@
-import DefaultServiceProvider from '../../src/utils/DefaultServiceProvider';
-import config from '../../src/utils/configs/decentralized-oasis-without-proxies';
+import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
+import config from '../../src/config/presets/decentralized-oasis-without-proxies';
 
 test('Should support services in mapping', () => {
   expect(new DefaultServiceProvider().supports('SmartContractService')).toBe(

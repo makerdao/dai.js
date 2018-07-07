@@ -1,6 +1,6 @@
-import DefaultServiceProvider from './utils/DefaultServiceProvider';
+import DefaultServiceProvider from './config/DefaultServiceProvider';
 import Cdp from './eth/Cdp';
-import ConfigFactory from './utils/ConfigFactory';
+import ConfigFactory from './config/ConfigFactory';
 
 export default class Maker {
   constructor(preset, options = {}) {

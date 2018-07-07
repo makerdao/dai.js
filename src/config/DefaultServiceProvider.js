@@ -8,17 +8,17 @@ import SmartContractService from '../eth/SmartContractService';
 import GasEstimatorService from '../eth/GasEstimatorService';
 import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
 import ZeroExExchangeService from '../exchanges/zeroEx/ZeroExExchangeService';
-import TimerService from './TimerService';
+import TimerService from '../utils/TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
-import ConsoleLogger from './loggers/ConsoleLogger';
-import NullLogger from './loggers/NullLogger';
+import ConsoleLogger from '../utils/loggers/ConsoleLogger';
+import NullLogger from '../utils/loggers/NullLogger';
 import TransactionManager from '../eth/TransactionManager';
 import AllowanceService from '../eth/AllowanceService';
 import PriceService from '../eth/PriceService';
-import EventService from './events/EventService';
-import NullEventService from './events/NullEventService';
+import EventService from '../utils/events/EventService';
+import NullEventService from '../utils/events/NullEventService';
 import CacheService from '../utils/CacheService';
-import { defaultServices, standardizeConfig } from './config';
+import { defaultServices, standardizeConfig } from './index';
 
 // maps all possible services to string names, so that configs can refer to them
 // by name.
