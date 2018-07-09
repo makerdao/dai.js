@@ -2,9 +2,9 @@ import { buildTestService } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 
 async function buildTestTokenConversionService(maxAllowance = true) {
-  const service = buildTestService('conversionService', {
+  const service = buildTestService('conversion', {
     allowance: maxAllowance ? true : { useMinimizeAllowancePolicy: true },
-    conversionService: true
+    conversion: true
   });
 
   await service.manager().authenticate();

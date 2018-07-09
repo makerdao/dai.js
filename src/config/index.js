@@ -5,7 +5,7 @@ export const defaultServices = {
   allowance: 'AllowanceService',
   cache: 'CacheService',
   cdp: 'EthereumCdpService',
-  conversionService: 'TokenConversionService',
+  conversion: 'TokenConversionService',
   event: 'EventService',
   // exchange: intentionally omitted
   gasEstimator: 'GasEstimatorService',

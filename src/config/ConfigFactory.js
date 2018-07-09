@@ -13,7 +13,7 @@ class ConfigPresetNotFoundError extends Error {
 const serviceRoles = [
   'allowance',
   'cdp',
-  'conversionService',
+  'conversion',
   'exchange',
   'gasEstimator',
   'log',

@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 import { getCurrency, ETH, WETH } from './CurrencyUnits';
 
 export default class TokenConversionService extends PrivateService {
-  constructor(name = 'conversionService') {
+  constructor(name = 'conversion') {
     super(name, ['smartContract', 'token', 'allowance']);
   }
 

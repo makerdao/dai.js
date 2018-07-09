@@ -15,7 +15,7 @@ export default class EthereumCdpService extends PrivateService {
     super(name, [
       'smartContract',
       'token',
-      'conversionService',
+      'conversion',
       'transactionManager',
       'allowance',
       'price',
@@ -40,7 +40,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   _conversionService() {
-    return this.get('conversionService');
+    return this.get('conversion');
   }
 
   openCdp() {
