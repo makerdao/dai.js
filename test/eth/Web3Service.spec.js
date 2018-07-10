@@ -1,4 +1,4 @@
-import TestAccountProvider from '../../src/utils/TestAccountProvider';
+import TestAccountProvider from '../helpers/TestAccountProvider';
 import Web3ProviderType from '../../src/eth/Web3ProviderType';
 import { captureConsole } from '../../src/utils';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';

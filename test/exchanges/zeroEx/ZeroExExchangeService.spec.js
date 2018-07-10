@@ -2,7 +2,7 @@ import { buildTestService } from '../../helpers/serviceBuilders';
 import Web3ProviderType from '../../../src/eth/Web3ProviderType';
 // import Web3Service from '../../../src/eth/Web3Service';
 import tokens from '../../../contracts/tokens';
-// import testAccountProvider from '../../../src/utils/TestAccountProvider';
+// import testAccountProvider from '../../helpers/TestAccountProvider';
 // import orderStyle from '../../../src/exchanges/orderStyle';
 // import TransactionState from '../../../src/eth/TransactionState';
 // import contracts from '../../../contracts/contracts';

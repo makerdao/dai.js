@@ -3,7 +3,7 @@ import {
   buildTestService
 } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
-import TestAccountProvider from '../../src/utils/TestAccountProvider';
+import TestAccountProvider from '../helpers/TestAccountProvider';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';

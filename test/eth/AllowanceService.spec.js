@@ -1,5 +1,5 @@
 import tokens from '../../contracts/tokens';
-import TestAccountProvider from '../../src/utils/TestAccountProvider';
+import TestAccountProvider from '../helpers/TestAccountProvider';
 import { buildTestService } from '../helpers/serviceBuilders';
 import { DAI } from '../../src/eth/CurrencyUnits';
 import { UINT256_MAX } from '../../src/utils/constants';
@@ -23,7 +23,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  await dai.approve(testAddress, 0);
+  if (dai) await dai.approve(testAddress, 0);
 });
 
 test('max allowance policy, no need to update', async () => {

@@ -1,7 +1,7 @@
 import {
   default as provider,
   TestAccountProvider
-} from '../../src/utils/TestAccountProvider';
+} from '../helpers/TestAccountProvider';
 
 test('should reject illegal indices', () => {
   const msg =

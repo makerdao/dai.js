@@ -1,6 +1,6 @@
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
 import tokens from '../../../contracts/tokens';
-import TestAccountProvider from '../../../src/utils/TestAccountProvider';
+import TestAccountProvider from '../../helpers/TestAccountProvider';
 
 test('get Ether allowance returns max safe integer', done => {
   const ethereumTokenService = buildTestEthereumTokenService();

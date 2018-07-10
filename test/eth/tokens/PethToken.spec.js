@@ -1,7 +1,7 @@
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
-import TestAccountProvider from '../../../src/utils/TestAccountProvider';
+import TestAccountProvider from '../../helpers/TestAccountProvider';
 import { WETH, PETH } from '../../../src/eth/CurrencyUnits';
 
 let tokenService, owner, weth, peth;
