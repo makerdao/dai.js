@@ -7,7 +7,6 @@ import EthereumTokenService from '../eth/EthereumTokenService';
 import SmartContractService from '../eth/SmartContractService';
 import GasEstimatorService from '../eth/GasEstimatorService';
 import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
-import ZeroExExchangeService from '../exchanges/zeroEx/ZeroExExchangeService';
 import TimerService from '../utils/TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
 import ConsoleLogger from '../utils/loggers/ConsoleLogger';
@@ -33,8 +32,8 @@ const _services = {
   EthereumCdpService,
   EthereumTokenService,
   EventService,
-  NullEventService,
   GasEstimatorService,
+  NullEventService,
   NullLogger,
   OasisExchangeService,
   PriceService,
@@ -42,8 +41,7 @@ const _services = {
   TimerService,
   TokenConversionService,
   TransactionManager,
-  Web3Service,
-  ZeroExExchangeService
+  Web3Service
 };
 
 export default class DefaultServiceProvider {
@@ -67,22 +65,28 @@ export default class DefaultServiceProvider {
     const container = new Container();
 
     for (let role in this._config) {
-      const [className, settings] = standardizeConfig(role, this._config[role]);
+      const [service, settings] = standardizeConfig(role, this._config[role]);
 
-      let service;
-      if (typeof className == 'object') {
-        // assume an already-instantiated service is being passed in
-        service = className;
+      let instance;
+
+      // each config can contain a service descriptor in one of several forms:
+      if (typeof service == 'object') {
+        // instance
+        instance = service;
+      } else if (typeof service == 'function') {
+        // constructor
+        instance = new service();
       } else {
-        if (!this.supports(className)) {
-          throw new Error('Unsupported service in configuration: ' + className);
+        // string
+        if (!this.supports(service)) {
+          throw new Error('Unsupported service in configuration: ' + service);
         }
 
-        service = new _services[className]();
+        instance = new _services[service]();
       }
 
-      service.manager().settings(settings);
-      container.register(service, role);
+      instance.manager().settings(settings);
+      container.register(instance, role);
     }
 
     this._registerDependencies(container);

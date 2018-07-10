@@ -54,7 +54,7 @@ export function standardizeConfig(role, config, resolveDefaults = true) {
       // handle a settings object -- use the default version
       className = resolveDefaults ? defaultServices[role] : true;
       settings = config;
-      // TODO could also handle a service instance here
+      // TODO could also handle a service instance or constructor here
       break;
     case 'boolean':
       className = resolveDefaults
