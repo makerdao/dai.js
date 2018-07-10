@@ -8,7 +8,7 @@ export default class Maker {
     this._container = new DefaultServiceProvider(
       config.services
     ).buildContainer();
-    this._authenticatedPromise = this._container.authenticate();
+    if (options.autoAuthenticate !== false) this.authenticate();
   }
 
   _validateCdp(cdpId) {
@@ -37,6 +37,9 @@ export default class Maker {
   }
 
   authenticate() {
+    if (!this._authenticatedPromise) {
+      this._authenticatedPromise = this._container.authenticate();
+    }
     return this._authenticatedPromise;
   }
 
