@@ -1,109 +1,71 @@
 import { buildTestEthereumTokenService } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
+import { MKR } from '../../src/eth/Currency';
 
-test('getTokens returns tokens', done => {
-  const ethereumTokenService = buildTestEthereumTokenService();
+let ethereumTokenService;
 
-  ethereumTokenService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const tokensList = ethereumTokenService.getTokens();
-      expect(tokensList.includes(tokens.DAI)).toBe(true);
-      expect(tokensList.includes(tokens.MKR)).toBe(true);
-      done();
-    });
+beforeAll(async () => {
+  ethereumTokenService = buildTestEthereumTokenService();
+  await ethereumTokenService.manager().authenticate();
 });
 
-test('getTokenVersions returns token versions using remote blockchain', done => {
-  const ethereumTokenService = buildTestEthereumTokenService();
-
-  ethereumTokenService
-    .manager()
-    .authenticate()
-    .then(() => {
-      const tokenVersions = ethereumTokenService.getTokenVersions();
-
-      expect(tokenVersions[tokens.MKR]).toEqual([1, 2]);
-      expect(tokenVersions[tokens.DAI]).toEqual([1]);
-      expect(tokenVersions[tokens.ETH]).toEqual([1]);
-
-      expect(
-        ethereumTokenService
-          .getToken(tokens.MKR)
-          ._contract.getAddress()
-          .toUpperCase()
-      ).toBe(
-        ethereumTokenService
-          .getToken(tokens.MKR, 2)
-          ._contract.getAddress()
-          .toUpperCase()
-      );
-      done();
-    });
+test('getTokens returns tokens', () => {
+  const tokensList = ethereumTokenService.getTokens();
+  expect(tokensList.includes(tokens.DAI)).toBe(true);
+  expect(tokensList.includes(tokens.MKR)).toBe(true);
 });
 
-test('getToken returns token object of correct version', done => {
-  const ethereumTokenService = buildTestEthereumTokenService();
+test('getTokenVersions returns token versions using remote blockchain', () => {
+  const tokenVersions = ethereumTokenService.getTokenVersions();
 
-  ethereumTokenService
-    .manager()
-    .authenticate()
-    .then(() => {
-      expect(
-        ethereumTokenService
-          .getToken(tokens.MKR)
-          ._contract.getAddress()
-          .toUpperCase()
-      ).toBe(
-        ethereumTokenService
-          .getToken(tokens.MKR, 2)
-          ._contract.getAddress()
-          .toUpperCase()
-      );
+  expect(tokenVersions[tokens.MKR]).toEqual([1, 2]);
+  expect(tokenVersions[tokens.DAI]).toEqual([1]);
+  expect(tokenVersions[tokens.ETH]).toEqual([1]);
 
-      expect(
-        ethereumTokenService
-          .getToken(tokens.MKR)
-          ._contract.getAddress()
-          .toUpperCase()
-      ).not.toBe(
-        ethereumTokenService
-          .getToken(tokens.MKR, 1)
-          ._contract.getAddress()
-          .toUpperCase()
-      );
-
-      done();
-    });
+  expect(
+    ethereumTokenService
+      .getToken(tokens.MKR)
+      ._contract.getAddress()
+      .toUpperCase()
+  ).toBe(
+    ethereumTokenService
+      .getToken(tokens.MKR, 2)
+      ._contract.getAddress()
+      .toUpperCase()
+  );
 });
 
-test('getToken throws when given unknown token symbol', done => {
-  const ethereumTokenService = buildTestEthereumTokenService();
+test('getToken returns token object of correct version', () => {
+  expect(
+    ethereumTokenService
+      .getToken(tokens.MKR)
+      ._contract.getAddress()
+      .toUpperCase()
+  ).toBe(
+    ethereumTokenService
+      .getToken(tokens.MKR, 2)
+      ._contract.getAddress()
+      .toUpperCase()
+  );
 
-  ethereumTokenService
-    .manager()
-    .authenticate()
-    .then(() => {
-      expect(() => ethereumTokenService.getToken('XYZ')).toThrow();
-      done();
-    });
+  expect(
+    ethereumTokenService
+      .getToken(tokens.MKR)
+      ._contract.getAddress()
+      .toUpperCase()
+  ).not.toBe(
+    ethereumTokenService
+      .getToken(tokens.MKR, 1)
+      ._contract.getAddress()
+      .toUpperCase()
+  );
 });
-/*
-test('approve DAI to Oasis', (done) => setTimeout(() => {
-  const web3 = Web3Service.buildInfuraService('kovan', '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700'),
-    smartContract = buildTestSmartContractService(web3),
-    ethereumTokenService = buildTestEthereumTokenService(smartContract);
 
-  ethereumTokenService.manager().authenticate()
-    .then(() => {
-      const token = ethereumTokenService.getToken(tokens.DAI),
-        makerOtcAddress = ethereumTokenService.get('smartContract').getContractByName(contracts.MAKER_OTC).getAddress();
-      return token.approveUnlimited(makerOtcAddress);
-    })
-    .then(transaction =>{
-      expect(!!transaction).toBe(true);
-      done();
-    });
+test('getToken throws when given unknown token symbol', () => {
+  expect(() => ethereumTokenService.getToken('XYZ')).toThrow();
+});
 
-}, 15000), 30000);*/
+test('getToken works with Currency', () => {
+  const token = ethereumTokenService.getToken(MKR);
+  expect(token.symbol).toBe('MKR');
+});

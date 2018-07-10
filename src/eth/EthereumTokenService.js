@@ -32,6 +32,9 @@ export default class EthereumTokenService extends PrivateService {
   }
 
   getToken(symbol, version = null) {
+    // support passing in Currency constructors
+    if (symbol.symbol) symbol = symbol.symbol;
+
     if (this.getTokens().indexOf(symbol) < 0) {
       throw new Error('provided token is not a symbol');
     }
