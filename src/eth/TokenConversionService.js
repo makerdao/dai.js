@@ -1,7 +1,7 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import { getCurrency, ETH, WETH } from './CurrencyUnits';
+import { getCurrency, ETH, WETH } from './Currency';
 
 export default class TokenConversionService extends PrivateService {
   constructor(name = 'conversion') {

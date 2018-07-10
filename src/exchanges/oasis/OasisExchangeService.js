@@ -5,7 +5,7 @@ import TransactionObject from '../../eth/TransactionObject';
 import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import { UINT256_MAX } from '../../utils/constants';
-import { DAI } from '../../eth/CurrencyUnits';
+import { DAI } from '../../eth/Currency';
 
 export default class OasisExchangeService extends PrivateService {
   constructor(name = 'exchange') {

@@ -1,4 +1,4 @@
-import { currencies, getCurrency } from '../CurrencyUnits';
+import { currencies, getCurrency } from '../Currency';
 
 export default class Erc20Token {
   constructor(

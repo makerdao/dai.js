@@ -4,7 +4,7 @@ import { RAY } from '../utils/constants';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
 import util from 'ethereumjs-util';
-import { getCurrency, ETH, PETH, MKR } from './CurrencyUnits';
+import { getCurrency, ETH, PETH, MKR } from './Currency';
 
 export default class PriceService extends PrivateService {
   /**

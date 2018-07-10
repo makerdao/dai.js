@@ -1,5 +1,5 @@
 import Erc20Token from './Erc20Token';
-import { WETH } from '../CurrencyUnits';
+import { WETH } from '../Currency';
 
 export default class PethToken extends Erc20Token {
   constructor(contract, web3Service, transactionManager, tub) {

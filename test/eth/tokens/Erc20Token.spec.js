@@ -1,7 +1,7 @@
 import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
-import { MKR } from '../../../src/eth/CurrencyUnits';
+import { MKR } from '../../../src/eth/Currency';
 import { UINT256_MAX } from '../../../src/utils/constants';
 
 let tokenService, mkr, weth, defaultAccount, testAddress;

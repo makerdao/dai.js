@@ -4,7 +4,7 @@ import Cdp from './Cdp';
 import tokens from '../../contracts/tokens';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
-import { getCurrency, DAI, ETH, PETH, WETH } from './CurrencyUnits';
+import { getCurrency, DAI, ETH, PETH, WETH } from './Currency';
 import { numberToBytes32 } from '../utils/conversion';
 
 export default class EthereumCdpService extends PrivateService {

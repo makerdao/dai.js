@@ -5,7 +5,7 @@ import {
   WETH,
   DAI,
   MKR
-} from '../../src/eth/CurrencyUnits';
+} from '../../src/eth/Currency';
 
 test('parses an amount and currency symbol', () => {
   expect(getCurrency(1, 'dai').toString()).toBe('1.00 DAI');

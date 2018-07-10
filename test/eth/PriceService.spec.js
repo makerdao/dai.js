@@ -1,5 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
-import { Currency, ETH } from '../../src/eth/CurrencyUnits';
+import { Currency, ETH } from '../../src/eth/Currency';
 
 function buildTestPriceService() {
   return buildTestService('price', { price: true });

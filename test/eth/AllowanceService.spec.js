@@ -1,7 +1,7 @@
 import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import { buildTestService } from '../helpers/serviceBuilders';
-import { DAI } from '../../src/eth/CurrencyUnits';
+import { DAI } from '../../src/eth/Currency';
 import { UINT256_MAX } from '../../src/utils/constants';
 
 let dai, testAddress, allowanceService, owner;
