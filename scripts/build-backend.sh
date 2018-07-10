@@ -19,7 +19,7 @@ copyfiles \
   npm-shrinkwrap.json \
   contracts/abi/**/* \
   contracts/abi/dai/**/* \
-  src/utils/configs/* \
+  src/config/presets/* \
   contracts/addresses/daiV1.json \
   contracts/addresses/exchanges.json \
   dist
