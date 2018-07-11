@@ -1,5 +1,5 @@
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
-import tokens from '../../../contracts/tokens';
+import { ETH } from '../../../src/eth/Currency';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 
 test('get Ether allowance returns max safe integer', done => {
@@ -8,7 +8,7 @@ test('get Ether allowance returns max safe integer', done => {
     .manager()
     .authenticate()
     .then(() => {
-      const token = ethereumTokenService.getToken(tokens.ETH);
+      const token = ethereumTokenService.getToken(ETH);
       return token.allowance(
         TestAccountProvider.nextAddress(),
         TestAccountProvider.nextAddress()
@@ -27,7 +27,7 @@ test('get Ether balance using test blockchain', done => {
     .manager()
     .authenticate()
     .then(() => {
-      const token = ethereumTokenService.getToken(tokens.ETH);
+      const token = ethereumTokenService.getToken(ETH);
       return token.balanceOf(TestAccountProvider.nextAddress());
     })
     .then(balance => {
@@ -45,7 +45,7 @@ test('approve and approveUnlimited should resolve to true', done => {
     .manager()
     .authenticate()
     .then(() => {
-      token = ethereumTokenService.getToken(tokens.ETH);
+      token = ethereumTokenService.getToken(ETH);
       return token.approve(TestAccountProvider.nextAddress(), '0.1');
     })
     .then(result => {
@@ -74,7 +74,7 @@ test(
       .authenticate()
       .then(() => {
         sender = ethereumTokenService.get('web3').defaultAccount();
-        token = ethereumTokenService.getToken(tokens.ETH);
+        token = ethereumTokenService.getToken(ETH);
         return Promise.all([
           token.balanceOf(sender),
           token.balanceOf(receiver)
@@ -115,7 +115,7 @@ test(
       .authenticate()
       .then(() => {
         sender = ethereumTokenService.get('web3').defaultAccount();
-        token = ethereumTokenService.getToken(tokens.ETH);
+        token = ethereumTokenService.getToken(ETH);
         return Promise.all([
           token.balanceOf(sender),
           token.balanceOf(receiver)

@@ -1,6 +1,6 @@
-import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
+import { DAI, WETH } from '../../../src/eth/Currency';
 
 function buildTestOasisExchangeService() {
   return buildTestService('exchange', { exchange: 'OasisExchangeService' });
@@ -11,8 +11,8 @@ const utils = require('ethers').utils;
 function _placeLimitOrder(oasisExchangeService, sellDai) {
   let ethereumTokenService = null;
   ethereumTokenService = oasisExchangeService.get('token');
-  const wethToken = ethereumTokenService.getToken(tokens.WETH);
-  const daiToken = ethereumTokenService.getToken(tokens.DAI);
+  const wethToken = ethereumTokenService.getToken(WETH);
+  const daiToken = ethereumTokenService.getToken(DAI);
   return wethToken
     .deposit('1')
     .onMined()
@@ -34,7 +34,7 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
     })
     .then(() => {
       const wethAddress = wethToken.address();
-      const daiAddress = ethereumTokenService.getToken(tokens.DAI).address();
+      const daiAddress = ethereumTokenService.getToken(DAI).address();
       const overrideOptions = { gasLimit: 5500000 };
       if (sellDai) {
         return oasisExchangeService.offer(
@@ -86,7 +86,7 @@ function createDaiAndPlaceLimitOrder(oasisExchangeService, sellDai = false) {
           newCdp.getInfo(),
           createdCdpService
             .get('token')
-            .getToken(tokens.DAI)
+            .getToken(DAI)
             .balanceOf(defaultAccount)
         ]);
       })
@@ -112,7 +112,7 @@ function createDaiAndPlaceLimitOrder(oasisExchangeService, sellDai = false) {
           newCdp.getInfo(),
           createdCdpService
             .get('token')
-            .getToken(tokens.DAI)
+            .getToken(DAI)
             .balanceOf(defaultAccount)
         ])
       )
@@ -152,14 +152,14 @@ test('sell Dai, console log the balances (used for debugging)', done => {
     })
     .then(() => {
       const ethereumTokenService = oasisExchangeService.get('token');
-      daiToken = ethereumTokenService.getToken(tokens.DAI);
+      daiToken = ethereumTokenService.getToken(DAI);
       return daiToken.balanceOf(
         oasisExchangeService.get('web3').defaultAccount()
       );
     })
     .then(balance => {
       initialBalance = balance;
-      const wethToken = oasisExchangeService.get('token').getToken(tokens.WETH);
+      const wethToken = oasisExchangeService.get('token').getToken(WETH);
       return wethToken.balanceOf(
         oasisExchangeService.get('web3').defaultAccount()
       );
@@ -180,17 +180,17 @@ test('sell Dai, console log the balances (used for debugging)', done => {
       );
     })
     .then(() => {
-      oasisOrder = oasisExchangeService.sellDai('0.01', tokens.WETH);
+      oasisOrder = oasisExchangeService.sellDai('0.01', WETH);
       return oasisOrder;
     })
     .then(() => {
       const ethereumTokenService = oasisExchangeService.get('token');
-      const token = ethereumTokenService.getToken(tokens.WETH);
+      const token = ethereumTokenService.getToken(WETH);
       return token.balanceOf(oasisExchangeService.get('web3').defaultAccount());
     })
     .then(() => {
       const ethereumTokenService = oasisExchangeService.get('token');
-      const token = ethereumTokenService.getToken(tokens.DAI);
+      const token = ethereumTokenService.getToken(DAI);
       return token.balanceOf(oasisExchangeService.get('web3').defaultAccount());
     })
     .then(balance => {
@@ -208,7 +208,7 @@ test('get fees and fillAmount sell Dai', done => {
       return createDaiAndPlaceLimitOrder(oasisExchangeService);
     })
     .then(() => {
-      return oasisExchangeService.sellDai('0.01', tokens.WETH);
+      return oasisExchangeService.sellDai('0.01', WETH);
     })
     .then(order => {
       expect(parseFloat(order.fees(), 10)).toBeGreaterThan(0);
@@ -226,7 +226,7 @@ test('get fees and fillAmount buy Dai', done => {
       return createDaiAndPlaceLimitOrder(oasisService, true);
     })
     .then(() => {
-      return oasisService.buyDai('0.01', tokens.WETH);
+      return oasisService.buyDai('0.01', WETH);
     })
     .then(oasisOrder => {
       expect(parseFloat(oasisOrder.fees(), 10)).toBeGreaterThan(0);

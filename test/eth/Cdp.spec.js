@@ -1,5 +1,5 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
-import tokens from '../../contracts/tokens';
+import { DAI, PETH, WETH } from '../../src/eth/Currency';
 
 let cdpService, cdp, defaultAccount, dai;
 
@@ -10,7 +10,7 @@ beforeAll(async () => {
     .get('token')
     .get('web3')
     .defaultAccount();
-  dai = cdpService.get('token').getToken(tokens.DAI);
+  dai = cdpService.get('token').getToken(DAI);
 });
 
 async function openCdp() {
@@ -51,8 +51,8 @@ describe('weth and peth', () => {
 
   beforeAll(() => {
     const tokenService = cdpService.get('token');
-    wethToken = tokenService.getToken(tokens.WETH);
-    pethToken = tokenService.getToken(tokens.PETH);
+    wethToken = tokenService.getToken(WETH);
+    pethToken = tokenService.getToken(PETH);
   });
 
   afterAll(async () => {

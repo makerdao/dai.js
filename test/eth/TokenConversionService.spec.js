@@ -1,5 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
-import tokens from '../../contracts/tokens';
+import { ETH, PETH, WETH } from '../../src/eth/Currency';
 
 async function buildTestTokenConversionService(maxAllowance = true) {
   const service = buildTestService('conversion', {
@@ -16,8 +16,8 @@ test('should convert eth to weth', async () => {
   const conversionService = await buildTestTokenConversionService();
   const tokenService = conversionService.get('token');
   owner = tokenService.get('web3').defaultAccount();
-  token = tokenService.getToken(tokens.WETH);
-  eth = tokenService.getToken(tokens.ETH);
+  token = tokenService.getToken(WETH);
+  eth = tokenService.getToken(ETH);
 
   initialEthBalance = parseFloat(await eth.balanceOf(owner));
   initialBalance = parseFloat(await token.balanceOf(owner));
@@ -34,7 +34,7 @@ test('should convert weth to peth', async () => {
   const conversionService = await buildTestTokenConversionService(false);
   const tokenService = conversionService.get('token');
   const owner = tokenService.get('web3').defaultAccount();
-  const token = tokenService.getToken(tokens.PETH);
+  const token = tokenService.getToken(PETH);
 
   const initialBalance = parseFloat(await token.balanceOf(owner));
   await conversionService.convertEthToWeth('0.1');
@@ -52,7 +52,7 @@ test('should convert eth to peth', async done => {
     .then(() => {
       const tokenService = conversionService.get('token');
       const owner = tokenService.get('web3').defaultAccount();
-      const token = tokenService.getToken(tokens.PETH);
+      const token = tokenService.getToken(PETH);
 
       token
         .balanceOf(owner)

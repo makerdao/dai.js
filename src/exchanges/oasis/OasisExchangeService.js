@@ -2,10 +2,9 @@ import PrivateService from '../../core/PrivateService';
 import OasisSellOrder from './OasisSellOrder';
 import OasisBuyOrder from './OasisBuyOrder';
 import TransactionObject from '../../eth/TransactionObject';
-import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import { UINT256_MAX } from '../../utils/constants';
-import { DAI } from '../../eth/Currency';
+import { DAI, WETH } from '../../eth/Currency';
 
 export default class OasisExchangeService extends PrivateService {
   constructor(name = 'exchange') {
@@ -30,7 +29,7 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    const daiToken = this.get('token').getToken(tokens.DAI);
+    const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
     const buyTokenAddress = this.get('token')
       .getToken(tokenSymbol)
@@ -38,7 +37,7 @@ minFillAmount: minimum amount of token being bought required.  If this can't be 
     const daiAmountEVM = DAI(daiAmount).toEthersBigNumber('wei');
     const minFillAmountEVM = DAI(minFillAmount).toEthersBigNumber('wei');
     return this.get('allowance')
-      .requireAllowance(tokens.DAI, oasisContract.getAddress())
+      .requireAllowance(DAI, oasisContract.getAddress())
       .then(() =>
         OasisSellOrder.buildOasisSellOrder(
           oasisContract,
@@ -63,7 +62,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    const daiToken = this.get('token').getToken(tokens.DAI);
+    const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
     const daiAmountEVM = DAI(daiAmount).toEthersBigNumber('wei');
     const maxFillAmountEVM = DAI(maxFillAmount).toEthersBigNumber('wei');
@@ -71,7 +70,7 @@ maxFillAmount: If the trade can't be done without selling more than the maxFillA
       .getToken(tokenSymbol)
       .address();
     return this.get('allowance')
-      .requireAllowance(tokens.WETH, oasisContract.getAddress())
+      .requireAllowance(WETH, oasisContract.getAddress())
       .then(() =>
         OasisBuyOrder.buildOasisBuyOrder(
           oasisContract,

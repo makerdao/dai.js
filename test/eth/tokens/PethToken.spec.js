@@ -1,5 +1,4 @@
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
-import tokens from '../../../contracts/tokens';
 import contracts from '../../../contracts/contracts';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import { WETH, PETH } from '../../../src/eth/Currency';
@@ -10,8 +9,8 @@ beforeAll(async () => {
   tokenService = buildTestEthereumTokenService();
   await tokenService.manager().authenticate();
   owner = tokenService.get('web3').defaultAccount();
-  weth = tokenService.getToken(tokens.WETH);
-  peth = tokenService.getToken(tokens.PETH);
+  weth = tokenService.getToken(WETH);
+  peth = tokenService.getToken(PETH);
 });
 
 test('get PETH balance of address', async () => {

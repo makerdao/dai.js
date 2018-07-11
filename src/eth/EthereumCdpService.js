@@ -1,10 +1,9 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
-import tokens from '../../contracts/tokens';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
-import { getCurrency, DAI, ETH, PETH, WETH } from './Currency';
+import { getCurrency, DAI, ETH, PETH, WETH, MKR } from './Currency';
 import { numberToBytes32 } from '../utils/conversion';
 
 export default class EthereumCdpService extends PrivateService {
@@ -52,11 +51,11 @@ export default class EthereumCdpService extends PrivateService {
 
     return Promise.all([
       this.get('allowance').requireAllowance(
-        tokens.MKR,
+        MKR,
         this._tubContract().getAddress()
       ),
       this.get('allowance').requireAllowance(
-        tokens.DAI,
+        DAI,
         this._tubContract().getAddress()
       )
     ]).then(() => {
@@ -84,7 +83,7 @@ export default class EthereumCdpService extends PrivateService {
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     await this.get('allowance').requireAllowance(
-      tokens.PETH,
+      PETH,
       this._tubContract().getAddress()
     );
     return this._transactionManager().createTransactionHybrid(
@@ -116,11 +115,11 @@ export default class EthereumCdpService extends PrivateService {
 
     await Promise.all([
       this.get('allowance').requireAllowance(
-        tokens.MKR,
+        MKR,
         this._tubContract().getAddress()
       ),
       this.get('allowance').requireAllowance(
-        tokens.DAI,
+        DAI,
         this._tubContract().getAddress()
       )
     ]);
@@ -284,7 +283,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async getSystemCollateralization() {
-    const dai = this.get('token').getToken(tokens.DAI);
+    const dai = this.get('token').getToken(DAI);
     const [
       _totalWethLocked,
       wethPrice,

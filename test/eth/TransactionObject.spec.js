@@ -2,11 +2,11 @@ import {
   buildTestEthereumTokenService,
   buildTestService
 } from '../helpers/serviceBuilders';
-import tokens from '../../contracts/tokens';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';
+import { WETH } from '../../src/eth/Currency';
 
 let service;
 
@@ -16,7 +16,7 @@ beforeAll(() => {
 });
 
 function createTestTransaction(srv = service) {
-  const wethToken = srv.getToken(tokens.WETH);
+  const wethToken = srv.getToken(WETH);
   return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
 }
 

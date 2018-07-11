@@ -1,7 +1,6 @@
-import tokens from '../../../contracts/tokens';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
-import { MKR } from '../../../src/eth/Currency';
+import { MKR, WETH } from '../../../src/eth/Currency';
 import { UINT256_MAX } from '../../../src/utils/constants';
 
 let tokenService, mkr, weth, defaultAccount, testAddress;
@@ -9,8 +8,8 @@ let tokenService, mkr, weth, defaultAccount, testAddress;
 beforeAll(async () => {
   tokenService = buildTestEthereumTokenService();
   await tokenService.manager().authenticate();
-  mkr = tokenService.getToken(tokens.MKR);
-  weth = tokenService.getToken(tokens.WETH);
+  mkr = tokenService.getToken(MKR);
+  weth = tokenService.getToken(WETH);
   defaultAccount = tokenService.get('web3').defaultAccount();
 });
 

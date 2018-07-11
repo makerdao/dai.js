@@ -1,6 +1,5 @@
 import './index.scss';
-import Maker from '../src/Maker';
-import tokens from '../contracts/tokens';
+import Maker, { DAI } from '../src';
 import Vue from 'vue';
 import MakerDebugger from '../components/MakerDebugger.vue';
 
@@ -10,7 +9,7 @@ function updateInfo(cdp) {
     cdp.getInfo(),
     window.maker
       .service('token')
-      .getToken(tokens.DAI)
+      .getToken(DAI)
       .balanceOf(window.maker.service('web3').defaultAccount())
   ]).then(() => {
     /*
