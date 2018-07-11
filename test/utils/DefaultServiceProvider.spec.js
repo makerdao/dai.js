@@ -1,5 +1,6 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import config from '../../src/config/presets/decentralized-oasis-without-proxies';
+import LocalService from '../../src/core/LocalService';
 
 test('Should support services in mapping', () => {
   expect(new DefaultServiceProvider().supports('SmartContractService')).toBe(
@@ -44,4 +45,18 @@ test('Should throw an error when passing a config with unsupported service', () 
   expect(() =>
     new DefaultServiceProvider(servicesCopy).buildContainer()
   ).toThrow('Unsupported service in configuration: DoesNotExist');
+});
+
+test('constructor in config', () => {
+  class FakeService extends LocalService {
+    constructor(name = 'timer') {
+      super(name);
+    }
+  }
+
+  const container = new DefaultServiceProvider({
+    timer: FakeService
+  }).buildContainer();
+
+  expect(container.service('timer') instanceof FakeService).toBeTruthy();
 });

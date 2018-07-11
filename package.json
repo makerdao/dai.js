@@ -87,15 +87,11 @@
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
-    "0x.js": "^0.37.2",
-    "@0xproject/connect": "^0.6.12",
-    "@0xproject/subproviders": "^0.10.1",
     "babel-polyfill": "^6.26.0",
     "bignumber.js": "^7.2.1",
     "bunyan": "^1.8.12",
     "chalk": "^2.4.1",
     "debug": "^3.1.0",
-    "ethereumjs-util": "^5.2.0",
     "ethers": "^3.0.15",
     "ethers-web3-bridge": "0.0.1",
     "eventemitter2": "^5.0.1",
@@ -105,8 +101,7 @@
     "lodash.uniq": "^4.5.0",
     "lodash.values": "^4.3.0",
     "toposort": "^2.0.2",
-    "web3": "^0.20.6",
-    "web3-provider-engine": "14.0.4"
+    "web3": "^0.20.6"
   },
   "jest": {
     "coverageReporters": [

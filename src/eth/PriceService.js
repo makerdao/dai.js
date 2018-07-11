@@ -3,7 +3,6 @@ import contracts from '../../contracts/contracts';
 import { RAY } from '../utils/constants';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
-import util from 'ethereumjs-util';
 import { getCurrency, ETH, PETH, MKR } from './Currency';
 
 export default class PriceService extends PrivateService {
@@ -34,12 +33,8 @@ export default class PriceService extends PrivateService {
   }
 
   _valueForContract(value, unit) {
-    return util.bufferToHex(
-      util.setLengthLeft(
-        utils.hexlify(getCurrency(value, unit).toEthersBigNumber('wei')),
-        32
-      )
-    );
+    const bn = getCurrency(value, unit).toEthersBigNumber('wei');
+    return utils.hexlify(utils.padZeros(bn, 32));
   }
 
   getWethToPethRatio() {

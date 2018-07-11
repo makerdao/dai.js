@@ -81,4 +81,9 @@ test('_valueForContract', async () => {
   expect(value).toBe(
     '0x00000000000000000000000000000000000000000000000254beb02d1dcc0000'
   );
+
+  const value2 = service._valueForContract('78901', ETH);
+  expect(value2).toBe(
+    '0x0000000000000000000000000000000000000000000010b53b55f895f7b40000'
+  );
 });

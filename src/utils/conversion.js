@@ -1,14 +1,8 @@
 import { utils as ethersUtils } from 'ethers';
 
 export function numberToBytes32(num) {
-  return (
-    '0x' +
-    ethersUtils
-      .bigNumberify(num)
-      .toHexString()
-      .substring(2)
-      .padStart(64, '0')
-  );
+  const bn = ethersUtils.bigNumberify(num);
+  return ethersUtils.hexlify(ethersUtils.padZeros(bn, 32));
 }
 
 export function bytes32ToNumber(bytes32) {
