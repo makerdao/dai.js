@@ -50,6 +50,11 @@ export function standardizeConfig(role, config, resolveDefaults = true) {
       className = config;
       settings = {};
       break;
+    case 'function':
+      // handle a service constructor
+      className = config;
+      settings = {};
+      break;
     case 'object':
       // handle a settings object -- use the default version
       className = resolveDefaults ? defaultServices[role] : true;
