@@ -1,4 +1,3 @@
-import '../polyfills';
 import { promiseWait } from '../utils';
 import { utils } from 'ethers';
 import TransactionLifeCycle from '../eth/TransactionLifeCycle';

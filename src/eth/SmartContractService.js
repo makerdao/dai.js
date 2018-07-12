@@ -4,7 +4,6 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
-import '../polyfills';
 import SmartContractInspector from './SmartContractInspector';
 
 export default class SmartContractService extends PublicService {
