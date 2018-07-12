@@ -46,7 +46,7 @@ test('event listeners work as promises', async () => {
 
 test('get fees', async () => {
   const tx = await createTestTransaction().mine();
-  expect(tx.fees()).toEqual(ETH.wei(32222));
+  expect(tx.fees().gt(ETH.wei(20000))).toBeTruthy();
 });
 
 test('event listeners work as callbacks', async () => {
