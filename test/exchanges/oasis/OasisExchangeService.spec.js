@@ -1,9 +1,15 @@
 import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
-import { DAI, WETH } from '../../../src/eth/Currency';
+import { DAI, ETH, WETH } from '../../../src/eth/Currency';
 
-function buildTestOasisExchangeService() {
-  return buildTestService('exchange', { exchange: 'OasisExchangeService' });
+let oasisExchangeService;
+
+async function buildTestOasisExchangeService() {
+  oasisExchangeService = buildTestService('exchange', {
+    exchange: 'OasisExchangeService'
+  });
+  await oasisExchangeService.manager().authenticate();
+  return oasisExchangeService;
 }
 
 const utils = require('ethers').utils;
@@ -68,79 +74,26 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
     });
 }
 
-function createDaiAndPlaceLimitOrder(oasisExchangeService, sellDai = false) {
-  let newCdp, firstInkBalance, firstDaiBalance, defaultAccount;
-  let createdCdpService = oasisExchangeService.get('cdp');
-  return (
-    createdCdpService
-      .openCdp()
-      .onMined()
-      .then(cdp => {
-        defaultAccount = createdCdpService
-          .get('token')
-          .get('web3')
-          .defaultAccount();
-        //console.log('defaultAccount', defaultAccount);
-        newCdp = cdp;
-        return Promise.all([
-          newCdp.getInfo(),
-          createdCdpService
-            .get('token')
-            .getToken(DAI)
-            .balanceOf(defaultAccount)
-        ]);
-      })
-      .then(info => {
-        firstInkBalance = parseFloat(info[0].ink);
-        firstDaiBalance = parseFloat(info[1].toString());
-        //console.log('firstInk', firstInkBalance, 'firstDai', firstDaiBalance);
-        return newCdp.lockEth('0.1').then(txn => txn.onMined());
-      })
-
-      //.then(() => createdCdpService.get('smartContract').getContractState(contracts.SAI_TUB, 5, true, []))
-      //.then(tub => console.log(tub))
-      .then(() => newCdp.getInfo())
-      .then(info => {
-        //console.log(info);
-        expect(parseFloat(info.ink)).toBeCloseTo(
-          firstInkBalance + 100000000000000000
-        );
-        return newCdp.drawDai('1').then(txn => txn.onMined());
-      })
-      .then(() =>
-        Promise.all([
-          newCdp.getInfo(),
-          createdCdpService
-            .get('token')
-            .getToken(DAI)
-            .balanceOf(defaultAccount)
-        ])
-      )
-      .then(result => {
-        //console.log(result);
-        expect(parseFloat(result[1].toString())).toBeCloseTo(
-          firstDaiBalance + 1.0
-        );
-        return _placeLimitOrder(oasisExchangeService, sellDai);
-      })
-  );
+async function createDaiAndPlaceLimitOrder(
+  oasisExchangeService,
+  sellDai = false
+) {
+  const cdp = await oasisExchangeService.get('cdp').openCdp();
+  await cdp.lockEth(0.1);
+  await cdp.drawDai(1);
+  return _placeLimitOrder(oasisExchangeService, sellDai);
 }
 
-test('sell Dai, console log the balances (used for debugging)', done => {
-  const oasisExchangeService = buildTestOasisExchangeService();
-  let oasisOrder = null;
+test('sell Dai, console log the balances (used for debugging)', async done => {
+  const oasisExchangeService = await buildTestOasisExchangeService();
+  let order = null;
   /* eslint-disable-next-line */
   let initialBalance;
   /* eslint-disable-next-line */
   let finalBalance;
   let daiToken = null;
 
-  oasisExchangeService
-    .manager()
-    .authenticate()
-    .then(() => {
-      return createDaiAndPlaceLimitOrder(oasisExchangeService);
-    })
+  return createDaiAndPlaceLimitOrder(oasisExchangeService)
     .then(() => {
       const oasisContract = oasisExchangeService
         .get('smartContract')
@@ -180,8 +133,8 @@ test('sell Dai, console log the balances (used for debugging)', done => {
       );
     })
     .then(() => {
-      oasisOrder = oasisExchangeService.sellDai('0.01', WETH);
-      return oasisOrder;
+      order = oasisExchangeService.sellDai('0.01', WETH);
+      return order;
     })
     .then(() => {
       const ethereumTokenService = oasisExchangeService.get('token');
@@ -199,46 +152,34 @@ test('sell Dai, console log the balances (used for debugging)', done => {
     });
 });
 
-test('get fees and fillAmount sell Dai', done => {
-  const oasisExchangeService = buildTestOasisExchangeService();
-  oasisExchangeService
-    .manager()
-    .authenticate()
-    .then(() => {
-      return createDaiAndPlaceLimitOrder(oasisExchangeService);
-    })
-    .then(() => {
-      return oasisExchangeService.sellDai('0.01', WETH);
-    })
-    .then(order => {
-      expect(parseFloat(order.fees(), 10)).toBeGreaterThan(0);
-      expect(parseFloat(order.fillAmount(), 10)).toBeGreaterThan(0);
-      done();
-    });
+test('sell Dai', async () => {
+  const oasisExchangeService = await buildTestOasisExchangeService();
+  await createDaiAndPlaceLimitOrder(oasisExchangeService);
+  const order = await oasisExchangeService.sellDai('0.01', WETH);
+  expect(order.fees()).toEqual(ETH.wei(93317));
+  expect(order.fillAmount()).toEqual(DAI(0.0005));
 });
 
-test('get fees and fillAmount buy Dai', done => {
-  const oasisService = buildTestOasisExchangeService();
-  oasisService
-    .manager()
-    .authenticate()
-    .then(() => {
-      return createDaiAndPlaceLimitOrder(oasisService, true);
-    })
-    .then(() => {
-      return oasisService.buyDai('0.01', WETH);
-    })
-    .then(oasisOrder => {
-      expect(parseFloat(oasisOrder.fees(), 10)).toBeGreaterThan(0);
-      expect(parseFloat(oasisOrder.fillAmount(), 10)).toBeGreaterThan(0);
-      done();
-    });
+test('buy Dai', async () => {
+  const oasisService = await buildTestOasisExchangeService();
+  await createDaiAndPlaceLimitOrder(oasisService, true);
+  const order = await oasisService.buyDai('0.01', WETH);
+  expect(order.fees()).toEqual(ETH.wei(95932));
+  expect(order.fillAmount()).toEqual(DAI(0.04));
 });
 
-/* commenting out until we fix explicit state transations for oasisOrder objects
+test('buy Dai with wei amount', async () => {
+  const oasisService = await buildTestOasisExchangeService();
+  await createDaiAndPlaceLimitOrder(oasisService, true);
+  const order = await oasisService.buyDai(DAI.wei(10000000000000000), WETH);
+  expect(order.fees()).toEqual(ETH.wei(95932));
+  expect(order.fillAmount()).toEqual(DAI(0.04));
+});
+
+/* commenting out until we fix explicit state transations for order objects
 test('OasisOrder properly finalizes', done => {
   const oasisService = buildTestOasisExchangeService();
-  let oasisOrder = null;
+  let order = null;
   let daiToken = null;
   let randomAddress = TestAccountProvider.nextAddress();
   let order = null;
@@ -252,9 +193,9 @@ test('OasisOrder properly finalizes', done => {
       return daiToken.approveUnlimited(oasisContract.getAddress()).onMined();
     })
     .then(() => {
-      oasisOrder = oasisService.sellDai('0.01', tokens.WETH);
-      order = oasisOrder;
-      return oasisOrder.onPending();
+      order = oasisService.sellDai('0.01', tokens.WETH);
+      order = order;
+      return order.onPending();
     })
     .then(OrderObject => {
       expect(OrderObject._hybrid.getOriginalTransaction().state()).toBe(TransactionState.pending);

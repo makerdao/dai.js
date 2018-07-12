@@ -1,7 +1,7 @@
 import { promiseWait } from '../utils';
-import { utils } from 'ethers';
 import TransactionLifeCycle from '../eth/TransactionLifeCycle';
 import debug from 'debug';
+import { ETH } from './Currency';
 
 const log = debug('makerjs:transactionObject');
 
@@ -104,7 +104,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       }
 
       if (!!receipt.gasUsed && !!gasPrice) {
-        this._fees = utils.formatEther(receipt.gasUsed.mul(gasPrice));
+        this._fees = ETH.wei(receipt.gasUsed.mul(gasPrice));
       } else {
         /*
           console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',

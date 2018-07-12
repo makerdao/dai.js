@@ -6,7 +6,7 @@ import TestAccountProvider from '../helpers/TestAccountProvider';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';
-import { WETH } from '../../src/eth/Currency';
+import { ETH, WETH } from '../../src/eth/Currency';
 
 let service;
 
@@ -46,7 +46,7 @@ test('event listeners work as promises', async () => {
 
 test('get fees', async () => {
   const tx = await createTestTransaction().mine();
-  expect(parseFloat(tx.fees())).toBeGreaterThan(0);
+  expect(tx.fees()).toEqual(ETH.wei(32222));
 });
 
 test('event listeners work as callbacks', async () => {
