@@ -1,9 +1,9 @@
 [submodule "lib/ds-test"]
-	path = lib/ds-test
+	path = testchain/lib/ds-test
 	url = https://github.com/dapphub/ds-test
 [submodule "lib/sai"]
-	path = lib/sai
+	path = testchain/lib/sai
 	url = https://github.com/makerdao/sai.git
 [submodule "lib/maker-otc"]
-	path = lib/maker-otc
+	path = testchain/lib/maker-otc
 	url = https://github.com/makerdao/maker-otc

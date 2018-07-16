@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# speed up ethers.js polling so tests finish faster
+# run this from the project root
 
 function sed_inplace {
   # sed's -i argument behaves differently on macOS, hence this hack

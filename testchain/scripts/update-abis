@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+CWD=`dirname $0`
+CONTRACTS=$CWD/../../contracts
+LIB=$CWD/../lib
+
+mkdir -p $CONTRACTS/abi/dai/v1/
+rm -f $CONTRACTS/abi/dai/v1/*.json
+cp $LIB/sai/out/addresses.json $CONTRACTS/abi/dai/v1/
+cp $LIB/sai/out/*.abi $CONTRACTS/abi/dai/v1/
+cd $CONTRACTS/abi/dai/v1
+for file in *.abi; do
+    mv "$file" "$(basename "$file" .abi).json"
+done
+rm -f *Test*.json *Fab.json Dev*.json
+cd -

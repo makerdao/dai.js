@@ -10,9 +10,12 @@
 ##
 ## When the script exits, the Geth testnet is stopped and deleted.
 
-# set -ex
+# stop the script if anything fails
+set -e
 
 START_TIME=`date +%s`
+CWD=`dirname $0`
+LIB=$CWD/../lib
 
 function sed_inplace {
   # sed's -i argument behaves differently on macOS, hence this hack
@@ -23,10 +26,10 @@ function sed_inplace {
 if ! nc -z 127.0.0.1 2000; then
 
   # Fix Sai deploy script
-  sed_inplace '13s/DSToken.*/WETH9)/' ./lib/sai/bin/deploy
+  sed_inplace '13s/DSToken.*/WETH9)/' $LIB/sai/bin/deploy
 
   # Speed up ethers.js polling
-  sed_inplace 's/var pollingInterval = [0-9]*/var pollingInterval = 50/' ./node_modules/ethers/providers/provider.js
+  $CWD/set-polling-interval
 
   # Start a local testnet on port 2000; set to stop on exit.
   ./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >./ganache.out 2>&1 & netpid=$!
@@ -35,10 +38,10 @@ if ! nc -z 127.0.0.1 2000; then
   # Wait until it's up, then use it for the deployment.
   echo "Waiting for ganache-cli to start up..."
   export ETH_RPC_URL=http://127.1:2000
-  until curl -s -o/dev/null "$ETH_RPC_URL"; do sleep 2; done
+  until curl -s -o/dev/null "$ETH_RPC_URL"; do sleep 3; done
 
   # Use the Sai system's deploy scripts to start it.
-  cd lib/sai
+  cd $LIB/sai
 
   # Configure seth
   export ETH_GAS=${ETH_GAS:-"4000000"}
@@ -79,10 +82,10 @@ if ! nc -z 127.0.0.1 2000; then
 }
 EOM
 
-  cd ../..
-  ./update-abis
+  cd -
+  $CWD/update-abis
 
-  cd lib/maker-otc
+  cd $LIB/maker-otc
 
   export SOLC_FLAGS=${SOLC_FLAGS:-"--optimize"}
   export ETH_GAS=${ETH_GAS:-"4000000"}
@@ -100,14 +103,13 @@ EOM
   addr2="0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238"
   seth send $OTC "addTokenPairWhitelist(address, address)" $addr1 $addr2
 
-
   ##seth send $addr2 "deposit()" --value $(seth --to-wei 1 eth) ##wrap some eth to weth
   ##make sure I have WETH
   ##seth send $addr2 "approve(address, uint256)" $OTC ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ##approve weth to oasis
   ##seth send $OTC "offer(uint256, address, uint256, address, uint256, bool)" $(seth --to-uint256 $(seth --to-wei 0.5 eth)) $addr2 $(seth --to-uint256 $(seth --to-wei 1 eth)) $addr1 0 1 ## create an offer to buy Dai for Weth <- this isn't working
   export OTC=$OTC
 
-  cd ../..
+  cd -
 
   END_TIME=`date +%s`
   ELAPSED=`echo $END_TIME - $START_TIME | bc`
@@ -126,7 +128,7 @@ if [[ "$1" != '--ci' ]]; then
 
     # The testnet will continue to run with its deployed contracts
     # until the user confirms it should shut down.
-    bash ./confirm-kill-testnet
+    bash $CWD/confirm-kill-testnet
 else
     # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
     # See the list at the bottom of the in the deploy script.
