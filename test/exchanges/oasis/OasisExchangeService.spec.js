@@ -156,7 +156,7 @@ test('sell Dai', async () => {
   const oasisExchangeService = await buildTestOasisExchangeService();
   await createDaiAndPlaceLimitOrder(oasisExchangeService);
   const order = await oasisExchangeService.sellDai('0.01', WETH);
-  expect(order.fees()).toEqual(ETH.wei(93317));
+  expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
   expect(order.fillAmount()).toEqual(DAI(0.0005));
 });
 
@@ -164,7 +164,7 @@ test('buy Dai', async () => {
   const oasisService = await buildTestOasisExchangeService();
   await createDaiAndPlaceLimitOrder(oasisService, true);
   const order = await oasisService.buyDai('0.01', WETH);
-  expect(order.fees()).toEqual(ETH.wei(95932));
+  expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
   expect(order.fillAmount()).toEqual(DAI(0.04));
 });
 
@@ -172,7 +172,7 @@ test('buy Dai with wei amount', async () => {
   const oasisService = await buildTestOasisExchangeService();
   await createDaiAndPlaceLimitOrder(oasisService, true);
   const order = await oasisService.buyDai(DAI.wei(10000000000000000), WETH);
-  expect(order.fees()).toEqual(ETH.wei(95932));
+  expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
   expect(order.fillAmount()).toEqual(DAI(0.04));
 });
 
