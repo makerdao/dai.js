@@ -232,29 +232,14 @@ export default class EthereumCdpService extends PrivateService {
     ).then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
   }
 
-  _getLiquidationPricePethUSD(cdpId) {
-    return Promise.all([
+  async getLiquidationPriceEthUSD(cdpId) {
+    const [debt, liqRatio, collateral] = await Promise.all([
       this.getDebtInUSD(cdpId),
-      this.getTargetPrice(),
       this.getLiquidationRatio(),
-      this.getCollateralInPeth(cdpId)
-    ]).then(vals => {
-      const debt = vals[0];
-      const targetPrice = vals[1];
-      const liqRatio = vals[2];
-      const collateral = vals[3];
-      const price = (debt * targetPrice * liqRatio) / collateral;
-      return price;
-    });
-  }
-
-  getLiquidationPriceEthUSD(cdpId) {
-    return Promise.all([
-      this._getLiquidationPricePethUSD(cdpId),
-      this.get('price').getWethToPethRatio()
-    ]).then(vals => {
-      return vals[0] / vals[1];
-    });
+      this.getCollateralInEth(cdpId)
+    ]);
+    const price = (debt * liqRatio) / collateral;
+    return price;
   }
 
   isSafe(cdpId) {
