@@ -24,8 +24,3 @@ script:
 - codecov
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
-deploy:
-  provider: npm
-  skip_cleanup: true
-  on:
-    tags: true
