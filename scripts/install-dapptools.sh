@@ -3,13 +3,7 @@
 
 set -e
 
-curl https://nixos.org/nix/install | sh
-. ~/.nix-profile/etc/profile.d/nix.sh
-nix-env -if https://github.com/cachix/cachix/tarball/master \
-  --substituters https://cachix.cachix.org \
-  --trusted-public-keys cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM=
-cachix use dapp
-git clone --recursive https://github.com/dapphub/dapptools
-cd dapptools
-make install
-cd ..
+sudo mkdir -m 0755 /nix && sudo chown travis /nix
+sudo mount -o bind /home/travis/build/makerdao/makerdao-integration-poc/nix /nix
+curl https://dapp.tools/install | sh
+. /home/travis/.nix-profile/etc/profile.d/nix.sh
