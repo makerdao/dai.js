@@ -13,7 +13,7 @@ cache:
 before_install:
 - sudo mkdir -m 0755 /nix && sudo chown travis /nix
 - sudo mount -o bind /home/travis/build/makerdao/makerdao-integration-poc/nix /nix
-- source ./scripts/install-dapptools.sh
+- curl https://dapp.tools/install | sh
 - npm i -g npm@latest
 install:
 - npm install
