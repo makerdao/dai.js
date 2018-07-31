@@ -16,7 +16,6 @@ copyfiles \
   npm-readme.md \
   LICENSE \
   package.json \
-  npm-shrinkwrap.json \
   contracts/abi/**/* \
   contracts/abi/dai/**/* \
   src/config/presets/* \
