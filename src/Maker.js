@@ -61,3 +61,9 @@ export default class Maker {
     );
   }
 }
+
+// This factory function doesn't do much at the moment, but it will give us
+// more flexibility for plugins and extensions in the future.
+Maker.create = function(...args) {
+  return new Maker(...args);
+};

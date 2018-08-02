@@ -54,7 +54,7 @@ For full documentation, please reference https://makerdao.com/documentation/
 Example:
 ```
 import Maker from '@makerdao/makerdao-exchange-integration';
-const maker = new Maker('test');
+const maker = Maker.create('test');
 const cdp = await maker.openCdp();
 const info = await cdp.getInfo();
 console.log(info);
