@@ -40,7 +40,7 @@ setTimeout(() => {
   const param = new URL(window.location.href).searchParams.get('inject') || '',
     useMetaMask = param.length > 0 && param !== '0';
 
-  window.maker = new Maker('http', {
+  window.maker = Maker.create('http', {
     url: window.location.protocol + '//' + window.location.hostname + ':2000',
     web3: {
       statusTimerDelay: useMetaMask ? 30000 : 5000,

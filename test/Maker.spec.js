@@ -2,7 +2,7 @@ import Maker, { ETH, LocalService } from '../src/index';
 const Maker2 = require('../src/index');
 
 function createMaker() {
-  return new Maker('test', { log: false });
+  return Maker.create('test', { log: false });
 }
 
 test('import vs require', () => {
