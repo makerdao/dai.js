@@ -1,6 +1,6 @@
 {
-  "name": "@makerdao/makerdao-exchange-integration",
-  "version": "0.2.3",
+  "name": "@makerdao/dai",
+  "version": "0.5.0",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -10,7 +10,7 @@
     "Joshua Levine <joshua@makerdao.com>",
     "Michael Elliot <mike@makerdao.com>"
   ],
-  "description": "MakerDAO exchange integration library.",
+  "description": "JavaScript library for interacting with the Dai Stablecoin System.",
   "license": "MIT",
   "keywords": [
     "makerdao",
@@ -21,12 +21,12 @@
     "margin"
   ],
   "bugs": {
-    "url": "https://github.com/wkampmann/makerdao-integration-poc/issues",
+    "url": "https://github.com/makerdao/dai.js/issues",
     "email": "wouter@makerdao.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wkampmann/makerdao-integration-poc.git"
+    "url": "https://github.com/makerdao/dai.js.git"
   },
   "module": "src/index.js",
   "main": "src/index.js",
