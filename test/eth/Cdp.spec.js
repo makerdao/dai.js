@@ -1,5 +1,5 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
-import { DAI, PETH, WETH } from '../../src/eth/Currency';
+import { DAI, PETH, WETH, USD, USD_ETH, ETH } from '../../src/eth/Currency';
 
 let cdpService, cdp, defaultAccount, dai;
 
@@ -140,72 +140,74 @@ describe('a cdp with collateral', () => {
   });
 
   test('read locked collateral in peth', async () => {
-    const collateral = await cdp.getCollateralValueInPeth();
-    expect(collateral.toString()).toEqual('0.2');
+    const collateral = await cdp.getCollateralValue(PETH);
+    expect(collateral).toEqual(PETH(0.2));
   });
 
   test('read locked collateral in eth', async () => {
-    const collateral = await cdp.getCollateralValueInEth();
-    expect(collateral.toString()).toEqual('0.2');
+    const collateral = await cdp.getCollateralValue();
+    expect(collateral).toEqual(ETH(0.2));
   });
 
   test('read locked collateral in USD', async () => {
-    const collateral = await cdp.getCollateralValueInUSD();
-    expect(collateral.toString()).toEqual('80');
+    const collateral = await cdp.getCollateralValue(USD);
+    expect(collateral).toEqual(USD(80));
   });
 
   describe('with debt', () => {
     beforeAll(() => cdp.drawDai(5));
 
     test('read debt in dai', async () => {
-      const debt = await cdp.getDebtValueInDai();
-      expect(debt.toString()).toEqual('5');
+      const debt = await cdp.getDebtValue();
+      expect(debt).toEqual(DAI(5));
     });
 
     test('read debt in usd', async () => {
-      const debt = await cdp.getDebtValueInUSD();
-      expect(debt.toString()).toEqual('5');
+      const debt = await cdp.getDebtValue(USD);
+      expect(debt).toEqual(USD(5));
     });
 
     describe('with drip', () => {
-      afterAll(() => {
-        cdp.drawDai('1');
-        cdpService.get('price').setMkrPrice(0);
+      afterAll(async () => {
+        // await cdp.drawDai(1);
+        return cdpService.get('price').setMkrPrice(0);
       });
 
       test('read MKR fee in USD', async done => {
-        //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
+        // block.timestamp is measured in seconds, so we need to wait at least a
+        // second for the fees to get updated
         setTimeout(async () => {
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-          const fee = await cdp.getMkrFeeInUSD();
-          expect(fee).toBeGreaterThan(0);
+          const fee = await cdp.getGovernanceFee();
+          expect(fee.gt(0)).toBeTruthy();
           done();
         }, 1500);
       });
 
       test('read MKR fee in MKR', async done => {
         await cdpService.get('price').setMkrPrice(600);
-        //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
+        // block.timestamp is measured in seconds, so we need to wait at least a
+        // second for the fees to get updated
         setTimeout(async () => {
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-          const fee = await cdp.getMkrFeeInMkr();
-          expect(fee).toBeGreaterThan(0);
+          const fee = await cdp.getGovernanceFee();
+          expect(fee.gt(0)).toBeTruthy();
           done();
         }, 1500);
       });
 
       test('wipe debt with non-zero stability fee', async () => {
-        const firstDebtAmount = await cdp.getDebtValueInDai();
-        await cdp.wipeDai('1');
-        const secondDebtAmount = await cdp.getDebtValueInDai();
-
-        expect(secondDebtAmount).toEqual(firstDebtAmount - 1);
+        const firstDebtAmount = await cdp.getDebtValue();
+        await cdp.wipeDai(1);
+        const secondDebtAmount = await cdp.getDebtValue();
+        await cdp.drawDai(1);
+        expect(firstDebtAmount.minus(secondDebtAmount)).toEqual(DAI(1));
       });
     });
 
     test('read liquidation price', async () => {
-      const price = await cdp.getLiquidationPriceEthUSD();
-      expect(price.toString()).toEqual('37.5');
+      const price = await cdp.getLiquidationPrice();
+      expect(price).toEqual(USD_ETH(37.5));
     });
 
     test('check if cdp is safe', async () => {
@@ -223,8 +225,8 @@ describe('a cdp with collateral', () => {
       await cdp.wipeDai('5');
       const balance2 = parseFloat(await dai.balanceOf(defaultAccount));
       expect(balance2 - balance1).toBeCloseTo(-5);
-      const debt = await cdp.getDebtValueInDai();
-      expect(debt.toString()).toEqual('0');
+      const debt = await cdp.getDebtValue();
+      expect(debt).toEqual(DAI(0));
     });
 
     test('free', async () => {

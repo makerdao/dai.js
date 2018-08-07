@@ -1,4 +1,5 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
+import { USD_DAI } from '../../src/eth/Currency';
 
 let cdpService;
 
@@ -29,7 +30,7 @@ test('can read the annual governance fee', async () => {
 
 test('can read the target price', async () => {
   const tp = await cdpService.getTargetPrice();
-  expect(tp).toBe(1);
+  expect(tp).toEqual(USD_DAI(1));
 });
 
 test('can calculate system collateralization', async () => {

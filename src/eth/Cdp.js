@@ -1,5 +1,6 @@
 import contracts from '../../contracts/contracts';
 import { utils as ethersUtils } from 'ethers';
+import { USD } from './Currency';
 
 export default class Cdp {
   constructor(cdpService, cdpId = null) {
@@ -15,11 +16,11 @@ export default class Cdp {
     this.on = this._emitterInstance.on;
     this._emitterInstance.registerPollEvents({
       COLLATERAL: {
-        USD: () => this.getCollateralValueInUSD(),
-        ETH: () => this.getCollateralValueInEth()
+        USD: () => this.getCollateralValue(USD),
+        ETH: () => this.getCollateralValue()
       },
       DEBT: {
-        dai: () => this.getDebtValueInDai()
+        dai: () => this.getDebtValue()
       }
     });
   }
@@ -70,16 +71,12 @@ const passthroughMethods = [
   'bite',
   'drawDai',
   'freePeth',
-  'getCollateralValueInEth',
-  'getCollateralValueInPeth',
-  'getCollateralValueInUSD',
+  'getCollateralValue',
   'getCollateralizationRatio',
-  'getDebtValueInDai',
-  'getDebtValueInUSD',
-  'getMkrFeeInUSD',
-  'getMkrFeeInMkr',
+  'getDebtValue',
+  'getGovernanceFee',
   'getInfo',
-  'getLiquidationPriceEthUSD',
+  'getLiquidationPrice',
   'give',
   'isSafe',
   'lockEth',
@@ -92,9 +89,8 @@ const passthroughMethods = [
 Object.assign(
   Cdp.prototype,
   passthroughMethods.reduce((acc, name) => {
-    const newName = name.replace('Value', '');
     acc[name] = async function(...args) {
-      return this._cdpService[newName](await this.getId(), ...args);
+      return this._cdpService[name](await this.getId(), ...args);
     };
     return acc;
   }, {})

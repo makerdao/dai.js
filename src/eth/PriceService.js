@@ -3,7 +3,7 @@ import contracts from '../../contracts/contracts';
 import { RAY } from '../utils/constants';
 import BigNumber from 'bignumber.js';
 import { utils } from 'ethers';
-import { getCurrency, ETH, PETH, MKR } from './Currency';
+import { getCurrency, ETH, USD_PETH, MKR, USD_ETH, USD_MKR } from './Currency';
 
 export default class PriceService extends PrivateService {
   /**
@@ -44,15 +44,15 @@ export default class PriceService extends PrivateService {
   }
 
   async getEthPrice() {
-    return ETH.wei(await this._getContract(contracts.SAI_PIP).read());
+    return USD_ETH.wei(await this._getContract(contracts.SAI_PIP).read());
   }
 
   async getPethPrice() {
-    return PETH.ray(await this._getContract(contracts.SAI_TUB).tag());
+    return USD_PETH.ray(await this._getContract(contracts.SAI_TUB).tag());
   }
 
   async getMkrPrice() {
-    return MKR.wei((await this._getContract(contracts.SAI_PEP).peek())[0]);
+    return USD_MKR.wei((await this._getContract(contracts.SAI_PEP).peek())[0]);
   }
 
   setEthPrice(newPrice, unit = ETH) {

@@ -5,8 +5,10 @@ const { bigNumberify } = utils;
 import BigNumber from 'bignumber.js';
 
 function amountToBigNumber(amount) {
+  if (amount instanceof Currency) return amount.toBigNumber();
   const value = BigNumber(amount);
   if (value.lt(0)) throw new Error('amount cannot be negative');
+  if (value.isNaN()) throw new Error(`amount "${amount}" is not a number`);
   return value;
 }
 
@@ -18,6 +20,10 @@ export class Currency {
       ? amountToBigNumber(amount).shiftedBy(shift)
       : amountToBigNumber(amount);
     this.symbol = '???';
+  }
+
+  isEqual(other) {
+    return this._amount.eq(other._amount) && this.symbol == other.symbol;
   }
 
   toString(decimals = 2) {
@@ -72,6 +78,8 @@ const booleanFunctions = [
 function assertValidOperation(method, left, right) {
   const message = `Invalid operation: ${left.symbol} ${method} ${right.symbol}`;
 
+  if (!(right instanceof Currency) || left.isSameType(right)) return;
+
   if (right instanceof CurrencyRatio) {
     // only supporting Currency as a left operand for now, though we could
     // extend this to support ratio-ratio math if needed
@@ -83,25 +91,32 @@ function assertValidOperation(method, left, right) {
         if (left.isSameType(right.numerator)) return;
         break;
     }
-
-    throw new Error(message);
   }
 
-  if (right instanceof Currency && !left.isSameType(right)) {
-    throw new Error(message);
+  switch (method) {
+    // division between two different units results in a ratio, e.g. USD/DAI
+    case 'div':
+      return;
   }
+
+  throw new Error(message);
 }
 
 function result(method, left, right, value) {
   if (right instanceof CurrencyRatio) {
     switch (method) {
       case 'times':
-        return right.numerator(value);
+        return new right.numerator(value);
       case 'div':
-        return right.denominator(value);
+        return new right.denominator(value);
     }
   }
-  return new left.constructor(value);
+
+  if (!(right instanceof Currency) || left.isSameType(right)) {
+    return new left.constructor(value);
+  }
+
+  return new CurrencyRatio(value, left.constructor, right.constructor);
 }
 
 function bigNumberFnWrapper(method, isBoolean) {
@@ -134,6 +149,14 @@ Object.assign(
   }, {})
 );
 
+const makeCreatorFnWithShift = (creatorFn, symbol, shift) => {
+  const fn = amount => creatorFn(amount, shift);
+  // these two properties are used by getCurrency
+  fn.symbol = symbol;
+  fn.shift = shift;
+  return fn;
+};
+
 function setupWrapper(symbol) {
   class CurrencyX extends Currency {
     constructor(amount, shift) {
@@ -144,23 +167,17 @@ function setupWrapper(symbol) {
 
   // this changes the name of the class in stack traces
   Object.defineProperty(CurrencyX, 'name', { value: symbol });
+  Object.defineProperty(CurrencyX, 'symbol', { value: symbol });
 
   // This provides short syntax, e.g. ETH(6). We need a wrapper function because
   // you can't call an ES6 class consructor without `new`
   const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
 
-  const makeCreatorFnWithShift = shift => {
-    const fn = amount => creatorFn(amount, shift);
-    // these two properties are used by getCurrency
-    fn.symbol = symbol;
-    fn.shift = shift;
-    return fn;
-  };
-
   Object.assign(creatorFn, {
-    wei: makeCreatorFnWithShift('wei'),
-    ray: makeCreatorFnWithShift('ray'),
-    symbol
+    wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
+    ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
+    symbol,
+    wrappedClass: CurrencyX
   });
 
   return creatorFn;
@@ -199,11 +216,39 @@ export function getCurrency(amount, unit) {
   return ctor(amount, unit.shift);
 }
 
+// FIXME: this is not exactly analogous to Currency above, because all the
+// different pairs are instances of the same class rather than subclasses in
+// their own right. but for now it works fine, because it's the wrapper
+// functions that are used externally anyway. so if we want to be consistent, we
+// could either create subclasses for each ratio, or refactor Currency so it
+// also just stores its symbol in the instance rather than the subclass.
+
 export class CurrencyRatio extends Currency {
-  constructor(amount, numerator, denominator) {
-    super(amount);
-    this.numerator = numerator;
-    this.denominator = denominator;
+  constructor(amount, numerator, denominator, shift) {
+    super(amount, shift);
+    this.numerator = numerator.wrappedClass || numerator;
+    this.denominator = denominator.wrappedClass || denominator;
     this.symbol = `${numerator.symbol}/${denominator.symbol}`;
   }
 }
+
+const setupRatioWrapper = (numerator, denominator) => {
+  const creatorFn = (amount, shift) =>
+    new CurrencyRatio(amount, numerator, denominator, shift);
+
+  const symbol = `${numerator.symbol}/${denominator.symbol}`;
+
+  Object.assign(creatorFn, {
+    wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
+    ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
+    symbol
+  });
+
+  return creatorFn;
+};
+
+export const USD_DAI = setupRatioWrapper(USD, DAI);
+export const USD_ETH = setupRatioWrapper(USD, ETH);
+export const USD_MKR = setupRatioWrapper(USD, MKR);
+export const USD_PETH = setupRatioWrapper(USD, PETH);
+export const USD_WETH = setupRatioWrapper(USD, WETH);

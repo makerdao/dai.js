@@ -1,6 +1,6 @@
 import {
   getCurrency,
-  CurrencyRatio,
+  USD_DAI,
   ETH,
   PETH,
   WETH,
@@ -104,6 +104,7 @@ test('throws an error if trying to do math with different types', () => {
 });
 
 test('equality of different instances', () => {
+  expect(MKR('2').isEqual(MKR('2'))).toBeTruthy();
   expect(MKR('2')).toEqual(MKR('2'));
   expect(MKR('2')).not.toEqual(MKR('2.1'));
   expect(MKR('2')).not.toEqual(DAI('2'));
@@ -141,12 +142,18 @@ test('wrap BigNumber methods', () => {
 });
 
 test('ratios', () => {
-  const value = new CurrencyRatio(14, USD, DAI);
+  const value = USD_DAI(14);
   expect(value.toString()).toEqual('14.00 USD/DAI');
 });
 
 test('ratio math', () => {
   const value1 = DAI(20);
-  const value2 = new CurrencyRatio(4, USD, DAI);
+  const value2 = USD_DAI(4);
   expect(value1.times(value2)).toEqual(USD(80));
+});
+
+test('creating a ratio from division', () => {
+  const value1 = USD(4);
+  const value2 = DAI(20);
+  expect(value1.div(value2)).toEqual(USD_DAI(0.2));
 });

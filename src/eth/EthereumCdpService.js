@@ -3,7 +3,17 @@ import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
-import { getCurrency, DAI, ETH, PETH, WETH, MKR } from './Currency';
+import {
+  getCurrency,
+  USD_DAI,
+  USD_ETH,
+  DAI,
+  ETH,
+  PETH,
+  WETH,
+  MKR,
+  USD
+} from './Currency';
 import { numberToBytes32 } from '../utils/conversion';
 
 export default class EthereumCdpService extends PrivateService {
@@ -133,45 +143,43 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().cups(hexCdpId);
   }
 
-  async getCollateralInPeth(cdpId) {
+  async getCollateralValue(cdpId, unit = ETH) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = await this._tubContract().ink(hexCdpId);
+    const pethValue = PETH.wei(await this._tubContract().ink(hexCdpId));
+    if (unit === PETH) return pethValue;
 
-    return new BigNumber(value.toString()).dividedBy(WAD).toNumber();
+    const pethPrice = await this.get('price').getWethToPethRatio();
+    const ethValue = ETH(pethValue.times(pethPrice));
+
+    if (unit === ETH) return ethValue;
+
+    const ethPrice = await this.get('price').getEthPrice();
+    const usdValue = ethValue.times(ethPrice);
+
+    if (unit === USD) return usdValue;
+
+    throw new Error(
+      `Don't know how to get collateral value in ${unit ? unit.symbol : unit}`
+    );
   }
 
-  async getCollateralInEth(cdpId) {
-    const [pethCollateral, ratio] = await Promise.all([
-      this.getCollateralInPeth(cdpId),
-      this.get('price').getWethToPethRatio()
-    ]);
-    return pethCollateral * ratio;
-  }
-
-  async getCollateralInUSD(cdpId) {
-    const [ethCollateral, ethPrice] = await Promise.all([
-      this.getCollateralInEth(cdpId),
-      this.get('price').getEthPrice()
-    ]);
-    return ethCollateral * ethPrice.toNumber();
-  }
-
-  getDebtInDai(cdpId) {
+  async getDebtValue(cdpId, unit = DAI) {
     const hexCdpId = numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `tab`
     const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
-    return new Promise((resolve, reject) =>
+    const tab = await new Promise((resolve, reject) =>
       tub.tab.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
-    ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
-  }
-
-  async getDebtInUSD(cdpId) {
-    const [daiDebt, tp] = await Promise.all([
-      this.getDebtInDai(cdpId),
-      this.getTargetPrice()
-    ]);
-    return daiDebt * tp;
+    );
+    const daiDebt = DAI.wei(tab.toString());
+    switch (unit) {
+      case DAI:
+        return daiDebt;
+      case USD: {
+        const targetPrice = await this.getTargetPrice();
+        return daiDebt.times(targetPrice);
+      }
+    }
   }
 
   //updates compound interest calculations for all CDPs.  Used by tests that depend on a fee
@@ -181,36 +189,36 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  getMkrFeeInUSD(cdpId) {
+  async getGovernanceFee(cdpId, unit = MKR) {
     const hexCdpId = numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
-    // from the non-constant function `tab`
+    // from the non-constant function `rap`
     const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
-    return new Promise((resolve, reject) =>
+    const rap = await new Promise((resolve, reject) =>
       tub.rap.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
-    ).then(bn => new BigNumber(bn.toString()).dividedBy(WAD).toNumber());
-  }
-
-  async getMkrFeeInMkr(cdpId) {
-    const [fee, mkrPrice] = await Promise.all([
-      this.getMkrFeeInUSD(cdpId),
-      this.get('price').getMkrPrice()
-    ]);
-    return fee / mkrPrice.toNumber();
+    );
+    const mkrFee = MKR.wei(rap);
+    switch (unit) {
+      case MKR:
+        return mkrFee;
+      case USD: {
+        const price = await this.get('price').getMkrPrice();
+        return mkrFee.times(price);
+      }
+    }
   }
 
   async getCollateralizationRatio(cdpId) {
-    const [daiDebt, pethPrice, pethCollateral] = await Promise.all([
-      this.getDebtInUSD(cdpId),
+    const [usdDebt, pethPrice, pethCollateral] = await Promise.all([
+      this.getDebtValue(cdpId, USD),
       this.get('price').getPethPrice(),
-      this.getCollateralInPeth(cdpId)
+      this.getCollateralValue(cdpId, PETH)
     ]);
-    return (pethCollateral * pethPrice.toNumber()) / daiDebt;
+    return pethCollateral.times(pethPrice).toNumber() / usdDebt.toNumber();
   }
 
   async getLiquidationRatio() {
     const value = await this._tubContract().mat();
-
     return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
@@ -223,34 +231,32 @@ export default class EthereumCdpService extends PrivateService {
       .toNumber();
   }
 
-  getTargetPrice() {
+  async getTargetPrice() {
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `par()`
     const vox = this._smartContract().getWeb3ContractByName(contracts.SAI_VOX);
-    return new Promise((resolve, reject) =>
+    const par = await new Promise((resolve, reject) =>
       vox.par.call((err, val) => (err ? reject(err) : resolve(val)))
-    ).then(bn => new BigNumber(bn.toString()).dividedBy(RAY).toNumber());
+    );
+
+    return USD_DAI.ray(par);
   }
 
-  async getLiquidationPriceEthUSD(cdpId) {
+  async getLiquidationPrice(cdpId) {
     const [debt, liqRatio, collateral] = await Promise.all([
-      this.getDebtInUSD(cdpId),
+      this.getDebtValue(cdpId, USD),
       this.getLiquidationRatio(),
-      this.getCollateralInEth(cdpId)
+      this.getCollateralValue(cdpId)
     ]);
-    const price = (debt * liqRatio) / collateral;
-    return price;
+    return debt.times(liqRatio).div(collateral);
   }
 
-  isSafe(cdpId) {
-    return Promise.all([
-      this.getLiquidationPriceEthUSD(cdpId),
+  async isSafe(cdpId) {
+    const [liqPrice, ethPrice] = await Promise.all([
+      this.getLiquidationPrice(cdpId),
       this.get('price').getEthPrice()
-    ]).then(vals => {
-      const liqPrice = vals[0];
-      const ethPrice = vals[1];
-      return parseFloat(ethPrice) >= liqPrice;
-    });
+    ]);
+    return USD_ETH(ethPrice).gte(liqPrice);
   }
 
   getAnnualGovernanceFee() {

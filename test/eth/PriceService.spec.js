@@ -1,5 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
-import { Currency, ETH } from '../../src/eth/Currency';
+import { Currency, ETH, USD_ETH, USD_MKR } from '../../src/eth/Currency';
 
 function buildTestPriceService() {
   return buildTestService('price', { price: true });
@@ -10,16 +10,16 @@ test('should return current eth price', async () => {
 
   await service.manager().authenticate();
   const price = await service.getEthPrice();
-  expect(price.toString()).toEqual('400.00 ETH');
+  expect(price).toEqual(USD_ETH(400));
 });
 
 test('should be able to set eth price', async () => {
   const service = buildTestPriceService();
   await service.manager().authenticate();
-  await service.setEthPrice('100');
-  expect((await service.getEthPrice()).toString()).toEqual('100.00 ETH');
-  await service.setEthPrice('400.0');
-  expect((await service.getEthPrice()).toString()).toEqual('400.00 ETH');
+  await service.setEthPrice(100);
+  expect(await service.getEthPrice()).toEqual(USD_ETH(100));
+  await service.setEthPrice(400);
+  expect(await service.getEthPrice()).toEqual(USD_ETH(400));
 });
 
 test('should be able to get mkr price', done => {
@@ -30,7 +30,7 @@ test('should be able to get mkr price', done => {
     .authenticate()
     .then(() => {
       service.getMkrPrice().then(price => {
-        expect(price.toString()).toEqual('0.00 MKR');
+        expect(price).toEqual(USD_MKR(0));
         done();
       });
     });
@@ -47,7 +47,7 @@ test('should be able to set mkr price', done => {
         .setMkrPrice('100')
         .then(() => service.getMkrPrice())
         .then(price => {
-          expect(price.toString()).toEqual('100.00 MKR');
+          expect(price).toEqual(USD_MKR(100));
           service.setMkrPrice('0.0').then(() => done());
         });
     });
