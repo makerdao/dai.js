@@ -1,6 +1,6 @@
 {
     "testnet": {
-        "MAKER_OTC": "0x7eecf9215ed79706a656c5b4fc67b4135a4272a8"
+        "MAKER_OTC": "0x06ef37a95603cb52e2dff4c2b177c84cdb3ce989"
     },
     "kovan": {
         "MAKER_OTC": "0x8cf1Cab422A0b6b554077A361f8419cDf122a9F9",
