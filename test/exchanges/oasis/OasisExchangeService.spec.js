@@ -1,6 +1,7 @@
 import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
 import { DAI, ETH, WETH } from '../../../src/eth/Currency';
+import { utils } from 'ethers';
 
 let oasisExchangeService;
 
@@ -11,8 +12,6 @@ async function buildTestOasisExchangeService() {
   await oasisExchangeService.manager().authenticate();
   return oasisExchangeService;
 }
-
-const utils = require('ethers').utils;
 
 function _placeLimitOrder(oasisExchangeService, sellDai) {
   let ethereumTokenService = null;
@@ -157,7 +156,7 @@ test('sell Dai', async () => {
   await createDaiAndPlaceLimitOrder(oasisExchangeService);
   const order = await oasisExchangeService.sellDai('0.01', WETH);
   expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
-  expect(order.fillAmount()).toEqual(DAI(0.0005));
+  expect(order.fillAmount()).toEqual(WETH(0.0005));
 });
 
 test('buy Dai', async () => {

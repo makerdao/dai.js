@@ -13,7 +13,7 @@ babel contracts/addresses --out-dir ./dist/contracts/addresses
 babel src --out-dir ./dist/src
 
 copyfiles \
-  npm-readme.md \
+  README.md \
   LICENSE \
   package.json \
   contracts/abi/**/* \
@@ -23,5 +23,4 @@ copyfiles \
   contracts/addresses/exchanges.json \
   dist
 
-mv dist/npm-readme.md dist/README.md
 cp package-lock.json dist/npm-shrinkwrap.json

@@ -74,7 +74,7 @@ function buildInfuraService(network, privateKey = null) {
       provider: {
         type: Web3ProviderType.INFURA,
         network,
-        infuraApiKey: 'ihagQOzC3mkRXYuCivDN'
+        infuraApiKey: process.env.INFURA_API_KEY
       }
     }
   });

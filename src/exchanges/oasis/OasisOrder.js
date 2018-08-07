@@ -39,7 +39,7 @@ export default class OasisOrder {
           const parsedLog = LogTradeEvent.parse(event.data);
           total = total.add(parsedLog[this._logKey]);
         });
-        this._fillAmount = DAI.wei(total.toString());
+        this._fillAmount = this._unit.wei(total.toString());
       }
     );
   }
@@ -49,6 +49,7 @@ export class OasisBuyOrder extends OasisOrder {
   constructor() {
     super();
     this._logKey = 'buy_amt';
+    this._unit = DAI;
   }
 
   static build(oasisContract, transaction, transactionService) {
@@ -63,13 +64,14 @@ export class OasisBuyOrder extends OasisOrder {
 }
 
 export class OasisSellOrder extends OasisOrder {
-  constructor() {
+  constructor(currency) {
     super();
     this._logKey = 'pay_amt';
+    this._unit = currency;
   }
 
-  static build(oasisContract, transaction, transactionService) {
-    const order = new OasisSellOrder();
+  static build(oasisContract, transaction, transactionService, currency) {
+    const order = new OasisSellOrder(currency);
     order._hybrid = order.transact(
       oasisContract,
       transaction,

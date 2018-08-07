@@ -1,6 +1,9 @@
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import { buildTestSmartContractService } from '../helpers/serviceBuilders';
+import {
+  buildTestService,
+  buildTestSmartContractService
+} from '../helpers/serviceBuilders';
 
 test('getContractByName should have proper error checking', done => {
   const service = buildTestSmartContractService();
@@ -17,7 +20,7 @@ test('getContractByName should have proper error checking', done => {
     .authenticate()
     .then(() => {
       expect(() => service.getContractByName(contracts.SAI_TOP, 999)).toThrow(
-        'Cannot find version 999 of contract SAI_TOP'
+        'Cannot find contract SAI_TOP, version 999'
       );
       done();
     });
@@ -74,4 +77,34 @@ test('should support recursive smart contract state inspection', done => {
       expect(top.tub.gem.symbol).toEqual('WETH');
       done();
     });
+});
+
+test('parameterized smart contract input', async () => {
+  const mockContractDefinition = {
+    address: '0xbeefed1bedded2dabbed3defaced4decade5dead',
+    abi: [
+      {
+        constant: true,
+        inputs: [],
+        name: 'foo',
+        outputs: [{ name: '', type: 'bytes32' }],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function'
+      }
+    ]
+  };
+
+  const service = buildTestService('smartContract', {
+    smartContract: {
+      addContracts: {
+        mock: mockContractDefinition
+      }
+    }
+  });
+
+  await service.manager().authenticate();
+  const contract = service.getContractByName('mock');
+  expect(contract.getAddress()).toEqual(mockContractDefinition.address);
+  expect(typeof contract.foo).toBe('function');
 });
