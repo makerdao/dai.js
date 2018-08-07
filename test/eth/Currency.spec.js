@@ -1,10 +1,12 @@
 import {
   getCurrency,
+  CurrencyRatio,
   ETH,
   PETH,
   WETH,
   DAI,
-  MKR
+  MKR,
+  USD
 } from '../../src/eth/Currency';
 
 test('parses an amount and currency symbol', () => {
@@ -98,7 +100,7 @@ test('throws an error if trying to do math with different types', () => {
   const b = DAI('3.4');
   expect(() => {
     a.plus(b);
-  }).toThrow('Mismatched currency types: MKR, DAI');
+  }).toThrow('Invalid operation: MKR plus DAI');
 });
 
 test('equality of different instances', () => {
@@ -136,4 +138,15 @@ test('convert to ethers.js BigNumber with optional shifting', () => {
 
 test('wrap BigNumber methods', () => {
   expect(DAI(4).shiftedBy(2)).toEqual(DAI(400));
+});
+
+test('ratios', () => {
+  const value = new CurrencyRatio(14, USD, DAI);
+  expect(value.toString()).toEqual('14.00 USD/DAI');
+});
+
+test('ratio math', () => {
+  const value1 = DAI(20);
+  const value2 = new CurrencyRatio(4, USD, DAI);
+  expect(value1.times(value2)).toEqual(USD(80));
 });

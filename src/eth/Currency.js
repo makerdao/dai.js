@@ -1,4 +1,4 @@
-import enums from '../../contracts/tokens';
+import tokens from '../../contracts/tokens';
 import values from 'lodash.values';
 import { utils } from 'ethers';
 const { bigNumberify } = utils;
@@ -55,50 +55,81 @@ export class Currency {
 }
 
 const mathFunctions = [
-  'plus',
-  'minus',
-  'times',
-  'multipliedBy',
-  'div',
-  'dividedBy',
-  'shiftedBy'
+  ['plus'],
+  ['minus'],
+  ['times', 'multipliedBy'],
+  ['div', 'dividedBy'],
+  ['shiftedBy']
 ];
 
 const booleanFunctions = [
-  'isLessThan',
-  'lt',
-  'isLessThanOrEqualTo',
-  'lte',
-  'isGreaterThan',
-  'gt',
-  'isGreaterThanOrEqualTo',
-  'gte'
+  ['isLessThan', 'lt'],
+  ['isLessThanOrEqualTo', 'lte'],
+  ['isGreaterThan', 'gt'],
+  ['isGreaterThanOrEqualTo', 'gte']
 ];
+
+function assertValidOperation(method, left, right) {
+  const message = `Invalid operation: ${left.symbol} ${method} ${right.symbol}`;
+
+  if (right instanceof CurrencyRatio) {
+    // only supporting Currency as a left operand for now, though we could
+    // extend this to support ratio-ratio math if needed
+    switch (method) {
+      case 'times':
+        if (left.isSameType(right.denominator)) return;
+        break;
+      case 'div':
+        if (left.isSameType(right.numerator)) return;
+        break;
+    }
+
+    throw new Error(message);
+  }
+
+  if (right instanceof Currency && !left.isSameType(right)) {
+    throw new Error(message);
+  }
+}
+
+function result(method, left, right, value) {
+  if (right instanceof CurrencyRatio) {
+    switch (method) {
+      case 'times':
+        return right.numerator(value);
+      case 'div':
+        return right.denominator(value);
+    }
+  }
+  return new left.constructor(value);
+}
 
 function bigNumberFnWrapper(method, isBoolean) {
   return function(other) {
-    if (other instanceof Currency && !this.isSameType(other)) {
-      throw new Error(
-        `Mismatched currency types: ${this.symbol}, ${other.symbol}`
-      );
-    }
+    assertValidOperation(method, this, other);
 
     const otherBigNumber =
       other instanceof Currency ? other.toBigNumber() : other;
 
     const value = this.toBigNumber()[method](otherBigNumber);
-    return isBoolean ? value : this.constructor(value);
+    return isBoolean ? value : result(method, this, other, value);
   };
 }
 
 Object.assign(
   Currency.prototype,
-  mathFunctions.reduce((output, method) => {
+  mathFunctions.reduce((output, [method, ...aliases]) => {
     output[method] = bigNumberFnWrapper(method);
+    for (let alias of aliases) {
+      output[alias] = output[method];
+    }
     return output;
   }, {}),
-  booleanFunctions.reduce((output, method) => {
+  booleanFunctions.reduce((output, [method, ...aliases]) => {
     output[method] = bigNumberFnWrapper(method, true);
+    for (let alias of aliases) {
+      output[alias] = output[method];
+    }
     return output;
   }, {})
 );
@@ -135,10 +166,15 @@ function setupWrapper(symbol) {
   return creatorFn;
 }
 
-export const currencies = values(enums).reduce((output, symbol) => {
-  output[symbol] = setupWrapper(symbol);
-  return output;
-}, {});
+export const currencies = values(tokens).reduce(
+  (output, symbol) => {
+    output[symbol] = setupWrapper(symbol);
+    return output;
+  },
+  {
+    USD: setupWrapper('USD')
+  }
+);
 
 // we export both the currencies object above and the individual currencies
 // below because the latter is convenient when you know what you want to use,
@@ -150,6 +186,7 @@ export const ETH = currencies.ETH;
 export const MKR = currencies.MKR;
 export const PETH = currencies.PETH;
 export const WETH = currencies.WETH;
+export const USD = currencies.USD;
 
 export function getCurrency(amount, unit) {
   if (amount instanceof Currency) return amount;
@@ -160,4 +197,13 @@ export function getCurrency(amount, unit) {
     throw new Error(`Couldn't find currency for "${key}"`);
   }
   return ctor(amount, unit.shift);
+}
+
+export class CurrencyRatio extends Currency {
+  constructor(amount, numerator, denominator) {
+    super(amount);
+    this.numerator = numerator;
+    this.denominator = denominator;
+    this.symbol = `${numerator.symbol}/${denominator.symbol}`;
+  }
 }
