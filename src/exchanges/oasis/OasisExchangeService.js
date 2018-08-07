@@ -21,18 +21,16 @@ export default class OasisExchangeService extends PrivateService {
 
   /*
   daiAmount: amount of Dai to sell
-  tokenSymbol: symbol of token to buy
+  currency: currency to buy
   minFillAmount: minimum amount of token being bought required.  If this can't be met, the trade will fail
   */
-  async sellDai(amount, tokenSymbol, minFillAmount = 0) {
+  async sellDai(amount, currency, minFillAmount = 0) {
     const oasisContract = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
     const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
-    const buyTokenAddress = this.get('token')
-      .getToken(tokenSymbol)
-      .address();
+    const buyToken = this.get('token').getToken(currency);
     const daiAmountEVM = daiValueForContract(amount);
     const minFillAmountEVM = daiValueForContract(minFillAmount);
     await this.get('allowance').requireAllowance(
@@ -44,11 +42,12 @@ export default class OasisExchangeService extends PrivateService {
       oasisContract.sellAllAmount(
         daiAddress,
         daiAmountEVM,
-        buyTokenAddress,
+        buyToken.address(),
         minFillAmountEVM,
         { gasLimit: 300000 }
       ),
-      this.get('transactionManager')
+      this.get('transactionManager'),
+      currency
     );
   }
 
