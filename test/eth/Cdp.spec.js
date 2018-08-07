@@ -1,6 +1,5 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 import { DAI, PETH, WETH } from '../../src/eth/Currency';
-import tokens from '../../contracts/tokens';
 
 let cdpService, cdp, defaultAccount, dai;
 
@@ -24,12 +23,6 @@ describe('basic checks', () => {
 
   beforeAll(async () => {
     id = await openCdp();
-  });
-
-  // This test is here arbitrarily to test the new setup functionality
-  test.only('buy MKR', async () => {
-    const mkr = cdpService.get('token').getToken(tokens.MKR);
-    console.log(await mkr.balanceOf(defaultAccount));
   });
 
   test('check properties', () => {
