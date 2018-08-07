@@ -168,7 +168,10 @@ describe('a cdp with collateral', () => {
     });
 
     describe('with drip', () => {
-      afterAll(() => cdpService.get('price').setMkrPrice(0));
+      afterAll(() => {
+        cdp.drawDai('1');
+        cdpService.get('price').setMkrPrice(0);
+      });
 
       test('read MKR fee in USD', async done => {
         //block.timestamp is measured in seconds, so we need to wait at least a second for the fees to get updated
@@ -189,6 +192,14 @@ describe('a cdp with collateral', () => {
           expect(fee).toBeGreaterThan(0);
           done();
         }, 1500);
+      });
+
+      test('wipe debt with non-zero stability fee', async () => {
+        const firstDebtAmount = await cdp.getDebtValueInDai();
+        await cdp.wipeDai('1');
+        const secondDebtAmount = await cdp.getDebtValueInDai();
+
+        expect(secondDebtAmount).toEqual(firstDebtAmount - 1);
       });
     });
 
