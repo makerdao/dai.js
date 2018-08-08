@@ -1,5 +1,13 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
-import { DAI, PETH, WETH, USD, USD_ETH, ETH } from '../../src/eth/Currency';
+import {
+  DAI,
+  PETH,
+  WETH,
+  USD,
+  USD_ETH,
+  ETH,
+  MKR
+} from '../../src/eth/Currency';
 
 let cdpService, cdp, defaultAccount, dai;
 
@@ -169,7 +177,7 @@ describe('a cdp with collateral', () => {
 
     describe('with drip', () => {
       afterAll(async () => {
-        // await cdp.drawDai(1);
+        await cdp.drawDai(1);
         return cdpService.get('price').setMkrPrice(0);
       });
 
@@ -197,11 +205,18 @@ describe('a cdp with collateral', () => {
       });
 
       test('wipe debt with non-zero stability fee', async () => {
+        const mkr = cdpService.get('token').getToken(MKR);
         const firstDebtAmount = await cdp.getDebtValue();
+        const firstMkrBalance = MKR(
+          await mkr.balanceOf(defaultAccount)
+        ).toNumber();
         await cdp.wipeDai(1);
         const secondDebtAmount = await cdp.getDebtValue();
-        await cdp.drawDai(1);
+        const secondMkrBalance = MKR(
+          await mkr.balanceOf(defaultAccount)
+        ).toNumber();
         expect(firstDebtAmount.minus(secondDebtAmount)).toEqual(DAI(1));
+        expect(firstMkrBalance).toBeGreaterThan(secondMkrBalance);
       });
     });
 
