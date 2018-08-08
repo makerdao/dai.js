@@ -193,18 +193,6 @@ export const currencies = values(tokens).reduce(
   }
 );
 
-// we export both the currencies object above and the individual currencies
-// below because the latter is convenient when you know what you want to use,
-// and the former is convenient when you are picking a currency based on a
-// symbol from input
-
-export const DAI = currencies.DAI;
-export const ETH = currencies.ETH;
-export const MKR = currencies.MKR;
-export const PETH = currencies.PETH;
-export const WETH = currencies.WETH;
-export const USD = currencies.USD;
-
 export function getCurrency(amount, unit) {
   if (amount instanceof Currency) return amount;
   if (!unit) throw new Error('Unit not specified');
@@ -247,8 +235,27 @@ const setupRatioWrapper = (numerator, denominator) => {
   return creatorFn;
 };
 
+// we export both the currencies object and the individual currencies because
+// the latter is convenient when you know what you want to use, and the former
+// is convenient when you are picking a currency based on a symbol from input
+
+export const DAI = currencies.DAI;
+export const ETH = currencies.ETH;
+export const MKR = currencies.MKR;
+export const PETH = currencies.PETH;
+export const WETH = currencies.WETH;
+export const USD = currencies.USD;
+
 export const USD_DAI = setupRatioWrapper(USD, DAI);
 export const USD_ETH = setupRatioWrapper(USD, ETH);
 export const USD_MKR = setupRatioWrapper(USD, MKR);
 export const USD_PETH = setupRatioWrapper(USD, PETH);
 export const USD_WETH = setupRatioWrapper(USD, WETH);
+
+Object.assign(currencies, {
+  USD_DAI,
+  USD_ETH,
+  USD_MKR,
+  USD_PETH,
+  USD_WETH
+});
