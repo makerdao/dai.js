@@ -1,6 +1,7 @@
 import decentralizedOasisWithoutProxies from './presets/decentralized-oasis-without-proxies.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
+import mainnet from './presets/mainnet.json';
 import merge from 'lodash.merge';
 import { mergeServiceConfig } from './index';
 
@@ -41,6 +42,9 @@ function loadPreset(name) {
       break;
     case 'kovan':
       preset = kovan;
+      break;
+    case 'mainnet':
+      preset = mainnet;
       break;
     default:
       throw new ConfigPresetNotFoundError(name);
