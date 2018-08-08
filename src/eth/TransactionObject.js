@@ -3,7 +3,7 @@ import TransactionLifeCycle from '../eth/TransactionLifeCycle';
 import debug from 'debug';
 import { ETH } from './Currency';
 
-const log = debug('makerjs:transactionObject');
+const log = debug('dai:transactionObject');
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(
