@@ -46,6 +46,8 @@ console.log(info);
 
 For full documentation, please refer to [https://makerdao.com/documentation/][docs].
 
+For example code that consumes the library, check out [this repository](https://github.com/makerdao/integration-examples).
+
 ## Developing
 
 1. `git clone https://github.com/makerdao/dai.js`
