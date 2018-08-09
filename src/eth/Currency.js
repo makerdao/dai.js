@@ -72,7 +72,8 @@ const booleanFunctions = [
   ['isLessThan', 'lt'],
   ['isLessThanOrEqualTo', 'lte'],
   ['isGreaterThan', 'gt'],
-  ['isGreaterThanOrEqualTo', 'gte']
+  ['isGreaterThanOrEqualTo', 'gte'],
+  ['eq']
 ];
 
 function assertValidOperation(method, left, right) {

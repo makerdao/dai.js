@@ -162,6 +162,11 @@ describe('a cdp with collateral', () => {
     expect(collateral).toEqual(USD(80));
   });
 
+  test('read collateralization ratio when there is no debt', async () => {
+    const ratio = await cdp.getCollateralizationRatio();
+    expect(ratio).toEqual(Infinity);
+  });
+
   describe('with debt', () => {
     beforeAll(() => cdp.drawDai(5));
 

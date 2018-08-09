@@ -209,8 +209,11 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async getCollateralizationRatio(cdpId) {
-    const [usdDebt, pethPrice, pethCollateral] = await Promise.all([
-      this.getDebtValue(cdpId, USD),
+    const usdDebt = await this.getDebtValue(cdpId, USD);
+    // avoid division by 0
+    if (usdDebt.eq(0)) return Infinity;
+
+    const [pethPrice, pethCollateral] = await Promise.all([
       this.get('price').getPethPrice(),
       this.getCollateralValue(cdpId, PETH)
     ]);
