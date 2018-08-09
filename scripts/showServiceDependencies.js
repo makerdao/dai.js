@@ -6,10 +6,6 @@ import { defaultServices } from '../src/config';
 import chalk from 'chalk';
 import times from 'lodash.times';
 
-if (!process.env.DEBUG) {
-  process.env.DEBUG = 'makerjs:container';
-}
-
 const config = {};
 for (let key in defaultServices) {
   config[key] = true;

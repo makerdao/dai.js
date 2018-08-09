@@ -32,17 +32,25 @@ test('can take an options object as first argument', () => {
 });
 
 test('it merges url, privateKey, provider, and web3 options', () => {
-  const config = ConfigFactory.create('http', {
-    url: 'http://foo.net',
-    privateKey: '0xf00',
-    provider: {
-      type: 'INFURA'
+  const config = ConfigFactory.create(
+    'http',
+    {
+      url: 'http://foo.net',
+      privateKey: '0xf00',
+      provider: {
+        type: 'INFURA'
+      },
+      web3: {
+        statusTimerDelay: 10000,
+        usePresetProvider: true
+      }
     },
-    web3: {
-      statusTimerDelay: 10000,
-      usePresetProvider: true
+    {
+      defaults: {
+        web3: 'Web3Service'
+      }
     }
-  });
+  );
 
   expect(config.services.web3).toEqual([
     'Web3Service',

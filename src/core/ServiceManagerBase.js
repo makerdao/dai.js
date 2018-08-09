@@ -3,7 +3,7 @@ import ServiceState from './ServiceState';
 import ServiceType, { serviceTypeTransitions } from './ServiceType';
 import debug from 'debug';
 
-const log = debug('makerjs:ServiceManagerBase');
+const log = debug('dai:ServiceManagerBase');
 
 function _promisify(unsafeCallback) {
   return new Promise((resolve, reject) => {
