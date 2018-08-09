@@ -251,9 +251,7 @@ test('deauthenticating a dependency should deauthenticate the dependency and all
       });
   });
 });
-/**
- *
- */
+
 class DummyService extends ServiceBase {
   /**
    * @param {string} name

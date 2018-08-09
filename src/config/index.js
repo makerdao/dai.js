@@ -1,44 +1,21 @@
 import merge from 'lodash.merge';
 
-// TODO this should probably move to DefaultServiceProvider
-export const defaultServices = {
-  allowance: 'AllowanceService',
-  cache: 'CacheService',
-  cdp: 'EthereumCdpService',
-  conversion: 'TokenConversionService',
-  event: 'EventService',
-  // exchange: intentionally omitted
-  gasEstimator: 'GasEstimatorService',
-  log: 'ConsoleLogger',
-  price: 'PriceService',
-  smartContract: 'SmartContractService',
-  timer: 'TimerService',
-  token: 'EthereumTokenService',
-  transactionManager: 'TransactionManager',
-  web3: 'Web3Service'
-};
-
-const disabledServices = {
-  event: 'NullEventService',
-  log: 'NullLogger'
-};
-
-function resolveNameForBoolean(role, bool) {
+function resolveNameForBoolean(role, bool, { defaults, disabled }) {
   let name;
   if (bool) {
-    name = defaultServices[role];
+    name = defaults[role];
     if (!name) throw new Error(`The "${role}" service has no default`);
   } else {
-    name = disabledServices[role];
+    name = disabled[role];
     if (!name) throw new Error(`The "${role}" service cannot be disabled`);
   }
   return name;
 }
 
-export function standardizeConfig(role, config, resolveDefaults = true) {
+export function standardizeConfig(role, config, resolver) {
   if (config instanceof Array) {
-    if (typeof config[0] == 'boolean' && resolveDefaults) {
-      return [resolveNameForBoolean(role, config[0]), config[1]];
+    if (typeof config[0] == 'boolean' && resolver) {
+      return [resolveNameForBoolean(role, config[0], resolver), config[1]];
     }
     return config;
   }
@@ -57,13 +34,13 @@ export function standardizeConfig(role, config, resolveDefaults = true) {
       break;
     case 'object':
       // handle a settings object -- use the default version
-      className = resolveDefaults ? defaultServices[role] : true;
+      className = resolver ? resolveNameForBoolean(role, true, resolver) : true;
       settings = config;
       // TODO could also handle a service instance or constructor here
       break;
     case 'boolean':
-      className = resolveDefaults
-        ? resolveNameForBoolean(role, config)
+      className = resolver
+        ? resolveNameForBoolean(role, config, resolver)
         : config;
       settings = {};
       break;
@@ -74,9 +51,9 @@ export function standardizeConfig(role, config, resolveDefaults = true) {
   return [className, settings];
 }
 
-export function mergeServiceConfig(role, sink, source) {
-  sink = standardizeConfig(role, sink);
-  source = standardizeConfig(role, source, false);
+export function mergeServiceConfig(role, sink, source, resolver) {
+  sink = standardizeConfig(role, sink, resolver);
+  source = standardizeConfig(role, source);
   if (sink[0] === false || source[0] === false) return source;
 
   return [

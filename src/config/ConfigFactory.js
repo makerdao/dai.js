@@ -58,7 +58,7 @@ export default class ConfigFactory {
    * @param {string} preset
    * @param {object} options
    */
-  static create(preset, options = {}) {
+  static create(preset, options = {}, resolver) {
     if (typeof preset !== 'string') {
       options = preset;
       preset = options.preset;
@@ -75,7 +75,8 @@ export default class ConfigFactory {
       config.services[role] = mergeServiceConfig(
         role,
         config.services[role],
-        options[role]
+        options[role],
+        resolver
       );
     }
 
