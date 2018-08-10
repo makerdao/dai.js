@@ -38,7 +38,7 @@ test('it merges url, privateKey, provider, and web3 options', () => {
       url: 'http://foo.net',
       privateKey: '0xf00',
       provider: {
-        type: 'INFURA'
+        timeout: 1000
       },
       web3: {
         statusTimerDelay: 10000,
@@ -59,7 +59,8 @@ test('it merges url, privateKey, provider, and web3 options', () => {
       usePresetProvider: true,
       privateKey: '0xf00',
       provider: {
-        type: 'INFURA',
+        timeout: 1000,
+        type: 'HTTP',
         url: 'http://foo.net'
       }
     }

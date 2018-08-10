@@ -354,21 +354,26 @@ export default class Web3Service extends PrivateService {
   _buildWeb3Provider(providerSettings) {
     let provider;
     const { url, network, infuraApiKey, type } = providerSettings;
+    const timeout = Number(providerSettings.timeout || 0);
     const cacheKey = 'provider:' + JSON.stringify(providerSettings);
     const cache = this.get('cache');
     if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
 
     switch (type) {
       case Web3ProviderType.HTTP:
-        provider = new Web3.providers.HttpProvider(url);
+        provider = new Web3.providers.HttpProvider(url, timeout);
         break;
       case Web3ProviderType.INFURA:
         provider = new Web3.providers.HttpProvider(
-          'https://' + network + '.infura.io/' + infuraApiKey
+          `https://${network}.infura.io/${infuraApiKey || ''}`,
+          timeout
         );
         break;
       case Web3ProviderType.TEST:
-        provider = new Web3.providers.HttpProvider('http://127.1:2000');
+        provider = new Web3.providers.HttpProvider(
+          'http://127.1:2000',
+          timeout
+        );
         break;
       default:
         throw new Error('Illegal web3 provider type: ' + type);
