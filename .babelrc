@@ -3,5 +3,5 @@
     "env",
     "stage-2"
   ],
-  "plugins": ["transform-regenerator"]
+  "plugins": ["transform-runtime"]
 }

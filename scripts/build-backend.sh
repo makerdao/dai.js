@@ -8,9 +8,9 @@ else
   rm -rf dist
 fi
 
-babel contracts --out-dir ./dist/contracts
-babel contracts/addresses --out-dir ./dist/contracts/addresses
-babel src --out-dir ./dist/src
+babel -q contracts --out-dir ./dist/contracts
+babel -q contracts/addresses --out-dir ./dist/contracts/addresses
+babel -q src --out-dir ./dist/src
 
 copyfiles \
   README.md \
@@ -22,5 +22,3 @@ copyfiles \
   contracts/addresses/daiV1.json \
   contracts/addresses/exchanges.json \
   dist
-
-cp package-lock.json dist/npm-shrinkwrap.json
