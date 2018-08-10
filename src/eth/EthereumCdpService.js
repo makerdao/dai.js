@@ -83,12 +83,7 @@ export default class EthereumCdpService extends PrivateService {
   async lockWeth(cdpId, amount, unit = WETH) {
     const wethPerPeth = await this.get('price').getWethToPethRatio();
     const weth = getCurrency(amount, unit);
-
-    try {
-      await this._conversionService().convertWethToPeth(weth);
-    } catch (err) {
-      console.log(err);
-    }
+    await this._conversionService().convertWethToPeth(weth);
 
     return this.lockPeth(cdpId, weth.div(wethPerPeth));
   }
