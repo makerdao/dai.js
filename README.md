@@ -52,8 +52,6 @@ For example code that consumes the library, check out [this repository](https://
 
 1. `git clone https://github.com/makerdao/dai.js`
 2. `npm install`
-3. Start the dev server using `npm start`
-3. Open [http://localhost:9000](http://localhost:9000)
 
 ### Running the tests
 
@@ -65,7 +63,6 @@ If you want to deploy the contracts to a test chain independently from the test 
 
 ### Commands
 
-- `npm start` - start the dev server
 - `npm run build:backend` - create backend build in `dist` folder
 - `npm run build:frontend` - create a UMD build in `dist` folder
 - `npm run lint` - run an ESLint check
