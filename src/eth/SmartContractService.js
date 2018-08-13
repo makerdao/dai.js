@@ -4,7 +4,6 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
-import SmartContractInspector from './SmartContractInspector';
 
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
@@ -150,13 +149,6 @@ export default class SmartContractService extends PublicService {
         values.forEach(v => (result[v[0]] = v.length > 2 ? v.slice(1) : v[1]));
         return result;
       });
-  }
-
-  inspect() {
-    const contractNames = [contracts.SAI_TUB];
-    const inspector = new SmartContractInspector(this);
-    contractNames.forEach(n => inspector.watch(n));
-    return inspector.inspect();
   }
 
   hasContract(name) {
