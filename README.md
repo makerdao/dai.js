@@ -29,14 +29,14 @@ npm install @makerdao/dai
 
 Then include it:
 
-```
+```js
 import Maker from '@makerdao/dai';
 // or:
 const Maker = require('@makerdao/dai');
 ```
 
 Example:
-```
+```js
 import Maker from '@makerdao/dai';
 const maker = Maker.create('test');
 const cdp = await maker.openCdp();
