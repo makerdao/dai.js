@@ -26,7 +26,8 @@ export default class OasisExchangeService extends PrivateService {
   */
   async sellDai(amount, currency, minFillAmount = 0) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
+      contracts.MAKER_OTC,
+      { hybrid: false }
     );
     const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
@@ -58,7 +59,8 @@ export default class OasisExchangeService extends PrivateService {
   */
   async buyDai(amount, tokenSymbol, maxFillAmount = UINT256_MAX) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
+      contracts.MAKER_OTC,
+      { hybrid: false }
     );
     const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
@@ -94,7 +96,8 @@ export default class OasisExchangeService extends PrivateService {
     overrides
   ) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
+      contracts.MAKER_OTC,
+      { hybrid: false }
     );
     return new TransactionObject(
       oasisContract.offer(

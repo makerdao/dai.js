@@ -19,6 +19,9 @@ export default class TransactionManager extends PublicService {
     businessObject = null,
     parseLogs = null
   ) {
+    // do nothing if it's already a transaction object
+    if (contractTransaction._original) return contractTransaction;
+
     const tx = new TransactionObject(
       contractTransaction,
       this.get('web3'),

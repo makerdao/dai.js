@@ -42,7 +42,8 @@ export default class Cdp {
 
   _newCdpPromise() {
     const tubContract = this._smartContractService.getContractByName(
-      contracts.SAI_TUB
+      contracts.SAI_TUB,
+      { hybrid: false }
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
     const contractPromise = tubContract.open();

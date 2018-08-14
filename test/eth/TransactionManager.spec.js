@@ -35,7 +35,7 @@ test('should reuse the same web3 and log service in test services', done => {
 test('should create a Transaction object based on a Contract transaction promise', done => {
   buildTestServices().then(services => {
     const contractTransaction = services.contract
-        .getContractByName(tokens.DAI)
+        .getContractByName(tokens.DAI, { hybrid: false })
         .approve(services.defaultAccount, '1000000000000000000'),
       businessObject = { x: 1 },
       hybrid = services.txMgr.createTransactionHybrid(
@@ -59,7 +59,7 @@ test('should create a Transaction object based on a Contract transaction promise
 test('should register all created transaction hybrids', done => {
   buildTestServices().then(services => {
     const contractTransaction = services.contract
-        .getContractByName(tokens.DAI)
+        .getContractByName(tokens.DAI, { hybrid: false })
         .approve(services.defaultAccount, '1000000000000000000'),
       hybrids = [
         services.txMgr.createTransactionHybrid(contractTransaction),
@@ -76,7 +76,7 @@ test('should register all created transaction hybrids', done => {
 test('should add businessObject functions, getters, and setters', done => {
   buildTestServices().then(services => {
     const contractTransaction = services.contract
-        .getContractByName(tokens.DAI)
+        .getContractByName(tokens.DAI, { hybrid: false })
         .approve(services.defaultAccount, '1000000000000000000'),
       businessObject = {
         a: 1,
@@ -114,7 +114,7 @@ test('should add businessObject functions, getters, and setters', done => {
 test('should add TransactionLifeCycle functions', async () => {
   const services = await buildTestServices();
   const contractTransaction = services.contract
-      .getContractByName(tokens.DAI)
+      .getContractByName(tokens.DAI, { hybrid: false })
       .approve(services.defaultAccount, '1000000000000000000'),
     businessObject = {
       a: 1,

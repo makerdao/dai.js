@@ -5,9 +5,51 @@ import networks from '../../contracts/networks';
 import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
 
+function wrapContract(contract, name, abi, txManager) {
+  const nonConstantFns = abi.reduce((acc, { type, constant, name }) => {
+    if (type === 'function' && !constant) acc[name] = true;
+    return acc;
+  }, {});
+
+  // FIXME this is only used for contract-explorer and should be moved there
+  const firstWrapper = ObjectWrapper.addWrapperInterface(
+    { _original: contract },
+    contract,
+    [],
+    true,
+    false,
+    false,
+    {
+      afterCall: (k, args, result) => {
+        if (typeof result === 'object') {
+          result._callInfo = {
+            contract: name,
+            call: k,
+            args: args
+          };
+        }
+        return result;
+      }
+    }
+  );
+
+  const proxy = new Proxy(firstWrapper, {
+    get(target, key) {
+      if (nonConstantFns[key] && txManager) {
+        return (...args) =>
+          txManager.createTransactionHybrid(target[key](...args));
+      }
+
+      return target[key];
+    }
+  });
+
+  return proxy;
+}
+
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
-    super(name, ['web3', 'log']);
+    super(name, ['web3', 'log', 'transactionManager']);
   }
 
   initialize(settings = {}) {
@@ -23,38 +65,27 @@ export default class SmartContractService extends PublicService {
     }
   }
 
-  getContractByAddressAndAbi(address, abi, name = null) {
+  getContractByAddressAndAbi(address, abi, { name, hybrid = true } = {}) {
     if (!address) throw Error('Contract address is required');
     if (!name) name = this.lookupContractName(address);
 
     const signer = this.get('web3').ethersSigner(),
       contract = new Contract(address, abi, signer);
 
-    return ObjectWrapper.addWrapperInterface(
-      { _original: contract },
+    return wrapContract(
       contract,
-      [],
-      true,
-      false,
-      false,
-      {
-        afterCall: (k, args, result) => {
-          if (typeof result === 'object') {
-            result._callInfo = {
-              contract: name,
-              call: k,
-              args: args
-            };
-          }
-          return result;
-        }
-      }
+      name,
+      abi,
+      hybrid ? this.get('transactionManager') : null
     );
   }
 
-  getContractByName(name, version = null) {
+  getContractByName(name, { version, hybrid = true } = {}) {
     const info = this._getContractInfo(name, version);
-    return this.getContractByAddressAndAbi(info.address, info.abi, name);
+    return this.getContractByAddressAndAbi(info.address, info.abi, {
+      name,
+      hybrid
+    });
   }
 
   lookupContractName(address) {
