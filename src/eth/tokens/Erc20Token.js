@@ -1,17 +1,10 @@
 import { currencies, getCurrency } from '../Currency';
 
 export default class Erc20Token {
-  constructor(
-    contract,
-    web3Service,
-    decimals = 18,
-    transactionManager,
-    symbol
-  ) {
+  constructor(contract, web3Service, decimals = 18, symbol) {
     this._contract = contract;
     this._web3Service = web3Service;
     this._decimals = decimals;
-    this._transactionManager = transactionManager;
     this.symbol = symbol;
     this._currency = currencies[symbol];
   }
@@ -43,33 +36,22 @@ export default class Erc20Token {
   }
 
   approve(spender, value, unit = this._currency) {
-    return this._transact(
-      'approve',
-      spender,
-      this._valueForContract(value, unit)
-    );
+    return this._contract.approve(spender, this._valueForContract(value, unit));
   }
 
   approveUnlimited(spender) {
-    return this._transact('approve', spender, -1);
+    return this._contract.approve(spender, -1);
   }
 
   transfer(to, value, unit = currencies[this.symbol]) {
-    return this._transact('transfer', to, this._valueForContract(value, unit));
+    return this._contract.transfer(to, this._valueForContract(value, unit));
   }
 
   transferFrom(from, to, value, unit = currencies[this.symbol]) {
-    return this._transact(
-      'transferFrom',
+    return this._contract.transferFrom(
       from,
       to,
       this._valueForContract(value, unit)
-    );
-  }
-
-  _transact(method, ...args) {
-    return this._transactionManager.createTransactionHybrid(
-      this._contract[method](...args)
     );
   }
 }

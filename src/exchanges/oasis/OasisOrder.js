@@ -19,14 +19,14 @@ export default class OasisOrder {
     return this._hybrid.getOriginalTransaction().timestamp();
   }
 
-  transact(oasisContract, transaction, transactionService) {
-    return transactionService.createTransactionHybrid(
+  transact(oasisContract, transaction, transactionManager) {
+    return transactionManager.createTransactionHybrid(
       transaction,
       this,
       receiptLogs => {
         const LogTradeEvent = oasisContract.getInterface().events.LogTrade;
         const LogTradeTopic = utils.keccak256(
-          transactionService.get('web3')._web3.toHex(LogTradeEvent.signature)
+          transactionManager.get('web3')._web3.toHex(LogTradeEvent.signature)
         ); //find a way to convert string to hex without web3
         const receiptEvents = receiptLogs.filter(e => {
           return (
@@ -52,12 +52,12 @@ export class OasisBuyOrder extends OasisOrder {
     this._unit = DAI;
   }
 
-  static build(oasisContract, transaction, transactionService) {
+  static build(oasisContract, transaction, transactionManager) {
     const order = new OasisBuyOrder();
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionService
+      transactionManager
     );
     return order._hybrid;
   }
@@ -70,12 +70,12 @@ export class OasisSellOrder extends OasisOrder {
     this._unit = currency;
   }
 
-  static build(oasisContract, transaction, transactionService, currency) {
+  static build(oasisContract, transaction, transactionManager, currency) {
     const order = new OasisSellOrder(currency);
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionService
+      transactionManager
     );
     return order._hybrid;
   }

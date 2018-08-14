@@ -5,8 +5,10 @@ import { USD } from './Currency';
 export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
-    this._transactionManager = this._cdpService.get('transactionManager');
     this._smartContractService = this._cdpService.get('smartContract');
+    this._transactionManager = this._smartContractService.get(
+      'transactionManager'
+    );
     if (cdpId === null) {
       this._cdpIdPromise = this._newCdpPromise();
     } else {
