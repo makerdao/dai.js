@@ -24,7 +24,9 @@ function wrapContract(contract, name, abi, txManager) {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
           return (...args) =>
-            txManager.createTransactionHybrid(contract[key](...args));
+            txManager.createHybridTx(contract[key](...args), {
+              metadata: { contract: name, method: key, args }
+            });
         }
 
         return contract[key];

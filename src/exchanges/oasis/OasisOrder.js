@@ -20,10 +20,9 @@ export default class OasisOrder {
   }
 
   transact(oasisContract, transaction, transactionManager) {
-    return transactionManager.createTransactionHybrid(
-      transaction,
-      this,
-      receiptLogs => {
+    return transactionManager.createHybridTx(transaction, {
+      businessObject: this,
+      parseLogs: receiptLogs => {
         const LogTradeEvent = oasisContract.interface.events.LogTrade;
         const LogTradeTopic = utils.keccak256(
           transactionManager.get('web3')._web3.toHex(LogTradeEvent.signature)
@@ -41,7 +40,7 @@ export default class OasisOrder {
         });
         this._fillAmount = this._unit.wei(total.toString());
       }
-    );
+    });
   }
 }
 

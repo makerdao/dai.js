@@ -38,10 +38,9 @@ test('should create a Transaction object based on a Contract transaction promise
         .getContractByName(tokens.DAI, { hybrid: false })
         .approve(services.defaultAccount, '1000000000000000000'),
       businessObject = { x: 1 },
-      hybrid = services.txMgr.createTransactionHybrid(
-        contractTransaction,
+      hybrid = services.txMgr.createHybridTx(contractTransaction, {
         businessObject
-      );
+      });
 
     expect(contractTransaction.toString()).toEqual('[object Promise]');
     expect(hybrid.toString()).toEqual('[object Promise]');
@@ -62,9 +61,9 @@ test('should register all created transaction hybrids', done => {
         .getContractByName(tokens.DAI, { hybrid: false })
         .approve(services.defaultAccount, '1000000000000000000'),
       hybrids = [
-        services.txMgr.createTransactionHybrid(contractTransaction),
-        services.txMgr.createTransactionHybrid(contractTransaction),
-        services.txMgr.createTransactionHybrid(contractTransaction)
+        services.txMgr.createHybridTx(contractTransaction),
+        services.txMgr.createHybridTx(contractTransaction),
+        services.txMgr.createHybridTx(contractTransaction)
       ];
 
     expect(services.txMgr.getTransactions().length).toBe(3);
@@ -90,10 +89,9 @@ test('should add businessObject functions, getters, and setters', done => {
         add2: b => 10 + b,
         mul2: (b, c) => 10 * b * c
       },
-      hybrid = services.txMgr.createTransactionHybrid(
-        contractTransaction,
+      hybrid = services.txMgr.createHybridTx(contractTransaction, {
         businessObject
-      );
+      });
 
     expect(hybrid.getA()).toBe(1);
     expect(
@@ -128,10 +126,9 @@ test('should add TransactionLifeCycle functions', async () => {
       add2: b => 10 + b,
       mul2: (b, c) => 10 * b * c
     },
-    hybrid = services.txMgr.createTransactionHybrid(
-      contractTransaction,
+    hybrid = services.txMgr.createHybridTx(contractTransaction, {
       businessObject
-    );
+    });
 
   expect(typeof hybrid._assertBlockHashUnchanged).toBe('undefined');
   expect(typeof hybrid.timeStampSubmitted).toBe('undefined');

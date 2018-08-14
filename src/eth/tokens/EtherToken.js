@@ -39,7 +39,7 @@ export default class EtherToken {
       //gasPrice: 500000000
     });
 
-    return this._transactionManager.createTransactionHybrid(
+    return this._transactionManager.createHybridTx(
       tx.then(tx => ({ hash: tx }))
     );
   }
@@ -52,7 +52,7 @@ export default class EtherToken {
       value: valueInWei
     });
 
-    return this._transactionManager.createTransactionHybrid(
+    return this._transactionManager.createHybridTx(
       tx.then(tx => ({ hash: tx }))
     );
   }

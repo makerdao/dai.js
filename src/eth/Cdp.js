@@ -48,9 +48,12 @@ export default class Cdp {
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
     const contractPromise = tubContract.open();
-    this._transactionObject = this._transactionManager.createTransactionHybrid(
+    this._transactionObject = this._transactionManager.createHybridTx(
       contractPromise,
-      this
+      {
+        businessObject: this,
+        metadata: { contract: contracts.SAI_TUB, method: 'open' }
+      }
     );
 
     return Promise.all([captureCdpIdPromise, contractPromise]).then(
