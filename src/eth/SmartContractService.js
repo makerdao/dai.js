@@ -2,47 +2,40 @@ import PublicService from '../core/PublicService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
-import ObjectWrapper from '../utils/ObjectWrapper';
 import { Contract } from 'ethers';
 
 function wrapContract(contract, name, abi, txManager) {
-  const nonConstantFns = abi.reduce((acc, { type, constant, name }) => {
-    if (type === 'function' && !constant) acc[name] = true;
-    return acc;
-  }, {});
+  const nonConstantFns = {};
 
-  // FIXME this is only used for contract-explorer and should be moved there
-  const firstWrapper = ObjectWrapper.addWrapperInterface(
-    { _original: contract },
-    contract,
-    [],
-    true,
-    false,
-    false,
+  for (let { type, constant, name } of abi) {
+    if (type === 'function' && !constant) nonConstantFns[name] = true;
+  }
+
+  // The functions in ethers.Contract are set up as read-only, non-configurable
+  // properties, which means if we try to change their values with Proxy, we
+  // get an error. See https://stackoverflow.com/a/48495509/56817 for more
+  // detail.
+  //
+  // But that only happens if the contract is specified as the first argument
+  // to Proxy. So we don't do that. Go on, wag your finger.
+  const proxy = new Proxy(
+    {},
     {
-      afterCall: (k, args, result) => {
-        if (typeof result === 'object') {
-          result._callInfo = {
-            contract: name,
-            call: k,
-            args: args
-          };
+      get(target, key) {
+        if (nonConstantFns[key] && txManager) {
+          return (...args) =>
+            txManager.createTransactionHybrid(contract[key](...args));
         }
-        return result;
+
+        return contract[key];
+      },
+
+      set(target, key, value) {
+        contract[key] = value;
+        return true;
       }
     }
   );
-
-  const proxy = new Proxy(firstWrapper, {
-    get(target, key) {
-      if (nonConstantFns[key] && txManager) {
-        return (...args) =>
-          txManager.createTransactionHybrid(target[key](...args));
-      }
-
-      return target[key];
-    }
-  });
 
   return proxy;
 }
@@ -176,7 +169,7 @@ export default class SmartContractService extends PublicService {
         return Promise.all(valuePromises);
       })
       .then(values => {
-        const result = { __self: contract.getAddress() + '; ' + name };
+        const result = { __self: contract.address + '; ' + name };
         values.forEach(v => (result[v[0]] = v.length > 2 ? v.slice(1) : v[1]));
         return result;
       });

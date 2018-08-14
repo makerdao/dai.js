@@ -23,41 +23,23 @@ test('getTokenVersions returns token versions using remote blockchain', () => {
   expect(tokenVersions[tokens.ETH]).toEqual([1]);
 
   expect(
-    ethereumTokenService
-      .getToken(tokens.MKR)
-      ._contract.getAddress()
-      .toUpperCase()
+    ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase()
   ).toBe(
-    ethereumTokenService
-      .getToken(tokens.MKR, 2)
-      ._contract.getAddress()
-      .toUpperCase()
+    ethereumTokenService.getToken(tokens.MKR, 2)._contract.address.toUpperCase()
   );
 });
 
 test('getToken returns token object of correct version', () => {
   expect(
-    ethereumTokenService
-      .getToken(tokens.MKR)
-      ._contract.getAddress()
-      .toUpperCase()
+    ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase()
   ).toBe(
-    ethereumTokenService
-      .getToken(tokens.MKR, 2)
-      ._contract.getAddress()
-      .toUpperCase()
+    ethereumTokenService.getToken(tokens.MKR, 2)._contract.address.toUpperCase()
   );
 
   expect(
-    ethereumTokenService
-      .getToken(tokens.MKR)
-      ._contract.getAddress()
-      .toUpperCase()
+    ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase()
   ).not.toBe(
-    ethereumTokenService
-      .getToken(tokens.MKR, 1)
-      ._contract.getAddress()
-      .toUpperCase()
+    ethereumTokenService.getToken(tokens.MKR, 1)._contract.address.toUpperCase()
   );
 });
 

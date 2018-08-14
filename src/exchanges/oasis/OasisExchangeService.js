@@ -34,10 +34,7 @@ export default class OasisExchangeService extends PrivateService {
     const buyToken = this.get('token').getToken(currency);
     const daiAmountEVM = daiValueForContract(amount);
     const minFillAmountEVM = daiValueForContract(minFillAmount);
-    await this.get('allowance').requireAllowance(
-      DAI,
-      oasisContract.getAddress()
-    );
+    await this.get('allowance').requireAllowance(DAI, oasisContract.address);
     return OasisSellOrder.build(
       oasisContract,
       oasisContract.sellAllAmount(
@@ -69,10 +66,7 @@ export default class OasisExchangeService extends PrivateService {
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-    await this.get('allowance').requireAllowance(
-      WETH,
-      oasisContract.getAddress()
-    );
+    await this.get('allowance').requireAllowance(WETH, oasisContract.address);
     return OasisBuyOrder.build(
       oasisContract,
       oasisContract.buyAllAmount(

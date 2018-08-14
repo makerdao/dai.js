@@ -24,14 +24,14 @@ export default class OasisOrder {
       transaction,
       this,
       receiptLogs => {
-        const LogTradeEvent = oasisContract.getInterface().events.LogTrade;
+        const LogTradeEvent = oasisContract.interface.events.LogTrade;
         const LogTradeTopic = utils.keccak256(
           transactionManager.get('web3')._web3.toHex(LogTradeEvent.signature)
         ); //find a way to convert string to hex without web3
         const receiptEvents = receiptLogs.filter(e => {
           return (
             e.topics[0].toLowerCase() === LogTradeTopic.toLowerCase() &&
-            e.address.toLowerCase() === oasisContract.getAddress().toLowerCase()
+            e.address.toLowerCase() === oasisContract.address.toLowerCase()
           );
         });
         let total = utils.bigNumberify('0');

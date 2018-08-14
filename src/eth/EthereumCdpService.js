@@ -55,14 +55,8 @@ export default class EthereumCdpService extends PrivateService {
     const hexCdpId = numberToBytes32(cdpId);
 
     return Promise.all([
-      this.get('allowance').requireAllowance(
-        MKR,
-        this._tubContract().getAddress()
-      ),
-      this.get('allowance').requireAllowance(
-        DAI,
-        this._tubContract().getAddress()
-      )
+      this.get('allowance').requireAllowance(MKR, this._tubContract().address),
+      this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]).then(() => {
       return this._tubContract().shut(hexCdpId, { gasLimit: 4000000 });
     });
@@ -87,7 +81,7 @@ export default class EthereumCdpService extends PrivateService {
 
     await this.get('allowance').requireAllowance(
       PETH,
-      this._tubContract().getAddress()
+      this._tubContract().address
     );
     return this._tubContract().lock(hexCdpId, value);
   }
@@ -109,14 +103,8 @@ export default class EthereumCdpService extends PrivateService {
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
     await Promise.all([
-      this.get('allowance').requireAllowance(
-        MKR,
-        this._tubContract().getAddress()
-      ),
-      this.get('allowance').requireAllowance(
-        DAI,
-        this._tubContract().getAddress()
-      )
+      this.get('allowance').requireAllowance(MKR, this._tubContract().address),
+      this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]);
     return this._tubContract().wipe(hexCdpId, value, { gasLimit: 4000000 });
   }

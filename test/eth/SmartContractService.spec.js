@@ -38,10 +38,7 @@ test('getContractByName should return a functioning contract', done => {
         .gem()
         .then(data => {
           expect(data.toString().toUpperCase()).toEqual(
-            service
-              .getContractByName(tokens.WETH)
-              .getAddress()
-              .toUpperCase()
+            service.getContractByName(tokens.WETH).address.toUpperCase()
           );
           done();
         });
@@ -105,6 +102,6 @@ test('parameterized smart contract input', async () => {
 
   await service.manager().authenticate();
   const contract = service.getContractByName('mock');
-  expect(contract.getAddress()).toEqual(mockContractDefinition.address);
+  expect(contract.address).toEqual(mockContractDefinition.address);
   expect(typeof contract.foo).toBe('function');
 });

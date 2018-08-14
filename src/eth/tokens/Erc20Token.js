@@ -24,7 +24,7 @@ export default class Erc20Token {
   }
 
   address() {
-    return this._contract.getAddress();
+    return this._contract.address;
   }
 
   _valueForContract(value, unit = this._currency) {

@@ -31,8 +31,7 @@ export default class Cdp {
     const ethersSigner = this._smartContractService.get('web3').ethersSigner();
 
     return new Promise(resolve => {
-      // Event handlers need to be registered on the inner Ethers.js contract, for now
-      tubContract._original.onlognewcup = function(address, cdpIdBytes32) {
+      tubContract.onlognewcup = function(address, cdpIdBytes32) {
         if (ethersSigner.address.toLowerCase() == address.toLowerCase()) {
           const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
           this.removeListener();

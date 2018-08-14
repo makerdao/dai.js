@@ -20,9 +20,7 @@ export default class TokenConversionService extends PrivateService {
 
     await this.get('allowance').requireAllowance(
       WETH,
-      this.get('smartContract')
-        .getContractByName(contracts.SAI_TUB)
-        .getAddress()
+      this.get('smartContract').getContractByName(contracts.SAI_TUB).address
     );
     return pethToken.join(amount, unit);
   }
