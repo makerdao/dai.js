@@ -58,7 +58,7 @@ export default class EthereumCdpService extends PrivateService {
 
   shut(cdpId) {
     const hexCdpId = numberToBytes32(cdpId);
-
+    console.log('just before allowance in shut');
     return Promise.all([
       this.get('allowance').requireAllowance(
         MKR,
@@ -69,8 +69,12 @@ export default class EthereumCdpService extends PrivateService {
         this._tubContract().getAddress()
       )
     ]).then(() => {
+      console.log('got past allowances in shut');
       return this._transactionManager().createTransactionHybrid(
-        this._tubContract().shut(hexCdpId, { gasLimit: 4000000 })
+        this._tubContract().shut(hexCdpId, {
+          gasLimit: 4000000,
+          gasPrice: 12000000000
+        })
       );
     });
   }
@@ -91,13 +95,17 @@ export default class EthereumCdpService extends PrivateService {
   async lockPeth(cdpId, amount, unit = PETH) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-
+    console.log('just before allowance in peth');
     await this.get('allowance').requireAllowance(
       PETH,
       this._tubContract().getAddress()
     );
+    console.log('got past allowance in lock peth');
     return this._transactionManager().createTransactionHybrid(
-      this._tubContract().lock(hexCdpId, value)
+      this._tubContract().lock(hexCdpId, value, {
+        gasLimit: 4000000,
+        gasPrice: 12000000000
+      })
     );
   }
 
@@ -110,19 +118,22 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  drawDai(cdpId, amount, unit = DAI) {
+  async drawDai(cdpId, amount, unit = DAI) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
 
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().draw(hexCdpId, value, { gasLimit: 4000000 })
+    return await this._transactionManager().createTransactionHybrid(
+      this._tubContract().draw(hexCdpId, value, {
+        gasLimit: 4000000,
+        gasPrice: 12000000000
+      })
     );
   }
 
   async wipeDai(cdpId, amount, unit = DAI) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-
+    console.log('just before allowance in wipe');
     await Promise.all([
       this.get('allowance').requireAllowance(
         MKR,
@@ -133,8 +144,12 @@ export default class EthereumCdpService extends PrivateService {
         this._tubContract().getAddress()
       )
     ]);
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().wipe(hexCdpId, value, { gasLimit: 4000000 })
+    console.log('got past allowances in wipe');
+    return await this._transactionManager().createTransactionHybrid(
+      this._tubContract().wipe(hexCdpId, value, {
+        gasLimit: 4000000,
+        gasPrice: 12000000000
+      })
     );
   }
 

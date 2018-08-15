@@ -10,12 +10,19 @@ export default class WethToken extends Erc20Token {
     return this._contract.name();
   }
 
-  deposit(amount, unit = ETH) {
-    return this._transactionManager.createTransactionHybrid(
+  async deposit(amount, unit = ETH) {
+    console.log('got inside deposit');
+    const value = this._valueForContract(amount, unit);
+
+    const txHybrid = this._transactionManager.createTransactionHybrid(
       this._contract.deposit({
-        value: this._valueForContract(amount, unit)
+        value: value,
+        gasPrice: 20000000000,
+        gasLimit: 4000000
       })
     );
+    console.log('hybrid back in deposit:', txHybrid);
+    return txHybrid;
   }
 
   withdraw(amount, unit = ETH) {

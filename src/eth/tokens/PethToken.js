@@ -7,11 +7,14 @@ export default class PethToken extends Erc20Token {
     this._tub = tub;
   }
 
-  join(amount, unit = WETH) {
-    const value = this._valueForContract(amount, unit);
-    return this._transactionManager.createTransactionHybrid(
-      this._tub.join(value, { gasLimit: 200000 })
+  async join(amount, unit = WETH) {
+    console.log('got inside join');
+    const value = await this._valueForContract(amount, unit);
+    const txHybrid = this._transactionManager.createTransactionHybrid(
+      this._tub.join(value, { gasLimit: 4000000, gasPrice: 20000000000 })
     );
+    console.log('hybrid about to return in join:', txHybrid);
+    return txHybrid;
   }
 
   exit(amount, unit = WETH) {

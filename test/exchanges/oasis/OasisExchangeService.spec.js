@@ -20,12 +20,12 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
   const daiToken = ethereumTokenService.getToken(DAI);
   return wethToken
     .deposit('1')
-    .onMined()
+
     .then(() => {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return wethToken.approveUnlimited(oasisContract.getAddress()).onMined();
+      return wethToken.approveUnlimited(oasisContract.getAddress());
     })
     .then(() => {
       return wethToken.balanceOf(
@@ -120,7 +120,7 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return daiToken.approveUnlimited(oasisContract.getAddress()).onMined();
+      return daiToken.approveUnlimited(oasisContract.getAddress());
     })
     .then(() => {
       const oasisContract = oasisExchangeService
@@ -189,7 +189,7 @@ test('OasisOrder properly finalizes', done => {
     .then(() => {
       daiToken = oasisService.get('token').getToken(tokens.DAI);
       const oasisContract = oasisService.get('smartContract').getContractByName(contracts.MAKER_OTC);
-      return daiToken.approveUnlimited(oasisContract.getAddress()).onMined();
+      return daiToken.approveUnlimited(oasisContract.getAddress());
     })
     .then(() => {
       order = oasisService.sellDai('0.01', tokens.WETH);

@@ -46,6 +46,7 @@ export default class TransactionManager extends PublicService {
     this._transactions.push(hybrid);
     this._listeners.forEach(cb => cb(hybrid));
 
+    console.log('got through createTransactionHybrid');
     return hybrid;
   }
 
