@@ -12,13 +12,11 @@ export default class WethToken extends Erc20Token {
 
   deposit(amount, unit = ETH) {
     console.log('got inside deposit');
-    const txHybrid = this._contract.deposit({
+    return this._contract.deposit({
       value: this._valueForContract(amount, unit),
       gasPrice: 20000000000,
       gasLimit: 4000000
     });
-    console.log('txHybrid about to return in deposit:', txHybrid);
-    return txHybrid;
   }
 
   withdraw(amount, unit = ETH) {

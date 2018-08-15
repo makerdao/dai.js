@@ -14,9 +14,7 @@ export default class TokenConversionService extends PrivateService {
   async convertEthToWeth(amount, unit = ETH) {
     console.log('got inside EthToWeth');
     const value = getCurrency(amount, unit);
-    const txHybrid = await this._getToken(WETH).deposit(value);
-    console.log('tx back in ethtoweth:', txHybrid);
-    return txHybrid;
+    return await this._getToken(WETH).deposit(value);
   }
 
   async convertWethToPeth(amount, unit = WETH) {
@@ -26,10 +24,7 @@ export default class TokenConversionService extends PrivateService {
       WETH,
       this.get('smartContract').getContractByName(contracts.SAI_TUB).address
     );
-    const txHybrid = await pethToken.join(amount, unit);
-
-    console.log('txHybrid about to return in wethToPeth:', txHybrid);
-    return txHybrid;
+    return await pethToken.join(amount, unit);
   }
 
   async convertEthToPeth(value) {
