@@ -114,3 +114,18 @@ test('it overrides metamask when specified in options', () => {
   expect(secondConfigProvider).toEqual(true);
   expect(thirdConfigProvider).toEqual(true);
 });
+
+test('skips unknown service roles', () => {
+  const config = ConfigFactory.create('http', {
+    foo: 'FooService'
+  });
+  expect(config.services.foo).toBeFalsy();
+});
+
+test('allows new service roles if specified', () => {
+  const config = ConfigFactory.create('http', {
+    additionalServices: ['foo'],
+    foo: 'FooService'
+  });
+  expect(config.services.foo).toEqual('FooService');
+});
