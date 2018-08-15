@@ -30,8 +30,8 @@ test('should successfully join and exit PETH', async () => {
   const tub = tokenService
     .get('smartContract')
     .getContractByName(contracts.SAI_TUB);
-  await weth.approveUnlimited(tub.getAddress());
-  await peth.approveUnlimited(tub.getAddress());
+  await weth.approveUnlimited(tub.address);
+  await peth.approveUnlimited(tub.address);
 
   await weth.deposit(0.1);
   const balance1 = await peth.balanceOf(owner);

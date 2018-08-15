@@ -18,10 +18,6 @@ export default class EthereumTokenService extends PrivateService {
     ]);
   }
 
-  _transactionManager() {
-    return this.get('transactionManager');
-  }
-
   getTokens() {
     return Object.keys(tokens);
   }
@@ -62,8 +58,7 @@ export default class EthereumTokenService extends PrivateService {
         return new WethToken(
           contract,
           this.get('web3'),
-          tokenVersionData.decimals,
-          this._transactionManager()
+          tokenVersionData.decimals
         );
       }
 
@@ -72,19 +67,13 @@ export default class EthereumTokenService extends PrivateService {
           throw new Error('PethToken code hardcodes 18 decimal places.');
         }
         const tub = smartContractService.getContractByName(contracts.SAI_TUB);
-        return new PethToken(
-          contract,
-          this.get('web3'),
-          this._transactionManager(),
-          tub
-        );
+        return new PethToken(contract, this.get('web3'), tub);
       }
 
       return new Erc20Token(
         contract,
         this.get('web3'),
         tokenVersionData.decimals,
-        this._transactionManager(),
         symbol
       );
     }

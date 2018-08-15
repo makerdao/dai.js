@@ -5,8 +5,10 @@ import { USD } from './Currency';
 export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
-    this._transactionManager = this._cdpService.get('transactionManager');
     this._smartContractService = this._cdpService.get('smartContract');
+    this._transactionManager = this._smartContractService.get(
+      'transactionManager'
+    );
     if (cdpId === null) {
       this._cdpIdPromise = this._newCdpPromise();
     } else {
@@ -29,8 +31,7 @@ export default class Cdp {
     const ethersSigner = this._smartContractService.get('web3').ethersSigner();
 
     return new Promise(resolve => {
-      // Event handlers need to be registered on the inner Ethers.js contract, for now
-      tubContract._original.onlognewcup = function(address, cdpIdBytes32) {
+      tubContract.onlognewcup = function(address, cdpIdBytes32) {
         if (ethersSigner.address.toLowerCase() == address.toLowerCase()) {
           const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
           this.removeListener();
@@ -42,13 +43,17 @@ export default class Cdp {
 
   _newCdpPromise() {
     const tubContract = this._smartContractService.getContractByName(
-      contracts.SAI_TUB
+      contracts.SAI_TUB,
+      { hybrid: false }
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
     const contractPromise = tubContract.open();
-    this._transactionObject = this._transactionManager.createTransactionHybrid(
+    this._transactionObject = this._transactionManager.createHybridTx(
       contractPromise,
-      this
+      {
+        businessObject: this,
+        metadata: { contract: contracts.SAI_TUB, method: 'open' }
+      }
     );
 
     return Promise.all([captureCdpIdPromise, contractPromise]).then(

@@ -19,19 +19,18 @@ export default class OasisOrder {
     return this._hybrid.getOriginalTransaction().timestamp();
   }
 
-  transact(oasisContract, transaction, transactionService) {
-    return transactionService.createTransactionHybrid(
-      transaction,
-      this,
-      receiptLogs => {
-        const LogTradeEvent = oasisContract.getInterface().events.LogTrade;
+  transact(oasisContract, transaction, transactionManager) {
+    return transactionManager.createHybridTx(transaction, {
+      businessObject: this,
+      parseLogs: receiptLogs => {
+        const LogTradeEvent = oasisContract.interface.events.LogTrade;
         const LogTradeTopic = utils.keccak256(
-          transactionService.get('web3')._web3.toHex(LogTradeEvent.signature)
+          transactionManager.get('web3')._web3.toHex(LogTradeEvent.signature)
         ); //find a way to convert string to hex without web3
         const receiptEvents = receiptLogs.filter(e => {
           return (
             e.topics[0].toLowerCase() === LogTradeTopic.toLowerCase() &&
-            e.address.toLowerCase() === oasisContract.getAddress().toLowerCase()
+            e.address.toLowerCase() === oasisContract.address.toLowerCase()
           );
         });
         let total = utils.bigNumberify('0');
@@ -41,7 +40,7 @@ export default class OasisOrder {
         });
         this._fillAmount = this._unit.wei(total.toString());
       }
-    );
+    });
   }
 }
 
@@ -52,12 +51,12 @@ export class OasisBuyOrder extends OasisOrder {
     this._unit = DAI;
   }
 
-  static build(oasisContract, transaction, transactionService) {
+  static build(oasisContract, transaction, transactionManager) {
     const order = new OasisBuyOrder();
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionService
+      transactionManager
     );
     return order._hybrid;
   }
@@ -70,12 +69,12 @@ export class OasisSellOrder extends OasisOrder {
     this._unit = currency;
   }
 
-  static build(oasisContract, transaction, transactionService, currency) {
+  static build(oasisContract, transaction, transactionManager, currency) {
     const order = new OasisSellOrder(currency);
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionService
+      transactionManager
     );
     return order._hybrid;
   }

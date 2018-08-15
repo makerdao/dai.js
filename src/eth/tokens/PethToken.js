@@ -2,27 +2,25 @@ import Erc20Token from './Erc20Token';
 import { WETH } from '../Currency';
 
 export default class PethToken extends Erc20Token {
-  constructor(contract, web3Service, transactionManager, tub) {
-    super(contract, web3Service, 18, transactionManager, 'PETH');
+  constructor(contract, web3Service, tub) {
+    super(contract, web3Service, 18, 'PETH');
     this._tub = tub;
   }
 
-  async join(amount, unit = WETH) {
+  join(amount, unit = WETH) {
     console.log('got inside join');
-    const value = await this._valueForContract(amount, unit);
-    const txHybrid = this._transactionManager.createTransactionHybrid(
-      this._tub.join(value, { gasLimit: 4000000, gasPrice: 20000000000 })
-    );
-    console.log('hybrid about to return in join:', txHybrid);
+    const value = this._valueForContract(amount, unit);
+    const txHybrid = this._tub.join(value, {
+      gasLimit: 200000,
+      gasPrice: 12000000000
+    });
+    console.log('txHybrid about to return in join:', txHybrid);
     return txHybrid;
   }
 
   exit(amount, unit = WETH) {
     const value = this._valueForContract(amount, unit);
-
-    return this._transactionManager.createTransactionHybrid(
-      this._tub.exit(value, { gasLimit: 100000 })
-    );
+    return this._tub.exit(value, { gasLimit: 100000 });
   }
 
   async wrapperRatio() {

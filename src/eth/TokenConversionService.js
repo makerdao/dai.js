@@ -24,9 +24,7 @@ export default class TokenConversionService extends PrivateService {
     console.log('got inside WethToPeth');
     await this.get('allowance').requireAllowance(
       WETH,
-      await this.get('smartContract')
-        .getContractByName(contracts.SAI_TUB)
-        .getAddress()
+      this.get('smartContract').getContractByName(contracts.SAI_TUB).address
     );
     const txHybrid = await pethToken.join(amount, unit);
 

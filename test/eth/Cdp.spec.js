@@ -64,8 +64,8 @@ describe('weth and peth', () => {
   });
 
   afterAll(async () => {
-    await wethToken.approve(cdpService._tubContract().getAddress(), '0');
-    await pethToken.approve(cdpService._tubContract().getAddress(), '0');
+    await wethToken.approve(cdpService._tubContract().address, '0');
+    await pethToken.approve(cdpService._tubContract().address, '0');
   });
 
   test('lock weth in a cdp', async () => {
@@ -86,7 +86,7 @@ describe('weth and peth', () => {
     await openCdp();
 
     await wethToken.deposit('0.1');
-    await wethToken.approve(cdpService._tubContract().getAddress(), '0.1');
+    await wethToken.approve(cdpService._tubContract().address, '0.1');
     await pethToken.join('0.1');
 
     const balancePre = await pethToken.balanceOf(defaultAccount);

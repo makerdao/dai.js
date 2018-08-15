@@ -9,6 +9,6 @@ export default async function setupAllowances(tokenList = []) {
 
   for (let symbol of tokenList) {
     const token = tokenService.getToken(tokens[symbol.toUpperCase()]);
-    await token.approve(cdpService._tubContract().getAddress(), '0');
+    await token.approve(cdpService._tubContract().address, '0');
   }
 }

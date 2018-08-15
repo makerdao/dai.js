@@ -65,8 +65,9 @@ export default class ConfigFactory {
     }
 
     const config = loadPreset(preset);
+    const additionalServices = options.additionalServices || [];
 
-    for (let role of serviceRoles) {
+    for (let role of serviceRoles.concat(additionalServices)) {
       if (!(role in options)) continue;
       if (!(role in config.services)) {
         config.services[role] = options[role];

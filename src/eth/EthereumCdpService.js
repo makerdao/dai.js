@@ -25,7 +25,6 @@ export default class EthereumCdpService extends PrivateService {
       'smartContract',
       'token',
       'conversion',
-      'transactionManager',
       'allowance',
       'price',
       'event'
@@ -44,10 +43,6 @@ export default class EthereumCdpService extends PrivateService {
     return this._smartContract().get('web3');
   }
 
-  _transactionManager() {
-    return this.get('transactionManager');
-  }
-
   _conversionService() {
     return this.get('conversion');
   }
@@ -60,22 +55,14 @@ export default class EthereumCdpService extends PrivateService {
     const hexCdpId = numberToBytes32(cdpId);
     console.log('just before allowance in shut');
     return Promise.all([
-      this.get('allowance').requireAllowance(
-        MKR,
-        this._tubContract().getAddress()
-      ),
-      this.get('allowance').requireAllowance(
-        DAI,
-        this._tubContract().getAddress()
-      )
+      this.get('allowance').requireAllowance(MKR, this._tubContract().address),
+      this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]).then(() => {
       console.log('got past allowances in shut');
-      return this._transactionManager().createTransactionHybrid(
-        this._tubContract().shut(hexCdpId, {
-          gasLimit: 4000000,
-          gasPrice: 12000000000
-        })
-      );
+      return this._tubContract().shut(hexCdpId, {
+        gasLimit: 4000000,
+        gasPrice: 12000000000
+      });
     });
   }
 
@@ -98,36 +85,28 @@ export default class EthereumCdpService extends PrivateService {
     console.log('just before allowance in peth');
     await this.get('allowance').requireAllowance(
       PETH,
-      this._tubContract().getAddress()
+      this._tubContract().address
     );
-    console.log('got past allowance in lock peth');
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().lock(hexCdpId, value, {
-        gasLimit: 4000000,
-        gasPrice: 12000000000
-      })
-    );
+    console.log('got past allowances in lockPeth');
+    return this._tubContract().lock(hexCdpId, value, {
+      gasLimit: 4000000,
+      gasPrice: 12000000000
+    });
   }
 
   freePeth(cdpId, amount, unit = PETH) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().free(hexCdpId, value, { gasLimit: 200000 })
-    );
+    return this._tubContract().free(hexCdpId, value, { gasLimit: 200000 });
   }
 
   async drawDai(cdpId, amount, unit = DAI) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-
-    return await this._transactionManager().createTransactionHybrid(
-      this._tubContract().draw(hexCdpId, value, {
-        gasLimit: 4000000,
-        gasPrice: 12000000000
-      })
-    );
+    return this._tubContract().draw(hexCdpId, value, {
+      gasLimit: 4000000,
+      gasPrice: 12000000000
+    });
   }
 
   async wipeDai(cdpId, amount, unit = DAI) {
@@ -135,22 +114,11 @@ export default class EthereumCdpService extends PrivateService {
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     console.log('just before allowance in wipe');
     await Promise.all([
-      this.get('allowance').requireAllowance(
-        MKR,
-        this._tubContract().getAddress()
-      ),
-      this.get('allowance').requireAllowance(
-        DAI,
-        this._tubContract().getAddress()
-      )
+      this.get('allowance').requireAllowance(MKR, this._tubContract().address),
+      this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]);
     console.log('got past allowances in wipe');
-    return await this._transactionManager().createTransactionHybrid(
-      this._tubContract().wipe(hexCdpId, value, {
-        gasLimit: 4000000,
-        gasPrice: 12000000000
-      })
-    );
+    return this._tubContract().wipe(hexCdpId, value, { gasLimit: 4000000 });
   }
 
   getInfo(cdpId) {
@@ -199,9 +167,7 @@ export default class EthereumCdpService extends PrivateService {
 
   //updates compound interest calculations for all CDPs.  Used by tests that depend on a fee
   async _drip() {
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().drip()
-    );
+    return this._tubContract().drip();
   }
 
   async getGovernanceFee(cdpId, unit = MKR) {
@@ -317,23 +283,16 @@ export default class EthereumCdpService extends PrivateService {
 
   async getWethToPethRatio() {
     const value = await this._tubContract().per();
-
     return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
   give(cdpId, newAddress) {
     const hexCdpId = numberToBytes32(cdpId);
-
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().give(hexCdpId, newAddress)
-    );
+    return this._tubContract().give(hexCdpId, newAddress);
   }
 
   bite(cdpId) {
     const hexCdpId = numberToBytes32(cdpId);
-
-    return this._transactionManager().createTransactionHybrid(
-      this._tubContract().bite(hexCdpId, { gasLimit: 4000000 })
-    );
+    return this._tubContract().bite(hexCdpId, { gasLimit: 4000000 });
   }
 }

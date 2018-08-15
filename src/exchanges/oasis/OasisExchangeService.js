@@ -26,17 +26,15 @@ export default class OasisExchangeService extends PrivateService {
   */
   async sellDai(amount, currency, minFillAmount = 0) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
+      contracts.MAKER_OTC,
+      { hybrid: false }
     );
     const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
     const buyToken = this.get('token').getToken(currency);
     const daiAmountEVM = daiValueForContract(amount);
     const minFillAmountEVM = daiValueForContract(minFillAmount);
-    await this.get('allowance').requireAllowance(
-      DAI,
-      oasisContract.getAddress()
-    );
+    await this.get('allowance').requireAllowance(DAI, oasisContract.address);
     return OasisSellOrder.build(
       oasisContract,
       oasisContract.sellAllAmount(
@@ -58,7 +56,8 @@ export default class OasisExchangeService extends PrivateService {
   */
   async buyDai(amount, tokenSymbol, maxFillAmount = UINT256_MAX) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
+      contracts.MAKER_OTC,
+      { hybrid: false }
     );
     const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
@@ -67,10 +66,7 @@ export default class OasisExchangeService extends PrivateService {
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-    await this.get('allowance').requireAllowance(
-      WETH,
-      oasisContract.getAddress()
-    );
+    await this.get('allowance').requireAllowance(WETH, oasisContract.address);
     return OasisBuyOrder.build(
       oasisContract,
       oasisContract.buyAllAmount(
@@ -94,7 +90,8 @@ export default class OasisExchangeService extends PrivateService {
     overrides
   ) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
+      contracts.MAKER_OTC,
+      { hybrid: false }
     );
     return new TransactionObject(
       oasisContract.offer(

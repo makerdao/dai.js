@@ -60,3 +60,17 @@ test('constructor in config', () => {
 
   expect(container.service('timer') instanceof FakeService).toBeTruthy();
 });
+
+test('can define new service roles', () => {
+  class FooService extends LocalService {
+    constructor(name = 'foo') {
+      super(name);
+    }
+  }
+  const container = new DefaultServiceProvider({
+    foo: FooService
+  });
+
+  const service = container.service('foo');
+  expect(service instanceof FooService).toBeTruthy();
+});

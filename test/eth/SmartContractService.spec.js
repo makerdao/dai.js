@@ -11,7 +11,7 @@ test('getContractByName should have proper error checking', done => {
   expect(() => service.getContractByName('NOT_A_CONTRACT')).toThrow(
     'Provided name "NOT_A_CONTRACT" is not a contract'
   );
-  expect(() => service.getContractByName(contracts.SAI_TOP, 999)).toThrow(
+  expect(() => service.getContractByName(contracts.SAI_TOP)).toThrow(
     'Cannot resolve network ID. Are you connected?'
   );
 
@@ -19,9 +19,9 @@ test('getContractByName should have proper error checking', done => {
     .manager()
     .authenticate()
     .then(() => {
-      expect(() => service.getContractByName(contracts.SAI_TOP, 999)).toThrow(
-        'Cannot find contract SAI_TOP, version 999'
-      );
+      expect(() =>
+        service.getContractByName(contracts.SAI_TOP, { version: 999 })
+      ).toThrow('Cannot find contract SAI_TOP, version 999');
       done();
     });
 });
@@ -38,10 +38,7 @@ test('getContractByName should return a functioning contract', done => {
         .gem()
         .then(data => {
           expect(data.toString().toUpperCase()).toEqual(
-            service
-              .getContractByName(tokens.WETH)
-              .getAddress()
-              .toUpperCase()
+            service.getContractByName(tokens.WETH).address.toUpperCase()
           );
           done();
         });
@@ -105,6 +102,6 @@ test('parameterized smart contract input', async () => {
 
   await service.manager().authenticate();
   const contract = service.getContractByName('mock');
-  expect(contract.getAddress()).toEqual(mockContractDefinition.address);
+  expect(contract.address).toEqual(mockContractDefinition.address);
   expect(typeof contract.foo).toBe('function');
 });

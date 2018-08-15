@@ -11,7 +11,7 @@ export default class PriceService extends PrivateService {
    */
 
   constructor(name = 'price') {
-    super(name, ['token', 'smartContract', 'transactionManager', 'event']);
+    super(name, ['token', 'smartContract', 'event']);
   }
 
   initialize() {
@@ -57,17 +57,11 @@ export default class PriceService extends PrivateService {
 
   setEthPrice(newPrice, unit = ETH) {
     const value = this._valueForContract(newPrice, unit);
-
-    return this.get('transactionManager').createTransactionHybrid(
-      this._getContract(contracts.SAI_PIP).poke(value)
-    );
+    return this._getContract(contracts.SAI_PIP).poke(value);
   }
 
   setMkrPrice(newPrice, unit = MKR) {
     const value = this._valueForContract(newPrice, unit);
-
-    return this.get('transactionManager').createTransactionHybrid(
-      this._getContract(contracts.SAI_PEP).poke(value)
-    );
+    return this._getContract(contracts.SAI_PEP).poke(value);
   }
 }

@@ -22,6 +22,17 @@ class ServiceDependencyLoopError extends Error {
   }
 }
 
+// exported just for testing
+export function orderServices(services) {
+  const edges = [];
+  for (let service of services) {
+    const name = service.manager().name();
+    const depNames = service.manager().dependencies();
+    depNames.forEach(dn => edges.push([dn, name]));
+  }
+  return toposort(edges);
+}
+
 class Container {
   constructor() {
     this._services = {};
@@ -74,16 +85,6 @@ class Container {
     }
   }
 
-  _orderServices(services) {
-    const edges = [];
-    for (let service of services) {
-      const name = service.manager().name();
-      const depNames = service.manager().dependencies();
-      depNames.forEach(dn => edges.push([dn, name]));
-    }
-    return toposort(edges);
-  }
-
   initialize() {
     return this._waitForServices(s => s.manager().initialize());
   }
@@ -98,7 +99,7 @@ class Container {
 
   async _waitForServices(callback) {
     if (!this._orderedServiceNames) {
-      this._orderedServiceNames = this._orderServices(values(this._services));
+      this._orderedServiceNames = orderServices(values(this._services));
     }
     for (let name of this._orderedServiceNames) {
       const service = this._services[name];

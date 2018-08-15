@@ -25,7 +25,7 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return wethToken.approveUnlimited(oasisContract.getAddress());
+      return wethToken.approveUnlimited(oasisContract.address).onMined();
     })
     .then(() => {
       return wethToken.balanceOf(
@@ -120,7 +120,7 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return daiToken.approveUnlimited(oasisContract.getAddress());
+      return daiToken.approveUnlimited(oasisContract.address).onMined();
     })
     .then(() => {
       const oasisContract = oasisExchangeService
@@ -128,7 +128,7 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
         .getContractByName(contracts.MAKER_OTC);
       return daiToken.allowance(
         oasisExchangeService.get('web3').defaultAccount(),
-        oasisContract.getAddress()
+        oasisContract.address
       );
     })
     .then(() => {
@@ -189,7 +189,7 @@ test('OasisOrder properly finalizes', done => {
     .then(() => {
       daiToken = oasisService.get('token').getToken(tokens.DAI);
       const oasisContract = oasisService.get('smartContract').getContractByName(contracts.MAKER_OTC);
-      return daiToken.approveUnlimited(oasisContract.getAddress());
+      return daiToken.approveUnlimited(oasisContract.address).onMined();
     })
     .then(() => {
       order = oasisService.sellDai('0.01', tokens.WETH);

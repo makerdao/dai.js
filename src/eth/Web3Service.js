@@ -439,8 +439,7 @@ export default class Web3Service extends PrivateService {
   }
 }
 
-/* istanbul ignore next */
-export function _web3Promise(cb, onErrorValue) {
+function _web3Promise(cb, onErrorValue) {
   return new Promise((resolve, reject) => {
     try {
       cb((error, result) => {
