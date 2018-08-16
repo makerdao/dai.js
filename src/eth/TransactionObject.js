@@ -48,7 +48,6 @@ export default class TransactionObject extends TransactionLifeCycle {
   async mine() {
     if (!this._dataPromise) this._dataPromise = this._getTransactionData();
     await this._dataPromise;
-    console.log('about to return in mine');
     return this;
   }
 
@@ -71,7 +70,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       let gasPrice = null;
       let tx = await this._transaction;
       this.setPending(); // set state to pending
-      console.log('successfully awaited transaction and set to pending');
       this._hash = tx.hash;
 
       // when you're on a local testnet, a single call to getTransaction should

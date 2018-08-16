@@ -12,14 +12,12 @@ export default class TokenConversionService extends PrivateService {
   }
 
   async convertEthToWeth(amount, unit = ETH) {
-    console.log('got inside EthToWeth');
     const value = getCurrency(amount, unit);
     return await this._getToken(WETH).deposit(value);
   }
 
   async convertWethToPeth(amount, unit = WETH) {
     const pethToken = this._getToken(PETH);
-    console.log('got inside WethToPeth');
     await this.get('allowance').requireAllowance(
       WETH,
       this.get('smartContract').getContractByName(contracts.SAI_TUB).address
