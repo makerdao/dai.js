@@ -13,7 +13,8 @@ export default class NonceService extends PublicService {
     this._transactionCount = count;
   }
 
-  async getNonce() {}
-
-  setNonce() {}
+  getNewNonce() {
+    this._transactionCount += 1;
+    return this._transactionCount;
+  }
 }
