@@ -24,7 +24,7 @@ export default class AllowanceService extends PrivateService {
     const token = this.get('token').getToken(tokenSymbol);
     const ownerAddress = this.get('token')
       .get('web3')
-      .ethersSigner().address;
+      .signerAddress();
     const allowance = await token.allowance(ownerAddress, spenderAddress);
 
     if (allowance.lt(maxAllowance.div(2)) && !this._shouldMinimizeAllowance) {
@@ -42,7 +42,7 @@ export default class AllowanceService extends PrivateService {
       .allowance(
         this.get('token')
           .get('web3')
-          .ethersSigner().address,
+          .signerAddress(),
         spenderAddress
       )
       .then(allowance => {
