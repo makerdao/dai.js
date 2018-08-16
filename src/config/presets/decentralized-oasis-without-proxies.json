@@ -9,6 +9,7 @@
         "type": "TEST"
       }
     },
-    "exchange": "OasisExchangeService"
+    "exchange": "OasisExchangeService",
+    "nonce": "NonceService"
   }
 }

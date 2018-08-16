@@ -11,6 +11,7 @@ export default class Maker {
       config.services
     ).buildContainer();
     if (options.autoAuthenticate !== false) this.authenticate();
+    // this._container.service('nonce').setInitialTransactionCount();
   }
 
   _validateCdp(cdpId) {

@@ -23,7 +23,8 @@ const serviceRoles = [
   'timer',
   'token',
   'transactionManager',
-  'web3'
+  'web3',
+  'nonce'
 ];
 
 function loadPreset(name) {
