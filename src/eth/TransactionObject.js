@@ -69,8 +69,8 @@ export default class TransactionObject extends TransactionLifeCycle {
     try {
       let gasPrice = null;
       let tx = await this._transaction;
-      this.setPending(); // set state to pending
       this._hash = tx.hash;
+      this.setPending(); // set state to pending
 
       // when you're on a local testnet, a single call to getTransaction should
       // be enough. but on a remote net, it may take multiple calls.
