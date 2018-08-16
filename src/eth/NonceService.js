@@ -3,14 +3,14 @@ import PublicService from '../core/PublicService';
 export default class NonceService extends PublicService {
   constructor(name = 'nonce') {
     super(name, ['web3']);
-    this._transactionCount = 0;
   }
 
-  async setInitialNonce() {
+  async setInitialTransactionCount() {
     const web3 = this.get('web3');
-    const address = this.get('web3').defaultAccount();
-    // return web3.eth.getTransactionCount(address);
-    return address;
+    const address = web3.defaultAccount();
+    const count = await web3._web3.eth.getTransactionCount(address);
+
+    this._transactionCount = count;
   }
 
   async getNonce() {}
