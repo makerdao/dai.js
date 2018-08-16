@@ -13,27 +13,6 @@ export default class Maker {
     if (options.autoAuthenticate !== false) this.authenticate();
   }
 
-  _validateCdp(cdpId) {
-    return this._authenticatedPromise.then(() => {
-      if (typeof cdpId !== 'number') {
-        throw new Error('ID must be a number.');
-      }
-
-      return this._container
-        .service('cdp')
-        .getInfo(cdpId)
-        .then(info => {
-          if (
-            info.lad.toString() === '0x0000000000000000000000000000000000000000'
-          ) {
-            // eslint-disable-next-line
-            throw new Error("That CDP doesn't exist--try opening a new one.");
-          }
-          return true;
-        });
-    });
-  }
-
   on(event, listener) {
     this._container.service('event').on(event, listener);
   }
@@ -49,18 +28,14 @@ export default class Maker {
     return this._container.service(service);
   }
 
-  openCdp() {
-    return this._authenticatedPromise.then(() =>
-      this._container.service('cdp').openCdp()
-    );
+  async openCdp() {
+    await this._authenticatedPromise;
+    return this._container.service('cdp').openCdp();
   }
 
-  getCdp(cdpId) {
-    return this._authenticatedPromise.then(() =>
-      this._validateCdp(cdpId).then(
-        () => new Cdp(this._container.service('cdp'), cdpId)
-      )
-    );
+  async getCdp(id) {
+    await this._authenticatedPromise;
+    return Cdp.find(id, this._container.service('cdp'));
   }
 }
 

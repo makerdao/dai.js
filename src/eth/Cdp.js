@@ -70,6 +70,19 @@ export default class Cdp {
   }
 }
 
+Cdp.find = async function(id, cdpService) {
+  if (typeof id !== 'number') {
+    throw new Error('ID must be a number.');
+  }
+
+  const info = await cdpService.getInfo(id);
+  if (info.lad.toString() === '0x0000000000000000000000000000000000000000') {
+    throw new Error("That CDP doesn't exist--try opening a new one.");
+  }
+
+  return new Cdp(cdpService, id);
+};
+
 // each of these methods just calls the method of the same name on the service
 // with the cdp's id as the first argument
 const passthroughMethods = [
