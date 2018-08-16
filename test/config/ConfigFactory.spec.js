@@ -1,16 +1,12 @@
-import decentralizedOasisWithoutProxies from '../../src/config/presets/decentralized-oasis-without-proxies';
+import oasis from '../../src/config/presets/oasis';
 import ConfigFactory from '../../src/config/ConfigFactory';
 
 test('returns a preset by name', () => {
-  expect(ConfigFactory.create('decentralized-oasis-without-proxies')).toEqual(
-    decentralizedOasisWithoutProxies
-  );
+  expect(ConfigFactory.create('oasis')).toEqual(oasis);
 });
 
 test('returns a preset by alias', () => {
-  expect(ConfigFactory.create('test')).toEqual(
-    decentralizedOasisWithoutProxies
-  );
+  expect(ConfigFactory.create('test')).toEqual(oasis);
 });
 
 test('throws an error when requesting a non-existing preset', () => {
@@ -21,14 +17,12 @@ test('throws an error when requesting a non-existing preset', () => {
 
 test('can take an options object in addition to a preset name', () => {
   const config = ConfigFactory.create('test', { log: false });
-  expect(config.global.enableProxies).toEqual(false);
-  expect(config.services.log).toEqual(false);
+  expect(config.log).toEqual(false);
 });
 
 test('can take an options object as first argument', () => {
   const config = ConfigFactory.create({ preset: 'test', log: false });
-  expect(config.global.enableProxies).toEqual(false);
-  expect(config.services.log).toEqual(false);
+  expect(config.log).toEqual(false);
 });
 
 test('it merges url, privateKey, provider, and web3 options', () => {
@@ -52,7 +46,7 @@ test('it merges url, privateKey, provider, and web3 options', () => {
     }
   );
 
-  expect(config.services.web3).toEqual([
+  expect(config.web3).toEqual([
     'Web3Service',
     {
       statusTimerDelay: 10000,
@@ -69,26 +63,23 @@ test('it merges url, privateKey, provider, and web3 options', () => {
 
 test('it overwrites a service name', () => {
   const config = ConfigFactory.create('http', { exchange: 'OtherService' });
-  expect(config.services.exchange).toEqual(['OtherService', {}]);
+  expect(config.exchange).toEqual(['OtherService', {}]);
 });
 
 test('it adds service options', () => {
   const config = ConfigFactory.create('http', { exchange: { foo: 'bar' } });
-  expect(config.services.exchange).toEqual([
-    'OasisExchangeService',
-    { foo: 'bar' }
-  ]);
+  expect(config.exchange).toEqual(['OasisExchangeService', { foo: 'bar' }]);
 });
 
 test('it passes service options for an omitted service', () => {
   const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
-  expect(config.services.cdp).toEqual({ foo: 'bar' });
+  expect(config.cdp).toEqual({ foo: 'bar' });
 });
 
 test('it preserves the preset service name', () => {
-  const preset = { services: { log: 'BunyanLogger' } };
+  const preset = { log: 'BunyanLogger' };
   const config = ConfigFactory.create({ preset, log: { verbose: true } });
-  expect(config.services.log).toEqual(['BunyanLogger', { verbose: true }]);
+  expect(config.log).toEqual(['BunyanLogger', { verbose: true }]);
 });
 
 test('it overrides metamask when specified in options', () => {
@@ -98,34 +89,42 @@ test('it overrides metamask when specified in options', () => {
     overrideMetamask: false
   });
   const firstConfigProvider =
-    firstConfig.services.web3.usePresetProvider !== undefined
-      ? firstConfig.services.web3.usePresetProvider
-      : firstConfig.services.web3.usePresetProvider[1];
+    firstConfig.web3.usePresetProvider !== undefined
+      ? firstConfig.web3.usePresetProvider
+      : firstConfig.web3.usePresetProvider[1];
   const secondConfigProvider =
-    secondConfig.services.web3.usePresetProvider !== undefined
-      ? secondConfig.services.web3.usePresetProvider
-      : secondConfig.services.web3.usePresetProvider[1];
+    secondConfig.web3.usePresetProvider !== undefined
+      ? secondConfig.web3.usePresetProvider
+      : secondConfig.web3.usePresetProvider[1];
   const thirdConfigProvider =
-    thirdConfig.services.web3.usePresetProvider !== undefined
-      ? thirdConfig.services.web3.usePresetProvider
-      : thirdConfig.services.web3.usePresetProvider[1];
+    thirdConfig.web3.usePresetProvider !== undefined
+      ? thirdConfig.web3.usePresetProvider
+      : thirdConfig.web3.usePresetProvider[1];
 
   expect(firstConfigProvider).toEqual(false);
   expect(secondConfigProvider).toEqual(true);
   expect(thirdConfigProvider).toEqual(true);
 });
 
-test('skips unknown service roles', () => {
+test('skip unknown service roles', () => {
   const config = ConfigFactory.create('http', {
     foo: 'FooService'
   });
-  expect(config.services.foo).toBeFalsy();
+  expect(config.foo).toBeFalsy();
 });
 
-test('allows new service roles if specified', () => {
+test('allow new service roles if specified', () => {
   const config = ConfigFactory.create('http', {
     additionalServices: ['foo'],
     foo: 'FooService'
   });
-  expect(config.services.foo).toEqual('FooService');
+  expect(config.foo).toEqual('FooService');
+});
+
+test('reject invalid service roles', () => {
+  expect(() => {
+    ConfigFactory.create('http', {
+      additionalServices: ['url']
+    });
+  }).toThrow(/cannot be used as service role names/);
 });

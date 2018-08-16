@@ -28,11 +28,13 @@ export default class Cdp {
   }
 
   _captureCdpIdPromise(tubContract) {
-    const ethersSigner = this._smartContractService.get('web3').ethersSigner();
+    const signerAddress = this._smartContractService
+      .get('web3')
+      .signerAddress();
 
     return new Promise(resolve => {
       tubContract.onlognewcup = function(address, cdpIdBytes32) {
-        if (ethersSigner.address.toLowerCase() == address.toLowerCase()) {
+        if (signerAddress.toLowerCase() == address.toLowerCase()) {
           const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
           this.removeListener();
           resolve(cdpId);
@@ -48,6 +50,8 @@ export default class Cdp {
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
     const contractPromise = tubContract.open();
+
+    // FIXME push this back down into SmartContractService
     this._transactionObject = this._transactionManager.createHybridTx(
       contractPromise,
       {
@@ -69,6 +73,19 @@ export default class Cdp {
     return this._cdpIdPromise;
   }
 }
+
+Cdp.find = async function(id, cdpService) {
+  if (typeof id !== 'number') {
+    throw new Error('ID must be a number.');
+  }
+
+  const info = await cdpService.getInfo(id);
+  if (info.lad.toString() === '0x0000000000000000000000000000000000000000') {
+    throw new Error("That CDP doesn't exist--try opening a new one.");
+  }
+
+  return new Cdp(cdpService, id);
+};
 
 // each of these methods just calls the method of the same name on the service
 // with the cdp's id as the first argument
