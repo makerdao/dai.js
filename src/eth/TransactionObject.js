@@ -117,6 +117,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     } catch (err) {
       console.log(this);
       this._errorMessage = err.message;
+      console.error(err);
       this.setError();
     }
     return this;
