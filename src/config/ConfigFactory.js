@@ -3,6 +3,7 @@ import kovan from './presets/kovan.json';
 import http from './presets/http.json';
 import mainnet from './presets/mainnet.json';
 import merge from 'lodash.merge';
+import intersection from 'lodash.intersection';
 import { mergeServiceConfig } from './index';
 
 class ConfigPresetNotFoundError extends Error {
@@ -53,6 +54,8 @@ function loadPreset(name) {
   return merge({}, preset);
 }
 
+const reservedWords = ['overrideMetamask', 'privateKey', 'provider', 'url'];
+
 export default class ConfigFactory {
   /**
    * @param {string} preset
@@ -66,6 +69,14 @@ export default class ConfigFactory {
 
     const config = loadPreset(preset);
     const additionalServices = options.additionalServices || [];
+
+    const usedReservedWords = intersection(additionalServices, reservedWords);
+    if (usedReservedWords.length > 0) {
+      throw new Error(
+        'The following words cannot be used as service role names: ' +
+          usedReservedWords.join(', ')
+      );
+    }
 
     for (let role of serviceRoles.concat(additionalServices)) {
       if (!(role in options)) continue;
