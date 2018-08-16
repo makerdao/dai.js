@@ -79,7 +79,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       for (let i = 0; i < 10; i++) {
         tx = await this._ethersProvider.getTransaction(this._hash);
         if (tx) break;
-        await promiseWait(500);
+        await promiseWait(1500);
       }
 
       if (!tx) {
@@ -117,23 +117,9 @@ export default class TransactionObject extends TransactionLifeCycle {
       }
       this.setMined();
     } catch (err) {
+      console.log(this);
       this._errorMessage = err.message;
       this.setError();
-      throw new Error('Transaction failed.', err);
-      // Setting the error isn't enough:
-      //
-      // The promise will still resolve, which means
-      // any async code waiting for the transaction to
-      // mine will continue to execute. Throwing this
-      // error isn't an appropriate solution, though,
-      // because we don't want to break app code.
-      // The promise representing the tx needs to be
-      // explicitly rejected, at which point this should
-      // be changed to console.error()
-      //
-      // Also: sometimes with insufficient funds (
-      // maybe with other reversions too), err
-      // is undefined
     }
     return this;
   }
