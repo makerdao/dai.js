@@ -61,7 +61,11 @@ export default class Web3Service extends PrivateService {
     return this._web3.eth.contract(abi).at(address);
   }
 
-  ethersSigner() {
+  signerAddress() {
+    return this.signer().address;
+  }
+
+  signer() {
     if (this._ethersWallet === null && this._ethersProvider === null) {
       throw new Error(
         'Cannot get ethersSigner: ethers wallet and provider are null.'

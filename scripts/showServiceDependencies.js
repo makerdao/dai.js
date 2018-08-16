@@ -1,15 +1,10 @@
 // run this with babel-node:
 // > npx babel-node scripts/showServiceDependencies.js
 
-import DefaultServiceProvider from '../src/config/DefaultServiceProvider';
-import { defaultServices } from '../src/config';
+import DefaultServiceProvider, { resolver } from '../src/config/DefaultServiceProvider';
 import chalk from 'chalk';
 import times from 'lodash.times';
 
-const config = {};
-for (let key in defaultServices) {
-  config[key] = true;
-}
 
 const colors = [
   '#e6194b',
@@ -57,6 +52,10 @@ function colorizeAndPad(name) {
     .join('');
 }
 
+const config = Object.keys(resolver.defaults).reduce((acc, key) => {
+  acc[key] = true;
+  return acc;
+}, {});
 const container = new DefaultServiceProvider(config).buildContainer();
 for (let key of Object.keys(container._services).sort()) {
   const service = container._services[key];
