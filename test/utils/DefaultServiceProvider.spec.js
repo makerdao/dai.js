@@ -1,5 +1,5 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
-import config from '../../src/config/presets/decentralized-oasis-without-proxies';
+import config from '../../src/config/presets/oasis';
 import LocalService from '../../src/core/LocalService';
 
 test('Should support services in mapping', () => {
@@ -22,7 +22,7 @@ test('Should configure the settings of a created service', done => {
 
 test('Should correctly create a container with all services when passed a service configuration', done => {
   const container = new DefaultServiceProvider({
-    ...config.services,
+    ...config,
     log: false
   }).buildContainer();
   expect(
@@ -40,8 +40,10 @@ test('Should correctly create a container with all services when passed a servic
 });
 
 test('Should throw an error when passing a config with unsupported service', () => {
-  const servicesCopy = { ...config.services };
-  servicesCopy.missingService = 'DoesNotExist';
+  const servicesCopy = {
+    ...config,
+    missingService: 'DoesNotExist'
+  };
   expect(() =>
     new DefaultServiceProvider(servicesCopy).buildContainer()
   ).toThrow('Unsupported service in configuration: DoesNotExist');

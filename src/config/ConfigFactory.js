@@ -1,4 +1,4 @@
-import decentralizedOasisWithoutProxies from './presets/decentralized-oasis-without-proxies.json';
+import oasis from './presets/oasis.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
 import mainnet from './presets/mainnet.json';
@@ -34,8 +34,8 @@ function loadPreset(name) {
   let preset;
   switch (name) {
     case 'test':
-    case 'decentralized-oasis-without-proxies':
-      preset = decentralizedOasisWithoutProxies;
+    case 'oasis':
+      preset = oasis;
       break;
     case 'http':
       preset = http;
@@ -69,21 +69,21 @@ export default class ConfigFactory {
 
     for (let role of serviceRoles.concat(additionalServices)) {
       if (!(role in options)) continue;
-      if (!(role in config.services)) {
-        config.services[role] = options[role];
+      if (!(role in config)) {
+        config[role] = options[role];
         continue;
       }
-      config.services[role] = mergeServiceConfig(
+      config[role] = mergeServiceConfig(
         role,
-        config.services[role],
+        config[role],
         options[role],
         resolver
       );
     }
 
     // web3-specific convenience options
-    if (config.services.web3) {
-      const web3Settings = config.services.web3[1] || config.services.web3;
+    if (config.web3) {
+      const web3Settings = config.web3[1] || config.web3;
       if (!web3Settings.provider) web3Settings.provider = {};
 
       if (options.url) {

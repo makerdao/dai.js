@@ -1,15 +1,10 @@
 {
-  "global": {
-    "enableProxies": false
+  "web3": {
+    "usePresetProvider": true,
+    "provider": {
+      "type": "INFURA",
+      "network": "mainnet"
+    }
   },
-  "services": {
-    "web3": {
-      "usePresetProvider": true,
-      "provider": {
-        "type": "INFURA",
-        "network": "mainnet"
-      }
-    },
-    "exchange": "OasisExchangeService"
-  }
+  "exchange": "OasisExchangeService"
 }

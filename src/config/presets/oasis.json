@@ -2,8 +2,7 @@
   "web3": {
     "usePresetProvider": true,
     "provider": {
-      "type": "INFURA",
-      "network": "kovan"
+      "type": "TEST"
     }
   },
   "exchange": "OasisExchangeService"
