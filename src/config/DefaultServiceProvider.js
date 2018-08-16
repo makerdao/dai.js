@@ -3,6 +3,7 @@ import EthereumCdpService from '../eth/EthereumCdpService';
 import EthereumTokenService from '../eth/EthereumTokenService';
 import SmartContractService from '../eth/SmartContractService';
 import GasEstimatorService from '../eth/GasEstimatorService';
+import NonceService from '../eth/NonceService';
 import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
 import TimerService from '../utils/TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
@@ -31,7 +32,8 @@ export const resolver = {
     timer: 'TimerService',
     token: 'EthereumTokenService',
     transactionManager: 'TransactionManager',
-    web3: 'Web3Service'
+    web3: 'Web3Service',
+    nonce: 'NonceService'
   },
   disabled: {
     event: 'NullEventService',
@@ -58,7 +60,8 @@ export default class DefaultServiceProvider extends ServiceProvider {
         TimerService,
         TokenConversionService,
         TransactionManager,
-        Web3Service
+        Web3Service,
+        NonceService
       },
       ...resolver
     });
