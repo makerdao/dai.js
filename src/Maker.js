@@ -8,6 +8,11 @@ export default class Maker {
   constructor(preset, options = {}) {
     const config = ConfigFactory.create(preset, options, resolver);
     this._container = new DefaultServiceProvider(config).buildContainer();
+    if (options.plugins) {
+      for (let plugin of options.plugins) {
+        plugin(this);
+      }
+    }
     if (options.autoAuthenticate !== false) this.authenticate();
   }
 

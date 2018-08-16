@@ -54,7 +54,14 @@ function loadPreset(name) {
   return merge({}, preset);
 }
 
-const reservedWords = ['overrideMetamask', 'privateKey', 'provider', 'url'];
+const reservedWords = [
+  'accounts',
+  'overrideMetamask',
+  'plugins',
+  'privateKey',
+  'provider',
+  'url'
+];
 
 export default class ConfigFactory {
   /**
