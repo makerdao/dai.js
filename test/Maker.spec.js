@@ -1,8 +1,9 @@
 import Maker, { ETH, LocalService } from '../src/index';
+import TestAccountProvider from './helpers/TestAccountProvider';
 const Maker2 = require('../src/index');
 
-function createMaker() {
-  return Maker.create('test', { log: false });
+function createMaker(privateKey) {
+  return Maker.create('test', { privateKey, log: false });
 }
 
 test('import vs require', () => {
@@ -19,6 +20,22 @@ test('openCdp', async () => {
   expect(typeof id).toBe('number');
   expect(id).toBeGreaterThan(0);
 });
+
+test(
+  'openCdp with a private key',
+  async () => {
+    const testAccount = TestAccountProvider.nextAccount();
+
+    const maker = createMaker(testAccount.key);
+    const cdp = await maker.openCdp();
+    const id = await cdp.getId();
+    expect(typeof id).toBe('number');
+    expect(id).toBeGreaterThan(0);
+    const info = await cdp.getInfo();
+    expect(info.lad.toLowerCase()).toEqual(testAccount.address);
+  },
+  5000
+);
 
 test('creates a new CDP object for existing CDPs', async () => {
   const maker = createMaker();

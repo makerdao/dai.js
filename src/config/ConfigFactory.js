@@ -108,10 +108,6 @@ export default class ConfigFactory {
         web3Settings.provider.url = options.url;
       }
 
-      if (options.privateKey) {
-        web3Settings.privateKey = options.privateKey;
-      }
-
       if (options.provider) {
         merge(web3Settings.provider, options.provider);
       }
@@ -119,6 +115,13 @@ export default class ConfigFactory {
       if (options.overrideMetamask) {
         web3Settings.usePresetProvider = !options.overrideMetamask;
       }
+    }
+
+    if (options.privateKey) {
+      config.accounts = {
+        ...config.accounts,
+        default: { type: 'privateKey', value: options.privateKey }
+      };
     }
 
     return config;

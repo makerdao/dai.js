@@ -25,7 +25,7 @@ test('can take an options object as first argument', () => {
   expect(config.log).toEqual(false);
 });
 
-test('it merges url, privateKey, provider, and web3 options', () => {
+test('it handles url, privateKey, provider, and web3 options', () => {
   const config = ConfigFactory.create(
     'http',
     {
@@ -46,19 +46,27 @@ test('it merges url, privateKey, provider, and web3 options', () => {
     }
   );
 
-  expect(config.web3).toEqual([
-    'Web3Service',
-    {
-      statusTimerDelay: 10000,
-      usePresetProvider: true,
-      privateKey: '0xf00',
-      provider: {
-        timeout: 1000,
-        type: 'HTTP',
-        url: 'http://foo.net'
+  expect(config).toEqual({
+    accounts: {
+      default: {
+        type: 'privateKey',
+        value: '0xf00'
       }
-    }
-  ]);
+    },
+    web3: [
+      'Web3Service',
+      {
+        statusTimerDelay: 10000,
+        usePresetProvider: true,
+        provider: {
+          timeout: 1000,
+          type: 'HTTP',
+          url: 'http://foo.net'
+        }
+      }
+    ],
+    exchange: 'OasisExchangeService'
+  });
 });
 
 test('it overwrites a service name', () => {

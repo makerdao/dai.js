@@ -33,6 +33,7 @@
   "scripts": {
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
+    "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
     "coverage": "./testchain/scripts/with-deployed-system --ci jest --runInBand --coverage",
     "lint": "eslint web src test",
     "precommit": "lint-staged",
@@ -68,6 +69,7 @@
     "jest": "^22.4.3",
     "lint-staged": "^7.1.0",
     "prettier": "^1.12.1",
+    "sane": "^3.0.0",
     "solc": "^0.4.23",
     "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^3.11.0",
@@ -89,7 +91,8 @@
     "lodash.uniq": "^4.5.0",
     "lodash.values": "^4.3.0",
     "toposort": "^2.0.2",
-    "web3": "^0.20.6"
+    "web3": "^0.20.6",
+    "web3-provider-engine": "^14.0.6"
   },
   "jest": {
     "coverageReporters": [

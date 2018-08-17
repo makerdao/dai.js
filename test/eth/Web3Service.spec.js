@@ -10,7 +10,7 @@ function buildDisconnectingService(disconnectAfter = 25) {
     service
       .get('timer')
       .createTimer('disconnect', disconnectAfter, false, () => {
-        service._web3.version.getNode = () => {
+        service._web3.version.getNetwork = () => {
           throw new Error('fake disconnection error');
         };
       });
@@ -57,14 +57,19 @@ function buildAccountChangingService(changeAccountAfter = 25) {
 }
 
 function buildTestService(privateKey, statusTimerDelay = 5000) {
-  return buildTestServiceCore('web3', {
+  const config = {
     web3: {
-      privateKey,
       statusTimerDelay,
       usePresetProvider: true,
       provider: { type: Web3ProviderType.TEST }
     }
-  });
+  };
+  if (privateKey) {
+    config.accounts = {
+      default: { type: 'privateKey', value: privateKey }
+    };
+  }
+  return buildTestServiceCore('web3', config);
 }
 
 function buildInfuraService(network, privateKey = null) {
@@ -163,7 +168,7 @@ test('should be authenticated and know default address when private key passed i
     .then(() => {
       expect(service.manager().isAuthenticated()).toBe(true);
       expect(service.currentAccount()).toBe(
-        '0x717bc9648b627316718Fe93f4cD98056E53a8C8d'
+        '0x717bc9648b627316718fe93f4cd98056e53a8c8d'
       );
       done();
     });
@@ -256,7 +261,7 @@ test('should connect to ganache testnet with account 0x16fb9...', done => {
     .catch(console.error);
 });
 
-test('should have a balance of 100 ETH in test account', done => {
+test('should have ETH in test account', done => {
   const service = buildTestService();
 
   service
@@ -264,7 +269,7 @@ test('should have a balance of 100 ETH in test account', done => {
     .connect()
     .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
-      expect(service._web3.fromWei(balance).toString()).toEqual('100');
+      expect(Number(service._web3.fromWei(balance))).toBeGreaterThan(50);
       done();
     });
 });

@@ -21,7 +21,7 @@ export default class AccountsService extends PublicService {
 
       switch (type) {
         case 'privateKey':
-          if (!value || !value.match(/^0x[0-9a-fA-F]{64}$/)) {
+          if (typeof value != 'string' || !value.match(/^0x[0-9a-fA-F]{64}$/)) {
             throw new Error('Invalid private key format');
           }
 

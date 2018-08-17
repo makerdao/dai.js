@@ -3,6 +3,9 @@ import Web3ProviderType from './Web3ProviderType';
 import { promisifyAsyncMethods, getNetworkName } from '../utils';
 import Web3 from 'web3';
 import Web3ServiceList from '../utils/Web3ServiceList';
+import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
+import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
+import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -10,13 +13,12 @@ const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
-    super(name, ['log', 'timer', 'cache', 'event']);
+    super(name, ['accounts', 'log', 'timer', 'cache', 'event']);
 
     this._web3 = null;
     this._ethersProvider = null;
     this._blockListeners = {};
     this._currentBlock = null;
-    this._ethersWallet = null;
     this._info = {
       version: { api: null, node: null, network: null, ethereum: null },
       account: null
@@ -61,19 +63,6 @@ export default class Web3Service extends PrivateService {
     return this._web3.eth.contract(abi).at(address);
   }
 
-  signer() {
-    if (this._ethersWallet === null && this._ethersProvider === null) {
-      throw new Error(
-        'Cannot get ethersSigner: ethers wallet and provider are null.'
-      );
-    }
-
-    return (
-      this._ethersWallet ||
-      this._ethersProvider.getSigner(this.currentAccount())
-    );
-  }
-
   initialize(settings) {
     this.get('log').info('Web3 is initializing...');
 
@@ -85,7 +74,6 @@ export default class Web3Service extends PrivateService {
     this._web3.setProvider(this._getWeb3Provider(settings, this._web3));
 
     this._setStatusTimerDelay(settings.statusTimerDelay);
-    this._setPrivateKey(settings.privateKey);
 
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
@@ -146,14 +134,10 @@ export default class Web3Service extends PrivateService {
     this.get('log').info('Web3 is authenticating...');
 
     const data = await _web3Promise(_ => this._web3.eth.getAccounts(_));
-    if (this._hasPrivateKey()) {
-      this._info.account = this._ethersWallet.address;
-    } else if (data instanceof Array && data.length > 0) {
+    if (data instanceof Array && data.length > 0) {
       this._info.account = data[0];
     } else {
-      throw new Error(
-        'Expected Web3 to be authenticated, but no default account is available.'
-      );
+      throw new Error("Couldn't get accounts from provider.");
     }
     this._defaultEmitter.emit('web3/AUTHENTICATED', {
       account: this._info.account
@@ -226,11 +210,6 @@ export default class Web3Service extends PrivateService {
   _setUpEthers(chainId) {
     const ethers = require('ethers');
     this._ethersProvider = this._buildEthersProvider(ethers, chainId);
-    this._ethersWallet = this._buildEthersWallet(
-      ethers,
-      this._privateKey,
-      this._ethersProvider
-    );
   }
 
   _buildEthersProvider(ethers, chainId) {
@@ -243,20 +222,6 @@ export default class Web3Service extends PrivateService {
     this.manager().onDisconnected(() => provider.removeAllListeners('block'));
 
     return provider;
-  }
-
-  _buildEthersWallet(ethers, privateKey, provider) {
-    let wallet = null;
-
-    if (privateKey) {
-      try {
-        wallet = new ethers.Wallet(privateKey, provider);
-      } catch (e) {
-        this.get('log').error(e);
-      }
-    }
-
-    return wallet;
   }
 
   _normalizeSettings(settings) {
@@ -307,23 +272,11 @@ export default class Web3Service extends PrivateService {
     return web3;
   }
 
-  _setPrivateKey(privateKey) {
-    if (
-      privateKey &&
-      (typeof privateKey !== 'string' ||
-        privateKey.match(/^0x[0-9a-fA-F]{64}$/) === null)
-    ) {
-      throw new Error('Invalid private key format');
-    }
-    this._privateKey = privateKey || null;
-  }
-
-  _hasPrivateKey() {
-    return !!this._privateKey;
-  }
-
   _getWeb3Provider(settings, web3) {
-    let web3Provider = null;
+    let web3Provider;
+
+    // TODO: rather than having usePresetProvider override the provider
+    // completely, it should add an account
 
     if (
       settings.usePresetProvider &&
@@ -346,35 +299,56 @@ export default class Web3Service extends PrivateService {
   }
 
   _buildWeb3Provider(providerSettings) {
-    let provider;
-    const { url, network, infuraApiKey, type } = providerSettings;
-    const timeout = Number(providerSettings.timeout || 0);
-    const cacheKey = 'provider:' + JSON.stringify(providerSettings);
-    const cache = this.get('cache');
-    if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
+    const { network, infuraApiKey, type } = providerSettings;
 
+    // TODO determine if caching is still useful
+    // const cacheKey = 'provider:' + JSON.stringify(providerSettings);
+    // const cache = this.get('cache');
+    // if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
+
+    // TODO make timeout work with RpcSource
+    // const timeout = Number(providerSettings.timeout || 0);
+
+    let rpcUrl;
     switch (type) {
       case Web3ProviderType.HTTP:
-        provider = new Web3.providers.HttpProvider(url, timeout);
+        rpcUrl = providerSettings.url;
         break;
       case Web3ProviderType.INFURA:
-        provider = new Web3.providers.HttpProvider(
-          `https://${network}.infura.io/${infuraApiKey || ''}`,
-          timeout
-        );
+        rpcUrl = `https://${network}.infura.io/${infuraApiKey || ''}`;
         break;
       case Web3ProviderType.TEST:
-        provider = new Web3.providers.HttpProvider(
-          'http://127.1:2000',
-          timeout
-        );
+        rpcUrl = 'http://127.1:2000';
         break;
       default:
-        throw new Error('Illegal web3 provider type: ' + type);
+        throw new Error('Invalid web3 provider type: ' + type);
     }
 
-    if (cache) cache.store(cacheKey, provider);
-    return provider;
+    // if (cache) cache.store(cacheKey, provider);
+    // return provider;
+
+    const engine = new Web3ProviderEngine();
+
+    const accountService = this.get('accounts');
+    if (accountService.hasAccount()) {
+      const wallet = new Wallet(
+        {
+          getAddressString: () => {
+            return this.get('accounts').currentAddress();
+          },
+          getPrivateKey: () => {
+            return this.get('accounts').currentPrivateKey();
+          }
+        },
+        {}
+      );
+      engine.addProvider(wallet);
+    }
+
+    engine.addProvider(new RpcSource({ rpcUrl }));
+
+    engine.start();
+    return engine;
   }
 
   _setStatusTimerDelay(delay) {
@@ -397,15 +371,9 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillConnected() {
-    return Promise.all([
-      _web3Promise(_ => this._web3.version.getNode(_)), // can remove this
-      _web3Promise(_ => this._web3.version.getNetwork(_))
-    ]).then(
-      versionInfo =>
-        versionInfo[1] != null &&
-        versionInfo[1] === this._info.version['network'],
-      () => false
-    );
+    return _web3Promise(_ => this._web3.version.getNetwork(_))
+      .then(network => network === this._info.version['network'])
+      .catch(() => false);
   }
 
   _installDeauthenticationCheck() {
@@ -424,7 +392,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillAuthenticated() {
-    if (this._hasPrivateKey()) return this._isStillConnected();
+    if (this.get('accounts').hasAccount()) return this._isStillConnected();
     return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
       accounts =>
         accounts instanceof Array && accounts[0] === this._info.account,
