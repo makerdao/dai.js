@@ -41,9 +41,9 @@ export default class Web3Service extends PrivateService {
     return parseInt(result);
   }
 
-  defaultAccount() {
+  currentAccount() {
     if (!this.manager().isAuthenticated()) {
-      throw new Error('Default account is unavailable when not authenticated.');
+      throw new Error('Not authenticated.');
     }
 
     return this._info.account;
@@ -61,10 +61,6 @@ export default class Web3Service extends PrivateService {
     return this._web3.eth.contract(abi).at(address);
   }
 
-  signerAddress() {
-    return this.signer().address;
-  }
-
   signer() {
     if (this._ethersWallet === null && this._ethersProvider === null) {
       throw new Error(
@@ -74,7 +70,7 @@ export default class Web3Service extends PrivateService {
 
     return (
       this._ethersWallet ||
-      this._ethersProvider.getSigner(this.defaultAccount())
+      this._ethersProvider.getSigner(this.currentAccount())
     );
   }
 
@@ -146,29 +142,23 @@ export default class Web3Service extends PrivateService {
       );
   }
 
-  authenticate() {
+  async authenticate() {
     this.get('log').info('Web3 is authenticating...');
 
-    return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
-      data => {
-        if (this._hasPrivateKey()) {
-          this._info.account = this._ethersWallet.address;
-        } else if (data instanceof Array && data.length > 0) {
-          this._info.account = data[0];
-        } else {
-          throw new Error(
-            'Expected Web3 to be authenticated, but no default account is available.'
-          );
-        }
-        this._defaultEmitter.emit('web3/AUTHENTICATED', {
-          account: this._info.account
-        });
-        this._installDeauthenticationCheck();
-      },
-      reason => {
-        this.get('log').error(reason);
-      }
-    );
+    const data = await _web3Promise(_ => this._web3.eth.getAccounts(_));
+    if (this._hasPrivateKey()) {
+      this._info.account = this._ethersWallet.address;
+    } else if (data instanceof Array && data.length > 0) {
+      this._info.account = data[0];
+    } else {
+      throw new Error(
+        'Expected Web3 to be authenticated, but no default account is available.'
+      );
+    }
+    this._defaultEmitter.emit('web3/AUTHENTICATED', {
+      account: this._info.account
+    });
+    this._installDeauthenticationCheck();
   }
 
   getNetwork() {

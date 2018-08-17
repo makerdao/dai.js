@@ -64,15 +64,10 @@ export default class SmartContractService extends PublicService {
     if (!address) throw Error('Contract address is required');
     if (!name) name = this.lookupContractName(address);
 
-    const signer = this.get('web3').signer(),
-      contract = new Contract(address, abi, signer);
-
-    return wrapContract(
-      contract,
-      name,
-      abi,
-      hybrid ? this.get('transactionManager') : null
-    );
+    const signer = this.get('web3').signer();
+    const contract = new Contract(address, abi, signer);
+    const txManager = hybrid ? this.get('transactionManager') : null;
+    return wrapContract(contract, name, abi, txManager);
   }
 
   getContractByName(name, { version, hybrid = true } = {}) {

@@ -3,14 +3,14 @@ import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
 import { MKR, WETH } from '../../../src/eth/Currency';
 import { UINT256_MAX } from '../../../src/utils/constants';
 
-let tokenService, mkr, weth, defaultAccount, testAddress;
+let tokenService, mkr, weth, currentAccount, testAddress;
 
 beforeAll(async () => {
   tokenService = buildTestEthereumTokenService();
   await tokenService.manager().authenticate();
   mkr = tokenService.getToken(MKR);
   weth = tokenService.getToken(WETH);
-  defaultAccount = tokenService.get('web3').defaultAccount();
+  currentAccount = tokenService.get('web3').currentAccount();
 });
 
 beforeEach(() => {
@@ -32,27 +32,27 @@ test('get ERC20 (MKR) allowance of address', async () => {
 
 test('approve an ERC20 (MKR) allowance', async () => {
   await mkr.approve(testAddress, 10000);
-  let allowance = await mkr.allowance(defaultAccount, testAddress);
+  let allowance = await mkr.allowance(currentAccount, testAddress);
   expect(allowance).toEqual(MKR(10000));
 
   await mkr.approve(testAddress, 0);
-  allowance = await mkr.allowance(defaultAccount, testAddress);
+  allowance = await mkr.allowance(currentAccount, testAddress);
   expect(allowance).toEqual(MKR(0));
 });
 
 test('approveUnlimited an ERC20 (MKR) allowance', async () => {
   await mkr.approveUnlimited(testAddress);
-  const allowance = await mkr.allowance(defaultAccount, testAddress);
+  const allowance = await mkr.allowance(currentAccount, testAddress);
   expect(allowance).toEqual(MKR.wei(UINT256_MAX));
 });
 
 test('ERC20 transfer should move transferValue from sender to receiver', async () => {
   await weth.deposit('0.1');
-  const senderBalance = await weth.balanceOf(defaultAccount);
+  const senderBalance = await weth.balanceOf(currentAccount);
   const receiverBalance = await weth.balanceOf(testAddress);
 
   await weth.transfer(testAddress, '0.1');
-  const newSenderBalance = await weth.balanceOf(defaultAccount);
+  const newSenderBalance = await weth.balanceOf(currentAccount);
   const newReceiverBalance = await weth.balanceOf(testAddress);
 
   expect(newSenderBalance).toEqual(senderBalance.minus(0.1));
@@ -61,11 +61,11 @@ test('ERC20 transfer should move transferValue from sender to receiver', async (
 
 test('ERC20 transferFrom should move transferValue from sender to receiver', async () => {
   await weth.deposit('0.1');
-  const senderBalance = await weth.balanceOf(defaultAccount);
+  const senderBalance = await weth.balanceOf(currentAccount);
   const receiverBalance = await weth.balanceOf(testAddress);
 
-  await weth.transferFrom(defaultAccount, testAddress, '0.1');
-  const newSenderBalance = await weth.balanceOf(defaultAccount);
+  await weth.transferFrom(currentAccount, testAddress, '0.1');
+  const newSenderBalance = await weth.balanceOf(currentAccount);
   const newReceiverBalance = await weth.balanceOf(testAddress);
 
   expect(newSenderBalance).toEqual(senderBalance.minus(0.1));

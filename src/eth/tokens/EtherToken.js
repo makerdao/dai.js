@@ -31,9 +31,9 @@ export default class EtherToken {
 
   transfer(toAddress, transferValue) {
     const valueInWei = utils.parseEther(transferValue).toString();
-    const defaultAccount = this._web3.defaultAccount();
+    const currentAccount = this._web3.currentAccount();
     const tx = this._web3.eth.sendTransaction({
-      from: defaultAccount,
+      from: currentAccount,
       to: toAddress,
       value: valueInWei
       //gasPrice: 500000000
