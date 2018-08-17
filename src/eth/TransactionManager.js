@@ -6,7 +6,7 @@ let txId = 1;
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log']);
+    super(name, ['web3', 'log', 'nonce']);
     this._transactions = [];
     this._listeners = [];
   }
@@ -18,6 +18,10 @@ export default class TransactionManager extends PublicService {
     if (tx._original) {
       console.warn('Redundant call to createHybridTx');
       return tx;
+    }
+
+    if (!this.get('nonce')._transactionCount) {
+      this.get('nonce').setInitialTransactionCount();
     }
 
     const txo = new TransactionObject(
