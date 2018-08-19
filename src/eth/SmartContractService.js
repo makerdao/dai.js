@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 
-function wrapContract(contract, name, abi, txManager) {
+function wrapContract(contract, name, abi, nonceService, txManager) {
   const nonConstantFns = {};
 
   for (let { type, constant, name } of abi) {
@@ -23,10 +23,23 @@ function wrapContract(contract, name, abi, txManager) {
     {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
-          return (...args) =>
-            txManager.createHybridTx(contract[key](...args), {
+          return (...args) => {
+            switch (args) {
+              case args.length === 1 && typeof args[0] === 'object':
+                args[0]['nonce'] = nonceService.getNewNonce();
+                break;
+              case args.length === 1:
+                args.push({ nonce: nonceService.getNewNonce() });
+                break;
+              default:
+                args[args.length - 1]['nonce'] = nonceService.getNewNonce();
+                break;
+            }
+            console.log(args);
+            return txManager.createHybridTx(contract[key](...args), {
               metadata: { contract: name, method: key, args }
             });
+          };
         }
 
         return contract[key];
@@ -44,7 +57,7 @@ function wrapContract(contract, name, abi, txManager) {
 
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
-    super(name, ['web3', 'log', 'transactionManager']);
+    super(name, ['web3', 'log', 'transactionManager', 'nonce']);
   }
 
   initialize(settings = {}) {
@@ -71,6 +84,7 @@ export default class SmartContractService extends PublicService {
       contract,
       name,
       abi,
+      this.get('nonce'),
       hybrid ? this.get('transactionManager') : null
     );
   }
