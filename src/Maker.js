@@ -28,8 +28,10 @@ export default class Maker {
     return this._authenticatedPromise;
   }
 
-  service(service) {
-    if (!this._container.isAuthenticated) {
+  // skipAuthCheck should only be set if you're sure you don't need the service
+  // to be initialized yet, e.g. when setting up a plugin
+  service(service, skipAuthCheck) {
+    if (!skipAuthCheck && !this._container.isAuthenticated) {
       throw new Error('this.authenticate() did not finish yet.');
     }
     return this._container.service(service);

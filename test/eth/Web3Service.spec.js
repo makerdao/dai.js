@@ -56,7 +56,7 @@ function buildAccountChangingService(changeAccountAfter = 25) {
   return service;
 }
 
-function buildTestService(privateKey, statusTimerDelay = 5000) {
+function buildTestService(key, statusTimerDelay = 5000) {
   const config = {
     web3: {
       statusTimerDelay,
@@ -64,9 +64,9 @@ function buildTestService(privateKey, statusTimerDelay = 5000) {
       provider: { type: Web3ProviderType.TEST }
     }
   };
-  if (privateKey) {
+  if (key) {
     config.accounts = {
-      default: { type: 'privateKey', value: privateKey }
+      default: { type: 'privateKey', key }
     };
   }
   return buildTestServiceCore('web3', config);
@@ -289,28 +289,3 @@ test(
   },
   10000
 );
-
-test('should reject invalid private key formats', async () => {
-  const service1 = buildTestService(TestAccountProvider.nextAccount()),
-    service2 = buildTestService(
-      TestAccountProvider.nextAccount().key.substr(2)
-    ),
-    service3 = buildTestService(
-      TestAccountProvider.nextAccount().key.substr(0, 65)
-    ),
-    service4 = buildTestService(TestAccountProvider.nextAddress()),
-    service5 = buildTestService(TestAccountProvider.nextAccount().key);
-
-  expect.assertions(5);
-
-  for (let s of [service1, service2, service3, service4]) {
-    try {
-      await s.manager().initialize();
-    } catch (err) {
-      expect(err).toBe('Invalid private key format');
-    }
-  }
-
-  await service5.manager().initialize();
-  expect(service5.manager().isInitialized()).toBeTruthy();
-});

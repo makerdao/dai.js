@@ -50,7 +50,7 @@ test('it handles url, privateKey, provider, and web3 options', () => {
     accounts: {
       default: {
         type: 'privateKey',
-        value: '0xf00'
+        key: '0xf00'
       }
     },
     web3: [

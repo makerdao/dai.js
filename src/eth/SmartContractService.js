@@ -64,6 +64,7 @@ export default class SmartContractService extends PublicService {
     if (!address) throw Error('Contract address is required');
     if (!name) name = this.lookupContractName(address);
 
+    // this signer just delegates to the provider
     const signer = this.get('web3')
       .ethersProvider()
       .getSigner();

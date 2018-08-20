@@ -13,6 +13,7 @@ class ConfigPresetNotFoundError extends Error {
 }
 
 const serviceRoles = [
+  'accounts',
   'allowance',
   'cdp',
   'conversion',
@@ -120,7 +121,7 @@ export default class ConfigFactory {
     if (options.privateKey) {
       config.accounts = {
         ...config.accounts,
-        default: { type: 'privateKey', value: options.privateKey }
+        default: { type: 'privateKey', key: options.privateKey }
       };
     }
 

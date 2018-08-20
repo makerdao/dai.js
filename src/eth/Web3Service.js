@@ -5,7 +5,6 @@ import Web3 from 'web3';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
-import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -276,7 +275,12 @@ export default class Web3Service extends PrivateService {
     let web3Provider;
 
     // TODO: rather than having usePresetProvider override the provider
-    // completely, it should add an account
+    // completely, should it just add an account? that's tricky... because
+    // users expect MetaMask to handle not just signing but sending, choice of
+    // network, etc.
+    //
+    // we need to support the case where we get most of the provider behavior
+    // from MetaMask but still use a specified wallet for signing
 
     if (
       settings.usePresetProvider &&
@@ -306,7 +310,7 @@ export default class Web3Service extends PrivateService {
     // const cache = this.get('cache');
     // if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
 
-    // TODO make timeout work with RpcSource
+    // TODO make timeout work again
     // const timeout = Number(providerSettings.timeout || 0);
 
     let rpcUrl;
@@ -329,22 +333,8 @@ export default class Web3Service extends PrivateService {
 
     const engine = new Web3ProviderEngine();
 
-    const accountService = this.get('accounts');
-    if (accountService.hasAccount()) {
-      const wallet = new Wallet(
-        {
-          getAddressString: () => {
-            return this.get('accounts').currentAddress();
-          },
-          getPrivateKey: () => {
-            return this.get('accounts').currentPrivateKey();
-          }
-        },
-        {}
-      );
-      engine.addProvider(wallet);
-    }
-
+    const accounts = this.get('accounts');
+    if (accounts.hasAccount()) engine.addProvider(accounts.getWallet());
     engine.addProvider(new RpcSource({ rpcUrl }));
 
     engine.start();
