@@ -14,7 +14,7 @@ test('import vs require', () => {
 
 test('openCdp', async () => {
   const maker = createMaker();
-
+  await maker.authenticate();
   const cdp = await maker.openCdp();
   const id = await cdp.getId();
   expect(typeof id).toBe('number');
@@ -27,6 +27,7 @@ test(
     const testAccount = TestAccountProvider.nextAccount();
 
     const maker = createMaker(testAccount.key);
+    await maker.authenticate();
     const cdp = await maker.openCdp();
     const id = await cdp.getId();
     expect(typeof id).toBe('number');
@@ -39,6 +40,7 @@ test(
 
 test('creates a new CDP object for existing CDPs', async () => {
   const maker = createMaker();
+  await maker.authenticate();
   const cdp = await maker.openCdp();
   const id = await cdp.getId();
   const newCdp = await maker.getCdp(id);
@@ -49,6 +51,7 @@ test('creates a new CDP object for existing CDPs', async () => {
 
 test('throws an error for an invalid id', async () => {
   const maker = createMaker();
+  await maker.authenticate();
   expect.assertions(1);
   try {
     await maker.getCdp(99999);
