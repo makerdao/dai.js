@@ -10,7 +10,7 @@ export default class NonceService extends PublicService {
     const address = web3.defaultAccount();
     const count = await web3._web3.eth.getTransactionCount(address);
 
-    this._transactionCount = count;
+    this._transactionCount = count + 1;
   }
 
   getNewNonce() {

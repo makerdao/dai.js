@@ -24,16 +24,22 @@ function wrapContract(contract, name, abi, nonceService, txManager) {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
           return (...args) => {
-            switch (args) {
-              case args.length === 1 && typeof args[0] === 'object':
+            if (args.length > 0) {
+              if (
+                args.length === 1 &&
+                typeof args[0] === 'object' &&
+                !Object.keys(args[0]).includes('_bn')
+              ) {
+                console.log('inside first case');
                 args[0]['nonce'] = nonceService.getNewNonce();
-                break;
-              case args.length === 1:
-                args.push({ nonce: nonceService.getNewNonce() });
-                break;
-              default:
+              } else if (
+                typeof args[args.length - 1] === 'object' &&
+                !Object.keys(args[args.length - 1]).includes('_bn')
+              ) {
                 args[args.length - 1]['nonce'] = nonceService.getNewNonce();
-                break;
+              } else {
+                args.push({ nonce: nonceService.getNewNonce() });
+              }
             }
             console.log(args);
             return txManager.createHybridTx(contract[key](...args), {
