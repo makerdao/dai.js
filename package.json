@@ -92,7 +92,7 @@
     "lodash.values": "^4.3.0",
     "toposort": "^2.0.2",
     "web3": "^0.20.6",
-    "web3-provider-engine": "^14.0.6"
+    "web3-provider-engine": "14.0.4"
   },
   "jest": {
     "coverageReporters": [
