@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 
-function wrapContract(contract, name, abi, nonceService, txManager) {
+function wrapContract(contract, name, abi, nonceService, nonce, txManager) {
   const nonConstantFns = {};
 
   for (let { type, constant, name } of abi) {
@@ -24,23 +24,10 @@ function wrapContract(contract, name, abi, nonceService, txManager) {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
           return (...args) => {
-            if (args.length > 0) {
-              if (
-                args.length === 1 &&
-                typeof args[0] === 'object' &&
-                !Object.keys(args[0]).includes('_bn')
-              ) {
-                console.log('inside first case');
-                args[0]['nonce'] = nonceService.getNewNonce();
-              } else if (
-                typeof args[args.length - 1] === 'object' &&
-                !Object.keys(args[args.length - 1]).includes('_bn')
-              ) {
-                args[args.length - 1]['nonce'] = nonceService.getNewNonce();
-              } else {
-                args.push({ nonce: nonceService.getNewNonce() });
-              }
-            }
+            // if (args.length > 0) {
+            console.log('just before inject');
+            args = nonceService.inject(args, nonce);
+            // }
             console.log(args);
             return txManager.createHybridTx(contract[key](...args), {
               metadata: { contract: name, method: key, args }
@@ -84,13 +71,17 @@ export default class SmartContractService extends PublicService {
     if (!name) name = this.lookupContractName(address);
 
     const signer = this.get('web3').signer(),
-      contract = new Contract(address, abi, signer);
+      contract = new Contract(address, abi, signer),
+      nonce = this.get('web3')._web3.eth.getTransactionCount(
+        this.get('web3').defaultAccount()
+      );
 
     return wrapContract(
       contract,
       name,
       abi,
       this.get('nonce'),
+      nonce,
       hybrid ? this.get('transactionManager') : null
     );
   }
