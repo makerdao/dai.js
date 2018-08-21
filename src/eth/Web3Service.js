@@ -18,10 +18,7 @@ export default class Web3Service extends PrivateService {
     this._ethersProvider = null;
     this._blockListeners = {};
     this._currentBlock = null;
-    this._info = {
-      version: { api: null, node: null, network: null, ethereum: null },
-      account: null
-    };
+    this._info = { version: {} };
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     this._defaultEmitter = null;
 
@@ -34,11 +31,9 @@ export default class Web3Service extends PrivateService {
 
   networkId() {
     const result = this.version().network;
-
-    if (result === null) {
+    if (!result) {
       throw new Error('Cannot resolve network ID. Are you connected?');
     }
-
     return parseInt(result);
   }
 
@@ -47,7 +42,10 @@ export default class Web3Service extends PrivateService {
       throw new Error('Not authenticated.');
     }
 
-    return this._info.account;
+    const accounts = this.get('accounts');
+    if (accounts.hasAccount()) return accounts.currentAddress();
+
+    return this._providerAccountAddress;
   }
 
   ethersProvider() {
@@ -132,20 +130,14 @@ export default class Web3Service extends PrivateService {
   async authenticate() {
     this.get('log').info('Web3 is authenticating...');
 
-    const data = await _web3Promise(_ => this._web3.eth.getAccounts(_));
-    if (data instanceof Array && data.length > 0) {
-      this._info.account = data[0];
-    } else {
-      throw new Error("Couldn't get accounts from provider.");
-    }
-    this._defaultEmitter.emit('web3/AUTHENTICATED', {
-      account: this._info.account
-    });
+    const account = (await _web3Promise(_ => this._web3.eth.getAccounts(_)))[0];
+    this._defaultEmitter.emit('web3/AUTHENTICATED', { account });
+    this._providerAccountAddress = account;
     this._installDeauthenticationCheck();
   }
 
   getNetwork() {
-    return this._info.version['network'];
+    return this._info.version.network;
   }
 
   blockNumber() {
@@ -332,12 +324,8 @@ export default class Web3Service extends PrivateService {
     // return provider;
 
     const engine = new Web3ProviderEngine();
-
-    const accounts = this.get('accounts');
-    if (accounts.hasAccount()) engine.addProvider(accounts.getWallet());
     engine.addProvider(new RpcSource({ rpcUrl }));
-
-    engine.start();
+    this.get('accounts').attachToEngine(engine);
     return engine;
   }
 
@@ -381,13 +369,10 @@ export default class Web3Service extends PrivateService {
     );
   }
 
-  _isStillAuthenticated() {
+  async _isStillAuthenticated() {
     if (this.get('accounts').hasAccount()) return this._isStillConnected();
-    return _web3Promise(_ => this._web3.eth.getAccounts(_)).then(
-      accounts =>
-        accounts instanceof Array && accounts[0] === this._info.account,
-      () => false
-    );
+    const account = (await _web3Promise(_ => this._web3.eth.getAccounts(_)))[0];
+    return account === this._providerAccountAddress;
   }
 }
 

@@ -15,9 +15,16 @@ export default class Maker {
     if (options.autoAuthenticate !== false) this.authenticate();
 
     delegateToServices(this, {
-      accounts: ['addAccount'],
+      accounts: [
+        'addAccount',
+        'currentAccount',
+        'currentAddress',
+        'listAccounts',
+        'useAccount'
+      ],
       cdp: ['getCdp', 'openCdp'],
-      event: ['on']
+      event: ['on'],
+      token: ['getToken']
     });
   }
 
