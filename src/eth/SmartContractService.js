@@ -24,10 +24,7 @@ function wrapContract(contract, name, abi, nonceService, nonce, txManager) {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
           return (...args) => {
-            // if (args.length > 0) {
-            console.log('just before inject');
             args = nonceService.inject(args, nonce);
-            // }
             console.log(args);
             return txManager.createHybridTx(contract[key](...args), {
               metadata: { contract: name, method: key, args }
@@ -72,9 +69,7 @@ export default class SmartContractService extends PublicService {
 
     const signer = this.get('web3').signer(),
       contract = new Contract(address, abi, signer),
-      nonce = this.get('web3')._web3.eth.getTransactionCount(
-        this.get('web3').defaultAccount()
-      );
+      nonce = this.get('nonce').getNonce();
 
     return wrapContract(
       contract,
