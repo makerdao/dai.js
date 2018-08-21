@@ -1,4 +1,5 @@
 import { utils } from 'ethers';
+import { getCurrency, ETH } from '../Currency';
 
 export default class EtherToken {
   constructor(web3Service, gasEstimatorService, transactionManager) {
@@ -29,13 +30,15 @@ export default class EtherToken {
     return Promise.resolve(true);
   }
 
-  transfer(toAddress, transferValue) {
-    const valueInWei = utils.parseEther(transferValue).toString();
+  transfer(toAddress, amount, unit = ETH) {
+    const value = getCurrency(amount, unit)
+      .toEthersBigNumber('wei')
+      .toString();
     const currentAccount = this._web3.currentAccount();
     const tx = this._web3.eth.sendTransaction({
       from: currentAccount,
       to: toAddress,
-      value: valueInWei
+      value
       //gasPrice: 500000000
     });
 
