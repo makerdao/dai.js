@@ -7,12 +7,6 @@ export default class NonceService extends PublicService {
 
   inject(args, nonce) {
     if (
-      args.length === 1 &&
-      typeof args[0] === 'object' &&
-      !Object.keys(args[0]).includes('_bn')
-    ) {
-      args[0]['nonce'] = nonce;
-    } else if (
       typeof args[args.length - 1] === 'object' &&
       !Object.keys(args[args.length - 1]).includes('_bn')
     ) {
