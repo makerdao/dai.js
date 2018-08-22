@@ -10,9 +10,13 @@ import { ETH, WETH } from '../../src/eth/Currency';
 
 let service;
 
-beforeAll(() => {
+beforeAll(async () => {
   service = buildTestEthereumTokenService();
-  return service.manager().authenticate();
+  await service.manager().authenticate();
+  service
+    .get('smartContract')
+    .get('nonce')
+    .setNextNonce();
 });
 
 function createTestTransaction(srv = service) {

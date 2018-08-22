@@ -49,7 +49,9 @@ export default class Cdp {
       { hybrid: false }
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
-    const contractPromise = tubContract.open();
+    const nonce = this._cdpService.get('nonce').getNonce();
+    console.log(nonce);
+    const contractPromise = tubContract.open({ nonce: nonce });
 
     // FIXME push this back down into SmartContractService
     this._transactionObject = this._transactionManager.createHybridTx(

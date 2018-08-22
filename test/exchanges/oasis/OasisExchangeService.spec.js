@@ -83,73 +83,81 @@ async function createDaiAndPlaceLimitOrder(
   return _placeLimitOrder(oasisExchangeService, sellDai);
 }
 
-test('sell Dai, console log the balances (used for debugging)', async done => {
-  const oasisExchangeService = await buildTestOasisExchangeService();
-  let order = null;
-  /* eslint-disable-next-line */
-  let initialBalance;
-  /* eslint-disable-next-line */
-  let finalBalance;
-  let daiToken = null;
+test(
+  'sell Dai, console log the balances (used for debugging)',
+  async done => {
+    const oasisExchangeService = await buildTestOasisExchangeService();
+    let order = null;
+    /* eslint-disable-next-line */
+    let initialBalance;
+    /* eslint-disable-next-line */
+    let finalBalance;
+    let daiToken = null;
 
-  return createDaiAndPlaceLimitOrder(oasisExchangeService)
-    .then(() => {
-      const oasisContract = oasisExchangeService
-        .get('smartContract')
-        .getContractByName(contracts.MAKER_OTC);
-      return oasisContract.getBestOffer(
-        '0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238',
-        '0xc226f3cd13d508bc319f4f4290172748199d6612'
-      );
-    })
-    .then(() => {
-      const ethereumTokenService = oasisExchangeService.get('token');
-      daiToken = ethereumTokenService.getToken(DAI);
-      return daiToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
-      );
-    })
-    .then(balance => {
-      initialBalance = balance;
-      const wethToken = oasisExchangeService.get('token').getToken(WETH);
-      return wethToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
-      );
-    })
-    .then(() => {
-      const oasisContract = oasisExchangeService
-        .get('smartContract')
-        .getContractByName(contracts.MAKER_OTC);
-      return daiToken.approveUnlimited(oasisContract.address).onMined();
-    })
-    .then(() => {
-      const oasisContract = oasisExchangeService
-        .get('smartContract')
-        .getContractByName(contracts.MAKER_OTC);
-      return daiToken.allowance(
-        oasisExchangeService.get('web3').defaultAccount(),
-        oasisContract.address
-      );
-    })
-    .then(() => {
-      order = oasisExchangeService.sellDai('0.01', WETH);
-      return order;
-    })
-    .then(() => {
-      const ethereumTokenService = oasisExchangeService.get('token');
-      const token = ethereumTokenService.getToken(WETH);
-      return token.balanceOf(oasisExchangeService.get('web3').defaultAccount());
-    })
-    .then(() => {
-      const ethereumTokenService = oasisExchangeService.get('token');
-      const token = ethereumTokenService.getToken(DAI);
-      return token.balanceOf(oasisExchangeService.get('web3').defaultAccount());
-    })
-    .then(balance => {
-      finalBalance = balance;
-      done();
-    });
-});
+    return createDaiAndPlaceLimitOrder(oasisExchangeService)
+      .then(() => {
+        const oasisContract = oasisExchangeService
+          .get('smartContract')
+          .getContractByName(contracts.MAKER_OTC);
+        return oasisContract.getBestOffer(
+          '0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238',
+          '0xc226f3cd13d508bc319f4f4290172748199d6612'
+        );
+      })
+      .then(() => {
+        const ethereumTokenService = oasisExchangeService.get('token');
+        daiToken = ethereumTokenService.getToken(DAI);
+        return daiToken.balanceOf(
+          oasisExchangeService.get('web3').defaultAccount()
+        );
+      })
+      .then(balance => {
+        initialBalance = balance;
+        const wethToken = oasisExchangeService.get('token').getToken(WETH);
+        return wethToken.balanceOf(
+          oasisExchangeService.get('web3').defaultAccount()
+        );
+      })
+      .then(() => {
+        const oasisContract = oasisExchangeService
+          .get('smartContract')
+          .getContractByName(contracts.MAKER_OTC);
+        return daiToken.approveUnlimited(oasisContract.address).onMined();
+      })
+      .then(() => {
+        const oasisContract = oasisExchangeService
+          .get('smartContract')
+          .getContractByName(contracts.MAKER_OTC);
+        return daiToken.allowance(
+          oasisExchangeService.get('web3').defaultAccount(),
+          oasisContract.address
+        );
+      })
+      .then(() => {
+        order = oasisExchangeService.sellDai('0.01', WETH);
+        return order;
+      })
+      .then(() => {
+        const ethereumTokenService = oasisExchangeService.get('token');
+        const token = ethereumTokenService.getToken(WETH);
+        return token.balanceOf(
+          oasisExchangeService.get('web3').defaultAccount()
+        );
+      })
+      .then(() => {
+        const ethereumTokenService = oasisExchangeService.get('token');
+        const token = ethereumTokenService.getToken(DAI);
+        return token.balanceOf(
+          oasisExchangeService.get('web3').defaultAccount()
+        );
+      })
+      .then(balance => {
+        finalBalance = balance;
+        done();
+      });
+  },
+  20000
+);
 
 test('sell Dai', async () => {
   const oasisExchangeService = await buildTestOasisExchangeService();

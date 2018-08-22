@@ -30,9 +30,11 @@ export default class EtherToken {
   }
 
   transfer(toAddress, transferValue) {
+    const nonce = this._transactionManager.get('nonce').getNonce();
     const valueInWei = utils.parseEther(transferValue).toString();
     const defaultAccount = this._web3.defaultAccount();
     const tx = this._web3.eth.sendTransaction({
+      nonce: nonce,
       from: defaultAccount,
       to: toAddress,
       value: valueInWei
@@ -45,8 +47,10 @@ export default class EtherToken {
   }
 
   transferFrom(fromAddress, toAddress, transferValue) {
+    const nonce = this._transactionManager.get('nonce').getNonce();
     const valueInWei = utils.parseEther(transferValue).toString();
     const tx = this._web3.eth.sendTransaction({
+      nonce: nonce,
       from: fromAddress,
       to: toAddress,
       value: valueInWei

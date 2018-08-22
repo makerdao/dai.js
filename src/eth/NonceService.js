@@ -33,9 +33,13 @@ export default class NonceService extends PublicService {
     // await this._nextNonce;
     const txCount = this._getTxCount();
     let nonce;
-
-    txCount > this._nextNonce ? (nonce = txCount) : (nonce = this._nextNonce);
-    this._nextNonce += 1;
+    if (this._nextNonce) {
+      txCount > this._nextNonce ? (nonce = txCount) : (nonce = this._nextNonce);
+      this._nextNonce += 1;
+    } else {
+      console.warn('NonceService transaction count is undefined.');
+      nonce = txCount;
+    }
 
     return nonce;
   }

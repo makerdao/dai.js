@@ -8,6 +8,10 @@ test('get Ether allowance returns max safe integer', done => {
     .manager()
     .authenticate()
     .then(() => {
+      ethereumTokenService
+        .get('smartContract')
+        .get('nonce')
+        .setNextNonce();
       const token = ethereumTokenService.getToken(ETH);
       return token.allowance(
         TestAccountProvider.nextAddress(),
@@ -27,6 +31,10 @@ test('get Ether balance using test blockchain', done => {
     .manager()
     .authenticate()
     .then(() => {
+      ethereumTokenService
+        .get('smartContract')
+        .get('nonce')
+        .setNextNonce();
       const token = ethereumTokenService.getToken(ETH);
       return token.balanceOf(TestAccountProvider.nextAddress());
     })
@@ -45,6 +53,10 @@ test('approve and approveUnlimited should resolve to true', done => {
     .manager()
     .authenticate()
     .then(() => {
+      ethereumTokenService
+        .get('smartContract')
+        .get('nonce')
+        .setNextNonce();
       token = ethereumTokenService.getToken(ETH);
       return token.approve(TestAccountProvider.nextAddress(), '0.1');
     })
@@ -73,6 +85,10 @@ test(
       .manager()
       .authenticate()
       .then(() => {
+        ethereumTokenService
+          .get('smartContract')
+          .get('nonce')
+          .setNextNonce();
         sender = ethereumTokenService.get('web3').defaultAccount();
         token = ethereumTokenService.getToken(ETH);
         return Promise.all([
@@ -114,6 +130,10 @@ test(
       .manager()
       .authenticate()
       .then(() => {
+        ethereumTokenService
+          .get('smartContract')
+          .get('nonce')
+          .setNextNonce();
         sender = ethereumTokenService.get('web3').defaultAccount();
         token = ethereumTokenService.getToken(ETH);
         return Promise.all([
