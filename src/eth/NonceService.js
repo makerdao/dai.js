@@ -5,23 +5,37 @@ export default class NonceService extends PublicService {
     super(name, ['web3']);
   }
 
-  inject(args, nonce) {
+  _getTxCount() {
+    return this.get('web3')._web3.eth.getTransactionCount(
+      this.get('web3').defaultAccount(),
+      'pending'
+    );
+  }
+
+  inject(args) {
     if (
       typeof args[args.length - 1] === 'object' &&
       !Object.keys(args[args.length - 1]).includes('_bn')
     ) {
-      args[args.length - 1]['nonce'] = nonce;
+      args[args.length - 1]['nonce'] = this.getNonce();
     } else {
-      args.push({ nonce: nonce });
+      args.push({ nonce: this.getNonce() });
     }
 
     return args;
   }
 
+  setNextNonce() {
+    this._nextNonce = this._getTxCount();
+  }
+
   getNonce() {
-    return this.get('web3')._web3.eth.getTransactionCount(
-      this.get('web3').defaultAccount(),
-      'pending'
-    );
+    // await this._nextNonce;
+    const txCount = this._getTxCount();
+    let nonce;
+
+    this._nextNonce > txCount ? (nonce = this._nextNonce) : (nonce = txCount);
+
+    return nonce;
   }
 }

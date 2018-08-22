@@ -20,6 +20,10 @@ export default class TransactionManager extends PublicService {
       return tx;
     }
 
+    if (!this.get('nonce')._nextNonce) {
+      this.get('nonce').setNextNonce();
+    }
+
     const txo = new TransactionObject(
       tx,
       this.get('web3'),
