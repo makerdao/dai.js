@@ -92,6 +92,7 @@
     "lodash.times": "^4.3.2",
     "lodash.uniq": "^4.5.0",
     "lodash.values": "^4.3.0",
+    "promise-props": "^1.0.0",
     "toposort": "^2.0.2",
     "web3": "^0.20.6",
     "web3-provider-engine": "makerdao/provider-engine#remove-provider-dist"

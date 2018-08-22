@@ -1,10 +1,11 @@
 import PrivateService from '../core/PrivateService';
 import Web3ProviderType from './Web3ProviderType';
-import { promisifyAsyncMethods, getNetworkName } from '../utils';
+import { promisify, promisifyMethods, getNetworkName } from '../utils';
 import Web3 from 'web3';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
+import promiseProps from 'promise-props';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -60,7 +61,7 @@ export default class Web3Service extends PrivateService {
     return this._web3.eth.contract(abi).at(address);
   }
 
-  initialize(settings) {
+  async initialize(settings) {
     this.get('log').info('Web3 is initializing...');
 
     this._defaultEmitter = this.get('event');
@@ -78,53 +79,23 @@ export default class Web3Service extends PrivateService {
     });
   }
 
-  connect() {
+  async connect() {
     this.get('log').info('Web3 is connecting...');
 
-    return Promise.all([
-      _web3Promise(_ => this._web3.version.getNode(_)),
-      _web3Promise(_ => this._web3.version.getNetwork(_)),
-      _web3Promise(_ => this._web3.version.getEthereum(_))
-    ])
-      .then(versions => {
-        if (!versions[0].includes('MetaMask')) {
-          return _web3Promise(_ => this._web3.version.getWhisper(_), null)
-            .then(whisperVersion => versions.push(whisperVersion))
-            .then(() => {
-              return versions;
-            });
-        } else {
-          return versions;
-        }
-      })
-      .then(
-        versions => {
-          this._info.version = {
-            api: this._web3.version.api,
-            node: versions[0],
-            network: versions[1],
-            ethereum: versions[2],
-            whisper: versions[3]
-          };
-
-          this._setUpEthers(this.networkId());
-          this._installDisconnectCheck();
-          this._initEventPolling();
-        },
-
-        reason => {
-          this.get('log').error(reason);
-        }
-      )
-      .then(
-        () => {
-          this._defaultEmitter.emit('web3/CONNECTED', {
-            ...this._info.version
-          });
-          this.get('log').info('Web3 version: ', this._info.version);
-        },
-        reason => this.get('log').error(reason)
-      );
+    this._info.version = await promiseProps({
+      api: this._web3.version.api,
+      node: promisify(this._web3.version.getNode)(),
+      network: promisify(this._web3.version.getNetwork)(),
+      ethereum: promisify(this._web3.version.getEthereum)(),
+      whisper: promisify(this._web3.version.getWhisper)().catch(() => '')
+    });
+    this._setUpEthers(this.networkId());
+    this._installDisconnectCheck();
+    await this._initEventPolling();
+    this._defaultEmitter.emit('web3/CONNECTED', {
+      ...this._info.version
+    });
+    this.get('log').info('Web3 version: ', this._info.version);
   }
 
   async authenticate() {
@@ -241,22 +212,12 @@ export default class Web3Service extends PrivateService {
     this.eth = {};
     Object.assign(
       this.eth,
-      promisifyAsyncMethods(web3.eth, [
+      promisifyMethods(web3.eth, [
         'getAccounts',
         'estimateGas',
         'getBlock',
         'sendTransaction',
         'getBalance'
-      ])
-    );
-
-    this.personal = {};
-    Object.assign(
-      this.personal,
-      promisifyAsyncMethods(web3.personal, [
-        'lockAccount',
-        'newAccount',
-        'unlockAccount'
       ])
     );
 
@@ -297,14 +258,6 @@ export default class Web3Service extends PrivateService {
   _buildWeb3Provider(providerSettings) {
     const { network, infuraApiKey, type } = providerSettings;
 
-    // TODO determine if caching is still useful
-    // const cacheKey = 'provider:' + JSON.stringify(providerSettings);
-    // const cache = this.get('cache');
-    // if (cache && cache.has(cacheKey)) return cache.fetch(cacheKey);
-
-    // TODO make timeout work again
-    // const timeout = Number(providerSettings.timeout || 0);
-
     let rpcUrl;
     switch (type) {
       case Web3ProviderType.HTTP:
@@ -319,9 +272,6 @@ export default class Web3Service extends PrivateService {
       default:
         throw new Error('Invalid web3 provider type: ' + type);
     }
-
-    // if (cache) cache.store(cacheKey, provider);
-    // return provider;
 
     const engine = new Web3ProviderEngine();
     engine.addProvider(new RpcSource({ rpcUrl }));
