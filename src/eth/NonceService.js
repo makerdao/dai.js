@@ -26,7 +26,8 @@ export default class NonceService extends PublicService {
 
   getNonce() {
     return this.get('web3')._web3.eth.getTransactionCount(
-      this.get('web3').defaultAccount()
+      this.get('web3').defaultAccount(),
+      'pending'
     );
   }
 }
