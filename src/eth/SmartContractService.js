@@ -4,14 +4,7 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 
-async function wrapContract(
-  contract,
-  name,
-  abi,
-  nonceService,
-  nonce,
-  txManager
-) {
+function wrapContract(contract, name, abi, nonceService, txManager) {
   const nonConstantFns = {};
 
   for (let { type, constant, name } of abi) {
@@ -25,15 +18,12 @@ async function wrapContract(
   //
   // But that only happens if the contract is specified as the first argument
   // to Proxy. So we don't do that. Go on, wag your finger.
-  const proxy = await new Proxy(
+  const proxy = new Proxy(
     {},
     {
       get(target, key) {
-        console.log('got here');
         if (nonConstantFns[key] && txManager) {
-          console('got here');
           return (...args) => {
-            console.log('got here');
             args = nonceService.inject(args);
             console.log(args);
             return txManager.createHybridTx(contract[key](...args), {
@@ -73,14 +63,14 @@ export default class SmartContractService extends PublicService {
     }
   }
 
-  async getContractByAddressAndAbi(address, abi, { name, hybrid = true } = {}) {
+  getContractByAddressAndAbi(address, abi, { name, hybrid = true } = {}) {
     if (!address) throw Error('Contract address is required');
     if (!name) name = this.lookupContractName(address);
 
     const signer = this.get('web3').signer(),
       contract = new Contract(address, abi, signer);
 
-    return await wrapContract(
+    return wrapContract(
       contract,
       name,
       abi,

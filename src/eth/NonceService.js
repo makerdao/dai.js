@@ -34,7 +34,7 @@ export default class NonceService extends PublicService {
     const txCount = this._getTxCount();
     let nonce;
 
-    this._nextNonce > txCount ? (nonce = this._nextNonce) : (nonce = txCount);
+    txCount > this._nextNonce ? (nonce = txCount) : (nonce = this._nextNonce);
 
     return nonce;
   }
