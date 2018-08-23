@@ -5,8 +5,8 @@ export default class NonceService extends PublicService {
     super(name, ['web3']);
   }
 
-  _getTxCount() {
-    return this.get('web3')._web3.eth.getTransactionCount(
+  async _getTxCount() {
+    return await this.get('web3')._web3.eth.getTransactionCount(
       this.get('web3').defaultAccount(),
       'pending'
     );
@@ -32,7 +32,6 @@ export default class NonceService extends PublicService {
   }
 
   async getNonce() {
-    // await this._nextNonce;
     const txCount = await this._getTxCount();
     let nonce;
     if (this._nextNonce) {
