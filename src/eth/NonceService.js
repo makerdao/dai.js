@@ -5,6 +5,11 @@ export default class NonceService extends PublicService {
     super(name, ['web3']);
   }
 
+  async connect() {
+    // await super.manager().connect();
+    await this.setNextNonce();
+  }
+
   async _getTxCount() {
     return await this.get('web3')._web3.eth.getTransactionCount(
       this.get('web3').defaultAccount(),

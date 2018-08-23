@@ -50,25 +50,23 @@ export default class Cdp {
       { hybrid: false }
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
-    nonceService.setNextNonce().then(() =>
-      nonceService.getNonce().then(nonce => {
-        console.log(nonce);
-        const contractPromise = tubContract.open({ nonce: nonce });
+    nonceService.getNonce().then(nonce => {
+      console.log(nonce);
+      const contractPromise = tubContract.open({ nonce: nonce });
 
-        // FIXME push this back down into SmartContractService
-        this._transactionObject = this._transactionManager.createHybridTx(
-          contractPromise,
-          {
-            businessObject: this,
-            metadata: { contract: contracts.SAI_TUB, method: 'open' }
-          }
-        );
+      // FIXME push this back down into SmartContractService
+      this._transactionObject = this._transactionManager.createHybridTx(
+        contractPromise,
+        {
+          businessObject: this,
+          metadata: { contract: contracts.SAI_TUB, method: 'open' }
+        }
+      );
 
-        return Promise.all([captureCdpIdPromise, contractPromise]).then(
-          result => result[0]
-        );
-      })
-    );
+      return Promise.all([captureCdpIdPromise, contractPromise]).then(
+        result => result[0]
+      );
+    });
   }
 
   transactionObject() {
