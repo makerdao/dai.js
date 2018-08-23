@@ -9,12 +9,14 @@ export default class TransactionObject extends TransactionLifeCycle {
   constructor(
     transaction,
     web3Service,
+    nonceService,
     businessObject = null,
     logsParser = logs => logs
   ) {
     super(businessObject);
     this._transaction = transaction;
     this._web3Service = web3Service;
+    this._nonceService = nonceService;
     this._ethersProvider = web3Service.ethersProvider();
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
@@ -117,6 +119,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     } catch (err) {
       this._errorMessage = err.message;
       console.error(err);
+      this._nonceService.setNextNonce();
       this.setError();
     }
     return this;

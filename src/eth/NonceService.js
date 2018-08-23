@@ -47,10 +47,10 @@ export default class NonceService extends PublicService {
   async getNonce() {
     const txCount = await this._getTxCount();
     let nonce;
-    this._count += 1;
 
     if (this._count) {
       nonce = this._compareNonceCounts(txCount);
+      this._count += 1;
     } else {
       console.warn('NonceService transaction count is undefined.');
       nonce = txCount;

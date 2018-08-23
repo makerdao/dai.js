@@ -4,12 +4,12 @@ import tokens from '../../contracts/tokens';
 function buildTestServices() {
   const container = buildTestContainer({
     smartContract: true,
-    transactionManager: true,
-    nonce: true
+    transactionManager: true
+    // nonce: true
   });
   const smartContract = container.service('smartContract');
   const transactionManager = container.service('transactionManager');
-  const nonce = container.service('nonce');
+  // const nonce = container.service('nonce');
 
   return Promise.all([
     smartContract.manager().authenticate(),
@@ -17,7 +17,7 @@ function buildTestServices() {
   ]).then(() => ({
     contract: smartContract,
     txMgr: transactionManager,
-    nonce: nonce,
+    // nonce: nonce,
     defaultAccount: smartContract.get('web3').defaultAccount()
   }));
 }
@@ -140,17 +140,4 @@ test('should add TransactionLifeCycle functions', async () => {
   expect(hybrid.isPending()).toBe(true);
   await hybrid.onMined();
   expect(hybrid.isMined()).toBe(true);
-});
-
-test('should set nonce before sending any transactions', async () => {
-  const services = await buildTestServices();
-  const contractTransaction = services.contract
-    .getContractByName(tokens.DAI, { hybrid: false })
-    .approve(services.defaultAccount, '1000000000000000000');
-  const businessObject = { x: 1 };
-  await services.txMgr.createHybridTx(contractTransaction, {
-    businessObject
-  });
-
-  expect(services.nonce._count).toBeDefined();
 });

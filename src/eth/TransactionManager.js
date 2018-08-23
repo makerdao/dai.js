@@ -23,6 +23,7 @@ export default class TransactionManager extends PublicService {
     const txo = new TransactionObject(
       tx,
       this.get('web3'),
+      this.get('nonce'),
       businessObject,
       parseLogs
     );
