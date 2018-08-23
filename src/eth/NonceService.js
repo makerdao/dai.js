@@ -12,26 +12,28 @@ export default class NonceService extends PublicService {
     );
   }
 
-  inject(args) {
+  async inject(args) {
+    const nonce = await this.getNonce();
+
     if (
       typeof args[args.length - 1] === 'object' &&
       !Object.keys(args[args.length - 1]).includes('_bn')
     ) {
-      args[args.length - 1]['nonce'] = this.getNonce();
+      args[args.length - 1]['nonce'] = nonce;
     } else {
-      args.push({ nonce: this.getNonce() });
+      args.push({ nonce: nonce });
     }
 
     return args;
   }
 
-  setNextNonce() {
-    this._nextNonce = this._getTxCount();
+  async setNextNonce() {
+    this._nextNonce = await this._getTxCount();
   }
 
-  getNonce() {
+  async getNonce() {
     // await this._nextNonce;
-    const txCount = this._getTxCount();
+    const txCount = await this._getTxCount();
     let nonce;
     if (this._nextNonce) {
       txCount > this._nextNonce ? (nonce = txCount) : (nonce = this._nextNonce);

@@ -23,8 +23,8 @@ function wrapContract(contract, name, abi, nonceService, txManager) {
     {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
-          return (...args) => {
-            args = nonceService.inject(args);
+          return async (...args) => {
+            args = await nonceService.inject(args);
             console.log(args);
             return txManager.createHybridTx(contract[key](...args), {
               metadata: { contract: name, method: key, args }

@@ -14,14 +14,15 @@ export default class TransactionManager extends PublicService {
   // FIXME: having a method that returns one thing when it's called in a promise
   // chain and something else when it's not (besides a promise that resolves to
   // the first thing) makes it pretty difficult to work with.
-  createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
+  async createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
     if (tx._original) {
       console.warn('Redundant call to createHybridTx');
       return tx;
     }
 
     if (!this.get('nonce')._nextNonce) {
-      this.get('nonce').setNextNonce();
+      await this.get('nonce').setNextNonce();
+      console.log('in txManager', this.get('nonce')._nextNonce);
     }
 
     const txo = new TransactionObject(
