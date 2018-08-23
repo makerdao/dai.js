@@ -113,7 +113,10 @@ export default class EthereumCdpService extends PrivateService {
       this.get('allowance').requireAllowance(MKR, this._tubContract().address),
       this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]);
-    return this._tubContract().wipe(hexCdpId, value, { gasLimit: 4000000 });
+    return this._tubContract().wipe(hexCdpId, value, {
+      gasLimit: 4000000,
+      gasPrice: 12000000000
+    });
   }
 
   getInfo(cdpId) {

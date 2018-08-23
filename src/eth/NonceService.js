@@ -12,6 +12,14 @@ export default class NonceService extends PublicService {
     );
   }
 
+  _compareNonceCounts(txCount) {
+    if (txCount > this._count) {
+      return txCount;
+    } else {
+      return this._count;
+    }
+  }
+
   async inject(args) {
     const nonce = await this.getNonce();
 
@@ -28,15 +36,16 @@ export default class NonceService extends PublicService {
   }
 
   async setNextNonce() {
-    this._nextNonce = await this._getTxCount();
+    this._count = await this._getTxCount();
   }
 
   async getNonce() {
     const txCount = await this._getTxCount();
     let nonce;
-    if (this._nextNonce) {
-      txCount > this._nextNonce ? (nonce = txCount) : (nonce = this._nextNonce);
-      this._nextNonce += 1;
+    this._count += 1;
+
+    if (this._count) {
+      nonce = this._compareNonceCounts(txCount);
     } else {
       console.warn('NonceService transaction count is undefined.');
       nonce = txCount;

@@ -20,9 +20,9 @@ export default class TransactionManager extends PublicService {
       return tx;
     }
 
-    if (!this.get('nonce')._nextNonce) {
+    if (!this.get('nonce')._count) {
       await this.get('nonce').setNextNonce();
-      console.log('in txManager', this.get('nonce')._nextNonce);
+      console.log('in txManager', this.get('nonce')._count);
     }
 
     const txo = new TransactionObject(

@@ -152,5 +152,5 @@ test('should set nonce before sending any transactions', async () => {
     businessObject
   });
 
-  expect(services.nonce._nextNonce).toBeDefined();
+  expect(services.nonce._count).toBeDefined();
 });
