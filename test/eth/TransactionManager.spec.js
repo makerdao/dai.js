@@ -4,12 +4,12 @@ import tokens from '../../contracts/tokens';
 function buildTestServices() {
   const container = buildTestContainer({
     smartContract: true,
-    transactionManager: true
-    // nonce: true
+    transactionManager: true,
+    nonce: true
   });
   const smartContract = container.service('smartContract');
   const transactionManager = container.service('transactionManager');
-  // const nonce = container.service('nonce');
+  const nonce = container.service('nonce');
 
   return Promise.all([
     smartContract.manager().authenticate(),
@@ -17,7 +17,7 @@ function buildTestServices() {
   ]).then(() => ({
     contract: smartContract,
     txMgr: transactionManager,
-    // nonce: nonce,
+    nonce: nonce,
     defaultAccount: smartContract.get('web3').defaultAccount()
   }));
 }

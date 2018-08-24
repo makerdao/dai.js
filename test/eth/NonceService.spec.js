@@ -50,7 +50,7 @@ test('getNonce should return its own tx count if higher than node count', async 
   nonceService._count = 500000;
   const nonce = await nonceService.getNonce();
 
-  expect(nonce).toEqual(500001);
+  expect(nonce).toEqual(500000);
 });
 
 test('getNonce should return tx count from node if higher than own count', async () => {

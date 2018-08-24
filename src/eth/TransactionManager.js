@@ -14,7 +14,7 @@ export default class TransactionManager extends PublicService {
   // FIXME: having a method that returns one thing when it's called in a promise
   // chain and something else when it's not (besides a promise that resolves to
   // the first thing) makes it pretty difficult to work with.
-  async createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
+  createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
     if (tx._original) {
       console.warn('Redundant call to createHybridTx');
       return tx;

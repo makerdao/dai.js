@@ -6,7 +6,6 @@ export default class NonceService extends PublicService {
   }
 
   async connect() {
-    // await super.manager().connect();
     await this.setNextNonce();
   }
 
