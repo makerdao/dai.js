@@ -1,8 +1,7 @@
 {
   "web3": {
     "provider": {
-      "type": "INFURA",
-      "network": "mainnet"
+      "type": "TEST"
     }
   },
   "exchange": "OasisExchangeService"

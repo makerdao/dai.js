@@ -1,11 +1,11 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
-import Web3ProviderType from '../../src/eth/Web3ProviderType';
+import ProviderType from '../../src/eth/web3/ProviderType';
 
 export const kovanProviderConfig = {
   web3: {
     privateKey: process.env.KOVAN_PRIVATE_KEY,
     provider: {
-      type: Web3ProviderType.INFURA,
+      type: ProviderType.INFURA,
       network: 'kovan',
       infuraApiKey: process.env.INFURA_API_KEY
     }
@@ -14,7 +14,7 @@ export const kovanProviderConfig = {
 
 export const defaultProviderConfig = {
   web3: {
-    provider: { type: Web3ProviderType.TEST }
+    provider: { type: ProviderType.TEST }
   },
   log: false
 };

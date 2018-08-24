@@ -1,7 +1,8 @@
-import oasis from './presets/oasis.json';
+import test from './presets/test.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
 import mainnet from './presets/mainnet.json';
+import windowPreset from './presets/window.json';
 import merge from 'lodash.merge';
 import intersection from 'lodash.intersection';
 import { mergeServiceConfig } from './index';
@@ -36,8 +37,7 @@ function loadPreset(name) {
   let preset;
   switch (name) {
     case 'test':
-    case 'oasis':
-      preset = oasis;
+      preset = test;
       break;
     case 'http':
       preset = http;
@@ -47,6 +47,9 @@ function loadPreset(name) {
       break;
     case 'mainnet':
       preset = mainnet;
+      break;
+    case 'window':
+      preset = windowPreset;
       break;
     default:
       throw new ConfigPresetNotFoundError(name);
@@ -112,12 +115,9 @@ export default class ConfigFactory {
       if (options.provider) {
         merge(web3Settings.provider, options.provider);
       }
-
-      if (options.overrideMetamask) {
-        web3Settings.usePresetProvider = !options.overrideMetamask;
-      }
     }
 
+    // accounts-specific convenience option
     if (options.privateKey) {
       config.accounts = {
         ...config.accounts,
