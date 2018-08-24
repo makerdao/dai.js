@@ -129,12 +129,13 @@ class ServiceManagerBase {
               );
             }
           },
-          reason => {
-            log('connect error: ' + reason);
+          error => {
+            log('connect error:', error);
             // Check if we are still CONNECTING, because another process might have come in between
             if (this._state.inState(ServiceState.CONNECTING)) {
               this._state.transitionTo(ServiceState.OFFLINE);
             }
+            throw error;
           }
         );
       });

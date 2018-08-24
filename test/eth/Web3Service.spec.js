@@ -132,29 +132,20 @@ test('should correctly use web3 provider of a previously injected web3 object, o
     .catch(() => done.fail());
 });
 
-test('should return error reason on a failure to connect', done => {
-  captureConsole(() => {
-    const service = buildTestService();
-    let error = false;
-    service.get('log').error = msg => {
-      error = msg;
-    };
+test('should throw error on a failure to connect', async () => {
+  expect.assertions(1);
+  const service = buildTestService();
+  await service.manager().initialize();
+  service._web3.version.getNode = cb => {
+    cb(new Error('fake connection failure error'));
+  };
 
-    service
-      .manager()
-      .initialize()
-      .then(() => {
-        service._web3.version.getNode = () => {
-          error = true;
-          throw new Error('fake connection failure error');
-        };
-        return service.manager().connect();
-      })
-      .then(() => {
-        expect(error).toBeInstanceOf(Error);
-        done();
-      });
-  });
+  try {
+    await service.manager().connect();
+    console.log(service._info);
+  } catch (err) {
+    expect(err).toBeInstanceOf(Error);
+  }
 });
 
 test('should be authenticated and know default address when private key passed in', done => {
@@ -274,18 +265,13 @@ test('should have ETH in test account', done => {
     });
 });
 
-test(
-  'should connect to the right network when using the INFURA provider type',
-  done => {
-    const service = buildInfuraService('kovan');
-    service
-      .manager()
-      .connect()
-      .then(() => {
-        expect(service.manager().isConnected()).toBe(true);
-        expect(service.networkId()).toBe(42);
-        done();
-      });
-  },
-  10000
-);
+test('connect to kovan', async () => {
+  const service = buildInfuraService('kovan');
+  try {
+    await service.manager().connect();
+  } catch (err) {
+    console.log(err);
+  }
+  expect(service.manager().isConnected()).toBe(true);
+  expect(service.networkId()).toBe(42);
+});

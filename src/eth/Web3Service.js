@@ -101,7 +101,7 @@ export default class Web3Service extends PrivateService {
   async authenticate() {
     this.get('log').info('Web3 is authenticating...');
 
-    const account = (await _web3Promise(_ => this._web3.eth.getAccounts(_)))[0];
+    const account = (await promisify(this._web3.eth.getAccounts)())[0];
     this._defaultEmitter.emit('web3/AUTHENTICATED', { account });
     this._providerAccountAddress = account;
     this._installDeauthenticationCheck();
@@ -299,7 +299,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillConnected() {
-    return _web3Promise(_ => this._web3.version.getNetwork(_))
+    return promisify(this._web3.version.getNetwork)()
       .then(network => network === this._info.version['network'])
       .catch(() => false);
   }
@@ -321,34 +321,7 @@ export default class Web3Service extends PrivateService {
 
   async _isStillAuthenticated() {
     if (this.get('accounts').hasAccount()) return this._isStillConnected();
-    const account = (await _web3Promise(_ => this._web3.eth.getAccounts(_)))[0];
+    const account = (await promisify(this._web3.eth.getAccounts)())[0];
     return account === this._providerAccountAddress;
   }
-}
-
-function _web3Promise(cb, onErrorValue) {
-  return new Promise((resolve, reject) => {
-    try {
-      cb((error, result) => {
-        if (error) {
-          if (typeof onErrorValue === 'undefined') {
-            //console.log(error);
-            //console.log(new Error().stack);
-            reject(error);
-          } else {
-            resolve(onErrorValue);
-          }
-        } else {
-          resolve(result);
-        }
-      });
-    } catch (e) {
-      if (typeof onErrorValue === 'undefined') {
-        //console.log(e);
-        reject(e);
-      } else {
-        resolve(onErrorValue);
-      }
-    }
-  });
 }
