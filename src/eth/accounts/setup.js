@@ -1,48 +1,50 @@
-import ProviderType from './ProviderType';
+import ProviderType from '../web3/ProviderType';
 import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
-import Web3 from 'web3';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
-export default async function setupWeb3(settings, accountsService) {
-  const web3 = new Web3();
+export async function setupEngine(settings) {
+  const { provider: providerSettings } = settings.web3;
   const engine = new Web3ProviderEngine();
-  web3.setProvider(engine);
+  const result = { engine };
 
-  if (settings.provider.type === ProviderType.WINDOW) {
-    const windowProvider = await getWindowProvider();
-    engine.addProvider(new ProviderSubprovider(windowProvider));
+  if (providerSettings.type === ProviderType.WINDOW || !providerSettings) {
+    result.provider = await getWindowProvider();
   } else {
-    const rpcUrl = getRpcUrl(settings.provider);
-    engine.addProvider(new RpcSource({ rpcUrl }));
+    const rpcUrl = getRpcUrl(providerSettings);
+    result.provider = new RpcSource({ rpcUrl });
   }
 
-  // this must come after subprovider setup, because it starts the engine
-  accountsService.attachToEngine(engine);
-
-  return web3;
+  engine.addProvider(result.provider);
+  return result;
 }
 
-async function getWindowProvider() {
+export async function getWindowProvider() {
   if (typeof window === 'undefined') {
     throw new Error(
       'Cannot use ProviderType.WINDOW because window is undefined'
     );
   }
 
-  // If web3 is injected (legacy browsers)...
+  const wrap = provider => {
+    const subprovider = new ProviderSubprovider(provider);
+    subprovider.isWindowProvider = true;
+    return subprovider;
+  };
+
+  // If web3 is injected (old MetaMask)...
   if (typeof window.web3 !== 'undefined') {
-    return window.web3.currentProvider;
+    return wrap(window.web3.currentProvider);
   }
 
-  // If web3 is not injected (modern browsers)...
+  // If web3 is not injected (new MetaMask)...
   return new Promise((resolve, reject) => {
     let resolved = false;
 
     window.addEventListener('message', ({ data }) => {
       if (data && data.type && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
         resolved = true;
-        resolve(window.ethereum);
+        resolve(wrap(window.ethereum));
       }
     });
 

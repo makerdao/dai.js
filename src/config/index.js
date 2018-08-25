@@ -61,3 +61,8 @@ export function mergeServiceConfig(role, sink, source, resolver) {
     merge({}, sink[1], source[1])
   ];
 }
+
+export function getSettings(config) {
+  if (config instanceof Array) return config[1];
+  return config;
+}

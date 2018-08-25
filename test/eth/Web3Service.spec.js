@@ -169,22 +169,22 @@ test('handle a manual disconnect', (done) => {
 });
 */
 
-test('handle automatic deauthentication', done => {
+test('handle automatic deauthentication', async done => {
   const service = buildDeauthenticatingService();
   service.manager().onDeauthenticated(() => {
     expect(service.manager().isAuthenticated()).toBe(false);
     done();
   });
-  service.manager().authenticate();
+  await service.manager().authenticate();
 });
 
-test('handle automatic change of account as a deauthenticate', done => {
+test('handle automatic change of account as a deauthenticate', async done => {
   const service = buildAccountChangingService();
   service.manager().onDeauthenticated(() => {
     expect(service.manager().isAuthenticated()).toBe(false);
     done();
   });
-  service.manager().authenticate();
+  await service.manager().authenticate();
 });
 
 test('create a ethersjs object running parallel to web3', done => {
@@ -210,10 +210,8 @@ test('connect to ganache testnet with account 0x16fb9...', done => {
 
   service
     .manager()
-    .initialize()
-    .then(() => {
-      return service.eth.getAccounts();
-    })
+    .connect()
+    .then(() => service.eth.getAccounts())
     .then(accounts => {
       expect(accounts.slice(0, 2)).toEqual(expectedAccounts);
       done();

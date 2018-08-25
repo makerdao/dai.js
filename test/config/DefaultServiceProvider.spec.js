@@ -12,6 +12,26 @@ test('do not support services not in mapping', () => {
   expect(new DefaultServiceProvider().supports('DoesNotExist')).toBe(false);
 });
 
+test('add web3 config into accounts config', () => {
+  const settings = { provider: { type: 'foo' } };
+  const web3configs = [settings, ['Web3Service', settings]];
+
+  for (let config of web3configs) {
+    const provider = new DefaultServiceProvider({
+      web3: config,
+      accounts: { metamask: { type: 'window' } }
+    });
+
+    expect(provider._config).toEqual({
+      web3: config,
+      accounts: {
+        metamask: { type: 'window' },
+        web3: settings
+      }
+    });
+  }
+});
+
 test('create a container from a service configuration', async () => {
   const container = new DefaultServiceProvider({
     ...config,

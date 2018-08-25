@@ -2,6 +2,8 @@ import AccountsService from '../../src/eth/AccountsService';
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
+import { providerAccountFactory } from '../../src/eth/accounts/factories';
+import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
 
 function mockEngine(overrides = {}) {
   return {
@@ -20,8 +22,7 @@ test('account with private key string literal in settings', async () => {
       foo: { type: 'privateKey', key: account.key }
     }
   });
-  await service.manager().initialize();
-  service.attachToEngine(mockEngine());
+  await service.manager().connect();
   expect(service.currentAddress()).toEqual(account.address);
   expect(service.currentWallet()).toBeInstanceOf(Wallet);
 });
@@ -41,7 +42,7 @@ test('invalid private keys', async () => {
       }
     });
     try {
-      await service.manager().initialize();
+      await service.manager().connect();
     } catch (err) {
       expect(err.message).toMatch(/private key/);
     }
@@ -49,36 +50,32 @@ test('invalid private keys', async () => {
 });
 
 test('account with custom subprovider implementation', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', {
+    accounts: true,
+    web3: { provider: { type: 'TEST' } }
+  });
+  await service.manager().connect();
+  const setEngine = jest.fn();
 
   service.addAccountType('foo', async settings => {
     return Promise.resolve({
-      address: '0xf00' + settings.suffix
+      address: '0xf00' + settings.suffix,
+      subprovider: { setEngine, handleRequest: jest.fn() }
     });
   });
 
-  await service.addAccount('fakeaccount', {
-    type: 'foo',
-    suffix: 'bae'
-  });
-
-  service.attachToEngine(mockEngine());
+  await service.addAccount('fakeaccount', { type: 'foo', suffix: 'bae' });
   service.useAccount('fakeaccount');
   expect(service.currentAddress()).toEqual('0xf00bae');
+  expect(setEngine).toBeCalled();
 });
 
 test('currentAccount', async () => {
-  expect.assertions(2);
   const service = new AccountsService();
+  service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
-  try {
-    service.currentAccount();
-  } catch (err) {
-    expect(err.message).toMatch(/attachToEngine/);
-  }
   service.useAccount('foo');
-  service.attachToEngine(mockEngine());
   expect(service.currentAccount()).toEqual({
     name: 'foo',
     type: 'privateKey',
@@ -88,6 +85,7 @@ test('currentAccount', async () => {
 
 test('listAccounts', async () => {
   const service = new AccountsService();
+  service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
@@ -98,30 +96,14 @@ test('listAccounts', async () => {
   ]);
 });
 
-test('useAccount before engine setup', async () => {
+test('useAccount', async () => {
   const service = new AccountsService();
-  const a1 = TestAccountProvider.nextAccount();
-  await service.addAccount('foo', { type: 'privateKey', key: a1.key });
-  service.useAccount('foo');
-  const engine = mockEngine();
-  service.attachToEngine(engine);
-
-  expect(engine.stop).not.toBeCalled();
-  expect(engine.removeProvider).not.toBeCalled();
-  expect(engine.start).toBeCalled();
-  expect(engine.addProvider).toBeCalled();
-  expect(service.currentAddress()).toEqual(a1.address);
-});
-
-test('useAccount after engine setup', async () => {
-  const service = new AccountsService();
+  const engine = (service._engine = mockEngine());
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
   await service.addAccount('bar', { type: 'privateKey', key: a2.key });
-  const engine = mockEngine();
   service.useAccount('foo');
-  service.attachToEngine(engine);
   service.useAccount('bar');
 
   expect(engine.stop).toBeCalled();
@@ -129,4 +111,10 @@ test('useAccount after engine setup', async () => {
   expect(engine.start).toBeCalled();
   expect(engine.addProvider).toBeCalled();
   expect(service.currentAddress()).toEqual(a2.address);
+});
+
+test('providerAccountFactory', async () => {
+  const rpc = new RpcSource({ rpcUrl: 'http://localhost:2000' });
+  const account = await providerAccountFactory(null, rpc);
+  expect(account.address).toEqual('0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6');
 });

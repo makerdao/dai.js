@@ -6,6 +6,7 @@ import windowPreset from './presets/window.json';
 import merge from 'lodash.merge';
 import intersection from 'lodash.intersection';
 import { mergeServiceConfig } from './index';
+import { AccountType } from '../utils/constants';
 
 class ConfigPresetNotFoundError extends Error {
   constructor(message) {
@@ -121,7 +122,7 @@ export default class ConfigFactory {
     if (options.privateKey) {
       config.accounts = {
         ...config.accounts,
-        default: { type: 'privateKey', key: options.privateKey }
+        default: { type: AccountType.PRIVATE_KEY, key: options.privateKey }
       };
     }
 

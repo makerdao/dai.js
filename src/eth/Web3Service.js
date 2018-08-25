@@ -1,9 +1,8 @@
 import PrivateService from '../core/PrivateService';
-import ProviderType from './web3/ProviderType';
 import { promisify, promisifyMethods, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
-import setupWeb3 from './web3/setup';
+import Web3 from 'web3';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -37,14 +36,7 @@ export default class Web3Service extends PrivateService {
   }
 
   currentAccount() {
-    if (!this.manager().isAuthenticated()) {
-      throw new Error('Not authenticated.');
-    }
-
-    const accounts = this.get('accounts');
-    if (accounts.hasAccount()) return accounts.currentAddress();
-
-    return this._providerAccountAddress;
+    return this.get('accounts').currentAddress();
   }
 
   ethersProvider() {
@@ -62,12 +54,9 @@ export default class Web3Service extends PrivateService {
   async initialize(settings) {
     this.get('log').info('Web3 is initializing...');
     this._defaultEmitter = this.get('event');
-    settings = this._normalizeSettings(settings);
-    this._web3 = await setupWeb3(
-      settings,
-      this.get('accounts'),
-      this._defaultEmitter.emit.bind(this._defaultEmitter)
-    );
+
+    this._web3 = new Web3();
+    this._web3.setProvider(this.get('accounts').getProvider());
 
     // TODO: is this still necessary? it seems confusing to have methods
     // that look like web3.eth methods but behave differently
@@ -97,9 +86,14 @@ export default class Web3Service extends PrivateService {
       api: this._web3.version.api,
       node: promisify(this._web3.version.getNode)(),
       network: promisify(this._web3.version.getNetwork)(),
-      ethereum: promisify(this._web3.version.getEthereum)(),
-      whisper: promisify(this._web3.version.getWhisper)().catch(() => '')
+      ethereum: promisify(this._web3.version.getEthereum)()
     });
+
+    if (!this._info.version.node.includes('MetaMask')) {
+      this._info.version.whisper = await promisify(
+        this._web3.version.getWhisper
+      )().catch(() => '');
+    }
     this._setUpEthers(this.networkId());
     this._installDisconnectCheck();
     await this._initEventPolling();
@@ -112,9 +106,9 @@ export default class Web3Service extends PrivateService {
   async authenticate() {
     this.get('log').info('Web3 is authenticating...');
 
-    const account = (await promisify(this._web3.eth.getAccounts)())[0];
-    this._defaultEmitter.emit('web3/AUTHENTICATED', { account });
-    this._providerAccountAddress = account;
+    this._defaultEmitter.emit('web3/AUTHENTICATED', {
+      account: this.currentAccount()
+    });
     this._installDeauthenticationCheck();
   }
 
@@ -197,24 +191,6 @@ export default class Web3Service extends PrivateService {
     return provider;
   }
 
-  _normalizeSettings(settings) {
-    const defaultSettings = {
-      provider: {
-        type: ProviderType.WINDOW
-      }
-    };
-
-    if (!settings) {
-      settings = defaultSettings;
-    }
-
-    if (!settings.provider) {
-      settings.provider = defaultSettings.provider;
-    }
-
-    return settings;
-  }
-
   _setStatusTimerDelay(delay) {
     this._statusTimerDelay = delay ? parseInt(delay) : TIMER_DEFAULT_DELAY;
   }
@@ -256,8 +232,9 @@ export default class Web3Service extends PrivateService {
   }
 
   async _isStillAuthenticated() {
-    if (this.get('accounts').hasAccount()) return this._isStillConnected();
+    if (this.get('accounts').hasNonProviderAccount())
+      return this._isStillConnected();
     const account = (await promisify(this._web3.eth.getAccounts)())[0];
-    return account === this._providerAccountAddress;
+    return account === this.currentAccount();
   }
 }
