@@ -2,8 +2,12 @@ import AccountsService from '../../src/eth/AccountsService';
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
-import { providerAccountFactory } from '../../src/eth/accounts/factories';
+import {
+  providerAccountFactory,
+  windowProviderAccountFactory
+} from '../../src/eth/accounts/factories';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
+import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
 function mockEngine(overrides = {}) {
   return {
@@ -117,4 +121,63 @@ test('providerAccountFactory', async () => {
   const rpc = new RpcSource({ rpcUrl: 'http://localhost:2000' });
   const account = await providerAccountFactory(null, rpc);
   expect(account.address).toEqual('0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6');
+});
+
+describe('mocking window', () => {
+  const origWindow = {};
+
+  let mockProvider;
+
+  beforeAll(() => {
+    // preserve the original versions of the methods that we will overwrite
+    // with mocks during tests
+    const { postMessage, addEventListener } = window;
+    Object.assign(origWindow, { postMessage, addEventListener });
+  });
+
+  beforeEach(() => {
+    mockProvider = {
+      sendAsync: ({ method }, callback) => {
+        if (method === 'eth_accounts') {
+          callback(null, { result: ['0xf00'] });
+        }
+      }
+    };
+  });
+
+  afterEach(() => {
+    Object.assign(window, origWindow);
+    delete window.web3;
+    delete window.ethereum;
+  });
+
+  test('windowProviderAccountFactory with window.web3', async () => {
+    window.web3 = {
+      currentProvider: mockProvider
+    };
+
+    const account = await windowProviderAccountFactory();
+    expect(account.address).toEqual('0xf00');
+    expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
+  });
+
+  test('windowProviderAccountFactory with postMessage', async () => {
+    window.postMessage = jest.fn((...args) => {
+      expect(args[0]).toEqual({ type: 'ETHEREUM_PROVIDER_REQUEST' });
+      expect(args[1]).toEqual('*');
+      window.ethereum = mockProvider;
+      document.dispatchEvent(
+        new window.MessageEvent('message', {
+          bubbles: true,
+          data: {
+            type: 'ETHEREUM_PROVIDER_SUCCESS'
+          }
+        })
+      );
+    });
+
+    const account = await windowProviderAccountFactory();
+    expect(account.address).toEqual('0xf00');
+    expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
+  });
 });
