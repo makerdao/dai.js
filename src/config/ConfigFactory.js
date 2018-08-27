@@ -2,7 +2,7 @@ import test from './presets/test.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
 import mainnet from './presets/mainnet.json';
-import windowPreset from './presets/window.json';
+import browser from './presets/browser.json';
 import merge from 'lodash.merge';
 import intersection from 'lodash.intersection';
 import { mergeServiceConfig } from './index';
@@ -49,8 +49,8 @@ function loadPreset(name) {
     case 'mainnet':
       preset = mainnet;
       break;
-    case 'window':
-      preset = windowPreset;
+    case 'browser':
+      preset = browser;
       break;
     default:
       throw new ConfigPresetNotFoundError(name);

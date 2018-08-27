@@ -4,7 +4,7 @@ import invariant from 'invariant';
 import {
   privateKeyAccountFactory,
   providerAccountFactory,
-  windowProviderAccountFactory
+  browserProviderAccountFactory
 } from './accounts/factories';
 import { setupEngine } from './accounts/setup';
 import { AccountType } from '../utils/constants';
@@ -16,7 +16,7 @@ export default class AccountsService extends PublicService {
     this._accountFactories = {
       privateKey: privateKeyAccountFactory,
       provider: providerAccountFactory,
-      window: windowProviderAccountFactory
+      browser: browserProviderAccountFactory
     };
   }
 

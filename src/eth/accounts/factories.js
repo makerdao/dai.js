@@ -1,6 +1,6 @@
 import ethUtil from 'ethereumjs-util';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
-import { getWindowProvider } from './setup';
+import { getBrowserProvider } from './setup';
 
 export function privateKeyAccountFactory({ key }) {
   if (typeof key != 'string' || !key.match(/^(0x)?[0-9a-fA-F]{64}$/)) {
@@ -41,7 +41,7 @@ export async function providerAccountFactory(_, provider) {
   return { subprovider, address: await getAccountAddress(subprovider) };
 }
 
-export async function windowProviderAccountFactory() {
-  const subprovider = await getWindowProvider();
+export async function browserProviderAccountFactory() {
+  const subprovider = await getBrowserProvider();
   return { subprovider, address: await getAccountAddress(subprovider) };
 }

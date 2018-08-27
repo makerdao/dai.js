@@ -19,13 +19,13 @@ test('add web3 config into accounts config', () => {
   for (let config of web3configs) {
     const provider = new DefaultServiceProvider({
       web3: config,
-      accounts: { metamask: { type: 'window' } }
+      accounts: { metamask: { type: 'browser' } }
     });
 
     expect(provider._config).toEqual({
       web3: config,
       accounts: {
-        metamask: { type: 'window' },
+        metamask: { type: 'browser' },
         web3: settings
       }
     });

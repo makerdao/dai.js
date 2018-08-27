@@ -10,5 +10,5 @@ export const UINT256_MAX =
 export const AccountType = {
   PROVIDER: 'provider',
   PRIVATE_KEY: 'privateKey',
-  WINDOW: 'window'
+  BROWSER: 'browser'
 };

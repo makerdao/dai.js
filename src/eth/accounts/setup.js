@@ -8,8 +8,8 @@ export async function setupEngine(settings) {
   const engine = new Web3ProviderEngine();
   const result = { engine };
 
-  if (providerSettings.type === ProviderType.WINDOW || !providerSettings) {
-    result.provider = await getWindowProvider();
+  if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
+    result.provider = await getBrowserProvider();
   } else {
     const rpcUrl = getRpcUrl(providerSettings);
     result.provider = new RpcSource({ rpcUrl });
@@ -19,10 +19,10 @@ export async function setupEngine(settings) {
   return result;
 }
 
-export async function getWindowProvider() {
+export async function getBrowserProvider() {
   if (typeof window === 'undefined') {
     throw new Error(
-      'Cannot use ProviderType.WINDOW because window is undefined'
+      'Cannot use ProviderType.BROWSER because window is undefined'
     );
   }
 

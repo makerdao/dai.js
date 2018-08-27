@@ -4,7 +4,7 @@ import TestAccountProvider from '../helpers/TestAccountProvider';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
 import {
   providerAccountFactory,
-  windowProviderAccountFactory
+  browserProviderAccountFactory
 } from '../../src/eth/accounts/factories';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
@@ -151,17 +151,17 @@ describe('mocking window', () => {
     delete window.ethereum;
   });
 
-  test('windowProviderAccountFactory with window.web3', async () => {
+  test('browserProviderAccountFactory with window.web3', async () => {
     window.web3 = {
       currentProvider: mockProvider
     };
 
-    const account = await windowProviderAccountFactory();
+    const account = await browserProviderAccountFactory();
     expect(account.address).toEqual('0xf00');
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
   });
 
-  test('windowProviderAccountFactory with postMessage', async () => {
+  test('browserProviderAccountFactory with postMessage', async () => {
     window.postMessage = jest.fn((...args) => {
       expect(args[0]).toEqual({ type: 'ETHEREUM_PROVIDER_REQUEST' });
       expect(args[1]).toEqual('*');
@@ -176,7 +176,7 @@ describe('mocking window', () => {
       );
     });
 
-    const account = await windowProviderAccountFactory();
+    const account = await browserProviderAccountFactory();
     expect(account.address).toEqual('0xf00');
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
   });
