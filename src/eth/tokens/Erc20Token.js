@@ -36,11 +36,27 @@ export default class Erc20Token {
   }
 
   approve(spender, value, unit = this._currency) {
-    return this._contract.approve(spender, this._valueForContract(value, unit));
+    return this._contract.approve(
+      spender,
+      this._valueForContract(value, unit),
+      {
+        metadata: {
+          action: value === '0' ? 'lock' : 'unlock',
+          spender: spender,
+          currency: getCurrency(value, unit)
+        }
+      }
+    );
   }
 
   approveUnlimited(spender) {
-    return this._contract.approve(spender, -1);
+    return this._contract.approve(spender, -1, {
+      metadata: {
+        action: 'unlock',
+        spender: spender,
+        unlimited: true
+      }
+    });
   }
 
   transfer(to, value, unit = currencies[this.symbol]) {
