@@ -44,7 +44,13 @@ export default class Erc20Token {
   }
 
   transfer(to, value, unit = currencies[this.symbol]) {
-    return this._contract.transfer(to, this._valueForContract(value, unit));
+    return this._contract.transfer(to, this._valueForContract(value, unit), {
+      metadata: {
+        action: 'transfer',
+        recipient: to,
+        currency: getCurrency(value, unit)
+      }
+    });
   }
 
   transferFrom(from, to, value, unit = currencies[this.symbol]) {
