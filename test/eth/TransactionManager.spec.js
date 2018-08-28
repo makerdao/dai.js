@@ -18,7 +18,7 @@ function buildTestServices() {
     contract: smartContract,
     txMgr: transactionManager,
     nonce: nonce,
-    defaultAccount: smartContract.get('web3').defaultAccount()
+    currentAccount: smartContract.get('web3').currentAccount()
   }));
 }
 
@@ -30,7 +30,7 @@ test('should reuse the same web3 and log service in test services', done => {
     expect(services.txMgr.get('log')).toBe(
       services.contract.get('web3').get('log')
     );
-    expect(services.defaultAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
+    expect(services.currentAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
     done();
   });
 });
@@ -39,7 +39,7 @@ test('should create a Transaction object based on a Contract transaction promise
   buildTestServices().then(services => {
     const contractTransaction = services.contract
         .getContractByName(tokens.DAI, { hybrid: false })
-        .approve(services.defaultAccount, '1000000000000000000'),
+        .approve(services.currentAccount, '1000000000000000000'),
       businessObject = { x: 1 },
       hybrid = services.txMgr.createHybridTx(contractTransaction, {
         businessObject
@@ -62,7 +62,7 @@ test('should register all created transaction hybrids', done => {
   buildTestServices().then(services => {
     const contractTransaction = services.contract
         .getContractByName(tokens.DAI, { hybrid: false })
-        .approve(services.defaultAccount, '1000000000000000000'),
+        .approve(services.currentAccount, '1000000000000000000'),
       hybrids = [
         services.txMgr.createHybridTx(contractTransaction),
         services.txMgr.createHybridTx(contractTransaction),
@@ -79,7 +79,7 @@ test('should add businessObject functions, getters, and setters', done => {
   buildTestServices().then(services => {
     const contractTransaction = services.contract
         .getContractByName(tokens.DAI, { hybrid: false })
-        .approve(services.defaultAccount, '1000000000000000000'),
+        .approve(services.currentAccount, '1000000000000000000'),
       businessObject = {
         a: 1,
         oneTwo: 2,
@@ -116,7 +116,7 @@ test('should add TransactionLifeCycle functions', async () => {
   const services = await buildTestServices();
   const contractTransaction = services.contract
       .getContractByName(tokens.DAI, { hybrid: false })
-      .approve(services.defaultAccount, '1000000000000000000'),
+      .approve(services.currentAccount, '1000000000000000000'),
     businessObject = {
       a: 1,
       oneTwo: 2,

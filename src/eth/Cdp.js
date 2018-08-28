@@ -29,13 +29,13 @@ export default class Cdp {
   }
 
   _captureCdpIdPromise(tubContract) {
-    const signerAddress = this._smartContractService
+    const currentAccount = this._smartContractService
       .get('web3')
-      .signerAddress();
+      .currentAccount();
 
     return new Promise(resolve => {
       tubContract.onlognewcup = function(address, cdpIdBytes32) {
-        if (signerAddress.toLowerCase() == address.toLowerCase()) {
+        if (currentAccount.toLowerCase() == address.toLowerCase()) {
           const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
           this.removeListener();
           resolve(cdpId);

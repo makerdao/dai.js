@@ -24,7 +24,7 @@ test('token name and symbol are correct', async () => {
 });
 
 test('wrap and unwrap ETH', async () => {
-  const owner = tokenService.get('web3').defaultAccount();
+  const owner = tokenService.get('web3').currentAccount();
   const balance1 = await weth.balanceOf(owner);
   await weth.deposit(0.1);
   const balance2 = await weth.balanceOf(owner);

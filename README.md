@@ -39,6 +39,7 @@ Example:
 ```js
 import Maker from '@makerdao/dai';
 const maker = Maker.create('test');
+await maker.authenticate();
 const cdp = await maker.openCdp();
 const info = await cdp.getInfo();
 console.log(info);

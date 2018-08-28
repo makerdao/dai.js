@@ -1,8 +1,7 @@
 {
   "web3": {
-    "usePresetProvider": true,
     "provider": {
-      "type": "TEST"
+      "type": "BROWSER"
     }
   },
   "exchange": "OasisExchangeService"

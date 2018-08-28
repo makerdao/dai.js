@@ -1,5 +1,5 @@
 import TestAccountProvider from '../helpers/TestAccountProvider';
-import Web3ProviderType from '../../src/eth/Web3ProviderType';
+import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole } from '../../src/utils';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 
@@ -10,7 +10,7 @@ function buildDisconnectingService(disconnectAfter = 25) {
     service
       .get('timer')
       .createTimer('disconnect', disconnectAfter, false, () => {
-        service._web3.version.getNode = () => {
+        service._web3.version.getNetwork = () => {
           throw new Error('fake disconnection error');
         };
       });
@@ -56,15 +56,19 @@ function buildAccountChangingService(changeAccountAfter = 25) {
   return service;
 }
 
-function buildTestService(privateKey, statusTimerDelay = 5000) {
-  return buildTestServiceCore('web3', {
+function buildTestService(key, statusTimerDelay = 5000) {
+  const config = {
     web3: {
-      privateKey,
       statusTimerDelay,
-      usePresetProvider: true,
-      provider: { type: Web3ProviderType.TEST }
+      provider: { type: ProviderType.TEST }
     }
-  });
+  };
+  if (key) {
+    config.accounts = {
+      default: { type: 'privateKey', key }
+    };
+  }
+  return buildTestServiceCore('web3', config);
 }
 
 function buildInfuraService(network, privateKey = null) {
@@ -72,7 +76,7 @@ function buildInfuraService(network, privateKey = null) {
     web3: {
       privateKey,
       provider: {
-        type: Web3ProviderType.INFURA,
+        type: ProviderType.INFURA,
         network,
         infuraApiKey: process.env.INFURA_API_KEY
       }
@@ -80,7 +84,7 @@ function buildInfuraService(network, privateKey = null) {
   });
 }
 
-test('should fetch version info on connect', done => {
+test('fetch version info on connect', done => {
   const web3 = buildTestService();
 
   web3
@@ -97,62 +101,23 @@ test('should fetch version info on connect', done => {
     });
 });
 
-test('should correctly use web3 provider of a previously injected web3 object, or use default', done => {
-  const service = buildTestService(),
-    service2 = buildTestService();
+test('throw error on a failure to connect', async () => {
+  expect.assertions(1);
+  const service = buildTestService();
+  await service.manager().initialize();
+  service._web3.version.getNode = cb => {
+    cb(new Error('fake connection failure error'));
+  };
 
-  service
-    .manager()
-    .initialize()
-    .then(() => {
-      expect(service._web3.currentProvider).toBeDefined();
-      window.web3 = service._web3;
-      return service2.manager().initialize();
-    })
-    .then(() => {
-      expect(typeof service2._web3.currentProvider).toBe('object');
-      expect(service2._web3.currentProvider).toBe(window.web3.currentProvider);
-      expect(service2._web3.currentProvider).toBe(
-        service._web3.currentProvider
-      );
-
-      // The window.web3 object also needs to be set to the initializing service's web3 object now.
-      expect(window.web3).toBe(service2._web3);
-
-      window.web3 = undefined;
-      delete window.web3;
-
-      done();
-    })
-    .catch(() => done.fail());
+  try {
+    await service.manager().connect();
+    console.log(service._info);
+  } catch (err) {
+    expect(err).toBeInstanceOf(Error);
+  }
 });
 
-test('should return error reason on a failure to connect', done => {
-  captureConsole(() => {
-    const service = buildTestService();
-    let error = false;
-    service.get('log').error = msg => {
-      error = msg;
-    };
-
-    service
-      .manager()
-      .initialize()
-      .then(() => {
-        service._web3.version.getNode = () => {
-          error = true;
-          throw new Error('fake connection failure error');
-        };
-        return service.manager().connect();
-      })
-      .then(() => {
-        expect(error).toBeInstanceOf(Error);
-        done();
-      });
-  });
-});
-
-test('should be authenticated and know default address when private key passed in', done => {
+test('be authenticated and know default address when private key passed in', done => {
   const service = buildTestService(
     '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700'
   );
@@ -162,14 +127,14 @@ test('should be authenticated and know default address when private key passed i
     .authenticate()
     .then(() => {
       expect(service.manager().isAuthenticated()).toBe(true);
-      expect(service.defaultAccount()).toBe(
-        '0x717bc9648b627316718Fe93f4cD98056E53a8C8d'
+      expect(service.currentAccount()).toBe(
+        '0x717bc9648b627316718fe93f4cd98056e53a8c8d'
       );
       done();
     });
 });
 
-test('should correctly handle automatic disconnect', done => {
+test('handle automatic disconnect', done => {
   captureConsole(() => {
     const service = buildDisconnectingService();
 
@@ -182,7 +147,7 @@ test('should correctly handle automatic disconnect', done => {
   });
 });
 
-test('should correctly handle automatic change of network as a disconnect', done => {
+test('handle automatic change of network as a disconnect', done => {
   const service = buildNetworkChangingService();
   service.manager().onDisconnected(() => {
     expect(service.manager().isConnected()).toBe(false);
@@ -194,7 +159,7 @@ test('should correctly handle automatic change of network as a disconnect', done
 //this test needs to be commented out in order to push it to git and have it pass the tests
 //need to run this test individually and then disconnect the wifi for it to pass
 /*
-test('should correctly handle a manual disconnect', (done) => {
+test('handle a manual disconnect', (done) => {
   const service = Web3Service.buildRemoteService();
   service.manager().onDisconnected(()=>{
     expect(service.manager().isConnected()).toBe(false);
@@ -204,25 +169,25 @@ test('should correctly handle a manual disconnect', (done) => {
 });
 */
 
-test('should correctly handle automatic deauthentication', done => {
+test('handle automatic deauthentication', async done => {
   const service = buildDeauthenticatingService();
   service.manager().onDeauthenticated(() => {
     expect(service.manager().isAuthenticated()).toBe(false);
     done();
   });
-  service.manager().authenticate();
+  await service.manager().authenticate();
 });
 
-test('should correctly handle automatic change of account as a deauthenticate', done => {
+test('handle automatic change of account as a deauthenticate', async done => {
   const service = buildAccountChangingService();
   service.manager().onDeauthenticated(() => {
     expect(service.manager().isAuthenticated()).toBe(false);
     done();
   });
-  service.manager().authenticate();
+  await service.manager().authenticate();
 });
 
-test('should create a ethersjs object running parallel to web3', done => {
+test('create a ethersjs object running parallel to web3', done => {
   const service = buildTestService();
   service
     .manager()
@@ -236,7 +201,7 @@ test('should create a ethersjs object running parallel to web3', done => {
     });
 });
 
-test('should connect to ganache testnet with account 0x16fb9...', done => {
+test('connect to ganache testnet with account 0x16fb9...', done => {
   const service = buildTestService(),
     expectedAccounts = [
       '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6',
@@ -245,10 +210,8 @@ test('should connect to ganache testnet with account 0x16fb9...', done => {
 
   service
     .manager()
-    .initialize()
-    .then(() => {
-      return service.eth.getAccounts();
-    })
+    .connect()
+    .then(() => service.eth.getAccounts())
     .then(accounts => {
       expect(accounts.slice(0, 2)).toEqual(expectedAccounts);
       done();
@@ -256,7 +219,7 @@ test('should connect to ganache testnet with account 0x16fb9...', done => {
     .catch(console.error);
 });
 
-test('should have a balance of 100 ETH in test account', done => {
+test('have ETH in test account', done => {
   const service = buildTestService();
 
   service
@@ -264,48 +227,18 @@ test('should have a balance of 100 ETH in test account', done => {
     .connect()
     .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
-      expect(service._web3.fromWei(balance).toString()).toEqual('100');
+      expect(Number(service._web3.fromWei(balance))).toBeGreaterThan(50);
       done();
     });
 });
 
-test(
-  'should connect to the right network when using the INFURA provider type',
-  done => {
-    const service = buildInfuraService('kovan');
-    service
-      .manager()
-      .connect()
-      .then(() => {
-        expect(service.manager().isConnected()).toBe(true);
-        expect(service.networkId()).toBe(42);
-        done();
-      });
-  },
-  10000
-);
-
-test('should reject invalid private key formats', async () => {
-  const service1 = buildTestService(TestAccountProvider.nextAccount()),
-    service2 = buildTestService(
-      TestAccountProvider.nextAccount().key.substr(2)
-    ),
-    service3 = buildTestService(
-      TestAccountProvider.nextAccount().key.substr(0, 65)
-    ),
-    service4 = buildTestService(TestAccountProvider.nextAddress()),
-    service5 = buildTestService(TestAccountProvider.nextAccount().key);
-
-  expect.assertions(5);
-
-  for (let s of [service1, service2, service3, service4]) {
-    try {
-      await s.manager().initialize();
-    } catch (err) {
-      expect(err).toBe('Invalid private key format');
-    }
+test('connect to kovan', async () => {
+  const service = buildInfuraService('kovan');
+  try {
+    await service.manager().connect();
+  } catch (err) {
+    console.log(err);
   }
-
-  await service5.manager().initialize();
-  expect(service5.manager().isInitialized()).toBeTruthy();
+  expect(service.manager().isConnected()).toBe(true);
+  expect(service.networkId()).toBe(42);
 });
