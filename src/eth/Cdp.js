@@ -49,23 +49,23 @@ export default class Cdp {
       contracts.SAI_TUB,
       { hybrid: false }
     );
+    const contractPromise = this._nonceService
+      .inject([{ gasPrice: 12000000000 }])
+      .then(args => tubContract.open(...args));
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
-    return this._nonceService.inject([{ gasPrice: 12000000000 }]).then(args => {
-      const contractPromise = tubContract.open(...args);
 
-      // FIXME push this back down into SmartContractService
-      this._transactionObject = this._transactionManager.createHybridTx(
-        contractPromise,
-        {
-          businessObject: this,
-          metadata: { contract: contracts.SAI_TUB, method: 'open' }
-        }
-      );
+    // FIXME push this back down into SmartContractService
+    this._transactionObject = this._transactionManager.createHybridTx(
+      contractPromise,
+      {
+        businessObject: this,
+        metadata: { contract: contracts.SAI_TUB, method: 'open' }
+      }
+    );
 
-      return Promise.all([captureCdpIdPromise, contractPromise]).then(
-        result => result[0]
-      );
-    });
+    return Promise.all([captureCdpIdPromise, contractPromise]).then(
+      result => result[0]
+    );
   }
 
   transactionObject() {

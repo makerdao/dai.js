@@ -23,6 +23,7 @@ beforeAll(async () => {
 
 async function openCdp() {
   cdp = await cdpService.openCdp();
+  console.log(cdp);
   return cdp.getId();
 }
 
@@ -33,8 +34,7 @@ describe('basic checks', () => {
     id = await openCdp();
   });
 
-  test.only('check properties', () => {
-    // console.log(cdpService.get('nonce')._count);
+  test('check properties', () => {
     expect(typeof id).toBe('number');
     expect(id).toBeGreaterThan(0);
     expect(cdp._cdpService).toBeDefined();
