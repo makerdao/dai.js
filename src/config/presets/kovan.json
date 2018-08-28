@@ -1,6 +1,5 @@
 {
   "web3": {
-    "usePresetProvider": true,
     "provider": {
       "type": "INFURA",
       "network": "kovan"

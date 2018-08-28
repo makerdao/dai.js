@@ -1,7 +1,6 @@
 import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
-import Cdp from './eth/Cdp';
 import ConfigFactory from './config/ConfigFactory';
 
 export default class Maker {
@@ -14,10 +13,19 @@ export default class Maker {
       }
     }
     if (options.autoAuthenticate !== false) this.authenticate();
-  }
 
-  on(event, listener) {
-    this._container.service('event').on(event, listener);
+    delegateToServices(this, {
+      accounts: [
+        'addAccount',
+        'currentAccount',
+        'currentAddress',
+        'listAccounts',
+        'useAccount'
+      ],
+      cdp: ['getCdp', 'openCdp'],
+      event: ['on'],
+      token: ['getToken']
+    });
   }
 
   authenticate() {
@@ -27,18 +35,22 @@ export default class Maker {
     return this._authenticatedPromise;
   }
 
-  service(service) {
+  // skipAuthCheck should only be set if you're sure you don't need the service
+  // to be initialized yet, e.g. when setting up a plugin
+  service(service, skipAuthCheck) {
+    if (!skipAuthCheck && !this._container.isAuthenticated) {
+      throw new Error('this.authenticate() did not finish yet.');
+    }
     return this._container.service(service);
   }
+}
 
-  async openCdp() {
-    await this._authenticatedPromise;
-    return this._container.service('cdp').openCdp();
-  }
-
-  async getCdp(id) {
-    await this._authenticatedPromise;
-    return Cdp.find(id, this._container.service('cdp'));
+function delegateToServices(maker, services) {
+  for (const serviceName in services) {
+    for (const methodName of services[serviceName]) {
+      maker[methodName] = (...args) =>
+        maker.service(serviceName)[methodName](...args);
+    }
   }
 }
 

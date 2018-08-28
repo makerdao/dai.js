@@ -116,7 +116,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       this.setMined();
     } catch (err) {
       this._errorMessage = err.message;
-      this.setError();
+      this.setError(err);
     }
     return this;
   }

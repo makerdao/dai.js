@@ -94,7 +94,9 @@ class Container {
   }
 
   authenticate() {
-    return this._waitForServices(s => s.manager().authenticate());
+    return this._waitForServices(s => s.manager().authenticate()).then(() => {
+      this.isAuthenticated = true;
+    });
   }
 
   async _waitForServices(callback) {

@@ -51,6 +51,10 @@ export default class EthereumCdpService extends PrivateService {
     return new Cdp(this).transactionObject();
   }
 
+  getCdp(id) {
+    return Cdp.find(id, this);
+  }
+
   shut(cdpId) {
     const hexCdpId = numberToBytes32(cdpId);
     console.log('just before allowance in shut');

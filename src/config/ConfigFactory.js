@@ -1,10 +1,12 @@
-import oasis from './presets/oasis.json';
+import test from './presets/test.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
 import mainnet from './presets/mainnet.json';
+import browser from './presets/browser.json';
 import merge from 'lodash.merge';
 import intersection from 'lodash.intersection';
 import { mergeServiceConfig } from './index';
+import { AccountType } from '../utils/constants';
 
 class ConfigPresetNotFoundError extends Error {
   constructor(message) {
@@ -13,6 +15,7 @@ class ConfigPresetNotFoundError extends Error {
 }
 
 const serviceRoles = [
+  'accounts',
   'allowance',
   'cdp',
   'conversion',
@@ -35,8 +38,7 @@ function loadPreset(name) {
   let preset;
   switch (name) {
     case 'test':
-    case 'oasis':
-      preset = oasis;
+      preset = test;
       break;
     case 'http':
       preset = http;
@@ -46,6 +48,9 @@ function loadPreset(name) {
       break;
     case 'mainnet':
       preset = mainnet;
+      break;
+    case 'browser':
+      preset = browser;
       break;
     default:
       throw new ConfigPresetNotFoundError(name);
@@ -108,17 +113,17 @@ export default class ConfigFactory {
         web3Settings.provider.url = options.url;
       }
 
-      if (options.privateKey) {
-        web3Settings.privateKey = options.privateKey;
-      }
-
       if (options.provider) {
         merge(web3Settings.provider, options.provider);
       }
+    }
 
-      if (options.overrideMetamask) {
-        web3Settings.usePresetProvider = !options.overrideMetamask;
-      }
+    // accounts-specific convenience option
+    if (options.privateKey) {
+      config.accounts = {
+        ...config.accounts,
+        default: { type: AccountType.PRIVATE_KEY, key: options.privateKey }
+      };
     }
 
     return config;

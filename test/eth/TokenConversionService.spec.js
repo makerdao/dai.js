@@ -15,7 +15,7 @@ test('should convert eth to weth', async () => {
   let initialBalance, initialEthBalance, owner, token, eth;
   const conversionService = await buildTestTokenConversionService();
   const tokenService = conversionService.get('token');
-  owner = tokenService.get('web3').defaultAccount();
+  owner = tokenService.get('web3').currentAccount();
   token = tokenService.getToken(WETH);
   eth = tokenService.getToken(ETH);
 
@@ -33,7 +33,7 @@ test('should convert eth to weth', async () => {
 test('should convert weth to peth', async () => {
   const conversionService = await buildTestTokenConversionService(false);
   const tokenService = conversionService.get('token');
-  const owner = tokenService.get('web3').defaultAccount();
+  const owner = tokenService.get('web3').currentAccount();
   const token = tokenService.getToken(PETH);
 
   const initialBalance = parseFloat(await token.balanceOf(owner));
@@ -51,7 +51,7 @@ test('should convert eth to peth', async done => {
     .authenticate()
     .then(() => {
       const tokenService = conversionService.get('token');
-      const owner = tokenService.get('web3').defaultAccount();
+      const owner = tokenService.get('web3').currentAccount();
       const token = tokenService.getToken(PETH);
 
       token

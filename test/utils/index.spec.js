@@ -1,11 +1,11 @@
-import { promisifyAsync, getNetworkName } from '../../src/utils';
+import { promisify, getNetworkName } from '../../src/utils';
 
-describe('promisifyAsync makes async functions return Promises', () => {
+describe('promisify makes async functions return Promises', () => {
   test('arguments can be passed and results are resolved', () => {
     expect.assertions(1);
 
     const argVal = 'foobar';
-    const promisified = promisifyAsync((arg1, cb) => {
+    const promisified = promisify((arg1, cb) => {
       cb(null, arg1);
     });
 
@@ -18,7 +18,7 @@ describe('promisifyAsync makes async functions return Promises', () => {
     expect.assertions(1);
 
     const errVal = 'foobar';
-    const promisified = promisifyAsync(cb => {
+    const promisified = promisify(cb => {
       cb(errVal);
     });
 

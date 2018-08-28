@@ -9,15 +9,15 @@ import {
   MKR
 } from '../../src/eth/Currency';
 
-let cdpService, cdp, defaultAccount, dai;
+let cdpService, cdp, currentAccount, dai;
 
 beforeAll(async () => {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
-  defaultAccount = cdpService
+  currentAccount = cdpService
     .get('token')
     .get('web3')
-    .defaultAccount();
+    .currentAccount();
   dai = cdpService.get('token').getToken(DAI);
 });
 
@@ -71,11 +71,11 @@ describe('weth and peth', () => {
   test('lock weth in a cdp', async () => {
     await openCdp();
     await wethToken.deposit('0.1');
-    const balancePre = await wethToken.balanceOf(defaultAccount);
+    const balancePre = await wethToken.balanceOf(currentAccount);
     const cdpInfoPre = await cdp.getInfo();
     await cdp.lockWeth(0.1);
     const cdpInfoPost = await cdp.getInfo();
-    const balancePost = await wethToken.balanceOf(defaultAccount);
+    const balancePost = await wethToken.balanceOf(currentAccount);
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
@@ -89,11 +89,11 @@ describe('weth and peth', () => {
     await wethToken.approve(cdpService._tubContract().address, '0.1');
     await pethToken.join('0.1');
 
-    const balancePre = await pethToken.balanceOf(defaultAccount);
+    const balancePre = await pethToken.balanceOf(currentAccount);
     const cdpInfoPre = await cdp.getInfo();
     await cdp.lockPeth(0.1);
     const cdpInfoPost = await cdp.getInfo();
-    const balancePost = await pethToken.balanceOf(defaultAccount);
+    const balancePost = await pethToken.balanceOf(currentAccount);
 
     expect(cdpInfoPre.ink.toString()).toEqual('0');
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
@@ -213,12 +213,12 @@ describe('a cdp with collateral', () => {
         const mkr = cdpService.get('token').getToken(MKR);
         const firstDebtAmount = await cdp.getDebtValue();
         const firstMkrBalance = MKR(
-          await mkr.balanceOf(defaultAccount)
+          await mkr.balanceOf(currentAccount)
         ).toNumber();
         await cdp.wipeDai(1);
         const secondDebtAmount = await cdp.getDebtValue();
         const secondMkrBalance = MKR(
-          await mkr.balanceOf(defaultAccount)
+          await mkr.balanceOf(currentAccount)
         ).toNumber();
         expect(firstDebtAmount.minus(secondDebtAmount)).toEqual(DAI(1));
         expect(firstMkrBalance).toBeGreaterThan(secondMkrBalance);
@@ -241,9 +241,9 @@ describe('a cdp with collateral', () => {
     });
 
     test('wipe', async () => {
-      const balance1 = parseFloat(await dai.balanceOf(defaultAccount));
+      const balance1 = parseFloat(await dai.balanceOf(currentAccount));
       await cdp.wipeDai('5');
-      const balance2 = parseFloat(await dai.balanceOf(defaultAccount));
+      const balance2 = parseFloat(await dai.balanceOf(currentAccount));
       expect(balance2 - balance1).toBeCloseTo(-5);
       const debt = await cdp.getDebtValue();
       expect(debt).toEqual(DAI(0));
