@@ -8,12 +8,12 @@ beforeEach(async () => {
   nonceService.setNextNonce();
 });
 
-test('getTxCount returns the transaction count', async () => {
+test('should properly fetch the transaction count', async () => {
   const count = await nonceService._getTxCount();
   expect(typeof count).toEqual('number');
 });
 
-test('inject should inject the nonce in the proper place in args list', async () => {
+test('should inject the nonce in the proper place in args list', async () => {
   const firstArgs = await nonceService.inject(['a', 2, { gasLimit: 400000 }]);
   const secondArgs = await nonceService.inject(['0x']);
   const thirdArgs = await nonceService.inject([
@@ -38,7 +38,7 @@ test('inject should inject the nonce in the proper place in args list', async ()
   );
 });
 
-test('setNextNonce should set the next nonce in state', async () => {
+test('should properly initialize the count in state', async () => {
   const originalCount = nonceService._count;
   nonceService._count = undefined;
   await nonceService.setNextNonce();
@@ -46,21 +46,21 @@ test('setNextNonce should set the next nonce in state', async () => {
   expect(nonceService._count).toEqual(originalCount);
 });
 
-test('getNonce should return its own tx count if higher than node count', async () => {
+test('should return its own tx count if higher than count from node', async () => {
   nonceService._count = 500000;
   const nonce = await nonceService.getNonce();
 
   expect(nonce).toEqual(500000);
 });
 
-test('getNonce should return tx count from node if higher than own count', async () => {
+test('should return tx count from node if higher than own count', async () => {
   nonceService._count = 0;
   const nonce = await nonceService.getNonce();
 
   expect(nonce).not.toEqual(0);
 });
 
-test('getNonce should return a nonce even when own count is undefined', async () => {
+test('should return a nonce even when own count is undefined', async () => {
   nonceService._count = undefined;
   const nonce = await nonceService.getNonce();
 
