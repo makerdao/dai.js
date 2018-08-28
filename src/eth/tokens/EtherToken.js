@@ -1,4 +1,5 @@
 import { utils } from 'ethers';
+import { ETH, getCurrency } from '../Currency';
 
 export default class EtherToken {
   constructor(web3Service, gasEstimatorService, transactionManager) {
@@ -40,7 +41,14 @@ export default class EtherToken {
     });
 
     return this._transactionManager.createHybridTx(
-      tx.then(tx => ({ hash: tx }))
+      tx.then(tx => ({ hash: tx })),
+      {
+        metadata: {
+          action: 'transfer',
+          recipient: toAddress,
+          currency: getCurrency(transferValue, ETH)
+        }
+      }
     );
   }
 
@@ -53,7 +61,15 @@ export default class EtherToken {
     });
 
     return this._transactionManager.createHybridTx(
-      tx.then(tx => ({ hash: tx }))
+      tx.then(tx => ({ hash: tx })),
+      {
+        metadata: {
+          action: 'transferFrom',
+          sender: fromAddress,
+          recipient: toAddress,
+          currency: getCurrency(transferValue, ETH)
+        }
+      }
     );
   }
 }

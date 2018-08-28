@@ -23,10 +23,21 @@ function wrapContract(contract, name, abi, txManager) {
     {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
-          return (...args) =>
-            txManager.createHybridTx(contract[key](...args), {
-              metadata: { contract: name, method: key, args }
+          return (...args) => {
+            // Additional metadata detection (as last arg) when calling a SC function via the proxy
+            let metadata = { contract: name, method: key, args };
+            if (
+              typeof args !== 'undefined' &&
+              Array.isArray(args) &&
+              typeof args[args.length - 1] === 'object' &&
+              args[args.length - 1].hasOwnProperty('metadata')
+            ) {
+              Object.assign(metadata, args.pop().metadata);
+            }
+            return txManager.createHybridTx(contract[key](...args), {
+              metadata
             });
+          };
         }
 
         return contract[key];
