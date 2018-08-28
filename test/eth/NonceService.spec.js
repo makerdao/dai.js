@@ -13,7 +13,7 @@ test('getTxCount returns the transaction count', async () => {
   expect(typeof count).toEqual('number');
 });
 
-test('inject should inject the nonce in the proper place', async () => {
+test('inject should inject the nonce in the proper place in args list', async () => {
   const firstArgs = await nonceService.inject(['a', 2, { gasLimit: 400000 }]);
   const secondArgs = await nonceService.inject(['0x']);
   const thirdArgs = await nonceService.inject([
