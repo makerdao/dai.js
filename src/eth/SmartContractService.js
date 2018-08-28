@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 
-function wrapContract(contract, name, abi, nonceService, txManager) {
+function wrapContract(contract, name, abi, txManager) {
   const nonConstantFns = {};
 
   for (let { type, constant, name } of abi) {
@@ -24,11 +24,6 @@ function wrapContract(contract, name, abi, nonceService, txManager) {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
           return (...args) => {
-            // args = nonceService.inject(args);
-            // console.log(contract[key]);
-            // return txManager.createHybridTx(contract[key](...args), {
-            //   metadata: { contract: name, method: key, args }
-            // });
             return txManager.formatHybridTx(contract, key, args, name);
           };
         }
@@ -48,7 +43,7 @@ function wrapContract(contract, name, abi, nonceService, txManager) {
 
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
-    super(name, ['web3', 'log', 'transactionManager', 'nonce']);
+    super(name, ['web3', 'log', 'transactionManager']);
   }
 
   initialize(settings = {}) {
@@ -75,7 +70,6 @@ export default class SmartContractService extends PublicService {
       contract,
       name,
       abi,
-      this.get('nonce'),
       hybrid ? this.get('transactionManager') : null
     );
   }
