@@ -19,6 +19,7 @@ export default class NonceService extends PublicService {
   }
 
   _compareNonceCounts(txCount) {
+    console.log(txCount, this._count);
     if (txCount > this._count) {
       return txCount;
     } else {

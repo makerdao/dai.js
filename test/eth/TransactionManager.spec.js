@@ -147,7 +147,7 @@ test('should properly format hybrid transaction object with injected nonce and a
     hybrid = services.txMgr.formatHybridTx(
       services.contract.getContractByName(tokens.DAI, { hybrid: false }),
       'approve',
-      [services.defaultAccount, '1000000000000000000'],
+      [services.currentAccount, '1000000000000000000'],
       'DAI'
     );
 
