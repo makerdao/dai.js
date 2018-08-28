@@ -230,14 +230,17 @@ test('connect() should first wait for OFFLINE and then call the provided connect
   });
 });
 
-test('connect() should correctly revert back to OFFLINE after unsuccessfully CONNECTING', done => {
+test('connect() should correctly revert back to OFFLINE after unsuccessfully CONNECTING', async () => {
+  expect.assertions(2);
   const s = new ServiceManagerBase(null, () => {
     throw new Error('ConnectError');
   });
-  s.connect().then(() => {
-    expect(s.state()).toBe(ServiceState.OFFLINE);
-    done();
-  });
+  try {
+    await s.connect();
+  } catch (err) {
+    expect(err).toMatch(/ConnectError/);
+  }
+  expect(s.state()).toBe(ServiceState.OFFLINE);
 });
 
 test('connect() should call onConnected handlers and reflect state through the is* methods', done => {

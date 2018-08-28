@@ -29,12 +29,12 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
     })
     .then(() => {
       return wethToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
+        oasisExchangeService.get('web3').currentAccount()
       );
     })
     .then(() => {
       return daiToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
+        oasisExchangeService.get('web3').currentAccount()
       );
     })
     .then(() => {
@@ -63,12 +63,12 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
     })
     .then(() => {
       return wethToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
+        oasisExchangeService.get('web3').currentAccount()
       );
     })
     .then(() => {
       return daiToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
+        oasisExchangeService.get('web3').currentAccount()
       );
     });
 }
@@ -106,14 +106,14 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
       const ethereumTokenService = oasisExchangeService.get('token');
       daiToken = ethereumTokenService.getToken(DAI);
       return daiToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
+        oasisExchangeService.get('web3').currentAccount()
       );
     })
     .then(balance => {
       initialBalance = balance;
       const wethToken = oasisExchangeService.get('token').getToken(WETH);
       return wethToken.balanceOf(
-        oasisExchangeService.get('web3').defaultAccount()
+        oasisExchangeService.get('web3').currentAccount()
       );
     })
     .then(() => {
@@ -127,7 +127,7 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
       return daiToken.allowance(
-        oasisExchangeService.get('web3').defaultAccount(),
+        oasisExchangeService.get('web3').currentAccount(),
         oasisContract.address
       );
     })
@@ -138,12 +138,12 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
     .then(() => {
       const ethereumTokenService = oasisExchangeService.get('token');
       const token = ethereumTokenService.getToken(WETH);
-      return token.balanceOf(oasisExchangeService.get('web3').defaultAccount());
+      return token.balanceOf(oasisExchangeService.get('web3').currentAccount());
     })
     .then(() => {
       const ethereumTokenService = oasisExchangeService.get('token');
       const token = ethereumTokenService.getToken(DAI);
-      return token.balanceOf(oasisExchangeService.get('web3').defaultAccount());
+      return token.balanceOf(oasisExchangeService.get('web3').currentAccount());
     })
     .then(balance => {
       finalBalance = balance;

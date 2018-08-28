@@ -73,7 +73,7 @@ test(
       .manager()
       .authenticate()
       .then(() => {
-        sender = ethereumTokenService.get('web3').defaultAccount();
+        sender = ethereumTokenService.get('web3').currentAccount();
         token = ethereumTokenService.getToken(ETH);
         return Promise.all([
           token.balanceOf(sender),
@@ -114,7 +114,7 @@ test(
       .manager()
       .authenticate()
       .then(() => {
-        sender = ethereumTokenService.get('web3').defaultAccount();
+        sender = ethereumTokenService.get('web3').currentAccount();
         token = ethereumTokenService.getToken(ETH);
         return Promise.all([
           token.balanceOf(sender),

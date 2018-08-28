@@ -1,12 +1,8 @@
-import oasis from '../../src/config/presets/oasis';
+import testPreset from '../../src/config/presets/test';
 import ConfigFactory from '../../src/config/ConfigFactory';
 
 test('returns a preset by name', () => {
-  expect(ConfigFactory.create('oasis')).toEqual(oasis);
-});
-
-test('returns a preset by alias', () => {
-  expect(ConfigFactory.create('test')).toEqual(oasis);
+  expect(ConfigFactory.create('test')).toEqual(testPreset);
 });
 
 test('throws an error when requesting a non-existing preset', () => {
@@ -25,7 +21,7 @@ test('can take an options object as first argument', () => {
   expect(config.log).toEqual(false);
 });
 
-test('it merges url, privateKey, provider, and web3 options', () => {
+test('it handles url, privateKey, provider, and web3 options', () => {
   const config = ConfigFactory.create(
     'http',
     {
@@ -35,8 +31,7 @@ test('it merges url, privateKey, provider, and web3 options', () => {
         timeout: 1000
       },
       web3: {
-        statusTimerDelay: 10000,
-        usePresetProvider: true
+        statusTimerDelay: 10000
       }
     },
     {
@@ -46,19 +41,26 @@ test('it merges url, privateKey, provider, and web3 options', () => {
     }
   );
 
-  expect(config.web3).toEqual([
-    'Web3Service',
-    {
-      statusTimerDelay: 10000,
-      usePresetProvider: true,
-      privateKey: '0xf00',
-      provider: {
-        timeout: 1000,
-        type: 'HTTP',
-        url: 'http://foo.net'
+  expect(config).toEqual({
+    accounts: {
+      default: {
+        type: 'privateKey',
+        key: '0xf00'
       }
-    }
-  ]);
+    },
+    web3: [
+      'Web3Service',
+      {
+        statusTimerDelay: 10000,
+        provider: {
+          timeout: 1000,
+          type: 'HTTP',
+          url: 'http://foo.net'
+        }
+      }
+    ],
+    exchange: 'OasisExchangeService'
+  });
 });
 
 test('it overwrites a service name', () => {
@@ -80,30 +82,6 @@ test('it preserves the preset service name', () => {
   const preset = { log: 'BunyanLogger' };
   const config = ConfigFactory.create({ preset, log: { verbose: true } });
   expect(config.log).toEqual(['BunyanLogger', { verbose: true }]);
-});
-
-test('it overrides metamask when specified in options', () => {
-  const firstConfig = ConfigFactory.create('kovan', { overrideMetamask: true });
-  const secondConfig = ConfigFactory.create('kovan');
-  const thirdConfig = ConfigFactory.create('kovan', {
-    overrideMetamask: false
-  });
-  const firstConfigProvider =
-    firstConfig.web3.usePresetProvider !== undefined
-      ? firstConfig.web3.usePresetProvider
-      : firstConfig.web3.usePresetProvider[1];
-  const secondConfigProvider =
-    secondConfig.web3.usePresetProvider !== undefined
-      ? secondConfig.web3.usePresetProvider
-      : secondConfig.web3.usePresetProvider[1];
-  const thirdConfigProvider =
-    thirdConfig.web3.usePresetProvider !== undefined
-      ? thirdConfig.web3.usePresetProvider
-      : thirdConfig.web3.usePresetProvider[1];
-
-  expect(firstConfigProvider).toEqual(false);
-  expect(secondConfigProvider).toEqual(true);
-  expect(thirdConfigProvider).toEqual(true);
 });
 
 test('skip unknown service roles', () => {

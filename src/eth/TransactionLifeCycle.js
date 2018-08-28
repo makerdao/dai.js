@@ -28,7 +28,8 @@ class TransactionLifeCycle {
     this._state.transitionTo(finalized);
   }
 
-  setError() {
+  setError(errorObject) {
+    this.error = errorObject;
     this._state.transitionTo(error);
   }
 
@@ -85,7 +86,7 @@ class TransactionLifeCycle {
   }
 
   _onStateChange(from, to, handler) {
-    if (this.isError()) return Promise.reject();
+    if (this.isError()) return Promise.reject(this.error);
     if (this._inOrPastState(to)) return Promise.resolve(this._returnValue());
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
@@ -93,7 +94,7 @@ class TransactionLifeCycle {
           if (handler) handler(this._returnValue());
           resolve(this._returnValue());
         }
-        if (newState === error) reject();
+        if (newState === error) reject(this.error);
       });
     });
   }
@@ -115,8 +116,8 @@ class TransactionLifeCycle {
     return new Promise((resolve, reject) => {
       this._state.onStateChanged((oldState, newState) => {
         if (newState === error) {
-          if (handler) handler(this.error(), this._returnValue());
-          reject(this.error(), this._returnValue());
+          if (handler) handler(this.error, this._returnValue());
+          reject(this.error, this._returnValue());
         }
       });
     });

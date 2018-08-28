@@ -109,7 +109,7 @@ class FailingWeb3Service extends Web3Service {
   ethersProvider() {
     return new Proxy(super.ethersProvider(), {
       get(target, key) {
-        if (key === 'getTransaction') {
+        if (key === 'getTransactionReceipt') {
           return async () => {
             throw new Error('test error');
           };
