@@ -1,4 +1,5 @@
 import PublicService from '../core/PublicService';
+import { promisify } from '../utils';
 
 export default class NonceService extends PublicService {
   constructor(name = 'nonce') {
@@ -10,12 +11,10 @@ export default class NonceService extends PublicService {
   }
 
   async _getTxCount() {
-    // Passing in a callback fixes synchronous error
-    // but doesn't return the count
-    return await this.get('web3')._web3.eth.getTransactionCount(
-      this.get('web3').currentAccount(),
+    const web3Service = this.get('web3');
+    return promisify(web3Service._web3.eth.getTransactionCount)(
+      web3Service.currentAccount(),
       'pending'
-      // nonce => { console.log(nonce) }
     );
   }
 
