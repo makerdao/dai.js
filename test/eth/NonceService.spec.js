@@ -10,6 +10,7 @@ beforeEach(async () => {
 
 test('should properly fetch the transaction count', async () => {
   const count = await nonceService._getTxCount();
+  console.log(count);
   expect(typeof count).toEqual('number');
 });
 

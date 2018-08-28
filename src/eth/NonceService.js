@@ -10,9 +10,12 @@ export default class NonceService extends PublicService {
   }
 
   async _getTxCount() {
+    // Passing in a callback fixes synchronous error
+    // but doesn't return the count
     return await this.get('web3')._web3.eth.getTransactionCount(
-      this.get('web3').defaultAccount(),
+      this.get('web3').currentAccount(),
       'pending'
+      // nonce => { console.log(nonce) }
     );
   }
 
@@ -40,7 +43,7 @@ export default class NonceService extends PublicService {
   }
 
   async setNextNonce() {
-    this._count = await this._getTxCount();
+    return (this._count = await this._getTxCount());
   }
 
   async getNonce() {
