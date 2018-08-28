@@ -11,6 +11,15 @@ export default class TransactionManager extends PublicService {
     this._listeners = [];
   }
 
+  formatHybridTx(contract, key, args, name) {
+    const contractCall = this.get('nonce')
+      .inject(args)
+      .then(newArgs => contract[key](...newArgs));
+    return this.createHybridTx(contractCall, {
+      metadata: { contract: name, method: key, args }
+    });
+  }
+
   // FIXME: having a method that returns one thing when it's called in a promise
   // chain and something else when it's not (besides a promise that resolves to
   // the first thing) makes it pretty difficult to work with.
@@ -23,7 +32,7 @@ export default class TransactionManager extends PublicService {
     const txo = new TransactionObject(
       tx,
       this.get('web3'),
-      this.get('nonce'),
+      // this.get('nonce'),
       businessObject,
       parseLogs
     );

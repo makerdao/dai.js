@@ -50,7 +50,7 @@ export default class Cdp {
       { hybrid: false }
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
-    const contractPromise = tubContract.open();
+    const contractPromise = tubContract.open({ gasPrice: 12000000000 });
 
     // FIXME push this back down into SmartContractService
     this._transactionObject = this._transactionManager.createHybridTx(

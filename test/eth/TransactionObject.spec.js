@@ -20,7 +20,7 @@ function createTestTransaction(srv = service) {
   return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
 }
 
-test.only('event listeners work as promises', async () => {
+test('event listeners work as promises', async () => {
   expect.assertions(3);
   const tx = createTestTransaction();
   console.log(tx);
