@@ -49,9 +49,7 @@ test('should properly initialize the count in state', async () => {
 
 xtest('should return its own tx count if higher than count from node', async () => {
   nonceService._count = 500000;
-  console.log(nonceService._count);
   const nonce = await nonceService.getNonce();
-  console.log(nonceService._count);
 
   expect(nonce).toEqual(500000);
 });
