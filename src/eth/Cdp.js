@@ -6,6 +6,7 @@ export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
+    this._nonceService = this._cdpService.get('nonce');
     this._transactionManager = this._smartContractService.get(
       'transactionManager'
     );
@@ -44,27 +45,27 @@ export default class Cdp {
   }
 
   _newCdpPromise() {
-    // const nonceService = this._cdpService.get('nonce');
     const tubContract = this._smartContractService.getContractByName(
       contracts.SAI_TUB,
       { hybrid: false }
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
-    const contractPromise = tubContract.open({ gasPrice: 12000000000 });
+    return this._nonceService.inject([{ gasPrice: 12000000000 }]).then(args => {
+      const contractPromise = tubContract.open(...args);
 
-    // FIXME push this back down into SmartContractService
-    this._transactionObject = this._transactionManager.createHybridTx(
-      contractPromise,
-      {
-        businessObject: this,
-        metadata: { contract: contracts.SAI_TUB, method: 'open' }
-      }
-    );
+      // FIXME push this back down into SmartContractService
+      this._transactionObject = this._transactionManager.createHybridTx(
+        contractPromise,
+        {
+          businessObject: this,
+          metadata: { contract: contracts.SAI_TUB, method: 'open' }
+        }
+      );
 
-    return Promise.all([captureCdpIdPromise, contractPromise]).then(
-      result => result[0]
-    );
-    // });
+      return Promise.all([captureCdpIdPromise, contractPromise]).then(
+        result => result[0]
+      );
+    });
   }
 
   transactionObject() {

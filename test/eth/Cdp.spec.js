@@ -33,7 +33,8 @@ describe('basic checks', () => {
     id = await openCdp();
   });
 
-  test('check properties', () => {
+  test.only('check properties', () => {
+    // console.log(cdpService.get('nonce')._count);
     expect(typeof id).toBe('number');
     expect(id).toBeGreaterThan(0);
     expect(cdp._cdpService).toBeDefined();

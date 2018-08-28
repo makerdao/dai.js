@@ -11,11 +11,12 @@ export default class TransactionManager extends PublicService {
     this._listeners = [];
   }
 
-  formatHybridTx(contract, key, args, name) {
+  formatHybridTx(contract, key, args, name, businessObject = null) {
     const contractCall = this.get('nonce')
       .inject(args)
       .then(newArgs => contract[key](...newArgs));
     return this.createHybridTx(contractCall, {
+      businessObject: businessObject,
       metadata: { contract: name, method: key, args }
     });
   }

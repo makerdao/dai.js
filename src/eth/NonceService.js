@@ -33,9 +33,9 @@ export default class NonceService extends PublicService {
     ) {
       args[args.length - 1]['nonce'] = nonce;
     } else {
+      console.log('args in else:', args);
       args.push({ nonce: nonce });
     }
-
     return args;
   }
 
