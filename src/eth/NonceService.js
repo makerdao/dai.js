@@ -8,12 +8,13 @@ export default class NonceService extends PublicService {
   }
 
   async connect() {
+    this._accountsService = this.get('accounts');
+    this._web3Service = this.get('web3');
     await this.setCounts();
   }
 
   async _getTxCount(address) {
-    const web3Service = this.get('web3');
-    return promisify(web3Service._web3.eth.getTransactionCount)(
+    return promisify(this._web3Service._web3.eth.getTransactionCount)(
       address,
       'pending'
     );
@@ -42,7 +43,7 @@ export default class NonceService extends PublicService {
   }
 
   async setCounts() {
-    const accountsList = await this.get('accounts').listAccounts();
+    const accountsList = await this._accountsService.listAccounts();
 
     return new Promise(resolve => {
       accountsList.map(async account => {
@@ -57,11 +58,11 @@ export default class NonceService extends PublicService {
   }
 
   async getNonce() {
-    const address = this.get('web3').currentAccount();
+    const address = this._web3Service.currentAccount();
     const txCount = await this._getTxCount(address);
     let nonce;
 
-    if (this._counts[address]) {
+    if (this._counts && this._counts[address]) {
       nonce = this._compareNonceCounts(txCount, address);
       this._counts[address] += 1;
     } else {
