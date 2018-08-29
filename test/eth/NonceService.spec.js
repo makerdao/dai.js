@@ -76,7 +76,7 @@ test('should return tx count from node if higher than own count', async () => {
 });
 
 test('should return a nonce even when own count is undefined', async () => {
-  nonceService._counts = undefined;
+  nonceService._counts[currentAccount()] = undefined;
   const nonce = await nonceService.getNonce();
 
   expect(typeof nonce).toEqual('number');

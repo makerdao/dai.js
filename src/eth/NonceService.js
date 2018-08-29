@@ -66,8 +66,9 @@ export default class NonceService extends PublicService {
       nonce = this._compareNonceCounts(txCount, address);
       this._counts[address] += 1;
     } else {
-      console.warn('NonceService transaction count is undefined.');
+      this._counts[address] = txCount;
       nonce = txCount;
+      this._counts[address] += 1;
     }
 
     return nonce;
