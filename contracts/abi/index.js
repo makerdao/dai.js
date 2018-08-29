@@ -6,6 +6,7 @@ import dsGuard from './dai/v1/DSGuard.json';
 import dsChief from './dai/v1/DSChief.json';
 import dsSpell from './dai/v1/DSSpell.json';
 import dsSpellBook from './dai/v1/DSSpellBook.json';
+import dsProxy from './dai/v1/DSProxy.json';
 
 import makerOtc from './makerOtc/v1.json';
 import zeroExExchange from './zeroExExchange/v1.json';
@@ -32,7 +33,8 @@ const dappHub = {
   dsGuard,
   dsChief,
   dsSpell,
-  dsSpellBook
+  dsSpellBook,
+  dsProxy
 };
 
 const exchangesV1 = {
