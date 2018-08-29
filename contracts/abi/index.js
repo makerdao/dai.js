@@ -10,6 +10,7 @@ import dsProxy from './dai/v1/DSProxy.json';
 
 import makerOtc from './makerOtc/v1.json';
 import zeroExExchange from './zeroExExchange/v1.json';
+import saiProxyCreateAndExecute from './saiProxyCreateAndExecute/v1.json';
 
 import saiTop from './dai/v1/SaiTop.json';
 import tub from './dai/v1/SaiTub.json';
@@ -46,4 +47,8 @@ const general = {
   erc20
 };
 
-export { daiV1, dappHub, exchangesV1, general };
+const proxies = {
+  saiProxyCreateAndExecute
+};
+
+export { daiV1, dappHub, exchangesV1, general, proxies };

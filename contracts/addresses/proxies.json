@@ -1,0 +1,11 @@
+{
+    "testnet": {
+        "SAI_PROXY_CREATE_AND_EXECUTE": ""
+    },
+    "kovan": {
+        "SAI_PROXY_CREATE_AND_EXECUTE": "0xe5086654b25ceb17c6a4566cdcae355388c17c00"
+    },
+    "mainnet": {
+        "SAI_PROXY_CREATE_AND_EXECUTE": ""
+    }
+}

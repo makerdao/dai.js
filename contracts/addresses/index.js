@@ -1,5 +1,6 @@
 import daiV1 from './daiV1.json';
 import exchanges from './exchanges.json';
+import proxies from './proxies.json';
 
 // these addresses can be dynamically changed at build-time
 import testnetAddressesDaiV1 from '../abi/dai/v1/addresses.json';
@@ -8,17 +9,20 @@ import testnetAddressesDaiV1 from '../abi/dai/v1/addresses.json';
 // for now though, we import hardcoded value(s) from the exchanges.json file
 const testnet = {
   ...testnetAddressesDaiV1,
-  ...exchanges.testnet
+  ...exchanges.testnet,
+  ...proxies.testnet
 };
 
 const kovan = {
   ...daiV1.kovan,
-  ...exchanges.kovan
+  ...exchanges.kovan,
+  ...proxies.kovan
 };
 
 const mainnet = {
   ...daiV1.mainnet,
-  ...exchanges.mainnet
+  ...exchanges.mainnet,
+  ...proxies.mainnet
 };
 
 export { testnet, kovan, mainnet };
