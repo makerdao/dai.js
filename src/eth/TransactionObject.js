@@ -119,8 +119,8 @@ export default class TransactionObject extends TransactionLifeCycle {
     } catch (err) {
       this._errorMessage = err.message;
       console.error(err);
-      this._nonceService.setCounts();
-      this.setError();
+      await this._nonceService.setCounts();
+      this.setError(err);
     }
     return this;
   }

@@ -62,7 +62,7 @@ export default class NonceService extends PublicService {
     const txCount = await this._getTxCount(address);
     let nonce;
 
-    if (this._counts && this._counts[address]) {
+    if (this._counts[address]) {
       nonce = this._compareNonceCounts(txCount, address);
       this._counts[address] += 1;
     } else {

@@ -53,7 +53,3 @@ export function buildTestSmartContractService() {
 export function buildTestEventService() {
   return buildTestService('event', { event: true });
 }
-
-export function buildTestNonceService() {
-  return buildTestService('nonce', { nonce: true });
-}

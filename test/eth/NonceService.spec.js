@@ -1,9 +1,9 @@
-import { buildTestNonceService } from '../helpers/serviceBuilders';
+import { buildTestService } from '../helpers/serviceBuilders';
 
 let nonceService;
 
 beforeEach(async () => {
-  nonceService = buildTestNonceService();
+  nonceService = buildTestService('nonce', { nonce: true });
   await nonceService.manager().authenticate();
 });
 
