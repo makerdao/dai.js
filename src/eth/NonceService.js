@@ -3,26 +3,27 @@ import { promisify } from '../utils';
 
 export default class NonceService extends PublicService {
   constructor(name = 'nonce') {
-    super(name, ['web3']);
+    super(name, ['web3', 'accounts']);
+    this._counts = {};
   }
 
   async connect() {
-    await this.setNextNonce();
+    await this.setCounts();
   }
 
-  async _getTxCount() {
+  async _getTxCount(address) {
     const web3Service = this.get('web3');
     return promisify(web3Service._web3.eth.getTransactionCount)(
-      web3Service.currentAccount(),
+      address,
       'pending'
     );
   }
 
-  _compareNonceCounts(txCount) {
-    if (txCount > this._count) {
+  _compareNonceCounts(txCount, address) {
+    if (txCount > this._counts[address]) {
       return txCount;
     } else {
-      return this._count;
+      return this._counts[address];
     }
   }
 
@@ -35,23 +36,34 @@ export default class NonceService extends PublicService {
     ) {
       args[args.length - 1]['nonce'] = nonce;
     } else {
-      console.log('args in else:', args);
       args.push({ nonce: nonce });
     }
     return args;
   }
 
-  async setNextNonce() {
-    return (this._count = await this._getTxCount());
+  async setCounts() {
+    const accountsList = await this.get('accounts').listAccounts();
+
+    return new Promise(resolve => {
+      accountsList.map(async account => {
+        const txCount = await this._getTxCount(account.address);
+        this._counts[account.address] = txCount;
+
+        if (Object.keys(this._counts).length === accountsList.length) {
+          resolve();
+        }
+      });
+    });
   }
 
   async getNonce() {
-    const txCount = await this._getTxCount();
+    const address = this.get('web3').currentAccount();
+    const txCount = await this._getTxCount(address);
     let nonce;
 
-    if (this._count) {
-      nonce = this._compareNonceCounts(txCount);
-      this._count += 1;
+    if (this._counts[address]) {
+      nonce = this._compareNonceCounts(txCount, address);
+      this._counts[address] += 1;
     } else {
       console.warn('NonceService transaction count is undefined.');
       nonce = txCount;

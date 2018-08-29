@@ -5,12 +5,10 @@ let nonceService;
 beforeEach(async () => {
   nonceService = buildTestNonceService();
   await nonceService.manager().authenticate();
-  nonceService.setNextNonce();
 });
 
 test('should properly fetch the transaction count', async () => {
   const count = await nonceService._getTxCount();
-  console.log(count);
   expect(typeof count).toEqual('number');
 });
 
@@ -42,16 +40,17 @@ test('should inject the nonce in the proper place in args list', async () => {
 test('should properly initialize the count in state', async () => {
   const originalCount = nonceService._count;
   nonceService._count = undefined;
-  await nonceService.setNextNonce();
+  // await nonceService.setNextNonce();
 
   expect(nonceService._count).toEqual(originalCount);
 });
 
-xtest('should return its own tx count if higher than count from node', async () => {
-  nonceService._count = 500000;
-  const nonce = await nonceService.getNonce();
+test('should set different counts for each signer', async () => {
+  await nonceService.setCounts();
+  console.log(nonceService._counts);
 
-  expect(nonce).toEqual(500000);
+  expect(typeof nonceService._counts).toEqual('object');
+  expect(Object.keys(nonceService._counts).length).toEqual(1);
 });
 
 test('should return tx count from node if higher than own count', async () => {

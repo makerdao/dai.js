@@ -23,7 +23,6 @@ beforeAll(async () => {
 
 async function openCdp() {
   cdp = await cdpService.openCdp();
-  console.log(cdp);
   return cdp.getId();
 }
 
