@@ -48,7 +48,7 @@
     "./{src,web,test,contracts}/**/*.js": [
       "prettier --single-quote --write",
       "git add",
-      "eslint web src test"
+      "eslint"
     ]
   },
   "devDependencies": {
