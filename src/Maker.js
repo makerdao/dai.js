@@ -9,7 +9,7 @@ export default class Maker {
     this._container = new DefaultServiceProvider(config).buildContainer();
     if (options.plugins) {
       for (let plugin of options.plugins) {
-        plugin(this);
+        plugin(this, config);
       }
     }
     if (options.autoAuthenticate !== false) this.authenticate();

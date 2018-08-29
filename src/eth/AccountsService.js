@@ -53,6 +53,9 @@ export default class AccountsService extends PublicService {
 
   async addAccount(name, { type, ...otherSettings }) {
     invariant(this._engine, 'engine must be set up before adding an account');
+    if (this._accounts[name]) {
+      throw new Error('An account with this name already exists.');
+    }
     const factory = this._accountFactories[type];
     invariant(factory, `no factory for type "${type}"`);
     const accountData = await factory(otherSettings, this._provider);
