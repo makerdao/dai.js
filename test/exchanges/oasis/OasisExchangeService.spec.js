@@ -20,7 +20,6 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
   const daiToken = ethereumTokenService.getToken(DAI);
   return wethToken
     .deposit('1')
-
     .then(() => {
       const oasisContract = oasisExchangeService
         .get('smartContract')

@@ -54,10 +54,11 @@ test('should properly initialize the counts in state', async () => {
 });
 
 test('should set different counts for each signer', async () => {
+  const accountsList = nonceService._accountsService.listAccounts();
   await nonceService.setCounts();
 
   expect(typeof nonceService._counts).toEqual('object');
-  expect(Object.keys(nonceService._counts).length).toEqual(1);
+  expect(Object.keys(nonceService._counts).length).toEqual(accountsList.length);
 });
 
 test('should return its own tx count if higher than count from node', async () => {

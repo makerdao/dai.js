@@ -101,7 +101,7 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().free(hexCdpId, value, { gasLimit: 200000 });
   }
 
-  async drawDai(cdpId, amount, unit = DAI) {
+  drawDai(cdpId, amount, unit = DAI) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     return this._tubContract().draw(hexCdpId, value, {

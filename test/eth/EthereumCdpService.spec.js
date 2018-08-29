@@ -6,7 +6,6 @@ let cdpService;
 beforeAll(async () => {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
-  cdpService.get('nonce').setCounts();
 });
 
 afterAll(async () => {

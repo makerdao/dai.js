@@ -11,22 +11,22 @@ export default class TokenConversionService extends PrivateService {
     return this.get('token').getToken(token);
   }
 
-  async convertEthToWeth(amount, unit = ETH) {
-    const value = getCurrency(amount, unit);
-    return await this._getToken(WETH).deposit(value);
+  convertEthToWeth(amount, unit = ETH) {
+    return this._getToken(WETH).deposit(getCurrency(amount, unit));
   }
 
   async convertWethToPeth(amount, unit = WETH) {
     const pethToken = this._getToken(PETH);
+
     await this.get('allowance').requireAllowance(
       WETH,
       this.get('smartContract').getContractByName(contracts.SAI_TUB).address
     );
-    return await pethToken.join(amount, unit);
+    return pethToken.join(amount, unit);
   }
 
   async convertEthToPeth(value) {
     await this.convertEthToWeth(value);
-    return await this.convertWethToPeth(value);
+    return this.convertWethToPeth(value);
   }
 }
