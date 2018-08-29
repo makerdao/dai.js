@@ -23,7 +23,6 @@ function createTestTransaction(srv = service) {
 test('event listeners work as promises', async () => {
   expect.assertions(3);
   const tx = createTestTransaction();
-  console.log(tx);
   tx.onPending().then(tx => {
     expect(tx.state()).toBe(TransactionState.pending);
   });
