@@ -30,15 +30,17 @@ export default class EtherToken {
     return Promise.resolve(true);
   }
 
-  transfer(toAddress, amount, unit = ETH) {
+  async transfer(toAddress, amount, unit = ETH) {
     const value = getCurrency(amount, unit)
       .toEthersBigNumber('wei')
       .toString();
+    const nonce = await this._transactionManager.get('nonce').getNonce();
     const currentAccount = this._web3.currentAccount();
     const tx = this._web3.eth.sendTransaction({
       from: currentAccount,
       to: toAddress,
-      value
+      value,
+      nonce: nonce
       //gasPrice: 500000000
     });
 
@@ -47,9 +49,11 @@ export default class EtherToken {
     );
   }
 
-  transferFrom(fromAddress, toAddress, transferValue) {
+  async transferFrom(fromAddress, toAddress, transferValue) {
+    const nonce = await this._transactionManager.get('nonce').getNonce();
     const valueInWei = utils.parseEther(transferValue).toString();
     const tx = this._web3.eth.sendTransaction({
+      nonce: nonce,
       from: fromAddress,
       to: toAddress,
       value: valueInWei

@@ -6,9 +6,19 @@ let txId = 1;
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log']);
+    super(name, ['web3', 'log', 'nonce']);
     this._transactions = [];
     this._listeners = [];
+  }
+
+  formatHybridTx(contract, key, args, name, businessObject = null) {
+    const contractCall = this.get('nonce')
+      .inject(args)
+      .then(newArgs => contract[key](...newArgs));
+    return this.createHybridTx(contractCall, {
+      businessObject: businessObject,
+      metadata: { contract: name, method: key, args }
+    });
   }
 
   // FIXME: having a method that returns one thing when it's called in a promise
@@ -23,6 +33,7 @@ export default class TransactionManager extends PublicService {
     const txo = new TransactionObject(
       tx,
       this.get('web3'),
+      this.get('nonce'),
       businessObject,
       parseLogs
     );

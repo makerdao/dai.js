@@ -49,20 +49,17 @@ export default class Cdp {
       { hybrid: false }
     );
     const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
-    const contractPromise = tubContract.open();
 
     // FIXME push this back down into SmartContractService
-    this._transactionObject = this._transactionManager.createHybridTx(
-      contractPromise,
-      {
-        businessObject: this,
-        metadata: { contract: contracts.SAI_TUB, method: 'open' }
-      }
+    this._transactionObject = this._transactionManager.formatHybridTx(
+      tubContract,
+      'open',
+      [{ gasPrice: 12000000000 }],
+      'SAI_TUB',
+      this
     );
 
-    return Promise.all([captureCdpIdPromise, contractPromise]).then(
-      result => result[0]
-    );
+    return captureCdpIdPromise.then(result => result);
   }
 
   transactionObject() {

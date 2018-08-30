@@ -102,7 +102,8 @@ export default class OasisExchangeService extends PrivateService {
         pos,
         overrides
       ),
-      this.get('web3')
+      this.get('web3'),
+      this.get('transactionManager').get('nonce')
     );
   }
 }

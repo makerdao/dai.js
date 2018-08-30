@@ -138,3 +138,18 @@ test('should add TransactionLifeCycle functions', async () => {
   await hybrid.onMined();
   expect(hybrid.isMined()).toBe(true);
 });
+
+test('should properly format hybrid transaction object with injected nonce and add TransactionLifecycle functions', async () => {
+  const services = await buildTestServices(),
+    hybrid = services.txMgr.formatHybridTx(
+      services.contract.getContractByName(tokens.DAI, { hybrid: false }),
+      'approve',
+      [services.currentAccount, '1000000000000000000'],
+      'DAI'
+    );
+
+  await hybrid.onPending();
+  expect(hybrid.isPending()).toBe(true);
+  await hybrid.onMined();
+  expect(hybrid.isMined()).toBe(true);
+});

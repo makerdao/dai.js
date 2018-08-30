@@ -9,12 +9,14 @@ export default class TransactionObject extends TransactionLifeCycle {
   constructor(
     transaction,
     web3Service,
+    nonceService,
     businessObject = null,
     logsParser = logs => logs
   ) {
     super(businessObject);
     this._transaction = transaction;
     this._web3Service = web3Service;
+    this._nonceService = nonceService;
     this._ethersProvider = web3Service.ethersProvider();
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
@@ -77,7 +79,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       for (let i = 0; i < 10; i++) {
         tx = await this._ethersProvider.getTransaction(this._hash);
         if (tx) break;
-        await promiseWait(500);
+        await promiseWait(1500);
       }
 
       if (!tx) {
@@ -116,6 +118,8 @@ export default class TransactionObject extends TransactionLifeCycle {
       this.setMined();
     } catch (err) {
       this._errorMessage = err.message;
+      console.error(err);
+      await this._nonceService.setCounts();
       this.setError(err);
     }
     return this;

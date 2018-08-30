@@ -10,9 +10,9 @@ import { ETH, WETH } from '../../src/eth/Currency';
 
 let service;
 
-beforeAll(() => {
+beforeAll(async () => {
   service = buildTestEthereumTokenService();
-  return service.manager().authenticate();
+  await service.manager().authenticate();
 });
 
 function createTestTransaction(srv = service) {
@@ -23,7 +23,6 @@ function createTestTransaction(srv = service) {
 test('event listeners work as promises', async () => {
   expect.assertions(3);
   const tx = createTestTransaction();
-
   tx.onPending().then(tx => {
     expect(tx.state()).toBe(TransactionState.pending);
   });
