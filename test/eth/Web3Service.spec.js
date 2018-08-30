@@ -79,6 +79,9 @@ function buildInfuraService(network, privateKey = null) {
         type: ProviderType.INFURA,
         network,
         infuraApiKey: process.env.INFURA_API_KEY
+      },
+      transactionSettings: {
+        gasLimit: 4000000
       }
     }
   });

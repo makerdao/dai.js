@@ -56,6 +56,9 @@ test('it handles url, privateKey, provider, and web3 options', () => {
           timeout: 1000,
           type: 'HTTP',
           url: 'http://foo.net'
+        },
+        transactionSettings: {
+          gasLimit: 4000000
         }
       }
     ],
@@ -93,7 +96,8 @@ test('skip unknown service roles', () => {
 
 test('should capture transaction settings', () => {
   const txSettings = {
-    gasPrice: 12000000000
+    gasPrice: 12000000000,
+    gasLimit: 4000000
   };
   const config = ConfigFactory.create('http', {
     web3: {

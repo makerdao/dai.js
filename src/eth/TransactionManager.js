@@ -29,9 +29,7 @@ export default class TransactionManager extends PublicService {
       typeof args[args.length - 1] === 'object' &&
       !Object.keys(args[args.length - 1]).includes('_bn')
     ) {
-      // This condition won't apply to any transactions
-      // until we add support for individual tx options
-      // (e.g. cdp.lockEth({ gasPrice: 12000000 }))
+      // This doesn't seem to be merging correctly
       merge(settings, args[args.length - 1]);
     } else {
       args.push(settings);
