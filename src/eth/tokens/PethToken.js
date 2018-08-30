@@ -9,18 +9,12 @@ export default class PethToken extends Erc20Token {
 
   join(amount, unit = WETH) {
     const value = this._valueForContract(amount, unit);
-    return this._tub.join(value, {
-      gasLimit: 200000,
-      gasPrice: 12000000000
-    });
+    return this._tub.join(value);
   }
 
   exit(amount, unit = WETH) {
     const value = this._valueForContract(amount, unit);
-    return this._tub.exit(value, {
-      gasLimit: 100000,
-      gasPrice: 12000000000
-    });
+    return this._tub.exit(value);
   }
 
   async wrapperRatio() {
