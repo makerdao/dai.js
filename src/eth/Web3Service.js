@@ -19,6 +19,7 @@ export default class Web3Service extends PrivateService {
     this._info = { version: {} };
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     this._defaultEmitter = null;
+    this._transactionSettings = null;
 
     Web3ServiceList.push(this);
   }
@@ -45,6 +46,10 @@ export default class Web3Service extends PrivateService {
 
   web3Provider() {
     return this._web3.currentProvider;
+  }
+
+  transactionSettings() {
+    return this._transactionSettings;
   }
 
   web3Contract(abi, address) {
@@ -77,6 +82,7 @@ export default class Web3Service extends PrivateService {
     this._defaultEmitter.emit('web3/INITIALIZED', {
       provider: { ...settings.provider }
     });
+    this._transactionSettings = settings.transactionSettings;
   }
 
   async connect() {

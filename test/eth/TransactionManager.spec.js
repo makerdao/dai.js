@@ -153,3 +153,8 @@ test('should properly format hybrid transaction object with injected nonce and a
   await hybrid.onMined();
   expect(hybrid.isMined()).toBe(true);
 });
+
+test('should properly inject transaction settings and nonce into hybrid transactions', async () => {
+  const services = await buildTestServices();
+  console.log(await services.txMgr.injectSettings(['0x']));
+});

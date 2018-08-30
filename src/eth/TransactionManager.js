@@ -1,6 +1,7 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
 import ObjectWrapper from '../utils/ObjectWrapper';
+import merge from 'lodash.merge';
 
 let txId = 1;
 
@@ -12,13 +13,34 @@ export default class TransactionManager extends PublicService {
   }
 
   formatHybridTx(contract, key, args, name, businessObject = null) {
-    const contractCall = this.get('nonce')
-      .inject(args)
-      .then(newArgs => contract[key](...newArgs));
+    const contractCall = this.injectSettings(args).then(newArgs =>
+      contract[key](...newArgs)
+    );
     return this.createHybridTx(contractCall, {
       businessObject: businessObject,
       metadata: { contract: name, method: key, args }
     });
+  }
+
+  async injectSettings(args) {
+    const nonce = await this.get('nonce').getNonce();
+    const options = this.get('web3').transactionSettings();
+    const settings = { nonce: nonce };
+
+    Object.keys(options).map(option => {
+      settings[option] = options[option];
+    });
+
+    if (
+      typeof args[args.length - 1] === 'object' &&
+      !Object.keys(args[args.length - 1]).includes('_bn')
+    ) {
+      merge(settings, args[args.length - 1]);
+    } else {
+      args.push(settings);
+    }
+
+    return args;
   }
 
   // FIXME: having a method that returns one thing when it's called in a promise
