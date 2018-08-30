@@ -157,4 +157,26 @@ test('should properly format hybrid transaction object with injected nonce and a
 test('should properly inject transaction settings and nonce into hybrid transactions', async () => {
   const services = await buildTestServices();
   console.log(await services.txMgr.injectSettings(['0x']));
+  const firstArgs = await nonceService.inject(['a', 2, { gasLimit: 400000 }]);
+  const secondArgs = await nonceService.inject(['0x']);
+  const thirdArgs = await nonceService.inject([
+    '0x',
+    { _bn: 'some BigNumber' }
+  ]);
+
+  expect(Object.keys(firstArgs[firstArgs.length - 1]).includes('nonce')).toBe(
+    true
+  );
+  expect(secondArgs.length).toEqual(2);
+  expect(typeof secondArgs[secondArgs.length - 1]).toEqual('object');
+  expect(Object.keys(secondArgs[secondArgs.length - 1]).includes('nonce')).toBe(
+    true
+  );
+  expect(thirdArgs.length).toEqual(3);
+  expect(Object.keys(thirdArgs[thirdArgs.length - 1]).includes('nonce')).toBe(
+    true
+  );
+  expect(Object.keys(thirdArgs[thirdArgs.length - 1]).includes('_bn')).toBe(
+    false
+  );
 });

@@ -28,20 +28,6 @@ export default class NonceService extends PublicService {
     }
   }
 
-  async inject(args) {
-    const nonce = await this.getNonce();
-
-    if (
-      typeof args[args.length - 1] === 'object' &&
-      !Object.keys(args[args.length - 1]).includes('_bn')
-    ) {
-      args[args.length - 1]['nonce'] = nonce;
-    } else {
-      args.push({ nonce: nonce });
-    }
-    return args;
-  }
-
   async setCounts() {
     const accountsList = await this._accountsService.listAccounts();
 
