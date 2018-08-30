@@ -23,13 +23,7 @@ export default class TransactionManager extends PublicService {
   }
 
   async injectSettings(args) {
-    const nonce = await this.get('nonce').getNonce();
-    const options = this.get('web3').transactionSettings();
-    const settings = { nonce: nonce };
-
-    Object.keys(options).map(option => {
-      settings[option] = options[option];
-    });
+    const settings = await this.getSettings();
 
     if (
       typeof args[args.length - 1] === 'object' &&
@@ -41,6 +35,20 @@ export default class TransactionManager extends PublicService {
     }
 
     return args;
+  }
+
+  async getSettings() {
+    const nonce = await this.get('nonce').getNonce();
+    const options = this.get('web3').transactionSettings();
+    const settings = { nonce: nonce };
+
+    if (options) {
+      Object.keys(options).map(option => {
+        settings[option] = options[option];
+      });
+    }
+
+    return settings;
   }
 
   // FIXME: having a method that returns one thing when it's called in a promise
