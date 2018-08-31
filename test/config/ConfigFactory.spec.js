@@ -56,6 +56,9 @@ test('it handles url, privateKey, provider, and web3 options', () => {
           timeout: 1000,
           type: 'HTTP',
           url: 'http://foo.net'
+        },
+        transactionSettings: {
+          gasLimit: 4000000
         }
       }
     ],
@@ -89,6 +92,19 @@ test('skip unknown service roles', () => {
     foo: 'FooService'
   });
   expect(config.foo).toBeFalsy();
+});
+
+test('should capture transaction settings', () => {
+  const txSettings = {
+    gasPrice: 12000000000,
+    gasLimit: 4000000
+  };
+  const config = ConfigFactory.create('http', {
+    web3: {
+      transactionSettings: txSettings
+    }
+  });
+  expect(config.web3[1].transactionSettings).toEqual(txSettings);
 });
 
 test('allow new service roles if specified', () => {

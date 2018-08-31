@@ -61,10 +61,7 @@ export default class EthereumCdpService extends PrivateService {
       this.get('allowance').requireAllowance(MKR, this._tubContract().address),
       this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]).then(() => {
-      return this._tubContract().shut(hexCdpId, {
-        gasLimit: 4000000,
-        gasPrice: 12000000000
-      });
+      return this._tubContract().shut(hexCdpId);
     });
   }
 
@@ -88,25 +85,19 @@ export default class EthereumCdpService extends PrivateService {
       PETH,
       this._tubContract().address
     );
-    return this._tubContract().lock(hexCdpId, value, {
-      gasLimit: 4000000,
-      gasPrice: 12000000000
-    });
+    return this._tubContract().lock(hexCdpId, value);
   }
 
   freePeth(cdpId, amount, unit = PETH) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-    return this._tubContract().free(hexCdpId, value, { gasLimit: 200000 });
+    return this._tubContract().free(hexCdpId, value);
   }
 
   drawDai(cdpId, amount, unit = DAI) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-    return this._tubContract().draw(hexCdpId, value, {
-      gasLimit: 4000000,
-      gasPrice: 12000000000
-    });
+    return this._tubContract().draw(hexCdpId, value);
   }
 
   async wipeDai(cdpId, amount, unit = DAI) {
@@ -116,10 +107,7 @@ export default class EthereumCdpService extends PrivateService {
       this.get('allowance').requireAllowance(MKR, this._tubContract().address),
       this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]);
-    return this._tubContract().wipe(hexCdpId, value, {
-      gasLimit: 4000000,
-      gasPrice: 12000000000
-    });
+    return this._tubContract().wipe(hexCdpId, value);
   }
 
   getInfo(cdpId) {

@@ -18,31 +18,6 @@ test('should properly fetch the transaction count', async () => {
   expect(count).toBeGreaterThan(0);
 });
 
-test('should inject the nonce in the proper place in args list', async () => {
-  const firstArgs = await nonceService.inject(['a', 2, { gasLimit: 400000 }]);
-  const secondArgs = await nonceService.inject(['0x']);
-  const thirdArgs = await nonceService.inject([
-    '0x',
-    { _bn: 'some BigNumber' }
-  ]);
-
-  expect(Object.keys(firstArgs[firstArgs.length - 1]).includes('nonce')).toBe(
-    true
-  );
-  expect(secondArgs.length).toEqual(2);
-  expect(typeof secondArgs[secondArgs.length - 1]).toEqual('object');
-  expect(Object.keys(secondArgs[secondArgs.length - 1]).includes('nonce')).toBe(
-    true
-  );
-  expect(thirdArgs.length).toEqual(3);
-  expect(Object.keys(thirdArgs[thirdArgs.length - 1]).includes('nonce')).toBe(
-    true
-  );
-  expect(Object.keys(thirdArgs[thirdArgs.length - 1]).includes('_bn')).toBe(
-    false
-  );
-});
-
 test('should properly initialize the counts in state', async () => {
   const originalCounts = nonceService._counts;
   nonceService._counts = {};

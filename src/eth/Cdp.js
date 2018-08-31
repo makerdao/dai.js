@@ -54,7 +54,7 @@ export default class Cdp {
     this._transactionObject = this._transactionManager.formatHybridTx(
       tubContract,
       'open',
-      [{ gasPrice: 12000000000 }],
+      [],
       'SAI_TUB',
       this
     );

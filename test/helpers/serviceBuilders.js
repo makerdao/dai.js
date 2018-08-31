@@ -14,7 +14,10 @@ export const kovanProviderConfig = {
 
 export const defaultProviderConfig = {
   web3: {
-    provider: { type: ProviderType.TEST }
+    provider: { type: ProviderType.TEST },
+    transactionSettings: {
+      gasLimit: 4000000
+    }
   },
   log: false
 };

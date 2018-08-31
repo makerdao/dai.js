@@ -153,3 +153,38 @@ test('should properly format hybrid transaction object with injected nonce and a
   await hybrid.onMined();
   expect(hybrid.isMined()).toBe(true);
 });
+
+test('should properly inject transaction settings and nonce into hybrid transactions', async () => {
+  const services = await buildTestServices();
+  const firstArgs = await services.txMgr.injectSettings(['0x']);
+  const secondArgs = await services.txMgr.injectSettings([
+    '0x',
+    { _bn: 'some BigNumber' }
+  ]);
+
+  expect(Object.keys(firstArgs[firstArgs.length - 1]).includes('nonce')).toBe(
+    true
+  );
+  expect(firstArgs.length).toEqual(2);
+  expect(typeof firstArgs[firstArgs.length - 1]).toEqual('object');
+  expect(Object.keys(firstArgs[firstArgs.length - 1]).includes('nonce')).toBe(
+    true
+  );
+  expect(secondArgs.length).toEqual(3);
+  expect(Object.keys(secondArgs[secondArgs.length - 1]).includes('nonce')).toBe(
+    true
+  );
+  expect(Object.keys(secondArgs[secondArgs.length - 1]).includes('_bn')).toBe(
+    false
+  );
+});
+
+test('should get tx settings from Web3Service and add nonce', async () => {
+  const services = await buildTestServices();
+  const settings = await services.txMgr.getSettings();
+
+  expect(Object.keys(settings).length).toEqual(
+    Object.keys(services.txMgr.get('web3').transactionSettings()).length + 1
+  );
+  expect(Object.keys(settings).includes('nonce')).toBe(true);
+});
