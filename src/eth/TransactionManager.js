@@ -29,12 +29,10 @@ export default class TransactionManager extends PublicService {
       typeof args[args.length - 1] === 'object' &&
       !Object.keys(args[args.length - 1]).includes('_bn')
     ) {
-      // This doesn't seem to be merging correctly
-      merge(settings, args[args.length - 1]);
+      await merge(args[args.length - 1], settings);
     } else {
       args.push(settings);
     }
-
     return args;
   }
 
