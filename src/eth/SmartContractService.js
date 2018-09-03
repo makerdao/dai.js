@@ -1,11 +1,13 @@
 import PublicService from '../core/PublicService';
 import contracts from '../../contracts/contracts';
+import * as abiMap from '../../contracts/abi';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
-import { Contract } from 'ethers';
+import { Contract, Interface } from 'ethers';
 
 function wrapContract(contract, name, abi, txManager) {
   const nonConstantFns = {};
+  const contractInterface = new Interface(abi);
 
   for (let { type, constant, name } of abi) {
     if (type === 'function' && !constant) nonConstantFns[name] = true;
@@ -22,18 +24,96 @@ function wrapContract(contract, name, abi, txManager) {
     {},
     {
       get(target, key) {
-        if (nonConstantFns[key] && txManager) {
+        // Get just the method name (in case name + args e.g. "method(arg1,arg2)" is used as key to call this func
+        const method = key.replace(/\(.*\)$/g, '');
+
+        // Get the method argument types (that make up the method sig)
+        let checkMethodArgs = key.match(/^.+(\(.+?\))$/);
+        const methodArgs = checkMethodArgs ? checkMethodArgs[1] : '()';
+
+        if (nonConstantFns[method] && txManager) {
           return (...args) => {
-            // Additional metadata detection (as last arg) when calling a SC function via the proxy
-            let metadata = { contract: name, method: key, args };
+            console.debug(
+              'Calling ' + method + methodArgs + ' with args:',
+              args
+            );
+            let dsProxyAddress = null;
+
+            // Default metadata fields
+            let metadata = { contract: name, method, methodArgs, args };
+
             if (
               typeof args !== 'undefined' &&
               Array.isArray(args) &&
-              typeof args[args.length - 1] === 'object' &&
-              args[args.length - 1].hasOwnProperty('metadata')
+              typeof args[args.length - 1] === 'object'
             ) {
-              Object.assign(metadata, args.pop().metadata);
+              // Detect additional metadata attatched to last arg and merge it with default metadata
+              if (args[args.length - 1].hasOwnProperty('metadata')) {
+                console.debug(
+                  'Found additional metadata attached to tx:',
+                  args[args.length - 1].metadata
+                );
+                Object.assign(metadata, args[args.length - 1].metadata);
+                delete args[args.length - 1].metadata;
+              }
+              // Detect proxy address and route through DSProxy contract
+              if (args[args.length - 1].hasOwnProperty('dsProxyAddress')) {
+                dsProxyAddress = args[args.length - 1].dsProxyAddress;
+                delete args[args.length - 1].dsProxyAddress;
+                console.debug(`Using DSProxy (${dsProxyAddress}) for this tx`);
+              }
+              // If last arg item is an empty object, remove it
+              if (Object.keys(args[args.length - 1]).length === 0) args.pop();
             }
+
+            // DSProxy handling (different from the fact that this class is called Proxy)
+            if (dsProxyAddress !== null) {
+              var dsProxyContract = new Contract(
+                dsProxyAddress,
+                abiMap.dappHub.dsProxy,
+                txManager.get('web3').ethersSigner()
+              );
+              dsProxyContract = wrapContract(
+                dsProxyContract,
+                'DSProxy',
+                abiMap.dappHub.dsProxy,
+                txManager
+              );
+
+              // const func = find(abi, i => i.constant === false && i.name === key && i.inputs.length === args.length);
+              // const argTypes = func.inputs.map(i => i.type);
+              // let funcData = "";
+              // argTypes.forEach((type, i) => {
+              //   if (type === 'address') funcData += addressToBytes32(args[i], false);
+              //   else if (type === 'bytes32' || type === 'uint256') funcData += numberToBytes32(args[i], false);
+              // })
+              // const data = utils.id(`${key}(${argTypes.join(',')})`).substring(0, 10) + funcData;
+
+              // Default options to pass to DSProxy tx (e.g. value, gasLimit)
+              let options = { gasLimit: 6000000 };
+              // Pass in any additional tx options passed to this tx (e.g. value, gasLimit)
+              // Check to make sure last arg is an object literal (not a BigNumber object etc.)
+              if (
+                typeof args[args.length - 1] === 'object' &&
+                args[args.length - 1].constructor === Object
+              ) {
+                Object.assign(options, args[args.length - 1]);
+                args.pop();
+              }
+              // Assign proxied tx metadata to proxy tx
+              Object.assign(options, { metadata });
+
+              // Get proxied tx calldata to pass to DSProxy
+              const data = contractInterface.functions[key](...args).data;
+              console.debug(
+                'args passed to DSProxy.execute() for ' + key + ' call:',
+                args
+              );
+              console.debug('data passed to DSProxy.execute():', data);
+
+              return dsProxyContract.execute(contract.address, data, options);
+            }
+
             return txManager.createHybridTx(contract[key](...args), {
               metadata
             });
