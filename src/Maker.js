@@ -2,6 +2,7 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import Cdp from './eth/Cdp';
+import ProxyCdp from './eth/ProxyCdp';
 import ConfigFactory from './config/ConfigFactory';
 
 export default class Maker {
@@ -55,10 +56,17 @@ export default class Maker {
     );
   }
 
-  getCdp(cdpId) {
+  getCdp(cdpId, dsProxyAddress = null) {
     return this._authenticatedPromise.then(() =>
       this._validateCdp(cdpId).then(
-        () => new Cdp(this._container.service('cdp'), cdpId)
+        () =>
+          dsProxyAddress === null
+            ? new Cdp(this._container.service('cdp'), cdpId)
+            : new ProxyCdp(
+                this._container.service('cdp'),
+                dsProxyAddress,
+                cdpId
+              )
       )
     );
   }
