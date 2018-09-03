@@ -39,6 +39,10 @@ export default class EthereumCdpService extends PrivateService {
     return this._smartContract().getContractByName(contracts.SAI_TUB);
   }
 
+  _saiProxyTubContract() {
+    return this._smartContract().getContractByName(contracts.SAI_PROXY);
+  }
+
   _web3Service() {
     return this._smartContract().get('web3');
   }
@@ -50,6 +54,10 @@ export default class EthereumCdpService extends PrivateService {
   openCdp() {
     return new Cdp(this).transactionObject();
   }
+
+  // openProxyCdp(dsProxyAddress = null) {
+  //   return new ProxyCdp(this).transactionObject();
+  // }
 
   shut(cdpId) {
     const hexCdpId = numberToBytes32(cdpId);
@@ -105,6 +113,114 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
+  // TODO: Validate dsProxyAddress address
+  freeEthProxy(dsProxyAddress, cdpId, amount, unit = ETH) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
+    return this._saiProxyTubContract().free(
+      this._tubContract().address,
+      hexCdpId,
+      value,
+      {
+        dsProxyAddress,
+        metadata: {
+          action: {
+            name: 'free',
+            amount: getCurrency(amount, unit),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
+  // TODO: Validate dsProxyAddress address
+  lockEthProxy(dsProxyAddress, cdpId, amount) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, ETH).toEthersBigNumber('wei');
+
+    return this._saiProxyTubContract().lock(
+      this._tubContract().address,
+      hexCdpId,
+      {
+        dsProxyAddress,
+        value,
+        metadata: {
+          action: {
+            name: 'lock',
+            amount: getCurrency(amount, ETH),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
+  // TODO: Validate dsProxyAddress address
+  drawDaiProxy(dsProxyAddress, cdpId, amount) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
+
+    return this._saiProxyTubContract().draw(
+      this._tubContract().address,
+      hexCdpId,
+      value,
+      {
+        dsProxyAddress,
+        metadata: {
+          action: {
+            name: 'draw',
+            amount: getCurrency(amount, DAI),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
+  // TODO: Validate dsProxyAddress address
+  async wipeDaiProxy(dsProxyAddress, cdpId, amount, useOtc = false) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
+
+    // Only require MKR allowance if paying fee using MKR (if using OTC, no need to approve MKR right now)
+    let approveCalls = [
+      this.get('allowance').requireAllowance(DAI, dsProxyAddress)
+    ];
+    if (!useOtc)
+      approveCalls.unshift(
+        this.get('allowance').requireAllowance(MKR, dsProxyAddress)
+      );
+    await Promise.all(approveCalls);
+
+    const options = {
+      dsProxyAddress,
+      gasLimit: 5000000,
+      metadata: {
+        action: {
+          name: 'wipe',
+          amount: getCurrency(amount, DAI),
+          otc: useOtc,
+          proxy: true
+        }
+      }
+    };
+
+    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy wipe() method
+    return useOtc
+      ? this._saiProxyTubContract()['wipe(address,bytes32,uint256,address)'](
+          this._tubContract().address,
+          hexCdpId,
+          value,
+          this._smartContract().getContractAddressByName(contracts.MAKER_OTC),
+          options
+        )
+      : this._saiProxyTubContract()['wipe(address,bytes32,uint256)'](
+          this._tubContract().address,
+          hexCdpId,
+          value,
+          options
+        );
   }
 
   async wipeDai(cdpId, amount, unit = DAI) {
