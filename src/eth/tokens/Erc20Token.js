@@ -41,9 +41,12 @@ export default class Erc20Token {
       this._valueForContract(value, unit),
       {
         metadata: {
-          action: value === '0' ? 'lock' : 'unlock',
-          spender: spender,
-          currency: getCurrency(value, unit)
+          action: {
+            name: 'approve',
+            spender: spender,
+            amount: getCurrency(value, unit),
+            allowing: value !== '0'
+          }
         }
       }
     );
@@ -52,9 +55,12 @@ export default class Erc20Token {
   approveUnlimited(spender) {
     return this._contract.approve(spender, -1, {
       metadata: {
-        action: 'unlock',
-        spender: spender,
-        unlimited: true
+        action: {
+          name: 'approve',
+          spender: spender,
+          amount: -1,
+          unlimited: true
+        }
       }
     });
   }
@@ -62,9 +68,12 @@ export default class Erc20Token {
   transfer(to, value, unit = currencies[this.symbol]) {
     return this._contract.transfer(to, this._valueForContract(value, unit), {
       metadata: {
-        action: 'transfer',
-        recipient: to,
-        currency: getCurrency(value, unit)
+        action: {
+          name: 'transfer',
+          sender: this._web3Service.defaultAccount(),
+          recipient: to,
+          amount: getCurrency(value, unit)
+        }
       }
     });
   }
@@ -76,10 +85,12 @@ export default class Erc20Token {
       this._valueForContract(value, unit),
       {
         metadata: {
-          action: 'transferFrom',
-          sender: from,
-          recipient: to,
-          currency: getCurrency(value, unit)
+          action: {
+            name: 'transfer',
+            sender: from,
+            recipient: to,
+            amount: getCurrency(value, unit)
+          }
         }
       }
     );

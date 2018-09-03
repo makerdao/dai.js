@@ -44,9 +44,12 @@ export default class EtherToken {
       tx.then(tx => ({ hash: tx })),
       {
         metadata: {
-          action: 'transfer',
-          recipient: toAddress,
-          currency: getCurrency(transferValue, ETH)
+          action: {
+            name: 'transfer',
+            sender: defaultAccount,
+            recipient: toAddress,
+            amount: getCurrency(transferValue, ETH)
+          }
         }
       }
     );
@@ -64,10 +67,12 @@ export default class EtherToken {
       tx.then(tx => ({ hash: tx })),
       {
         metadata: {
-          action: 'transferFrom',
-          sender: fromAddress,
-          recipient: toAddress,
-          currency: getCurrency(transferValue, ETH)
+          action: {
+            name: 'transfer',
+            sender: fromAddress,
+            recipient: toAddress,
+            amount: getCurrency(transferValue, ETH)
+          }
         }
       }
     );
