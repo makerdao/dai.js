@@ -87,11 +87,11 @@ const mapping = {
   ],
 
   // Proxies
-  [contracts.SAI_PROXY_CREATE_AND_EXECUTE]: [
+  [contracts.SAI_PROXY]: [
     {
       version: 1,
-      address: kovanAddresses.SAI_PROXY_CREATE_AND_EXECUTE,
-      abi: abiMap.proxies.saiProxyCreateAndExecute
+      address: kovanAddresses.SAI_PROXY,
+      abi: abiMap.proxies.saiProxy
     }
   ]
 };
