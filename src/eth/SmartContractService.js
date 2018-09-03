@@ -86,6 +86,11 @@ export default class SmartContractService extends PublicService {
     );
   }
 
+  getContractAddressByName(name, { version } = {}) {
+    const { address } = this._getContractInfo(name, version);
+    return address;
+  }
+
   getContractByName(name, { version, hybrid = true } = {}) {
     const info = this._getContractInfo(name, version);
     return this.getContractByAddressAndAbi(info.address, info.abi, {
