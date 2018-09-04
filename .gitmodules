@@ -10,3 +10,6 @@
 [submodule "lib/ds-proxy"]
 	path = testchain/lib/ds-proxy
 	url = https://github.com/dapphub/ds-proxy
+[submodule "lib/sai-proxy"]
+	path = testchain/lib/sai-proxy
+	url = https://github.com/makerdao/sai-proxy
