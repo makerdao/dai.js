@@ -13,3 +13,6 @@
 [submodule "lib/sai-proxy"]
 	path = testchain/lib/sai-proxy
 	url = https://github.com/makerdao/sai-proxy
+[submodule "lib/proxy-registry"]
+	path = testchain/lib/proxy-registry
+	url = https://github.com/makerdao/proxy-registry
