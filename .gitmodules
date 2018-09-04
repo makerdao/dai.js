@@ -3,7 +3,10 @@
 	url = https://github.com/dapphub/ds-test
 [submodule "lib/sai"]
 	path = testchain/lib/sai
-	url = https://github.com/makerdao/sai.git
+	url = https://github.com/makerdao/sai
 [submodule "lib/maker-otc"]
 	path = testchain/lib/maker-otc
 	url = https://github.com/makerdao/maker-otc
+[submodule "lib/ds-proxy"]
+	path = testchain/lib/ds-proxy
+	url = https://github.com/dapphub/ds-proxy
