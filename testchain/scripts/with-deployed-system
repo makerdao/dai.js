@@ -145,8 +145,8 @@ EOM
   echo "Deployed to ProxyRegistry to $PROXY_REGISTRY"
 
   echo "Creating DSProxy via ProxyRegistry.build()..."
-  TX_HASH=$(seth send --async $PROXY_REGISTRY "build()(address)")
-  DS_PROXY=$(seth receipt $TX_HASH logs | sed 's/.*"address":"\(0x[a-zA-Z0-9]*\)".*/\1/') # Find address of the newly created DSProxy. Is there a better way to do this using seth?
+  DS_PROXY="0x"$(seth --abi-decode "build()(address)" $(seth call $PROXY_REGISTRY "build()")) # Get expected address of new DSProxy instance about to be created
+  seth send $PROXY_REGISTRY "build()"
   echo "Created new DSProxy instance with address: $DS_PROXY"
   cd -
 
