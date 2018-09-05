@@ -165,7 +165,7 @@ EOM
   $CWD/update-abis
 
   # Save the proxy addresses to a JSON file
-  cat > $CWD/../../contracts/abi/dsProxy/v1/addresses.json <<- EOM
+  cat > $CWD/../../contracts/abi/dsProxy/addresses.json <<- EOM
 {
   "DS_PROXY_FACTORY": "$DS_PROXY_FACTORY",
   "PROXY_REGISTRY": "$PROXY_REGISTRY",
