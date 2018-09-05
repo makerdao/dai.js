@@ -1,0 +1,11 @@
+{
+    "testnet": {
+        "SAI_PROXY": "0xc72b03c37735cf122c27dc352e5f25f75beea389"
+    },
+    "kovan": {
+        "SAI_PROXY": "0xbe20df25d09b76275a3043c87b31aa1bd47f1f6a"
+    },
+    "mainnet": {
+        "SAI_PROXY": ""
+    }
+}

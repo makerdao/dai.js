@@ -90,6 +90,15 @@ const mapping = {
       address: mainnetAddresses.ZERO_EX_EXCHANGE,
       abi: abiMap.exchangesV1.zeroExExchange
     }
+  ],
+
+  // Proxies
+  [contracts.SAI_PROXY]: [
+    {
+      version: 1,
+      address: mainnetAddresses.SAI_PROXY,
+      abi: abiMap.proxies.saiProxy
+    }
   ]
 };
 

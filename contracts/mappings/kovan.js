@@ -84,6 +84,15 @@ const mapping = {
       address: kovanAddresses.ZERO_EX_EXCHANGE,
       abi: abiMap.exchangesV1.zeroExExchange
     }
+  ],
+
+  // Proxies
+  [contracts.SAI_PROXY]: [
+    {
+      version: 1,
+      address: kovanAddresses.SAI_PROXY,
+      abi: abiMap.proxies.saiProxy
+    }
   ]
 };
 
