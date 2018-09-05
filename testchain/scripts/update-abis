@@ -19,3 +19,7 @@ cd -
 # Copy DSProxy ABI into project
 mkdir -p $CONTRACTS/abi/dsProxy/
 cp $LIB/ds-proxy/out/DSProxy.abi $CONTRACTS/abi/dsProxy/v1.json
+
+# Copy SaiProxyCreateAndExecute ABI into project
+mkdir -p $CONTRACTS/abi/saiProxy/v1/
+cp $LIB/sai-proxy/out/SaiProxyCreateAndExecute.abi $CONTRACTS/abi/saiProxy/v1.json
