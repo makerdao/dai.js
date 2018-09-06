@@ -10,7 +10,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     transaction,
     web3Service,
     nonceService,
-    businessObject = null,
+    businessObject,
     logsParser = logs => logs
   ) {
     super(businessObject);
@@ -20,11 +20,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._ethersProvider = web3Service.ethersProvider();
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
-    this._timeStampMined = null;
-    this._errorMessage = null;
-    this._fees = null;
-    this._logs = null;
-    this._hash = null;
   }
 
   timeStampSubmitted() {
@@ -118,7 +113,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       this.setMined();
     } catch (err) {
       this._errorMessage = err.message;
-      console.error(err);
       await this._nonceService.setCounts();
       this.setError(err);
     }
