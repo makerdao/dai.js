@@ -8,7 +8,7 @@ const { initialized, pending, mined, finalized, error } = transactionState;
 const stateOrder = [initialized, pending, mined, finalized];
 
 class TransactionLifeCycle {
-  constructor(businessObject = null) {
+  constructor(businessObject) {
     this._state = new StateMachine(
       initialized,
       transactionTypeTransitions[TransactionType.transaction]

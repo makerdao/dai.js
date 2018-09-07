@@ -1,6 +1,5 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
-import ObjectWrapper from '../utils/ObjectWrapper';
 import merge from 'lodash.merge';
 
 let txId = 1;
@@ -50,9 +49,9 @@ export default class TransactionManager extends PublicService {
     return settings;
   }
 
-  // FIXME: having a method that returns one thing when it's called in a promise
-  // chain and something else when it's not (besides a promise that resolves to
-  // the first thing) makes it pretty difficult to work with.
+  // FIXME: a method that returns one thing when it's called in a promise chain
+  // and something else when it's not (besides a promise that resolves to the
+  // first thing) is pretty difficult to work with.
   createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
     if (tx._original) {
       console.warn('Redundant call to createHybridTx');
@@ -68,24 +67,31 @@ export default class TransactionManager extends PublicService {
     );
 
     const hybrid = txo.mine().then(() => txo.onMined());
-    Object.assign(hybrid, {
-      _original: txo,
-      getOriginalTransaction: () => txo,
-      _txId: txId++,
-      metadata // put whatever you want in here for inspecting/debugging
-    });
-
-    if (businessObject) {
-      ObjectWrapper.addWrapperInterface(hybrid, businessObject);
-    }
-
-    ObjectWrapper.addWrapperInterface(hybrid, txo, [
-      'logs',
-      'hash',
-      'fees',
-      'timeStamp',
-      'timeStampSubmitted'
-    ]);
+    Object.assign(
+      hybrid,
+      {
+        _original: txo,
+        getOriginalTransaction: () => txo,
+        _txId: txId++,
+        metadata // put whatever you want in here for inspecting/debugging
+      },
+      [
+        'mine',
+        'confirm',
+        'state',
+        'isPending',
+        'isMined',
+        'isFinalized',
+        'isError',
+        'onPending',
+        'onMined',
+        'onFinalized',
+        'onError'
+      ].reduce((acc, method) => {
+        acc[method] = (...args) => txo[method](...args);
+        return acc;
+      }, {})
+    );
 
     this._transactions.push(hybrid);
     this._listeners.forEach(cb => cb(hybrid));
