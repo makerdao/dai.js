@@ -48,6 +48,19 @@ export default class Web3Service extends PrivateService {
     return this._web3.currentProvider;
   }
 
+  ethersSigner() {
+    if (this._ethersWallet === null && this._ethersProvider === null) {
+      throw new Error(
+        'Cannot get ethersSigner: ethers wallet and provider are null.'
+      );
+    }
+
+    return (
+      this._ethersWallet ||
+      this._ethersProvider.getSigner(this.currentAccount())
+    );
+  }
+
   transactionSettings() {
     return this._transactionSettings;
   }

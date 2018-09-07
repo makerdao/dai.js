@@ -1,6 +1,7 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
+import ProxyCdp from './ProxyCdp';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
 import {
@@ -39,6 +40,10 @@ export default class EthereumCdpService extends PrivateService {
     return this._smartContract().getContractByName(contracts.SAI_TUB);
   }
 
+  _saiProxyTubContract() {
+    return this._smartContract().getContractByName(contracts.SAI_PROXY);
+  }
+
   _web3Service() {
     return this._smartContract().get('web3');
   }
@@ -47,12 +52,25 @@ export default class EthereumCdpService extends PrivateService {
     return this.get('conversion');
   }
 
+  async _findCdp(id, dsProxyAddress = null) {
+    if (typeof id !== 'number') {
+      throw new Error('ID must be a number.');
+    }
+    const info = await this.getInfo(id);
+    if (info.lad.toString() === '0x0000000000000000000000000000000000000000') {
+      throw new Error("That CDP doesn't exist--try opening a new one.");
+    }
+    return dsProxyAddress === null
+      ? new Cdp(this, id)
+      : new ProxyCdp(this, dsProxyAddress, id);
+  }
+
   openCdp() {
     return new Cdp(this).transactionObject();
   }
 
-  getCdp(id) {
-    return Cdp.find(id, this);
+  getCdp(id, dsProxyAddress = null) {
+    return this._findCdp(id, dsProxyAddress);
   }
 
   shut(cdpId) {
@@ -283,5 +301,112 @@ export default class EthereumCdpService extends PrivateService {
   bite(cdpId) {
     const hexCdpId = numberToBytes32(cdpId);
     return this._tubContract().bite(hexCdpId, { gasLimit: 4000000 });
+  }
+
+  freeEthProxy(dsProxyAddress, cdpId, amount) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, ETH).toEthersBigNumber('wei');
+
+    return this._saiProxyTubContract().free(
+      this._tubContract().address,
+      hexCdpId,
+      value,
+      {
+        dsProxyAddress,
+        metadata: {
+          action: {
+            name: 'free',
+            amount: getCurrency(amount, ETH),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
+  lockEthProxy(dsProxyAddress, cdpId, amount) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, ETH).toEthersBigNumber('wei');
+
+    return this._saiProxyTubContract().lock(
+      this._tubContract().address,
+      hexCdpId,
+      {
+        dsProxyAddress,
+        value,
+        metadata: {
+          action: {
+            name: 'lock',
+            amount: getCurrency(amount, ETH),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
+  drawDaiProxy(dsProxyAddress, cdpId, amount) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
+
+    return this._saiProxyTubContract().draw(
+      this._tubContract().address,
+      hexCdpId,
+      value,
+      {
+        dsProxyAddress,
+        metadata: {
+          action: {
+            name: 'draw',
+            amount: getCurrency(amount, DAI),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
+  async wipeDaiProxy(dsProxyAddress, cdpId, amount, useOtc = false) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
+
+    // Only require MKR allowance if paying fee using MKR (if using OTC, no need to approve MKR right now)
+    let approveCalls = [
+      this.get('allowance').requireAllowance(DAI, dsProxyAddress)
+    ];
+    if (!useOtc)
+      approveCalls.unshift(
+        this.get('allowance').requireAllowance(MKR, dsProxyAddress)
+      );
+    await Promise.all(approveCalls);
+
+    const options = {
+      dsProxyAddress,
+      gasLimit: 5000000,
+      metadata: {
+        action: {
+          name: 'wipe',
+          amount: getCurrency(amount, DAI),
+          otc: useOtc,
+          proxy: true
+        }
+      }
+    };
+
+    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy wipe() method
+    return useOtc
+      ? this._saiProxyTubContract()['wipe(address,bytes32,uint256,address)'](
+          this._tubContract().address,
+          hexCdpId,
+          value,
+          this._smartContract().getContractAddressByName(contracts.MAKER_OTC),
+          options
+        )
+      : this._saiProxyTubContract()['wipe(address,bytes32,uint256)'](
+          this._tubContract().address,
+          hexCdpId,
+          value,
+          options
+        );
   }
 }
