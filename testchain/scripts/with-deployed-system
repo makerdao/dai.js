@@ -58,7 +58,7 @@ if ! nc -z 127.0.0.1 2000; then
 
   # Set the ETH price feed to 400 USD
   seth send $SAI_PIP "poke(bytes32)" 0x000000000000000000000000000000000000000000000015af1d78b58c400000
-  # Set the MKR price feed
+  # Set the MKR price feed to 1040.49 USD
   seth send $SAI_PEP "poke(bytes32)" 0x00000000000000000000000000000000000000000000003867bb3260a7cf7200
   seth send $SAI_MOM "setCap(uint256)" $(seth --to-uint256 $(seth --to-wei 1000 eth))
   # Mint MKR, owned by default account
@@ -120,21 +120,16 @@ EOM
 
 else
   echo "You already have a test network running on port 2000."
-
 fi
 
-if [[ "$1" != '--ci' ]]; then
-    # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
-    # See the list at the bottom of the in the deploy script.
-    # Proceed to the command given as arguments (but first strip --ci as first param).
-    "$@"
+# We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
+# See the list at the bottom of the deploy script.
 
+if [[ "$1" != '--ci' ]]; then
     # The testnet will continue to run with its deployed contracts
     # until the user confirms it should shut down.
     bash $CWD/confirm-kill-testnet
 else
-    # We now have SAI_GEM, SAI_SAI, SAI_SKR, etc in the environment.
-    # See the list at the bottom of the in the deploy script.
     # Proceed to the command given as arguments (but first strip --ci as first param).
     $(echo "$@" | sed 's/^\-\-ci //')
 fi
