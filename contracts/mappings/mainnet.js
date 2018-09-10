@@ -107,6 +107,12 @@ const mapping = {
       abi: abiMap.proxies.dsProxyFactory
     }
   ],
+  [contracts.DS_PROXY]: [
+    {
+      version: 1,
+      abi: abiMap.dappHub.dsProxy
+    }
+  ],
   [contracts.PROXY_REGISTRY]: [
     {
       version: 1,
