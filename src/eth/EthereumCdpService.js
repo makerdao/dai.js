@@ -66,7 +66,11 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   openCdp() {
-    return new Cdp(this).transactionObject();
+    return new Cdp(this);
+  }
+
+  openProxyCdp(dsProxyAddress = null) {
+    return new ProxyCdp(this, dsProxyAddress);
   }
 
   getCdp(id, dsProxyAddress = null) {
@@ -316,6 +320,7 @@ export default class EthereumCdpService extends PrivateService {
         metadata: {
           action: {
             name: 'free',
+            id: cdpId,
             amount: getCurrency(amount, ETH),
             proxy: true
           }
@@ -337,6 +342,7 @@ export default class EthereumCdpService extends PrivateService {
         metadata: {
           action: {
             name: 'lock',
+            id: cdpId,
             amount: getCurrency(amount, ETH),
             proxy: true
           }
@@ -358,7 +364,29 @@ export default class EthereumCdpService extends PrivateService {
         metadata: {
           action: {
             name: 'draw',
+            id: cdpId,
             amount: getCurrency(amount, DAI),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
+  giveProxy(dsProxyAddress, cdpId, newAddress) {
+    const hexCdpId = numberToBytes32(cdpId);
+
+    return this._saiProxyTubContract().give(
+      this._tubContract().address,
+      hexCdpId,
+      newAddress,
+      {
+        dsProxyAddress,
+        metadata: {
+          action: {
+            name: 'give',
+            id: cdpId,
+            to: newAddress,
             proxy: true
           }
         }
@@ -382,10 +410,10 @@ export default class EthereumCdpService extends PrivateService {
 
     const options = {
       dsProxyAddress,
-      gasLimit: 5000000,
       metadata: {
         action: {
           name: 'wipe',
+          id: cdpId,
           amount: getCurrency(amount, DAI),
           otc: useOtc,
           proxy: true
@@ -409,4 +437,45 @@ export default class EthereumCdpService extends PrivateService {
           options
         );
   }
+
+  async shutProxy(dsProxyAddress, cdpId, useOtc = false) {
+    const hexCdpId = numberToBytes32(cdpId);
+
+    // Only require MKR allowance if paying fee using MKR (if using OTC, no need to approve MKR right now)
+    let approveCalls = [
+      this.get('allowance').requireAllowance(DAI, dsProxyAddress)
+    ];
+    if (!useOtc)
+      approveCalls.unshift(
+        this.get('allowance').requireAllowance(MKR, dsProxyAddress)
+      );
+    await Promise.all(approveCalls);
+
+    const options = {
+      dsProxyAddress,
+      metadata: {
+        action: {
+          name: 'close',
+          id: cdpId,
+          otc: useOtc,
+          proxy: true
+        }
+      }
+    };
+
+    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy shut() method
+    return useOtc
+      ? this._saiProxyTubContract()['shut(address,bytes32,address)'](
+          this._tubContract().address,
+          hexCdpId,
+          this._smartContract().getContractAddressByName(contracts.MAKER_OTC),
+          options
+        )
+      : this._saiProxyTubContract()['shut(address,bytes32)'](
+          this._tubContract().address,
+          hexCdpId,
+          options
+        );
+  }
+
 }

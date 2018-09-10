@@ -43,13 +43,12 @@ export default class TransactionManager extends PublicService {
 
     // DSProxy handling – different from the fact that this class is called Proxy ;)
     if (dsProxyAddress !== null) {
-      var dsProxyContract = new Contract(
-        dsProxyAddress,
-        dappHub.dsProxy,
-        this.get('web3').ethersSigner()
-      );
-      dsProxyContract = wrapContract(
-        dsProxyContract,
+      const dsProxyContract = wrapContract(
+        new Contract(
+          dsProxyAddress,
+          dappHub.dsProxy,
+          this.get('web3').ethersSigner()
+        ),
         'DSProxy',
         dappHub.dsProxy,
         this
