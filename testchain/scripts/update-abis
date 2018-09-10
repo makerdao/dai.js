@@ -16,6 +16,8 @@ done
 rm -f *Test*.json *Fab.json Dev*.json
 cd -
 
+cp $LIB/sai-proxy/out/addresses.json $CONTRACTS/abi/dsProxy
+
 # Copy DSProxy ABI into project
 mkdir -p $CONTRACTS/abi/dsProxy/
 cp $LIB/ds-proxy/out/DSProxy.abi $CONTRACTS/abi/dsProxy/v1.json

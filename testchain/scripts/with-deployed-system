@@ -168,12 +168,9 @@ EOM
   echo "Deploying sai-proxy (SaiProxyCreateAndExecute)..."
   SAI_PROXY=$(dapp create SaiProxyCreateAndExecute)
   echo "Deployed SaiProxyCreateAndExecute to $SAI_PROXY"
-  cd -
-
-  $CWD/update-abis
 
   # Save the proxy addresses to a JSON file
-  cat > $CWD/../../contracts/abi/dsProxy/addresses.json <<- EOM
+  cat > ./out/addresses.json <<- EOM
 {
   "DS_PROXY_FACTORY": "$DS_PROXY_FACTORY",
   "PROXY_REGISTRY": "$PROXY_REGISTRY",
@@ -181,6 +178,9 @@ EOM
   "SAI_PROXY": "$SAI_PROXY"
 }
 EOM
+
+  cd -
+  $CWD/update-abis
 
   END_TIME=`date +%s`
   ELAPSED=`echo $END_TIME - $START_TIME | bc`
