@@ -8,8 +8,9 @@ import {
   ETH,
   MKR
 } from '../../src/eth/Currency';
+import { dappHub } from '../../contracts/abi';
 
-let cdpService, cdp, dsProxyAddress, currentAccount, dai;
+let cdpService, smartContractService, cdp, dsProxyAddress, currentAccount, dai;
 
 beforeAll(async () => {
   cdpService = buildTestEthereumCdpService();
@@ -19,7 +20,36 @@ beforeAll(async () => {
     .get('web3')
     .currentAccount();
   dai = cdpService.get('token').getToken(DAI);
+  smartContractService = cdpService.get('smartContract');
+
+  // Clear owner of DSProxy created during testchain deployment
+  // (allowing us to create new DSProxy instances using the default address)
+  const dsProxyFromDeployment = '0xaff08328e5a586754702f570d70972c43ab82ef8';
+  const owner = await getDsProxyOwner(dsProxyFromDeployment);
+  if (owner !== '0x0000000000000000000000000000000000000000') {
+    await clearDsProxyOwner(dsProxyFromDeployment);
+  }
 });
+
+afterAll(async () => {
+  await clearDsProxyOwner(dsProxyAddress);
+});
+
+async function getDsProxyOwner(dsProxyAddress = null) {
+  const contract = smartContractService.getContractByAddressAndAbi(dsProxyAddress, dappHub.dsProxy, {
+    name: 'DS_PROXY',
+    hybrid: true
+  });
+  return await contract.owner();
+}
+
+async function clearDsProxyOwner(dsProxyAddress = null) {
+  const contract = smartContractService.getContractByAddressAndAbi(dsProxyAddress, dappHub.dsProxy, {
+    name: 'DS_PROXY',
+    hybrid: true
+  });
+  await contract.setOwner('0x0000000000000000000000000000000000000000');
+}
 
 async function openProxyCdp(dsProxyAddress = null) {
   cdp = await cdpService.openProxyCdp(dsProxyAddress);
@@ -30,7 +60,7 @@ describe('create DSProxy and open CDP', () => {
   let id;
 
   beforeAll(async () => {
-    const results = await openProxyCdp();
+    const results = await openProxyCdp(dsProxyAddress);
     id = await results.id;
     dsProxyAddress = await results.dsProxyAddress;
   });
@@ -82,7 +112,6 @@ describe('use existing DSProxy to open CDP', () => {
   });
 });
 
-
 describe('locking collateral', () => {
   let wethToken, pethToken;
 
@@ -119,7 +148,7 @@ test('transfer ownership', async () => {
 
 describe('bite', () => {
   beforeAll(async () => {
-    await openProxyCdp();
+    await openProxyCdp(dsProxyAddress);
     await cdp.lockEth(0.1);
     await cdp.drawDai(13);
   });
@@ -144,7 +173,7 @@ describe('bite', () => {
 
 describe('a cdp with collateral', () => {
   beforeAll(async () => {
-    await openProxyCdp();
+    await openProxyCdp(dsProxyAddress);
     await cdp.lockEth(0.2);
   });
 
