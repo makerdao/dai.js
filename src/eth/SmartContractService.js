@@ -54,7 +54,7 @@ export default class SmartContractService extends PublicService {
     const contracts = this._getAllContractInfo();
     for (let name of Object.keys(contracts)) {
       const versions = contracts[name];
-      if (versions.find(info => info.address.toUpperCase() === address)) {
+      if (versions.find(info => info.address && info.address.toUpperCase() === address)) {
         return name;
       }
     }
