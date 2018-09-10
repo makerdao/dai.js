@@ -48,7 +48,7 @@ describe('basic checks', () => {
   });
 
   test('shut', async () => {
-    await cdp.shut(id);
+    await cdp.shut();
     const info = await cdp.getInfo();
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
   });
