@@ -99,6 +99,20 @@ const mapping = {
       address: mainnetAddresses.SAI_PROXY,
       abi: abiMap.proxies.saiProxy
     }
+  ],
+  [contracts.DS_PROXY_FACTORY]: [
+    {
+      version: 1,
+      address: mainnetAddresses.DS_PROXY_FACTORY,
+      abi: abiMap.proxies.dsProxyFactory
+    }
+  ],
+  [contracts.PROXY_REGISTRY]: [
+    {
+      version: 1,
+      address: mainnetAddresses.PROXY_REGISTRY,
+      abi: abiMap.proxies.proxyRegistry
+    }
   ]
 };
 

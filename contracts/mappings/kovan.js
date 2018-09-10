@@ -93,6 +93,20 @@ const mapping = {
       address: kovanAddresses.SAI_PROXY,
       abi: abiMap.proxies.saiProxy
     }
+  ],
+  [contracts.DS_PROXY_FACTORY]: [
+    {
+      version: 1,
+      address: kovanAddresses.DS_PROXY_FACTORY,
+      abi: abiMap.proxies.dsProxyFactory
+    }
+  ],
+  [contracts.PROXY_REGISTRY]: [
+    {
+      version: 1,
+      address: kovanAddresses.PROXY_REGISTRY,
+      abi: abiMap.proxies.proxyRegistry
+    }
   ]
 };
 
