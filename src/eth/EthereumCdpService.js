@@ -274,7 +274,7 @@ export default class EthereumCdpService extends PrivateService {
   async getSystemCollateralization() {
     const dai = this.get('token').getToken(DAI);
     const [
-      _totalWethLocked,
+      totalWethLocked,
       wethPrice,
       daiSupply,
       targetPrice
@@ -285,7 +285,7 @@ export default class EthereumCdpService extends PrivateService {
       this.getTargetPrice()
     ]);
 
-    const totalCollateralValue = new BigNumber(_totalWethLocked)
+    const totalCollateralValue = new BigNumber(totalWethLocked)
       .div(WAD)
       .times(wethPrice.toBigNumber());
     const systemDaiDebt = daiSupply.times(targetPrice);
@@ -477,5 +477,4 @@ export default class EthereumCdpService extends PrivateService {
           options
         );
   }
-
 }

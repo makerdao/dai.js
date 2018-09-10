@@ -39,8 +39,14 @@ export default class Maker {
   // to be initialized yet, e.g. when setting up a plugin
   service(service, skipAuthCheck = false) {
     const skipAuthCheckForServices = ['event'];
-    if (skipAuthCheck === false && this._container.isAuthenticated === false && skipAuthCheckForServices.includes(service) === false) {
-      throw new Error(`Trying to use service ${service} before this.authenticate() has finished.`);
+    if (
+      !skipAuthCheck &&
+      !this._container.isAuthenticated &&
+      !skipAuthCheckForServices.includes(service)
+    ) {
+      throw new Error(
+        `Can't use service ${service} before authenticate() has finished.`
+      );
     }
     return this._container.service(service);
   }
