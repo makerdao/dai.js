@@ -3,7 +3,7 @@ import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
-import { wrapContract } from '../utils';
+import { wrapContract } from './smartContract/wrapContract';
 
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {

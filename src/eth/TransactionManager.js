@@ -3,7 +3,7 @@ import TransactionObject from './TransactionObject';
 import merge from 'lodash.merge';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abi';
-import { wrapContract } from '../utils';
+import { wrapContract } from './smartContract/wrapContract';
 
 let txId = 1;
 
