@@ -19,7 +19,11 @@ export default class TransactionManager extends PublicService {
     let metadata = null;
     let dsProxyAddress = null;
 
-    if (typeof args !== 'undefined' && Array.isArray(args) && typeof args[args.length - 1] === 'object') {
+    if (
+      typeof args !== 'undefined' &&
+      Array.isArray(args) &&
+      typeof args[args.length - 1] === 'object'
+    ) {
       // Detect additional metadata attatched to last arg and merge it with default metadata
       if (args[args.length - 1].hasOwnProperty('metadata')) {
         metadata = {};
@@ -43,22 +47,32 @@ export default class TransactionManager extends PublicService {
     const method = key.replace(/\(.*\)$/g, '');
 
     const metadata = { contract: name, method, args };
-    const { additionalMetadata, dsProxyAddress } = this.parseContractFunctionArgs(args);
+    const {
+      additionalMetadata,
+      dsProxyAddress
+    } = this.parseContractFunctionArgs(args);
 
     // Handle any additional metadata
     if (additionalMetadata !== null) {
-      this.get('log').debug('Attaching additional tx metadata:', additionalMetadata);
+      this.get('log').debug(
+        'Attaching additional tx metadata:',
+        additionalMetadata
+      );
       Object.assign(metadata, additionalMetadata);
     }
 
     // DSProxy handling – different from the fact that this is a Proxy class ;)
     if (dsProxyAddress !== null) {
-      this.get('log').debug('Calling ' + key + ' via DSProxy at ' + dsProxyAddress);
+      this.get('log').debug(
+        'Calling ' + key + ' via DSProxy at ' + dsProxyAddress
+      );
       const dsProxyContract = wrapContract(
         new Contract(
           dsProxyAddress,
           dappHub.dsProxy,
-          this.get('web3').ethersProvider().getSigner()
+          this.get('web3')
+            .ethersProvider()
+            .getSigner()
         ),
         'DSProxy',
         dappHub.dsProxy,
@@ -67,7 +81,10 @@ export default class TransactionManager extends PublicService {
       // Pass in any additional tx options passed to this tx (e.g. value, gasLimit)
       // if the last arg is an object literal (not a BigNumber object etc.)
       let options = {};
-      if (typeof args[args.length - 1] === 'object' && args[args.length - 1].constructor === Object) {
+      if (
+        typeof args[args.length - 1] === 'object' &&
+        args[args.length - 1].constructor === Object
+      ) {
         Object.assign(options, args[args.length - 1]);
         args.pop();
       }
