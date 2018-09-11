@@ -36,18 +36,26 @@ afterAll(async () => {
 });
 
 async function getDsProxyOwner(dsProxyAddress = null) {
-  const contract = smartContractService.getContractByAddressAndAbi(dsProxyAddress, dappHub.dsProxy, {
-    name: 'DS_PROXY',
-    hybrid: true
-  });
+  const contract = smartContractService.getContractByAddressAndAbi(
+    dsProxyAddress,
+    dappHub.dsProxy,
+    {
+      name: 'DS_PROXY',
+      hybrid: true
+    }
+  );
   return await contract.owner();
 }
 
 async function clearDsProxyOwner(dsProxyAddress = null) {
-  const contract = smartContractService.getContractByAddressAndAbi(dsProxyAddress, dappHub.dsProxy, {
-    name: 'DS_PROXY',
-    hybrid: true
-  });
+  const contract = smartContractService.getContractByAddressAndAbi(
+    dsProxyAddress,
+    dappHub.dsProxy,
+    {
+      name: 'DS_PROXY',
+      hybrid: true
+    }
+  );
   await contract.setOwner('0x0000000000000000000000000000000000000000');
 }
 

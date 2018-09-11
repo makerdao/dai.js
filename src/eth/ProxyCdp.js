@@ -6,14 +6,18 @@ export default class ProxyCdp {
   constructor(cdpService, dsProxyAddress = null, cdpId = null) {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
-    this._transactionManager = this._smartContractService.get('transactionManager');
+    this._transactionManager = this._smartContractService.get(
+      'transactionManager'
+    );
 
     if (dsProxyAddress === null && cdpId === null) {
       this._newProxyCdpPromise();
     } else if (dsProxyAddress !== null && cdpId === null) {
       this._newProxyCdpPromise(dsProxyAddress.toLowerCase());
     } else {
-      this._dsProxyAddressPromise = Promise.resolve(dsProxyAddress.toLowerCase());
+      this._dsProxyAddressPromise = Promise.resolve(
+        dsProxyAddress.toLowerCase()
+      );
       this._cdpIdPromise = Promise.resolve(cdpId);
     }
 
@@ -47,7 +51,12 @@ export default class ProxyCdp {
     });
   }
 
-  _captureCdpIdPromise(saiProxyAddress, captureDsProxyAddressPromise, existingDsProxyAddress, tubContract) {
+  _captureCdpIdPromise(
+    saiProxyAddress,
+    captureDsProxyAddressPromise,
+    existingDsProxyAddress,
+    tubContract
+  ) {
     return new Promise(resolve => {
       // If using an existing DSProxy, listen for the LogNewCup event
       if (existingDsProxyAddress) {
@@ -62,13 +71,16 @@ export default class ProxyCdp {
       // If a new DSProxy instance is being created at the same time as the cup,
       // listen for the give event (via DSNote) rather than the LogNewCup event
       else {
-        const provider = this._smartContractService.get('web3').ethersProvider();
+        const provider = this._smartContractService
+          .get('web3')
+          .ethersProvider();
         const topics = [
-          ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56),
-         '0x000000000000000000000000' + saiProxyAddress.substring(2),
-         // '0x000000000000000000000000' + proxy.substring(2)
+          ethersUtils.id('give(bytes32,address)').substring(0, 10) +
+            '0'.repeat(56),
+          '0x000000000000000000000000' + saiProxyAddress.substring(2)
+          // '0x000000000000000000000000' + proxy.substring(2)
         ];
-        provider.on(topics, (log) => {
+        provider.on(topics, log => {
           captureDsProxyAddressPromise.then(proxy => {
             const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
             if (proxy === proxyInLog) {
@@ -82,13 +94,26 @@ export default class ProxyCdp {
   }
 
   _newProxyCdpPromise(dsProxyAddress = null) {
-    const proxyRegistryAddress = this._smartContractService.getContractAddressByName(contracts.PROXY_REGISTRY);
-    const tubContract = this._smartContractService.getContractByName(contracts.SAI_TUB, { hybrid: false });
-    const dsProxyFactoryContract = this._smartContractService.getContractByName(contracts.DS_PROXY_FACTORY, { hybrid: false });
-    const saiProxyContract = this._smartContractService.getContractByName(contracts.SAI_PROXY, { hybrid: false });
+    const proxyRegistryAddress = this._smartContractService.getContractAddressByName(
+      contracts.PROXY_REGISTRY
+    );
+    const tubContract = this._smartContractService.getContractByName(
+      contracts.SAI_TUB,
+      { hybrid: false }
+    );
+    const dsProxyFactoryContract = this._smartContractService.getContractByName(
+      contracts.DS_PROXY_FACTORY,
+      { hybrid: false }
+    );
+    const saiProxyContract = this._smartContractService.getContractByName(
+      contracts.SAI_PROXY,
+      { hybrid: false }
+    );
 
     if (dsProxyAddress === null) {
-      this._dsProxyAddressPromise = this._captureDsProxyAddressPromise(dsProxyFactoryContract);
+      this._dsProxyAddressPromise = this._captureDsProxyAddressPromise(
+        dsProxyFactoryContract
+      );
       this._transactionObject = this._transactionManager.formatHybridTx(
         saiProxyContract,
         'createAndOpen',
@@ -106,7 +131,12 @@ export default class ProxyCdp {
         this
       );
     }
-    this._cdpIdPromise = this._captureCdpIdPromise(saiProxyContract.address, this._dsProxyAddressPromise, dsProxyAddress, tubContract);
+    this._cdpIdPromise = this._captureCdpIdPromise(
+      saiProxyContract.address,
+      this._dsProxyAddressPromise,
+      dsProxyAddress,
+      tubContract
+    );
   }
 
   transactionObject() {
@@ -151,15 +181,12 @@ Object.assign(
   passthroughMethods.reduce((acc, name) => {
     acc[name[0]] = async function(...args) {
       return name[1] === true
-      ? this._cdpService[name[0] + 'Proxy'](
-        await this.getDsProxyAddress(),
-        await this.getId(),
-        ...args
-      )
-      : this._cdpService[name[0]](
-        await this.getId(),
-        ...args
-      );
+        ? this._cdpService[name[0] + 'Proxy'](
+            await this.getDsProxyAddress(),
+            await this.getId(),
+            ...args
+          )
+        : this._cdpService[name[0]](await this.getId(), ...args);
     };
     return acc;
   }, {})
