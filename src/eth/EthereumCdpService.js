@@ -181,7 +181,7 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().drip();
   }
 
-  async getGovernanceFee(cdpId, unit = MKR) {
+  async getGovernanceFee(cdpId, unit = USD) {
     const hexCdpId = numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `rap`
@@ -189,13 +189,13 @@ export default class EthereumCdpService extends PrivateService {
     const rap = await new Promise((resolve, reject) =>
       tub.rap.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
     );
-    const mkrFee = MKR.wei(rap);
+    const usdFee = USD.wei(rap);
     switch (unit) {
-      case MKR:
-        return mkrFee;
-      case USD: {
+      case USD:
+        return usdFee;
+      case MKR: {
         const price = await this.get('price').getMkrPrice();
-        return mkrFee.times(price);
+        return usdFee.div(price);
       }
     }
   }

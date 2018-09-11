@@ -8,6 +8,7 @@ import {
   ETH,
   MKR
 } from '../../src/eth/Currency';
+import { promiseWait } from '../../src/utils';
 
 let cdpService, cdp, currentAccount, dai;
 
@@ -186,27 +187,16 @@ describe('a cdp with collateral', () => {
         return cdpService.get('price').setMkrPrice(0);
       });
 
-      test('read MKR fee in USD', async done => {
-        // block.timestamp is measured in seconds, so we need to wait at least a
-        // second for the fees to get updated
-        setTimeout(async () => {
-          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-          const fee = await cdp.getGovernanceFee();
-          expect(fee.gt(0)).toBeTruthy();
-          done();
-        }, 1500);
-      });
-
-      test('read MKR fee in MKR', async done => {
+      test('read MKR fee', async () => {
         await cdpService.get('price').setMkrPrice(600);
         // block.timestamp is measured in seconds, so we need to wait at least a
         // second for the fees to get updated
-        setTimeout(async () => {
-          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-          const fee = await cdp.getGovernanceFee();
-          expect(fee.gt(0)).toBeTruthy();
-          done();
-        }, 1500);
+        await promiseWait(1500);
+        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+        const usdFee = await cdp.getGovernanceFee();
+        expect(usdFee.gt(0)).toBeTruthy();
+        const mkrFee = await cdp.getGovernanceFee(MKR);
+        expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
       });
 
       test('wipe debt with non-zero stability fee', async () => {
