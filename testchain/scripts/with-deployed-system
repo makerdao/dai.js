@@ -128,6 +128,7 @@ fi
 if [[ "$1" != '--ci' ]]; then
     # The testnet will continue to run with its deployed contracts
     # until the user confirms it should shut down.
+    $@
     bash $CWD/confirm-kill-testnet
 else
     # Proceed to the command given as arguments (but first strip --ci as first param).
