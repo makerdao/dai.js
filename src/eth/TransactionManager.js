@@ -47,7 +47,7 @@ export default class TransactionManager extends PublicService {
         new Contract(
           dsProxyAddress,
           dappHub.dsProxy,
-          this.get('web3').ethersSigner()
+          this.get('web3').ethersProvider().getSigner()
         ),
         'DSProxy',
         dappHub.dsProxy,
