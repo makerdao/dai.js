@@ -30,11 +30,12 @@ function sed_inplace {
   sed -i.bak "$1" $2 && rm $2.bak
 }
 
-if [ -n "$SKIP_BUILD_IF_ALREADY_BUILT" ]; then echo "Skipping build of dapps that are already built."; fi
+
 
 # Check if a testnet is already running on port 2000
 if ! nc -z 127.0.0.1 2000; then
 
+  if [ -n "$SKIP_BUILD_IF_ALREADY_BUILT" ]; then echo "Skipping build of dapps that are already built."; fi
   if [ -n "$SKIP_SUBMODULE_UPDATE" ]; then
     echo "Skipping git submodule update."
   else
@@ -196,6 +197,7 @@ fi
 if [[ "$1" != '--ci' ]]; then
   # The testnet will continue to run with its deployed contracts
   # until the user confirms it should shut down.
+  $@
   bash $CWD/confirm-kill-testnet
 else
   # Proceed to the command given as arguments (but first strip --ci as first param).
