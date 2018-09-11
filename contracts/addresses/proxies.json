@@ -1,8 +1,4 @@
 {
-    "testnet": {
-        "SAI_PROXY": "0xc72b03c37735cf122c27dc352e5f25f75beea389",
-        "PROXY_REGISTRY": "0x9706786bf567796647d9428076fbc219830116ae"
-    },
     "kovan": {
         "SAI_PROXY": "0xbe20df25d09b76275a3043c87b31aa1bd47f1f6a",
         "PROXY_REGISTRY": ""

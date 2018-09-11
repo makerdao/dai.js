@@ -11,8 +11,7 @@ import testnetAddressesProxies from '../abi/dsProxy/addresses.json';
 const testnet = {
   ...testnetAddressesDaiV1,
   ...testnetAddressesProxies,
-  ...exchanges.testnet,
-  ...proxies.testnet
+  ...exchanges.testnet
 };
 
 const kovan = {
