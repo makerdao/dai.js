@@ -14,35 +14,46 @@ export default class TransactionManager extends PublicService {
     this._listeners = [];
   }
 
-  formatHybridTx(contract, key, args, name, businessObject = null) {
-
-    // Strip the key to just the method name (in cases where the method was called
-    // using the full method sig e.g. contract["draw(address,uint256)"](foo, bar)
-    const method = key.replace(/\(.*\)$/g, '');
-    const metadata = { contract: name, method, args };
+  // Parse contract function call args for additional metadata and dsProxyAddress
+  parseContractFunctionArgs(args) {
+    let metadata = null;
     let dsProxyAddress = null;
 
     if (typeof args !== 'undefined' && Array.isArray(args) && typeof args[args.length - 1] === 'object') {
-
       // Detect additional metadata attatched to last arg and merge it with default metadata
       if (args[args.length - 1].hasOwnProperty('metadata')) {
+        metadata = {};
         Object.assign(metadata, args[args.length - 1].metadata);
         delete args[args.length - 1].metadata;
       }
-
       // Detect proxy address and route through DSProxy contract
       if (args[args.length - 1].hasOwnProperty('dsProxyAddress')) {
         dsProxyAddress = args[args.length - 1].dsProxyAddress;
         delete args[args.length - 1].dsProxyAddress;
-        this.get('log').debug('Using DSProxy ' + dsProxyAddress + ' for this tx');
       }
-
       // If last arg item is an empty object, remove it
       if (Object.keys(args[args.length - 1]).length === 0) args.pop();
     }
+    return { additionalMetadata: metadata, dsProxyAddress };
+  }
 
-    // DSProxy handling – different from the fact that this class is called Proxy ;)
+  formatHybridTx(contract, key, args, name, businessObject = null) {
+    // Strip the key to just the method name, in cases where the method was called
+    // using the full method sig e.g. contract["draw(address,uint256)"](foo, bar)
+    const method = key.replace(/\(.*\)$/g, '');
+
+    const metadata = { contract: name, method, args };
+    const { additionalMetadata, dsProxyAddress } = this.parseContractFunctionArgs(args);
+
+    // Handle any additional metadata
+    if (additionalMetadata !== null) {
+      this.get('log').debug('Attaching additional tx metadata:', additionalMetadata);
+      Object.assign(metadata, additionalMetadata);
+    }
+
+    // DSProxy handling – different from the fact that this is a Proxy class ;)
     if (dsProxyAddress !== null) {
+      this.get('log').debug('Calling ' + key + ' via DSProxy at ' + dsProxyAddress);
       const dsProxyContract = wrapContract(
         new Contract(
           dsProxyAddress,
@@ -53,7 +64,6 @@ export default class TransactionManager extends PublicService {
         dappHub.dsProxy,
         this
       );
-
       // Pass in any additional tx options passed to this tx (e.g. value, gasLimit)
       // if the last arg is an object literal (not a BigNumber object etc.)
       let options = {};
@@ -63,9 +73,6 @@ export default class TransactionManager extends PublicService {
       }
       // Assign proxied tx metadata and options to proxy tx
       Object.assign(options, { metadata });
-
-      this.get('log').debug('Calling ' + key + ' via DSProxy at ' + dsProxyAddress);
-
       // Get proxied tx calldata to pass to DSProxy
       const data = contract.interface.functions[key](...args).data;
       return dsProxyContract.execute(contract.address, data, options);
@@ -74,7 +81,6 @@ export default class TransactionManager extends PublicService {
     const contractCall = this.injectSettings(args).then(newArgs =>
       contract[key](...newArgs)
     );
-
     return this.createHybridTx(contractCall, {
       businessObject: businessObject,
       metadata
