@@ -1,7 +1,9 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
-import ObjectWrapper from '../utils/ObjectWrapper';
 import merge from 'lodash.merge';
+import { Contract } from 'ethers';
+import { dappHub } from '../../contracts/abi';
+import { wrapContract } from './smartContract/wrapContract';
 
 let txId = 1;
 
@@ -12,13 +14,93 @@ export default class TransactionManager extends PublicService {
     this._listeners = [];
   }
 
+  // Parse contract function call args for additional metadata and dsProxyAddress
+  parseContractFunctionArgs(args) {
+    let metadata = null;
+    let dsProxyAddress = null;
+
+    if (
+      typeof args !== 'undefined' &&
+      Array.isArray(args) &&
+      typeof args[args.length - 1] === 'object'
+    ) {
+      // Detect additional metadata attatched to last arg and merge it with default metadata
+      if (args[args.length - 1].hasOwnProperty('metadata')) {
+        metadata = {};
+        Object.assign(metadata, args[args.length - 1].metadata);
+        delete args[args.length - 1].metadata;
+      }
+      // Detect proxy address and route through DSProxy contract
+      if (args[args.length - 1].hasOwnProperty('dsProxyAddress')) {
+        dsProxyAddress = args[args.length - 1].dsProxyAddress;
+        delete args[args.length - 1].dsProxyAddress;
+      }
+      // If last arg item is an empty object, remove it
+      if (Object.keys(args[args.length - 1]).length === 0) args.pop();
+    }
+    return { additionalMetadata: metadata, dsProxyAddress };
+  }
+
   formatHybridTx(contract, key, args, name, businessObject = null) {
+    // Strip the key to just the method name, in cases where the method was called
+    // using the full method sig e.g. contract["draw(address,uint256)"](foo, bar)
+    const method = key.replace(/\(.*\)$/g, '');
+
+    const metadata = { contract: name, method, args };
+    const {
+      additionalMetadata,
+      dsProxyAddress
+    } = this.parseContractFunctionArgs(args);
+
+    // Handle any additional metadata
+    if (additionalMetadata !== null) {
+      this.get('log').debug(
+        'Attaching additional tx metadata:',
+        additionalMetadata
+      );
+      Object.assign(metadata, additionalMetadata);
+    }
+
+    // DSProxy handling – different from the fact that this is a Proxy class ;)
+    if (dsProxyAddress !== null) {
+      this.get('log').debug(
+        'Calling ' + key + ' via DSProxy at ' + dsProxyAddress
+      );
+      const dsProxyContract = wrapContract(
+        new Contract(
+          dsProxyAddress,
+          dappHub.dsProxy,
+          this.get('web3')
+            .ethersProvider()
+            .getSigner()
+        ),
+        'DSProxy',
+        dappHub.dsProxy,
+        this
+      );
+      // Pass in any additional tx options passed to this tx (e.g. value, gasLimit)
+      // if the last arg is an object literal (not a BigNumber object etc.)
+      let options = {};
+      if (
+        typeof args[args.length - 1] === 'object' &&
+        args[args.length - 1].constructor === Object
+      ) {
+        Object.assign(options, args[args.length - 1]);
+        args.pop();
+      }
+      // Assign proxied tx metadata and options to proxy tx
+      Object.assign(options, { metadata });
+      // Get proxied tx calldata to pass to DSProxy
+      const data = contract.interface.functions[key](...args).data;
+      return dsProxyContract.execute(contract.address, data, options);
+    }
+
     const contractCall = this.injectSettings(args).then(newArgs =>
       contract[key](...newArgs)
     );
     return this.createHybridTx(contractCall, {
       businessObject: businessObject,
-      metadata: { contract: name, method: key, args }
+      metadata
     });
   }
 
@@ -50,9 +132,9 @@ export default class TransactionManager extends PublicService {
     return settings;
   }
 
-  // FIXME: having a method that returns one thing when it's called in a promise
-  // chain and something else when it's not (besides a promise that resolves to
-  // the first thing) makes it pretty difficult to work with.
+  // FIXME: a method that returns one thing when it's called in a promise chain
+  // and something else when it's not (besides a promise that resolves to the
+  // first thing) is pretty difficult to work with.
   createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
     if (tx._original) {
       console.warn('Redundant call to createHybridTx');
@@ -68,24 +150,31 @@ export default class TransactionManager extends PublicService {
     );
 
     const hybrid = txo.mine().then(() => txo.onMined());
-    Object.assign(hybrid, {
-      _original: txo,
-      getOriginalTransaction: () => txo,
-      _txId: txId++,
-      metadata // put whatever you want in here for inspecting/debugging
-    });
-
-    if (businessObject) {
-      ObjectWrapper.addWrapperInterface(hybrid, businessObject);
-    }
-
-    ObjectWrapper.addWrapperInterface(hybrid, txo, [
-      'logs',
-      'hash',
-      'fees',
-      'timeStamp',
-      'timeStampSubmitted'
-    ]);
+    Object.assign(
+      hybrid,
+      {
+        _original: txo,
+        getOriginalTransaction: () => txo,
+        _txId: txId++,
+        metadata // put whatever you want in here for inspecting/debugging
+      },
+      [
+        'mine',
+        'confirm',
+        'state',
+        'isPending',
+        'isMined',
+        'isFinalized',
+        'isError',
+        'onPending',
+        'onMined',
+        'onFinalized',
+        'onError'
+      ].reduce((acc, method) => {
+        acc[method] = (...args) => txo[method](...args);
+        return acc;
+      }, {})
+    );
 
     this._transactions.push(hybrid);
     this._listeners.forEach(cb => cb(hybrid));

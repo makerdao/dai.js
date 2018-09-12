@@ -3,43 +3,7 @@ import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
-
-function wrapContract(contract, name, abi, txManager) {
-  const nonConstantFns = {};
-
-  for (let { type, constant, name } of abi) {
-    if (type === 'function' && !constant) nonConstantFns[name] = true;
-  }
-
-  // The functions in ethers.Contract are set up as read-only, non-configurable
-  // properties, which means if we try to change their values with Proxy, we
-  // get an error. See https://stackoverflow.com/a/48495509/56817 for more
-  // detail.
-  //
-  // But that only happens if the contract is specified as the first argument
-  // to Proxy. So we don't do that. Go on, wag your finger.
-  const proxy = new Proxy(
-    {},
-    {
-      get(target, key) {
-        if (nonConstantFns[key] && txManager) {
-          return (...args) => {
-            return txManager.formatHybridTx(contract, key, args, name);
-          };
-        }
-
-        return contract[key];
-      },
-
-      set(target, key, value) {
-        contract[key] = value;
-        return true;
-      }
-    }
-  );
-
-  return proxy;
-}
+import { wrapContract } from './smartContract/wrapContract';
 
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
@@ -72,6 +36,11 @@ export default class SmartContractService extends PublicService {
     return wrapContract(contract, name, abi, txManager);
   }
 
+  getContractAddressByName(name, { version } = {}) {
+    const { address } = this._getContractInfo(name, version);
+    return address;
+  }
+
   getContractByName(name, { version, hybrid = true } = {}) {
     const info = this._getContractInfo(name, version);
     return this.getContractByAddressAndAbi(info.address, info.abi, {
@@ -85,7 +54,7 @@ export default class SmartContractService extends PublicService {
     const contracts = this._getAllContractInfo();
     for (let name of Object.keys(contracts)) {
       const versions = contracts[name];
-      if (versions.find(info => info.address.toUpperCase() === address)) {
+      if (versions.find(info => info.address && info.address.toUpperCase() === address)) {
         return name;
       }
     }

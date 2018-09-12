@@ -36,6 +36,7 @@ export function orderServices(services) {
 class Container {
   constructor() {
     this._services = {};
+    this.isAuthenticated = false;
   }
 
   register(service, name = null) {

@@ -30,27 +30,19 @@ test('should be able to get mkr price', done => {
     .authenticate()
     .then(() => {
       service.getMkrPrice().then(price => {
-        expect(price).toEqual(USD_MKR(0));
+        expect(price.gt(USD_MKR(0))).toBeTruthy();
         done();
       });
     });
 });
 
-test('should be able to set mkr price', done => {
+test('should be able to set mkr price', async () => {
   const service = buildTestPriceService();
 
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      service
-        .setMkrPrice('100')
-        .then(() => service.getMkrPrice())
-        .then(price => {
-          expect(price).toEqual(USD_MKR(100));
-          service.setMkrPrice('0.0').then(() => done());
-        });
-    });
+  await service.manager().authenticate();
+  await service.setMkrPrice('777');
+  const price = await service.getMkrPrice();
+  expect(price).toEqual(USD_MKR(777));
 });
 
 test('should return the peth price', done => {

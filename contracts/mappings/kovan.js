@@ -84,6 +84,35 @@ const mapping = {
       address: kovanAddresses.ZERO_EX_EXCHANGE,
       abi: abiMap.exchangesV1.zeroExExchange
     }
+  ],
+
+  // Proxies
+  [contracts.SAI_PROXY]: [
+    {
+      version: 1,
+      address: kovanAddresses.SAI_PROXY,
+      abi: abiMap.proxies.saiProxy
+    }
+  ],
+  [contracts.DS_PROXY_FACTORY]: [
+    {
+      version: 1,
+      address: kovanAddresses.DS_PROXY_FACTORY,
+      abi: abiMap.proxies.dsProxyFactory
+    }
+  ],
+  [contracts.DS_PROXY]: [
+    {
+      version: 1,
+      abi: abiMap.dappHub.dsProxy
+    }
+  ],
+  [contracts.PROXY_REGISTRY]: [
+    {
+      version: 1,
+      address: kovanAddresses.PROXY_REGISTRY,
+      abi: abiMap.proxies.proxyRegistry
+    }
   ]
 };
 

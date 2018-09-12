@@ -37,9 +37,16 @@ export default class Maker {
 
   // skipAuthCheck should only be set if you're sure you don't need the service
   // to be initialized yet, e.g. when setting up a plugin
-  service(service, skipAuthCheck) {
-    if (!skipAuthCheck && !this._container.isAuthenticated) {
-      throw new Error('this.authenticate() did not finish yet.');
+  service(service, skipAuthCheck = false) {
+    const skipAuthCheckForServices = ['event'];
+    if (
+      !skipAuthCheck &&
+      !this._container.isAuthenticated &&
+      !skipAuthCheckForServices.includes(service)
+    ) {
+      throw new Error(
+        `Can't use service ${service} before authenticate() has finished.`
+      );
     }
     return this._container.service(service);
   }
