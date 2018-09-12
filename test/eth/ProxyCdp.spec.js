@@ -8,9 +8,10 @@ import {
   ETH,
   MKR
 } from '../../src/eth/Currency';
-import { promiseWait } from '../../src/utils';
+import { dappHub } from '../../contracts/abi';
+import testnetAddressesProxies from '../../contracts/abi/dsProxy/addresses.json';
 
-let cdpService, cdp, currentAccount, dai;
+let cdpService, smartContractService, cdp, dsProxyAddress, currentAccount, dai;
 
 beforeAll(async () => {
   cdpService = buildTestEthereumCdpService();
@@ -20,22 +21,60 @@ beforeAll(async () => {
     .get('web3')
     .currentAccount();
   dai = cdpService.get('token').getToken(DAI);
+  smartContractService = cdpService.get('smartContract');
+
+  // Clear owner of DSProxy created during testchain deployment
+  // (allowing us to create new DSProxy instances using the default address)
+  const owner = await getDsProxyOwner(testnetAddressesProxies.DS_PROXY);
+  if (owner !== '0x0000000000000000000000000000000000000000') {
+    await clearDsProxyOwner(testnetAddressesProxies.DS_PROXY);
+  }
 });
 
-async function openCdp() {
-  cdp = await cdpService.openCdp();
-  return cdp.getId();
+afterAll(async () => {
+  await clearDsProxyOwner(dsProxyAddress);
+});
+
+async function getDsProxyOwner(dsProxyAddress = null) {
+  const contract = smartContractService.getContractByAddressAndAbi(
+    dsProxyAddress,
+    dappHub.dsProxy,
+    {
+      name: 'DS_PROXY',
+      hybrid: true
+    }
+  );
+  return await contract.owner();
 }
 
-describe('basic checks', () => {
+async function clearDsProxyOwner(dsProxyAddress = null) {
+  const contract = smartContractService.getContractByAddressAndAbi(
+    dsProxyAddress,
+    dappHub.dsProxy,
+    {
+      name: 'DS_PROXY',
+      hybrid: true
+    }
+  );
+  await contract.setOwner('0x0000000000000000000000000000000000000000');
+}
+
+async function openProxyCdp(dsProxyAddress = null) {
+  cdp = await cdpService.openProxyCdp(dsProxyAddress);
+  return { id: cdp.getId(), dsProxyAddress: cdp.getDsProxyAddress() };
+}
+
+describe('create DSProxy and open CDP', () => {
   let id;
 
   beforeAll(async () => {
-    id = await openCdp();
+    const results = await openProxyCdp(dsProxyAddress);
+    id = await results.id;
+    dsProxyAddress = await results.dsProxyAddress;
   });
 
   test('check properties', () => {
-    expect(typeof id).toBe('number');
+    expect(dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
     expect(id).toBeGreaterThan(0);
     expect(cdp._cdpService).toBeDefined();
     expect(cdp._smartContractService).toBeDefined();
@@ -50,12 +89,38 @@ describe('basic checks', () => {
 
   test('shut', async () => {
     await cdp.shut();
+    const info = await cdpService.getInfo(id);
+    expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+  });
+});
+
+describe('use existing DSProxy to open CDP', () => {
+  let id;
+
+  beforeAll(async () => {
+    const results = await openProxyCdp(dsProxyAddress);
+    id = await results.id;
+  });
+
+  test('check properties', () => {
+    expect(id).toBeGreaterThan(0);
+  });
+
+  test('lookup by ID', async () => {
+    expect.assertions(2);
+    const info = await cdpService.getInfo(id);
+    expect(info).toBeTruthy();
+    expect(info.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test('shut', async () => {
+    await cdp.shut(id);
     const info = await cdp.getInfo();
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
   });
 });
 
-describe('weth and peth', () => {
+describe('locking collateral', () => {
   let wethToken, pethToken;
 
   beforeAll(() => {
@@ -69,42 +134,19 @@ describe('weth and peth', () => {
     await pethToken.approve(cdpService._tubContract().address, '0');
   });
 
-  test('lock weth in a cdp', async () => {
-    await openCdp();
-    await wethToken.deposit('0.1');
-    const balancePre = await wethToken.balanceOf(currentAccount);
+  test('lock eth in a cdp', async () => {
+    await openProxyCdp(dsProxyAddress);
     const cdpInfoPre = await cdp.getInfo();
-    await cdp.lockWeth(0.1);
+    await cdp.lockEth(0.1);
     const cdpInfoPost = await cdp.getInfo();
-    const balancePost = await wethToken.balanceOf(currentAccount);
-
     expect(cdpInfoPre.ink.toString()).toEqual('0');
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-    expect(balancePre.minus(0.1)).toEqual(balancePost);
-  });
-
-  test('lock peth in a cdp', async () => {
-    await openCdp();
-
-    await wethToken.deposit('0.1');
-    await wethToken.approve(cdpService._tubContract().address, '0.1');
-    await pethToken.join('0.1');
-
-    const balancePre = await pethToken.balanceOf(currentAccount);
-    const cdpInfoPre = await cdp.getInfo();
-    await cdp.lockPeth(0.1);
-    const cdpInfoPost = await cdp.getInfo();
-    const balancePost = await pethToken.balanceOf(currentAccount);
-
-    expect(cdpInfoPre.ink.toString()).toEqual('0');
-    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
-    expect(balancePre.minus(0.1)).toEqual(balancePost);
   });
 });
 
 test('transfer ownership', async () => {
   const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
-  await openCdp();
+  await openProxyCdp(dsProxyAddress);
   const info = await cdp.getInfo();
   await cdp.give(newAddress);
   const info2 = await cdp.getInfo();
@@ -114,7 +156,7 @@ test('transfer ownership', async () => {
 
 describe('bite', () => {
   beforeAll(async () => {
-    await openCdp();
+    await openProxyCdp(dsProxyAddress);
     await cdp.lockEth(0.1);
     await cdp.drawDai(13);
   });
@@ -139,7 +181,7 @@ describe('bite', () => {
 
 describe('a cdp with collateral', () => {
   beforeAll(async () => {
-    await openCdp();
+    await openProxyCdp(dsProxyAddress);
     await cdp.lockEth(0.2);
   });
 
@@ -187,16 +229,27 @@ describe('a cdp with collateral', () => {
         return cdpService.get('price').setMkrPrice(0);
       });
 
-      test('read MKR fee', async () => {
+      test('read MKR fee in USD', async done => {
+        // block.timestamp is measured in seconds, so we need to wait at least a
+        // second for the fees to get updated
+        setTimeout(async () => {
+          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+          const fee = await cdp.getGovernanceFee();
+          expect(fee.gt(0)).toBeTruthy();
+          done();
+        }, 1500);
+      });
+
+      test('read MKR fee in MKR', async done => {
         await cdpService.get('price').setMkrPrice(600);
         // block.timestamp is measured in seconds, so we need to wait at least a
         // second for the fees to get updated
-        await promiseWait(1500);
-        await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-        const usdFee = await cdp.getGovernanceFee();
-        expect(usdFee.gt(0)).toBeTruthy();
-        const mkrFee = await cdp.getGovernanceFee(MKR);
-        expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
+        setTimeout(async () => {
+          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+          const fee = await cdp.getGovernanceFee();
+          expect(fee.gt(0)).toBeTruthy();
+          done();
+        }, 1500);
       });
 
       test('wipe debt with non-zero stability fee', async () => {
@@ -240,7 +293,7 @@ describe('a cdp with collateral', () => {
     });
 
     test('free', async () => {
-      await cdp.freePeth(0.1);
+      await cdp.freeEth(0.1);
       const info = await cdp.getInfo();
       expect(info.ink.toString()).toEqual('100000000000000000');
     });

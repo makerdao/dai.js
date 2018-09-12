@@ -145,3 +145,43 @@ test('should get tx settings from Web3Service and add nonce', async () => {
   );
   expect(Object.keys(settings).includes('nonce')).toBe(true);
 });
+
+test('should parse additional function args', async () => {
+  const services = await buildTestServices();
+  const dsProxyTestAddress = '0x1234567890123456789012345678901234567890';
+  const args = ['0x0000000000000000000000000000000000000000', 1, 2, 3, {
+    dsProxyAddress: dsProxyTestAddress,
+    metadata: {
+      action: {
+        foo: 'bar'
+      }
+    }
+  }];
+  const { additionalMetadata, dsProxyAddress } = services.txMgr.parseContractFunctionArgs(args);
+
+  expect(dsProxyAddress).toEqual(dsProxyTestAddress);
+  expect(Object.keys(additionalMetadata).includes('action')).toBe(true);
+  expect(args.length).toBe(4);
+});
+
+test('should parse additional function args without affecting last object arg', async () => {
+  const services = await buildTestServices();
+  const dsProxyTestAddress = '0x1234567890123456789012345678901234567890';
+  const args = ['0x0000000000000000000000000000000000000000', 1, 2, 3, {
+    dsProxyAddress: dsProxyTestAddress,
+    metadata: {
+      action: {
+        foo: 'bar'
+      }
+    },
+    value: 1,
+    gasLimit: 500000
+  }];
+  const { additionalMetadata, dsProxyAddress } = services.txMgr.parseContractFunctionArgs(args);
+
+  expect(dsProxyAddress).toEqual(dsProxyTestAddress);
+  expect(Object.keys(additionalMetadata).includes('action')).toBe(true);
+  expect(args.length).toBe(5);
+  expect(Object.keys(args[args.length - 1]).includes('value')).toBe(true);
+  expect(Object.keys(args[args.length - 1]).includes('gasLimit')).toBe(true);
+});

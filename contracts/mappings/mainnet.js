@@ -90,6 +90,35 @@ const mapping = {
       address: mainnetAddresses.ZERO_EX_EXCHANGE,
       abi: abiMap.exchangesV1.zeroExExchange
     }
+  ],
+
+  // Proxies
+  [contracts.SAI_PROXY]: [
+    {
+      version: 1,
+      address: mainnetAddresses.SAI_PROXY,
+      abi: abiMap.proxies.saiProxy
+    }
+  ],
+  [contracts.DS_PROXY_FACTORY]: [
+    {
+      version: 1,
+      address: mainnetAddresses.DS_PROXY_FACTORY,
+      abi: abiMap.proxies.dsProxyFactory
+    }
+  ],
+  [contracts.DS_PROXY]: [
+    {
+      version: 1,
+      abi: abiMap.dappHub.dsProxy
+    }
+  ],
+  [contracts.PROXY_REGISTRY]: [
+    {
+      version: 1,
+      address: mainnetAddresses.PROXY_REGISTRY,
+      abi: abiMap.proxies.proxyRegistry
+    }
   ]
 };
 

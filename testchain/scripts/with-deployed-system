@@ -10,25 +10,43 @@
 ##
 ## When the script exits, the Geth testnet is stopped and deleted.
 
-# stop the script if anything fails
+# Stop the script if anything fails
 set -e
 
 START_TIME=`date +%s`
 CWD=`dirname $0`
 LIB=$CWD/../lib
 
+# If 'fast' is passed as last arg, set the SKIP_BUILD_IF_ALREADY_BUILT and
+# SKIP_SUBMODULE_UPDATE env variables for many speed, much fast, very impress
+if [[ "${@:$#}" == 'fast' ]]; then
+  export SKIP_BUILD_IF_ALREADY_BUILT=1
+  export SKIP_SUBMODULE_UPDATE=1
+  set -- "${@:1:$(($#-1))}" # Pop last arg
+fi
+
 function sed_inplace {
   # sed's -i argument behaves differently on macOS, hence this hack
   sed -i.bak "$1" $2 && rm $2.bak
 }
 
-# Check if a testnet is already running on port 2000.
+
+
+# Check if a testnet is already running on port 2000
 if ! nc -z 127.0.0.1 2000; then
 
-  git submodule update --init --recursive
+  if [ -n "$SKIP_BUILD_IF_ALREADY_BUILT" ]; then echo "Skipping build of dapps that are already built."; fi
+  if [ -n "$SKIP_SUBMODULE_UPDATE" ]; then
+    echo "Skipping git submodule update."
+  else
+    git submodule update --init --recursive
+  fi
 
-  # Fix Sai deploy script
+  # Fix sai deploy script
   sed_inplace '13s/DSToken.*/WETH9)/' $LIB/sai/bin/deploy
+  # Change sai deploy scripts (deploy and deploy-fab) to skip dapp build if SKIP_BUILD_IF_ALREADY_BUILT is set and dapp is already built
+  sed_inplace 's/^dapp build$/if [[ -z "$SKIP_BUILD_IF_ALREADY_BUILT" || ( -n "$SKIP_BUILD_IF_ALREADY_BUILT" \&\& ! -f out\/SaiTop.abi ) ]]; then dapp build; fi/' $LIB/sai/bin/deploy-fab
+  sed_inplace 's/^dapp build$/if [[ -z "$SKIP_BUILD_IF_ALREADY_BUILT" || ( -n "$SKIP_BUILD_IF_ALREADY_BUILT" \&\& ! -f out\/SaiTop.abi ) ]]; then dapp build; fi/' $LIB/sai/bin/deploy
 
   # Speed up ethers.js polling
   $CWD/set-polling-interval
@@ -40,9 +58,9 @@ if ! nc -z 127.0.0.1 2000; then
   # Wait until it's up, then use it for the deployment.
   echo "Waiting for ganache-cli to start up..."
   export ETH_RPC_URL=http://127.1:2000
-  until curl -s -o/dev/null "$ETH_RPC_URL"; do sleep 3; done
+  until curl -s -o/dev/null "$ETH_RPC_URL"; do sleep 1; done
 
-  # Use the Sai system's deploy scripts to start it.
+  # Use the sai system's deploy scripts to start it.
   cd $LIB/sai
 
   # Configure seth
@@ -51,8 +69,12 @@ if ! nc -z 127.0.0.1 2000; then
   export SETH_STATUS=yes
   export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
 
-  # Build & deploy the SAI contracts
-  echo "Building and deploying contracts..."
+  # Build and/or deploy the sai contracts
+  if [[ -z "$SKIP_BUILD_IF_ALREADY_BUILT" || ( -n "$SKIP_BUILD_IF_ALREADY_BUILT" && ! -f out/SaiTop.abi ) ]]; then
+    echo "Building and deploying sai contracts..."
+  else
+    echo "Deploying sai contracts..."
+  fi
   bin/deploy-fab 2> /dev/null && . load-fab-unknown
   bin/deploy 2> /dev/null     && . load-env-unknown
 
@@ -86,9 +108,6 @@ if ! nc -z 127.0.0.1 2000; then
 EOM
 
   cd -
-  $CWD/update-abis
-
-  cd $LIB/maker-otc
 
   export SOLC_FLAGS=${SOLC_FLAGS:-"--optimize"}
   export ETH_GAS=${ETH_GAS:-"4000000"}
@@ -96,23 +115,73 @@ EOM
   export SETH_STATUS=yes
   export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
 
-  if [ -z "$SKIP_DAPP_BUILD" ]; then
-    dapp build 2> /dev/null
+  cd $LIB/maker-otc
+  if [ -n "$SKIP_BUILD_IF_ALREADY_BUILT" ] && [ -f out/MatchingMarket.abi ]; then
+    echo "Skipping dapp build for maker-otc (already built)"
   else
-    echo "Not running dapp build."
+    echo "Building maker-otc..."
+    dapp build 2> /dev/null
   fi
-  OTC=$(dapp create MatchingMarket 1577836800) ##this is some random date in 2020
+  echo "Deploying maker-otc (MatchingMarket)..."
+  OTC=$(dapp create MatchingMarket 1577836800) # This is some random date in 2020
   addr1="0xc226f3cd13d508bc319f4f4290172748199d6612"
   addr2="0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238"
-  seth send $OTC "addTokenPairWhitelist(address, address)" $addr1 $addr2
-
-  ##seth send $addr2 "deposit()" --value $(seth --to-wei 1 eth) ##wrap some eth to weth
-  ##make sure I have WETH
-  ##seth send $addr2 "approve(address, uint256)" $OTC ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ##approve weth to oasis
-  ##seth send $OTC "offer(uint256, address, uint256, address, uint256, bool)" $(seth --to-uint256 $(seth --to-wei 0.5 eth)) $addr2 $(seth --to-uint256 $(seth --to-wei 1 eth)) $addr1 0 1 ## create an offer to buy Dai for Weth <- this isn't working
+  seth send $OTC "addTokenPairWhitelist(address,address)" $addr1 $addr2
   export OTC=$OTC
+  cd -
+
+  cd $LIB/ds-proxy
+  if [ -n "$SKIP_BUILD_IF_ALREADY_BUILT" ] && [ -f out/DSProxy.abi ]; then
+    echo "Skipping dapp build for ds-proxy (already built)"
+  else
+    echo "Building ds-proxy..."
+    dapp build 2> /dev/null
+  fi
+  echo "Deploying ds-proxy (DSProxyFactory)..."
+  DS_PROXY_FACTORY=$(dapp create DSProxyFactory) # Deploy proxy factory instance
+  echo "Deployed to DSProxyFactory to $DS_PROXY_FACTORY"
+  cd -
+
+  cd $LIB/proxy-registry
+  if [ -n "$SKIP_BUILD_IF_ALREADY_BUILT" ] && [ -f out/ProxyRegistry.abi ]; then
+    echo "Skipping dapp build for proxy-registry (already built)"
+  else
+    echo "Building proxy-registry..."
+    dapp build ProxyRegistry 2> /dev/null
+  fi
+  echo "Deploying proxy-registry (ProxyRegistry)..."
+  PROXY_REGISTRY=$(dapp create ProxyRegistry $DS_PROXY_FACTORY) # Deploy proxy registry instance and pass in proxy factory
+  echo "Deployed to ProxyRegistry to $PROXY_REGISTRY"
+
+  echo "Creating DSProxy via ProxyRegistry.build()..."
+  DS_PROXY="0x"$(seth --abi-decode "build()(address)" $(seth call $PROXY_REGISTRY "build()")) # Get expected address of new DSProxy instance about to be created
+  seth send $PROXY_REGISTRY "build()"
+  echo "Created new DSProxy instance with address: $DS_PROXY"
+  cd -
+
+  cd $LIB/sai-proxy
+  if [ -n "$SKIP_BUILD_IF_ALREADY_BUILT" ] && [ -f out/SaiProxyCreateAndExecute.abi ]; then
+    echo "Skipping dapp build for sai-proxy (already built)"
+  else
+    echo "Building sai-proxy..."
+    dapp build 2> /dev/null
+  fi
+  echo "Deploying sai-proxy (SaiProxyCreateAndExecute)..."
+  SAI_PROXY=$(dapp create SaiProxyCreateAndExecute)
+  echo "Deployed SaiProxyCreateAndExecute to $SAI_PROXY"
+
+  # Save the proxy addresses to a JSON file
+  cat > ./out/addresses.json <<- EOM
+{
+  "DS_PROXY_FACTORY": "$DS_PROXY_FACTORY",
+  "PROXY_REGISTRY": "$PROXY_REGISTRY",
+  "DS_PROXY": "$DS_PROXY",
+  "SAI_PROXY": "$SAI_PROXY"
+}
+EOM
 
   cd -
+  $CWD/update-abis
 
   END_TIME=`date +%s`
   ELAPSED=`echo $END_TIME - $START_TIME | bc`
@@ -126,11 +195,11 @@ fi
 # See the list at the bottom of the deploy script.
 
 if [[ "$1" != '--ci' ]]; then
-    # The testnet will continue to run with its deployed contracts
-    # until the user confirms it should shut down.
-    $@
-    bash $CWD/confirm-kill-testnet
+  # The testnet will continue to run with its deployed contracts
+  # until the user confirms it should shut down.
+  $@
+  bash $CWD/confirm-kill-testnet
 else
-    # Proceed to the command given as arguments (but first strip --ci as first param).
-    $(echo "$@" | sed 's/^\-\-ci //')
+  # Proceed to the command given as arguments (but first strip --ci as first param).
+  $(echo "$@" | sed 's/^\-\-ci //')
 fi

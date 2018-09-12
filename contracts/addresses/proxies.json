@@ -1,0 +1,10 @@
+{
+    "kovan": {
+        "SAI_PROXY": "0xbe20df25d09b76275a3043c87b31aa1bd47f1f6a",
+        "PROXY_REGISTRY": ""
+    },
+    "mainnet": {
+        "SAI_PROXY": "",
+        "PROXY_REGISTRY": ""
+    }
+}

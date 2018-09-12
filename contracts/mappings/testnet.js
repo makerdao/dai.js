@@ -83,6 +83,35 @@ const mapping = {
       address: testnetAddresses.MAKER_OTC,
       abi: abiMap.exchangesV1.makerOtc
     }
+  ],
+
+  // Proxies
+  [contracts.SAI_PROXY]: [
+    {
+      version: 1,
+      address: testnetAddresses.SAI_PROXY,
+      abi: abiMap.proxies.saiProxy
+    }
+  ],
+  [contracts.DS_PROXY_FACTORY]: [
+    {
+      version: 1,
+      address: testnetAddresses.DS_PROXY_FACTORY,
+      abi: abiMap.proxies.dsProxyFactory
+    }
+  ],
+  [contracts.DS_PROXY]: [
+    {
+      version: 1,
+      abi: abiMap.dappHub.dsProxy
+    }
+  ],
+  [contracts.PROXY_REGISTRY]: [
+    {
+      version: 1,
+      address: testnetAddresses.PROXY_REGISTRY,
+      abi: abiMap.proxies.proxyRegistry
+    }
   ]
 };
 

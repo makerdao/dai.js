@@ -15,3 +15,21 @@ for file in *.abi; do
 done
 rm -f *Test*.json *Fab.json Dev*.json
 cd -
+
+cp $LIB/sai-proxy/out/addresses.json $CONTRACTS/abi/dsProxy
+
+# Copy DSProxy ABI into project
+mkdir -p $CONTRACTS/abi/dsProxy/
+cp $LIB/ds-proxy/out/DSProxy.abi $CONTRACTS/abi/dsProxy/v1.json
+
+# Copy DSProxyFactory ABI into project
+mkdir -p $CONTRACTS/abi/dsProxyFactory/
+cp $LIB/ds-proxy/out/DSProxyFactory.abi $CONTRACTS/abi/dsProxyFactory/v1.json
+
+# Copy SaiProxyCreateAndExecute ABI into project
+mkdir -p $CONTRACTS/abi/saiProxy/
+cp $LIB/sai-proxy/out/SaiProxyCreateAndExecute.abi $CONTRACTS/abi/saiProxy/v1.json
+
+# Copy ProxyRegistry ABI into project
+mkdir -p $CONTRACTS/abi/proxyRegistry/
+cp $LIB/proxy-registry/out/ProxyRegistry.abi $CONTRACTS/abi/proxyRegistry/v1.json
