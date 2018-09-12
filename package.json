@@ -34,7 +34,7 @@
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
     "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
-    "coverage": "./testchain/scripts/with-deployed-system --ci jest --runInBand --coverage",
+    "coverage": "./testchain/scripts/with-deployed-system --ci jest --runInBand --coverage --config ./default-config.json",
     "lint": "eslint web src test",
     "precommit": "lint-staged",
     "prepush": "npm run test",
