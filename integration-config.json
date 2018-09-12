@@ -1,0 +1,4 @@
+{
+  "testMatch": ["<rootDir>/test/integration/networks.spec.js"],
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"]
+}

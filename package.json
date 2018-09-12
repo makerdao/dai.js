@@ -39,10 +39,12 @@
     "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "prettier --write --single-quote '{src,web,test,contracts}/**/*.js'",
-    "test": "./testchain/scripts/with-deployed-system --ci jest --runInBand",
-    "test:watch": "./testchain/scripts/with-deployed-system jest --watch --runInBand",
+    "test": "./testchain/scripts/with-deployed-system --ci jest --runInBand --config ./default-config.json",
+    "test:watch": "./testchain/scripts/with-deployed-system jest --watch --runInBand --config ./default-config.json",
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
-    "test:net": "./testchain/scripts/with-deployed-system"
+    "test:net": "./testchain/scripts/with-deployed-system",
+    "test:mainnet": "export NETWORK='mainnet' && jest --config ./integration-config.json",
+    "test:kovan": "export NETWORK='kovan' && jest --config ./integration-config.json"
   },
   "lint-staged": {
     "./{src,web,test,contracts}/**/*.js": [
@@ -97,22 +99,5 @@
     "toposort": "^2.0.2",
     "web3": "^0.20.6",
     "web3-provider-engine": "makerdao/provider-engine#remove-provider-dist"
-  },
-  "jest": {
-    "coverageReporters": [
-      "json",
-      "lcov",
-      "text-summary"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.js"
-    ],
-    "globalSetup": "<rootDir>/test/setup-global.js",
-    "roots": [
-      "src",
-      "test"
-    ],
-    "setupTestFrameworkScriptFile": "<rootDir>/test/setup-test.js",
-    "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/test/integration/"]
   }
 }

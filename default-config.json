@@ -1,0 +1,17 @@
+{
+  "coverageReporters": [
+    "json",
+    "lcov",
+    "text-summary"
+  ],
+  "collectCoverageFrom": [
+    "src/**/*.js"
+  ],
+  "globalSetup": "<rootDir>/test/setup-global.js",
+  "roots": [
+    "src",
+    "test"
+  ],
+  "setupTestFrameworkScriptFile": "<rootDir>/test/setup-test.js",
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/test/integration/"]
+}
