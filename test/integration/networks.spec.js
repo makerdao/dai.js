@@ -27,12 +27,16 @@ beforeAll(async () => {
 
 afterAll(async () => {
   const peth = maker.service('token').getToken(tokens.PETH);
-  const pethBalance = peth.balanceOf(address);
+  let pethBalance = await peth.balanceOf(address);
   await peth.exit(pethBalance);
+  pethBalance = await peth.balanceOf(address);
+  console.log('After exiting peth, peth balance is', pethBalance);
 
   const weth = maker.service('token').getToken(tokens.WETH);
-  const wethBalance = weth.balanceOf(address);
+  let wethBalance = await weth.balanceOf(address);
   await weth.withdraw(wethBalance);
+  wethBalance = await weth.balanceOf(address);
+  console.log('After withdrawing weth, weth balance is', wethBalance);
 });
 
 test('can create Maker instance', () => {
@@ -43,7 +47,7 @@ test(
   'can open a CDP',
   async () => {
     id = await cdp.getId();
-    console.log('Opened CDP with ID ', id);
+    console.log('Opened CDP with ID', id);
     expect(cdp).toBeDefined();
     expect(typeof id).toEqual('number');
   },
@@ -56,7 +60,7 @@ test(
     await cdp.lockEth(0.1);
     const collateral = await cdp.getCollateralValue();
     console.log(
-      'After attempting to lock eth, collateral value is ',
+      'After attempting to lock eth, collateral value is',
       collateral.toString()
     );
     expect(collateral.toString()).toEqual('0.10 ETH');
@@ -69,7 +73,7 @@ test(
   async () => {
     await cdp.drawDai(0.1);
     const debt = await cdp.getDebtValue();
-    console.log('After attempting to draw Dai, CDP debt is ', debt.toString());
+    console.log('After attempting to draw Dai, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.10 DAI');
   },
   1000000
@@ -80,13 +84,13 @@ test(
   async () => {
     const initialBalance = await dai.balanceOf(address);
     console.log(
-      'Before attempting to sell Dai, balance is ',
+      'Before attempting to sell Dai, balance is',
       initialBalance.toString()
     );
     await exchange.sellDai('1', MKR);
     const newBalance = await dai.balanceOf(address);
     console.log(
-      'After attempting to sell Dai, balance is ',
+      'After attempting to sell Dai, balance is',
       newBalance.toString()
     );
     expect(parseFloat(newBalance)).toBeLessThan(parseFloat(initialBalance));
@@ -99,15 +103,15 @@ test(
   async () => {
     const initialBalance = await dai.balanceOf(address);
     console.log(
-      'Before attempting to buy Dai, balance is ',
+      'Before attempting to buy Dai, balance is',
       initialBalance.toString()
     );
     await exchange.buyDai('1', WETH);
+    const newBalance = await dai.balanceOf(address);
     console.log(
-      'After attempting to wipe Dai, balance is ',
+      'After attempting to buy Dai, balance is',
       newBalance.toString()
     );
-    const newBalance = await dai.balanceOf(address);
     expect(parseFloat(newBalance)).toBeGreaterThan(parseFloat(initialBalance));
   },
   1000000
@@ -118,7 +122,7 @@ test(
   async () => {
     await cdp.wipeDai('0.1');
     const debt = await cdp.getDebtValue();
-    console.log('After attempting to wipe debt, CDP debt is ', debt.toString());
+    console.log('After attempting to wipe debt, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.00 DAI');
   },
   10000000

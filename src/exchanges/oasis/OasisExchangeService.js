@@ -34,6 +34,9 @@ export default class OasisExchangeService extends PrivateService {
     const buyToken = this.get('token').getToken(currency);
     const daiAmountEVM = daiValueForContract(amount);
     const minFillAmountEVM = daiValueForContract(minFillAmount);
+    const nonce = await this.get('transactionManager')
+      .get('nonce')
+      .getNonce();
     await this.get('allowance').requireAllowance(DAI, oasisContract.address);
     return OasisSellOrder.build(
       oasisContract,
@@ -42,7 +45,10 @@ export default class OasisExchangeService extends PrivateService {
         daiAmountEVM,
         buyToken.address(),
         minFillAmountEVM,
-        { gasLimit: 300000 }
+        {
+          gasLimit: 300000,
+          nonce: nonce
+        }
       ),
       this.get('transactionManager'),
       currency
@@ -66,6 +72,9 @@ export default class OasisExchangeService extends PrivateService {
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
+    const nonce = await this.get('transactionManager')
+      .get('nonce')
+      .getNonce();
     await this.get('allowance').requireAllowance(WETH, oasisContract.address);
     return OasisBuyOrder.build(
       oasisContract,
@@ -74,7 +83,10 @@ export default class OasisExchangeService extends PrivateService {
         daiAmountEVM,
         sellTokenAddress,
         maxFillAmountEVM,
-        { gasLimit: 300000 }
+        {
+          gasLimit: 300000,
+          nonce: nonce
+        }
       ),
       this.get('transactionManager')
     );
