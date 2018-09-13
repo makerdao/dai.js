@@ -33,10 +33,11 @@ test(
   'can open a CDP',
   async () => {
     id = await cdp.getId();
+    console.log('Opened CDP with ID ', id);
     expect(cdp).toBeDefined();
     expect(typeof id).toEqual('number');
   },
-  100000
+  1000000
 );
 
 test(
@@ -44,9 +45,13 @@ test(
   async () => {
     await cdp.lockEth(0.1);
     const collateral = await cdp.getCollateralValue();
+    console.log(
+      'After attempting to lock eth, collateral value is ',
+      collateral.toString()
+    );
     expect(collateral.toString()).toEqual('0.10 ETH');
   },
-  100000
+  1000000
 );
 
 test(
@@ -54,31 +59,48 @@ test(
   async () => {
     await cdp.drawDai(0.1);
     const debt = await cdp.getDebtValue();
+    console.log('After attempting to draw Dai, CDP debt is ', debt.toString());
     expect(debt.toString()).toEqual('0.10 DAI');
   },
-  100000
+  1000000
 );
 
 test(
   'can sell Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
+    console.log(
+      'Before attempting to sell Dai, balance is ',
+      initialBalance.toString()
+    );
     await exchange.sellDai('1', MKR);
     const newBalance = await dai.balanceOf(address);
+    console.log(
+      'After attempting to sell Dai, balance is ',
+      newBalance.toString()
+    );
     expect(parseFloat(newBalance)).toBeLessThan(parseFloat(initialBalance));
   },
-  100000
+  1000000
 );
 
 test(
   'can buy Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
+    console.log(
+      'Before attempting to buy Dai, balance is ',
+      initialBalance.toString()
+    );
     await exchange.buyDai('1', WETH);
+    console.log(
+      'After attempting to wipe Dai, balance is ',
+      newBalance.toString()
+    );
     const newBalance = await dai.balanceOf(address);
     expect(parseFloat(newBalance)).toBeGreaterThan(parseFloat(initialBalance));
   },
-  100000
+  1000000
 );
 
 test(
@@ -86,9 +108,10 @@ test(
   async () => {
     await cdp.wipeDai('0.1');
     const debt = await cdp.getDebtValue();
+    console.log('After attempting to wipe debt, CDP debt is ', debt.toString());
     expect(debt.toString()).toEqual('0.00 DAI');
   },
-  1000000
+  10000000
 );
 
 test(
@@ -98,5 +121,5 @@ test(
     const info = await cdp.getInfo();
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
   },
-  100000
+  1000000
 );
