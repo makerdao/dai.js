@@ -25,6 +25,16 @@ beforeAll(async () => {
   exchange = maker.service('exchange');
 });
 
+afterAll(async () => {
+  const peth = maker.service('token').getToken(tokens.PETH);
+  const pethBalance = peth.balanceOf(address);
+  await peth.exit(pethBalance);
+
+  const weth = maker.service('token').getToken(tokens.WETH);
+  const wethBalance = weth.balanceOf(address);
+  await weth.withdraw(wethBalance);
+});
+
 test('can create Maker instance', () => {
   expect(maker).toBeDefined();
 });
