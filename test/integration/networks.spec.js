@@ -2,7 +2,7 @@ import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
 import { MKR, WETH } from '../../src/eth/Currency';
 
-let maker, cdp, id, dai, address, exchange;
+let maker, cdp, dai, address, exchange;
 
 beforeAll(async () => {
   if (!process.env.PRIVATE_KEY) {
@@ -13,30 +13,18 @@ beforeAll(async () => {
     privateKey: process.env.PRIVATE_KEY,
     web3: {
       transactionSettings: {
-        gasPrice: 12000000000
+        gasPrice: 12000000000,
+        gasLimit: 4000000
       }
     }
   });
 
   await maker.authenticate();
   cdp = await maker.openCdp();
+  console.info('Opened CDP');
   dai = maker.service('token').getToken(tokens.DAI);
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
-});
-
-afterAll(async () => {
-  const peth = maker.service('token').getToken(tokens.PETH);
-  let pethBalance = await peth.balanceOf(address);
-  await peth.exit(pethBalance);
-  pethBalance = await peth.balanceOf(address);
-  console.log('After exiting peth, peth balance is', pethBalance);
-
-  const weth = maker.service('token').getToken(tokens.WETH);
-  let wethBalance = await weth.balanceOf(address);
-  await weth.withdraw(wethBalance);
-  wethBalance = await weth.balanceOf(address);
-  console.log('After withdrawing weth, weth balance is', wethBalance);
 });
 
 test('can create Maker instance', () => {
@@ -45,11 +33,8 @@ test('can create Maker instance', () => {
 
 test(
   'can open a CDP',
-  async () => {
-    id = await cdp.getId();
-    console.log('Opened CDP with ID', id);
+  () => {
     expect(cdp).toBeDefined();
-    expect(typeof id).toEqual('number');
   },
   1000000
 );
@@ -57,13 +42,13 @@ test(
 test(
   'can lock eth',
   async () => {
-    await cdp.lockEth(0.1);
+    await cdp.lockEth(0.01);
     const collateral = await cdp.getCollateralValue();
-    console.log(
+    console.info(
       'After attempting to lock eth, collateral value is',
       collateral.toString()
     );
-    expect(collateral.toString()).toEqual('0.10 ETH');
+    expect(collateral.toString()).toEqual('0.01 ETH');
   },
   1000000
 );
@@ -73,7 +58,7 @@ test(
   async () => {
     await cdp.drawDai(0.1);
     const debt = await cdp.getDebtValue();
-    console.log('After attempting to draw Dai, CDP debt is', debt.toString());
+    console.info('After attempting to draw Dai, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.10 DAI');
   },
   1000000
@@ -83,13 +68,13 @@ test(
   'can sell Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
-    console.log(
+    console.info(
       'Before attempting to sell Dai, balance is',
       initialBalance.toString()
     );
-    await exchange.sellDai('1', MKR);
+    await exchange.sellDai('0.1', MKR);
     const newBalance = await dai.balanceOf(address);
-    console.log(
+    console.info(
       'After attempting to sell Dai, balance is',
       newBalance.toString()
     );
@@ -102,13 +87,13 @@ test(
   'can buy Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
-    console.log(
+    console.info(
       'Before attempting to buy Dai, balance is',
       initialBalance.toString()
     );
-    await exchange.buyDai('1', WETH);
+    await exchange.buyDai('0.1', WETH);
     const newBalance = await dai.balanceOf(address);
-    console.log(
+    console.info(
       'After attempting to buy Dai, balance is',
       newBalance.toString()
     );
@@ -122,7 +107,7 @@ test(
   async () => {
     await cdp.wipeDai('0.1');
     const debt = await cdp.getDebtValue();
-    console.log('After attempting to wipe debt, CDP debt is', debt.toString());
+    console.info('After attempting to wipe debt, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.00 DAI');
   },
   10000000

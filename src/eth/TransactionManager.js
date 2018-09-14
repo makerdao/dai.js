@@ -111,7 +111,7 @@ export default class TransactionManager extends PublicService {
       typeof args[args.length - 1] === 'object' &&
       !Object.keys(args[args.length - 1]).includes('_bn')
     ) {
-      await merge(args[args.length - 1], settings);
+      merge(args[args.length - 1], settings);
     } else {
       args.push(settings);
     }

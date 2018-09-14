@@ -21,4 +21,5 @@ copyfiles \
   src/config/presets/* \
   contracts/addresses/daiV1.json \
   contracts/addresses/exchanges.json \
+  contracts/addresses/proxies.json \
   dist

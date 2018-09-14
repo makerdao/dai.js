@@ -43,8 +43,8 @@
     "test:watch": "./testchain/scripts/with-deployed-system jest --watch --runInBand --config ./default-config.json",
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
     "test:net": "./testchain/scripts/with-deployed-system",
-    "test:mainnet": "export NETWORK='mainnet' && jest --config ./integration-config.json",
-    "test:kovan": "export NETWORK='kovan' && jest --config ./integration-config.json"
+    "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./integration-config.json",
+    "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./integration-config.json"
   },
   "lint-staged": {
     "./{src,web,test,contracts}/**/*.js": [
