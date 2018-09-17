@@ -66,11 +66,11 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   openCdp() {
-    return new Cdp(this);
+    return new Cdp(this).transactionObject();
   }
 
   openProxyCdp(dsProxyAddress = null) {
-    return new ProxyCdp(this, dsProxyAddress);
+    return new ProxyCdp(this, dsProxyAddress).transactionObject();
   }
 
   getCdp(id, dsProxyAddress = null) {
