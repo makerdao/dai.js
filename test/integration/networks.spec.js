@@ -4,29 +4,41 @@ import { WETH } from '../../src/eth/Currency';
 
 let maker, cdp, dai, address, exchange, tokenService;
 
+// Convert balances to numbers in these functions
 async function convertPeth() {
   const peth = tokenService.getToken(tokens.PETH);
   const pethBalance = await peth.balanceOf(address);
 
   if (pethBalance) {
-    console.info('Remaining peth balance is', pethBalance.toString());
+    console.info('Remaining PETH balance is', pethBalance.toString());
     await peth.exit(pethBalance);
-    console.info('Exited remaining peth');
+    console.info('Exited remaining PETH');
   } else {
-    console.info('No remaining peth to exit');
+    console.info('No remaining PETH to exit');
   }
 }
 
 async function convertWeth() {
   const weth = tokenService.getToken(tokens.WETH);
-  const wethBalance = weth.balanceOf(address);
+  const wethBalance = await weth.balanceOf(address);
 
   if (wethBalance) {
-    console.info('Remaining weth balance is', wethBalance.toString());
+    console.info('Remaining WETH balance is', wethBalance.toString());
     await weth.withdraw(wethBalance);
-    console.info('Withdrew remaining weth');
+    console.info('Withdrew remaining WETH');
   } else {
-    console.info('No remaining weth to withdraw');
+    console.info('No remaining WETH to withdraw');
+  }
+}
+
+async function checkWethBalance() {
+  const weth = tokenService.getToken(tokens.WETH);
+  const wethBalance = await weth.balanceOf(address);
+
+  if (wethBalance <= 0.1) {
+    return await maker.service('conversion').convertEthToWeth(0.1);
+  } else {
+    return;
   }
 }
 
@@ -101,7 +113,7 @@ test(
       'Before attempting to sell Dai, balance is',
       initialBalance.toString()
     );
-    const order = exchange.sellDai('0.1', WETH);
+    const order = await exchange.sellDai('0.1', WETH);
     await order._hybrid;
     await order._hybrid.confirm();
     const newBalance = await dai.balanceOf(address);
@@ -110,6 +122,28 @@ test(
       newBalance.toString()
     );
     expect(parseFloat(newBalance)).toBeLessThan(parseFloat(initialBalance));
+  },
+  1000000
+);
+
+test(
+  'can buy Dai',
+  async () => {
+    await checkWethBalance();
+    const initialBalance = await dai.balanceOf(address);
+    console.info(
+      'Before attempting to buy Dai, balance is',
+      initialBalance.toString()
+    );
+    const order = await exchange.buyDai('0.1', WETH);
+    await order._hybrid;
+    await order._hybrid.confirm();
+    const newBalance = await dai.balanceOf(address);
+    console.info(
+      'After attempting to buy Dai, balance is',
+      newBalance.toString()
+    );
+    expect(parseFloat(newBalance)).toBeGreaterThan(parseFloat(initialBalance));
   },
   1000000
 );
