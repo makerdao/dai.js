@@ -35,7 +35,19 @@ import Maker from '@makerdao/dai';
 const Maker = require('@makerdao/dai');
 ```
 
-Example:
+Example for transferring Dai:
+```js
+import Maker from '@makerdao/dai';
+const maker = Maker.create('test');
+await maker.authenticate();
+
+transferDai(address, amount) {
+  const dai = maker.service('token').getToken(tokens.DAI);
+  return dai.transfer(address, amount);
+ }
+```
+
+Example for using CDPs:
 ```js
 import Maker from '@makerdao/dai';
 const maker = Maker.create('test');

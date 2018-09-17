@@ -30,6 +30,9 @@ export default class EthereumCdpService extends PrivateService {
       'price',
       'event'
     ]);
+
+    // aliases
+    this.freeEth = this.freePeth;
   }
 
   _smartContract() {
@@ -66,11 +69,11 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   openCdp() {
-    return new Cdp(this);
+    return new Cdp(this).transactionObject();
   }
 
   openProxyCdp(dsProxyAddress = null) {
-    return new ProxyCdp(this, dsProxyAddress);
+    return new ProxyCdp(this, dsProxyAddress).transactionObject();
   }
 
   getCdp(id, dsProxyAddress = null) {
@@ -246,6 +249,7 @@ export default class EthereumCdpService extends PrivateService {
       this.getLiquidationRatio(),
       this.getCollateralValue(cdpId)
     ]);
+    if (collateral.eq(0)) return USD_ETH(Infinity);
     return debt.times(liqRatio).div(collateral);
   }
 

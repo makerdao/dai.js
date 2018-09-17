@@ -76,7 +76,8 @@ export default class TransactionManager extends PublicService {
         ),
         'DSProxy',
         dappHub.dsProxy,
-        this
+        this,
+        businessObject
       );
       // Pass in any additional tx options passed to this tx (e.g. value, gasLimit)
       // if the last arg is an object literal (not a BigNumber object etc.)
@@ -111,7 +112,7 @@ export default class TransactionManager extends PublicService {
       typeof args[args.length - 1] === 'object' &&
       !Object.keys(args[args.length - 1]).includes('_bn')
     ) {
-      await merge(args[args.length - 1], settings);
+      merge(args[args.length - 1], settings);
     } else {
       args.push(settings);
     }
