@@ -1,4 +1,4 @@
-export function wrapContract(contract, name, abi, txManager) {
+export function wrapContract(contract, name, abi, txManager, businessObject) {
   const nonConstantFns = {};
   for (let { type, constant, name, inputs } of abi) {
     if (type === 'function' && constant === false) {
@@ -27,7 +27,13 @@ export function wrapContract(contract, name, abi, txManager) {
       get(target, key) {
         if (nonConstantFns[key] && txManager) {
           return (...args) => {
-            return txManager.formatHybridTx(contract, key, args, name);
+            return txManager.formatHybridTx(
+              contract,
+              key,
+              args,
+              name,
+              businessObject
+            );
           };
         }
 

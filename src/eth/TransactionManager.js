@@ -76,7 +76,8 @@ export default class TransactionManager extends PublicService {
         ),
         'DSProxy',
         dappHub.dsProxy,
-        this
+        this,
+        businessObject
       );
       // Pass in any additional tx options passed to this tx (e.g. value, gasLimit)
       // if the last arg is an object literal (not a BigNumber object etc.)

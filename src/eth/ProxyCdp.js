@@ -57,7 +57,7 @@ export default class ProxyCdp {
     existingDsProxyAddress,
     tubContract
   ) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       // If using an existing DSProxy, listen for the LogNewCup event
       if (existingDsProxyAddress) {
         tubContract.onlognewcup = function(address, cdpIdBytes32) {
@@ -81,13 +81,17 @@ export default class ProxyCdp {
           // '0x000000000000000000000000' + proxy.substring(2)
         ];
         provider.on(topics, log => {
-          captureDsProxyAddressPromise.then(proxy => {
-            const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
-            if (proxy === proxyInLog) {
-              const cdpId = ethersUtils.bigNumberify(log.topics[2]).toNumber();
-              resolve(cdpId);
-            }
-          });
+          captureDsProxyAddressPromise
+            .then(proxy => {
+              const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
+              if (proxy === proxyInLog) {
+                const cdpId = ethersUtils
+                  .bigNumberify(log.topics[2])
+                  .toNumber();
+                resolve(cdpId);
+              }
+            })
+            .catch(err => reject(err));
         });
       }
     });
