@@ -246,6 +246,7 @@ export default class EthereumCdpService extends PrivateService {
       this.getLiquidationRatio(),
       this.getCollateralValue(cdpId)
     ]);
+    if (collateral.eq(0)) return USD_ETH(Infinity);
     return debt.times(liqRatio).div(collateral);
   }
 

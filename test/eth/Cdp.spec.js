@@ -112,6 +112,11 @@ test('transfer ownership', async () => {
   expect(info2.lad).toEqual(newAddress);
 });
 
+test('read liquidation price with 0 collateral', async () => {
+  const price = await cdp.getLiquidationPrice();
+  expect(price).toEqual(USD_ETH(Infinity));
+});
+
 describe('bite', () => {
   beforeAll(async () => {
     await openCdp();
@@ -163,7 +168,7 @@ describe('a cdp with collateral', () => {
     expect(collateral).toEqual(USD(80));
   });
 
-  test('read collateralization ratio when there is no debt', async () => {
+  test('read collateralization ratio with no debt', async () => {
     const ratio = await cdp.getCollateralizationRatio();
     expect(ratio).toEqual(Infinity);
   });
