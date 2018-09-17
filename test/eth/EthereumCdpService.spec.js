@@ -1,5 +1,6 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 import { USD_DAI } from '../../src/eth/Currency';
+import Cdp from '../../src/eth/Cdp';
 
 let cdpService;
 
@@ -46,4 +47,11 @@ test('can calculate system collateralization', async () => {
   await cdp.drawDai(1);
   const scC = await cdpService.getSystemCollateralization();
   expect(scC).toBeLessThan(scB);
+});
+
+test('openCdp returns the transaction object', async () => {
+  const txo = cdpService.openCdp();
+  expect(txo).toBeInstanceOf(Promise);
+  const cdp = await txo;
+  expect(cdp).toBeInstanceOf(Cdp);
 });
