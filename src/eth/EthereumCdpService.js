@@ -30,6 +30,9 @@ export default class EthereumCdpService extends PrivateService {
       'price',
       'event'
     ]);
+
+    // aliases
+    this.freeEth = this.freePeth;
   }
 
   _smartContract() {
