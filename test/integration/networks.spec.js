@@ -21,7 +21,7 @@ beforeAll(async () => {
 
   await maker.authenticate();
   cdp = await maker.openCdp();
-  console.info('Opened CDP');
+  console.info('Opened new CDP');
   dai = maker.service('token').getToken(tokens.DAI);
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
@@ -56,7 +56,8 @@ test(
 test(
   'can withdraw Dai',
   async () => {
-    await cdp.drawDai(0.1);
+    const tx = await cdp.drawDai(0.1);
+    await tx.confirm();
     const debt = await cdp.getDebtValue();
     console.info('After attempting to draw Dai, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.10 DAI');
@@ -72,7 +73,8 @@ test(
       'Before attempting to sell Dai, balance is',
       initialBalance.toString()
     );
-    await exchange.sellDai('0.1', MKR);
+    const tx = await exchange.sellDai('0.1', MKR);
+    await tx.confirm();
     const newBalance = await dai.balanceOf(address);
     console.info(
       'After attempting to sell Dai, balance is',
@@ -91,7 +93,8 @@ test(
       'Before attempting to buy Dai, balance is',
       initialBalance.toString()
     );
-    await exchange.buyDai('0.1', WETH);
+    const tx = await exchange.buyDai('0.1', WETH);
+    await tx.confirm();
     const newBalance = await dai.balanceOf(address);
     console.info(
       'After attempting to buy Dai, balance is',
@@ -105,7 +108,8 @@ test(
 test(
   'can wipe debt',
   async () => {
-    await cdp.wipeDai('0.1');
+    const tx = await cdp.wipeDai('0.1');
+    await tx.confirm();
     const debt = await cdp.getDebtValue();
     console.info('After attempting to wipe debt, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.00 DAI');
@@ -116,7 +120,8 @@ test(
 test(
   'can shut a CDP',
   async () => {
-    await cdp.shut();
+    const tx = await cdp.shut();
+    await tx.confirm();
     const info = await cdp.getInfo();
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
   },
