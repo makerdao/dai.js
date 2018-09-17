@@ -2,7 +2,33 @@ import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
 import { WETH } from '../../src/eth/Currency';
 
-let maker, cdp, dai, address, exchange;
+let maker, cdp, dai, address, exchange, tokenService;
+
+async function convertPeth() {
+  const peth = tokenService.getToken(tokens.PETH);
+  const pethBalance = await peth.balanceOf(address);
+
+  if (pethBalance) {
+    console.info('Remaining peth balance is', pethBalance.toString());
+    await peth.exit(pethBalance);
+    console.info('Exited remaining peth');
+  } else {
+    console.info('No remaining peth to exit');
+  }
+}
+
+async function convertWeth() {
+  const weth = tokenService.getToken(tokens.WETH);
+  const wethBalance = weth.balanceOf(address);
+
+  if (wethBalance) {
+    console.info('Remaining weth balance is', wethBalance.toString());
+    await weth.withdraw(wethBalance);
+    console.info('Withdrew remaining weth');
+  } else {
+    console.info('No remaining weth to withdraw');
+  }
+}
 
 beforeAll(async () => {
   if (!process.env.PRIVATE_KEY) {
@@ -20,7 +46,8 @@ beforeAll(async () => {
   });
 
   await maker.authenticate();
-  dai = maker.service('token').getToken(tokens.DAI);
+  tokenService = maker.service('token');
+  dai = tokenService.getToken(tokens.DAI);
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
 });
@@ -42,9 +69,8 @@ test(
 test(
   'can lock eth',
   async () => {
-    await cdp;
-    console.log('starting the lock test');
-    await cdp.lockEth(0.01);
+    const tx = await cdp.lockEth(0.01);
+    await tx.confirm();
     const collateral = await cdp.getCollateralValue();
     console.info(
       'After attempting to lock eth, collateral value is',
@@ -52,14 +78,12 @@ test(
     );
     expect(collateral.toString()).toEqual('0.01 ETH');
   },
-  1000000
+  2000000
 );
 
 test(
   'can withdraw Dai',
   async () => {
-    console.log('starting the draw test');
-    await cdp;
     const tx = await cdp.drawDai(0.1);
     await tx.confirm();
     const debt = await cdp.getDebtValue();
@@ -72,14 +96,14 @@ test(
 test(
   'can sell Dai',
   async () => {
-    console.log('starting the sell test');
     const initialBalance = await dai.balanceOf(address);
     console.info(
       'Before attempting to sell Dai, balance is',
       initialBalance.toString()
     );
-    const tx = await exchange.sellDai('0.1', WETH);
-    await tx._hybrid.confirm();
+    const order = exchange.sellDai('0.1', WETH);
+    await order._hybrid;
+    await order._hybrid.confirm();
     const newBalance = await dai.balanceOf(address);
     console.info(
       'After attempting to sell Dai, balance is',
@@ -91,31 +115,8 @@ test(
 );
 
 test(
-  'can buy Dai',
-  async () => {
-    console.log('starting the buy test');
-    const initialBalance = await dai.balanceOf(address);
-    console.info(
-      'Before attempting to buy Dai, balance is',
-      initialBalance.toString()
-    );
-    const tx = await exchange.buyDai('0.1', WETH);
-    await tx._hybrid.confirm();
-    const newBalance = await dai.balanceOf(address);
-    console.info(
-      'After attempting to buy Dai, balance is',
-      newBalance.toString()
-    );
-    expect(parseFloat(newBalance)).toBeGreaterThan(parseFloat(initialBalance));
-  },
-  1000000
-);
-
-test(
   'can wipe debt',
   async () => {
-    await cdp;
-    console.log('starting the wipe test');
     const tx = await cdp.wipeDai('0.1');
     await tx.confirm();
     const debt = await cdp.getDebtValue();
@@ -128,10 +129,10 @@ test(
 test(
   'can shut a CDP',
   async () => {
-    await cdp;
-    console.log('starting the shut test');
     const tx = await cdp.shut();
     await tx.confirm();
+    await convertPeth();
+    await convertWeth();
     const info = await cdp.getInfo();
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
   },
