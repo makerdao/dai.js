@@ -191,7 +191,11 @@ export default class Web3Service extends PrivateService {
       { name: getNetworkName(chainId), chainId: chainId }
     );
 
-    provider.on('block', num => this._updateBlockNumber(num));
+    provider.on('block', num => {
+      if (this._currentBlock !== num) {
+        this._updateBlockNumber(num);
+      }
+    });
     this.manager().onDisconnected(() => provider.removeAllListeners('block'));
 
     return provider;
