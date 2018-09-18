@@ -17,7 +17,6 @@ export default class WethToken extends Erc20Token {
   }
 
   withdraw(amount, unit = ETH) {
-    console.log(amount);
     const value = this._valueForContract(amount, unit);
     return this._contract.withdraw(value);
   }
