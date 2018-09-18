@@ -2,7 +2,7 @@ import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
 import { WETH } from '../../src/eth/Currency';
 
-let maker, cdp, dai, address, exchange, tokenService;
+let maker, cdp, dai, exchange, address, tokenService;
 
 async function convertPeth() {
   const peth = tokenService.getToken(tokens.PETH);
@@ -110,7 +110,7 @@ test(
   1000000
 );
 
-xtest(
+test(
   'can sell Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
@@ -131,7 +131,7 @@ xtest(
   1000000
 );
 
-xtest(
+test(
   'can buy Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
