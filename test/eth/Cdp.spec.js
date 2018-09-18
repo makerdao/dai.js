@@ -1,4 +1,6 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
+import { takeSnapshot, restoreSnapshot } from '../helpers/ganache';
+import TestAccountProvider from '../helpers/TestAccountProvider';
 import {
   DAI,
   PETH,
@@ -14,13 +16,20 @@ import testnetAddressesProxies from '../../contracts/abi/dsProxy/addresses.json'
 
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, smartContractService;
 
-beforeAll(async () => {
+// this function should be called again after reverting a snapshot; otherwise,
+// you may get errors about account and transaction nonces not matching.
+async function init() {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
   currentAccount = cdpService
     .get('token')
     .get('web3')
     .currentAccount();
+  if (cdp) cdp._cdpService = cdpService;
+}
+
+beforeAll(async () => {
+  await init();
   dai = cdpService.get('token').getToken(DAI);
   smartContractService = cdpService.get('smartContract');
 
@@ -168,9 +177,15 @@ const sharedTests = openCdp => {
       });
 
       describe('with drip', () => {
-        afterAll(async () => {
-          await cdp.drawDai(1);
-          return cdpService.get('price').setMkrPrice(0);
+        let snapshotId;
+
+        beforeEach(async () => {
+          snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+          await restoreSnapshot(snapshotId);
+          await init();
         });
 
         test('read MKR fee', async () => {
@@ -198,6 +213,19 @@ const sharedTests = openCdp => {
           ).toNumber();
           expect(firstDebtAmount.minus(secondDebtAmount)).toEqual(DAI(1));
           expect(firstMkrBalance).toBeGreaterThan(secondMkrBalance);
+        });
+
+        test('fail to wipe debt due to lack of MKR', async () => {
+          expect.assertions(2);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+          try {
+            await cdp.wipeDai(1);
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toMatch(/revert/);
+          }
         });
       });
 

@@ -4,7 +4,15 @@ import tokens from '../../contracts/tokens';
 function buildTestServices() {
   const container = buildTestContainer({
     smartContract: true,
-    transactionManager: true
+    transactionManager: true,
+    web3: {
+      provider: {
+        type: 'TEST'
+      },
+      transactionSettings: {
+        gasLimit: 1234567
+      }
+    }
   });
   const smartContract = container.service('smartContract');
   const transactionManager = container.service('transactionManager');
@@ -19,21 +27,23 @@ function buildTestServices() {
   }));
 }
 
-test('should reuse the same web3 and log service in test services', done => {
-  buildTestServices().then(services => {
-    expect(services.contract.manager().isConnected()).toBe(true);
-    expect(services.txMgr.manager().isConnected()).toBe(true);
-    expect(services.txMgr.get('web3')).toBe(services.contract.get('web3'));
-    expect(services.txMgr.get('log')).toBe(
-      services.contract.get('web3').get('log')
-    );
-    expect(services.currentAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
-    done();
-  });
+let services;
+
+beforeEach(async () => {
+  services = await buildTestServices();
+});
+
+test('reuse the same web3 and log service in test services', () => {
+  expect(services.contract.manager().isConnected()).toBe(true);
+  expect(services.txMgr.manager().isConnected()).toBe(true);
+  expect(services.txMgr.get('web3')).toBe(services.contract.get('web3'));
+  expect(services.txMgr.get('log')).toBe(
+    services.contract.get('web3').get('log')
+  );
+  expect(services.currentAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
 });
 
 test('create a Transaction object from a transaction promise', async () => {
-  const services = await buildTestServices();
   const contractTransaction = services.contract
       .getContractByName(tokens.DAI, { hybrid: false })
       .approve(services.currentAccount, '1000000000000000000'),
@@ -52,39 +62,30 @@ test('create a Transaction object from a transaction promise', async () => {
   });
 });
 
-test('should register all created transaction hybrids', done => {
-  buildTestServices().then(services => {
-    const contractTransaction = services.contract
-        .getContractByName(tokens.DAI, { hybrid: false })
-        .approve(services.currentAccount, '1000000000000000000'),
-      hybrids = [
-        services.txMgr.createHybridTx(contractTransaction),
-        services.txMgr.createHybridTx(contractTransaction),
-        services.txMgr.createHybridTx(contractTransaction)
-      ];
+test('register all created transaction hybrids', async () => {
+  const contractTransaction = services.contract
+      .getContractByName(tokens.DAI, { hybrid: false })
+      .approve(services.currentAccount, '1000000000000000000'),
+    hybrids = [
+      services.txMgr.createHybridTx(contractTransaction),
+      services.txMgr.createHybridTx(contractTransaction),
+      services.txMgr.createHybridTx(contractTransaction)
+    ];
 
-    expect(services.txMgr.getTransactions().length).toBe(3);
-    expect(services.txMgr.getTransactions()).toEqual(hybrids);
-    Promise.all(hybrids).then(() => done());
-  });
+  await Promise.all(hybrids);
+  expect(services.txMgr.getTransactions().length).toBe(3);
+  expect(services.txMgr.getTransactions()).toEqual(hybrids);
 });
 
-test('should add TransactionLifeCycle functions', async () => {
-  const services = await buildTestServices();
+test('createHybridTx adds hooks and resolves to business object', async () => {
   const contractTransaction = services.contract
       .getContractByName(tokens.DAI, { hybrid: false })
       .approve(services.currentAccount, '1000000000000000000'),
     businessObject = {
       a: 1,
-      oneTwo: 2,
       add: function(b) {
         return this.a + b;
-      },
-      mul: function(b, c) {
-        return this.a * b * c;
-      },
-      add2: b => 10 + b,
-      mul2: (b, c) => 10 * b * c
+      }
     },
     hybrid = services.txMgr.createHybridTx(contractTransaction, {
       businessObject
@@ -92,96 +93,30 @@ test('should add TransactionLifeCycle functions', async () => {
 
   await hybrid.onPending();
   expect(hybrid.isPending()).toBe(true);
+  const bob = await hybrid.onMined();
+  expect(hybrid.isMined()).toBe(true);
+  expect(bob.add(10)).toEqual(11);
+});
+
+test('formatHybridTx adds nonce, web3 settings, lifecycle hooks', async () => {
+  const { txMgr, currentAccount, contract } = services;
+  const dai = contract.getContractByName(tokens.DAI, { hybrid: false });
+  jest.spyOn(txMgr, '_execute');
+
+  const hybrid = txMgr.formatHybridTx(
+    dai,
+    'approve',
+    [currentAccount, 20000],
+    'DAI'
+  );
+
   await hybrid.onMined();
   expect(hybrid.isMined()).toBe(true);
-});
 
-test('should properly format hybrid transaction object with injected nonce and add TransactionLifecycle functions', async () => {
-  const services = await buildTestServices(),
-    hybrid = services.txMgr.formatHybridTx(
-      services.contract.getContractByName(tokens.DAI, { hybrid: false }),
-      'approve',
-      [services.currentAccount, '1000000000000000000'],
-      'DAI'
-    );
-
-  await hybrid.onPending();
-  expect(hybrid.isPending()).toBe(true);
-  await hybrid.onMined();
-  expect(hybrid.isMined()).toBe(true);
-});
-
-test('should properly inject transaction settings and nonce into hybrid transactions', async () => {
-  const services = await buildTestServices();
-  const firstArgs = await services.txMgr.injectSettings(['0x']);
-  const secondArgs = await services.txMgr.injectSettings([
-    '0x',
-    { _bn: 'some BigNumber' }
-  ]);
-
-  expect(Object.keys(firstArgs[firstArgs.length - 1]).includes('nonce')).toBe(
-    true
+  expect(txMgr._execute).toHaveBeenCalledWith(
+    dai,
+    'approve',
+    [currentAccount, 20000],
+    { gasLimit: 1234567, nonce: expect.any(Number) }
   );
-  expect(firstArgs.length).toEqual(2);
-  expect(typeof firstArgs[firstArgs.length - 1]).toEqual('object');
-  expect(Object.keys(firstArgs[firstArgs.length - 1]).includes('nonce')).toBe(
-    true
-  );
-  expect(secondArgs.length).toEqual(3);
-  expect(Object.keys(secondArgs[secondArgs.length - 1]).includes('nonce')).toBe(
-    true
-  );
-  expect(Object.keys(secondArgs[secondArgs.length - 1]).includes('_bn')).toBe(
-    false
-  );
-});
-
-test('should get tx settings from Web3Service and add nonce', async () => {
-  const services = await buildTestServices();
-  const settings = await services.txMgr.getSettings();
-
-  expect(Object.keys(settings).length).toEqual(
-    Object.keys(services.txMgr.get('web3').transactionSettings()).length + 1
-  );
-  expect(Object.keys(settings).includes('nonce')).toBe(true);
-});
-
-test('should parse additional function args', async () => {
-  const services = await buildTestServices();
-  const dsProxyTestAddress = '0x1234567890123456789012345678901234567890';
-  const args = ['0x0000000000000000000000000000000000000000', 1, 2, 3, {
-    dsProxyAddress: dsProxyTestAddress,
-    metadata: {
-      action: {
-        foo: 'bar'
-      }
-    }
-  }];
-  const { additionalMetadata, dsProxyAddress } = services.txMgr.parseContractFunctionArgs(args);
-
-  expect(dsProxyAddress).toEqual(dsProxyTestAddress);
-  expect(Object.keys(additionalMetadata).includes('action')).toBe(true);
-  expect(args.length).toBe(4);
-});
-
-test('should parse additional function args without affecting last object arg', async () => {
-  const services = await buildTestServices();
-  const dsProxyTestAddress = '0x1234567890123456789012345678901234567890';
-  const args = ['0x0000000000000000000000000000000000000000', 1, 2, 3, {
-    dsProxyAddress: dsProxyTestAddress,
-    metadata: {
-      action: {
-        foo: 'bar'
-      }
-    },
-    value: 1,
-    gasLimit: 500000
-  }];
-  const { additionalMetadata, dsProxyAddress } = services.txMgr.parseContractFunctionArgs(args);
-
-  expect(dsProxyAddress).toEqual(dsProxyTestAddress);
-  expect(Object.keys(additionalMetadata).includes('action')).toBe(true);
-  expect(args.length).toBe(5);
-  expect(Object.keys(args[args.length - 1]).includes('value')).toBe(true);
-  expect(Object.keys(args[args.length - 1]).includes('gasLimit')).toBe(true);
 });
