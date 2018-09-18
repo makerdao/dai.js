@@ -45,7 +45,7 @@ export default class TransactionObject extends TransactionLifeCycle {
   async mine() {
     if (!this._dataPromise) this._dataPromise = this._getTransactionData();
     await this._dataPromise;
-    return this;
+    return this._returnValue();
   }
 
   async confirm(count = 3) {
@@ -60,6 +60,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       throw new Error('transaction block hash changed');
     }
     this.setFinalized();
+    return this._returnValue();
   }
 
   async _getTransactionData() {
