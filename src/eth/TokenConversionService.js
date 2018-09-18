@@ -12,6 +12,7 @@ export default class TokenConversionService extends PrivateService {
   }
 
   convertEthToWeth(amount, unit = ETH) {
+    console.log('inside eth to weth');
     return this._getToken(WETH).deposit(getCurrency(amount, unit));
   }
 

@@ -4,14 +4,14 @@ import { WETH } from '../../src/eth/Currency';
 
 let maker, cdp, dai, address, exchange, tokenService;
 
-// Convert balances to numbers in these functions
 async function convertPeth() {
   const peth = tokenService.getToken(tokens.PETH);
   const pethBalance = await peth.balanceOf(address);
 
-  if (pethBalance) {
+  if (pethBalance.toNumber() > 0.009) {
     console.info('Remaining PETH balance is', pethBalance.toString());
-    await peth.exit(pethBalance);
+    const tx = await peth.exit(pethBalance.toNumber().toFixed(2));
+    await tx.confirm();
     console.info('Exited remaining PETH');
   } else {
     console.info('No remaining PETH to exit');
@@ -22,9 +22,10 @@ async function convertWeth() {
   const weth = tokenService.getToken(tokens.WETH);
   const wethBalance = await weth.balanceOf(address);
 
-  if (wethBalance) {
+  if (wethBalance.toNumber() > 0.009) {
     console.info('Remaining WETH balance is', wethBalance.toString());
-    await weth.withdraw(wethBalance);
+    const tx = await weth.withdraw(wethBalance.toNumber().toFixed(2));
+    await tx.confirm();
     console.info('Withdrew remaining WETH');
   } else {
     console.info('No remaining WETH to withdraw');
@@ -35,8 +36,12 @@ async function checkWethBalance() {
   const weth = tokenService.getToken(tokens.WETH);
   const wethBalance = await weth.balanceOf(address);
 
-  if (wethBalance <= 0.1) {
-    return await maker.service('conversion').convertEthToWeth(0.1);
+  if (wethBalance.toNumber() < 0.1) {
+    console.log(
+      'Current balance is ' + wethBalance.toString() + ', depositing 0.1'
+    );
+    const tx = await maker.service('conversion').convertEthToWeth(0.1);
+    return await tx.confirm();
   } else {
     return;
   }
@@ -81,8 +86,7 @@ test(
 test(
   'can lock eth',
   async () => {
-    const tx = await cdp.lockEth(0.01);
-    await tx.confirm();
+    await cdp.lockEth(0.01);
     const collateral = await cdp.getCollateralValue();
     console.info(
       'After attempting to lock eth, collateral value is',
@@ -129,12 +133,12 @@ test(
 test(
   'can buy Dai',
   async () => {
-    await checkWethBalance();
     const initialBalance = await dai.balanceOf(address);
     console.info(
       'Before attempting to buy Dai, balance is',
       initialBalance.toString()
     );
+    await checkWethBalance();
     const order = await exchange.buyDai('0.1', WETH);
     await order._hybrid;
     await order._hybrid.confirm();
