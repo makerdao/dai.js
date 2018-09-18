@@ -80,13 +80,14 @@ test(
     console.info('Opened new CDP');
     expect(cdp).toBeDefined();
   },
-  1000000
+  100000
 );
 
 test(
   'can lock eth',
   async () => {
-    await cdp.lockEth(0.01);
+    const tx = await cdp.lockEth(0.01);
+    await tx.confirm();
     const collateral = await cdp.getCollateralValue();
     console.info(
       'After attempting to lock eth, collateral value is',
@@ -109,7 +110,7 @@ test(
   1000000
 );
 
-test(
+xtest(
   'can sell Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
@@ -130,7 +131,7 @@ test(
   1000000
 );
 
-test(
+xtest(
   'can buy Dai',
   async () => {
     const initialBalance = await dai.balanceOf(address);
