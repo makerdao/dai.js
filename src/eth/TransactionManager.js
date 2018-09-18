@@ -1,9 +1,7 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
-import merge from 'lodash.merge';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abi';
-import { wrapContract } from './smartContract/wrapContract';
 
 let txId = 1;
 
@@ -14,128 +12,46 @@ export default class TransactionManager extends PublicService {
     this._listeners = [];
   }
 
-  // Parse contract function call args for additional metadata and dsProxyAddress
-  parseContractFunctionArgs(args) {
-    let metadata = null;
-    let dsProxyAddress = null;
+  formatHybridTx(contract, method, args, name, businessObject = null) {
+    if (!args) args = [];
+    let options,
+      metadata = {
+        contract: name,
+        method: method.replace(/\(.*\)$/g, ''),
+        args
+      },
+      lastArg = args[args.length - 1];
 
-    if (
-      typeof args !== 'undefined' &&
-      Array.isArray(args) &&
-      typeof args[args.length - 1] === 'object'
-    ) {
-      // Detect additional metadata attatched to last arg and merge it with default metadata
-      if (args[args.length - 1].hasOwnProperty('metadata')) {
-        metadata = {};
-        Object.assign(metadata, args[args.length - 1].metadata);
-        delete args[args.length - 1].metadata;
+    if (typeof lastArg === 'object' && lastArg.constructor === Object) {
+      options = lastArg;
+      args = args.slice(0, args.length - 1);
+
+      // append additional metadata to the default values.
+      if (options.metadata) {
+        metadata = { ...metadata, ...options.metadata };
+        delete options.metadata;
       }
-      // Detect proxy address and route through DSProxy contract
-      if (args[args.length - 1].hasOwnProperty('dsProxyAddress')) {
-        dsProxyAddress = args[args.length - 1].dsProxyAddress;
-        delete args[args.length - 1].dsProxyAddress;
-      }
-      // If last arg item is an empty object, remove it
-      if (Object.keys(args[args.length - 1]).length === 0) args.pop();
-    }
-    return { additionalMetadata: metadata, dsProxyAddress };
-  }
-
-  formatHybridTx(contract, key, args, name, businessObject = null) {
-    // Strip the key to just the method name, in cases where the method was called
-    // using the full method sig e.g. contract["draw(address,uint256)"](foo, bar)
-    const method = key.replace(/\(.*\)$/g, '');
-
-    const metadata = { contract: name, method, args };
-    const {
-      additionalMetadata,
-      dsProxyAddress
-    } = this.parseContractFunctionArgs(args);
-
-    // Handle any additional metadata
-    if (additionalMetadata !== null) {
-      this.get('log').debug(
-        'Attaching additional tx metadata:',
-        additionalMetadata
-      );
-      Object.assign(metadata, additionalMetadata);
-    }
-
-    // DSProxy handling – different from the fact that this is a Proxy class ;)
-    if (dsProxyAddress !== null) {
-      this.get('log').debug(
-        'Calling ' + key + ' via DSProxy at ' + dsProxyAddress
-      );
-      const dsProxyContract = wrapContract(
-        new Contract(
-          dsProxyAddress,
-          dappHub.dsProxy,
-          this.get('web3')
-            .ethersProvider()
-            .getSigner()
-        ),
-        'DSProxy',
-        dappHub.dsProxy,
-        this,
-        businessObject
-      );
-      // Pass in any additional tx options passed to this tx (e.g. value, gasLimit)
-      // if the last arg is an object literal (not a BigNumber object etc.)
-      let options = {};
-      if (
-        typeof args[args.length - 1] === 'object' &&
-        args[args.length - 1].constructor === Object
-      ) {
-        Object.assign(options, args[args.length - 1]);
-        args.pop();
-      }
-      // Assign proxied tx metadata and options to proxy tx
-      Object.assign(options, { metadata });
-      // Get proxied tx calldata to pass to DSProxy
-      const data = contract.interface.functions[key](...args).data;
-      return dsProxyContract.execute(contract.address, data, options);
-    }
-
-    const contractCall = this.injectSettings(args).then(newArgs =>
-      contract[key](...newArgs)
-    );
-    return this.createHybridTx(contractCall, {
-      businessObject: businessObject,
-      metadata
-    });
-  }
-
-  async injectSettings(args) {
-    const settings = await this.getSettings();
-
-    if (
-      typeof args[args.length - 1] === 'object' &&
-      !Object.keys(args[args.length - 1]).includes('_bn')
-    ) {
-      merge(args[args.length - 1], settings);
     } else {
-      args.push(settings);
-    }
-    return args;
-  }
-
-  async getSettings() {
-    const nonce = await this.get('nonce').getNonce();
-    const options = this.get('web3').transactionSettings();
-    const settings = { nonce: nonce };
-
-    if (options) {
-      Object.keys(options).map(option => {
-        settings[option] = options[option];
-      });
+      options = {};
     }
 
-    return settings;
+    return this.createHybridTx(
+      // this async immediately-executed function wrapper is necessary to ensure
+      // that the hybrid tx gets wrapped around the async operation that gets
+      // the nonce. if we were to await outside of the wrapper, it would cause
+      // `formatHybridTx` to return a promise that resolved to the hybrid,
+      // instead of the hybrid itself, and then the hybrid's lifecycle hooks
+      // wouldn't be accessible.
+      (async () =>
+        this._execute(contract, method, args, {
+          ...options,
+          ...this.get('web3').transactionSettings(),
+          nonce: await this.get('nonce').getNonce()
+        }))(),
+      { businessObject, metadata }
+    );
   }
 
-  // FIXME: a method that returns one thing when it's called in a promise chain
-  // and something else when it's not (besides a promise that resolves to the
-  // first thing) is pretty difficult to work with.
   createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
     if (tx._original) {
       console.warn('Redundant call to createHybridTx');
@@ -189,5 +105,26 @@ export default class TransactionManager extends PublicService {
 
   onNewTransaction(callback) {
     this._listeners.push(callback);
+  }
+
+  // if options.dsProxyAddress is set, execute this contract method through the
+  // proxy contract at that address.
+  _execute(contract, method, args, options) {
+    if (!options.dsProxyAddress) return contract[method](...args, options);
+
+    const dsProxyAddress = options.dsProxyAddress;
+    delete options.dsProxyAddress;
+
+    this.get('log').debug(`Calling ${method} vis DSProxy at ${dsProxyAddress}`);
+    const dsProxyContract = new Contract(
+      dsProxyAddress,
+      dappHub.dsProxy,
+      this.get('web3')
+        .ethersProvider()
+        .getSigner()
+    );
+
+    const data = contract.interface.functions[method](...args).data;
+    return dsProxyContract.execute(contract.address, data, options);
   }
 }
