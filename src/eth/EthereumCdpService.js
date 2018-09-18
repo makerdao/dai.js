@@ -92,7 +92,7 @@ export default class EthereumCdpService extends PrivateService {
 
   async lockEth(cdpId, amount, unit = ETH) {
     const tx = await this._conversionService().convertEthToWeth(amount, unit);
-    await tx.confirm();
+    // await tx.confirm();
     return this.lockWeth(cdpId, amount);
   }
 

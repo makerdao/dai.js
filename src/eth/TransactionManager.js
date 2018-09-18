@@ -44,8 +44,8 @@ export default class TransactionManager extends PublicService {
       // wouldn't be accessible.
       (async () =>
         this._execute(contract, method, args, {
-          ...options,
           ...this.get('web3').transactionSettings(),
+          ...options,
           nonce: await this.get('nonce').getNonce()
         }))(),
       { businessObject, metadata }

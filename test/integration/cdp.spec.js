@@ -63,17 +63,23 @@ beforeAll(async () => {
   });
 
   await maker.authenticate();
+  cdp = await maker.getCdp(2745);
   tokenService = maker.service('token');
   dai = tokenService.getToken(tokens.DAI);
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
 });
 
+afterAll(async () => {
+  await convertPeth();
+  await convertWeth();
+});
+
 test('can create Maker instance', () => {
   expect(maker).toBeDefined();
 });
 
-test(
+xtest(
   'can open a CDP',
   async () => {
     cdp = await maker.openCdp();
@@ -165,7 +171,7 @@ test(
   10000000
 );
 
-test(
+xtest(
   'can shut a CDP',
   async () => {
     const tx = await cdp.shut();

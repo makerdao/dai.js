@@ -46,7 +46,7 @@ export default class OasisExchangeService extends PrivateService {
         buyToken.address(),
         minFillAmountEVM,
         {
-          gasLimit: 300000,
+          ...this.get('web3').transactionSettings(),
           nonce: nonce
         }
       ),
@@ -84,7 +84,7 @@ export default class OasisExchangeService extends PrivateService {
         sellTokenAddress,
         maxFillAmountEVM,
         {
-          gasLimit: 300000,
+          ...this.get('web3').transactionSettings(),
           nonce: nonce
         }
       ),
