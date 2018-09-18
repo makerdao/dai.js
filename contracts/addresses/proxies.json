@@ -1,10 +1,12 @@
 {
     "kovan": {
-        "SAI_PROXY": "0xbe20df25d09b76275a3043c87b31aa1bd47f1f6a",
-        "PROXY_REGISTRY": ""
+        "SAI_PROXY": "0xadb7c74bce932fc6c27dda3ac2344707d2fbb0e6",
+        "PROXY_REGISTRY": "0x64a436ae831c1672ae81f674cab8b6775df3475c",
+        "DS_PROXY_FACTORY": "0xe11e3b391f7e8bc47247866af32af67dd58dc800"
     },
     "mainnet": {
-        "SAI_PROXY": "",
-        "PROXY_REGISTRY": ""
+        "SAI_PROXY": "0x190c2cfc69e68a8e8d5e2b9e2b9cc3332caff77b",
+        "PROXY_REGISTRY": "0x4678f0a6958e4d2bc4f1baf7bc52e8f3564f3fe4",
+        "DS_PROXY_FACTORY": "0xa26e15c895efc0616177b7c1e7270a4c7d51c997"
     }
 }
