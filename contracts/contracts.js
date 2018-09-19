@@ -1,4 +1,4 @@
-const enums = {
+export default {
   SAI_PIP: 'SAI_PIP',
   SAI_PEP: 'SAI_PEP',
   SAI_PIT: 'SAI_PIT',
@@ -15,4 +15,3 @@ const enums = {
   DS_PROXY_FACTORY: 'DS_PROXY_FACTORY',
   DS_PROXY: 'DS_PROXY'
 };
-export default enums;

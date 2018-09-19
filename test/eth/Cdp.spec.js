@@ -12,7 +12,7 @@ import {
 } from '../../src/eth/Currency';
 import { promiseWait } from '../../src/utils';
 import { dappHub } from '../../contracts/abi';
-import testnetAddressesProxies from '../../contracts/abi/dsProxy/addresses.json';
+import testnetAddresses from '../../contracts/addresses/testnet.json';
 
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, smartContractService;
 
@@ -35,9 +35,9 @@ beforeAll(async () => {
 
   // Clear owner of DSProxy created during testchain deployment
   // (allowing us to create new DSProxy instances using the default address)
-  const owner = await getDsProxyOwner(testnetAddressesProxies.DS_PROXY);
+  const owner = await getDsProxyOwner(testnetAddresses.DS_PROXY);
   if (owner !== '0x0000000000000000000000000000000000000000') {
-    await clearDsProxyOwner(testnetAddressesProxies.DS_PROXY);
+    await clearDsProxyOwner(testnetAddresses.DS_PROXY);
   }
 });
 

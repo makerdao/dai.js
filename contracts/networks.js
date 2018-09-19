@@ -1,12 +1,8 @@
 import tokens from './tokens';
 import contracts from './contracts';
 import * as abiMap from './abi';
-
-import {
-  testnet as testAddresses,
-  kovan as kovanAddresses,
-  mainnet as mainnetAddresses
-} from './addresses';
+import kovanAddresses from './addresses/kovan.json';
+import mainnetAddresses from './addresses/mainnet.json';
 
 export function contractInfo(network) {
   let addresses;
@@ -18,7 +14,9 @@ export function contractInfo(network) {
       addresses = kovanAddresses;
       break;
     case 'test':
-      addresses = testAddresses;
+      // we "require just in time" here because a non-developer user will not
+      // have a testnet addresses file
+      addresses = require('./addresses/testnet.json');
       break;
   }
 
@@ -137,10 +135,10 @@ export function contractInfo(network) {
 }
 
 export default [
-  { name: 'mainnet', networkId: 1, addresses: contractInfo('mainnet') },
-  { name: 'morden', networkId: 2, addresses: null },
-  { name: 'ropsten', networkId: 3, addresses: null },
-  { name: 'rinkeby', networkId: 4, addresses: null },
-  { name: 'kovan', networkId: 42, addresses: contractInfo('kovan') },
-  { name: 'test', networkId: 999, addresses: contractInfo('test') }
+  { name: 'mainnet', networkId: 1, contracts: contractInfo('mainnet') },
+  { name: 'morden', networkId: 2, contracts: null },
+  { name: 'ropsten', networkId: 3, contracts: null },
+  { name: 'rinkeby', networkId: 4, contracts: null },
+  { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
+  { name: 'test', networkId: 999, contracts: contractInfo('test') }
 ];
