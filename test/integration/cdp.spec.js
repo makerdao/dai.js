@@ -1,6 +1,8 @@
 import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
 import { WETH } from '../../src/eth/Currency';
+import debug from 'debug';
+const log = debug('dai:testing');
 
 let maker, cdp, dai, exchange, address, tokenService;
 
@@ -41,7 +43,7 @@ async function checkWethBalance() {
       'Current balance is ' + wethBalance.toString() + ', depositing 0.1'
     );
     const tx = await maker.service('conversion').convertEthToWeth(0.1);
-    return await tx.confirm();
+    return tx.confirm();
   } else {
     return;
   }
@@ -56,7 +58,7 @@ beforeAll(async () => {
     privateKey: process.env.PRIVATE_KEY,
     web3: {
       transactionSettings: {
-        gasPrice: 12000000000,
+        gasPrice: 15000000000,
         gasLimit: 4000000
       }
     }
@@ -68,6 +70,19 @@ beforeAll(async () => {
   dai = tokenService.getToken(tokens.DAI);
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
+
+  maker.service('transactionManager').onNewTransaction(hybrid => {
+    const {
+      metadata: { contract, method } = { contract: '???', method: '???' },
+      _txId
+    } = hybrid;
+    const label = `tx ${_txId}: ${contract}.${method}`;
+    log(`${label}: new`);
+
+    hybrid.onPending(() => log(`${label}: pending`));
+    hybrid.onMined(() => log(`${label}: mined`));
+    hybrid.onFinalized(() => log(`${label}: confirmed`));
+  });
 });
 
 afterAll(async () => {
@@ -82,16 +97,19 @@ test('can create Maker instance', () => {
 xtest(
   'can open a CDP',
   async () => {
-    cdp = await maker.openCdp();
-    console.info('Opened new CDP');
+    log('test 1');
+    cdp = await maker.openCdp().confirm();
+
+    console.info('Opened new CDP', await cdp.getId());
     expect(cdp).toBeDefined();
   },
-  100000
+  300000
 );
 
 test(
   'can lock eth',
   async () => {
+    log('test 2');
     const tx = await cdp.lockEth(0.01);
     await tx.confirm();
     const collateral = await cdp.getCollateralValue();
@@ -101,24 +119,26 @@ test(
     );
     expect(collateral.toString()).toEqual('0.01 ETH');
   },
-  2000000
+  300000
 );
 
 test(
   'can withdraw Dai',
   async () => {
+    log('test 3');
     const tx = await cdp.drawDai(0.1);
     await tx.confirm();
     const debt = await cdp.getDebtValue();
     console.info('After attempting to draw Dai, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.10 DAI');
   },
-  1000000
+  300000
 );
 
 test(
   'can sell Dai',
   async () => {
+    log('test 4');
     const initialBalance = await dai.balanceOf(address);
     console.info(
       'Before attempting to sell Dai, balance is',
@@ -134,12 +154,13 @@ test(
     );
     expect(parseFloat(newBalance)).toBeLessThan(parseFloat(initialBalance));
   },
-  1000000
+  600000
 );
 
 test(
   'can buy Dai',
   async () => {
+    log('test 5');
     const initialBalance = await dai.balanceOf(address);
     console.info(
       'Before attempting to buy Dai, balance is',
@@ -156,24 +177,26 @@ test(
     );
     expect(parseFloat(newBalance)).toBeGreaterThan(parseFloat(initialBalance));
   },
-  1000000
+  600000
 );
 
 test(
   'can wipe debt',
   async () => {
+    log('test 6');
     const tx = await cdp.wipeDai('0.1');
     await tx.confirm();
     const debt = await cdp.getDebtValue();
     console.info('After attempting to wipe debt, CDP debt is', debt.toString());
     expect(debt.toString()).toEqual('0.00 DAI');
   },
-  10000000
+  300000
 );
 
 xtest(
   'can shut a CDP',
   async () => {
+    log('test 7');
     const tx = await cdp.shut();
     await tx.confirm();
     await convertPeth();
@@ -181,5 +204,5 @@ xtest(
     const info = await cdp.getInfo();
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
   },
-  1000000
+  300000
 );

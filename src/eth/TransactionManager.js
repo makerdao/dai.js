@@ -66,7 +66,7 @@ export default class TransactionManager extends PublicService {
       parseLogs
     );
 
-    const hybrid = txo.mine().then(() => txo.onMined());
+    const hybrid = txo.mine();
     Object.assign(
       hybrid,
       {
