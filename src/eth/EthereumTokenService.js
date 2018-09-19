@@ -88,7 +88,7 @@ export default class EthereumTokenService extends PrivateService {
       throw new Error('networkId not found');
     }
 
-    return mapping[0].addresses;
+    return mapping[0].contracts;
   }
 
   _selectTokenVersions(mapping) {

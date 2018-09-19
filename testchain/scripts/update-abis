@@ -7,16 +7,13 @@ LIB=$CWD/../lib
 
 mkdir -p $CONTRACTS/abi/dai/v1/
 rm -f $CONTRACTS/abi/dai/v1/*.json
-cp $LIB/sai/out/addresses.json $CONTRACTS/abi/dai/v1/
 cp $LIB/sai/out/*.abi $CONTRACTS/abi/dai/v1/
 cd $CONTRACTS/abi/dai/v1
 for file in *.abi; do
     mv "$file" "$(basename "$file" .abi).json"
 done
 rm -f *Test*.json *Fab.json Dev*.json
-cd -
-
-cp $LIB/sai-proxy/out/addresses.json $CONTRACTS/abi/dsProxy
+cd - >/dev/null
 
 # Copy DSProxy ABI into project
 mkdir -p $CONTRACTS/abi/dsProxy/
@@ -33,3 +30,5 @@ cp $LIB/sai-proxy/out/SaiProxyCreateAndExecute.abi $CONTRACTS/abi/saiProxy/v1.js
 # Copy ProxyRegistry ABI into project
 mkdir -p $CONTRACTS/abi/proxyRegistry/
 cp $LIB/proxy-registry/out/ProxyRegistry.abi $CONTRACTS/abi/proxyRegistry/v1.json
+
+cp $LIB/addresses.json $CONTRACTS/addresses/testnet.json
