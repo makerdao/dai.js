@@ -10,7 +10,6 @@ import dsProxy from './dsProxy/v1.json';
 import dsProxyFactory from './dsProxyFactory/v1.json';
 
 import makerOtc from './makerOtc/v1.json';
-import zeroExExchange from './zeroExExchange/v1.json';
 import saiProxy from './saiProxy/v1.json';
 import proxyRegistry from './proxyRegistry/v1.json';
 
@@ -41,7 +40,6 @@ const dappHub = {
 };
 
 const exchangesV1 = {
-  zeroExExchange,
   makerOtc
 };
 
