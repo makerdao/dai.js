@@ -43,32 +43,35 @@ if ! nc -z 127.0.0.1 2000; then
     git submodule update --init --recursive
   fi
 
+  # Configure seth
+  export ETH_GAS=${ETH_GAS:-"4000000"}
+  export SETH_STATUS=yes
+  export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
+  export ETH_RPC_URL=http://127.1:2000
+
+  # Start a testnet on port 2000
+  echo "Starting ganache-cli..."
+  ./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 \
+    -m "hill law jazz limb penalty escape public dish stand bracket blue jar" \
+    > ./ganache.out 2>&1 & netpid=$!
+
+  # Stop the testnet when this script exits
+  trap "kill $netpid" EXIT
+
+  # Wait for the testnet to become responsive
+  until curl -s -o/dev/null "$ETH_RPC_URL"; do sleep 1; done
+
+  # Finish configuring seth with settings from running testnet
+  export ETH_FROM=$(seth rpc eth_coinbase)
+
+  ############################
+  # build sai system
+
   # Fix sai deploy script
   sed_inplace '13s/DSToken.*/WETH9)/' $LIB/sai/bin/deploy
   # Change sai deploy scripts (deploy and deploy-fab) to skip dapp build if SKIP_BUILD_IF_ALREADY_BUILT is set and dapp is already built
   sed_inplace 's/^dapp build$/if [[ -z "$SKIP_BUILD_IF_ALREADY_BUILT" || ( -n "$SKIP_BUILD_IF_ALREADY_BUILT" \&\& ! -f out\/SaiTop.abi ) ]]; then dapp build; fi/' $LIB/sai/bin/deploy-fab
   sed_inplace 's/^dapp build$/# dapp build/' $LIB/sai/bin/deploy
-
-  # Speed up ethers.js polling
-  $CWD/set-polling-interval
-
-  # Start a local testnet on port 2000; set to stop on exit.
-  ./node_modules/.bin/ganache-cli -i 999 -p 2000 -a 1000 -m "hill law jazz limb penalty escape public dish stand bracket blue jar" >./ganache.out 2>&1 & netpid=$!
-  trap "kill $netpid" EXIT
-
-  # Wait until it's up, then use it for the deployment.
-  echo "Waiting for ganache-cli to start up..."
-  export ETH_RPC_URL=http://127.1:2000
-  until curl -s -o/dev/null "$ETH_RPC_URL"; do sleep 1; done
-
-  # Configure seth
-  export ETH_GAS=${ETH_GAS:-"4000000"}
-  export ETH_FROM=$(seth rpc eth_coinbase)
-  export SETH_STATUS=yes
-  export ETH_RPC_ACCOUNTS=yes # Don't use ethsign
-
-  ############################
-  # build sai system
 
   cd $LIB/sai
   if [[ -z "$SKIP_BUILD_IF_ALREADY_BUILT" || ( -n "$SKIP_BUILD_IF_ALREADY_BUILT" && ! -f out/SaiTop.abi ) ]]; then
