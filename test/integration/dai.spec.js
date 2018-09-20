@@ -4,7 +4,7 @@ import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 const log = debug('dai:testing');
 
-let maker, cdp, dai, exchange, address, tokenService;
+let maker, cdp, exchange, address, tokenService;
 
 async function convertPeth() {
   const peth = tokenService.getToken(tokens.PETH);
@@ -12,8 +12,7 @@ async function convertPeth() {
 
   if (pethBalance.toNumber() > 0.009) {
     console.info('Remaining PETH balance is', pethBalance.toString());
-    const tx = await peth.exit(pethBalance.toNumber().toFixed(2));
-    await tx.confirm();
+    await peth.exit(pethBalance.toNumber().toFixed(2)).confirm();
     console.info('Exited remaining PETH');
   } else {
     console.info('No remaining PETH to exit');
@@ -26,8 +25,7 @@ async function convertWeth() {
 
   if (wethBalance.toNumber() > 0.009) {
     console.info('Remaining WETH balance is', wethBalance.toString());
-    const tx = await weth.withdraw(wethBalance.toNumber().toFixed(2));
-    await tx.confirm();
+    await weth.withdraw(wethBalance.toNumber().toFixed(2)).confirm();
     console.info('Withdrew remaining WETH');
   } else {
     console.info('No remaining WETH to withdraw');
@@ -38,11 +36,11 @@ async function checkWethBalance() {
   const weth = tokenService.getToken(tokens.WETH);
   const wethBalance = await weth.balanceOf(address);
 
-  if (wethBalance.toNumber() < 0.1) {
+  if (wethBalance.toNumber() < 0.01) {
     console.log(
-      'Current balance is ' + wethBalance.toString() + ', depositing 0.1'
+      'Current balance is ' + wethBalance.toString() + ', depositing 0.01'
     );
-    const tx = await maker.service('conversion').convertEthToWeth(0.1);
+    const tx = await maker.service('conversion').convertEthToWeth(0.01);
     return tx.confirm();
   } else {
     return;
@@ -65,9 +63,7 @@ beforeAll(async () => {
   });
 
   await maker.authenticate();
-  cdp = await maker.getCdp(2745);
   tokenService = maker.service('token');
-  dai = tokenService.getToken(tokens.DAI);
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
 
@@ -85,21 +81,14 @@ beforeAll(async () => {
   });
 });
 
-afterAll(async () => {
-  await convertPeth();
-  await convertWeth();
-});
-
 test('can create Maker instance', () => {
   expect(maker).toBeDefined();
 });
 
-xtest(
+test(
   'can open a CDP',
   async () => {
-    log('test 1');
     cdp = await maker.openCdp().confirm();
-
     console.info('Opened new CDP', await cdp.getId());
     expect(cdp).toBeDefined();
   },
@@ -109,28 +98,23 @@ xtest(
 test(
   'can lock eth',
   async () => {
-    log('test 2');
+    const initialCollateral = await cdp.getCollateralValue();
     const tx = await cdp.lockEth(0.01);
     await tx.confirm();
     const collateral = await cdp.getCollateralValue();
-    console.info(
-      'After attempting to lock eth, collateral value is',
-      collateral.toString()
-    );
-    expect(collateral.toString()).toEqual('0.01 ETH');
+    expect(collateral.toNumber()).toBeGreaterThan(initialCollateral.toNumber());
   },
-  300000
+  600000
 );
 
 test(
   'can withdraw Dai',
   async () => {
-    log('test 3');
+    const initialDebt = await cdp.getDebtValue();
     const tx = await cdp.drawDai(0.1);
     await tx.confirm();
-    const debt = await cdp.getDebtValue();
-    console.info('After attempting to draw Dai, CDP debt is', debt.toString());
-    expect(debt.toString()).toEqual('0.10 DAI');
+    const currentDebt = await cdp.getDebtValue();
+    expect(currentDebt.toNumber()).toBeGreaterThan(initialDebt.toNumber());
   },
   300000
 );
@@ -138,21 +122,16 @@ test(
 test(
   'can sell Dai',
   async () => {
-    log('test 4');
-    const initialBalance = await dai.balanceOf(address);
-    console.info(
-      'Before attempting to sell Dai, balance is',
-      initialBalance.toString()
-    );
-    const order = await exchange.sellDai('0.1', WETH);
-    await order._hybrid;
-    await order._hybrid.confirm();
-    const newBalance = await dai.balanceOf(address);
-    console.info(
-      'After attempting to sell Dai, balance is',
-      newBalance.toString()
-    );
-    expect(parseFloat(newBalance)).toBeLessThan(parseFloat(initialBalance));
+    let tx, error;
+
+    try {
+      tx = await exchange.sellDai('0.1', WETH);
+    } catch (err) {
+      error = err;
+    }
+
+    expect(tx).toBeDefined();
+    expect(error).toBeUndefined();
   },
   600000
 );
@@ -160,22 +139,17 @@ test(
 test(
   'can buy Dai',
   async () => {
-    log('test 5');
-    const initialBalance = await dai.balanceOf(address);
-    console.info(
-      'Before attempting to buy Dai, balance is',
-      initialBalance.toString()
-    );
+    let tx, error;
     await checkWethBalance();
-    const order = await exchange.buyDai('0.1', WETH);
-    await order._hybrid;
-    await order._hybrid.confirm();
-    const newBalance = await dai.balanceOf(address);
-    console.info(
-      'After attempting to buy Dai, balance is',
-      newBalance.toString()
-    );
-    expect(parseFloat(newBalance)).toBeGreaterThan(parseFloat(initialBalance));
+
+    try {
+      tx = await exchange.buyDai('0.1', WETH);
+    } catch (err) {
+      error = err;
+    }
+
+    expect(tx).toBeDefined();
+    expect(error).toBeUndefined();
   },
   600000
 );
@@ -183,26 +157,23 @@ test(
 test(
   'can wipe debt',
   async () => {
-    log('test 6');
+    const initialDebt = await cdp.getDebtValue();
     const tx = await cdp.wipeDai('0.1');
     await tx.confirm();
-    const debt = await cdp.getDebtValue();
-    console.info('After attempting to wipe debt, CDP debt is', debt.toString());
-    expect(debt.toString()).toEqual('0.00 DAI');
+    const currentDebt = await cdp.getDebtValue();
+    expect(initialDebt.toNumber()).toBeGreaterThan(currentDebt.toNumber());
   },
-  300000
+  600000
 );
 
-xtest(
+test(
   'can shut a CDP',
   async () => {
-    log('test 7');
-    const tx = await cdp.shut();
-    await tx.confirm();
+    await cdp.shut();
     await convertPeth();
     await convertWeth();
     const info = await cdp.getInfo();
     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
   },
-  300000
+  1200000
 );
