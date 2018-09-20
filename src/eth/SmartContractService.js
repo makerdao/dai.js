@@ -54,7 +54,11 @@ export default class SmartContractService extends PublicService {
     const contracts = this._getAllContractInfo();
     for (let name of Object.keys(contracts)) {
       const versions = contracts[name];
-      if (versions.find(info => info.address && info.address.toUpperCase() === address)) {
+      if (
+        versions.find(
+          info => info.address && info.address.toUpperCase() === address
+        )
+      ) {
         return name;
       }
     }
@@ -181,7 +185,7 @@ export default class SmartContractService extends PublicService {
       mapping = networks.find(m => m.networkId === id);
 
     if (!mapping) throw new Error(`Network ID ${id} not found in mapping.`);
-    const infos = mapping.addresses;
+    const infos = mapping.contracts;
     if (this._addedContracts) {
       const infos2 = { ...infos, ...this._addedContracts };
       return infos2;
