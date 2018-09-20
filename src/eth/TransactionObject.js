@@ -38,14 +38,10 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._hash;
   }
 
-  error() {
-    return this._errorMessage;
-  }
-
   async mine() {
     if (!this._dataPromise) this._dataPromise = this._getTransactionData();
     await this._dataPromise;
-    return this;
+    return this._returnValue();
   }
 
   async confirm(count = 3) {
@@ -60,6 +56,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       throw new Error('transaction block hash changed');
     }
     this.setFinalized();
+    return this._returnValue();
   }
 
   async _getTransactionData() {
@@ -112,9 +109,9 @@ export default class TransactionObject extends TransactionLifeCycle {
       }
       this.setMined();
     } catch (err) {
-      this._errorMessage = err.message;
       await this._nonceService.setCounts();
       this.setError(err);
+      throw err;
     }
     return this;
   }

@@ -12,7 +12,7 @@ import {
 } from '../../src/eth/Currency';
 import { promiseWait } from '../../src/utils';
 import { dappHub } from '../../contracts/abi';
-import testnetAddressesProxies from '../../contracts/abi/dsProxy/addresses.json';
+import testnetAddresses from '../../contracts/addresses/testnet.json';
 
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, smartContractService;
 
@@ -35,9 +35,9 @@ beforeAll(async () => {
 
   // Clear owner of DSProxy created during testchain deployment
   // (allowing us to create new DSProxy instances using the default address)
-  const owner = await getDsProxyOwner(testnetAddressesProxies.DS_PROXY);
+  const owner = await getDsProxyOwner(testnetAddresses.DS_PROXY);
   if (owner !== '0x0000000000000000000000000000000000000000') {
-    await clearDsProxyOwner(testnetAddressesProxies.DS_PROXY);
+    await clearDsProxyOwner(testnetAddresses.DS_PROXY);
   }
 });
 
@@ -181,6 +181,8 @@ const sharedTests = openCdp => {
 
         beforeEach(async () => {
           snapshotId = await takeSnapshot();
+          await promiseWait(1100);
+          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
         });
 
         afterEach(async () => {
@@ -192,8 +194,6 @@ const sharedTests = openCdp => {
           await cdpService.get('price').setMkrPrice(600);
           // block.timestamp is measured in seconds, so we need to wait at least a
           // second for the fees to get updated
-          await promiseWait(1500);
-          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
           const usdFee = await cdp.getGovernanceFee();
           expect(usdFee.gt(0)).toBeTruthy();
           const mkrFee = await cdp.getGovernanceFee(MKR);
@@ -202,17 +202,13 @@ const sharedTests = openCdp => {
 
         test('wipe debt with non-zero stability fee', async () => {
           const mkr = cdpService.get('token').getToken(MKR);
-          const firstDebtAmount = await cdp.getDebtValue();
-          const firstMkrBalance = MKR(
-            await mkr.balanceOf(currentAccount)
-          ).toNumber();
+          const debt1 = await cdp.getDebtValue();
+          const balance1 = await mkr.balanceOf(currentAccount);
           await cdp.wipeDai(1);
-          const secondDebtAmount = await cdp.getDebtValue();
-          const secondMkrBalance = MKR(
-            await mkr.balanceOf(currentAccount)
-          ).toNumber();
-          expect(firstDebtAmount.minus(secondDebtAmount)).toEqual(DAI(1));
-          expect(firstMkrBalance).toBeGreaterThan(secondMkrBalance);
+          const debt2 = await cdp.getDebtValue();
+          const balance2 = await mkr.balanceOf(currentAccount);
+          expect(debt1.minus(debt2)).toEqual(DAI(1));
+          expect(balance1.gt(balance2)).toBeTruthy();
         });
 
         test('fail to wipe debt due to lack of MKR', async () => {
