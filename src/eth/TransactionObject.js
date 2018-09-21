@@ -44,7 +44,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._returnValue();
   }
 
-  async confirm(count = 3) {
+  async confirm(count = 5) {
     await this.mine();
 
     const newBlockNumber = this._receipt.blockNumber + count;
