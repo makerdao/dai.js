@@ -34,15 +34,15 @@
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
     "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
-    "coverage": "./scripts/run-testnet.sh --ci jest --runInBand --coverage",
+    "coverage": "./scripts/run-testchain.sh --ci jest --runInBand --coverage",
     "lint": "eslint web src test",
     "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "prettier --write --single-quote '{src,web,test,contracts}/**/*.js'",
-    "test": "./scripts/run-testnet.sh --ci jest --runInBand",
-    "test:watch": "./scripts/run-testnet.sh --ci jest --watch --runInBand",
+    "test": "./scripts/run-testchain.sh --ci jest --runInBand",
+    "test:watch": "./scripts/run-testchain.sh --ci jest --watch --runInBand",
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
-    "test:net": "./scripts/run-testnet.sh"
+    "test:net": "./scripts/run-testchain.sh"
   },
   "lint-staged": {
     "./{src,web,test,contracts}/**/*.js": [
