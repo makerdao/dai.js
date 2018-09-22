@@ -220,7 +220,9 @@ const sharedTests = openCdp => {
             await cdp.wipeDai(1);
           } catch (err) {
             expect(err).toBeTruthy();
-            expect(err.message).toMatch(/revert/);
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
           }
         });
       });
