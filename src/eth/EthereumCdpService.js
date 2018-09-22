@@ -94,7 +94,8 @@ export default class EthereumCdpService extends PrivateService {
     return this._findCdp(id, dsProxyAddress);
   }
 
-  shut(cdpId) {
+  async shut(cdpId) {
+    await this._checkEnoughMkr(cdpId);
     const hexCdpId = numberToBytes32(cdpId);
     return Promise.all([
       this.get('allowance').requireAllowance(MKR, this._tubContract().address),
@@ -459,6 +460,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async shutProxy(dsProxyAddress, cdpId, useOtc = false) {
+    await this._checkEnoughMkr(cdpId);
     const hexCdpId = numberToBytes32(cdpId);
 
     // Only require MKR allowance if paying fee using MKR (if using OTC, no need to approve MKR right now)
