@@ -51,7 +51,11 @@ export default class OasisExchangeService extends PrivateService {
         }
       ),
       this.get('transactionManager'),
-      currency
+      currency,
+      {
+        method: 'sellAllAmount',
+        value: amount
+      }
     );
   }
 

@@ -17,8 +17,8 @@ export const defaultProviderConfig = {
     provider: { type: ProviderType.TEST },
     transactionSettings: {
       gasLimit: 4000000
-    }
-    // confirmedBlockCount: 0
+    },
+    confirmedBlockCount: 0
   },
   log: false
 };

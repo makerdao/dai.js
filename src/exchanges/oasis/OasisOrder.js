@@ -19,9 +19,14 @@ export default class OasisOrder {
     return this._hybrid.getOriginalTransaction().timestamp();
   }
 
-  transact(oasisContract, transaction, transactionManager) {
+  transact(oasisContract, transaction, transactionManager, metadata) {
     return transactionManager.createHybridTx(transaction, {
       businessObject: this,
+      // metadata: {
+      //   contract: 'OasisContract',
+      //   method: metadata.method || '???',
+      //   value: metadata.value || '???'
+      // },
       parseLogs: receiptLogs => {
         const LogTradeEvent = oasisContract.interface.events.LogTrade;
         const LogTradeTopic = utils.keccak256(
@@ -69,12 +74,19 @@ export class OasisSellOrder extends OasisOrder {
     this._unit = currency;
   }
 
-  static build(oasisContract, transaction, transactionManager, currency) {
+  static build(
+    oasisContract,
+    transaction,
+    transactionManager,
+    currency,
+    metadata
+  ) {
     const order = new OasisSellOrder(currency);
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionManager
+      transactionManager,
+      metadata
     );
     return order._hybrid;
   }

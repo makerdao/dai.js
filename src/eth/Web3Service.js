@@ -20,6 +20,7 @@ export default class Web3Service extends PrivateService {
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     this._defaultEmitter = null;
     this._transactionSettings = null;
+    this._confirmedBlockCount = null;
 
     Web3ServiceList.push(this);
   }
@@ -80,14 +81,13 @@ export default class Web3Service extends PrivateService {
         'getBalance'
       ])
     );
-
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
       provider: { ...settings.provider }
     });
     this._transactionSettings = settings.transactionSettings;
-    this._confirmedBlockCount = settings._confirmedBlockCount;
+    this._confirmedBlockCount = settings.confirmedBlockCount;
   }
 
   async connect() {

@@ -13,6 +13,7 @@ let service;
 beforeAll(async () => {
   service = buildTestEthereumTokenService();
   await service.manager().authenticate();
+  service.get('web3')._confirmedBlockCount = 3;
 });
 
 function createTestTransaction(srv = service) {

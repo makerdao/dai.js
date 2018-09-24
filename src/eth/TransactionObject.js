@@ -44,20 +44,32 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._returnValue();
   }
 
-  async confirm(count = 3) {
-    // console.log(this._web3Service.confirmedBlockCount());
-    await this.mine();
+  async confirm(delay) {
+    let count;
 
-    const newBlockNumber = this._receipt.blockNumber + count;
-    await this._web3Service.waitForBlockNumber(newBlockNumber);
-    const newReceipt = await this._ethersProvider.getTransactionReceipt(
-      this._hash
-    );
-    if (newReceipt.blockHash !== this._receipt.blockHash) {
-      throw new Error('transaction block hash changed');
+    if (delay) {
+      count = delay;
+    } else if (typeof this._web3Service.confirmedBlockCount() === 'number') {
+      count = this._web3Service.confirmedBlockCount();
+    } else {
+      count = 5;
     }
-    this.setFinalized();
-    return this._returnValue();
+
+    if (count > 0) {
+      await this.mine();
+      const newBlockNumber = this._receipt.blockNumber + count;
+      await this._web3Service.waitForBlockNumber(newBlockNumber);
+      const newReceipt = await this._ethersProvider.getTransactionReceipt(
+        this._hash
+      );
+      if (newReceipt.blockHash !== this._receipt.blockHash) {
+        throw new Error('transaction block hash changed');
+      }
+      this.setFinalized();
+      return this._returnValue();
+    } else {
+      return;
+    }
   }
 
   async _getTransactionData() {
