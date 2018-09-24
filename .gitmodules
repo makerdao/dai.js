@@ -1,18 +1,4 @@
-[submodule "lib/ds-test"]
-	path = testchain/lib/ds-test
-	url = https://github.com/dapphub/ds-test
-[submodule "lib/sai"]
-	path = testchain/lib/sai
-	url = https://github.com/makerdao/sai
-[submodule "lib/maker-otc"]
-	path = testchain/lib/maker-otc
-	url = https://github.com/makerdao/maker-otc
-[submodule "lib/ds-proxy"]
-	path = testchain/lib/ds-proxy
-	url = https://github.com/dapphub/ds-proxy
-[submodule "lib/sai-proxy"]
-	path = testchain/lib/sai-proxy
-	url = https://github.com/makerdao/sai-proxy
-[submodule "lib/proxy-registry"]
-	path = testchain/lib/proxy-registry
-	url = https://github.com/makerdao/proxy-registry
+[submodule "testchain"]
+	path = testchain
+	url = https://github.com/makerdao/testchain
+	branch = dai.js

@@ -11,7 +11,7 @@ import {
   MKR
 } from '../../src/eth/Currency';
 import { promiseWait } from '../../src/utils';
-import { dappHub } from '../../contracts/abi';
+import { dappHub } from '../../contracts/abis';
 import testnetAddresses from '../../contracts/addresses/testnet.json';
 
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, smartContractService;

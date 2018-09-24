@@ -22,7 +22,7 @@ Maker's entire suite of contracts will eventually be accessible through this lib
 
 ## Usage
 
-Use NPM to install the library:
+Use NPM or Yarn to install the library:
 ```
 npm install @makerdao/dai
 ```
@@ -64,25 +64,29 @@ For example code that consumes the library, check out [this repository](https://
 ## Developing
 
 1. `git clone https://github.com/makerdao/dai.js`
-2. `npm install`
+2. `yarn install`
 
 ### Running the tests
 
-The test suite is configured to run on a Ganache test chain. Before running the tests (`npm test`), the test chain will start, and the script will deploy all the Maker contracts to the chain.
+The test suite is configured to run on a Ganache test chain. Before running the tests with `yarn test`, the test chain will start from a snapshot that has the Maker contracts deployed to it.
 
-To avoid waiting for this process every time you run the tests, use the command `npm run test:watch`.
+If you want to re-run the tests whenever you make a change to the code, use `yarn test:watch`.
 
-If you want to deploy the contracts to a test chain independently from the test suite, use `npm run test:net`.
+If you want to start a test chain and leave it running, use `yarn test:net`.
+
+### Handling changes to contract code
+
+If you have deployed contract code changes to the testchain, run `scripts/install-testchain-outputs.sh` to copy any updated ABI files and contract addresses to their expected locations.
 
 ### Commands
 
-- `npm run build:backend` - create backend build in `dist` folder
-- `npm run build:frontend` - create a UMD build in `dist` folder
-- `npm run lint` - run an ESLint check
-- `npm run coverage` - run code coverage and generate report in the `coverage` folder
-- `npm test` - start a test chain and run all tests
-- `npm run test:watch` - start a test chain and run all tests in watch mode
-- `npm run test:net` - just start a test chain
+- `yarn build:backend` - create backend build in `dist` folder
+- `yarn build:frontend` - create a UMD build in `dist` folder
+- `yarn lint` - run an ESLint check
+- `yarn coverage` - run code coverage and generate report in the `coverage` folder
+- `yarn test` - start a test chain and run all tests
+- `yarn test:watch` - start a test chain and run all tests in watch mode
+- `yarn test:net` - just start a test chain
 
 ## License
 
