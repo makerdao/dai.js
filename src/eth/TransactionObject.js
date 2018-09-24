@@ -44,7 +44,8 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._returnValue();
   }
 
-  async confirm(count = 5) {
+  async confirm(count = 3) {
+    // console.log(this._web3Service.confirmedBlockCount());
     await this.mine();
 
     const newBlockNumber = this._receipt.blockNumber + count;

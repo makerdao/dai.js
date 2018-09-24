@@ -40,8 +40,10 @@ async function checkWethBalance() {
     console.log(
       'Current balance is ' + wethBalance.toString() + ', depositing 0.01'
     );
-    const tx = await maker.service('conversion').convertEthToWeth(0.01);
-    return tx.confirm();
+    return await maker
+      .service('conversion')
+      .convertEthToWeth(0.01)
+      .confirm();
   } else {
     return;
   }

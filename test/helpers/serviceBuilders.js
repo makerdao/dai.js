@@ -18,6 +18,7 @@ export const defaultProviderConfig = {
     transactionSettings: {
       gasLimit: 4000000
     }
+    // confirmedBlockCount: 0
   },
   log: false
 };

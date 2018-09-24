@@ -52,6 +52,10 @@ export default class Web3Service extends PrivateService {
     return this._transactionSettings;
   }
 
+  confirmedBlockCount() {
+    return this._confirmedBlockCount;
+  }
+
   web3Contract(abi, address) {
     return this._web3.eth.contract(abi).at(address);
   }
@@ -83,6 +87,7 @@ export default class Web3Service extends PrivateService {
       provider: { ...settings.provider }
     });
     this._transactionSettings = settings.transactionSettings;
+    this._confirmedBlockCount = settings._confirmedBlockCount;
   }
 
   async connect() {
