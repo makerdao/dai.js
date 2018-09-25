@@ -9,11 +9,13 @@ export default class Cdp {
     this._transactionManager = this._smartContractService.get(
       'transactionManager'
     );
-    if (cdpId === null) {
-      this._cdpIdPromise = this._newCdpPromise();
+
+    if (!cdpId) {
+      this._create();
     } else {
-      this._cdpIdPromise = Promise.resolve(cdpId);
+      this.id = cdpId;
     }
+
     this._emitterInstance = this._cdpService.get('event').buildEmitter();
     this.on = this._emitterInstance.on;
     this._emitterInstance.registerPollEvents({
@@ -27,39 +29,35 @@ export default class Cdp {
     });
   }
 
-  _captureCdpIdPromise(tubContract) {
+  _create() {
+    const tubContract = this._smartContractService.getContractByName(
+      contracts.SAI_TUB
+    );
+
     const currentAccount = this._smartContractService
       .get('web3')
       .currentAccount();
 
-    return new Promise(resolve => {
+    const getId = new Promise(resolve => {
       tubContract.onlognewcup = function(address, cdpIdBytes32) {
         if (currentAccount.toLowerCase() == address.toLowerCase()) {
-          const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
           this.removeListener();
-          resolve(cdpId);
+          resolve(ethersUtils.bigNumberify(cdpIdBytes32).toNumber());
         }
       };
     });
-  }
 
-  _newCdpPromise() {
-    const tubContract = this._smartContractService.getContractByName(
-      contracts.SAI_TUB,
-      { hybrid: false }
+    this._transactionObject = this._transactionManager.createHybridTx(
+      (async () => {
+        const [id, openResult] = await Promise.all([getId, tubContract.open()]);
+        this.id = id;
+        return openResult;
+      })(),
+      {
+        businessObject: this,
+        metadata: { contract: 'SAI_TUB', method: 'open' }
+      }
     );
-    const captureCdpIdPromise = this._captureCdpIdPromise(tubContract);
-
-    // FIXME push this back down into SmartContractService
-    this._transactionObject = this._transactionManager.formatHybridTx(
-      tubContract,
-      'open',
-      [],
-      'SAI_TUB',
-      this
-    );
-
-    return captureCdpIdPromise.then(result => result);
   }
 
   transactionObject() {
@@ -67,7 +65,7 @@ export default class Cdp {
   }
 
   getId() {
-    return this._cdpIdPromise;
+    return Promise.resolve(this.id);
   }
 }
 
@@ -96,8 +94,8 @@ const passthroughMethods = [
 Object.assign(
   Cdp.prototype,
   passthroughMethods.reduce((acc, name) => {
-    acc[name] = async function(...args) {
-      return this._cdpService[name](await this.getId(), ...args);
+    acc[name] = function(...args) {
+      return this._cdpService[name](this.id, ...args);
     };
     return acc;
   }, {})
