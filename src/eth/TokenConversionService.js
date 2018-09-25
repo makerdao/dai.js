@@ -25,8 +25,27 @@ export default class TokenConversionService extends PrivateService {
     return pethToken.join(amount, unit);
   }
 
-  async convertEthToPeth(value) {
-    await this.convertEthToWeth(value);
-    return this.convertWethToPeth(value);
+  async convertEthToPeth(amount) {
+    await this.convertEthToWeth(amount);
+    return this.convertWethToPeth(amount);
+  }
+
+  convertWethToEth(amount, unit = WETH) {
+    return this._getToken(WETH).withdraw(getCurrency(amount, unit));
+  }
+
+  async convertPethToWeth(amount, unit = WETH) {
+    const pethToken = this._getToken(PETH);
+
+    await this.get('allowance').requireAllowance(
+      PETH,
+      this.get('smartContract').getContractByName(contracts.SAI_TUB).address
+    );
+    return pethToken.exit(amount, unit);
+  }
+
+  async convertPethToEth(amount) {
+    await this.convertPethToWeth(amount);
+    return this.convertWethToEth(amount);
   }
 }

@@ -48,10 +48,7 @@ export default class TransactionObject extends TransactionLifeCycle {
   async confirm(delay = this._confirmedBlockCount) {
     let count;
     typeof delay === 'number' ? (count = delay) : (count = 5);
-
-    if (count <= 0) {
-      return;
-    }
+    if (count <= 0) return;
 
     await this.mine();
     const newBlockNumber = this._receipt.blockNumber + count;
