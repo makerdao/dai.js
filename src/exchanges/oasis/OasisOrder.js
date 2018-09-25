@@ -22,11 +22,6 @@ export default class OasisOrder {
   transact(oasisContract, transaction, transactionManager, metadata) {
     return transactionManager.createHybridTx(transaction, {
       businessObject: this,
-      // metadata: {
-      //   contract: 'OasisContract',
-      //   method: metadata.method || '???',
-      //   value: metadata.value || '???'
-      // },
       parseLogs: receiptLogs => {
         const LogTradeEvent = oasisContract.interface.events.LogTrade;
         const LogTradeTopic = utils.keccak256(
@@ -44,7 +39,8 @@ export default class OasisOrder {
           total = total.add(parsedLog[this._logKey]);
         });
         this._fillAmount = this._unit.wei(total.toString());
-      }
+      },
+      metadata: metadata
     });
   }
 }
@@ -56,12 +52,13 @@ export class OasisBuyOrder extends OasisOrder {
     this._unit = DAI;
   }
 
-  static build(oasisContract, transaction, transactionManager) {
+  static build(oasisContract, transaction, transactionManager, metadata) {
     const order = new OasisBuyOrder();
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionManager
+      transactionManager,
+      metadata
     );
     return order._hybrid;
   }
@@ -78,8 +75,8 @@ export class OasisSellOrder extends OasisOrder {
     oasisContract,
     transaction,
     transactionManager,
-    currency,
-    metadata
+    metadata,
+    currency
   ) {
     const order = new OasisSellOrder(currency);
     order._hybrid = order.transact(

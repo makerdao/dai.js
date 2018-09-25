@@ -51,11 +51,11 @@ export default class OasisExchangeService extends PrivateService {
         }
       ),
       this.get('transactionManager'),
-      currency,
       {
-        method: 'sellAllAmount',
-        value: amount
-      }
+        contract: 'MAKER_OTC',
+        method: 'sellAllAmount'
+      },
+      currency
     );
   }
 
@@ -92,7 +92,11 @@ export default class OasisExchangeService extends PrivateService {
           nonce: nonce
         }
       ),
-      this.get('transactionManager')
+      this.get('transactionManager'),
+      {
+        contract: 'MAKER_OTC',
+        method: 'buyAllAmount'
+      }
     );
   }
 
