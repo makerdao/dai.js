@@ -81,18 +81,22 @@ test(
         ]);
       })
       .then(balances => {
-        senderBalance = parseFloat(balances[0]);
-        receiverBalance = parseFloat(balances[1]);
+        senderBalance = ETH(balances[0]);
+        receiverBalance = ETH(balances[1]);
         return token.transfer(receiver, '0.1');
       })
       .then(() =>
         Promise.all([token.balanceOf(sender), token.balanceOf(receiver)])
       )
       .then(balances => {
-        const newSenderBalance = parseFloat(balances[0].toString()),
-          newReceiverBalance = parseFloat(balances[1].toString());
-        expect(newSenderBalance).toBeCloseTo(senderBalance - 0.1, 12);
-        expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
+        const newSenderBalance = ETH(balances[0]),
+          newReceiverBalance = ETH(balances[1]);
+        expect(newReceiverBalance.minus(0.1).eq(receiverBalance)).toBeTruthy();
+        // sender also pays tx fee, so their balance is lower
+        expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
+          senderBalance.toNumber(),
+          3
+        );
         done();
       });
   },
@@ -122,8 +126,8 @@ test(
         ]);
       })
       .then(balances => {
-        senderBalance = parseFloat(balances[0]);
-        receiverBalance = parseFloat(balances[1]);
+        senderBalance = ETH(balances[0]);
+        receiverBalance = ETH(balances[1]);
         return token.transferFrom(sender, receiver, '0.1');
       })
       .then(() => {
@@ -133,10 +137,14 @@ test(
         ]);
       })
       .then(balances => {
-        const newSenderBalance = parseFloat(balances[0].toString()),
-          newReceiverBalance = parseFloat(balances[1].toString());
-        expect(newSenderBalance).toBeCloseTo(senderBalance - 0.1, 12);
-        expect(newReceiverBalance).toBeCloseTo(receiverBalance + 0.1, 12);
+        const newSenderBalance = ETH(balances[0]),
+          newReceiverBalance = ETH(balances[1]);
+        expect(newReceiverBalance.minus(0.1).eq(receiverBalance)).toBeTruthy();
+        // sender also pays tx fee, so their balance is lower
+        expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
+          senderBalance.toNumber(),
+          3
+        );
         done();
       });
   },

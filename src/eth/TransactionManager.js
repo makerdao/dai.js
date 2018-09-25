@@ -1,7 +1,7 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
 import { Contract } from 'ethers';
-import { dappHub } from '../../contracts/abi';
+import { dappHub } from '../../contracts/abis';
 
 let txId = 1;
 
