@@ -20,6 +20,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._ethersProvider = web3Service.ethersProvider();
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
+    this._confirmedBlockCount = this._web3Service.confirmedBlockCount();
   }
 
   timeStampSubmitted() {
@@ -44,32 +45,25 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._returnValue();
   }
 
-  async confirm(delay) {
+  async confirm(delay = this._confirmedBlockCount) {
     let count;
+    typeof delay === 'number' ? (count = delay) : (count = 5);
 
-    if (delay) {
-      count = delay;
-    } else if (typeof this._web3Service.confirmedBlockCount() === 'number') {
-      count = this._web3Service.confirmedBlockCount();
-    } else {
-      count = 5;
-    }
-
-    if (count > 0) {
-      await this.mine();
-      const newBlockNumber = this._receipt.blockNumber + count;
-      await this._web3Service.waitForBlockNumber(newBlockNumber);
-      const newReceipt = await this._ethersProvider.getTransactionReceipt(
-        this._hash
-      );
-      if (newReceipt.blockHash !== this._receipt.blockHash) {
-        throw new Error('transaction block hash changed');
-      }
-      this.setFinalized();
-      return this._returnValue();
-    } else {
+    if (count <= 0) {
       return;
     }
+
+    await this.mine();
+    const newBlockNumber = this._receipt.blockNumber + count;
+    await this._web3Service.waitForBlockNumber(newBlockNumber);
+    const newReceipt = await this._ethersProvider.getTransactionReceipt(
+      this._hash
+    );
+    if (newReceipt.blockHash !== this._receipt.blockHash) {
+      throw new Error('transaction block hash changed');
+    }
+    this.setFinalized();
+    return this._returnValue();
   }
 
   async _getTransactionData() {
