@@ -86,6 +86,8 @@ Since these networks run much more slowly than Ganache, you might want to set th
 
 `export DEBUG="dai:testing"`
 
+You can also run these tests on the local test network with the command `yarn test:integration`.
+
 ### Handling changes to contract code
 
 If you have deployed contract code changes to the testchain, run `scripts/install-testchain-outputs.sh` to copy any updated ABI files and contract addresses to their expected locations.
@@ -101,6 +103,7 @@ If you have deployed contract code changes to the testchain, run `scripts/instal
 - `yarn test:net` - just start a test chain
 - `yarn test:kovan` - run integration tests on Kovan
 - `yarn test:mainnet` - run integration tests on mainnet
+- `yarn test:integration` - run integration tests on Ganache
 
 ## License
 
