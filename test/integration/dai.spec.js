@@ -59,8 +59,10 @@ beforeAll(async () => {
 
   process.env.NETWORK === 'test'
     ? (settings = {
-        web3: { transactionSettings: { gasLimit: 4000000 } },
-        confirmedBlockCount: 0,
+        web3: {
+          transactionSettings: { gasLimit: 4000000 },
+          confirmedBlockCount: 0
+        },
         provider: { type: ProviderType.TEST }
       })
     : (settings = {
@@ -79,7 +81,6 @@ beforeAll(async () => {
   tokenService = maker.service('token');
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
-
   maker.service('transactionManager').onNewTransaction(hybrid => {
     const {
       metadata: { contract, method } = { contract: '???', method: '???' },

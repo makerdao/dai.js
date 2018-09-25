@@ -81,13 +81,14 @@ export default class Web3Service extends PrivateService {
         'getBalance'
       ])
     );
+    // console.log(settings.confirmedBlockCount, typeof settings.confirmedBlockCount)
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
       provider: { ...settings.provider }
     });
     this._transactionSettings = settings.transactionSettings;
-    this._confirmedBlockCount = settings.confirmedBlockCount;
+    this._confirmedBlockCount = parseInt(settings.confirmedBlockCount);
   }
 
   async connect() {
