@@ -7,6 +7,10 @@ export default class OasisOrder {
     this._hybrid = null;
   }
 
+  orderTransaction() {
+    return this._hybrid;
+  }
+
   fillAmount() {
     return this._fillAmount;
   }

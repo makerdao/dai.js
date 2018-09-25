@@ -107,6 +107,10 @@ class TransactionLifeCycle {
     return this._onStateChange(pending, mined, handler);
   }
 
+  onConfirmed(handler) {
+    return this._onStateChange(mined, finalized, handler);
+  }
+
   onFinalized(handler) {
     return this._onStateChange(mined, finalized, handler);
   }

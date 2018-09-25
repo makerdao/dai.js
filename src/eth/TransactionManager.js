@@ -86,6 +86,7 @@ export default class TransactionManager extends PublicService {
         'onPending',
         'onMined',
         'onFinalized',
+        'onConfirmed',
         'onError'
       ].reduce((acc, method) => {
         acc[method] = (...args) => txo[method](...args);

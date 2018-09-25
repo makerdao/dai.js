@@ -44,6 +44,22 @@ test('event listeners work as promises', async () => {
   await tx.confirm();
 });
 
+test('onConfirmed alias works like onFinalized', async () => {
+  expect.assertions(1);
+  const tx = createTestTransaction();
+
+  // create more blocks so that the original tx gets confirmed
+  for (let i = 0; i < 3; i++) {
+    createTestTransaction();
+  }
+
+  tx.onConfirmed().then(tx => {
+    expect(tx.state()).toBe(TransactionState.finalized);
+  });
+
+  await tx.confirm();
+});
+
 test('get fees', async () => {
   const tx = await createTestTransaction().mine();
   expect(tx.fees().gt(ETH.wei(20000))).toBeTruthy();
