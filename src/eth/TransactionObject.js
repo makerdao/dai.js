@@ -35,10 +35,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._fees;
   }
 
-  hash() {
-    return this._hash;
-  }
-
   async mine() {
     if (!this._dataPromise) this._dataPromise = this._getTransactionData();
     await this._dataPromise;
@@ -54,7 +50,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     const newBlockNumber = this._receipt.blockNumber + count;
     await this._web3Service.waitForBlockNumber(newBlockNumber);
     const newReceipt = await this._ethersProvider.getTransactionReceipt(
-      this._hash
+      this.hash
     );
     if (newReceipt.blockHash !== this._receipt.blockHash) {
       throw new Error('transaction block hash changed');
@@ -67,13 +63,13 @@ export default class TransactionObject extends TransactionLifeCycle {
     try {
       let gasPrice = null;
       let tx = await this._transaction;
-      this._hash = tx.hash;
+      this.hash = tx.hash;
       this.setPending(); // set state to pending
 
       // when you're on a local testnet, a single call to getTransaction should
       // be enough. but on a remote net, it may take multiple calls.
       for (let i = 0; i < 10; i++) {
-        tx = await this._ethersProvider.getTransaction(this._hash);
+        tx = await this._ethersProvider.getTransaction(this.hash);
         if (tx) break;
         await promiseWait(1500);
       }
@@ -87,10 +83,10 @@ export default class TransactionObject extends TransactionLifeCycle {
       // it to be mined.
       if (!tx.blockHash) {
         const startTime = new Date();
-        log(`waitForTransaction ${this._hash}`);
-        tx = await this._ethersProvider.waitForTransaction(this._hash);
+        log(`waitForTransaction ${this.hash}`);
+        tx = await this._ethersProvider.waitForTransaction(this.hash);
         const elapsed = (new Date() - startTime) / 1000;
-        log(`waitForTransaction ${this._hash} done in ${elapsed}s`);
+        log(`waitForTransaction ${this.hash} done in ${elapsed}s`);
       }
 
       gasPrice = tx.gasPrice;
@@ -122,7 +118,7 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _waitForReceipt(retries = 5) {
     const result = Promise.resolve(
-      this._ethersProvider.getTransactionReceipt(this._hash)
+      this._ethersProvider.getTransactionReceipt(this.hash)
     );
 
     if (retries < 1) return result;
