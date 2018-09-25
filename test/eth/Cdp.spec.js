@@ -11,7 +11,7 @@ import {
   MKR
 } from '../../src/eth/Currency';
 import { promiseWait } from '../../src/utils';
-import { dappHub } from '../../contracts/abi';
+import { dappHub } from '../../contracts/abis';
 import testnetAddresses from '../../contracts/addresses/testnet.json';
 
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, smartContractService;
@@ -220,7 +220,24 @@ const sharedTests = openCdp => {
             await cdp.wipeDai(1);
           } catch (err) {
             expect(err).toBeTruthy();
-            expect(err.message).toMatch(/revert/);
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
+        test('fail to shut due to lack of MKR', async () => {
+          expect.assertions(2);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+          try {
+            await cdp.shut();
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
           }
         });
       });

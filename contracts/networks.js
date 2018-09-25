@@ -1,6 +1,6 @@
 import tokens from './tokens';
 import contracts from './contracts';
-import * as abiMap from './abi';
+import * as abis from './abis';
 import kovanAddresses from './addresses/kovan.json';
 import mainnetAddresses from './addresses/mainnet.json';
 
@@ -26,7 +26,7 @@ export function contractInfo(network) {
       {
         version: 1,
         address: addresses.SAI,
-        abi: abiMap.general.erc20,
+        abi: abis.general.erc20,
         decimals: 18
       }
     ],
@@ -34,7 +34,7 @@ export function contractInfo(network) {
       {
         version: 1,
         address: addresses.GEM,
-        abi: abiMap.dappHub.dsEthToken,
+        abi: abis.dappHub.dsEthToken,
         decimals: 18
       }
     ],
@@ -42,7 +42,7 @@ export function contractInfo(network) {
       {
         version: 1,
         address: addresses.SKR,
-        abi: abiMap.general.erc20,
+        abi: abis.general.erc20,
         decimals: 18
       }
     ],
@@ -51,47 +51,47 @@ export function contractInfo(network) {
         version: 1,
         address:
           addresses.GOV_OLD || '0x0000000000000000000000000000000000000001',
-        abi: abiMap.general.erc20,
+        abi: abis.general.erc20,
         decimals: 18
       },
       {
         version: 2,
         address: addresses.GOV,
-        abi: abiMap.general.erc20,
+        abi: abis.general.erc20,
         decimals: 18
       }
     ],
 
     // SAI
     [contracts.SAI_TOP]: [
-      { version: 1, address: addresses.TOP, abi: abiMap.daiV1.saiTop }
+      { version: 1, address: addresses.TOP, abi: abis.daiV1.saiTop }
     ],
     [contracts.SAI_PIP]: [
-      { version: 1, address: addresses.PIP, abi: abiMap.dappHub.dsValue }
+      { version: 1, address: addresses.PIP, abi: abis.dappHub.dsValue }
     ],
     [contracts.SAI_PEP]: [
-      { version: 1, address: addresses.PEP, abi: abiMap.dappHub.dsValue }
+      { version: 1, address: addresses.PEP, abi: abis.dappHub.dsValue }
     ],
     [contracts.SAI_PIT]: [
-      { version: 1, address: addresses.PIT, abi: abiMap.daiV1.pit }
+      { version: 1, address: addresses.PIT, abi: abis.daiV1.pit }
     ],
     [contracts.SAI_SIN]: [
-      { version: 1, address: addresses.SIN, abi: abiMap.general.erc20 }
+      { version: 1, address: addresses.SIN, abi: abis.general.erc20 }
     ],
     [contracts.SAI_DAD]: [
-      { version: 1, address: addresses.DAD, abi: abiMap.dappHub.dsGuard }
+      { version: 1, address: addresses.DAD, abi: abis.dappHub.dsGuard }
     ],
     [contracts.SAI_MOM]: [
-      { version: 1, address: addresses.MOM, abi: abiMap.daiV1.mom }
+      { version: 1, address: addresses.MOM, abi: abis.daiV1.mom }
     ],
     [contracts.SAI_VOX]: [
-      { version: 1, address: addresses.VOX, abi: abiMap.daiV1.vox }
+      { version: 1, address: addresses.VOX, abi: abis.daiV1.vox }
     ],
     [contracts.SAI_TAP]: [
-      { version: 1, address: addresses.TAP, abi: abiMap.daiV1.tap }
+      { version: 1, address: addresses.TAP, abi: abis.daiV1.tap }
     ],
     [contracts.SAI_TUB]: [
-      { version: 1, address: addresses.TUB, abi: abiMap.daiV1.tub }
+      { version: 1, address: addresses.TUB, abi: abis.daiV1.tub }
     ],
 
     // Exchanges
@@ -99,7 +99,7 @@ export function contractInfo(network) {
       {
         version: 1,
         address: addresses.MAKER_OTC,
-        abi: abiMap.exchangesV1.makerOtc
+        abi: abis.exchangesV1.makerOtc
       }
     ],
 
@@ -108,27 +108,27 @@ export function contractInfo(network) {
       {
         version: 1,
         address: addresses.SAI_PROXY,
-        abi: abiMap.proxies.saiProxy
+        abi: abis.proxies.saiProxy
       }
     ],
     [contracts.DS_PROXY_FACTORY]: [
       {
         version: 1,
         address: addresses.DS_PROXY_FACTORY,
-        abi: abiMap.proxies.dsProxyFactory
+        abi: abis.proxies.dsProxyFactory
       }
     ],
     [contracts.DS_PROXY]: [
       {
         version: 1,
-        abi: abiMap.dappHub.dsProxy
+        abi: abis.dappHub.dsProxy
       }
     ],
     [contracts.PROXY_REGISTRY]: [
       {
         version: 1,
         address: addresses.PROXY_REGISTRY,
-        abi: abiMap.proxies.proxyRegistry
+        abi: abis.proxies.proxyRegistry
       }
     ]
   };

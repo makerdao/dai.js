@@ -16,10 +16,7 @@ copyfiles \
   README.md \
   LICENSE \
   package.json \
-  contracts/abi/**/* \
-  contracts/abi/dai/**/* \
+  contracts/abis/* \
   src/config/presets/* \
-  contracts/addresses/daiV1.json \
-  contracts/addresses/exchanges.json \
-  contracts/addresses/proxies.json \
+  contracts/addresses/* \
   dist
