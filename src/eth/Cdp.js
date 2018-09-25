@@ -94,7 +94,7 @@ const passthroughMethods = [
 Object.assign(
   Cdp.prototype,
   passthroughMethods.reduce((acc, name) => {
-    acc[name] = async function(...args) {
+    acc[name] = function(...args) {
       return this._cdpService[name](this.id, ...args);
     };
     return acc;
