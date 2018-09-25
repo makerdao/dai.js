@@ -2,6 +2,7 @@ import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
 import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
+import ProviderType from '../../src/eth/web3/ProviderType';
 const log = debug('dai:testing');
 
 let maker, cdp, exchange, address, tokenService;
@@ -50,19 +51,29 @@ async function checkWethBalance() {
 }
 
 beforeAll(async () => {
-  if (!process.env.PRIVATE_KEY) {
+  if (!process.env.PRIVATE_KEY && process.env.NETWORK !== 'test') {
     throw new Error('Please set a private key to run integration tests.');
   }
 
-  maker = Maker.create(process.env.NETWORK, {
-    privateKey: process.env.PRIVATE_KEY,
-    web3: {
-      transactionSettings: {
-        gasPrice: 15000000000,
-        gasLimit: 4000000
-      }
-    }
-  });
+  let settings;
+
+  process.env.NETWORK === 'test'
+    ? (settings = {
+        web3: { transactionSettings: { gasLimit: 4000000 } },
+        confirmedBlockCount: 0,
+        provider: { type: ProviderType.TEST }
+      })
+    : (settings = {
+        privateKey: process.env.PRIVATE_KEY,
+        web3: {
+          transactionSettings: {
+            gasPrice: 15000000000,
+            gasLimit: 4000000
+          }
+        }
+      });
+
+  maker = Maker.create(process.env.NETWORK, settings);
 
   await maker.authenticate();
   tokenService = maker.service('token');

@@ -44,7 +44,8 @@
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
     "test:net": "./scripts/run-testchain.sh",
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./integration-config.json",
-    "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./integration-config.json"
+    "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./integration-config.json",
+    "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./integration-config.json" 
   },
   "lint-staged": {
     "./{src,web,test,contracts}/**/*.js": [
