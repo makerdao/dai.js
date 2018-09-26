@@ -1,8 +1,13 @@
-module.exports = function() {
-  /* eslint-disable */
-  process.on('unhandledRejection', err => {
-    console.error('Unhandled rejection is:', err);
-  });
+let addedLogger = false;
 
-  console.log('\nInstalled unhandledRejection logger.');
+module.exports = function() {
+  if (!addedLogger) {
+    /* eslint-disable */
+    process.on('unhandledRejection', err => {
+      console.error('Unhandled rejection is:', err);
+    });
+
+    console.log('\nInstalled unhandledRejection logger.');
+    addedLogger = true;
+  }
 };
