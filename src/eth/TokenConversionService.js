@@ -1,6 +1,6 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
-import { ETH, PETH, WETH } from './Currency';
+import { PETH, WETH } from './Currency';
 
 export default class TokenConversionService extends PrivateService {
   constructor(name = 'conversion') {
@@ -11,8 +11,8 @@ export default class TokenConversionService extends PrivateService {
     return this.get('token').getToken(token);
   }
 
-  convertEthToWeth(amount, unit = ETH, options) {
-    return this._getToken(WETH).deposit(amount, unit, options);
+  convertEthToWeth(amount, options) {
+    return this._getToken(WETH).deposit(amount, options);
   }
 
   async convertWethToPeth(amount, unit = WETH) {

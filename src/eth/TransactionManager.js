@@ -9,6 +9,37 @@ const log = debug('dai:testing');
 
 let txId = 1;
 
+// decorator definition
+export function tracksTransactions(target, name, descriptor) {
+  const original = descriptor.value;
+  descriptor.value = function(...args) {
+    const lastArg = args[args.length - 1];
+    let options;
+    if (typeof lastArg === 'object' && lastArg.constructor === Object) {
+      args = args.slice(0, args.length - 1);
+      options = lastArg;
+    } else {
+      options = {};
+    }
+
+    const promise = (async () => {
+      // this "no-op await" is necessary for the inner reference to the
+      // outer promise to become valid
+      await 0;
+
+      options.promise = promise;
+      const newArgs = [...args, options];
+      const inner = original.apply(this, newArgs);
+      log(`inner reference to wrapper promise: ${uniqueId(promise)}`);
+      return inner;
+    })();
+
+    log(`wrapper promise: ${uniqueId(promise)}`);
+    return promise;
+  };
+  return descriptor;
+}
+
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
     super(name, ['web3', 'log', 'nonce']);
@@ -150,6 +181,9 @@ export default class TransactionManager extends PublicService {
   getTx(promise, label) {
     const key = this._getKeyForPromise(promise);
     const ret = this._trackedPromises[key];
+    if (!ret) {
+      throw new Error(`Promise with id ${key} has no transactions.`);
+    }
     log(`getTx for ${key}, ${label || 'no label'}: ${!!ret}`);
     return label ? ret[label] : ret;
   }
