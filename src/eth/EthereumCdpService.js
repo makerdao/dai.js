@@ -156,8 +156,6 @@ export default class EthereumCdpService extends PrivateService {
 
   @tracksTransactions
   async wipeDai(cdpId, amount, { unit = DAI, promise }) {
-    await this._checkEnoughMkr(cdpId);
-    const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     await this.enoughMkrToWipe(cdpId, amount, unit);
     const hexCdpId = numberToBytes32(cdpId);
