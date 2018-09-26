@@ -1,5 +1,11 @@
-import { buildTestContainer } from '../helpers/serviceBuilders';
+import {
+  buildTestContainer,
+  buildTestEthereumCdpService
+} from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
+import { uniqueId } from '../../src/utils';
+import debug from 'debug';
+const log = debug('dai:testing');
 
 function buildTestServices() {
   const container = buildTestContainer({
@@ -119,4 +125,40 @@ test('formatHybridTx adds nonce, web3 settings, lifecycle hooks', async () => {
     [currentAccount, 20000],
     { gasLimit: 1234567, nonce: expect.any(Number) }
   );
+});
+
+test('confirm', async () => {
+  const service = buildTestEthereumCdpService({
+    log: true
+  });
+  await service.manager().authenticate();
+  const txMgr = service.get('smartContract').get('transactionManager');
+  const priceService = service.get('price');
+  // const web3Service = service.get('smartContract').get('web3');
+  const ethPrice = await priceService.getEthPrice();
+
+  // do busywork to create new blocks, assuming insta-mining is on
+  const waitForNewBlocks = async (count = 5) => {
+    for (let i = 0; i < count; i++) {
+      await priceService.setEthPrice(ethPrice);
+      // log('block:', web3Service.blockNumber());
+    }
+  };
+
+  const cdp = await service.openCdp();
+  const lock = cdp.lockEth(1);
+  log('lock id:', uniqueId(lock));
+  await lock;
+  await Promise.all([
+    txMgr.getTx(lock, 'deposit').confirm(),
+    waitForNewBlocks()
+  ]);
+
+  log('\ndraw');
+  const draw = cdp.drawDai(1);
+  await Promise.all([txMgr.confirm(draw), waitForNewBlocks()]);
+
+  log('\nwipe');
+  const wipe = cdp.wipeDai(1);
+  await Promise.all([txMgr.confirm(wipe), waitForNewBlocks()]);
 });

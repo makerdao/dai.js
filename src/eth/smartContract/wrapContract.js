@@ -14,6 +14,7 @@ export function wrapContract(contract, name, abi, txManager, businessObject) {
       nonConstantFns[name] = true;
     }
   }
+
   // The functions in ethers.Contract are set up as read-only, non-configurable
   // properties, which means if we try to change their values with Proxy, we
   // get an error. See https://stackoverflow.com/a/48495509/56817 for more

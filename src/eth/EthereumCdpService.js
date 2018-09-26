@@ -105,9 +105,16 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  async lockEth(cdpId, amount, unit = ETH) {
-    await this._conversionService().convertEthToWeth(amount, unit);
-    return this.lockWeth(cdpId, amount);
+  lockEth(cdpId, amount, unit = ETH) {
+    const promise = (async () => {
+      await 0;
+      await this._conversionService().convertEthToWeth(amount, unit, {
+        promise,
+        txLabel: 'deposit'
+      });
+      return this.lockWeth(cdpId, amount);
+    })();
+    return promise;
   }
 
   async lockWeth(cdpId, amount, unit = WETH) {
@@ -140,15 +147,22 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().draw(hexCdpId, value);
   }
 
-  async wipeDai(cdpId, amount, unit = DAI) {
-    await this._checkEnoughMkr(cdpId);
-    const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-    await Promise.all([
-      this.get('allowance').requireAllowance(MKR, this._tubContract().address),
-      this.get('allowance').requireAllowance(DAI, this._tubContract().address)
-    ]);
-    return this._tubContract().wipe(hexCdpId, value);
+  wipeDai(cdpId, amount, unit = DAI) {
+    const promise = (async () => {
+      await this._checkEnoughMkr(cdpId);
+      const hexCdpId = numberToBytes32(cdpId);
+      const value = getCurrency(amount, unit).toEthersBigNumber('wei');
+      await Promise.all([
+        this.get('allowance').requireAllowance(
+          MKR,
+          this._tubContract().address
+        ),
+        this.get('allowance').requireAllowance(DAI, this._tubContract().address)
+      ]);
+      return this._tubContract().wipe(hexCdpId, value, { promise });
+    })();
+
+    return promise;
   }
 
   getInfo(cdpId) {

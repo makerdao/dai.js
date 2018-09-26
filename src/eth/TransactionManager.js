@@ -2,6 +2,10 @@ import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
+import { uniqueId } from '../utils';
+import { has } from 'lodash';
+import debug from 'debug';
+const log = debug('dai:testing');
 
 let txId = 1;
 
@@ -10,11 +14,14 @@ export default class TransactionManager extends PublicService {
     super(name, ['web3', 'log', 'nonce']);
     this._transactions = [];
     this._listeners = [];
+    this._trackedPromises = {};
   }
 
   formatHybridTx(contract, method, args, name, businessObject = null) {
     if (!args) args = [];
     let options,
+      promiseToTrack,
+      txLabel,
       metadata = {
         contract: name,
         method: method.replace(/\(.*\)$/g, ''),
@@ -31,25 +38,58 @@ export default class TransactionManager extends PublicService {
         metadata = { ...metadata, ...options.metadata };
         delete options.metadata;
       }
+
+      if (has(options, 'promise')) {
+        if (!options.promise) {
+          throw new Error('promise is set but falsy?!');
+        }
+        promiseToTrack = options.promise;
+        delete options.promise;
+      }
+
+      if (options.txLabel) {
+        txLabel = options.txLabel;
+        delete options.txLabel;
+      }
     } else {
       options = {};
     }
 
-    return this.createHybridTx(
-      // this async immediately-executed function wrapper is necessary to ensure
-      // that the hybrid tx gets wrapped around the async operation that gets
-      // the nonce. if we were to await outside of the wrapper, it would cause
-      // `formatHybridTx` to return a promise that resolved to the hybrid,
-      // instead of the hybrid itself, and then the hybrid's lifecycle hooks
-      // wouldn't be accessible.
-      (async () =>
-        this._execute(contract, method, args, {
-          ...options,
-          ...this.get('web3').transactionSettings(),
-          nonce: await this.get('nonce').getNonce()
-        }))(),
-      { businessObject, metadata }
+    // this async immediately-executed function wrapper is necessary to ensure
+    // that the hybrid tx gets wrapped around the async operation that gets
+    // the nonce. if we were to await outside of the wrapper, it would cause
+    // `formatHybridTx` to return a promise that resolved to the hybrid,
+    // instead of the hybrid itself, and then the hybrid's lifecycle hooks
+    // wouldn't be accessible.
+    const innerTx = (async () =>
+      this._execute(contract, method, args, {
+        ...options,
+        ...this.get('web3').transactionSettings(),
+        nonce: await this.get('nonce').getNonce()
+      }))();
+
+    const hybrid = this.createHybridTx(innerTx, { businessObject, metadata });
+
+    const key = this._getKeyForPromise(promiseToTrack || hybrid);
+    log(
+      `tracking ${name}.${method},` +
+        `${promiseToTrack ? ' passed promise,' : ''}` +
+        `${txLabel ? ` labeled "${txLabel}",` : ''} with id ${key}`
     );
+
+    if (txLabel) {
+      if (!this._trackedPromises[key]) {
+        this._trackedPromises[key] = {};
+      }
+      this._trackedPromises[key][txLabel] = hybrid;
+    } else {
+      if (this._trackedPromises[key]) {
+        log('Uh oh! Collision without label.');
+      }
+      this._trackedPromises[key] = hybrid;
+    }
+
+    return hybrid;
   }
 
   createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
@@ -105,6 +145,22 @@ export default class TransactionManager extends PublicService {
 
   onNewTransaction(callback) {
     this._listeners.push(callback);
+  }
+
+  getTx(promise, label) {
+    const key = this._getKeyForPromise(promise);
+    const ret = this._trackedPromises[key];
+    log(`getTx for ${key}, ${label || 'no label'}: ${!!ret}`);
+    return label ? ret[label] : ret;
+  }
+
+  async confirm(promise, label, count) {
+    await promise;
+    return this.getTx(promise, label).confirm(count);
+  }
+
+  _getKeyForPromise(promise) {
+    return uniqueId(promise);
   }
 
   // if options.dsProxyAddress is set, execute this contract method through the
