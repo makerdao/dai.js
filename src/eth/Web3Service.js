@@ -20,7 +20,6 @@ export default class Web3Service extends PrivateService {
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     this._defaultEmitter = null;
     this._transactionSettings = null;
-    this._confirmedBlockCount = null;
 
     Web3ServiceList.push(this);
   }
