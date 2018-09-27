@@ -141,7 +141,8 @@ export default class Web3Service extends PrivateService {
 
   async waitForBlockNumber(blockNumber) {
     if (blockNumber < this._currentBlock) {
-      throw new Error('Cannot wait for past block ' + blockNumber);
+      console.error('Attempted to wait for past block ' + blockNumber);
+      return;
     }
 
     if (blockNumber === this._currentBlock) {

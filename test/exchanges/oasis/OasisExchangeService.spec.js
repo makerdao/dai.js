@@ -2,6 +2,7 @@ import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
 import { DAI, ETH, WETH } from '../../../src/eth/Currency';
 import { utils } from 'ethers';
+import { mineBlocks } from '../../helpers/transactionConfirmation';
 
 let oasisExchangeService;
 
@@ -77,7 +78,9 @@ async function createDaiAndPlaceLimitOrder(
   sellDai = false
 ) {
   const cdp = await oasisExchangeService.get('cdp').openCdp();
-  await cdp.lockEth(0.1);
+  const tx = cdp.lockEth(0.1);
+  mineBlocks(oasisExchangeService.get('token'));
+  await tx;
   await cdp.drawDai(1);
   return _placeLimitOrder(oasisExchangeService, sellDai);
 }
