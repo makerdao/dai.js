@@ -102,7 +102,8 @@ test('can create Maker instance', () => {
 test(
   'can open a CDP',
   async () => {
-    cdp = await maker.openCdp().confirm();
+    cdp = await maker.openCdp();
+    await cdp.transactionObject().confirm();
     console.info('Opened new CDP', await cdp.getId());
     expect(cdp).toBeDefined();
   },
@@ -133,7 +134,9 @@ test(
   300000
 );
 
-test(
+// FIXME: The buy/sell tests will fail on Ganache, but can be
+// unskipped for both mainnet and kovan
+xtest(
   'can sell Dai',
   async () => {
     let tx, error;
@@ -141,6 +144,7 @@ test(
     try {
       tx = await exchange.sellDai('0.1', WETH);
     } catch (err) {
+      console.error(err);
       error = err;
     }
 
@@ -150,7 +154,7 @@ test(
   600000
 );
 
-test(
+xtest(
   'can buy Dai',
   async () => {
     let tx, error;
@@ -159,6 +163,7 @@ test(
     try {
       tx = await exchange.buyDai('0.1', WETH);
     } catch (err) {
+      console.error(err);
       error = err;
     }
 
