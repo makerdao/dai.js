@@ -55,25 +55,24 @@ beforeAll(async () => {
     throw new Error('Please set a private key to run integration tests.');
   }
 
-  let settings;
-
-  process.env.NETWORK === 'test'
-    ? (settings = {
-        web3: {
-          transactionSettings: { gasLimit: 4000000 },
-          confirmedBlockCount: '0'
-        },
-        provider: { type: ProviderType.TEST }
-      })
-    : (settings = {
-        privateKey: process.env.PRIVATE_KEY,
-        web3: {
-          transactionSettings: {
-            gasPrice: 15000000000,
-            gasLimit: 4000000
-          }
+  const settings =
+    process.env.NETWORK === 'test'
+      ? {
+          web3: {
+            transactionSettings: { gasLimit: 4000000 },
+            confirmedBlockCount: '0'
+          },
+          provider: { type: ProviderType.TEST }
         }
-      });
+      : {
+          privateKey: process.env.PRIVATE_KEY,
+          web3: {
+            transactionSettings: {
+              gasPrice: 15000000000,
+              gasLimit: 4000000
+            }
+          }
+        };
 
   maker = Maker.create(process.env.NETWORK, settings);
 
@@ -136,7 +135,7 @@ test(
 
 // FIXME: The buy/sell tests will fail on Ganache, but can be
 // unskipped for both mainnet and kovan
-xtest(
+test(
   'can sell Dai',
   async () => {
     let tx, error;
@@ -154,7 +153,7 @@ xtest(
   600000
 );
 
-xtest(
+test(
   'can buy Dai',
   async () => {
     let tx, error;
