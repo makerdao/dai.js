@@ -1,6 +1,7 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
 import { PETH, WETH } from './Currency';
+import tracksTransactions from '../utils/tracksTransactions';
 
 export default class TokenConversionService extends PrivateService {
   constructor(name = 'conversion') {
@@ -15,14 +16,16 @@ export default class TokenConversionService extends PrivateService {
     return this._getToken(WETH).deposit(amount, options);
   }
 
-  async convertWethToPeth(amount, unit = WETH) {
-    const pethToken = this._getToken(PETH);
+  @tracksTransactions
+  async convertWethToPeth(amount, { unit = WETH, promise } = {}) {
+    const pethContract = this._getToken(PETH);
 
     await this.get('allowance').requireAllowance(
       WETH,
-      this.get('smartContract').getContractByName(contracts.SAI_TUB).address
+      this.get('smartContract').getContractByName(contracts.SAI_TUB).address,
+      { promise }
     );
-    return pethToken.join(amount, unit);
+    return pethContract.join(amount, { unit, promise });
   }
 
   async convertEthToPeth(value) {

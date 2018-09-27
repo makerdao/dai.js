@@ -10,7 +10,7 @@ export default class WethToken extends Erc20Token {
     return this._contract.name();
   }
 
-  deposit(amount, { unit = ETH, ...options }) {
+  deposit(amount, { unit = ETH, ...options } = {}) {
     return this._contract.deposit({
       value: this._valueForContract(amount, unit),
       ...options

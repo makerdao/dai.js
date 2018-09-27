@@ -5,47 +5,13 @@ import { dappHub } from '../../contracts/abis';
 import { uniqueId } from '../utils';
 import { has } from 'lodash';
 import debug from 'debug';
-const log = debug('dai:testing');
-
-let txId = 1;
-
-// decorator definition
-export function tracksTransactions(target, name, descriptor) {
-  const original = descriptor.value;
-  descriptor.value = function(...args) {
-    const lastArg = args[args.length - 1];
-    let options;
-    if (typeof lastArg === 'object' && lastArg.constructor === Object) {
-      args = args.slice(0, args.length - 1);
-      options = lastArg;
-    } else {
-      options = {};
-    }
-
-    const promise = (async () => {
-      // this "no-op await" is necessary for the inner reference to the
-      // outer promise to become valid
-      await 0;
-
-      options.promise = promise;
-      const newArgs = [...args, options];
-      const inner = original.apply(this, newArgs);
-      log(`inner reference to wrapper promise: ${uniqueId(promise)}`);
-      return inner;
-    })();
-
-    log(`wrapper promise: ${uniqueId(promise)}`);
-    return promise;
-  };
-  return descriptor;
-}
+const log = debug('dai:testing:txMgr');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
     super(name, ['web3', 'log', 'nonce']);
-    this._transactions = [];
     this._listeners = [];
-    this._trackedPromises = {};
+    this._tracker = new Tracker();
   }
 
   formatHybridTx(contract, method, args, name, businessObject = null) {
@@ -71,10 +37,11 @@ export default class TransactionManager extends PublicService {
       }
 
       if (has(options, 'promise')) {
-        if (!options.promise) {
-          throw new Error('promise is set but falsy?!');
+        if (options.promise) {
+          promiseToTrack = options.promise;
+        } else {
+          log('hmm. promise is set but falsy');
         }
-        promiseToTrack = options.promise;
         delete options.promise;
       }
 
@@ -99,102 +66,57 @@ export default class TransactionManager extends PublicService {
         nonce: await this.get('nonce').getNonce()
       }))();
 
-    const hybrid = this.createHybridTx(innerTx, { businessObject, metadata });
-
-    const key = this._getKeyForPromise(promiseToTrack || hybrid);
-    log(
-      `tracking ${name}.${method},` +
-        `${promiseToTrack ? ' passed promise,' : ''}` +
-        `${txLabel ? ` labeled "${txLabel}",` : ''} with id ${key}`
-    );
-
-    if (txLabel) {
-      if (!this._trackedPromises[key]) {
-        this._trackedPromises[key] = {};
-      }
-      this._trackedPromises[key][txLabel] = hybrid;
-    } else {
-      if (this._trackedPromises[key]) {
-        log('Uh oh! Collision without label.');
-      }
-      this._trackedPromises[key] = hybrid;
-    }
-
-    return hybrid;
-  }
-
-  createHybridTx(tx, { businessObject, parseLogs, metadata } = {}) {
-    if (tx._original) {
-      console.warn('Redundant call to createHybridTx');
-      return tx;
-    }
-
-    const txo = new TransactionObject(
-      tx,
-      this.get('web3'),
-      this.get('nonce'),
+    return this.createHybridTx(innerTx, {
       businessObject,
-      parseLogs
-    );
-
-    const hybrid = txo.mine();
-    Object.assign(
-      hybrid,
-      {
-        _original: txo,
-        getOriginalTransaction: () => txo,
-        _txId: txId++,
-        metadata // put whatever you want in here for inspecting/debugging
-      },
-      [
-        'mine',
-        'confirm',
-        'state',
-        'isPending',
-        'isMined',
-        'isFinalized',
-        'isError',
-        'onPending',
-        'onMined',
-        'onFinalized',
-        'onError'
-      ].reduce((acc, method) => {
-        acc[method] = (...args) => txo[method](...args);
-        return acc;
-      }, {})
-    );
-
-    this._transactions.push(hybrid);
-    this._listeners.forEach(cb => cb(hybrid));
-
-    return hybrid;
+      metadata,
+      promise: promiseToTrack,
+      txLabel
+    });
   }
 
-  getTransactions() {
-    return this._transactions;
+  // FIXME: this should be renamed, because it no longer creates a hybrid
+  createHybridTx(tx, { businessObject, parseLogs, metadata, promise } = {}) {
+    const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
+      businessObject,
+      parseLogs,
+      metadata
+    });
+
+    this._listeners.forEach(cb => cb(txo));
+
+    const minePromise = txo.mine();
+    const key = uniqueId(promise || minePromise);
+
+    // log(
+    //   `${metadata.contract}.${metadata.method}: ${key}` +
+    //     `${promise ? ' | passed promise' : ''}` +
+    //     `${txLabel ? ` | labeled "${txLabel}"` : ''}`
+    // );
+
+    this._tracker.store(key, txo);
+    return minePromise;
   }
 
   onNewTransaction(callback) {
     this._listeners.push(callback);
   }
 
-  getTx(promise, label) {
-    const key = this._getKeyForPromise(promise);
-    const ret = this._trackedPromises[key];
-    if (!ret) {
-      throw new Error(`Promise with id ${key} has no transactions.`);
-    }
-    log(`getTx for ${key}, ${label || 'no label'}: ${!!ret}`);
-    return label ? ret[label] : ret;
+  getTransaction(promise, label) {
+    return this._tracker.get(uniqueId(promise), label);
   }
 
   async confirm(promise, label, count) {
     await promise;
-    return this.getTx(promise, label).confirm(count);
+    const tx = this._tracker.get(uniqueId(promise), label);
+    return tx.confirm(count);
   }
 
-  _getKeyForPromise(promise) {
-    return uniqueId(promise);
+  isMined(promise) {
+    return this._tracker.get(uniqueId(promise)).isMined();
+  }
+
+  listen(promise, handlers) {
+    this._tracker.listen(uniqueId(promise), handlers);
   }
 
   // if options.dsProxyAddress is set, execute this contract method through the
@@ -216,5 +138,64 @@ export default class TransactionManager extends PublicService {
 
     const data = contract.interface.functions[method](...args).data;
     return dsProxyContract.execute(contract.address, data, options);
+  }
+}
+
+class Tracker {
+  static states = ['pending', 'mined', 'finalized', 'error'];
+
+  constructor() {
+    this._listeners = {};
+    this._transactions = {};
+  }
+
+  store(key, tx) {
+    this._init(key);
+    this._transactions[key].push(tx);
+
+    for (let event of this.constructor.states) {
+      tx.on(event, () => this._listeners[key][event].forEach(cb => cb(tx)));
+    }
+  }
+
+  listen(key, handlers) {
+    this._init(key);
+
+    for (let state in handlers) {
+      this._listeners[key][state].push(handlers[state]);
+
+      // if event has already happened, call handler immediately
+      this._transactions[key].forEach(
+        tx => tx && tx.inOrPastState(state) && handlers[state](tx)
+      );
+    }
+  }
+
+  trigger(key, event) {
+    for (let cb of this._listeners[key][event]) {
+      cb(this._transactions[key]);
+    }
+  }
+
+  get(key, label) {
+    const txs = this._transactions[key];
+    if (!txs || txs.length === 0) {
+      throw new Error(`No transactions for key ${key}`);
+    }
+    if (txs.length > 1) {
+      // TODO
+      console.warn(`label not implemented yet (received label "${label}")`);
+    }
+    return txs[0];
+  }
+
+  _init(key) {
+    if (!this._transactions[key]) this._transactions[key] = [];
+    if (!this._listeners[key]) {
+      this._listeners[key] = this.constructor.states.reduce((acc, state) => {
+        acc[state] = [];
+        return acc;
+      }, {});
+    }
   }
 }

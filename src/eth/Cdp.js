@@ -47,17 +47,16 @@ export default class Cdp {
       };
     });
 
-    this._transactionObject = this._transactionManager.createHybridTx(
-      (async () => {
-        const [id, openResult] = await Promise.all([getId, tubContract.open()]);
-        this.id = id;
-        return openResult;
-      })(),
-      {
-        businessObject: this,
-        metadata: { contract: 'SAI_TUB', method: 'open' }
-      }
-    );
+    const promise = (async () => {
+      // this "no-op await" is necessary for the inner reference to the
+      // outer promise to become valid
+      await 0;
+      const results = await Promise.all([getId, tubContract.open({ promise })]);
+      this.id = results[0];
+      return this;
+    })();
+
+    this._transactionObject = promise;
   }
 
   transactionObject() {

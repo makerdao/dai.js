@@ -4,8 +4,9 @@ import {
 } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 import { uniqueId } from '../../src/utils';
+import TestAccountProvider from '../helpers/TestAccountProvider';
 import debug from 'debug';
-const log = debug('dai:testing');
+const log = debug('dai:testing:TxMgr.spec');
 
 function buildTestServices() {
   const container = buildTestContainer({
@@ -49,41 +50,9 @@ test('reuse the same web3 and log service in test services', () => {
   expect(services.currentAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
 });
 
-test('create a Transaction object from a transaction promise', async () => {
-  const contractTransaction = services.contract
-      .getContractByName(tokens.DAI, { hybrid: false })
-      .approve(services.currentAccount, '1000000000000000000'),
-    businessObject = { x: 1 },
-    hybrid = services.txMgr.createHybridTx(contractTransaction, {
-      businessObject
-    });
+test('createHybridTx resolves to business object', async () => {
+  expect.assertions(3);
 
-  expect(contractTransaction).toBeInstanceOf(Promise);
-  expect(hybrid._original._transaction).toBe(contractTransaction);
-  expect(hybrid._original._businessObject).toBe(businessObject);
-  expect(hybrid._original._web3Service).toBe(services.txMgr.get('web3'));
-
-  return hybrid.then(() => {
-    expect(hybrid._original.isMined()).toBe(true);
-  });
-});
-
-test('register all created transaction hybrids', async () => {
-  const contractTransaction = services.contract
-      .getContractByName(tokens.DAI, { hybrid: false })
-      .approve(services.currentAccount, '1000000000000000000'),
-    hybrids = [
-      services.txMgr.createHybridTx(contractTransaction),
-      services.txMgr.createHybridTx(contractTransaction),
-      services.txMgr.createHybridTx(contractTransaction)
-    ];
-
-  await Promise.all(hybrids);
-  expect(services.txMgr.getTransactions().length).toBe(3);
-  expect(services.txMgr.getTransactions()).toEqual(hybrids);
-});
-
-test('createHybridTx adds hooks and resolves to business object', async () => {
   const contractTransaction = services.contract
       .getContractByName(tokens.DAI, { hybrid: false })
       .approve(services.currentAccount, '1000000000000000000'),
@@ -97,10 +66,13 @@ test('createHybridTx adds hooks and resolves to business object', async () => {
       businessObject
     });
 
-  await hybrid.onPending();
-  expect(hybrid.isPending()).toBe(true);
-  const bob = await hybrid.onMined();
-  expect(hybrid.isMined()).toBe(true);
+  services.txMgr.listen(hybrid, {
+    pending: tx => {
+      expect(tx.isPending()).toBe(true);
+    }
+  });
+  const bob = await hybrid;
+  expect(services.txMgr.isMined(hybrid)).toBe(true);
   expect(bob.add(10)).toEqual(11);
 });
 
@@ -116,8 +88,7 @@ test('formatHybridTx adds nonce, web3 settings, lifecycle hooks', async () => {
     'DAI'
   );
 
-  await hybrid.onMined();
-  expect(hybrid.isMined()).toBe(true);
+  await hybrid;
 
   expect(txMgr._execute).toHaveBeenCalledWith(
     dai,
@@ -127,8 +98,15 @@ test('formatHybridTx adds nonce, web3 settings, lifecycle hooks', async () => {
   );
 });
 
-test('confirm', async () => {
+test('lifecycle hooks', async () => {
+  TestAccountProvider.setIndex(599);
   const service = buildTestEthereumCdpService({
+    accounts: {
+      default: {
+        type: 'privateKey',
+        privateKey: TestAccountProvider.nextAccount().key
+      }
+    },
     log: true
   });
   await service.manager().authenticate();
@@ -145,14 +123,38 @@ test('confirm', async () => {
     }
   };
 
-  const cdp = await service.openCdp();
+  const open = service.openCdp();
+  log('open id:', uniqueId(open));
+
+  txMgr.listen(open, {
+    pending: tx => {
+      const { contract, method } = tx.metadata;
+      log(`open handler: pending: ${contract}.${method}`);
+    },
+    mined: tx => {
+      const { contract, method } = tx.metadata;
+      log(`open handler: mined: ${contract}.${method}`);
+    }
+  });
+
+  await Promise.all([txMgr.confirm(open), waitForNewBlocks()]);
+
+  const cdp = await open;
   const lock = cdp.lockEth(1);
   log('lock id:', uniqueId(lock));
+
+  txMgr.listen(lock, {
+    pending: tx => {
+      const { contract, method } = tx.metadata;
+      log(`lock handler: pending: ${contract}.${method}`);
+    },
+    mined: tx => {
+      const { contract, method } = tx.metadata;
+      log(`lock handler: mined: ${contract}.${method}`);
+    }
+  });
+
   await lock;
-  await Promise.all([
-    txMgr.getTx(lock, 'deposit').confirm(),
-    waitForNewBlocks()
-  ]);
 
   log('\ndraw');
   const draw = cdp.drawDai(1);

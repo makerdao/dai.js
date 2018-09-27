@@ -17,31 +17,10 @@ beforeAll(async () => {
 
 function createTestTransaction(srv = service) {
   const wethToken = srv.getToken(WETH);
-  return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
+  const promise = wethToken.approveUnlimited(TestAccountProvider.nextAddress());
+  const txMgr = srv.get('transactionManager');
+  return txMgr.getTransaction(promise);
 }
-
-test('event listeners work as promises', async () => {
-  expect.assertions(3);
-  const tx = createTestTransaction();
-  tx.onPending().then(tx => {
-    expect(tx.state()).toBe(TransactionState.pending);
-  });
-
-  tx.onMined().then(tx => {
-    expect(tx.state()).toBe(TransactionState.mined);
-
-    // create more blocks so that the original tx gets confirmed
-    for (let i = 0; i < 3; i++) {
-      createTestTransaction();
-    }
-  });
-
-  tx.onFinalized().then(tx => {
-    expect(tx.state()).toBe(TransactionState.finalized);
-  });
-
-  await tx.confirm();
-});
 
 test('get fees', async () => {
   const tx = await createTestTransaction().mine();

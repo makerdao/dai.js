@@ -10,8 +10,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     transaction,
     web3Service,
     nonceService,
-    businessObject,
-    logsParser = logs => logs
+    { businessObject, logsParser = logs => logs, metadata } = {}
   ) {
     super(businessObject);
     this._transaction = transaction;
@@ -20,6 +19,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._ethersProvider = web3Service.ethersProvider();
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
+    this.metadata = metadata;
   }
 
   timeStampSubmitted() {

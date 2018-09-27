@@ -24,7 +24,7 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return wethToken.approveUnlimited(oasisContract.address).onMined();
+      return wethToken.approveUnlimited(oasisContract.address);
     })
     .then(() => {
       return wethToken.balanceOf(
@@ -119,7 +119,7 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return daiToken.approveUnlimited(oasisContract.address).onMined();
+      return daiToken.approveUnlimited(oasisContract.address);
     })
     .then(() => {
       const oasisContract = oasisExchangeService

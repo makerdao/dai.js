@@ -16,7 +16,7 @@ import {
   USD
 } from './Currency';
 import { numberToBytes32 } from '../utils/conversion';
-import { tracksTransactions } from './TransactionManager';
+import tracksTransactions from '../utils/tracksTransactions';
 
 export default class EthereumCdpService extends PrivateService {
   /**
@@ -118,28 +118,33 @@ export default class EthereumCdpService extends PrivateService {
   async lockEth(cdpId, amount, { unit = ETH, promise }) {
     await this._conversionService().convertEthToWeth(amount, {
       unit,
-      promise,
-      txLabel: 'deposit'
+      promise
     });
-    return this.lockWeth(cdpId, amount);
+    return this.lockWeth(cdpId, amount, { promise });
   }
 
-  async lockWeth(cdpId, amount, unit = WETH) {
+  @tracksTransactions
+  async lockWeth(cdpId, amount, { unit = WETH, promise }) {
     const wethPerPeth = await this.get('price').getWethToPethRatio();
     const weth = getCurrency(amount, unit);
-    await this._conversionService().convertWethToPeth(weth);
+    await this._conversionService().convertWethToPeth(weth, {
+      promise
+    });
 
-    return this.lockPeth(cdpId, weth.div(wethPerPeth));
+    return this.lockPeth(cdpId, weth.div(wethPerPeth), { promise });
   }
 
-  async lockPeth(cdpId, amount, unit = PETH) {
+  @tracksTransactions
+  async lockPeth(cdpId, amount, { unit = PETH, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     await this.get('allowance').requireAllowance(
       PETH,
       this._tubContract().address
     );
-    return this._tubContract().lock(hexCdpId, value);
+    return this._tubContract().lock(hexCdpId, value, {
+      promise
+    });
   }
 
   freePeth(cdpId, amount, unit = PETH) {
