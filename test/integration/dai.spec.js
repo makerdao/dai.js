@@ -3,8 +3,8 @@ import tokens from '../../contracts/tokens';
 import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 import ProviderType from '../../src/eth/web3/ProviderType';
-const log = debug('dai:testing');
 
+const log = debug('dai:testing');
 let maker, cdp, exchange, address, tokenService;
 
 async function convertPeth() {
@@ -61,7 +61,7 @@ beforeAll(async () => {
     ? (settings = {
         web3: {
           transactionSettings: { gasLimit: 4000000 },
-          confirmedBlockCount: 0
+          confirmedBlockCount: '0'
         },
         provider: { type: ProviderType.TEST }
       })

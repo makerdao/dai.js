@@ -1,4 +1,5 @@
 {
+  "rootDir": "../../",
   "coverageReporters": [
     "json",
     "lcov",

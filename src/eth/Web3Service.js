@@ -87,7 +87,7 @@ export default class Web3Service extends PrivateService {
       provider: { ...settings.provider }
     });
     this._transactionSettings = settings.transactionSettings;
-    this._confirmedBlockCount = settings.confirmedBlockCount;
+    this._confirmedBlockCount = settings.confirmedBlockCount || 5;
   }
 
   async connect() {

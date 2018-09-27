@@ -34,18 +34,18 @@
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
     "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
-    "coverage": "./scripts/run-testchain.sh --ci jest --runInBand --coverage --config ./default-config.json",
+    "coverage": "./scripts/run-testchain.sh --ci jest --runInBand --coverage --config ./test/config/jestDefaultConfig.json",
     "lint": "eslint web src test",
     "precommit": "lint-staged",
     "prepush": "npm run test",
     "prettier": "prettier --write --single-quote '{src,web,test,contracts}/**/*.js'",
-    "test": "./scripts/run-testchain.sh --ci jest --runInBand --config ./default-config.json",
-    "test:watch": "./scripts/run-testchain.sh --ci jest --watch --runInBand --config ./default-config.json",
+    "test": "./scripts/run-testchain.sh --ci jest --runInBand --config ./test/config/jestDefaultConfig.json",
+    "test:watch": "./scripts/run-testchain.sh --ci jest --watch --runInBand --config ./test/config/jestDefaultConfig.json",
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
     "test:net": "./scripts/run-testchain.sh",
-    "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./integration-config.json",
-    "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./integration-config.json",
-    "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./integration-config.json" 
+    "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./test/config/jestIntegrationConfig.json" 
   },
   "lint-staged": {
     "./{src,web,test,contracts}/**/*.js": [
