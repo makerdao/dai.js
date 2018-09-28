@@ -6,7 +6,7 @@ import TestAccountProvider from '../helpers/TestAccountProvider';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';
-import { ETH, WETH } from '../../src/eth/Currency';
+import { ETH, WETH, MKR } from '../../src/eth/Currency';
 
 let service;
 
@@ -18,6 +18,11 @@ beforeAll(async () => {
 function createTestTransaction(srv = service) {
   const wethToken = srv.getToken(WETH);
   return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
+}
+
+function createRevertingTransaction(srv = service) {
+  const mkr = srv.getToken(MKR);
+  return mkr.transfer('0xe30d7f884b87681bd8f5bf1e818eb029a90ad9d2', '2000000');
 }
 
 test('event listeners work as promises', async () => {
@@ -134,4 +139,16 @@ test('error event listener works', async () => {
     // FIXME not sure why this try/catch is necessary...
     // console.log('hmm.', err);
   }
+});
+
+test('reverted transaction goes to error state', async () => {
+  expect.assertions(1);
+  const tx = createRevertingTransaction(service);
+  tx.onPending(() => {
+    //expect(tx.state()).toBe(TransactionState.pending);
+  });
+  tx.onError(() => {
+    expect(tx.state()).toBe(TransactionState.error);
+  });
+  await tx.mine();
 });
