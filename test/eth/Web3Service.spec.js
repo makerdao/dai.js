@@ -60,7 +60,10 @@ function buildTestService(key, statusTimerDelay = 5000) {
   const config = {
     web3: {
       statusTimerDelay,
-      provider: { type: ProviderType.TEST }
+      provider: { type: ProviderType.TEST },
+      transactionSettings: {
+        gasPrice: 1
+      }
     }
   };
   if (key) {
@@ -244,4 +247,31 @@ test('connect to kovan', async () => {
   }
   expect(service.manager().isConnected()).toBe(true);
   expect(service.networkId()).toBe(42);
+});
+
+test('stores transaction settings from config', async () => {
+  const service = buildTestService();
+  await service.manager().authenticate();
+  const settings = service.transactionSettings();
+  expect(settings).toEqual({ gasPrice: 1 });
+});
+
+test('stores confirmed block count from config', async () => {
+  const config = {
+    web3: {
+      provider: { type: ProviderType.TEST },
+      confirmedBlockCount: 8
+    }
+  };
+  const service = buildTestServiceCore('web3', config);
+  await service.manager().authenticate();
+  const count = service.confirmedBlockCount();
+  expect(count).toEqual(8);
+});
+
+test('sets default confirmed block count', async () => {
+  const service = buildTestService();
+  await service.manager().authenticate();
+  const count = service.confirmedBlockCount();
+  expect(count).toEqual(5);
 });

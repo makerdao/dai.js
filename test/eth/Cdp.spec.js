@@ -13,6 +13,7 @@ import {
 import { promiseWait } from '../../src/utils';
 import { dappHub } from '../../contracts/abis';
 import testnetAddresses from '../../contracts/addresses/testnet.json';
+import { mineBlocks } from '../helpers/transactionConfirmation';
 
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, smartContractService;
 
@@ -110,7 +111,9 @@ const sharedTests = openCdp => {
   describe('bite', () => {
     beforeAll(async () => {
       await openCdp();
-      await cdp.lockEth(0.1);
+      const tx = cdp.lockEth(0.1);
+      mineBlocks(cdpService.get('token'));
+      await tx;
       await cdp.drawDai(13);
     });
 
@@ -135,7 +138,9 @@ const sharedTests = openCdp => {
   describe('a cdp with collateral', () => {
     beforeAll(async () => {
       await openCdp();
-      await cdp.lockEth(0.2);
+      const tx = cdp.lockEth(0.2);
+      mineBlocks(cdpService.get('token'));
+      await tx;
     });
 
     test('read ink', async () => {

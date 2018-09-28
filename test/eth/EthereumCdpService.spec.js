@@ -1,6 +1,7 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 import { USD_DAI } from '../../src/eth/Currency';
 import Cdp from '../../src/eth/Cdp';
+import { mineBlocks } from '../helpers/transactionConfirmation';
 
 let cdpService;
 
@@ -36,11 +37,15 @@ test('can read the target price', async () => {
 
 test('can calculate system collateralization', async () => {
   const cdp = await cdpService.openCdp();
-  await cdp.lockEth(0.1);
+  let tx = cdp.lockEth(0.1);
+  mineBlocks(cdpService.get('token'));
+  await tx;
   await cdp.drawDai(1);
   const scA = await cdpService.getSystemCollateralization();
 
-  await cdp.lockEth(0.1);
+  tx = cdp.lockEth(0.1);
+  mineBlocks(cdpService.get('token'));
+  await tx;
   const scB = await cdpService.getSystemCollateralization();
   expect(scB).toBeGreaterThan(scA);
 
