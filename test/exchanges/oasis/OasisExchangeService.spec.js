@@ -1,8 +1,7 @@
 import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
 import { DAI, ETH, WETH } from '../../../src/eth/Currency';
-import { utils } from 'ethers';
-import { mineBlocks } from '../../helpers/transactionConfirmation';
+import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
 
 let oasisExchangeService;
 
@@ -14,85 +13,14 @@ async function buildTestOasisExchangeService() {
   return oasisExchangeService;
 }
 
-function _placeLimitOrder(oasisExchangeService, sellDai) {
-  let ethereumTokenService = null;
-  ethereumTokenService = oasisExchangeService.get('token');
-  const wethToken = ethereumTokenService.getToken(WETH);
-  const daiToken = ethereumTokenService.getToken(DAI);
-  return wethToken
-    .deposit('1')
-    .then(() => {
-      const oasisContract = oasisExchangeService
-        .get('smartContract')
-        .getContractByName(contracts.MAKER_OTC);
-      return wethToken.approveUnlimited(oasisContract.address).onMined();
-    })
-    .then(() => {
-      return wethToken.balanceOf(
-        oasisExchangeService.get('web3').currentAccount()
-      );
-    })
-    .then(() => {
-      return daiToken.balanceOf(
-        oasisExchangeService.get('web3').currentAccount()
-      );
-    })
-    .then(() => {
-      const wethAddress = wethToken.address();
-      const daiAddress = ethereumTokenService.getToken(DAI).address();
-      const overrideOptions = { gasLimit: 5500000 };
-      if (sellDai) {
-        return oasisExchangeService.offer(
-          utils.parseEther('0.5'),
-          daiAddress,
-          utils.parseEther('2.0'),
-          wethAddress,
-          0,
-          overrideOptions
-        );
-      } else {
-        return oasisExchangeService.offer(
-          utils.parseEther('0.5'),
-          wethAddress,
-          utils.parseEther('10.0'),
-          daiAddress,
-          1,
-          overrideOptions
-        );
-      }
-    })
-    .then(() => {
-      return wethToken.balanceOf(
-        oasisExchangeService.get('web3').currentAccount()
-      );
-    })
-    .then(() => {
-      return daiToken.balanceOf(
-        oasisExchangeService.get('web3').currentAccount()
-      );
-    });
-}
-
-async function createDaiAndPlaceLimitOrder(
-  oasisExchangeService,
-  sellDai = false
-) {
-  const cdp = await oasisExchangeService.get('cdp').openCdp();
-  const tx = cdp.lockEth(0.1);
-  mineBlocks(oasisExchangeService.get('token'));
-  await tx;
-  await cdp.drawDai(1);
-  return _placeLimitOrder(oasisExchangeService, sellDai);
-}
-
 test('sell Dai, console log the balances (used for debugging)', async done => {
   const oasisExchangeService = await buildTestOasisExchangeService();
-  let order = null;
+  let order;
   /* eslint-disable-next-line */
   let initialBalance;
   /* eslint-disable-next-line */
   let finalBalance;
-  let daiToken = null;
+  let daiToken;
 
   return createDaiAndPlaceLimitOrder(oasisExchangeService)
     .then(() => {

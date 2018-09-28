@@ -110,8 +110,7 @@ export default class OasisExchangeService extends PrivateService {
     overrides
   ) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC,
-      { hybrid: false }
+      contracts.MAKER_OTC
     );
     return new TransactionObject(
       oasisContract.offer(

@@ -3,6 +3,7 @@ import tokens from '../../contracts/tokens';
 import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 import ProviderType from '../../src/eth/web3/ProviderType';
+import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
 
 const log = debug('dai:testing');
 let maker, cdp, exchange, address, tokenService;
@@ -133,12 +134,14 @@ test(
   300000
 );
 
-// FIXME: The buy/sell tests will fail on Ganache, but can be
-// unskipped for both mainnet and kovan
-xtest(
+test(
   'can sell Dai',
   async () => {
     let tx, error;
+
+    if (process.env.NETWORK === 'test') {
+      await createDaiAndPlaceLimitOrder(exchange);
+    }
 
     try {
       tx = await exchange.sellDai('0.1', WETH);
@@ -153,11 +156,15 @@ xtest(
   600000
 );
 
-xtest(
+test(
   'can buy Dai',
   async () => {
     let tx, error;
     await checkWethBalance();
+
+    if (process.env.NETWORK === 'test') {
+      await createDaiAndPlaceLimitOrder(exchange, true);
+    }
 
     try {
       tx = await exchange.buyDai('0.1', WETH);
