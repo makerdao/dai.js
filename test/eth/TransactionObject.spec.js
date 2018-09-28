@@ -142,13 +142,19 @@ test('error event listener works', async () => {
 });
 
 test('reverted transaction goes to error state', async () => {
-  expect.assertions(1);
+  expect.assertions(4);
+  let mined = false;
   const tx = createRevertingTransaction(service);
   tx.onPending(() => {
-    //expect(tx.state()).toBe(TransactionState.pending);
+    expect(tx.state()).toBe(TransactionState.pending);
   });
-  tx.onError(() => {
+  tx.onMined(() => {
+    mined = true;
+  });
+  tx.onError(error => {
     expect(tx.state()).toBe(TransactionState.error);
+    expect(error).toMatch('reverted');
+    expect(mined).toBe(false);
   });
   await tx.mine();
 });

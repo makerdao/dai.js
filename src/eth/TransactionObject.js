@@ -103,7 +103,14 @@ export default class TransactionObject extends TransactionLifeCycle {
           );
         */
       }
-      this.setMined();
+      if (receipt.status == '0x1' || receipt.status == 1) {
+        this.setMined();
+      } else {
+        //transaction reverted
+        const revertMsg = `transaction with hash ${this.hash} reverted`;
+        log(revertMsg);
+        this.setError(revertMsg);
+      }
     } catch (err) {
       await this._nonceService.setCounts();
       this.setError(err);
