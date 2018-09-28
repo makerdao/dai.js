@@ -10,14 +10,13 @@ export default class TransactionObject extends TransactionLifeCycle {
     transaction,
     web3Service,
     nonceService,
-    { businessObject, parseLogs, metadata } = {}
+    { businessObject, metadata } = {}
   ) {
     super(businessObject);
     this._transaction = transaction;
     this._web3Service = web3Service;
     this._nonceService = nonceService;
     this._ethersProvider = web3Service.ethersProvider();
-    this._logsParser = parseLogs;
     this._timeStampSubmitted = new Date();
     this.metadata = metadata;
   }
@@ -43,12 +42,12 @@ export default class TransactionObject extends TransactionLifeCycle {
   async confirm(count = 3) {
     await this.mine();
 
-    const newBlockNumber = this._receipt.blockNumber + count;
+    const newBlockNumber = this.receipt.blockNumber + count;
     await this._web3Service.waitForBlockNumber(newBlockNumber);
     const newReceipt = await this._ethersProvider.getTransactionReceipt(
       this.hash
     );
-    if (newReceipt.blockHash !== this._receipt.blockHash) {
+    if (newReceipt.blockHash !== this.receipt.blockHash) {
       throw new Error('transaction block hash changed');
     }
     this.setFinalized();
@@ -87,14 +86,10 @@ export default class TransactionObject extends TransactionLifeCycle {
 
       gasPrice = tx.gasPrice;
       this._timeStampMined = new Date();
-      const receipt = (this._receipt = await this._waitForReceipt());
+      this.receipt = await this._waitForReceipt();
 
-      if (typeof this._logsParser === 'function') {
-        this._logsParser(receipt.logs);
-      }
-
-      if (!!receipt.gasUsed && !!gasPrice) {
-        this._fees = ETH.wei(receipt.gasUsed.mul(gasPrice));
+      if (!!this.receipt.gasUsed && !!gasPrice) {
+        this._fees = ETH.wei(this.receipt.gasUsed.mul(gasPrice));
       } else {
         /*
           console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',

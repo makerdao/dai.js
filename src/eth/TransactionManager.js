@@ -81,10 +81,9 @@ export default class TransactionManager extends PublicService {
   }
 
   // FIXME: this should be renamed, because it no longer creates a hybrid
-  createHybridTx(tx, { businessObject, parseLogs, metadata, promise } = {}) {
+  createHybridTx(tx, { businessObject, metadata, promise } = {}) {
     const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
       businessObject,
-      parseLogs,
       metadata
     });
 

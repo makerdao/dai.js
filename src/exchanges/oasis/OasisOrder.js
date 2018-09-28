@@ -14,29 +14,38 @@ export default class OasisOrder {
     return this._txMgr.getTransaction(this.promise).timestamp();
   }
 
-  transact(oasisContract, transaction, transactionManager) {
+  transact(contract, method, args, transactionManager) {
+    this._contract = contract;
     this._txMgr = transactionManager;
-    this.promise = transactionManager.createHybridTx(transaction, {
-      businessObject: this,
-      parseLogs: receiptLogs => {
-        const LogTradeEvent = oasisContract.interface.events.LogTrade;
-        const LogTradeTopic = utils.keccak256(
-          transactionManager.get('web3')._web3.toHex(LogTradeEvent.signature)
-        ); //find a way to convert string to hex without web3
-        const receiptEvents = receiptLogs.filter(e => {
-          return (
-            e.topics[0].toLowerCase() === LogTradeTopic.toLowerCase() &&
-            e.address.toLowerCase() === oasisContract.address.toLowerCase()
-          );
-        });
-        let total = utils.bigNumberify('0');
-        receiptEvents.forEach(event => {
-          const parsedLog = LogTradeEvent.parse(event.data);
-          total = total.add(parsedLog[this._logKey]);
-        });
-        this._fillAmount = this._unit.wei(total.toString());
-      }
-    });
+    const promise = (async () => {
+      await 0;
+      const txo = await contract[method](...[...args, { promise }]);
+      this._parseLogs(txo.receipt.logs);
+      return this;
+    })();
+    this.promise = promise;
+    return promise;
+  }
+
+  _parseLogs(logs) {
+    const { LogTrade } = this._contract.interface.events;
+
+    // TODO convert string to hex without web3
+    const topic = utils.keccak256(
+      this._txMgr.get('web3')._web3.toHex(LogTrade.signature)
+    );
+
+    const receiptEvents = logs.filter(
+      e =>
+        e.topics[0].toLowerCase() === topic.toLowerCase() &&
+        e.address.toLowerCase() === this._contract.address.toLowerCase()
+    );
+
+    const total = receiptEvents.reduce((acc, event) => {
+      const parsedLog = LogTrade.parse(event.data);
+      return acc.add(parsedLog[this._logKey]);
+    }, utils.bigNumberify('0'));
+    this._fillAmount = this._unit.wei(total.toString());
   }
 }
 
@@ -47,9 +56,9 @@ export class OasisBuyOrder extends OasisOrder {
     this._unit = DAI;
   }
 
-  static build(oasisContract, transaction, transactionManager) {
+  static build(contract, method, args, transactionManager) {
     const order = new OasisBuyOrder();
-    order.transact(oasisContract, transaction, transactionManager);
+    order.transact(contract, method, args, transactionManager);
     return order.promise;
   }
 }
@@ -61,9 +70,9 @@ export class OasisSellOrder extends OasisOrder {
     this._unit = currency;
   }
 
-  static build(oasisContract, transaction, transactionManager, currency) {
+  static build(contract, method, args, transactionManager, currency) {
     const order = new OasisSellOrder(currency);
-    order.transact(oasisContract, transaction, transactionManager);
+    order.transact(contract, method, args, transactionManager);
     return order.promise;
   }
 }
