@@ -74,6 +74,19 @@ export default class TransactionManager extends PublicService {
     });
   }
 
+  sendTx(data, options) {
+    const innerTx = (async () => {
+      const hash = await this.get('web3').eth.sendTransaction({
+        ...data,
+        ...this.get('web3').transactionSettings(),
+        nonce: await this.get('nonce').getNonce()
+      });
+      return { hash };
+    })();
+
+    return this.createHybridTx(innerTx, options);
+  }
+
   // FIXME: this should be renamed, because it no longer creates a hybrid
   createHybridTx(tx, { businessObject, parseLogs, metadata, promise } = {}) {
     const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
