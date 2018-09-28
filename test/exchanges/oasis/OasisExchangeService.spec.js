@@ -13,6 +13,27 @@ async function buildTestOasisExchangeService() {
   return oasisExchangeService;
 }
 
+async function offer(
+  payAmount,
+  payTokenAddress,
+  buyAmount,
+  buyTokenAddress,
+  pos,
+  overrides
+) {
+  const oasisContract = oasisExchangeService
+    .get('smartContract')
+    .getContractByName(contracts.MAKER_OTC);
+  return oasisContract.offer(
+    payAmount,
+    payTokenAddress,
+    buyAmount,
+    buyTokenAddress,
+    pos,
+    overrides
+  );
+}
+
 function _placeLimitOrder(oasisExchangeService, sellDai) {
   let ethereumTokenService = null;
   ethereumTokenService = oasisExchangeService.get('token');
@@ -41,7 +62,7 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
       const daiAddress = ethereumTokenService.getToken(DAI).address();
       const overrideOptions = { gasLimit: 5500000 };
       if (sellDai) {
-        return oasisExchangeService.offer(
+        return offer(
           utils.parseEther('0.5'),
           daiAddress,
           utils.parseEther('2.0'),
@@ -50,7 +71,7 @@ function _placeLimitOrder(oasisExchangeService, sellDai) {
           overrideOptions
         );
       } else {
-        return oasisExchangeService.offer(
+        return offer(
           utils.parseEther('0.5'),
           wethAddress,
           utils.parseEther('10.0'),

@@ -1,6 +1,5 @@
 import PrivateService from '../../core/PrivateService';
 import { OasisBuyOrder, OasisSellOrder } from './OasisOrder';
-import TransactionObject from '../../eth/TransactionObject';
 import contracts from '../../../contracts/contracts';
 import { UINT256_MAX } from '../../utils/constants';
 import { getCurrency, DAI, WETH } from '../../eth/Currency';
@@ -77,33 +76,6 @@ export default class OasisExchangeService extends PrivateService {
         { gasLimit: 300000 }
       ),
       this.get('transactionManager')
-    );
-  }
-
-  //only used to set up a limit order on the local testnet
-  async offer(
-    payAmount,
-    payTokenAddress,
-    buyAmount,
-    buyTokenAddress,
-    pos,
-    overrides
-  ) {
-    const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC,
-      { hybrid: false }
-    );
-    return new TransactionObject(
-      oasisContract.offer(
-        payAmount,
-        payTokenAddress,
-        buyAmount,
-        buyTokenAddress,
-        pos,
-        overrides
-      ),
-      this.get('web3'),
-      this.get('transactionManager').get('nonce')
     );
   }
 }
