@@ -343,14 +343,14 @@ export default class EthereumCdpService extends PrivateService {
     return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
-  give(cdpId, newAddress) {
+  give(cdpId, newAddress, options = {}) {
     const hexCdpId = numberToBytes32(cdpId);
-    return this._tubContract().give(hexCdpId, newAddress);
+    return this._tubContract().give(hexCdpId, newAddress, options);
   }
 
-  bite(cdpId) {
+  bite(cdpId, options = {}) {
     const hexCdpId = numberToBytes32(cdpId);
-    return this._tubContract().bite(hexCdpId);
+    return this._tubContract().bite(hexCdpId, options);
   }
 
   freeEthProxy(dsProxyAddress, cdpId, amount) {
