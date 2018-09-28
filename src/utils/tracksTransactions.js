@@ -11,6 +11,10 @@
 // list of all transactions that were created in the course of executing that
 // promise, so that they may attach lifecycle callbacks to those transactions.
 //
+// @tracksTransactions is only necessary when the function is async. If the
+// function returns a contract call, but does not make any async calls before
+// that, then the async keyword can be removed, and it just needs to have an
+// `options` argument that it passes to its contract call.
 export default function tracksTransactions(target, name, descriptor) {
   const original = descriptor.value;
   descriptor.value = function(...args) {

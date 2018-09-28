@@ -28,8 +28,9 @@ export default class TokenConversionService extends PrivateService {
     return pethContract.join(amount, { unit, promise });
   }
 
-  async convertEthToPeth(value) {
-    await this.convertEthToWeth(value);
-    return this.convertWethToPeth(value);
+  @tracksTransactions
+  async convertEthToPeth(value, { promise }) {
+    await this.convertEthToWeth(value, { promise });
+    return this.convertWethToPeth(value, { promise });
   }
 }
