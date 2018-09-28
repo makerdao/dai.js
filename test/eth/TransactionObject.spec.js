@@ -22,7 +22,7 @@ function createTestTransaction(srv = service) {
 
 function createRevertingTransaction(srv = service) {
   const mkr = srv.getToken(MKR);
-  return mkr.transfer('0xe30d7f884b87681bd8f5bf1e818eb029a90ad9d2', '2000000');
+  return mkr.transfer(TestAccountProvider.nextAddress(), '2000000');
 }
 
 test('event listeners work as promises', async () => {
