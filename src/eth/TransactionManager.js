@@ -14,11 +14,10 @@ export default class TransactionManager extends PublicService {
     this._tracker = new Tracker();
   }
 
-  formatHybridTx(contract, method, args, name, businessObject = null) {
+  formatHybridTx(contract, method, args, name, businessObject) {
     if (!args) args = [];
     let options,
       promiseToTrack,
-      txLabel,
       metadata = {
         contract: name,
         method: method.replace(/\(.*\)$/g, ''),
@@ -44,11 +43,6 @@ export default class TransactionManager extends PublicService {
         }
         delete options.promise;
       }
-
-      if (options.txLabel) {
-        txLabel = options.txLabel;
-        delete options.txLabel;
-      }
     } else {
       options = {};
     }
@@ -69,8 +63,7 @@ export default class TransactionManager extends PublicService {
     return this.createHybridTx(innerTx, {
       businessObject,
       metadata,
-      promise: promiseToTrack,
-      txLabel
+      promise: promiseToTrack
     });
   }
 
@@ -102,8 +95,7 @@ export default class TransactionManager extends PublicService {
 
     // log(
     //   `${metadata.contract}.${metadata.method}: ${key}` +
-    //     `${promise ? ' | passed promise' : ''}` +
-    //     `${txLabel ? ` | labeled "${txLabel}"` : ''}`
+    //     `${promise ? ' | passed promise' : ''}`
     // );
 
     this._tracker.store(key, txo);
