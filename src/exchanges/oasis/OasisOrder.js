@@ -2,25 +2,21 @@ import { utils } from 'ethers';
 import { DAI } from '../../eth/Currency';
 
 export default class OasisOrder {
-  constructor() {
-    this._fillAmount = null;
-    this._hybrid = null;
-  }
-
   fillAmount() {
     return this._fillAmount;
   }
 
   fees() {
-    return this._hybrid.getOriginalTransaction().fees();
+    return this._txMgr.getTransaction(this.promise).fees();
   }
 
   created() {
-    return this._hybrid.getOriginalTransaction().timestamp();
+    return this._txMgr.getTransaction(this.promise).timestamp();
   }
 
   transact(oasisContract, transaction, transactionManager) {
-    return transactionManager.createHybridTx(transaction, {
+    this._txMgr = transactionManager;
+    this.promise = transactionManager.createHybridTx(transaction, {
       businessObject: this,
       parseLogs: receiptLogs => {
         const LogTradeEvent = oasisContract.interface.events.LogTrade;
@@ -53,12 +49,8 @@ export class OasisBuyOrder extends OasisOrder {
 
   static build(oasisContract, transaction, transactionManager) {
     const order = new OasisBuyOrder();
-    order._hybrid = order.transact(
-      oasisContract,
-      transaction,
-      transactionManager
-    );
-    return order._hybrid;
+    order.transact(oasisContract, transaction, transactionManager);
+    return order.promise;
   }
 }
 
@@ -71,11 +63,7 @@ export class OasisSellOrder extends OasisOrder {
 
   static build(oasisContract, transaction, transactionManager, currency) {
     const order = new OasisSellOrder(currency);
-    order._hybrid = order.transact(
-      oasisContract,
-      transaction,
-      transactionManager
-    );
-    return order._hybrid;
+    order.transact(oasisContract, transaction, transactionManager);
+    return order.promise;
   }
 }

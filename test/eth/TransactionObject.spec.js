@@ -85,10 +85,12 @@ test('waitForTransaction', async () => {
 
 class FailingWeb3Service extends Web3Service {
   ethersProvider() {
+    if (!this.shouldFail) return super.ethersProvider();
     return new Proxy(super.ethersProvider(), {
       get(target, key) {
         if (key === 'getTransactionReceipt') {
           return async () => {
+            // await promiseWait(2000);
             throw new Error('test error');
           };
         }
@@ -98,19 +100,36 @@ class FailingWeb3Service extends Web3Service {
   }
 }
 
-test('error event listener works', async () => {
-  expect.assertions(1);
-  const service = buildTestService('token', {
-    token: true,
-    web3: [new FailingWeb3Service(), { provider: { type: 'TEST' } }]
+describe('work around problematic test', () => {
+  // the test below prints out "unhandled error" warnings even though the error
+  // is handled, which we know because the last `expect` in the catch block is
+  // called. so we temporarily suppress console.error.
+  beforeEach(() => {
+    jest.spyOn(global.console, 'error').mockImplementation(() => jest.fn());
   });
-  await service.manager().authenticate();
-  const tx = createTestTransaction(service);
-  tx.onError(error => expect(error).toEqual('test error'));
-  try {
-    await tx;
-  } catch (err) {
-    // FIXME not sure why this try/catch is necessary...
-    // console.log('hmm.', err);
-  }
+
+  test('error event listener works', async () => {
+    expect.assertions(2);
+    const service = buildTestService('token', {
+      token: true,
+      web3: [new FailingWeb3Service(), { provider: { type: 'TEST' } }]
+    });
+    await service.manager().authenticate();
+    const wethToken = service.getToken(WETH);
+    const txMgr = service.get('transactionManager');
+    service.get('web3').shouldFail = true;
+
+    try {
+      const promise = wethToken.approveUnlimited(
+        TestAccountProvider.nextAddress()
+      );
+      const tx = txMgr.getTransaction(promise);
+      tx.onError(error => {
+        expect(error.message).toEqual('test error');
+      });
+      await promise;
+    } catch (err) {
+      expect(err.message).toEqual('test error');
+    }
+  });
 });

@@ -21,7 +21,7 @@ export default class AllowanceService extends PrivateService {
   async requireAllowance(
     tokenSymbol,
     spenderAddress,
-    { amountEstimate = maxAllowance, promise }
+    { estimate = maxAllowance, promise }
   ) {
     const token = this.get('token').getToken(tokenSymbol);
     const ownerAddress = this.get('token')
@@ -33,8 +33,8 @@ export default class AllowanceService extends PrivateService {
       return token.approveUnlimited(spenderAddress, { promise });
     }
 
-    if (allowance.lt(amountEstimate) && this._shouldMinimizeAllowance) {
-      return token.approve(spenderAddress, amountEstimate, { promise });
+    if (allowance.lt(estimate) && this._shouldMinimizeAllowance) {
+      return token.approve(spenderAddress, estimate, { promise });
     }
   }
 
