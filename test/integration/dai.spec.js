@@ -102,8 +102,8 @@ test(
   'can open a CDP',
   async () => {
     cdp = await maker.openCdp();
-    await cdp.transactionObject().confirm();
     console.info('Opened new CDP', await cdp.getId());
+    await cdp.transactionObject().confirm();
     expect(cdp).toBeDefined();
   },
   300000
