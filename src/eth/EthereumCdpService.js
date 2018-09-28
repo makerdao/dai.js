@@ -120,6 +120,7 @@ export default class EthereumCdpService extends PrivateService {
       unit,
       promise
     });
+    // TODO await confirm
     return this.lockWeth(cdpId, amount, { promise });
   }
 

@@ -14,6 +14,7 @@ class TransactionLifeCycle {
       transactionTypeTransitions[TransactionType.transaction]
     );
     this._businessObject = businessObject;
+    this.onConfirmed = this.onFinalized;
   }
 
   setPending() {
