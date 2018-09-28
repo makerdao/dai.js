@@ -6,9 +6,6 @@ export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
-    this._transactionManager = this._smartContractService.get(
-      'transactionManager'
-    );
 
     if (!cdpId) {
       this._create();
@@ -64,6 +61,7 @@ export default class Cdp {
   }
 
   getId() {
+    console.warn('getId() is deprecated; use the .id property instead');
     return Promise.resolve(this.id);
   }
 }

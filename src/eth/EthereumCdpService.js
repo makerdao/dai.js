@@ -440,21 +440,22 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  async wipeDaiProxy(dsProxyAddress, cdpId, amount, useOtc = false) {
+  @tracksTransactions
+  async wipeDaiProxy(dsProxyAddress, cdpId, amount, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
 
-    // Only require MKR allowance if paying fee using MKR (if using OTC, no need to approve MKR right now)
-    let approveCalls = [
-      this.get('allowance').requireAllowance(DAI, dsProxyAddress)
-    ];
+    await this.get('allowance').requireAllowance(DAI, dsProxyAddress, {
+      promise
+    });
+    // Only require MKR allowance if paying fee using MKR (if using OTC, no need
+    // to approve MKR right now)
     if (!useOtc) {
       await this.enoughMkrToWipe(cdpId, amount, DAI);
-      approveCalls.unshift(
-        this.get('allowance').requireAllowance(MKR, dsProxyAddress)
-      );
+      await this.get('allowance').requireAllowance(MKR, dsProxyAddress, {
+        promise
+      });
     }
-    await Promise.all(approveCalls);
 
     const options = {
       dsProxyAddress,
@@ -466,10 +467,12 @@ export default class EthereumCdpService extends PrivateService {
           otc: useOtc,
           proxy: true
         }
-      }
+      },
+      promise
     };
 
-    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy wipe() method
+    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy wipe()
+    // method
     return useOtc
       ? this._saiProxyTubContract()['wipe(address,bytes32,uint256,address)'](
           this._tubContract().address,
@@ -486,21 +489,22 @@ export default class EthereumCdpService extends PrivateService {
         );
   }
 
-  async shutProxy(dsProxyAddress, cdpId, useOtc = false) {
+  @tracksTransactions
+  async shutProxy(dsProxyAddress, cdpId, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
 
-    // Only require MKR allowance and balance if paying fee using MKR (if using OTC, no need to approve MKR right now)
-    let approveCalls = [
-      this.get('allowance').requireAllowance(DAI, dsProxyAddress)
-    ];
+    await this.get('allowance').requireAllowance(DAI, dsProxyAddress, {
+      promise
+    });
+    // Only require MKR allowance and balance if paying fee using MKR (if using
+    // OTC, no need to approve MKR right now)
     if (!useOtc) {
       const debt = await this.getDebtValue(cdpId, DAI);
       await this.enoughMkrToWipe(cdpId, debt);
-      approveCalls.unshift(
-        this.get('allowance').requireAllowance(MKR, dsProxyAddress)
-      );
+      await this.get('allowance').requireAllowance(MKR, dsProxyAddress, {
+        promise
+      });
     }
-    await Promise.all(approveCalls);
 
     const options = {
       dsProxyAddress,
@@ -511,10 +515,12 @@ export default class EthereumCdpService extends PrivateService {
           otc: useOtc,
           proxy: true
         }
-      }
+      },
+      promise
     };
 
-    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy shut() method
+    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy shut()
+    // method
     return useOtc
       ? this._saiProxyTubContract()['shut(address,bytes32,address)'](
           this._tubContract().address,

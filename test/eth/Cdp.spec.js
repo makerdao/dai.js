@@ -289,7 +289,7 @@ const sharedTests = openCdp => {
 describe('non-proxy cdp', () => {
   async function openNonProxyCdp() {
     cdp = await cdpService.openCdp();
-    return cdp.getId();
+    return cdp.id;
   }
 
   sharedTests(openNonProxyCdp);
@@ -343,23 +343,18 @@ describe('non-proxy cdp', () => {
 });
 
 test('create DSProxy and open CDP', async () => {
-  try {
-    const cdp = await cdpService.openProxyCdp();
-    const id = await cdp.getId();
-    expect(id).toBeGreaterThan(0);
+  const cdp = await cdpService.openProxyCdp();
+  expect(cdp.id).toBeGreaterThan(0);
+  expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
 
-    // this value is used in the proxy cdp tests below
-    dsProxyAddress = await cdp.getDsProxyAddress();
-    expect(dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-  } catch (err) {
-    console.error(err);
-  }
+  // this value is used in the proxy cdp tests below
+  dsProxyAddress = cdp.dsProxyAddress;
 });
 
 describe('proxy cdp', () => {
   async function openProxyCdp() {
     cdp = await cdpService.openProxyCdp(dsProxyAddress);
-    return cdp.getId();
+    return cdp.id;
   }
 
   sharedTests(openProxyCdp);
