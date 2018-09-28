@@ -147,16 +147,16 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  freePeth(cdpId, amount, unit = PETH) {
+  freePeth(cdpId, amount, { unit = PETH, promise } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-    return this._tubContract().free(hexCdpId, value);
+    return this._tubContract().free(hexCdpId, value, { promise });
   }
 
-  drawDai(cdpId, amount, unit = DAI) {
+  drawDai(cdpId, amount, { unit = DAI, promise } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-    return this._tubContract().draw(hexCdpId, value);
+    return this._tubContract().draw(hexCdpId, value, { promise });
   }
 
   @tracksTransactions
@@ -344,7 +344,7 @@ export default class EthereumCdpService extends PrivateService {
 
   bite(cdpId) {
     const hexCdpId = numberToBytes32(cdpId);
-    return this._tubContract().bite(hexCdpId, { gasLimit: 4000000 });
+    return this._tubContract().bite(hexCdpId);
   }
 
   freeEthProxy(dsProxyAddress, cdpId, amount) {
