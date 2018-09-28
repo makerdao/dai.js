@@ -5,6 +5,7 @@ import { dappHub } from '../../contracts/abis';
 import { uniqueId } from '../utils';
 import { has } from 'lodash';
 import debug from 'debug';
+// eslint-disable-next-line
 const log = debug('dai:testing:txMgr');
 
 export default class TransactionManager extends PublicService {
@@ -38,8 +39,6 @@ export default class TransactionManager extends PublicService {
       if (has(options, 'promise')) {
         if (options.promise) {
           promiseToTrack = options.promise;
-        } else {
-          log('hmm. promise is set but falsy');
         }
         delete options.promise;
       }
@@ -70,8 +69,8 @@ export default class TransactionManager extends PublicService {
   sendTx(data, options) {
     const innerTx = (async () => {
       const hash = await this.get('web3').eth.sendTransaction({
-        ...data,
         ...this.get('web3').transactionSettings(),
+        ...data,
         nonce: await this.get('nonce').getNonce()
       });
       return { hash };
@@ -90,14 +89,29 @@ export default class TransactionManager extends PublicService {
     this._listeners.forEach(cb => cb(txo));
 
     const minePromise = txo.mine();
-    const key = uniqueId(promise || minePromise);
 
-    // log(
-    //   `${metadata.contract}.${metadata.method}: ${key}` +
-    //     `${promise ? ' | passed promise' : ''}`
-    // );
+    // we store the transaction object under the unique id of its own mine
+    // promise, so that it can be looked up when calling a contract function
+    // directly from a service method, e.g. WethToken.deposit.
+    const key1 = uniqueId(minePromise);
+    this._tracker.store(key1, txo);
 
-    this._tracker.store(key, txo);
+    // if the `promise` object is defined in the options argument, we also store
+    // the transaction object under that promise's id, so that it can be looked
+    // up when calling a contract function indirectly via two or more nested
+    // service method calls, e.g.
+    // EthereumCdpService.lockEth -> WethToken.deposit.
+    let key2;
+    if (promise) {
+      key2 = uniqueId(promise);
+      this._tracker.store(key2, txo);
+    }
+
+    // if (metadata) {
+    //   const { contract, method } = metadata;
+    //   log(`${contract}.${method}: ${key1}${key2 ? `, ${key2}` : ''}`);
+    // }
+
     return minePromise;
   }
 
@@ -109,10 +123,10 @@ export default class TransactionManager extends PublicService {
     return this._tracker.get(uniqueId(promise), label);
   }
 
-  async confirm(promise, label, count) {
+  async confirm(promise, count) {
     await promise;
-    const tx = this._tracker.get(uniqueId(promise), label);
-    return tx.confirm(count);
+    const txs = this._tracker.getAll(uniqueId(promise));
+    return Promise.all(txs.map(tx => tx.confirm(count)));
   }
 
   isMined(promise) {
@@ -183,14 +197,19 @@ class Tracker {
     }
   }
 
-  get(key, label) {
+  getAll(key) {
+    return this._transactions[key];
+  }
+
+  get(key) {
     const txs = this._transactions[key];
     if (!txs || txs.length === 0) {
       throw new Error(`No transactions for key ${key}`);
     }
     if (txs.length > 1) {
-      // TODO
-      console.warn(`label not implemented yet (received label "${label}")`);
+      console.warn(
+        `Key ${key} matches ${txs.length} transactions; returning the first.`
+      );
     }
     return txs[0];
   }

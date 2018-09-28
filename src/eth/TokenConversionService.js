@@ -1,6 +1,6 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
-import { PETH, WETH, getCurrency } from './Currency';
+import { PETH, WETH } from './Currency';
 import tracksTransactions from '../utils/tracksTransactions';
 
 export default class TokenConversionService extends PrivateService {
@@ -34,22 +34,25 @@ export default class TokenConversionService extends PrivateService {
     return this.convertWethToPeth(value, { promise });
   }
 
-  convertWethToEth(amount, unit = WETH) {
-    return this._getToken(WETH).withdraw(getCurrency(amount, unit));
+  convertWethToEth(amount, options) {
+    return this._getToken(WETH).withdraw(amount, options);
   }
 
-  async convertPethToWeth(amount, unit = WETH) {
+  @tracksTransactions
+  async convertPethToWeth(amount, { unit = WETH, promise }) {
     const pethToken = this._getToken(PETH);
 
     await this.get('allowance').requireAllowance(
       PETH,
-      this.get('smartContract').getContractByName(contracts.SAI_TUB).address
+      this.get('smartContract').getContractByName(contracts.SAI_TUB).address,
+      { promise }
     );
-    return pethToken.exit(amount, unit);
+    return pethToken.exit(amount, { unit, promise });
   }
 
-  async convertPethToEth(amount) {
-    await this.convertPethToWeth(amount);
-    return this.convertWethToEth(amount);
+  @tracksTransactions
+  async convertPethToEth(amount, { promise }) {
+    await this.convertPethToWeth(amount, { promise });
+    return this.convertWethToEth(amount, { promise });
   }
 }

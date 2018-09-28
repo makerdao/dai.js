@@ -36,7 +36,7 @@ function placeLimitOrder(oasisExchangeService, sellDai) {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return wethToken.approveUnlimited(oasisContract.address).onMined();
+      return wethToken.approveUnlimited(oasisContract.address);
     })
     .then(() => {
       return wethToken.balanceOf(
@@ -92,7 +92,7 @@ export default async function createDaiAndPlaceLimitOrder(
 ) {
   const cdp = await oasisExchangeService.get('cdp').openCdp();
   const tx = cdp.lockEth(0.1);
-  mineBlocks(oasisExchangeService.get('token'));
+  mineBlocks(oasisExchangeService);
   await tx;
   await cdp.drawDai(1);
   return placeLimitOrder(oasisExchangeService, sellDai);

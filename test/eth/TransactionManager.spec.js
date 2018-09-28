@@ -5,6 +5,7 @@ import {
 import tokens from '../../contracts/tokens';
 import { uniqueId } from '../../src/utils';
 import TestAccountProvider from '../helpers/TestAccountProvider';
+import { mineBlocks } from '../helpers/transactionConfirmation';
 import debug from 'debug';
 const log = debug('dai:testing:TxMgr.spec');
 
@@ -99,7 +100,6 @@ test('formatHybridTx adds nonce, web3 settings', async () => {
 });
 
 test('lifecycle hooks', async () => {
-  TestAccountProvider.setIndex(599);
   const service = buildTestEthereumCdpService({
     accounts: {
       default: {
@@ -111,35 +111,26 @@ test('lifecycle hooks', async () => {
   });
   await service.manager().authenticate();
   const txMgr = service.get('smartContract').get('transactionManager');
-  const priceService = service.get('price');
-  // const web3Service = service.get('smartContract').get('web3');
-  const ethPrice = await priceService.getEthPrice();
 
-  // do busywork to create new blocks, assuming insta-mining is on
-  const waitForNewBlocks = async (count = 5) => {
-    for (let i = 0; i < count; i++) {
-      await priceService.setEthPrice(ethPrice);
-      // log('block:', web3Service.blockNumber());
-    }
-  };
-
-  const makeListener = prefix =>
+  const makeListener = (label, state) =>
     jest.fn(tx => {
       const { contract, method } = tx.metadata;
-      log(`${prefix}: pending: ${contract}.${method}`);
+      log(`${label}: ${contract}.${method}: ${state}`);
     });
+
+  const makeHandlers = label => ({
+    pending: makeListener(label, 'pending'),
+    mined: makeListener(label, 'mined'),
+    confirmed: makeListener(label, 'confirmed')
+  });
 
   const open = service.openCdp();
   log('open id:', uniqueId(open));
 
-  const openHandlers = {
-    pending: makeListener('open'),
-    mined: makeListener('open'),
-    confirmed: makeListener('open')
-  };
+  const openHandlers = makeHandlers('open');
 
   txMgr.listen(open, openHandlers);
-  await Promise.all([txMgr.confirm(open), waitForNewBlocks()]);
+  await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
   expect(openHandlers.pending).toBeCalled();
   expect(openHandlers.mined).toBeCalled();
   expect(openHandlers.confirmed).toBeCalled();
@@ -148,22 +139,22 @@ test('lifecycle hooks', async () => {
   const lock = cdp.lockEth(1);
   log('lock id:', uniqueId(lock));
 
-  const lockHandlers = {
-    pending: makeListener('lock'),
-    mined: makeListener('lock')
-  };
+  const lockHandlers = makeHandlers('lock');
   txMgr.listen(lock, lockHandlers);
 
-  await lock;
-  // deposit, approve, join, lock
-  expect(lockHandlers.pending).toBeCalledTimes(4);
-  expect(lockHandlers.mined).toBeCalledTimes(4);
+  // we have to generate new blocks here because lockEth does `confirm`
+  await Promise.all([lock, mineBlocks(service)]);
+
+  // deposit, approve WETH, join, approve PETH, lock
+  expect(lockHandlers.pending).toBeCalledTimes(5);
+  expect(lockHandlers.mined).toBeCalledTimes(5);
+  expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
 
   log('\ndraw');
   const draw = cdp.drawDai(1);
-  await Promise.all([txMgr.confirm(draw), waitForNewBlocks()]);
+  await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
 
   log('\nwipe');
   const wipe = cdp.wipeDai(1);
-  await Promise.all([txMgr.confirm(wipe), waitForNewBlocks()]);
+  await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
 });

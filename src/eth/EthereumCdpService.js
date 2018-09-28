@@ -40,6 +40,10 @@ export default class EthereumCdpService extends PrivateService {
     return this.get('smartContract');
   }
 
+  _txMgr() {
+    return this.get('smartContract').get('transactionManager');
+  }
+
   _tubContract() {
     return this._smartContract().getContractByName(contracts.SAI_TUB);
   }
@@ -116,11 +120,11 @@ export default class EthereumCdpService extends PrivateService {
 
   @tracksTransactions
   async lockEth(cdpId, amount, { unit = ETH, promise }) {
-    await this._conversionService().convertEthToWeth(amount, {
+    const convert = this._conversionService().convertEthToWeth(amount, {
       unit,
       promise
     });
-    // TODO await confirm
+    await this._txMgr().confirm(convert);
     return this.lockWeth(cdpId, amount, { promise });
   }
 
@@ -141,7 +145,8 @@ export default class EthereumCdpService extends PrivateService {
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     await this.get('allowance').requireAllowance(
       PETH,
-      this._tubContract().address
+      this._tubContract().address,
+      { promise }
     );
     return this._tubContract().lock(hexCdpId, value, {
       promise

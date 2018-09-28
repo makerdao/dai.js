@@ -112,7 +112,7 @@ const sharedTests = openCdp => {
     beforeAll(async () => {
       await openCdp();
       const tx = cdp.lockEth(0.1);
-      mineBlocks(cdpService.get('token'));
+      mineBlocks(cdpService);
       await tx;
       await cdp.drawDai(13);
     });
@@ -139,7 +139,7 @@ const sharedTests = openCdp => {
     beforeAll(async () => {
       await openCdp();
       const tx = cdp.lockEth(0.2);
-      mineBlocks(cdpService.get('token'));
+      mineBlocks(cdpService);
       await tx;
     });
 

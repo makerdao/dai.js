@@ -32,26 +32,24 @@ export default class EtherToken {
   }
 
   @tracksTransactions
-  async transfer(toAddress, amount, { unit = ETH, promise }) {
-    return this._transactionManager.sendTx(
-      {
-        from: this._web3.currentAccount(),
-        to: toAddress,
-        value: getCurrency(amount, unit)
-          .toEthersBigNumber('wei')
-          .toString()
-      },
-      { promise }
+  async transfer(toAddress, amount, options) {
+    return this.transferFrom(
+      this._web3.currentAccount(),
+      toAddress,
+      amount,
+      options
     );
   }
 
   @tracksTransactions
-  async transferFrom(fromAddress, toAddress, transferValue, { promise }) {
+  async transferFrom(fromAddress, toAddress, amount, { unit = ETH, promise }) {
     return this._transactionManager.sendTx(
       {
         from: fromAddress,
         to: toAddress,
-        value: utils.parseEther(transferValue).toString()
+        value: getCurrency(amount, unit)
+          .toEthersBigNumber('wei')
+          .toString()
       },
       { promise }
     );

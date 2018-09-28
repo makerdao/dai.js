@@ -20,21 +20,21 @@ export default class AllowanceService extends PrivateService {
   @tracksTransactions
   async requireAllowance(
     tokenSymbol,
-    spenderAddress,
+    receiverAddress,
     { estimate = maxAllowance, promise }
   ) {
     const token = this.get('token').getToken(tokenSymbol);
     const ownerAddress = this.get('token')
       .get('web3')
       .currentAccount();
-    const allowance = await token.allowance(ownerAddress, spenderAddress);
+    const allowance = await token.allowance(ownerAddress, receiverAddress);
 
     if (allowance.lt(maxAllowance.div(2)) && !this._shouldMinimizeAllowance) {
-      return token.approveUnlimited(spenderAddress, { promise });
+      return token.approveUnlimited(receiverAddress, { promise });
     }
 
     if (allowance.lt(estimate) && this._shouldMinimizeAllowance) {
-      return token.approve(spenderAddress, estimate, { promise });
+      return token.approve(receiverAddress, estimate, { promise });
     }
   }
 
