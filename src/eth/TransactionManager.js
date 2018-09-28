@@ -166,11 +166,13 @@ class Tracker {
     this._init(key);
 
     for (let state in handlers) {
-      this._listeners[key][state].push(handlers[state]);
+      const cb = handlers[state];
+      if (state === 'confirmed') state = 'finalized';
+      this._listeners[key][state].push(cb);
 
       // if event has already happened, call handler immediately
       this._transactions[key].forEach(
-        tx => tx && tx.inOrPastState(state) && handlers[state](tx)
+        tx => tx && tx.inOrPastState(state) && cb(tx)
       );
     }
   }

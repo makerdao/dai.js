@@ -76,7 +76,7 @@ test('createHybridTx resolves to business object', async () => {
   expect(bob.add(10)).toEqual(11);
 });
 
-test('formatHybridTx adds nonce, web3 settings, lifecycle hooks', async () => {
+test('formatHybridTx adds nonce, web3 settings', async () => {
   const { txMgr, currentAccount, contract } = services;
   const dai = contract.getContractByName(tokens.DAI, { hybrid: false });
   jest.spyOn(txMgr, '_execute');
@@ -123,38 +123,41 @@ test('lifecycle hooks', async () => {
     }
   };
 
+  const makeListener = prefix =>
+    jest.fn(tx => {
+      const { contract, method } = tx.metadata;
+      log(`${prefix}: pending: ${contract}.${method}`);
+    });
+
   const open = service.openCdp();
   log('open id:', uniqueId(open));
 
-  txMgr.listen(open, {
-    pending: tx => {
-      const { contract, method } = tx.metadata;
-      log(`open handler: pending: ${contract}.${method}`);
-    },
-    mined: tx => {
-      const { contract, method } = tx.metadata;
-      log(`open handler: mined: ${contract}.${method}`);
-    }
-  });
+  const openHandlers = {
+    pending: makeListener('open'),
+    mined: makeListener('open'),
+    confirmed: makeListener('open')
+  };
 
+  txMgr.listen(open, openHandlers);
   await Promise.all([txMgr.confirm(open), waitForNewBlocks()]);
+  expect(openHandlers.pending).toBeCalled();
+  expect(openHandlers.mined).toBeCalled();
+  expect(openHandlers.confirmed).toBeCalled();
 
   const cdp = await open;
   const lock = cdp.lockEth(1);
   log('lock id:', uniqueId(lock));
 
-  txMgr.listen(lock, {
-    pending: tx => {
-      const { contract, method } = tx.metadata;
-      log(`lock handler: pending: ${contract}.${method}`);
-    },
-    mined: tx => {
-      const { contract, method } = tx.metadata;
-      log(`lock handler: mined: ${contract}.${method}`);
-    }
-  });
+  const lockHandlers = {
+    pending: makeListener('lock'),
+    mined: makeListener('lock')
+  };
+  txMgr.listen(lock, lockHandlers);
 
   await lock;
+  // deposit, approve, join, lock
+  expect(lockHandlers.pending).toBeCalledTimes(4);
+  expect(lockHandlers.mined).toBeCalledTimes(4);
 
   log('\ndraw');
   const draw = cdp.drawDai(1);
