@@ -124,6 +124,44 @@ class FailingWeb3Service extends Web3Service {
   }
 }
 
+test('reverted transaction using callback', async () => {
+  expect.assertions(4);
+  let mined = false;
+  const tx = createRevertingTransaction(service);
+  tx.onPending(() => {
+    expect(tx.state()).toBe(TransactionState.pending);
+  });
+  tx.onMined(() => {
+    mined = true;
+  });
+  tx.onError(error => {
+    expect(tx.state()).toBe(TransactionState.error);
+    expect(mined).toBe(false);
+    expect(error).toMatch('reverted');
+  });
+
+  await tx.mine();
+});
+
+test('reverted transaction using promise', async () => {
+  expect.assertions(4);
+  let mined = false;
+  const tx = createRevertingTransaction(service);
+  tx.onPending(() => {
+    expect(tx.state()).toBe(TransactionState.pending);
+  });
+  tx.onMined(() => {
+    mined = true;
+  });
+  tx.onError().then(error => {
+    expect(tx.state()).toBe(TransactionState.error);
+    expect(mined).toBe(false);
+    expect(error).toMatch('reverted');
+  });
+
+  await tx.mine();
+});
+
 test('error event listener works', async () => {
   expect.assertions(1);
   const service = buildTestService('token', {
@@ -139,22 +177,4 @@ test('error event listener works', async () => {
     // FIXME not sure why this try/catch is necessary...
     // console.log('hmm.', err);
   }
-});
-
-test('reverted transaction goes to error state', async () => {
-  expect.assertions(4);
-  let mined = false;
-  const tx = createRevertingTransaction(service);
-  tx.onPending(() => {
-    expect(tx.state()).toBe(TransactionState.pending);
-  });
-  tx.onMined(() => {
-    mined = true;
-  });
-  tx.onError(error => {
-    expect(tx.state()).toBe(TransactionState.error);
-    expect(error).toMatch('reverted');
-    expect(mined).toBe(false);
-  });
-  await tx.mine();
 });
