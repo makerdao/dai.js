@@ -23,13 +23,12 @@ describe('normal web service behavior', () => {
   test('onConfirmed alias works like onFinalized', async () => {
     expect.assertions(1);
     const tx = createTestTransaction(service);
-    mineBlocks(service);
 
     tx.onConfirmed(tx => {
       expect(tx.state()).toBe(TransactionState.finalized);
     });
 
-    await tx.confirm();
+    await Promise.all([tx.confirm(), mineBlocks(service)]);
   });
 
   test('get fees', async () => {
@@ -45,13 +44,12 @@ describe('normal web service behavior', () => {
     });
     tx.onMined(() => {
       expect(tx.state()).toBe(TransactionState.mined);
-      mineBlocks(service);
     });
     tx.onFinalized(() => {
       expect(tx.state()).toBe(TransactionState.finalized);
     });
 
-    await tx.confirm();
+    await Promise.all([tx.confirm(), mineBlocks(service)]);
   });
 });
 
