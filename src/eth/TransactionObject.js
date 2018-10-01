@@ -109,7 +109,7 @@ export default class TransactionObject extends TransactionLifeCycle {
         //transaction reverted
         const revertMsg = `transaction with hash ${this.hash} reverted`;
         log(revertMsg);
-        this.setError(revertMsg);
+        throw new Error(revertMsg);
       }
     } catch (err) {
       await this._nonceService.setCounts();
