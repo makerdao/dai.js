@@ -163,3 +163,48 @@ test('lifecycle hooks', async () => {
   const wipe = cdp.wipeDai(1);
   await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
 });
+
+test('lifecycle hooks for give', async () => {
+  TestAccountProvider.setIndex(900);
+  const service = buildTestEthereumCdpService({
+    accounts: {
+      default: {
+        type: 'privateKey',
+        privateKey: TestAccountProvider.nextAccount().key
+      }
+    },
+    log: true
+  });
+
+  await service.manager().authenticate();
+  const txMgr = service.get('smartContract').get('transactionManager');
+
+  const makeListener = (label, state) =>
+    jest.fn(tx => {
+      const { contract, method } = tx.metadata;
+      log(`${label}: ${contract}.${method}: ${state}`);
+    });
+
+  const makeHandlers = label => ({
+    pending: makeListener(label, 'pending'),
+    mined: makeListener(label, 'mined')
+  });
+
+  const open = service.openCdp();
+  log('open id:', uniqueId(open));
+
+  const cdp = await open;
+
+  const newCdpAddress = '0x75ac1188e69c815844dd433c2b3ccad1f5a109ff';
+  const give = cdp.give(newCdpAddress);
+
+  log('give id:', uniqueId(give));
+  
+  const giveHandlers = makeHandlers('give');
+
+  txMgr.listen(give, giveHandlers);
+  await give;
+  
+  expect(giveHandlers.pending).toBeCalled();
+  expect(giveHandlers.mined).toBeCalled();
+});
