@@ -151,8 +151,8 @@ test('lifecycle hooks', async () => {
   await Promise.all([lock, mineBlocks(service)]);
 
   // deposit, approve WETH, join, approve PETH, lock
-  expect(lockHandlers.pending).toBeCalledTimes(3);
-  expect(lockHandlers.mined).toBeCalledTimes(3);
+  expect(lockHandlers.pending).toBeCalledTimes(5);
+  expect(lockHandlers.mined).toBeCalledTimes(5);
   expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
 
   log('\ndraw');
@@ -249,7 +249,7 @@ test('lifecycle hooks for bite', async () => {
   await priceService.setEthPrice(0.01);
 
   const bite = cdp.bite();
-  console.log('bite id:', uniqueId(bite));
+  log('bite id:', uniqueId(bite));
 
   const biteHandlers = makeHandlers('bite');
 
