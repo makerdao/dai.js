@@ -55,13 +55,13 @@ export default class PriceService extends PrivateService {
     return USD_MKR.wei((await this._getContract(contracts.SAI_PEP).peek())[0]);
   }
 
-  setEthPrice(newPrice, unit = ETH) {
+  setEthPrice(newPrice, { unit = ETH, promise } = {}) {
     const value = this._valueForContract(newPrice, unit);
-    return this._getContract(contracts.SAI_PIP).poke(value);
+    return this._getContract(contracts.SAI_PIP).poke(value, { promise });
   }
 
-  setMkrPrice(newPrice, unit = MKR) {
+  setMkrPrice(newPrice, { unit = MKR, promise } = {}) {
     const value = this._valueForContract(newPrice, unit);
-    return this._getContract(contracts.SAI_PEP).poke(value);
+    return this._getContract(contracts.SAI_PEP).poke(value, { promise });
   }
 }
