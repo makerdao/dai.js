@@ -43,7 +43,7 @@ export default class EtherToken {
 
   @tracksTransactions
   async transferFrom(fromAddress, toAddress, amount, { unit = ETH, promise }) {
-    return this._transactionManager.sendTx(
+    return this._transactionManager.sendTransaction(
       {
         from: fromAddress,
         to: toAddress,

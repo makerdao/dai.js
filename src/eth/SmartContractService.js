@@ -23,7 +23,7 @@ export default class SmartContractService extends PublicService {
     }
   }
 
-  getContractByAddressAndAbi(address, abi, { name, hybrid = true } = {}) {
+  getContractByAddressAndAbi(address, abi, { name, wrap = true } = {}) {
     if (!address) throw Error('Contract address is required');
     if (!name) name = this.lookupContractName(address);
 
@@ -32,7 +32,7 @@ export default class SmartContractService extends PublicService {
       .ethersProvider()
       .getSigner();
     const contract = new Contract(address, abi, signer);
-    const txManager = hybrid ? this.get('transactionManager') : null;
+    const txManager = wrap && this.get('transactionManager');
     return wrapContract(contract, name, abi, txManager);
   }
 
@@ -41,11 +41,11 @@ export default class SmartContractService extends PublicService {
     return address;
   }
 
-  getContractByName(name, { version, hybrid = true } = {}) {
+  getContractByName(name, { version, wrap = true } = {}) {
     const info = this._getContractInfo(name, version);
     return this.getContractByAddressAndAbi(info.address, info.abi, {
       name,
-      hybrid
+      wrap
     });
   }
 

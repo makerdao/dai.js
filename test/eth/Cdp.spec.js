@@ -50,7 +50,7 @@ function getDsProxy(address) {
   return smartContractService.getContractByAddressAndAbi(
     address,
     dappHub.dsProxy,
-    { name: 'DS_PROXY', hybrid: true }
+    { name: 'DS_PROXY' }
   );
 }
 
