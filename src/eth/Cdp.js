@@ -61,6 +61,7 @@ export default class Cdp {
   }
 
   getId() {
+    console.log('testing precommit');
     console.warn('getId() is deprecated; use the .id property instead');
     return Promise.resolve(this.id);
   }
