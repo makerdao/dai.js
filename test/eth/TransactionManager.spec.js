@@ -151,8 +151,8 @@ test('lifecycle hooks', async () => {
   await Promise.all([lock, mineBlocks(service)]);
 
   // deposit, approve WETH, join, approve PETH, lock
-  expect(lockHandlers.pending).toBeCalledTimes(5);
-  expect(lockHandlers.mined).toBeCalledTimes(5);
+  expect(lockHandlers.pending).toBeCalledTimes(3);
+  expect(lockHandlers.mined).toBeCalledTimes(3);
   expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
 
   log('\ndraw');
@@ -207,4 +207,59 @@ test('lifecycle hooks for give', async () => {
   
   expect(giveHandlers.pending).toBeCalled();
   expect(giveHandlers.mined).toBeCalled();
+});
+
+test('lifecycle hooks for bite', async () => {
+  TestAccountProvider.setIndex(900);
+  const service = buildTestEthereumCdpService({
+    accounts: {
+      default: {
+        type: 'privateKey',
+        privateKey: TestAccountProvider.nextAccount().key
+      }
+    },
+    log: true
+  });
+
+  await service.manager().authenticate();
+  const txMgr = service.get('smartContract').get('transactionManager');
+  const priceService = service.get('price');
+
+  const makeListener = (label, state) =>
+    jest.fn(tx => {
+      const { contract, method } = tx.metadata;
+      log(`${label}: ${contract}.${method}: ${state}`);
+    });
+
+  const makeHandlers = label => ({
+    pending: makeListener(label, 'pending'),
+    mined: makeListener(label, 'mined')
+  });
+
+  const open = service.openCdp();
+  const cdp = await open;
+
+  const lock = cdp.lockEth(0.1);
+  await Promise.all([lock, mineBlocks(service)]);
+
+  const draw = cdp.drawDai(13);
+  await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
+  
+  // set price to make cdp unsafe
+  await priceService.setEthPrice(0.01);
+
+  const bite = cdp.bite();
+  console.log('bite id:', uniqueId(bite));
+
+  const biteHandlers = makeHandlers('bite');
+
+  txMgr.listen(bite, biteHandlers);
+  
+  await bite;
+
+  expect(biteHandlers.pending).toBeCalled();
+  expect(biteHandlers.mined).toBeCalled();
+
+  // set price back to 400
+  await priceService.setEthPrice(400);
 });
