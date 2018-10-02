@@ -1,6 +1,5 @@
 import PrivateService from '../../core/PrivateService';
 import { OasisBuyOrder, OasisSellOrder } from './OasisOrder';
-import TransactionObject from '../../eth/TransactionObject';
 import contracts from '../../../contracts/contracts';
 import { UINT256_MAX } from '../../utils/constants';
 import { getCurrency, DAI, WETH } from '../../eth/Currency';
@@ -26,35 +25,19 @@ export default class OasisExchangeService extends PrivateService {
   */
   async sellDai(amount, currency, minFillAmount = 0) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC,
-      { hybrid: false }
+      contracts.MAKER_OTC
     );
     const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
     const buyToken = this.get('token').getToken(currency);
     const daiAmountEVM = daiValueForContract(amount);
     const minFillAmountEVM = daiValueForContract(minFillAmount);
-    const nonce = await this.get('transactionManager')
-      .get('nonce')
-      .getNonce();
     await this.get('allowance').requireAllowance(DAI, oasisContract.address);
     return OasisSellOrder.build(
       oasisContract,
-      oasisContract.sellAllAmount(
-        daiAddress,
-        daiAmountEVM,
-        buyToken.address(),
-        minFillAmountEVM,
-        {
-          ...this.get('web3').transactionSettings(),
-          nonce: nonce
-        }
-      ),
+      'sellAllAmount',
+      [daiAddress, daiAmountEVM, buyToken.address(), minFillAmountEVM],
       this.get('transactionManager'),
-      {
-        contract: 'MAKER_OTC',
-        method: 'sellAllAmount'
-      },
       currency
     );
   }
@@ -66,8 +49,7 @@ export default class OasisExchangeService extends PrivateService {
   */
   async buyDai(amount, tokenSymbol, maxFillAmount = UINT256_MAX) {
     const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC,
-      { hybrid: false }
+      contracts.MAKER_OTC
     );
     const daiToken = this.get('token').getToken(DAI);
     const daiAddress = daiToken.address();
@@ -76,53 +58,12 @@ export default class OasisExchangeService extends PrivateService {
     const sellTokenAddress = this.get('token')
       .getToken(tokenSymbol)
       .address();
-    const nonce = await this.get('transactionManager')
-      .get('nonce')
-      .getNonce();
     await this.get('allowance').requireAllowance(WETH, oasisContract.address);
     return OasisBuyOrder.build(
       oasisContract,
-      oasisContract.buyAllAmount(
-        daiAddress,
-        daiAmountEVM,
-        sellTokenAddress,
-        maxFillAmountEVM,
-        {
-          ...this.get('web3').transactionSettings(),
-          nonce: nonce
-        }
-      ),
-      this.get('transactionManager'),
-      {
-        contract: 'MAKER_OTC',
-        method: 'buyAllAmount'
-      }
-    );
-  }
-
-  //only used to set up a limit order on the local testnet
-  async offer(
-    payAmount,
-    payTokenAddress,
-    buyAmount,
-    buyTokenAddress,
-    pos,
-    overrides
-  ) {
-    const oasisContract = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
-    );
-    return new TransactionObject(
-      oasisContract.offer(
-        payAmount,
-        payTokenAddress,
-        buyAmount,
-        buyTokenAddress,
-        pos,
-        overrides
-      ),
-      this.get('web3'),
-      this.get('transactionManager').get('nonce')
+      'buyAllAmount',
+      [daiAddress, daiAmountEVM, sellTokenAddress, maxFillAmountEVM],
+      this.get('transactionManager')
     );
   }
 }

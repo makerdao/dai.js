@@ -3,6 +3,28 @@ import contracts from '../../contracts/contracts';
 import { DAI, WETH } from '../../src/eth/Currency';
 import { mineBlocks } from './transactionConfirmation';
 
+async function offer(
+  oasisExchangeService,
+  payAmount,
+  payTokenAddress,
+  buyAmount,
+  buyTokenAddress,
+  pos,
+  overrides
+) {
+  const oasisContract = oasisExchangeService
+    .get('smartContract')
+    .getContractByName(contracts.MAKER_OTC);
+  return oasisContract.offer(
+    payAmount,
+    payTokenAddress,
+    buyAmount,
+    buyTokenAddress,
+    pos,
+    overrides
+  );
+}
+
 function placeLimitOrder(oasisExchangeService, sellDai) {
   let ethereumTokenService;
   ethereumTokenService = oasisExchangeService.get('token');
@@ -14,7 +36,7 @@ function placeLimitOrder(oasisExchangeService, sellDai) {
       const oasisContract = oasisExchangeService
         .get('smartContract')
         .getContractByName(contracts.MAKER_OTC);
-      return wethToken.approveUnlimited(oasisContract.address).onMined();
+      return wethToken.approveUnlimited(oasisContract.address);
     })
     .then(() => {
       return wethToken.balanceOf(
@@ -31,7 +53,8 @@ function placeLimitOrder(oasisExchangeService, sellDai) {
       const daiAddress = ethereumTokenService.getToken(DAI).address();
       const overrideOptions = { gasLimit: 5500000 };
       if (sellDai) {
-        return oasisExchangeService.offer(
+        return offer(
+          oasisExchangeService,
           utils.parseEther('0.5'),
           daiAddress,
           utils.parseEther('2.0'),
@@ -40,7 +63,8 @@ function placeLimitOrder(oasisExchangeService, sellDai) {
           overrideOptions
         );
       } else {
-        return oasisExchangeService.offer(
+        return offer(
+          oasisExchangeService,
           utils.parseEther('0.5'),
           wethAddress,
           utils.parseEther('10.0'),
@@ -68,7 +92,7 @@ export default async function createDaiAndPlaceLimitOrder(
 ) {
   const cdp = await oasisExchangeService.get('cdp').openCdp();
   const tx = cdp.lockEth(0.1);
-  mineBlocks(oasisExchangeService.get('token'));
+  mineBlocks(oasisExchangeService);
   await tx;
   await cdp.drawDai(1);
   return placeLimitOrder(oasisExchangeService, sellDai);

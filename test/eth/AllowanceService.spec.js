@@ -47,7 +47,7 @@ test('min allowance policy, need to update', async () => {
   buildTestAllowanceService(false);
   const estimate = DAI(100);
   await dai.approve(testAddress, DAI(50));
-  await allowanceService.requireAllowance(DAI, testAddress, estimate);
+  await allowanceService.requireAllowance(DAI, testAddress, { estimate });
 
   const allowance = await dai.allowance(owner, testAddress);
   expect(allowance).toEqual(estimate);
@@ -58,7 +58,7 @@ test('min allowance policy, no need to update', async () => {
   const estimate = DAI(100);
   const initialAllowance = DAI(200);
   await dai.approve(testAddress, initialAllowance);
-  await allowanceService.requireAllowance(DAI, testAddress, estimate);
+  await allowanceService.requireAllowance(DAI, testAddress, { estimate });
 
   const allowance = await dai.allowance(owner, testAddress);
   expect(allowance).toEqual(initialAllowance);
