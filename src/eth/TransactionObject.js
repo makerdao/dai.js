@@ -89,7 +89,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       gasPrice = tx.gasPrice;
       this._timeStampMined = new Date();
       const receipt = (this._receipt = await this._waitForReceipt());
-
       if (typeof this._logsParser === 'function') {
         this._logsParser(receipt.logs);
       }
@@ -104,7 +103,14 @@ export default class TransactionObject extends TransactionLifeCycle {
           );
         */
       }
-      this.setMined();
+      if (receipt.status == '0x1' || receipt.status == 1) {
+        this.setMined();
+      } else {
+        //transaction reverted
+        const revertMsg = `transaction with hash ${this.hash} reverted`;
+        log(revertMsg);
+        throw new Error(revertMsg);
+      }
     } catch (err) {
       await this._nonceService.setCounts();
       this.setError(err);

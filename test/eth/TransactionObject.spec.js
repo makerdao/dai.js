@@ -4,6 +4,10 @@ import {
 } from '../helpers/serviceBuilders';
 import {
   createTestTransaction,
+  createRevertingTransaction,
+  createOutOfGasTransaction,
+  createBelowBaseFeeTransaction,
+  //createOutOfEthTransaction,
   mineBlocks
 } from '../helpers/transactionConfirmation';
 import TransactionState from '../../src/eth/TransactionState';
@@ -120,6 +124,68 @@ class FailingWeb3Service extends Web3Service {
     });
   }
 }
+
+test('reverted transaction errors', async () => {
+  expect.assertions(4);
+  let mined = false;
+  const tx = createRevertingTransaction(service);
+  tx.onPending(() => {
+    expect(tx.state()).toBe(TransactionState.pending);
+  });
+  tx.onMined(() => {
+    mined = true;
+  });
+  try {
+    await tx.mine();
+  } catch (err) {
+    expect(tx.state()).toEqual(TransactionState.error);
+    expect(mined).toBe(false);
+    expect(err.message).toMatch('reverted');
+  }
+});
+
+test('out of gas transaction errors', async () => {
+  expect.assertions(4);
+  let mined = false;
+  const tx = createOutOfGasTransaction(service);
+  tx.onPending(() => {
+    expect(tx.state()).toBe(TransactionState.pending);
+  });
+  tx.onMined(() => {
+    mined = true;
+  });
+  try {
+    await tx.mine();
+  } catch (err) {
+    expect(tx.state()).toEqual(TransactionState.error);
+    expect(mined).toBe(false);
+    expect(err.message).toMatch('reverted');
+  }
+});
+
+test('below base fee tranaction errors', async () => {
+  expect.assertions(2);
+  const tx = createBelowBaseFeeTransaction(service);
+  try {
+    await tx.mine();
+  } catch (err) {
+    expect(tx.state()).toEqual(TransactionState.error);
+    expect(err.message).toEqual('base fee exceeds gas limit');
+  }
+});
+
+/* FIXME: this causes an issue with the nonce
+test('out of eth transaction errors', async () => {
+  expect.assertions(1);
+  let mined = false;
+  const tx = createOutOfEthTransaction(service);
+  try {
+    await tx;
+  } catch (err) {
+    expect(err.message).toMatch('enough funds');
+  }
+});
+*/
 
 test('error event listener works', async () => {
   expect.assertions(1);

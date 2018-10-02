@@ -97,7 +97,7 @@ class TransactionLifeCycle {
         }
         if (newState === error) reject(this.error);
       });
-    });
+    }).catch(e => e);
   }
 
   onPending(handler) {
@@ -121,7 +121,7 @@ class TransactionLifeCycle {
           reject(this.error, this._returnValue());
         }
       });
-    });
+    }).catch(e => e);
   }
 }
 
