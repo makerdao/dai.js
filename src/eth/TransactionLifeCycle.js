@@ -77,8 +77,11 @@ class TransactionLifeCycle {
     return this._businessObject || this;
   }
 
-  _inOrPastState(state) {
-    const currentIndex = stateOrder.indexOf(this.state());
+  inOrPastState(state) {
+    const currentState = this.state();
+    if (state === currentState) return true;
+
+    const currentIndex = stateOrder.indexOf(currentState);
     const targetIndex = stateOrder.indexOf(state);
     if (currentIndex === -1 || targetIndex === -1) {
       throw new Error('invalid state');
@@ -87,17 +90,11 @@ class TransactionLifeCycle {
   }
 
   _onStateChange(from, to, handler) {
-    if (this.isError()) return Promise.reject(this.error);
-    if (this._inOrPastState(to)) return Promise.resolve(this._returnValue());
-    return new Promise((resolve, reject) => {
-      this._state.onStateChanged((oldState, newState) => {
-        if (oldState === from && newState === to) {
-          if (handler) handler(this._returnValue());
-          resolve(this._returnValue());
-        }
-        if (newState === error) reject(this.error);
-      });
-    }).catch(e => e);
+    this._state.onStateChanged((oldState, newState) => {
+      if (oldState === from && newState === to) {
+        handler(this._returnValue());
+      }
+    });
   }
 
   onPending(handler) {
@@ -113,15 +110,20 @@ class TransactionLifeCycle {
   }
 
   onError(handler) {
-    if (this.isError()) return Promise.reject();
-    return new Promise((resolve, reject) => {
-      this._state.onStateChanged((oldState, newState) => {
-        if (newState === error) {
-          if (handler) handler(this.error, this._returnValue());
-          reject(this.error, this._returnValue());
-        }
-      });
-    }).catch(e => e);
+    this._state.onStateChanged((oldState, newState) => {
+      if (newState === error) {
+        handler(this.error, this._returnValue());
+      }
+    });
+  }
+
+  on(state, handler) {
+    if (state === error) return this.onError(handler);
+    if (!Object.keys(transactionState).includes(state)) {
+      throw new Error(`Unrecognized state "${state}"`);
+    }
+    const prevState = stateOrder[stateOrder.indexOf(state) - 1];
+    return this._onStateChange(prevState, state, handler);
   }
 }
 

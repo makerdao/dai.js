@@ -16,6 +16,7 @@ import {
   USD
 } from './Currency';
 import { numberToBytes32 } from '../utils/conversion';
+import tracksTransactions from '../utils/tracksTransactions';
 
 export default class EthereumCdpService extends PrivateService {
   /**
@@ -37,6 +38,10 @@ export default class EthereumCdpService extends PrivateService {
 
   _smartContract() {
     return this.get('smartContract');
+  }
+
+  _txMgr() {
+    return this.get('smartContract').get('transactionManager');
   }
 
   _tubContract() {
@@ -124,44 +129,55 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  async lockEth(cdpId, amount, unit = ETH) {
-    await this._conversionService()
-      .convertEthToWeth(amount, unit)
-      .confirm();
-    return this.lockWeth(cdpId, amount);
+  @tracksTransactions
+  async lockEth(cdpId, amount, { unit = ETH, promise }) {
+    const convert = this._conversionService().convertEthToWeth(amount, {
+      unit,
+      promise
+    });
+    await this._txMgr().confirm(convert);
+    return this.lockWeth(cdpId, amount, { promise });
   }
 
-  async lockWeth(cdpId, amount, unit = WETH) {
+  @tracksTransactions
+  async lockWeth(cdpId, amount, { unit = WETH, promise }) {
     const wethPerPeth = await this.get('price').getWethToPethRatio();
     const weth = getCurrency(amount, unit);
-    await this._conversionService().convertWethToPeth(weth);
+    await this._conversionService().convertWethToPeth(weth, {
+      promise
+    });
 
-    return this.lockPeth(cdpId, weth.div(wethPerPeth));
+    return this.lockPeth(cdpId, weth.div(wethPerPeth), { promise });
   }
 
-  async lockPeth(cdpId, amount, unit = PETH) {
+  @tracksTransactions
+  async lockPeth(cdpId, amount, { unit = PETH, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     await this.get('allowance').requireAllowance(
       PETH,
-      this._tubContract().address
+      this._tubContract().address,
+      { promise }
     );
-    return this._tubContract().lock(hexCdpId, value);
+    return this._tubContract().lock(hexCdpId, value, {
+      promise
+    });
   }
 
-  freePeth(cdpId, amount, unit = PETH) {
+  freePeth(cdpId, amount, { unit = PETH, promise } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-    return this._tubContract().free(hexCdpId, value);
+    return this._tubContract().free(hexCdpId, value, { promise });
   }
 
-  drawDai(cdpId, amount, unit = DAI) {
+  drawDai(cdpId, amount, { unit = DAI, promise } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
-    return this._tubContract().draw(hexCdpId, value);
+    return this._tubContract().draw(hexCdpId, value, { promise });
   }
 
-  async wipeDai(cdpId, amount, unit = DAI) {
+  @tracksTransactions
+  async wipeDai(cdpId, amount, { unit = DAI, promise }) {
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     await this._throwIfNotEnoughMkrToWipe(cdpId, amount, unit);
     const hexCdpId = numberToBytes32(cdpId);
@@ -169,7 +185,7 @@ export default class EthereumCdpService extends PrivateService {
       this.get('allowance').requireAllowance(MKR, this._tubContract().address),
       this.get('allowance').requireAllowance(DAI, this._tubContract().address)
     ]);
-    return this._tubContract().wipe(hexCdpId, value);
+    return this._tubContract().wipe(hexCdpId, value, { promise });
   }
 
   getInfo(cdpId) {
@@ -338,14 +354,14 @@ export default class EthereumCdpService extends PrivateService {
     return new BigNumber(value.toString()).dividedBy(RAY).toNumber();
   }
 
-  give(cdpId, newAddress) {
+  give(cdpId, newAddress, options = {}) {
     const hexCdpId = numberToBytes32(cdpId);
-    return this._tubContract().give(hexCdpId, newAddress);
+    return this._tubContract().give(hexCdpId, newAddress, options);
   }
 
-  bite(cdpId) {
+  bite(cdpId, options = {}) {
     const hexCdpId = numberToBytes32(cdpId);
-    return this._tubContract().bite(hexCdpId, { gasLimit: 4000000 });
+    return this._tubContract().bite(hexCdpId, options);
   }
 
   freeEthProxy(dsProxyAddress, cdpId, amount) {
@@ -435,21 +451,22 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  async wipeDaiProxy(dsProxyAddress, cdpId, amount, useOtc = false) {
+  @tracksTransactions
+  async wipeDaiProxy(dsProxyAddress, cdpId, amount, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
 
-    // Only require MKR allowance if paying fee using MKR (if using OTC, no need to approve MKR right now)
-    let approveCalls = [
-      this.get('allowance').requireAllowance(DAI, dsProxyAddress)
-    ];
+    await this.get('allowance').requireAllowance(DAI, dsProxyAddress, {
+      promise
+    });
+    // Only require MKR allowance if paying fee using MKR (if using OTC, no need
+    // to approve MKR right now)
     if (!useOtc) {
       await this._throwIfNotEnoughMkrToWipe(cdpId, amount, DAI);
-      approveCalls.unshift(
-        this.get('allowance').requireAllowance(MKR, dsProxyAddress)
-      );
+      await this.get('allowance').requireAllowance(MKR, dsProxyAddress, {
+        promise
+      });
     }
-    await Promise.all(approveCalls);
 
     const options = {
       dsProxyAddress,
@@ -461,10 +478,12 @@ export default class EthereumCdpService extends PrivateService {
           otc: useOtc,
           proxy: true
         }
-      }
+      },
+      promise
     };
 
-    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy wipe() method
+    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy wipe()
+    // method
     return useOtc
       ? this._saiProxyTubContract()['wipe(address,bytes32,uint256,address)'](
           this._tubContract().address,
@@ -481,21 +500,22 @@ export default class EthereumCdpService extends PrivateService {
         );
   }
 
-  async shutProxy(dsProxyAddress, cdpId, useOtc = false) {
+  @tracksTransactions
+  async shutProxy(dsProxyAddress, cdpId, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
 
-    // Only require MKR allowance and balance if paying fee using MKR (if using OTC, no need to approve MKR right now)
-    let approveCalls = [
-      this.get('allowance').requireAllowance(DAI, dsProxyAddress)
-    ];
+    await this.get('allowance').requireAllowance(DAI, dsProxyAddress, {
+      promise
+    });
+    // Only require MKR allowance and balance if paying fee using MKR (if using
+    // OTC, no need to approve MKR right now)
     if (!useOtc) {
       const debt = await this.getDebtValue(cdpId, DAI);
       await this._throwIfNotEnoughMkrToWipe(cdpId, debt);
-      approveCalls.unshift(
-        this.get('allowance').requireAllowance(MKR, dsProxyAddress)
-      );
+      await this.get('allowance').requireAllowance(MKR, dsProxyAddress, {
+        promise
+      });
     }
-    await Promise.all(approveCalls);
 
     const options = {
       dsProxyAddress,
@@ -506,10 +526,12 @@ export default class EthereumCdpService extends PrivateService {
           otc: useOtc,
           proxy: true
         }
-      }
+      },
+      promise
     };
 
-    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy shut() method
+    // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy shut()
+    // method
     return useOtc
       ? this._saiProxyTubContract()['shut(address,bytes32,address)'](
           this._tubContract().address,
