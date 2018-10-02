@@ -155,7 +155,6 @@ describe('lifecycle hooks', () => {
     expect(openHandlers.mined).toBeCalled();
     expect(openHandlers.confirmed).toBeCalled();
 
-    const cdp = await open;
     const lock = cdp.lockEth(1);
     log('lock id:', uniqueId(lock));
 
