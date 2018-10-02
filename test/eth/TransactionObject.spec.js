@@ -4,12 +4,16 @@ import {
 } from '../helpers/serviceBuilders';
 import {
   createTestTransaction,
+  createRevertingTransaction,
+  createOutOfGasTransaction,
+  createBelowBaseFeeTransaction,
+  //createOutOfEthTransaction,
   mineBlocks
 } from '../helpers/transactionConfirmation';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';
-import { ETH, MKR } from '../../src/eth/Currency';
+import { ETH } from '../../src/eth/Currency';
 
 let service;
 
@@ -17,11 +21,6 @@ beforeAll(async () => {
   service = buildTestEthereumTokenService();
   await service.manager().authenticate();
 });
-
-function createRevertingTransaction(srv = service) {
-  const mkr = srv.getToken(MKR);
-  return mkr.transfer(TestAccountProvider.nextAddress(), '2000000');
-}
 
 test('event listeners work as promises', async () => {
   expect.assertions(3);
@@ -126,7 +125,7 @@ class FailingWeb3Service extends Web3Service {
   }
 }
 
-test('reverted transaction using callback', async () => {
+test('reverted transaction errors', async () => {
   expect.assertions(4);
   let mined = false;
   const tx = createRevertingTransaction(service);
@@ -144,6 +143,49 @@ test('reverted transaction using callback', async () => {
     expect(err.message).toMatch('reverted');
   }
 });
+
+test('out of gas transaction errors', async () => {
+  expect.assertions(4);
+  let mined = false;
+  const tx = createOutOfGasTransaction(service);
+  tx.onPending(() => {
+    expect(tx.state()).toBe(TransactionState.pending);
+  });
+  tx.onMined(() => {
+    mined = true;
+  });
+  try {
+    await tx.mine();
+  } catch (err) {
+    expect(tx.state()).toEqual(TransactionState.error);
+    expect(mined).toBe(false);
+    expect(err.message).toMatch('reverted');
+  }
+});
+
+test('below base fee tranaction errors', async () => {
+  expect.assertions(2);
+  const tx = createBelowBaseFeeTransaction(service);
+  try {
+    await tx.mine();
+  } catch (err) {
+    expect(tx.state()).toEqual(TransactionState.error);
+    expect(err.message).toEqual('base fee exceeds gas limit');
+  }
+});
+
+/* FIXME: this causes an issue with the nonce
+test('out of eth transaction errors', async () => {
+  expect.assertions(1);
+  let mined = false;
+  const tx = createOutOfEthTransaction(service);
+  try {
+    await tx;
+  } catch (err) {
+    expect(err.message).toMatch('enough funds');
+  }
+});
+*/
 
 test('error event listener works', async () => {
   expect.assertions(1);

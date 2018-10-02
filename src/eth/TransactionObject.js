@@ -89,7 +89,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       gasPrice = tx.gasPrice;
       this._timeStampMined = new Date();
       const receipt = (this._receipt = await this._waitForReceipt());
-
       if (typeof this._logsParser === 'function') {
         this._logsParser(receipt.logs);
       }
