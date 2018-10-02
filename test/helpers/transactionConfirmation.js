@@ -1,4 +1,4 @@
-import { WETH } from '../../src/eth/Currency';
+import { ETH, WETH, MKR } from '../../src/eth/Currency';
 import TestAccountProvider from './TestAccountProvider';
 import debug from 'debug';
 const log = debug('dai:testing:mineBlocks');
@@ -22,4 +22,28 @@ export async function mineBlocks(service, count) {
     await createTestTransaction(service).mine();
     log(`block ${web3Service.blockNumber()}`);
   }
+}
+
+export function createRevertingTransaction(tokenService) {
+  const mkr = tokenService.getToken(MKR);
+  return mkr.transfer(TestAccountProvider.nextAddress(), '2000000');
+}
+
+export function createBelowBaseFeeTransaction(tokenService) {
+  const mkr = tokenService.getToken(MKR);
+  return mkr._contract.approve(TestAccountProvider.nextAddress(), -1, {
+    gasLimit: 4000
+  });
+}
+
+export function createOutOfGasTransaction(tokenService) {
+  const mkr = tokenService.getToken(MKR);
+  return mkr._contract.approve(TestAccountProvider.nextAddress(), -1, {
+    gasLimit: 40000
+  });
+}
+
+export function createOutOfEthTransaction(tokenService) {
+  const eth = tokenService.getToken(ETH);
+  return eth.transfer(TestAccountProvider.nextAddress(), 20000);
 }
