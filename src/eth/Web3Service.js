@@ -52,6 +52,10 @@ export default class Web3Service extends PrivateService {
     return this._transactionSettings;
   }
 
+  confirmedBlockCount() {
+    return this._confirmedBlockCount;
+  }
+
   web3Contract(abi, address) {
     return this._web3.eth.contract(abi).at(address);
   }
@@ -76,13 +80,13 @@ export default class Web3Service extends PrivateService {
         'getBalance'
       ])
     );
-
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
       provider: { ...settings.provider }
     });
     this._transactionSettings = settings.transactionSettings;
+    this._confirmedBlockCount = settings.confirmedBlockCount || 5;
   }
 
   async connect() {
@@ -136,7 +140,8 @@ export default class Web3Service extends PrivateService {
 
   async waitForBlockNumber(blockNumber) {
     if (blockNumber < this._currentBlock) {
-      throw new Error('Cannot wait for past block ' + blockNumber);
+      console.error('Attempted to wait for past block ' + blockNumber);
+      return;
     }
 
     if (blockNumber === this._currentBlock) {
