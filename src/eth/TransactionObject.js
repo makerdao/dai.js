@@ -34,10 +34,9 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._fees;
   }
 
-  async mine() {
+  mine() {
     if (!this._dataPromise) this._dataPromise = this._getTransactionData();
-    await this._dataPromise;
-    return this._returnValue();
+    return this._dataPromise.then(() => this._returnValue());
   }
 
   async confirm(count = this._confirmedBlockCount) {

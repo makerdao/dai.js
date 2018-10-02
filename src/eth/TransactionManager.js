@@ -124,6 +124,7 @@ export default class TransactionManager extends PublicService {
     const data = contract.interface.functions[method](...args).data;
     return dsProxyContract.execute(contract.address, data, options);
   }
+
   _createTransactionObject(tx, { businessObject, metadata, promise } = {}) {
     const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
       businessObject,
