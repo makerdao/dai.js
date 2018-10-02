@@ -65,6 +65,8 @@ For example code that consumes the library, check out [this repository](https://
 
 1. `git clone https://github.com/makerdao/dai.js`
 2. `yarn install`
+3. Install testchain - `git submodule update --init --recursive`
+4. Install [dapptools](https://dapp.tools/) - `curl https://dapp.tools/install | sh`
 
 ### Running the unit tests
 
