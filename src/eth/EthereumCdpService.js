@@ -68,16 +68,23 @@ export default class EthereumCdpService extends PrivateService {
       : new ProxyCdp(this, dsProxyAddress, id);
   }
 
-  async _checkEnoughMkr(cdpId) {
+  async enoughMkrToWipe(cdpId, amountToWipe, unit = DAI) {
+    const dai = getCurrency(amountToWipe, unit);
+    if (dai.eq(0)) return;
     const MkrToken = this.get('token').getToken(MKR);
     const ownerAddress = this.get('token')
       .get('web3')
       .currentAccount();
-    const [fee, balance] = await Promise.all([
+    const [fee, balance, debt] = await Promise.all([
       this.getGovernanceFee(cdpId, MKR),
-      MkrToken.balanceOf(ownerAddress)
+      MkrToken.balanceOf(ownerAddress),
+      this.getDebtValue(cdpId)
     ]);
-    if (fee.gt(balance)) {
+    const mkrOwed = dai
+      .div(debt)
+      .toBigNumber()
+      .times(fee.toBigNumber());
+    if (mkrOwed.gt(balance.toBigNumber())) {
       throw new Error('not enough MKR balance to cover governance fee');
     }
   }
@@ -95,7 +102,8 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async shut(cdpId) {
-    await this._checkEnoughMkr(cdpId);
+    const debt = await this.getDebtValue(cdpId, DAI);
+    await this.enoughMkrToWipe(cdpId, debt);
     const hexCdpId = numberToBytes32(cdpId);
     return Promise.all([
       this.get('allowance').requireAllowance(MKR, this._tubContract().address),
@@ -106,7 +114,9 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async lockEth(cdpId, amount, unit = ETH) {
-    await this._conversionService().convertEthToWeth(amount, unit);
+    await this._conversionService()
+      .convertEthToWeth(amount, unit)
+      .confirm();
     return this.lockWeth(cdpId, amount);
   }
 
@@ -141,9 +151,9 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async wipeDai(cdpId, amount, unit = DAI) {
-    await this._checkEnoughMkr(cdpId);
-    const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
+    await this.enoughMkrToWipe(cdpId, amount, unit);
+    const hexCdpId = numberToBytes32(cdpId);
     await Promise.all([
       this.get('allowance').requireAllowance(MKR, this._tubContract().address),
       this.get('allowance').requireAllowance(DAI, this._tubContract().address)
@@ -415,7 +425,6 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async wipeDaiProxy(dsProxyAddress, cdpId, amount, useOtc = false) {
-    await this._checkEnoughMkr(cdpId);
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
 
@@ -423,10 +432,12 @@ export default class EthereumCdpService extends PrivateService {
     let approveCalls = [
       this.get('allowance').requireAllowance(DAI, dsProxyAddress)
     ];
-    if (!useOtc)
+    if (!useOtc) {
+      await this.enoughMkrToWipe(cdpId, amount, DAI);
       approveCalls.unshift(
         this.get('allowance').requireAllowance(MKR, dsProxyAddress)
       );
+    }
     await Promise.all(approveCalls);
 
     const options = {
@@ -460,17 +471,19 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async shutProxy(dsProxyAddress, cdpId, useOtc = false) {
-    await this._checkEnoughMkr(cdpId);
     const hexCdpId = numberToBytes32(cdpId);
 
-    // Only require MKR allowance if paying fee using MKR (if using OTC, no need to approve MKR right now)
+    // Only require MKR allowance and balance if paying fee using MKR (if using OTC, no need to approve MKR right now)
     let approveCalls = [
       this.get('allowance').requireAllowance(DAI, dsProxyAddress)
     ];
-    if (!useOtc)
+    if (!useOtc) {
+      const debt = await this.getDebtValue(cdpId, DAI);
+      await this.enoughMkrToWipe(cdpId, debt);
       approveCalls.unshift(
         this.get('allowance').requireAllowance(MKR, dsProxyAddress)
       );
+    }
     await Promise.all(approveCalls);
 
     const options = {

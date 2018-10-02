@@ -7,6 +7,10 @@ export default class OasisOrder {
     this._hybrid = null;
   }
 
+  orderTransaction() {
+    return this._hybrid;
+  }
+
   fillAmount() {
     return this._fillAmount;
   }
@@ -19,7 +23,7 @@ export default class OasisOrder {
     return this._hybrid.getOriginalTransaction().timestamp();
   }
 
-  transact(oasisContract, transaction, transactionManager) {
+  transact(oasisContract, transaction, transactionManager, metadata) {
     return transactionManager.createHybridTx(transaction, {
       businessObject: this,
       parseLogs: receiptLogs => {
@@ -39,7 +43,8 @@ export default class OasisOrder {
           total = total.add(parsedLog[this._logKey]);
         });
         this._fillAmount = this._unit.wei(total.toString());
-      }
+      },
+      metadata: metadata
     });
   }
 }
@@ -51,12 +56,13 @@ export class OasisBuyOrder extends OasisOrder {
     this._unit = DAI;
   }
 
-  static build(oasisContract, transaction, transactionManager) {
+  static build(oasisContract, transaction, transactionManager, metadata) {
     const order = new OasisBuyOrder();
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionManager
+      transactionManager,
+      metadata
     );
     return order._hybrid;
   }
@@ -69,12 +75,19 @@ export class OasisSellOrder extends OasisOrder {
     this._unit = currency;
   }
 
-  static build(oasisContract, transaction, transactionManager, currency) {
+  static build(
+    oasisContract,
+    transaction,
+    transactionManager,
+    metadata,
+    currency
+  ) {
     const order = new OasisSellOrder(currency);
     order._hybrid = order.transact(
       oasisContract,
       transaction,
-      transactionManager
+      transactionManager,
+      metadata
     );
     return order._hybrid;
   }
