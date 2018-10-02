@@ -74,6 +74,7 @@ export default class Cdp {
 const passthroughMethods = [
   'bite',
   'drawDai',
+  'enoughMkrToWipe',
   'freeEth',
   'freePeth',
   'getCollateralValue',
