@@ -2,11 +2,14 @@ import {
   buildTestEthereumTokenService,
   buildTestService
 } from '../helpers/serviceBuilders';
-import TestAccountProvider from '../helpers/TestAccountProvider';
+import {
+  createTestTransaction,
+  mineBlocks
+} from '../helpers/transactionConfirmation';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';
-import { ETH, WETH, MKR } from '../../src/eth/Currency';
+import { ETH, MKR } from '../../src/eth/Currency';
 
 let service;
 
@@ -15,11 +18,6 @@ beforeAll(async () => {
   await service.manager().authenticate();
 });
 
-function createTestTransaction(srv = service) {
-  const wethToken = srv.getToken(WETH);
-  return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
-}
-
 function createRevertingTransaction(srv = service) {
   const mkr = srv.getToken(MKR);
   return mkr.transfer('0xe30d7f884b87681bd8f5bf1e818eb029a90ad9d2', '2000000');
@@ -27,18 +25,14 @@ function createRevertingTransaction(srv = service) {
 
 test('event listeners work as promises', async () => {
   expect.assertions(3);
-  const tx = createTestTransaction();
+  const tx = createTestTransaction(service);
   tx.onPending().then(tx => {
     expect(tx.state()).toBe(TransactionState.pending);
   });
 
   tx.onMined().then(tx => {
     expect(tx.state()).toBe(TransactionState.mined);
-
-    // create more blocks so that the original tx gets confirmed
-    for (let i = 0; i < 3; i++) {
-      createTestTransaction();
-    }
+    mineBlocks(service);
   });
 
   tx.onFinalized().then(tx => {
@@ -48,24 +42,32 @@ test('event listeners work as promises', async () => {
   await tx.confirm();
 });
 
+test('onConfirmed alias works like onFinalized', async () => {
+  expect.assertions(1);
+  const tx = createTestTransaction(service);
+  mineBlocks(service);
+
+  tx.onConfirmed().then(tx => {
+    expect(tx.state()).toBe(TransactionState.finalized);
+  });
+
+  await tx.confirm();
+});
+
 test('get fees', async () => {
-  const tx = await createTestTransaction().mine();
+  const tx = await createTestTransaction(service).mine();
   expect(tx.fees().gt(ETH.wei(20000))).toBeTruthy();
 });
 
 test('event listeners work as callbacks', async () => {
   expect.assertions(3);
-  const tx = createTestTransaction();
+  const tx = createTestTransaction(service);
   tx.onPending(() => {
     expect(tx.state()).toBe(TransactionState.pending);
   });
   tx.onMined(() => {
     expect(tx.state()).toBe(TransactionState.mined);
-
-    // create more blocks so that the original tx gets confirmed
-    for (let i = 0; i < 3; i++) {
-      createTestTransaction();
-    }
+    mineBlocks(service);
   });
   tx.onFinalized(() => {
     expect(tx.state()).toBe(TransactionState.finalized);

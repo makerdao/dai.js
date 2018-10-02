@@ -20,6 +20,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._ethersProvider = web3Service.ethersProvider();
     this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
+    this._confirmedBlockCount = this._web3Service.confirmedBlockCount();
   }
 
   timeStampSubmitted() {
@@ -40,9 +41,9 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._returnValue();
   }
 
-  async confirm(count = 3) {
+  async confirm(count = this._confirmedBlockCount) {
     await this.mine();
-
+    if (parseInt(count) <= 0) return;
     const newBlockNumber = this._receipt.blockNumber + count;
     await this._web3Service.waitForBlockNumber(newBlockNumber);
     const newReceipt = await this._ethersProvider.getTransactionReceipt(
