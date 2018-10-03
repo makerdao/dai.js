@@ -6,7 +6,7 @@ import ProviderType from '../../src/eth/web3/ProviderType';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
 import { uniqueId } from '../../src/utils';
 
-const log = debug('dai:testing');
+const log = debug('dai:testing:integration');
 let maker, cdp, exchange, address, tokenService, txMgr;
 
 async function convertPeth() {
