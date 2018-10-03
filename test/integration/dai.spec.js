@@ -104,7 +104,7 @@ test(
   'can open a CDP',
   async () => {
     cdp = await maker.openCdp();
-    console.info('Opened new CDP', await cdp.id);
+    console.info('Opened new CDP', cdp.id);
     const open = cdp.transactionObject();
     await txMgr.confirm(open);
     expect(cdp).toBeDefined();

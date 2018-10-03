@@ -129,18 +129,6 @@ export default class ProxyCdp {
   transactionObject() {
     return this._transactionObject;
   }
-
-  getId() {
-    console.warn('getId() is deprecated; use the .id property instead');
-    return Promise.resolve(this.id);
-  }
-
-  getDsProxyAddress() {
-    console.warn(
-      'getDsProxyAddress() is deprecated; use the .dsProxyAddress property instead'
-    );
-    return Promise.resolve(this.dsProxyAddress);
-  }
 }
 
 // Each of these passthrough methods gets called on the EthereumCdpService
