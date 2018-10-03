@@ -138,6 +138,7 @@ export default class ProxyCdp {
 const passthroughMethods = [
   ['bite', false],
   ['drawDai', true],
+  ['enoughMkrToWipe', false],
   ['freeEth', true],
   // 'freePeth',
   ['getCollateralValue', false],

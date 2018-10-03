@@ -105,3 +105,37 @@ test('parameterized smart contract input', async () => {
   expect(contract.address).toEqual(mockContractDefinition.address);
   expect(typeof contract.foo).toBe('function');
 });
+
+test('parameterized smart contract input with multiple addresses', async () => {
+  const mockContractDefinition = {
+    address: {
+      testnet: '0xbeefed1bedded2dabbed3defaced4decade5dead',
+      kovan: '0xbeefed1bedded2dabbed3defaced4decade5caca',
+      mainnet: '0xbeefed1bedded2dabbed3defaced4decade5feed'
+    },
+    abi: [
+      {
+        constant: true,
+        inputs: [],
+        name: 'foo',
+        outputs: [{ name: '', type: 'bytes32' }],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function'
+      }
+    ]
+  };
+
+  const service = buildTestService('smartContract', {
+    smartContract: {
+      addContracts: {
+        mock: mockContractDefinition
+      }
+    }
+  });
+
+  await service.manager().authenticate();
+  const contract = service.getContractByName('mock');
+  expect(contract.address).toEqual(mockContractDefinition.address.testnet);
+  expect(typeof contract.foo).toBe('function');
+});

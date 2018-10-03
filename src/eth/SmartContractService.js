@@ -1,9 +1,10 @@
 import PublicService from '../core/PublicService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import networks from '../../contracts/networks';
+import networks, { TESTNET_ID } from '../../contracts/networks';
 import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
+import { mapValues } from 'lodash';
 
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
@@ -187,7 +188,20 @@ export default class SmartContractService extends PublicService {
     if (!mapping) throw new Error(`Network ID ${id} not found in mapping.`);
     const infos = mapping.contracts;
     if (this._addedContracts) {
-      const infos2 = { ...infos, ...this._addedContracts };
+      const networkName = {
+        [TESTNET_ID]: 'testnet',
+        [42]: 'kovan',
+        [1]: 'mainnet'
+      }[id];
+
+      const infos2 = {
+        ...infos,
+        ...mapValues(this._addedContracts, ([definition]) => {
+          const { address, ...otherProps } = definition;
+          if (typeof address === 'string') return [definition];
+          return [{ address: address[networkName], ...otherProps }];
+        })
+      };
       return infos2;
     }
     return infos;
