@@ -134,11 +134,13 @@ export function contractInfo(network) {
   };
 }
 
+export const TESTNET_ID = 999;
+
 export default [
   { name: 'mainnet', networkId: 1, contracts: contractInfo('mainnet') },
   { name: 'morden', networkId: 2, contracts: null },
   { name: 'ropsten', networkId: 3, contracts: null },
   { name: 'rinkeby', networkId: 4, contracts: null },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
-  { name: 'test', networkId: 999, contracts: contractInfo('test') }
+  { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('test') }
 ];

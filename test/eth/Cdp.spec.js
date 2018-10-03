@@ -231,11 +231,62 @@ const sharedTests = openCdp => {
           }
         });
 
+        test('fail to wipe debt due to lack of MKR, despite having MKR', async () => {
+          expect.assertions(3);
+          const amountToWipe = DAI(1);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const [fee, debt, balance] = await Promise.all([
+            cdp.getGovernanceFee(MKR),
+            cdp.getDebtValue(),
+            mkr.balanceOf(currentAccount)
+          ]);
+          const mkrOwed = amountToWipe
+            .div(debt)
+            .toBigNumber()
+            .times(fee.toBigNumber());
+          const mkrToSendAway = balance.minus(mkrOwed.times(0.99)); //keep 99% of MKR needed
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, mkrToSendAway);
+          const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
+          expect(enoughMkrToWipe).toBe(false);
+          try {
+            await cdp.wipeDai(1);
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
         test('fail to shut due to lack of MKR', async () => {
           expect.assertions(2);
           const mkr = cdpService.get('token').getToken(MKR);
           const other = TestAccountProvider.nextAddress();
           await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+          try {
+            await cdp.shut();
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
+        test('fail to shut due to lack of MKR, despite having MKR', async () => {
+          expect.assertions(3);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const [fee, debt, balance] = await Promise.all([
+            cdp.getGovernanceFee(MKR),
+            cdp.getDebtValue(),
+            mkr.balanceOf(currentAccount)
+          ]);
+          const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, mkrToSendAway);
+          const enoughMkrToWipe = await cdp.enoughMkrToWipe(debt);
+          expect(enoughMkrToWipe).toBe(false);
           try {
             await cdp.shut();
           } catch (err) {
