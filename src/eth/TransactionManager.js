@@ -11,14 +11,16 @@ const log = debug('dai:testing:txMgr');
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
     super(name, ['web3', 'log', 'nonce']);
-    this._listeners = [];
+    this._newTxListeners = [];
     this._tracker = new Tracker();
   }
 
-  formatHybridTx(contract, method, args, name, businessObject) {
+  // this method must not be async
+  sendContractCall(contract, method, args, name) {
     if (!args) args = [];
     let options,
-      promiseToTrack,
+      promise,
+      businessObject,
       metadata = {
         contract: name,
         method: method.replace(/\(.*\)$/g, ''),
@@ -37,86 +39,51 @@ export default class TransactionManager extends PublicService {
       }
 
       if (has(options, 'promise')) {
-        if (options.promise) {
-          promiseToTrack = options.promise;
-        }
+        if (options.promise) promise = options.promise;
         delete options.promise;
+      }
+
+      if (options.businessObject) {
+        businessObject = options.businessObject;
+        delete options.businessObject;
       }
     } else {
       options = {};
     }
 
-    // this async immediately-executed function wrapper is necessary to ensure
-    // that the hybrid tx gets wrapped around the async operation that gets
-    // the nonce. if we were to await outside of the wrapper, it would cause
-    // `formatHybridTx` to return a promise that resolved to the hybrid,
-    // instead of the hybrid itself, and then the hybrid's lifecycle hooks
-    // wouldn't be accessible.
-    const innerTx = (async () =>
-      this._execute(contract, method, args, {
-        ...this.get('web3').transactionSettings(),
-        ...options,
-        nonce: await this.get('nonce').getNonce()
-      }))();
-
-    return this.createHybridTx(innerTx, {
-      businessObject,
-      metadata,
-      promise: promiseToTrack
-    });
+    // for promise tracking to work, we must return to the caller the result of
+    // _createTransactionObject, because that promise is the one stored for
+    // lookup to attach lifecycle hooks.
+    return this._createTransactionObject(
+      (async () => {
+        // so we do our async operations inside this immediately-executed
+        // async function.
+        const txOptions = await this._buildTransactionOptions(options);
+        return this._execute(contract, method, args, txOptions);
+      })(),
+      {
+        businessObject,
+        metadata,
+        promise
+      }
+    );
   }
 
-  sendTx(data, options) {
-    const innerTx = (async () => {
-      const hash = await this.get('web3').eth.sendTransaction({
-        ...this.get('web3').transactionSettings(),
-        ...data,
-        nonce: await this.get('nonce').getNonce()
-      });
-      return { hash };
-    })();
-
-    return this.createHybridTx(innerTx, options);
-  }
-
-  // FIXME: this should be renamed, because it no longer creates a hybrid
-  createHybridTx(tx, { businessObject, metadata, promise } = {}) {
-    const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
-      businessObject,
-      metadata
-    });
-
-    this._listeners.forEach(cb => cb(txo));
-
-    const minePromise = txo.mine();
-
-    // we store the transaction object under the unique id of its own mine
-    // promise, so that it can be looked up when calling a contract function
-    // directly from a service method, e.g. WethToken.deposit.
-    const key1 = uniqueId(minePromise);
-    this._tracker.store(key1, txo);
-
-    // if the `promise` object is defined in the options argument, we also store
-    // the transaction object under that promise's id, so that it can be looked
-    // up when calling a contract function indirectly via two or more nested
-    // service method calls, e.g.
-    // EthereumCdpService.lockEth -> WethToken.deposit.
-    let key2;
-    if (promise) {
-      key2 = uniqueId(promise);
-      this._tracker.store(key2, txo);
-    }
-
-    // if (metadata) {
-    //   const { contract, method } = metadata;
-    //   log(`${contract}.${method}: ${key1}${key2 ? `, ${key2}` : ''}`);
-    // }
-
-    return minePromise;
+  // this method must not be async
+  sendTransaction(data, options) {
+    return this._createTransactionObject(
+      (async () => {
+        const txOptions = await this._buildTransactionOptions(data);
+        return {
+          hash: await this.get('web3').eth.sendTransaction(txOptions)
+        };
+      })(),
+      options
+    );
   }
 
   onNewTransaction(callback) {
-    this._listeners.push(callback);
+    this._newTxListeners.push(callback);
   }
 
   getTransaction(promise, label) {
@@ -156,6 +123,39 @@ export default class TransactionManager extends PublicService {
 
     const data = contract.interface.functions[method](...args).data;
     return dsProxyContract.execute(contract.address, data, options);
+  }
+
+  _createTransactionObject(tx, { businessObject, metadata, promise } = {}) {
+    const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
+      businessObject,
+      metadata
+    });
+
+    this._newTxListeners.forEach(cb => cb(txo));
+
+    const minePromise = txo.mine();
+
+    // we store the transaction object under the unique id of its own mine
+    // promise, so that it can be looked up when calling a contract function
+    // directly from a service method, e.g. WethToken.deposit.
+    this._tracker.store(uniqueId(minePromise), txo);
+
+    // if the `promise` object is defined in the options argument, we also store
+    // the transaction object under that promise's id, so that it can be looked
+    // up when calling a contract function indirectly via two or more nested
+    // service method calls, e.g.
+    // EthereumCdpService.lockEth -> WethToken.deposit.
+    if (promise) this._tracker.store(uniqueId(promise), txo);
+
+    return minePromise;
+  }
+
+  async _buildTransactionOptions(data) {
+    return {
+      ...this.get('web3').transactionSettings(),
+      ...data,
+      nonce: await this.get('nonce').getNonce()
+    };
   }
 }
 

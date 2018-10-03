@@ -51,48 +51,40 @@ test('reuse the same web3 and log service in test services', () => {
   expect(services.currentAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
 });
 
-test('createHybridTx resolves to business object', async () => {
+test('wrapped contract call accepts a businessObject option', async () => {
   expect.assertions(3);
+  const dai = services.contract.getContractByName(tokens.DAI);
 
-  const contractTransaction = services.contract
-      .getContractByName(tokens.DAI, { hybrid: false })
-      .approve(services.currentAccount, '1000000000000000000'),
-    businessObject = {
-      a: 1,
-      add: function(b) {
-        return this.a + b;
-      }
-    },
-    hybrid = services.txMgr.createHybridTx(contractTransaction, {
-      businessObject
-    });
+  const businessObject = {
+    a: 1,
+    add: function(b) {
+      return this.a + b;
+    }
+  };
 
-  services.txMgr.listen(hybrid, {
+  const txo = dai.approve(services.currentAccount, '1000000000000000000', {
+    businessObject
+  });
+
+  services.txMgr.listen(txo, {
     pending: tx => {
       expect(tx.isPending()).toBe(true);
     }
   });
-  const bob = await hybrid;
-  expect(services.txMgr.isMined(hybrid)).toBe(true);
+  const bob = await txo;
+  expect(services.txMgr.isMined(txo)).toBe(true);
   expect(bob.add(10)).toEqual(11);
 });
 
-test('formatHybridTx adds nonce, web3 settings', async () => {
+test('wrapped contract call adds nonce, web3 settings', async () => {
   const { txMgr, currentAccount, contract } = services;
-  const dai = contract.getContractByName(tokens.DAI, { hybrid: false });
+  const dai = contract.getContractByName(tokens.DAI);
   jest.spyOn(txMgr, '_execute');
 
-  const hybrid = txMgr.formatHybridTx(
-    dai,
-    'approve',
-    [currentAccount, 20000],
-    'DAI'
-  );
-
-  await hybrid;
+  await dai.approve(currentAccount, 20000);
 
   expect(txMgr._execute).toHaveBeenCalledWith(
-    dai,
+    dai.wrappedContract,
     'approve',
     [currentAccount, 20000],
     { gasLimit: 1234567, nonce: expect.any(Number) }

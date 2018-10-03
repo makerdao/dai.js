@@ -34,10 +34,9 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._fees;
   }
 
-  async mine() {
+  mine() {
     if (!this._dataPromise) this._dataPromise = this._getTransactionData();
-    await this._dataPromise;
-    return this._returnValue();
+    return this._dataPromise.then(() => this._returnValue());
   }
 
   async confirm(count = this._confirmedBlockCount) {
@@ -99,7 +98,14 @@ export default class TransactionObject extends TransactionLifeCycle {
           );
         */
       }
-      this.setMined();
+      if (this.receipt.status == '0x1' || this.receipt.status == 1) {
+        this.setMined();
+      } else {
+        //transaction reverted
+        const revertMsg = `transaction with hash ${this.hash} reverted`;
+        log(revertMsg);
+        throw new Error(revertMsg);
+      }
     } catch (err) {
       await this._nonceService.setCounts();
       this.setError(err);

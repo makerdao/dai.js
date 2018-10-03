@@ -4,6 +4,7 @@ import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
+import { uniqueId } from '../../src/utils';
 
 const log = debug('dai:testing');
 let maker, cdp, exchange, address, tokenService, txMgr;
@@ -82,17 +83,16 @@ beforeAll(async () => {
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
   txMgr = maker.service('transactionManager');
-  txMgr.onNewTransaction(hybrid => {
+  txMgr.onNewTransaction(txo => {
     const {
-      metadata: { contract, method } = { contract: '???', method: '???' },
-      _txId
-    } = hybrid;
-    const label = `tx ${_txId}: ${contract}.${method}`;
+      metadata: { contract, method } = { contract: '???', method: '???' }
+    } = txo;
+    const label = `tx ${uniqueId(txo)}: ${contract}.${method}`;
     log(`${label}: new`);
 
-    hybrid.onPending(() => log(`${label}: pending`));
-    hybrid.onMined(() => log(`${label}: mined`));
-    hybrid.onFinalized(() => log(`${label}: confirmed`));
+    txo.onPending(() => log(`${label}: pending`));
+    txo.onMined(() => log(`${label}: mined`));
+    txo.onFinalized(() => log(`${label}: confirmed`));
   });
 });
 

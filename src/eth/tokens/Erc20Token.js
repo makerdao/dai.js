@@ -35,16 +35,16 @@ export default class Erc20Token {
     return this._currency(value, -1 * this._decimals);
   }
 
-  approve(spender, value, { unit = this._currency, promise } = {}) {
+  approve(spender, value, { unit = this._currency, ...options } = {}) {
     return this._contract.approve(
       spender,
       this._valueForContract(value, unit),
-      { promise }
+      options || {}
     );
   }
 
-  approveUnlimited(spender, { promise } = {}) {
-    return this._contract.approve(spender, -1, { promise });
+  approveUnlimited(spender, options = {}) {
+    return this._contract.approve(spender, -1, options);
   }
 
   transfer(to, value, { unit = currencies[this.symbol], promise } = {}) {
