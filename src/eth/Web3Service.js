@@ -158,7 +158,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _updateBlockNumber(blockNumber) {
-    this.get('log').info('New block: ', blockNumber);
+    this.get('log').info('New block:', blockNumber);
     this._currentBlock = blockNumber;
 
     if (this._blockListeners[blockNumber]) {

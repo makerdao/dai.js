@@ -50,7 +50,7 @@ function getDsProxy(address) {
   return smartContractService.getContractByAddressAndAbi(
     address,
     dappHub.dsProxy,
-    { name: 'DS_PROXY', hybrid: true }
+    { name: 'DS_PROXY' }
   );
 }
 
@@ -112,7 +112,7 @@ const sharedTests = openCdp => {
     beforeAll(async () => {
       await openCdp();
       const tx = cdp.lockEth(0.1);
-      mineBlocks(cdpService.get('token'));
+      mineBlocks(cdpService);
       await tx;
       await cdp.drawDai(13);
     });
@@ -139,7 +139,7 @@ const sharedTests = openCdp => {
     beforeAll(async () => {
       await openCdp();
       const tx = cdp.lockEth(0.2);
-      mineBlocks(cdpService.get('token'));
+      mineBlocks(cdpService);
       await tx;
     });
 
@@ -231,11 +231,62 @@ const sharedTests = openCdp => {
           }
         });
 
+        test('fail to wipe debt due to lack of MKR, despite having MKR', async () => {
+          expect.assertions(3);
+          const amountToWipe = DAI(1);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const [fee, debt, balance] = await Promise.all([
+            cdp.getGovernanceFee(MKR),
+            cdp.getDebtValue(),
+            mkr.balanceOf(currentAccount)
+          ]);
+          const mkrOwed = amountToWipe
+            .div(debt)
+            .toBigNumber()
+            .times(fee.toBigNumber());
+          const mkrToSendAway = balance.minus(mkrOwed.times(0.99)); //keep 99% of MKR needed
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, mkrToSendAway);
+          const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
+          expect(enoughMkrToWipe).toBe(false);
+          try {
+            await cdp.wipeDai(1);
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
         test('fail to shut due to lack of MKR', async () => {
           expect.assertions(2);
           const mkr = cdpService.get('token').getToken(MKR);
           const other = TestAccountProvider.nextAddress();
           await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+          try {
+            await cdp.shut();
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
+        test('fail to shut due to lack of MKR, despite having MKR', async () => {
+          expect.assertions(3);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const [fee, debt, balance] = await Promise.all([
+            cdp.getGovernanceFee(MKR),
+            cdp.getDebtValue(),
+            mkr.balanceOf(currentAccount)
+          ]);
+          const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, mkrToSendAway);
+          const enoughMkrToWipe = await cdp.enoughMkrToWipe(debt);
+          expect(enoughMkrToWipe).toBe(false);
           try {
             await cdp.shut();
           } catch (err) {
@@ -289,7 +340,7 @@ const sharedTests = openCdp => {
 describe('non-proxy cdp', () => {
   async function openNonProxyCdp() {
     cdp = await cdpService.openCdp();
-    return cdp.getId();
+    return cdp.id;
   }
 
   sharedTests(openNonProxyCdp);
@@ -343,23 +394,18 @@ describe('non-proxy cdp', () => {
 });
 
 test('create DSProxy and open CDP', async () => {
-  try {
-    const cdp = await cdpService.openProxyCdp();
-    const id = await cdp.getId();
-    expect(id).toBeGreaterThan(0);
+  const cdp = await cdpService.openProxyCdp();
+  expect(cdp.id).toBeGreaterThan(0);
+  expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
 
-    // this value is used in the proxy cdp tests below
-    dsProxyAddress = await cdp.getDsProxyAddress();
-    expect(dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-  } catch (err) {
-    console.error(err);
-  }
+  // this value is used in the proxy cdp tests below
+  dsProxyAddress = cdp.dsProxyAddress;
 });
 
 describe('proxy cdp', () => {
   async function openProxyCdp() {
     cdp = await cdpService.openProxyCdp(dsProxyAddress);
-    return cdp.getId();
+    return cdp.id;
   }
 
   sharedTests(openProxyCdp);

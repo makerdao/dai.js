@@ -4,9 +4,10 @@ import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
+import { uniqueId } from '../../src/utils';
 
 const log = debug('dai:testing');
-let maker, cdp, exchange, address, tokenService;
+let maker, cdp, exchange, address, tokenService, txMgr;
 
 async function convertPeth() {
   const peth = tokenService.getToken(tokens.PETH);
@@ -14,7 +15,8 @@ async function convertPeth() {
 
   if (pethBalance.toNumber() > 0.009) {
     console.info('Remaining PETH balance is', pethBalance.toString());
-    await peth.exit(pethBalance.toNumber().toFixed(2)).confirm();
+    const exit = peth.exit(pethBalance.toNumber().toFixed(2));
+    await txMgr.confirm(exit);
     console.info('Exited remaining PETH');
   } else {
     console.info('No remaining PETH to exit');
@@ -27,7 +29,8 @@ async function convertWeth() {
 
   if (wethBalance.toNumber() > 0.009) {
     console.info('Remaining WETH balance is', wethBalance.toString());
-    await weth.withdraw(wethBalance.toNumber().toFixed(2)).confirm();
+    const withdraw = weth.withdraw(wethBalance.toNumber().toFixed(2));
+    await txMgr.confirm(withdraw);
     console.info('Withdrew remaining WETH');
   } else {
     console.info('No remaining WETH to withdraw');
@@ -42,10 +45,8 @@ async function checkWethBalance() {
     console.log(
       'Current balance is ' + wethBalance.toString() + ', depositing 0.01'
     );
-    return await maker
-      .service('conversion')
-      .convertEthToWeth(0.01)
-      .confirm();
+    const convert = maker.service('conversion').convertEthToWeth(0.01);
+    await txMgr.confirm(convert);
   } else {
     return;
   }
@@ -81,17 +82,17 @@ beforeAll(async () => {
   tokenService = maker.service('token');
   address = maker.service('web3').currentAccount();
   exchange = maker.service('exchange');
-  maker.service('transactionManager').onNewTransaction(hybrid => {
+  txMgr = maker.service('transactionManager');
+  txMgr.onNewTransaction(txo => {
     const {
-      metadata: { contract, method } = { contract: '???', method: '???' },
-      _txId
-    } = hybrid;
-    const label = `tx ${_txId}: ${contract}.${method}`;
+      metadata: { contract, method } = { contract: '???', method: '???' }
+    } = txo;
+    const label = `tx ${uniqueId(txo)}: ${contract}.${method}`;
     log(`${label}: new`);
 
-    hybrid.onPending(() => log(`${label}: pending`));
-    hybrid.onMined(() => log(`${label}: mined`));
-    hybrid.onFinalized(() => log(`${label}: confirmed`));
+    txo.onPending(() => log(`${label}: pending`));
+    txo.onMined(() => log(`${label}: mined`));
+    txo.onFinalized(() => log(`${label}: confirmed`));
   });
 });
 
@@ -103,8 +104,9 @@ test(
   'can open a CDP',
   async () => {
     cdp = await maker.openCdp();
-    console.info('Opened new CDP', await cdp.getId());
-    await cdp.transactionObject().confirm();
+    console.info('Opened new CDP', await cdp.id);
+    const open = cdp.transactionObject();
+    await txMgr.confirm(open);
     expect(cdp).toBeDefined();
   },
   300000
@@ -114,8 +116,8 @@ test(
   'can lock eth',
   async () => {
     const initialCollateral = await cdp.getCollateralValue();
-    const tx = await cdp.lockEth(0.01);
-    await tx.confirm();
+    const lock = cdp.lockEth(0.01);
+    await txMgr.confirm(lock);
     const collateral = await cdp.getCollateralValue();
     expect(collateral.toNumber()).toBeGreaterThan(initialCollateral.toNumber());
   },
@@ -126,8 +128,8 @@ test(
   'can withdraw Dai',
   async () => {
     const initialDebt = await cdp.getDebtValue();
-    const tx = await cdp.drawDai(0.1);
-    await tx.confirm();
+    const draw = cdp.drawDai(0.1);
+    await txMgr.confirm(draw);
     const currentDebt = await cdp.getDebtValue();
     expect(currentDebt.toNumber()).toBeGreaterThan(initialDebt.toNumber());
   },
@@ -183,8 +185,8 @@ test(
   'can wipe debt',
   async () => {
     const initialDebt = await cdp.getDebtValue();
-    const tx = await cdp.wipeDai('0.1');
-    await tx.confirm();
+    const wipe = cdp.wipeDai('0.1');
+    await txMgr.confirm(wipe);
     const currentDebt = await cdp.getDebtValue();
     expect(initialDebt.toNumber()).toBeGreaterThan(currentDebt.toNumber());
   },

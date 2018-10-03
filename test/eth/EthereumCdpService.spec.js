@@ -37,15 +37,15 @@ test('can read the target price', async () => {
 
 test('can calculate system collateralization', async () => {
   const cdp = await cdpService.openCdp();
-  let tx = cdp.lockEth(0.1);
-  mineBlocks(cdpService.get('token'));
-  await tx;
+  let lock = cdp.lockEth(0.1);
+  mineBlocks(cdpService);
+  await lock;
   await cdp.drawDai(1);
   const scA = await cdpService.getSystemCollateralization();
 
-  tx = cdp.lockEth(0.1);
-  mineBlocks(cdpService.get('token'));
-  await tx;
+  lock = cdp.lockEth(0.1);
+  mineBlocks(cdpService);
+  await lock;
   const scB = await cdpService.getSystemCollateralization();
   expect(scB).toBeGreaterThan(scA);
 

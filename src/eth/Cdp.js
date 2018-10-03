@@ -6,9 +6,6 @@ export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
-    this._transactionManager = this._smartContractService.get(
-      'transactionManager'
-    );
 
     if (!cdpId) {
       this._create();
@@ -47,17 +44,16 @@ export default class Cdp {
       };
     });
 
-    this._transactionObject = this._transactionManager.createHybridTx(
-      (async () => {
-        const [id, openResult] = await Promise.all([getId, tubContract.open()]);
-        this.id = id;
-        return openResult;
-      })(),
-      {
-        businessObject: this,
-        metadata: { contract: 'SAI_TUB', method: 'open' }
-      }
-    );
+    const promise = (async () => {
+      // this "no-op await" is necessary for the inner reference to the
+      // outer promise to become valid
+      await 0;
+      const results = await Promise.all([getId, tubContract.open({ promise })]);
+      this.id = results[0];
+      return this;
+    })();
+
+    this._transactionObject = promise;
   }
 
   transactionObject() {
@@ -65,6 +61,7 @@ export default class Cdp {
   }
 
   getId() {
+    console.warn('getId() is deprecated; use the .id property instead');
     return Promise.resolve(this.id);
   }
 }
@@ -74,6 +71,7 @@ export default class Cdp {
 const passthroughMethods = [
   'bite',
   'drawDai',
+  'enoughMkrToWipe',
   'freeEth',
   'freePeth',
   'getCollateralValue',
