@@ -16,7 +16,7 @@ test('openCdp', async () => {
   const maker = createMaker();
   await maker.authenticate();
   const cdp = await maker.openCdp();
-  const id = await cdp.getId();
+  const id = cdp.id;
   expect(typeof id).toBe('number');
   expect(id).toBeGreaterThan(0);
 });
@@ -29,7 +29,7 @@ test(
     const maker = createMaker(testAccount.key);
     await maker.authenticate();
     const cdp = await maker.openCdp();
-    const id = await cdp.getId();
+    const id = cdp.id;
     expect(typeof id).toBe('number');
     expect(id).toBeGreaterThan(0);
     const info = await cdp.getInfo();
@@ -42,9 +42,9 @@ test('creates a new CDP object for existing CDPs', async () => {
   const maker = createMaker();
   await maker.authenticate();
   const cdp = await maker.openCdp();
-  const id = await cdp.getId();
+  const id = cdp.id;
   const newCdp = await maker.getCdp(id);
-  expect(id).toEqual(await newCdp.getId());
+  expect(id).toEqual(newCdp.id);
   expect(cdp._cdpService).toEqual(newCdp._cdpService);
   expect(cdp._smartContractService).toEqual(newCdp._smartContractService);
 });

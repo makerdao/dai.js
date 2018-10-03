@@ -171,13 +171,18 @@ class Tracker {
     this._init(key);
     this._transactions[key].push(tx);
 
+    // events are just the string values for events in the constructor
     for (let event of this.constructor.states) {
+      // on event, execute each listener's callback
       tx.on(event, () => this._listeners[key][event].forEach(cb => cb(tx)));
     }
+    this.clearExpiredListeners(key);
   }
 
   listen(key, handlers) {
     this._init(key);
+
+    // log(handlers);
 
     for (let state in handlers) {
       const cb = handlers[state];
@@ -212,6 +217,22 @@ class Tracker {
       );
     }
     return txs[0];
+  }
+
+  clearExpiredListeners(key) {
+    log('key', key);
+    this._transactions[key].forEach(tx => {
+      // TODO: check age for 5 minutes or older:
+      if (tx.state() === 'finalized' || tx.state() === 'error') {
+        // const age = (new Date() - new Date(tx._timeStampMined)) / 1000;
+        log(
+          `deleting key ${key}, contract: ${tx.metadata.contract}, method: ${
+            tx.metadata.method
+          }`
+        );
+        delete this._transactions[key];
+      }
+    });
   }
 
   _init(key) {

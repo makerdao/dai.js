@@ -91,23 +91,8 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
   );
 });
 
-test('lifecycle hooks', async () => {
-  // This test will fail if unlimited approval for WETH and PETH is already set
-  // for the current account. so we pick an account near the end of all the test
-  // accounts to make it unlikely that some other test in the suite will use it.
-  TestAccountProvider.setIndex(900);
-
-  const service = buildTestEthereumCdpService({
-    accounts: {
-      default: {
-        type: 'privateKey',
-        privateKey: TestAccountProvider.nextAccount().key
-      }
-    },
-    log: true
-  });
-  await service.manager().authenticate();
-  const txMgr = service.get('smartContract').get('transactionManager');
+describe('lifecycle hooks', () => {
+  let service, txMgr, priceService, open, cdp;
 
   const makeListener = (label, state) =>
     jest.fn(tx => {
@@ -121,37 +106,101 @@ test('lifecycle hooks', async () => {
     confirmed: makeListener(label, 'confirmed')
   });
 
-  const open = service.openCdp();
-  log('open id:', uniqueId(open));
+  beforeAll(async () => {
+    // This test will fail if unlimited approval for WETH and PETH is already set
+    // for the current account. so we pick an account near the end of all the test
+    // accounts to make it unlikely that some other test in the suite will use it.
+    TestAccountProvider.setIndex(900);
 
-  const openHandlers = makeHandlers('open');
+    service = buildTestEthereumCdpService({
+      accounts: {
+        default: {
+          type: 'privateKey',
+          privateKey: TestAccountProvider.nextAccount().key
+        }
+      },
+      log: true
+    });
 
-  txMgr.listen(open, openHandlers);
-  await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
-  expect(openHandlers.pending).toBeCalled();
-  expect(openHandlers.mined).toBeCalled();
-  expect(openHandlers.confirmed).toBeCalled();
+    await service.manager().authenticate();
+    txMgr = service.get('smartContract').get('transactionManager');
+    priceService = service.get('price');
+  });
 
-  const cdp = await open;
-  const lock = cdp.lockEth(1);
-  log('lock id:', uniqueId(lock));
+  beforeEach(async () => {
+    open = service.openCdp();
+    cdp = await open;
+  });
 
-  const lockHandlers = makeHandlers('lock');
-  txMgr.listen(lock, lockHandlers);
+  afterAll(async () => {
+    // set price back to 400
+    await priceService.setEthPrice(400);
+  });
 
-  // we have to generate new blocks here because lockEth does `confirm`
-  await Promise.all([lock, mineBlocks(service)]);
+  test('lifecycle hooks for open and lock', async () => {
+    log('open id:', uniqueId(open));
+    const openHandlers = makeHandlers('open');
 
-  // deposit, approve WETH, join, approve PETH, lock
-  expect(lockHandlers.pending).toBeCalledTimes(5);
-  expect(lockHandlers.mined).toBeCalledTimes(5);
-  expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
+    txMgr.listen(open, openHandlers);
+    await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+    expect(openHandlers.pending).toBeCalled();
+    expect(openHandlers.mined).toBeCalled();
+    expect(openHandlers.confirmed).toBeCalled();
 
-  log('\ndraw');
-  const draw = cdp.drawDai(1);
-  await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
+    const lock = cdp.lockEth(1);
+    log('lock id:', uniqueId(lock));
 
-  log('\nwipe');
-  const wipe = cdp.wipeDai(1);
-  await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
+    const lockHandlers = makeHandlers('lock');
+    txMgr.listen(lock, lockHandlers);
+
+    // we have to generate new blocks here because lockEth does `confirm`
+    await Promise.all([lock, mineBlocks(service)]);
+
+    // deposit, approve WETH, join, approve PETH, lock
+    expect(lockHandlers.pending).toBeCalledTimes(5);
+    expect(lockHandlers.mined).toBeCalledTimes(5);
+    expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
+
+    log('\ndraw');
+    const draw = cdp.drawDai(1);
+    await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
+
+    log('\nwipe');
+    const wipe = cdp.wipeDai(1);
+    await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
+  });
+
+  test('lifecycle hooks for give', async () => {
+    const newCdpAddress = '0x75ac1188e69c815844dd433c2b3ccad1f5a109ff';
+    const give = cdp.give(newCdpAddress);
+    log('give id:', uniqueId(give));
+
+    const giveHandlers = makeHandlers('give');
+    txMgr.listen(give, giveHandlers);
+    await give;
+
+    expect(giveHandlers.pending).toBeCalled();
+    expect(giveHandlers.mined).toBeCalled();
+  });
+
+  test('lifecycle hooks for bite', async () => {
+    const lock = cdp.lockEth(0.1);
+    await Promise.all([lock, mineBlocks(service)]);
+
+    const draw = cdp.drawDai(13);
+    await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
+
+    // set price to make cdp unsafe
+    await priceService.setEthPrice(0.01);
+
+    const bite = cdp.bite();
+    log('bite id:', uniqueId(bite));
+
+    const biteHandlers = makeHandlers('bite');
+    txMgr.listen(bite, biteHandlers);
+    await bite;
+
+    expect(biteHandlers.pending).toBeCalled();
+    expect(biteHandlers.mined).toBeCalled();
+  });
 });
