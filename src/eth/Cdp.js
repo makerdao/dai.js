@@ -59,11 +59,6 @@ export default class Cdp {
   transactionObject() {
     return this._transactionObject;
   }
-
-  getId() {
-    console.warn('getId() is deprecated; use the .id property instead');
-    return Promise.resolve(this.id);
-  }
 }
 
 // each of these methods just calls the method of the same name on the service
