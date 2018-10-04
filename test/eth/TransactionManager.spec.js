@@ -203,4 +203,18 @@ describe('lifecycle hooks', () => {
     expect(biteHandlers.pending).toBeCalled();
     expect(biteHandlers.mined).toBeCalled();
   });
+
+  test('clear listeners when Tx confirmed/finalized', async () => {
+    open = service.openCdp();
+    const openId = uniqueId(open).toString();
+    cdp = await open;
+
+    const openHandlers = makeHandlers('open');
+    txMgr.listen(open, openHandlers);
+
+    expect(txMgr._tracker._transactions).toHaveProperty(openId);
+    // after calling confirm, Tx state will become 'finalized' and be deleted from list.
+    await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+    expect(txMgr._tracker._transactions).not.toHaveProperty(openId);
+  });
 });
