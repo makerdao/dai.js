@@ -34,6 +34,7 @@
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
     "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
+    "build:backend:src:watch": "./scripts/watch-backend-src.sh",
     "coverage": "./scripts/run-testchain.sh --ci jest --runInBand --coverage --config ./test/config/jestDefaultConfig.json",
     "lint": "eslint web src test",
     "precommit": "lint-staged",
