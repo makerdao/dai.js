@@ -101,6 +101,7 @@ describe('lifecycle hooks', () => {
     });
 
   const makeHandlers = label => ({
+    initialized: makeListener(label, 'initialized'),
     pending: makeListener(label, 'pending'),
     mined: makeListener(label, 'mined'),
     confirmed: makeListener(label, 'confirmed')
@@ -143,6 +144,7 @@ describe('lifecycle hooks', () => {
 
     txMgr.listen(open, openHandlers);
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+    expect(openHandlers.initialized).toBeCalled();
     expect(openHandlers.pending).toBeCalled();
     expect(openHandlers.mined).toBeCalled();
     expect(openHandlers.confirmed).toBeCalled();
@@ -157,6 +159,7 @@ describe('lifecycle hooks', () => {
     await Promise.all([lock, mineBlocks(service)]);
 
     // deposit, approve WETH, join, approve PETH, lock
+    expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
     expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
@@ -179,6 +182,7 @@ describe('lifecycle hooks', () => {
     txMgr.listen(give, giveHandlers);
     await give;
 
+    expect(giveHandlers.initialized).toBeCalled();
     expect(giveHandlers.pending).toBeCalled();
     expect(giveHandlers.mined).toBeCalled();
   });
@@ -200,6 +204,7 @@ describe('lifecycle hooks', () => {
     txMgr.listen(bite, biteHandlers);
     await bite;
 
+    expect(biteHandlers.initialized).toBeCalled();
     expect(biteHandlers.pending).toBeCalled();
     expect(biteHandlers.mined).toBeCalled();
   });
