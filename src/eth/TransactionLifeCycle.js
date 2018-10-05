@@ -14,7 +14,6 @@ class TransactionLifeCycle {
       transactionTypeTransitions[TransactionType.transaction]
     );
     this._businessObject = businessObject;
-    this.onConfirmed = this.onFinalized;
   }
 
   setPending() {
@@ -107,6 +106,11 @@ class TransactionLifeCycle {
 
   onFinalized(handler) {
     return this._onStateChange(mined, finalized, handler);
+  }
+
+  // alias for onFinalized
+  onConfirmed(handler) {
+    return this.onFinalized(handler);
   }
 
   onError(handler) {
