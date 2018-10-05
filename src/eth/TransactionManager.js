@@ -219,7 +219,7 @@ class Tracker {
       val.forEach(tx => {
         // TODO: check Tx age for 5 minutes or older:
         // const age = (new Date() - new Date(tx._timeStampMined)) / 1000;
-        if (tx.state() === 'finalized' || tx.state() === 'error') {
+        if (tx.isFinalized() || tx.isError()) {
           log(
             `deleting key ${key}, contract: ${tx.metadata.contract}, method: ${
               tx.metadata.method
