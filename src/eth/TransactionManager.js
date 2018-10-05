@@ -181,6 +181,7 @@ class Tracker {
 
   listen(key, handlers) {
     this._init(key);
+
     for (let state in handlers) {
       const cb = handlers[state];
       if (state === 'confirmed') state = 'finalized';

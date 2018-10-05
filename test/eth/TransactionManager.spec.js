@@ -226,7 +226,7 @@ describe('lifecycle hooks', () => {
     // after calling confirm, Tx state will become 'finalized' and be deleted from list.
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
-    expect(txMgr._tracker._transactions).not.toHaveProperty(openId);
+    expect(txMgr._tracker._transactions[openId]).toBeUndefined();
     expect(size(txMgr._tracker._listeners)).toEqual(
       size(txMgr._tracker._transactions)
     );
@@ -257,7 +257,6 @@ describe('lifecycle hooks', () => {
     drawTx._timeStampMined = minedDate.setMinutes(minedDate.getMinutes() + 10);
 
     await mineBlocks(service);
-
-    expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
+    expect(txMgr._tracker._transactions[drawId]).toBeUndefined();
   });
 });
