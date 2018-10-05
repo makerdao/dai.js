@@ -176,7 +176,7 @@ class Tracker {
     }
 
     this._listeners[key].initialized.forEach(cb => cb(tx));
-    this.clearExpiredListeners();
+    this.clearExpiredTransactions();
   }
 
   listen(key, handlers) {
@@ -210,18 +210,18 @@ class Tracker {
     return txs[0];
   }
 
-  clearExpiredListeners() {
-    each(this._transactions, (val, key) => {
-      val.forEach(tx => {
-        // TODO: check Tx age for 5 minutes or older:
-        // const age = (new Date() - new Date(tx._timeStampMined)) / 1000;
-        if (tx.isFinalized() || tx.isError()) {
-          log(
-            `deleting key ${key}, contract: ${tx.metadata.contract}, method: ${
-              tx.metadata.method
-            }`
-          );
-          delete this._transactions[key];
+  clearExpiredTransactions() {
+    each(this._transactions, (txList, key) => {
+      txList.forEach(tx => {
+        const txAge =
+          new Date(tx._timeStampMined).getMinutes() - new Date().getMinutes();
+        if ((tx.isFinalized() || tx.isError()) && txAge > 5) {
+          const indexToRemove = this._transactions[key].indexOf(tx);
+          this._transactions[key].splice(indexToRemove, 1);
+          if (this._transactions[key].length === 0) {
+            delete this._transactions[key];
+            delete this._listeners[key];
+          }
         }
       });
     });
