@@ -32,31 +32,21 @@ export async function getBrowserProvider() {
     return subprovider;
   };
 
-  // If web3 is injected (old MetaMask)...
-  if (typeof window.web3 !== 'undefined') {
-    return wrap(window.web3.currentProvider);
-  }
-
-  // If web3 is not injected (new MetaMask)...
-  return new Promise((resolve, reject) => {
-    let resolved = false;
-
-    window.addEventListener('message', ({ data }) => {
-      if (data && data.type && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
-        resolved = true;
+  return new Promise(async (resolve, reject) => {
+    if (window.ethereum) {
+      console.log('*** requesting ethereum provider');
+      try {
+        await window.ethereum.enable();
         resolve(wrap(window.ethereum));
+      } catch (error) {
+        reject(error);
       }
-    });
-
-    // Request provider
-    window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*');
-
-    setTimeout(() => {
-      if (!resolved) reject(new Error('Timed out waiting for provider'));
-    }, 30000);
+    } else if (window.web3) {
+      console.log('*** using injected web3 provider');
+      resolve(wrap(window.web3.currentProvider));
+    }
   });
 }
-
 function getRpcUrl(providerSettings) {
   const { network, infuraApiKey, type, url } = providerSettings;
   switch (type) {
