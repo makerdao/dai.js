@@ -34,7 +34,6 @@ export async function getBrowserProvider() {
 
   return new Promise(async (resolve, reject) => {
     if (window.ethereum) {
-      console.log('*** requesting ethereum provider');
       try {
         await window.ethereum.enable();
         resolve(wrap(window.ethereum));
@@ -42,7 +41,6 @@ export async function getBrowserProvider() {
         reject(error);
       }
     } else if (window.web3) {
-      console.log('*** using injected web3 provider');
       resolve(wrap(window.web3.currentProvider));
     }
   });
