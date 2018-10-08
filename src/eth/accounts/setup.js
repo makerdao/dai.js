@@ -45,6 +45,7 @@ export async function getBrowserProvider() {
     }
   });
 }
+
 function getRpcUrl(providerSettings) {
   const { network, infuraApiKey, type, url } = providerSettings;
   switch (type) {
