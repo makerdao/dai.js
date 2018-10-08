@@ -17,7 +17,7 @@ export default class ProxyCdp {
     if (!cdpId) {
       this._create();
     } else {
-      this.id = Promise.resolve(cdpId);
+      this.id = cdpId;
     }
 
     this._emitterInstance = this._cdpService.get('event').buildEmitter();
