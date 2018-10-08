@@ -215,7 +215,8 @@ class Tracker {
     each(this._transactions, (txList, key) => {
       txList.forEach(tx => {
         const txAge =
-          new Date(tx._timeStampMined).getMinutes() - new Date().getMinutes();
+          (new Date(tx._timeStampMined).getTime() - new Date().getTime()) /
+          60000;
         if ((tx.isFinalized() || tx.isError()) && txAge > 5) {
           const indexToRemove = this._transactions[key].indexOf(tx);
           this._transactions[key].splice(indexToRemove, 1);
