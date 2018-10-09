@@ -64,6 +64,7 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-2": "^6.24.1",
+    "chokidar": "^2.0.4",
     "copyfiles": "^2.0.0",
     "eslint": "^5.3.0",
     "eslint-loader": "^1.9.0",
