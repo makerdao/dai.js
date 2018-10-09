@@ -160,7 +160,7 @@ export default class TransactionManager extends PublicService {
 }
 
 class Tracker {
-  static states = ['pending', 'mined', 'finalized', 'error'];
+  static states = ['initialized', 'pending', 'mined', 'finalized', 'error'];
 
   constructor() {
     this._listeners = {};
@@ -174,6 +174,8 @@ class Tracker {
     for (let event of this.constructor.states) {
       tx.on(event, () => this._listeners[key][event].forEach(cb => cb(tx)));
     }
+
+    this._listeners[key].initialized.forEach(cb => cb(tx));
   }
 
   listen(key, handlers) {
@@ -188,12 +190,6 @@ class Tracker {
       this._transactions[key].forEach(
         tx => tx && tx.inOrPastState(state) && cb(tx)
       );
-    }
-  }
-
-  trigger(key, event) {
-    for (let cb of this._listeners[key][event]) {
-      cb(this._transactions[key]);
     }
   }
 
