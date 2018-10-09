@@ -154,7 +154,7 @@ describe('mocking window', () => {
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
   });
 
-  test('browserProviderAccountFactory with window.ethereum', async () => {
+  test('browserProviderAccountFactory with window.ethereum, user accepts provider', async () => {
     window.ethereum = {
       enable: () => {
         window.ethereum['sendAsync'] = mockProvider.sendAsync;
@@ -163,5 +163,17 @@ describe('mocking window', () => {
     const account = await browserProviderAccountFactory();
     expect(account.address).toEqual('0xf00');
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
+  });
+
+  test('browserProviderAccountFactory with window.ethereum, user rejects provider', async () => {
+    window.ethereum = {
+      enable: () => {
+        window.ethereum['sendAsync'] = mockProvider.sendAsync;
+        throw new Error();
+      }
+    };
+    global.console = { error: jest.fn() };
+    await browserProviderAccountFactory();
+    expect(console.error).toBeCalled();
   });
 });
