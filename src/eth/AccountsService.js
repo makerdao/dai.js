@@ -73,7 +73,6 @@ export default class AccountsService extends PublicService {
 
   useAccount(name) {
     invariant(this._accounts[name], `No account found with name "${name}".`);
-
     if (this._currentAccount) {
       this._engine.stop();
       this._engine.removeProvider(this.currentWallet());
@@ -83,6 +82,12 @@ export default class AccountsService extends PublicService {
     // add the provider at index 0 so that it takes precedence over RpcSource
     this._engine.addProvider(this.currentWallet(), 0);
     this._engine.start();
+  }
+
+  useAccountWithAddress(addr) {
+    const accountObjects = Object.values(this._accounts);
+    const account = accountObjects.find(e => e.address === addr);
+    this.useAccount(account.name);
   }
 
   hasAccount() {
