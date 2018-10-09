@@ -32,18 +32,16 @@ export async function getBrowserProvider() {
     return subprovider;
   };
 
-  return new Promise(async (resolve, reject) => {
-    if (window.ethereum) {
-      try {
-        await window.ethereum.enable();
-        resolve(wrap(window.ethereum));
-      } catch (error) {
-        reject(error);
-      }
-    } else if (window.web3) {
-      resolve(wrap(window.web3.currentProvider));
+  if (window.ethereum) {
+    try {
+      await window.ethereum.enable();
+    } catch (error) {
+      console.error(error);
     }
-  });
+    return wrap(window.ethereum);
+  } else if (window.web3) {
+    return wrap(window.web3.currentProvider);
+  }
 }
 
 function getRpcUrl(providerSettings) {
