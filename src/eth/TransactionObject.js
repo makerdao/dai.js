@@ -86,6 +86,7 @@ export default class TransactionObject extends TransactionLifeCycle {
 
       gasPrice = tx.gasPrice;
       this._timeStampMined = new Date();
+      this._blockNumberWhenMined = tx.blockNumber;
       this.receipt = await this._waitForReceipt();
 
       if (!!this.receipt.gasUsed && !!gasPrice) {

@@ -259,4 +259,15 @@ describe('lifecycle hooks', () => {
     await mineBlocks(service);
     expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
   });
+
+  test('finalized Tx is set to correct state without without requiring a call to confirm()', async () => {
+    const openHandlers = makeHandlers('open');
+    txMgr.listen(open, openHandlers);
+    const openTx = txMgr._tracker.get(uniqueId(open));
+
+    await mineBlocks(service);
+
+    expect(openTx.isFinalized()).toBe(true);
+    expect(openHandlers.confirmed).toBeCalled();
+  });
 });

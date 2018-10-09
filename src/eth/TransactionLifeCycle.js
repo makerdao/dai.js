@@ -3,6 +3,7 @@ import transactionState from '../eth/TransactionState';
 import TransactionType, {
   transactionTypeTransitions
 } from './TransactionTransitions';
+import Web3Service from '../../src/eth/Web3Service';
 
 const { initialized, pending, mined, finalized, error } = transactionState;
 const stateOrder = [initialized, pending, mined, finalized];
@@ -14,6 +15,7 @@ class TransactionLifeCycle {
       transactionTypeTransitions[TransactionType.transaction]
     );
     this._businessObject = businessObject;
+    this._web3Service = new Web3Service();
   }
 
   setPending() {
@@ -62,6 +64,11 @@ class TransactionLifeCycle {
    * @returns {boolean|null}
    */
   isFinalized() {
+    if (
+      this._blockNumberWhenMined + this._confirmedBlockCount <=
+      this._web3Service.blockNumber()
+    )
+      this.setFinalized();
     return this._state.inState(finalized);
   }
 
