@@ -1,23 +1,24 @@
 import contracts from '../../contracts/contracts';
 import { utils as ethersUtils } from 'ethers';
-import { USD } from './Currency';
+import { getCurrency, DAI, ETH, USD } from './Currency';
 
 export default class ProxyCdp {
-  constructor(cdpService, dsProxyAddress, cdpId) {
+  constructor(
+    cdpService,
+    dsProxyAddress,
+    cdpId,
+    { lockAndDraw = false, amountEth = null, amountDai = null } = {}
+  ) {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
-    this._transactionManager = this._smartContractService.get(
-      'transactionManager'
-    );
+    this._transactionManager = this._smartContractService.get('transactionManager'); // prettier-ignore
 
-    if (dsProxyAddress) {
-      this.dsProxyAddress = dsProxyAddress.toLowerCase();
-    }
-
-    if (!cdpId) {
-      this._create();
+    if (lockAndDraw) {
+      this._create({ lockAndDraw, amountEth, amountDai });
     } else {
-      this.id = cdpId;
+      if (dsProxyAddress) this.dsProxyAddress = dsProxyAddress.toLowerCase();
+      if (!cdpId) this._create();
+      else this.id = cdpId;
     }
 
     this._emitterInstance = this._cdpService.get('event').buildEmitter();
@@ -34,9 +35,7 @@ export default class ProxyCdp {
   }
 
   _getDsProxyAddress() {
-    const dsProxyFactoryContract = this._smartContractService.getContractByName(
-      contracts.DS_PROXY_FACTORY
-    );
+    const dsProxyFactoryContract = this._smartContractService.getContractByName(contracts.DS_PROXY_FACTORY); // prettier-ignore
     const currentAccount = this._smartContractService
       .get('web3')
       .currentAccount();
@@ -75,10 +74,8 @@ export default class ProxyCdp {
           .get('web3')
           .ethersProvider();
         const topics = [
-          ethersUtils.id('give(bytes32,address)').substring(0, 10) +
-            '0'.repeat(56),
+          ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56), // prettier-ignore
           '0x000000000000000000000000' + saiProxyAddress.substring(2)
-          // '0x000000000000000000000000' + proxy.substring(2)
         ];
         provider.on(topics, log => {
           Promise.resolve(dsProxyAddressPromise).then(() => {
@@ -92,20 +89,23 @@ export default class ProxyCdp {
     });
   }
 
-  _create() {
+  _create({ lockAndDraw = false, amountEth = null, amountDai = null } = {}) {
     const tub = this._smartContractService.getContractByName(contracts.SAI_TUB);
-    const saiProxy = this._smartContractService.getContractByName(
-      contracts.SAI_PROXY
-    );
+    const saiProxy = this._smartContractService.getContractByName(contracts.SAI_PROXY); // prettier-ignore
 
     let method, args, dsProxyAddressPromise;
     if (!this.dsProxyAddress) {
-      const proxyRegistryAddress = this._smartContractService.getContractAddressByName(
-        contracts.PROXY_REGISTRY
-      );
+      const proxyRegistryAddress = this._smartContractService.getContractAddressByName(contracts.PROXY_REGISTRY); // prettier-ignore
 
-      method = 'createAndOpen';
-      args = [proxyRegistryAddress, tub.address, { promise }];
+      if (lockAndDraw) {
+        const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
+        const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
+        method = 'createOpenLockAndDraw';
+        args = [proxyRegistryAddress, tub.address, valueDai, { value: valueEth, promise }]; // prettier-ignore
+      } else {
+        method = 'createAndOpen';
+        args = [proxyRegistryAddress, tub.address, { promise }];
+      }
       dsProxyAddressPromise = this._getDsProxyAddress();
     } else {
       method = 'open';
