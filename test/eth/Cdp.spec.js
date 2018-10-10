@@ -403,10 +403,33 @@ test('create DSProxy and open CDP', async () => {
 });
 
 describe('proxy cdp', () => {
+  let ethToken;
+
+  beforeAll(() => {
+    const tokenService = cdpService.get('token');
+    ethToken = tokenService.getToken(ETH);
+  });
+
   async function openProxyCdp() {
     cdp = await cdpService.openProxyCdp(dsProxyAddress);
     return cdp.id;
   }
 
   sharedTests(openProxyCdp);
+
+  test('lock eth and draw dai', async () => {
+    const cdp = await cdpService.openProxyCdp(dsProxyAddress);
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdpInfoPre = await cdp.getInfo();
+    await cdp.lockEthAndDrawDai(0.1, 1);
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    // ETH balance should now be reduced by (at least) 0.1 (plus gas)
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(
+      0.1
+    );
+    expect(cdpInfoPre.ink.toString()).toEqual('0');
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+  });
 });

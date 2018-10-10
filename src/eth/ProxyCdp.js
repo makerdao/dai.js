@@ -153,7 +153,8 @@ const passthroughMethods = [
   // 'lockPeth',
   // 'lockWeth',
   ['shut', true],
-  ['wipeDai', true]
+  ['wipeDai', true],
+  ['lockEthAndDrawDai', true]
 ];
 
 Object.assign(

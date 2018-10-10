@@ -408,6 +408,31 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
+  lockEthAndDrawDaiProxy(dsProxyAddress, cdpId, amountEth, amountDai) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
+    const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
+
+    return this._saiProxyTubContract().lockAndDraw(
+      this._tubContract().address,
+      hexCdpId,
+      valueDai,
+      {
+        dsProxyAddress,
+        value: valueEth,
+        metadata: {
+          action: {
+            name: 'lockAndDraw',
+            id: cdpId,
+            lockAmount: getCurrency(amountEth, ETH),
+            drawAmount: getCurrency(amountDai, DAI),
+            proxy: true
+          }
+        }
+      }
+    );
+  }
+
   drawDaiProxy(dsProxyAddress, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
