@@ -134,14 +134,13 @@ test('useAccountWithAddress', async () => {
   expect(service.currentAddress()).toEqual(a2.address);
 });
 
-/*
 test('add and use account with no name', async () => {
   const service = new AccountsService();
   const engine = (service._engine = mockEngine());
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
-  await service.addAccount(null, { type: 'privateKey', key: a2.key });
+  await service.addAccount({ type: 'privateKey', key: a2.key });
   service.useAccount('foo');
   service.useAccount(a2.address);
 
@@ -151,7 +150,6 @@ test('add and use account with no name', async () => {
   expect(engine.addProvider).toBeCalled();
   expect(service.currentAddress()).toEqual(a2.address);
 });
-*/
 
 test('providerAccountFactory', async () => {
   const rpc = new RpcSource({ rpcUrl: 'http://localhost:2000' });
