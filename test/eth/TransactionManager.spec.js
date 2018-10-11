@@ -216,10 +216,10 @@ describe('lifecycle hooks', () => {
     const openHandlers = makeHandlers('open');
     txMgr.listen(open, openHandlers);
 
-    // Add 10 minutes to the Tx timestamp
+    // Subtract 10 minutes from the Tx timestamp
     const myTx = txMgr._tracker.get(openId);
     const minedDate = new Date(myTx._timeStampMined);
-    myTx._timeStampMined = minedDate.setMinutes(minedDate.getMinutes() + 10);
+    myTx._timeStampMined = new Date(minedDate.getTime() - 600000);
 
     expect(txMgr._tracker._transactions).toHaveProperty(openId);
 
@@ -252,9 +252,9 @@ describe('lifecycle hooks', () => {
       expect(drawTx.isError()).toBe(true);
     }
 
-    // Add 10 minutes to the Tx timestamp
+    // Subtract 10 minutes from the Tx timestamp
     const minedDate = new Date(drawTx._timeStampMined);
-    drawTx._timeStampMined = minedDate.setMinutes(minedDate.getMinutes() + 10);
+    drawTx._timeStampMined = new Date(minedDate.getTime() - 600000);
 
     await mineBlocks(service);
     expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
