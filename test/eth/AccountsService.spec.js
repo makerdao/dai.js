@@ -128,13 +128,6 @@ describe('mocking window', () => {
 
   let mockProvider;
 
-  beforeAll(() => {
-    // preserve the original versions of the methods that we will overwrite
-    // with mocks during tests
-    const { postMessage, addEventListener } = window;
-    Object.assign(origWindow, { postMessage, addEventListener });
-  });
-
   beforeEach(() => {
     mockProvider = {
       sendAsync: ({ method }, callback) => {
@@ -161,23 +154,26 @@ describe('mocking window', () => {
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
   });
 
-  test('browserProviderAccountFactory with postMessage', async () => {
-    window.postMessage = jest.fn((...args) => {
-      expect(args[0]).toEqual({ type: 'ETHEREUM_PROVIDER_REQUEST' });
-      expect(args[1]).toEqual('*');
-      window.ethereum = mockProvider;
-      document.dispatchEvent(
-        new window.MessageEvent('message', {
-          bubbles: true,
-          data: {
-            type: 'ETHEREUM_PROVIDER_SUCCESS'
-          }
-        })
-      );
-    });
-
+  test('browserProviderAccountFactory with window.ethereum, user accepts provider', async () => {
+    window.ethereum = {
+      enable: () => {
+        window.ethereum['sendAsync'] = mockProvider.sendAsync;
+      }
+    };
     const account = await browserProviderAccountFactory();
     expect(account.address).toEqual('0xf00');
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
+  });
+
+  test('browserProviderAccountFactory with window.ethereum, user rejects provider', async () => {
+    window.ethereum = {
+      enable: () => {
+        window.ethereum['sendAsync'] = mockProvider.sendAsync;
+        throw new Error();
+      }
+    };
+    global.console = { error: jest.fn() };
+    await browserProviderAccountFactory();
+    expect(console.error).toBeCalled();
   });
 });

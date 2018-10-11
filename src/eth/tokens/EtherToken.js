@@ -18,7 +18,7 @@ export default class EtherToken {
     return this._web3
       .ethersProvider()
       .getBalance(owner)
-      .then(b => getCurrency(utils.formatEther(b), ETH));
+      .then(b => ETH(utils.formatEther(b)));
   }
 
   // eslint-disable-next-line

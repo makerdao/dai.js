@@ -3,7 +3,7 @@ import TransactionObject from './TransactionObject';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
 import { uniqueId } from '../utils';
-import { has } from 'lodash';
+import { has, each } from 'lodash';
 import debug from 'debug';
 // eslint-disable-next-line
 const log = debug('dai:testing:txMgr');
@@ -176,6 +176,7 @@ class Tracker {
     }
 
     this._listeners[key].initialized.forEach(cb => cb(tx));
+    this.clearExpiredTransactions();
   }
 
   listen(key, handlers) {
@@ -208,6 +209,24 @@ class Tracker {
       );
     }
     return txs[0];
+  }
+
+  clearExpiredTransactions() {
+    each(this._transactions, (txList, key) => {
+      txList.forEach(tx => {
+        const txAge =
+          (new Date().getTime() - new Date(tx._timeStampMined).getTime()) /
+          60000;
+        if ((tx.isFinalized() || tx.isError()) && txAge > 5) {
+          const indexToRemove = this._transactions[key].indexOf(tx);
+          this._transactions[key].splice(indexToRemove, 1);
+          if (this._transactions[key].length === 0) {
+            delete this._transactions[key];
+            delete this._listeners[key];
+          }
+        }
+      });
+    });
   }
 
   _init(key) {
