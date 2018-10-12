@@ -10,7 +10,7 @@ function buildTestGasEstimatorService() {
     return {
       from: TestAccountProvider.nextAddress(),
       to: TestAccountProvider.nextAddress(),
-      amount: service.get('web3')._web3.toWei('0.01')
+      amount: service.get('web3')._web3.utils.toWei('0.01')
     };
   };
 
