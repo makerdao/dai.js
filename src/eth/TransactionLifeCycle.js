@@ -80,6 +80,9 @@ class TransactionLifeCycle {
     const currentState = this.state();
     if (state === currentState) return true;
 
+    // "error" is not part of the state order sequence, we can check it separately
+    if (state === error) return this.isError();
+
     const currentIndex = stateOrder.indexOf(currentState);
     const targetIndex = stateOrder.indexOf(state);
     if (currentIndex === -1 || targetIndex === -1) {
