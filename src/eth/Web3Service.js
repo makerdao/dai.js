@@ -57,7 +57,7 @@ export default class Web3Service extends PrivateService {
   }
 
   web3Contract(abi, address) {
-    return this._web3.eth.contract(abi).at(address);
+    return new this._web3.eth.Contract(abi, address);
   }
 
   async initialize(settings) {
@@ -93,10 +93,10 @@ export default class Web3Service extends PrivateService {
     this.get('log').info('Web3 is connecting...');
 
     this._info.version = await promiseProps({
-      api: this._web3.version.api,
-      node: promisify(this._web3.version.getNode)(),
-      network: promisify(this._web3.version.getNetwork)(),
-      ethereum: promisify(this._web3.version.getEthereum)()
+      api: this._web3.version,
+      node: promisify(this._web3.eth.getNodeInfo)(),
+      network: promisify(this._web3.eth.net.getId)(),
+      ethereum: promisify(this._web3.eth.getProtocolVersion)()
     });
 
     if (!this._info.version.node.includes('MetaMask')) {
