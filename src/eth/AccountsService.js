@@ -51,14 +51,20 @@ export default class AccountsService extends PublicService {
     this._accountFactories[type] = factory;
   }
 
-  async addAccount(name, { type, ...otherSettings }) {
+  async addAccount(name, options = {}) {
+    if (name && typeof name !== 'string') {
+      options = name;
+      name = null;
+    }
+    const { type, ...otherSettings } = options;
     invariant(this._engine, 'engine must be set up before adding an account');
-    if (this._accounts[name]) {
+    if (name && this._accounts[name]) {
       throw new Error('An account with this name already exists.');
     }
     const factory = this._accountFactories[type];
     invariant(factory, `no factory for type "${type}"`);
     const accountData = await factory(otherSettings, this._provider);
+    if (name === null) name = accountData.address;
     const account = { name, type, ...accountData };
     this._accounts[name] = account;
     if (!this._currentAccount || name === 'default') {
@@ -73,7 +79,6 @@ export default class AccountsService extends PublicService {
 
   useAccount(name) {
     invariant(this._accounts[name], `No account found with name "${name}".`);
-
     if (this._currentAccount) {
       this._engine.stop();
       this._engine.removeProvider(this.currentWallet());
@@ -83,6 +88,12 @@ export default class AccountsService extends PublicService {
     // add the provider at index 0 so that it takes precedence over RpcSource
     this._engine.addProvider(this.currentWallet(), 0);
     this._engine.start();
+  }
+
+  useAccountWithAddress(addr) {
+    const accountObjects = Object.values(this._accounts);
+    const account = accountObjects.find(e => e.address === addr);
+    this.useAccount(account.name);
   }
 
   hasAccount() {
