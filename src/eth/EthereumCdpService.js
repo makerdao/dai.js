@@ -113,8 +113,8 @@ export default class EthereumCdpService extends PrivateService {
     return new ProxyCdp(this, dsProxyAddress).transactionObject();
   }
 
-  openProxyCdpLockEthAndDrawDai(amountEth, amountDai) {
-    return new ProxyCdp(this, null, null, {
+  openProxyCdpLockEthAndDrawDai(amountEth, amountDai, dsProxyAddress = null) {
+    return new ProxyCdp(this, dsProxyAddress, null, {
       lockAndDraw: true,
       amountEth,
       amountDai
