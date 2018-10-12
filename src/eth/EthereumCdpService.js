@@ -227,7 +227,9 @@ export default class EthereumCdpService extends PrivateService {
     // from the non-constant function `tab`
     const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
     const tab = await new Promise((resolve, reject) =>
-      tub.tab.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
+      tub.methods
+        .tab(hexCdpId)
+        .call({}, (err, val) => (err ? reject(err) : resolve(val)))
     );
     const daiDebt = DAI.wei(tab.toString());
     switch (unit) {
@@ -250,9 +252,11 @@ export default class EthereumCdpService extends PrivateService {
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `rap`
     const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
-    const rap = await new Promise((resolve, reject) =>
-      tub.rap.call(hexCdpId, (err, val) => (err ? reject(err) : resolve(val)))
-    );
+    const rap = await new Promise((resolve, reject) => {
+      tub.methods
+        .rap(hexCdpId)
+        .call({}, (err, val) => (err ? reject(err) : resolve(val)));
+    });
     const usdFee = USD.wei(rap);
     switch (unit) {
       case USD:
@@ -298,7 +302,9 @@ export default class EthereumCdpService extends PrivateService {
     // from the non-constant function `par()`
     const vox = this._smartContract().getWeb3ContractByName(contracts.SAI_VOX);
     const par = await new Promise((resolve, reject) =>
-      vox.par.call((err, val) => (err ? reject(err) : resolve(val)))
+      vox.methods
+        .par()
+        .call({}, (err, val) => (err ? reject(err) : resolve(val)))
     );
 
     return USD_DAI.ray(par);
