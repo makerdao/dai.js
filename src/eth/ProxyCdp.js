@@ -101,15 +101,53 @@ export default class ProxyCdp {
         const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
         const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
         method = 'createOpenLockAndDraw';
-        args = [proxyRegistryAddress, tub.address, valueDai, { value: valueEth, promise }]; // prettier-ignore
+        args = [
+          proxyRegistryAddress,
+          tub.address,
+          valueDai,
+          {
+            metadata: {
+              action: {
+                name: method,
+                amountEth: getCurrency(amountEth, ETH),
+                amountDai: getCurrency(amountDai, DAI)
+              }
+            },
+            value: valueEth,
+            promise
+          }
+        ];
       } else {
         method = 'createAndOpen';
-        args = [proxyRegistryAddress, tub.address, { promise }];
+        args = [
+          proxyRegistryAddress,
+          tub.address,
+          {
+            metadata: {
+              action: {
+                name: method
+              }
+            },
+            promise
+          }
+        ];
       }
       dsProxyAddressPromise = this._getDsProxyAddress();
     } else {
       method = 'open';
-      args = [tub.address, { dsProxyAddress: this.dsProxyAddress, promise }];
+      args = [
+        tub.address,
+        {
+          metadata: {
+            action: {
+              name: method,
+              proxy: this.dsProxyAddress
+            }
+          },
+          dsProxyAddress: this.dsProxyAddress,
+          promise
+        }
+      ];
     }
 
     const promise = (async () => {
