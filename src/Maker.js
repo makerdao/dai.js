@@ -20,7 +20,8 @@ export default class Maker {
         'currentAccount',
         'currentAddress',
         'listAccounts',
-        'useAccount'
+        'useAccount',
+        'useAccountWithAddress'
       ],
       cdp: ['getCdp', 'openCdp'],
       event: ['on'],
