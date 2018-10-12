@@ -3,7 +3,7 @@ import { currencies, getCurrency } from '../Currency';
 export default class Erc20Token {
   constructor(contract, web3Service, decimals = 18, symbol) {
     this._contract = contract;
-    this._web3Service = web3Service;
+    this._web3 = web3Service;
     this._decimals = decimals;
     this.symbol = symbol;
     this._currency = currencies[symbol];
@@ -39,16 +39,45 @@ export default class Erc20Token {
     return this._contract.approve(
       spender,
       this._valueForContract(value, unit),
-      options || {}
+      {
+        metadata: {
+          action: {
+            name: 'approve',
+            spender: this._web3.currentAccount(),
+            allowance: getCurrency(value, unit),
+            allowing: value != '0'
+          }
+        },
+        ...options
+      }
     );
   }
 
   approveUnlimited(spender, options = {}) {
-    return this._contract.approve(spender, -1, options);
+    return this._contract.approve(spender, -1, {
+      metadata: {
+        action: {
+          name: 'approve',
+          spender: this._web3.currentAccount(),
+          allowance: Number.MAX_SAFE_INTEGER,
+          allowing: true,
+          unlimited: true
+        }
+      },
+      ...options
+    });
   }
 
   transfer(to, value, { unit = currencies[this.symbol], promise } = {}) {
     return this._contract.transfer(to, this._valueForContract(value, unit), {
+      metadata: {
+        action: {
+          name: 'transfer',
+          from: this._web3.currentAccount(),
+          to,
+          amount: getCurrency(value, unit)
+        }
+      },
       promise
     });
   }
@@ -63,7 +92,17 @@ export default class Erc20Token {
       from,
       to,
       this._valueForContract(value, unit),
-      { promise }
+      {
+        metadata: {
+          action: {
+            name: 'transfer',
+            from,
+            to,
+            amount: getCurrency(value, unit)
+          }
+        },
+        promise
+      }
     );
   }
 }
