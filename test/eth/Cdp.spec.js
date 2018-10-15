@@ -406,7 +406,7 @@ describe('proxy cdp', () => {
     return cdp.id;
   }
 
-  test('create DSProxy and open CDP', async () => {
+  test('create DSProxy and open CDP (single tx)', async () => {
     const cdp = await cdpService.openProxyCdp();
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
@@ -415,7 +415,7 @@ describe('proxy cdp', () => {
     dsProxyAddress = cdp.dsProxyAddress;
   });
 
-  test('create DSProxy, open CDP, lock ETH and draw DAI', async () => {
+  test('create DSProxy, open CDP, lock ETH and draw DAI (single tx)', async () => {
     const balancePre = await ethToken.balanceOf(currentAccount);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(0.1, 1);
     const cdpInfoPost = await cdp.getInfo();
@@ -427,7 +427,23 @@ describe('proxy cdp', () => {
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 
-  test('lock ETH and draw DAI', async () => {
+  test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
+      0.1,
+      1,
+      dsProxyAddress
+    );
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test('use existing DSProxy to open CDP, then lock ETH and draw DAI (multi tx)', async () => {
     const cdp = await cdpService.openProxyCdp(dsProxyAddress);
     const balancePre = await ethToken.balanceOf(currentAccount);
     const cdpInfoPre = await cdp.getInfo();
