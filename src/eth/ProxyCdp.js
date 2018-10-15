@@ -13,10 +13,10 @@ export default class ProxyCdp {
     this._smartContractService = this._cdpService.get('smartContract');
     this._transactionManager = this._smartContractService.get('transactionManager'); // prettier-ignore
 
+    if (dsProxyAddress) this.dsProxyAddress = dsProxyAddress.toLowerCase();
     if (lockAndDraw) {
       this._create({ lockAndDraw, amountEth, amountDai });
     } else {
-      if (dsProxyAddress) this.dsProxyAddress = dsProxyAddress.toLowerCase();
       if (!cdpId) this._create();
       else this.id = cdpId;
     }
@@ -101,15 +101,76 @@ export default class ProxyCdp {
         const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
         const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
         method = 'createOpenLockAndDraw';
-        args = [proxyRegistryAddress, tub.address, valueDai, { value: valueEth, promise }]; // prettier-ignore
+        args = [
+          proxyRegistryAddress,
+          tub.address,
+          valueDai,
+          {
+            metadata: {
+              action: {
+                name: method,
+                amountEth: getCurrency(amountEth, ETH),
+                amountDai: getCurrency(amountDai, DAI)
+              }
+            },
+            value: valueEth,
+            promise
+          }
+        ];
       } else {
         method = 'createAndOpen';
-        args = [proxyRegistryAddress, tub.address, { promise }];
+        args = [
+          proxyRegistryAddress,
+          tub.address,
+          {
+            metadata: {
+              action: {
+                name: method
+              }
+            },
+            promise
+          }
+        ];
       }
       dsProxyAddressPromise = this._getDsProxyAddress();
     } else {
-      method = 'open';
-      args = [tub.address, { dsProxyAddress: this.dsProxyAddress, promise }];
+      if (lockAndDraw) {
+        const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
+        const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
+        method = 'lockAndDraw(address,uint256)';
+        args = [
+          tub.address,
+          valueDai,
+          {
+            metadata: {
+              action: {
+                name: 'openLockAndDraw',
+                amountEth: getCurrency(amountEth, ETH),
+                amountDai: getCurrency(amountDai, DAI),
+                proxy: this.dsProxyAddress
+              }
+            },
+            value: valueEth,
+            dsProxyAddress: this.dsProxyAddress,
+            promise
+          }
+        ];
+      } else {
+        method = 'open';
+        args = [
+          tub.address,
+          {
+            metadata: {
+              action: {
+                name: method,
+                proxy: this.dsProxyAddress
+              }
+            },
+            dsProxyAddress: this.dsProxyAddress,
+            promise
+          }
+        ];
+      }
     }
 
     const promise = (async () => {

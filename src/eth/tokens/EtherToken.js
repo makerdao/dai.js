@@ -51,7 +51,17 @@ export default class EtherToken {
           .toEthersBigNumber('wei')
           .toString()
       },
-      { promise }
+      {
+        metadata: {
+          action: {
+            name: 'transfer',
+            from: fromAddress,
+            to: toAddress,
+            amount: getCurrency(amount, unit)
+          }
+        },
+        promise
+      }
     );
   }
 }
