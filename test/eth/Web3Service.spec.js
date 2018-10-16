@@ -97,14 +97,12 @@ test('fetch version info on connect', done => {
     .manager()
     .connect()
     .then(() => {
-      expect(web3.version().api).toMatch(
+      expect(web3.info().api).toMatch(
         /^([0-9]+\.)*[0-9]([-][b][e][t][a][.]([0-9])*)*$/
       );
-      expect(web3.version().node.toString()).toMatch(
-        /^(Parity)|(MetaMask)|(EthereumJS.*)$/
-      );
-      expect(web3.version().network.toString()).toMatch(/^[0-9]+$/);
-      expect(web3.version().ethereum).toMatch(/^[0-9]+$/);
+      expect(web3.info().node).toMatch(/^(Parity)|(MetaMask)|(EthereumJS.*)$/);
+      expect(web3.info().network.toString()).toMatch(/^[0-9]+$/);
+      expect(web3.info().ethereum).toMatch(/^[0-9]+$/);
       done();
     });
 });
