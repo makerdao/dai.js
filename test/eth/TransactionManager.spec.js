@@ -105,7 +105,8 @@ describe('lifecycle hooks', () => {
     initialized: makeListener(label, 'initialized'),
     pending: makeListener(label, 'pending'),
     mined: makeListener(label, 'mined'),
-    confirmed: makeListener(label, 'confirmed')
+    confirmed: makeListener(label, 'confirmed'),
+    error: makeListener(label, 'error')
   });
 
   beforeAll(async () => {
@@ -250,6 +251,7 @@ describe('lifecycle hooks', () => {
       await draw;
     } catch (err) {
       expect(drawTx.isError()).toBe(true);
+      expect(drawHandlers.error).toBeCalled();
     }
 
     // Subtract 10 minutes from the Tx timestamp
