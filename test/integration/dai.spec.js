@@ -1,6 +1,6 @@
 import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
-import { WETH } from '../../src/eth/Currency';
+import { WETH, DAI } from '../../src/eth/Currency';
 import debug from 'debug';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
@@ -147,6 +147,29 @@ test(
 
     try {
       tx = await exchange.sellDai('0.1', WETH);
+    } catch (err) {
+      console.error(err);
+      error = err;
+    }
+
+    expect(tx).toBeDefined();
+    expect(error).toBeUndefined();
+  },
+  600000
+);
+
+test(
+  'can create a proxy and buy Dai',
+  async () => {
+    let tx, error;
+    await checkWethBalance();
+
+    if (process.env.NETWORK === 'test') {
+      await createDaiAndPlaceLimitOrder(exchange, true);
+    }
+
+    try {
+      tx = await exchange.createProxyAndBuyTokenWithEth('0.01', DAI);
     } catch (err) {
       console.error(err);
       error = err;
