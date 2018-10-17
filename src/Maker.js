@@ -2,17 +2,30 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
+import { intersection, isEqual, mergeWith } from 'lodash';
 
 export default class Maker {
   constructor(preset, options = {}) {
-    const config = ConfigFactory.create(preset, options, resolver);
-    this._container = new DefaultServiceProvider(config).buildContainer();
-    if (options.plugins) {
-      for (let plugin of options.plugins) {
-        plugin(this, config);
+    const { plugins = [], ...otherOptions } = options;
+
+    for (let plugin of plugins) {
+      if (plugin.addConfig) {
+        mergeOptions(otherOptions, plugin.addConfig(otherOptions));
       }
     }
-    if (options.autoAuthenticate !== false) this.authenticate();
+
+    const config = ConfigFactory.create(preset, otherOptions, resolver);
+    this._container = new DefaultServiceProvider(config).buildContainer();
+
+    for (let plugin of plugins) {
+      if (typeof plugin === 'function') {
+        plugin(this, config);
+      } else if (plugin.afterCreate) {
+        plugin.afterCreate(this, config);
+      }
+    }
+
+    if (otherOptions.autoAuthenticate !== false) this.authenticate();
 
     delegateToServices(this, {
       accounts: [
@@ -60,6 +73,28 @@ function delegateToServices(maker, services) {
         maker.service(serviceName)[methodName](...args);
     }
   }
+}
+
+function mergeOptions(object, source) {
+  return mergeWith(object, source, (objValue, srcValue, key) => {
+    if (key === 'addContracts') {
+      const dupes = intersection(
+        Object.keys(objValue),
+        Object.keys(srcValue)
+      ).filter(key => !isEqual(objValue[key], srcValue[key]));
+
+      if (dupes.length > 0) {
+        const label = `Contract${dupes.length > 1 ? 's' : ''}`;
+        const names = dupes.map(d => `"${d}"`).join(', ');
+        throw new Error(`${label} ${names} cannot be defined more than once`);
+      }
+    }
+
+    if (Array.isArray(objValue)) return objValue.concat(srcValue);
+    // when this function returns undefined, mergeWith falls back to the
+    // default merging behavior.
+    // https://devdocs.io/lodash~4/index#mergeWith
+  });
 }
 
 // This factory function doesn't do much at the moment, but it will give us
