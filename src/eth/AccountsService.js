@@ -78,7 +78,19 @@ export default class AccountsService extends PublicService {
   }
 
   useAccount(name) {
-    invariant(this._accounts[name], `No account found with name "${name}".`);
+    const account = this._accounts[name];
+    invariant(account, `No account found with name "${name}".`);
+    //if using metamask, need to use the currently selected account
+    if (
+      account.type === AccountType.BROWSER &&
+      window.web3.eth.defaultAccount.toLowerCase() !=
+        account.address.toLowerCase()
+    ) {
+      throw new Error(
+        'cannot use a browser account that is not currently selected'
+      );
+    }
+
     if (this._currentAccount) {
       this._engine.stop();
       this._engine.removeProvider(this.currentWallet());
