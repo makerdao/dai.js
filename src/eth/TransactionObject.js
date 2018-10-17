@@ -39,7 +39,17 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._dataPromise.then(() => this._returnValue());
   }
 
+  isFinalized() {
+    if (
+      this._blockNumberWhenMined + this._confirmedBlockCount <=
+      this._web3Service.blockNumber()
+    )
+      this.setFinalized();
+    return super.isFinalized();
+  }
+
   async confirm(count = this._confirmedBlockCount) {
+    this._confirmedBlockCount = count;
     await this.mine();
     if (parseInt(count) <= 0) return;
     const newBlockNumber = this.receipt.blockNumber + count;
@@ -86,6 +96,7 @@ export default class TransactionObject extends TransactionLifeCycle {
 
       gasPrice = tx.gasPrice;
       this._timeStampMined = new Date();
+      this._blockNumberWhenMined = tx.blockNumber;
       this.receipt = await this._waitForReceipt();
       // console.log(this.receipt);
       if (!!this.receipt.gasUsed && !!gasPrice) {

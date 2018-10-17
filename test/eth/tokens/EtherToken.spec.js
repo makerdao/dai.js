@@ -31,7 +31,7 @@ test('get Ether balance using test blockchain', done => {
       return token.balanceOf(TestAccountProvider.nextAddress());
     })
     .then(balance => {
-      expect(balance).toEqual('100.0');
+      expect(balance).toEqual(ETH(100));
       done();
     });
 });

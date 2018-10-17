@@ -48,7 +48,17 @@ export default class Cdp {
       // this "no-op await" is necessary for the inner reference to the
       // outer promise to become valid
       await 0;
-      const results = await Promise.all([getId, tubContract.open({ promise })]);
+      const results = await Promise.all([
+        getId,
+        tubContract.open({
+          metadata: {
+            action: {
+              name: 'open'
+            }
+          },
+          promise
+        })
+      ]);
       this.id = results[0];
       return this;
     })();

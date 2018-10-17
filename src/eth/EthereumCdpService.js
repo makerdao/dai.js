@@ -113,6 +113,14 @@ export default class EthereumCdpService extends PrivateService {
     return new ProxyCdp(this, dsProxyAddress).transactionObject();
   }
 
+  openProxyCdpLockEthAndDrawDai(amountEth, amountDai, dsProxyAddress = null) {
+    return new ProxyCdp(this, dsProxyAddress, null, {
+      lockAndDraw: true,
+      amountEth,
+      amountDai
+    }).transactionObject();
+  }
+
   getCdp(id, dsProxyAddress = null) {
     return this._findCdp(id, dsProxyAddress);
   }
@@ -379,7 +387,7 @@ export default class EthereumCdpService extends PrivateService {
             name: 'free',
             id: cdpId,
             amount: getCurrency(amount, ETH),
-            proxy: true
+            proxy: dsProxyAddress
           }
         }
       }
@@ -401,7 +409,32 @@ export default class EthereumCdpService extends PrivateService {
             name: 'lock',
             id: cdpId,
             amount: getCurrency(amount, ETH),
-            proxy: true
+            proxy: dsProxyAddress
+          }
+        }
+      }
+    );
+  }
+
+  lockEthAndDrawDaiProxy(dsProxyAddress, cdpId, amountEth, amountDai) {
+    const hexCdpId = numberToBytes32(cdpId);
+    const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
+    const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
+
+    return this._saiProxyTubContract().lockAndDraw(
+      this._tubContract().address,
+      hexCdpId,
+      valueDai,
+      {
+        dsProxyAddress,
+        value: valueEth,
+        metadata: {
+          action: {
+            name: 'lockAndDraw',
+            id: cdpId,
+            lockAmount: getCurrency(amountEth, ETH),
+            drawAmount: getCurrency(amountDai, DAI),
+            proxy: dsProxyAddress
           }
         }
       }
@@ -423,7 +456,7 @@ export default class EthereumCdpService extends PrivateService {
             name: 'draw',
             id: cdpId,
             amount: getCurrency(amount, DAI),
-            proxy: true
+            proxy: dsProxyAddress
           }
         }
       }
@@ -444,7 +477,7 @@ export default class EthereumCdpService extends PrivateService {
             name: 'give',
             id: cdpId,
             to: newAddress,
-            proxy: true
+            proxy: dsProxyAddress
           }
         }
       }
@@ -476,14 +509,13 @@ export default class EthereumCdpService extends PrivateService {
           id: cdpId,
           amount: getCurrency(amount, DAI),
           otc: useOtc,
-          proxy: true
+          proxy: dsProxyAddress
         }
       },
       promise
     };
 
     // If using OTC to buy MKR to pay fee, pass OTC address to SaiProxy wipe()
-    // method
     return useOtc
       ? this._saiProxyTubContract()['wipe(address,bytes32,uint256,address)'](
           this._tubContract().address,
@@ -524,7 +556,7 @@ export default class EthereumCdpService extends PrivateService {
           name: 'close',
           id: cdpId,
           otc: useOtc,
-          proxy: true
+          proxy: dsProxyAddress
         }
       },
       promise

@@ -18,7 +18,7 @@ export default class EtherToken {
     return this._web3
       .ethersProvider()
       .getBalance(owner)
-      .then(b => utils.formatEther(b));
+      .then(b => ETH(utils.formatEther(b)));
   }
 
   // eslint-disable-next-line
@@ -51,7 +51,17 @@ export default class EtherToken {
           .toEthersBigNumber('wei')
           .toString()
       },
-      { promise }
+      {
+        metadata: {
+          action: {
+            name: 'transfer',
+            from: fromAddress,
+            to: toAddress,
+            amount: getCurrency(amount, unit)
+          }
+        },
+        promise
+      }
     );
   }
 }

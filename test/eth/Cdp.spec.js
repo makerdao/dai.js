@@ -393,20 +393,69 @@ describe('non-proxy cdp', () => {
   });
 });
 
-test('create DSProxy and open CDP', async () => {
-  const cdp = await cdpService.openProxyCdp();
-  expect(cdp.id).toBeGreaterThan(0);
-  expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-
-  // this value is used in the proxy cdp tests below
-  dsProxyAddress = cdp.dsProxyAddress;
-});
-
 describe('proxy cdp', () => {
+  let ethToken;
+
+  beforeAll(() => {
+    const tokenService = cdpService.get('token');
+    ethToken = tokenService.getToken(ETH);
+  });
+
   async function openProxyCdp() {
     cdp = await cdpService.openProxyCdp(dsProxyAddress);
     return cdp.id;
   }
+
+  test('create DSProxy and open CDP (single tx)', async () => {
+    const cdp = await cdpService.openProxyCdp();
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+
+    // this value is used in the proxy cdp tests below
+    dsProxyAddress = cdp.dsProxyAddress;
+  });
+
+  test('create DSProxy, open CDP, lock ETH and draw DAI (single tx)', async () => {
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(0.1, 1);
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
+      0.1,
+      1,
+      dsProxyAddress
+    );
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test('use existing DSProxy to open CDP, then lock ETH and draw DAI (multi tx)', async () => {
+    const cdp = await cdpService.openProxyCdp(dsProxyAddress);
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdpInfoPre = await cdp.getInfo();
+    await cdp.lockEthAndDrawDai(0.1, 1);
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    // ETH balance should now be reduced by (at least) 0.1 (plus gas)
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
+    expect(cdpInfoPre.ink.toString()).toEqual('0');
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+  });
 
   sharedTests(openProxyCdp);
 });

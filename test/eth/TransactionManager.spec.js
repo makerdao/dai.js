@@ -6,6 +6,7 @@ import tokens from '../../contracts/tokens';
 import { uniqueId } from '../../src/utils';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import { mineBlocks } from '../helpers/transactionConfirmation';
+import { size } from 'lodash';
 import debug from 'debug';
 const log = debug('dai:testing:TxMgr.spec');
 
@@ -101,9 +102,11 @@ describe('lifecycle hooks', () => {
     });
 
   const makeHandlers = label => ({
+    initialized: makeListener(label, 'initialized'),
     pending: makeListener(label, 'pending'),
     mined: makeListener(label, 'mined'),
-    confirmed: makeListener(label, 'confirmed')
+    confirmed: makeListener(label, 'confirmed'),
+    error: makeListener(label, 'error')
   });
 
   beforeAll(async () => {
@@ -143,6 +146,7 @@ describe('lifecycle hooks', () => {
 
     txMgr.listen(open, openHandlers);
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+    expect(openHandlers.initialized).toBeCalled();
     expect(openHandlers.pending).toBeCalled();
     expect(openHandlers.mined).toBeCalled();
     expect(openHandlers.confirmed).toBeCalled();
@@ -157,6 +161,7 @@ describe('lifecycle hooks', () => {
     await Promise.all([lock, mineBlocks(service)]);
 
     // deposit, approve WETH, join, approve PETH, lock
+    expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
     expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
@@ -179,6 +184,7 @@ describe('lifecycle hooks', () => {
     txMgr.listen(give, giveHandlers);
     await give;
 
+    expect(giveHandlers.initialized).toBeCalled();
     expect(giveHandlers.pending).toBeCalled();
     expect(giveHandlers.mined).toBeCalled();
   });
@@ -200,7 +206,70 @@ describe('lifecycle hooks', () => {
     txMgr.listen(bite, biteHandlers);
     await bite;
 
+    expect(biteHandlers.initialized).toBeCalled();
     expect(biteHandlers.pending).toBeCalled();
     expect(biteHandlers.mined).toBeCalled();
+  });
+
+  test('clear Tx when state is confirmed/finalized and older than 5 minutes', async () => {
+    const openId = uniqueId(open).toString();
+
+    const openHandlers = makeHandlers('open');
+    txMgr.listen(open, openHandlers);
+
+    // Subtract 10 minutes from the Tx timestamp
+    const myTx = txMgr._tracker.get(openId);
+    const minedDate = new Date(myTx._timeStampMined);
+    myTx._timeStampMined = new Date(minedDate.getTime() - 600000);
+
+    expect(txMgr._tracker._transactions).toHaveProperty(openId);
+
+    // after calling confirm, Tx state will become 'finalized' and be deleted from list.
+    await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+
+    expect(txMgr._tracker._transactions).not.toHaveProperty(openId);
+    expect(size(txMgr._tracker._listeners)).toEqual(
+      size(txMgr._tracker._transactions)
+    );
+  });
+
+  test('clear Tx when state is error and older than 5 minutes', async () => {
+    await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+
+    const lock = cdp.lockEth(0.01);
+    await Promise.all([lock, mineBlocks(service)]);
+
+    const draw = cdp.drawDai(1000);
+    const drawId = uniqueId(draw).toString();
+    const drawTx = txMgr._tracker.get(drawId);
+    const drawHandlers = makeHandlers('draw');
+
+    txMgr.listen(draw, drawHandlers);
+    expect(txMgr._tracker._transactions).toHaveProperty(drawId);
+
+    try {
+      await draw;
+    } catch (err) {
+      expect(drawTx.isError()).toBe(true);
+      expect(drawHandlers.error).toBeCalled();
+    }
+
+    // Subtract 10 minutes from the Tx timestamp
+    const minedDate = new Date(drawTx._timeStampMined);
+    drawTx._timeStampMined = new Date(minedDate.getTime() - 600000);
+
+    await mineBlocks(service);
+    expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
+  });
+
+  test('finalized Tx is set to correct state without without requiring a call to confirm()', async () => {
+    const openHandlers = makeHandlers('open');
+    txMgr.listen(open, openHandlers);
+    const openTx = txMgr._tracker.get(uniqueId(open));
+
+    await mineBlocks(service);
+
+    expect(openTx.isFinalized()).toBe(true);
+    expect(openHandlers.confirmed).toBeCalled();
   });
 });
