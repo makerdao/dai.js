@@ -2,8 +2,6 @@ import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
 import { DAI, ETH, WETH } from '../../../src/eth/Currency';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import Maker from '../../../src/Maker';
-import ProviderType from '../../../src/eth/web3/ProviderType';
 import tokens from '../../../dist/contracts/tokens';
 
 let oasisExchangeService;
@@ -109,29 +107,18 @@ test('buy Dai with wei amount', async () => {
 });
 
 describe.only('oasis proxy', () => {
-  beforeAll(async () => {
-    const maker = Maker.create('test', {
-      web3: {
-        provider: { type: ProviderType.TEST },
-        transactionSettings: {
-          gasLimit: 4000000
-        }
-      },
-      log: false
-    });
-    await maker.authenticate();
-  });
-
   test('create proxy and sell dai', async () => {
     const oasisExchangeService = await buildTestOasisExchangeService();
     let tx, error;
 
     try {
       await createDaiAndPlaceLimitOrder(oasisExchangeService);
-      tx = await oasisExchangeService.createProxyAndBuyTokenWithEth(
+      tx = oasisExchangeService.createProxyAndBuyTokenWithEth(
         '0.01',
         tokens.DAI
       );
+      console.log(tx);
+      await tx;
     } catch (err) {
       error = err;
       console.error(err);
