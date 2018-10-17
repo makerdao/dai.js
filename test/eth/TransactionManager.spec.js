@@ -273,7 +273,17 @@ describe('lifecycle hooks', () => {
     expect(openHandlers.confirmed).toBeCalled();
   });
 
-  test('return error information on error callback', async () => {
+  test('return error message with error callback', async () => {
+    const makeListener = () =>
+      jest.fn((tx, err) => {
+        log('Tx error message:', err);
+      });
+
+    const makeHandlers = () => ({
+      error: makeListener()
+    });
+    const drawHandlers = makeHandlers();
+
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
     const lock = cdp.lockEth(0.01);
@@ -282,27 +292,14 @@ describe('lifecycle hooks', () => {
     const draw = cdp.drawDai(1000);
     const drawId = uniqueId(draw).toString();
     const drawTx = txMgr._tracker.get(drawId);
-    // const drawHandlers = makeHandlers('draw');
 
-    txMgr.listen(draw, {
-      error: tx => {
-        console.log('THIS TX:', tx);
-      }
-    });
-    expect(txMgr._tracker._transactions).toHaveProperty(drawId);
+    txMgr.listen(draw, drawHandlers);
 
     try {
       await draw;
     } catch (err) {
       expect(drawTx.isError()).toBe(true);
-      // expect(drawHandlers.error).toBeCalled();
+      expect(drawHandlers.error).toHaveBeenCalledWith(drawTx, err.message);
     }
-
-    // // Subtract 10 minutes from the Tx timestamp
-    // const minedDate = new Date(drawTx._timeStampMined);
-    // drawTx._timeStampMined = new Date(minedDate.getTime() - 600000);
-
-    // await mineBlocks(service);
-    // expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
   });
 });
