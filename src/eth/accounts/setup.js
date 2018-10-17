@@ -33,11 +33,7 @@ export async function getBrowserProvider() {
   };
 
   if (window.ethereum) {
-    try {
-      await window.ethereum.enable();
-    } catch (error) {
-      console.error(error);
-    }
+    await window.ethereum.enable();
     return wrap(window.ethereum);
   } else if (window.web3) {
     return wrap(window.web3.currentProvider);

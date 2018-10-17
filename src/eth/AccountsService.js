@@ -92,7 +92,9 @@ export default class AccountsService extends PublicService {
 
   useAccountWithAddress(addr) {
     const accountObjects = Object.values(this._accounts);
-    const account = accountObjects.find(e => e.address === addr);
+    const account = accountObjects.find(
+      e => e.address.toUpperCase() === addr.toUpperCase()
+    );
     this.useAccount(account.name);
   }
 
