@@ -276,7 +276,7 @@ describe('lifecycle hooks', () => {
   test('return error message with error callback', async () => {
     const makeListener = () =>
       jest.fn((tx, err) => {
-        log('Tx error message:', err);
+        log('Tx error:', err);
       });
 
     const makeHandlers = () => ({
@@ -299,7 +299,7 @@ describe('lifecycle hooks', () => {
       await draw;
     } catch (err) {
       expect(drawTx.isError()).toBe(true);
-      expect(drawHandlers.error).toHaveBeenCalledWith(drawTx, err.message);
+      expect(drawHandlers.error).toHaveBeenCalledWith(drawTx, err);
     }
   });
 });

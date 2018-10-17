@@ -174,13 +174,13 @@ class Tracker {
     for (let event of this.constructor.states) {
       tx.on(event, () =>
         this._listeners[key][event].forEach(
-          cb => (tx.error ? cb(tx, tx.error.message) : cb(tx))
+          cb => (tx.error ? cb(tx, tx.error) : cb(tx))
         )
       );
     }
 
     this._listeners[key].initialized.forEach(
-      cb => (tx.error ? cb(tx, tx.error.message) : cb(tx))
+      cb => (tx.error ? cb(tx, tx.error) : cb(tx))
     );
     this.clearExpiredTransactions();
   }
@@ -198,7 +198,7 @@ class Tracker {
         tx =>
           tx &&
           tx.inOrPastState(state) &&
-          (tx.error ? cb(tx, tx.error.message) : cb(tx))
+          (tx.error ? cb(tx, tx.error) : cb(tx))
       );
     }
   }
