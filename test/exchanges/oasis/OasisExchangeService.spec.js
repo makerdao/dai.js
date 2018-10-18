@@ -105,16 +105,27 @@ test('buy Dai with wei amount', async () => {
   expect(order.fillAmount()).toEqual(DAI(0.04));
 });
 
-xdescribe('oasis proxy', () => {
-  test('create proxy and sell dai', async () => {
-    const oasisExchangeService = await buildTestOasisExchangeService();
+describe.only('oasis proxy', () => {
+  let exchange;
+
+  beforeEach(async () => {
+    exchange = await buildTestOasisExchangeService();
+  });
+
+  test('experimenting with proxy addresses', async () => {
+    const proxyRegistry = exchange
+      .get('smartContract')
+      .getContractByName(contracts.PROXY_REGISTRY);
+    const account = exchange.get('web3').currentAccount();
+    console.log(await proxyRegistry.proxies(account, 0));
+  });
+
+  xtest('create proxy and sell dai', async () => {
     let tx, error;
 
     try {
-      await createDaiAndPlaceLimitOrder(oasisExchangeService);
-      tx = oasisExchangeService.createProxyAndBuyTokenWithEth('0.01', DAI);
-      console.log(tx);
-      await tx;
+      await createDaiAndPlaceLimitOrder(exchange);
+      tx = await exchange.createProxyAndBuyTokenWithEth('0.01', DAI);
     } catch (err) {
       error = err;
       console.error(err);

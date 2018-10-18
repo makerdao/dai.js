@@ -54,17 +54,13 @@ export default class OasisExchangeService extends PrivateService {
       .address;
     const token = this.get('token').getToken(buyToken)._contract.address;
     const formattedAmount = daiValueForContract(minAmount);
-    const nonce = await this.get('transactionManager')
-      .get('nonce')
-      .getNonce();
-    console.log(nonce);
+
     return this._oasisProxy().createAndSellAllAmountPayEth(
       proxyFactory,
       otc,
       token,
       formattedAmount,
       {
-        nonce: nonce,
         value: daiValueForContract(amount)
       }
     );
