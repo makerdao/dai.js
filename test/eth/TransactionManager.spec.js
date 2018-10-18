@@ -272,4 +272,34 @@ describe('lifecycle hooks', () => {
     expect(openTx.isFinalized()).toBe(true);
     expect(openHandlers.confirmed).toBeCalled();
   });
+
+  test('return error message with error callback', async () => {
+    const makeListener = () =>
+      jest.fn((tx, err) => {
+        log('Tx error:', err);
+      });
+
+    const makeHandlers = () => ({
+      error: makeListener()
+    });
+    const drawHandlers = makeHandlers();
+
+    await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+
+    const lock = cdp.lockEth(0.01);
+    await Promise.all([lock, mineBlocks(service)]);
+
+    const draw = cdp.drawDai(1000);
+    const drawId = uniqueId(draw).toString();
+    const drawTx = txMgr._tracker.get(drawId);
+
+    txMgr.listen(draw, drawHandlers);
+
+    try {
+      await draw;
+    } catch (err) {
+      expect(drawTx.isError()).toBe(true);
+      expect(drawHandlers.error).toHaveBeenCalledWith(drawTx, err);
+    }
+  });
 });
