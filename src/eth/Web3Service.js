@@ -224,8 +224,8 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillConnected() {
-    return promisify(this._web3.version.getNetwork)()
-      .then(network => network === this._info.version['network'])
+    return promisify(this._web3.eth.net.getId)()
+      .then(network => network === this._info['network'])
       .catch(() => false);
   }
 

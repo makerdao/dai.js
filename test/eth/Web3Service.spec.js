@@ -25,7 +25,7 @@ function buildNetworkChangingService(changeNetworkAfter = 25) {
     service
       .get('timer')
       .createTimer('changeNetwork', changeNetworkAfter, false, () => {
-        service._web3.eth.net.getId = cb => cb(undefined, 999); //fake network id
+        service._info.network = cb => cb(undefined, 999); //fake network id
       });
   });
   return service;
