@@ -201,13 +201,16 @@ describe('mocking window', () => {
 
   test('browserProviderAccountFactory with window.ethereum, user rejects provider', async () => {
     window.ethereum = {
-      enable: () => {
+      enable: async () => {
         window.ethereum['sendAsync'] = mockProvider.sendAsync;
-        throw new Error();
+        throw new Error('nope');
       }
     };
-    global.console = { error: jest.fn() };
-    await browserProviderAccountFactory();
-    expect(console.error).toBeCalled();
+    expect.assertions(1);
+    try {
+      await browserProviderAccountFactory();
+    } catch (err) {
+      expect(err.message).toMatch(/nope/);
+    }
   });
 });
