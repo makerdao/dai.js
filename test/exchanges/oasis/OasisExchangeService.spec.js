@@ -2,7 +2,6 @@ import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
 import { DAI, ETH, WETH } from '../../../src/eth/Currency';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import tokens from '../../../dist/contracts/tokens';
 
 let oasisExchangeService;
 
@@ -106,17 +105,14 @@ test('buy Dai with wei amount', async () => {
   expect(order.fillAmount()).toEqual(DAI(0.04));
 });
 
-describe.only('oasis proxy', () => {
+xdescribe('oasis proxy', () => {
   test('create proxy and sell dai', async () => {
     const oasisExchangeService = await buildTestOasisExchangeService();
     let tx, error;
 
     try {
       await createDaiAndPlaceLimitOrder(oasisExchangeService);
-      tx = oasisExchangeService.createProxyAndBuyTokenWithEth(
-        '0.01',
-        tokens.DAI
-      );
+      tx = oasisExchangeService.createProxyAndBuyTokenWithEth('0.01', DAI);
       console.log(tx);
       await tx;
     } catch (err) {
