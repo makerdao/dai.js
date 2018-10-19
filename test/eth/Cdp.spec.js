@@ -43,10 +43,11 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await clearDsProxyOwner(dsProxyAddress);
+  if (dsProxyAddress) await clearDsProxyOwner(dsProxyAddress);
 });
 
 function getDsProxy(address) {
+  console.log(address);
   return smartContractService.getContractByAddressAndAbi(
     address,
     dappHub.dsProxy,
