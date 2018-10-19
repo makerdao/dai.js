@@ -10,6 +10,7 @@ async function buildTestOasisExchangeService() {
     exchange: 'OasisExchangeService'
   });
   await oasisExchangeService.manager().authenticate();
+  console.log(oasisExchangeService.get('web3').currentAccount());
   return oasisExchangeService;
 }
 
@@ -105,7 +106,7 @@ test('buy Dai with wei amount', async () => {
   expect(order.fillAmount()).toEqual(DAI(0.04));
 });
 
-describe.only('oasis proxy', () => {
+xdescribe('oasis proxy', () => {
   let exchange;
 
   beforeEach(async () => {

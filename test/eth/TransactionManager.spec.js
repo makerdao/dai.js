@@ -140,8 +140,14 @@ describe('lifecycle hooks', () => {
     await priceService.setEthPrice(400);
   });
 
-  test('lifecycle hooks for open and lock', async () => {
+  test.only('lifecycle hooks for open and lock', async () => {
     log('open id:', uniqueId(open));
+    console.log(
+      priceService
+        .get('smartContract')
+        .get('web3')
+        .currentAccount()
+    );
     const openHandlers = makeHandlers('open');
 
     txMgr.listen(open, openHandlers);

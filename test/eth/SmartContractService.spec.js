@@ -53,12 +53,12 @@ test("should get a contract's public constant member values in a state object", 
     .then(() => service.getContractState(contracts.SAI_MOM))
     .then(r => {
       expect(r).toEqual({
-        __self: '0x603d52d6ae2b98a49f8f32817ad4effe7e8a2502; SAI_MOM',
-        authority: '0x4986C24C7f752C2ac2D738F1270639Dd9E9D7BF5',
-        tub: '0xE82CE3D6Bf40F2F9414C8d01A35E3d9eb16a1761; SAI_TUB',
-        vox: '0xE16bf7AaFeB33cC921d6D311E0ff33C4faA836dD; SAI_VOX',
+        __self: '0x4bdf94bfb6e7c707a6cc4197cc45bed589a43bf9; SAI_MOM',
+        authority: '0xBaCE01E69dBac1B95C43A24689854cbBf091e3B5',
         owner: '0x0000000000000000000000000000000000000000',
-        tap: '0x6896659267C3C9FD055d764327199A98E571e00D; SAI_TAP'
+        tap: '0xFE728e121a1B6C48FC512754116CD2E5D91dc3b2; SAI_TAP',
+        tub: '0xF926cCA78a9A33A2D3e197e6104665df7a8D5F93; SAI_TUB',
+        vox: '0xD47e94f3cE71D15aabF274E3d9b7a484E1F91212; SAI_VOX'
       });
       done();
     });
