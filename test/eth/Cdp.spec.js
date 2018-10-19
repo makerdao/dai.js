@@ -47,7 +47,6 @@ afterAll(async () => {
 });
 
 function getDsProxy(address) {
-  console.log(address);
   return smartContractService.getContractByAddressAndAbi(
     address,
     dappHub.dsProxy,
