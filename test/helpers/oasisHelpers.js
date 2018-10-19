@@ -15,14 +15,7 @@ async function offer(
   const oasisContract = oasisExchangeService
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC);
-  console.log({
-    payAmount: payAmount,
-    payTokenAddress: payTokenAddress,
-    buyAmount: buyAmount,
-    buyTokenAddress: buyTokenAddress,
-    pos: pos,
-    overrides: overrides
-  });
+
   return oasisContract.offer(
     payAmount,
     payTokenAddress,
@@ -83,7 +76,6 @@ function placeLimitOrder(oasisExchangeService, sellDai) {
       }
     })
     .then(() => {
-      console.log('past the offers');
       return wethToken.balanceOf(
         oasisExchangeService.get('web3').currentAccount()
       );
