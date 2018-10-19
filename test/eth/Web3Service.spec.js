@@ -140,6 +140,25 @@ test('be authenticated and know default address when private key passed in', don
     });
 });
 
+test('determine correct connection status', async done => {
+  const service = buildTestService();
+
+  expect(await service._isStillConnected()).toBe(false);
+  await service.manager().connect();
+  expect(await service._isStillConnected()).toBe(true);
+
+  service.manager().onDisconnected(async () => {
+    expect(await service._isStillConnected()).toBe(false);
+    done();
+  });
+
+  service.get('timer').createTimer('disconnect', 25, false, () => {
+    service._web3.eth.net.getId = () => {
+      throw new Error('fake disconnection error');
+    };
+  });
+});
+
 test('handle automatic disconnect', done => {
   captureConsole(() => {
     const service = buildDisconnectingService();

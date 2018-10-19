@@ -224,6 +224,10 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillConnected() {
+    // only determine network change as disconnect if service is connected
+    if (!this.manager().isConnected()) {
+      return false;
+    }
     return promisify(this._web3.eth.net.getId)()
       .then(network => network === this._info['network'])
       .catch(() => false);
