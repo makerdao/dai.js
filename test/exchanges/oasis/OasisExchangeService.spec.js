@@ -10,7 +10,6 @@ async function buildTestOasisExchangeService() {
     exchange: 'OasisExchangeService'
   });
   await oasisExchangeService.manager().authenticate();
-  console.log(oasisExchangeService.get('web3').currentAccount());
   return oasisExchangeService;
 }
 
