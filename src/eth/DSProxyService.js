@@ -8,30 +8,40 @@ export default class DSProxyService extends PrivateService {
   }
 
   async authenticate() {
-    this._defaultAddress = await this.getProxyAddress();
+    this._default = await this.getProxyAddress();
+  }
+
+  defaultProxyAddress() {
+    return this._default;
   }
 
   async getProxyAddress() {
+    // For some reason, getting the proxy for the current account
+    // returns a proxy address, but getting the owner of that proxy
+    // returns 0x0...
     const accountAddress = this.get('web3').currentAccount();
     return await this.get('smartContract')
       .getContractByName(contracts.PROXY_REGISTRY)
       .proxies(accountAddress);
   }
 
-  getContractByProxyAddress(address = this._defaultAddress) {
-    return this.get('smartContract').getContractByAddressAndAbi(
+  async getContractByProxyAddress(address = this._default) {
+    return await this.get('smartContract').getContractByAddressAndAbi(
       address,
       dappHub.dsProxy,
       { name: 'DS_PROXY' }
     );
   }
 
-  getOwner(address = this._defaultAddress) {
-    return this.getContractByProxyAddress(address).owner();
+  async getOwner(address = this._default) {
+    const contract = await this.getContractByProxyAddress(address);
+    return await contract.owner();
   }
 
-  async clearOwner(address = this._defaultAddress) {
-    const proxy = await this.getContractByProxyAddress(address);
-    return await proxy.setOwner('0x0000000000000000000000000000000000000000');
+  async clearOwner(address = this._default) {
+    this._default = undefined;
+    return await this.getContractByProxyAddress(address).setOwner(
+      '0x0000000000000000000000000000000000000000'
+    );
   }
 }

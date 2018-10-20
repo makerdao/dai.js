@@ -29,7 +29,8 @@ export default class EthereumCdpService extends PrivateService {
       'conversion',
       'allowance',
       'price',
-      'event'
+      'event',
+      'proxy'
     ]);
 
     // aliases

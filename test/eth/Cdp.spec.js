@@ -43,7 +43,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  if (dsProxyAddress) await clearDsProxyOwner(dsProxyAddress);
+  console.log(dsProxyAddress);
+  console.log(smartContractService.get('web3').currentAccount());
+  if (dsProxyAddress) await cdpService.get('proxy').clearOwner(dsProxyAddress);
 });
 
 function getDsProxy(address) {
