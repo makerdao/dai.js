@@ -20,3 +20,8 @@ test('should set the default proxy address', async () => {
   const address = await service.getProxyAddress();
   expect(service.defaultProxyAddress()).toEqual(address);
 });
+
+test('should be able to build a new proxy', async () => {
+  await service.build();
+  console.log(await service.getProxyAddress());
+});

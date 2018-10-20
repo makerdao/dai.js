@@ -4,7 +4,7 @@ import contracts from '../../contracts/contracts';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
-    super(name, ['smartContract', 'web3']);
+    super(name, ['smartContract', 'web3', 'transactionManager']);
   }
 
   async authenticate() {
@@ -13,6 +13,16 @@ export default class DSProxyService extends PrivateService {
 
   defaultProxyAddress() {
     return this._default;
+  }
+
+  proxyFactory() {
+    return this.get('smartContract').getContractByName(
+      contracts.DS_PROXY_FACTORY
+    );
+  }
+
+  build() {
+    return this.proxyFactory().build();
   }
 
   async getProxyAddress() {
