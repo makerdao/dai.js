@@ -105,7 +105,7 @@ test('buy Dai with wei amount', async () => {
   expect(order.fillAmount()).toEqual(DAI(0.04));
 });
 
-xdescribe('oasis proxy', () => {
+describe('oasis proxy', () => {
   let exchange;
 
   beforeEach(async () => {
@@ -120,7 +120,7 @@ xdescribe('oasis proxy', () => {
     console.log(await proxyRegistry.proxies(account));
   });
 
-  test('create proxy and sell dai', async () => {
+  xtest('create proxy and sell dai', async () => {
     let tx, error;
 
     try {

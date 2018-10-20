@@ -54,7 +54,7 @@ function getDsProxy(address) {
   );
 }
 
-async function getDsProxyOwner(address) {
+function getDsProxyOwner(address) {
   return getDsProxy(address).owner();
 }
 

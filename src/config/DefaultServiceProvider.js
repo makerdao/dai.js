@@ -2,6 +2,7 @@ import AccountsService from '../eth/AccountsService';
 import AllowanceService from '../eth/AllowanceService';
 import CacheService from '../utils/CacheService';
 import ConsoleLogger from '../utils/loggers/ConsoleLogger';
+import DSProxyService from '../eth/DSProxyService';
 import EthereumCdpService from '../eth/EthereumCdpService';
 import EthereumTokenService from '../eth/EthereumTokenService';
 import EventService from '../utils/events/EventService';
@@ -30,13 +31,14 @@ export const resolver = {
     // exchange: intentionally omitted
     gasEstimator: 'GasEstimatorService',
     log: 'ConsoleLogger',
+    nonce: 'NonceService',
     price: 'PriceService',
+    proxy: 'DSProxyService',
     smartContract: 'SmartContractService',
     timer: 'TimerService',
     token: 'EthereumTokenService',
     transactionManager: 'TransactionManager',
-    web3: 'Web3Service',
-    nonce: 'NonceService'
+    web3: 'Web3Service'
   },
   disabled: {
     event: 'NullEventService',
@@ -62,10 +64,12 @@ export default class DefaultServiceProvider extends ServiceProvider {
         AllowanceService,
         CacheService,
         ConsoleLogger,
+        DSProxyService,
         EthereumCdpService,
         EthereumTokenService,
         EventService,
         GasEstimatorService,
+        NonceService,
         NullEventService,
         NullLogger,
         OasisExchangeService,
@@ -74,8 +78,7 @@ export default class DefaultServiceProvider extends ServiceProvider {
         TimerService,
         TokenConversionService,
         TransactionManager,
-        Web3Service,
-        NonceService
+        Web3Service
       },
       ...resolver
     });
