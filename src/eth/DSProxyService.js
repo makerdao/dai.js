@@ -1,12 +1,24 @@
 import PrivateService from '../core/PrivateService';
 import { dappHub } from '../../contracts/abis';
+import contracts from '../../contracts/contracts';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
-    super(name, ['smartContract']);
+    super(name, ['smartContract', 'web3']);
   }
 
-  getContract(address) {
+  async authenticate() {
+    this._defaultAddress = await this.getProxyAddress();
+  }
+
+  async getProxyAddress() {
+    const accountAddress = this.get('web3').currentAccount();
+    return await this.get('smartContract')
+      .getContractByName(contracts.PROXY_REGISTRY)
+      .proxies(accountAddress);
+  }
+
+  getContractByProxyAddress(address = this._defaultAddress) {
     return this.get('smartContract').getContractByAddressAndAbi(
       address,
       dappHub.dsProxy,
@@ -14,13 +26,12 @@ export default class DSProxyService extends PrivateService {
     );
   }
 
-  getOwner(address) {
-    return this.get(address).owner();
+  getOwner(address = this._defaultAddress) {
+    return this.getContractByProxyAddress(address).owner();
   }
 
-  async clearOwner(address) {
-    return await this.get(address).setOwner(
-      '0x0000000000000000000000000000000000000000'
-    );
+  async clearOwner(address = this._defaultAddress) {
+    const proxy = await this.getContractByProxyAddress(address);
+    return await proxy.setOwner('0x0000000000000000000000000000000000000000');
   }
 }

@@ -9,8 +9,13 @@ async function buildTestProxyService() {
 
 beforeEach(async () => {
   await buildTestProxyService();
+  const owner = await service.getProxyAddress();
+  if (owner !== '0x0000000000000000000000000000000000000000') {
+    await service.clearOwner();
+  }
 });
 
-test('tests are working', async () => {
-  console.log(service);
+test('should set the default proxy address', async () => {
+  const address = await service.getProxyAddress();
+  expect(service._defaultAddress).toEqual(address);
 });
