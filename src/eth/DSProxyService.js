@@ -26,13 +26,13 @@ export default class DSProxyService extends PrivateService {
   }
 
   async getProxyAddress() {
-    // For some reason, getting the proxy for the current account
-    // returns a proxy address, but getting the owner of that proxy
-    // returns 0x0...
     const accountAddress = this.get('web3').currentAccount();
-    return await this.get('smartContract')
+    const proxyAddress = await this.get('smartContract')
       .getContractByName(contracts.PROXY_REGISTRY)
       .proxies(accountAddress);
+    this._default = proxyAddress;
+
+    return proxyAddress;
   }
 
   async getContractByProxyAddress(address = this._default) {
