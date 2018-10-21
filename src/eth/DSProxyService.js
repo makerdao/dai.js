@@ -11,8 +11,15 @@ export default class DSProxyService extends PrivateService {
     this._default = await this.getProxyAddress();
   }
 
+  async _setNewDefault(transaction) {
+    return new Promise(async resolve => {
+      await transaction;
+      resolve(await this.getProxyAddress());
+    });
+  }
+
   defaultProxyAddress() {
-    return this._default ? this._default : this.getProxyAddress();
+    return this._default;
   }
 
   proxyRegistry() {
@@ -22,7 +29,9 @@ export default class DSProxyService extends PrivateService {
   }
 
   build() {
-    return this.proxyRegistry().build();
+    const transaction = this.proxyRegistry().build();
+    this._default = this._setNewDefault(transaction);
+    return transaction;
   }
 
   async getProxyAddress() {
@@ -33,9 +42,9 @@ export default class DSProxyService extends PrivateService {
       .getContractByName(contracts.PROXY_REGISTRY)
       .proxies(accountAddress);
     if (proxyAddress === '0x0000000000000000000000000000000000000000')
-      proxyAddress = undefined;
-    this._default = proxyAddress;
+      proxyAddress = null;
 
+    this._default = proxyAddress;
     return proxyAddress;
   }
 
@@ -53,7 +62,7 @@ export default class DSProxyService extends PrivateService {
   }
 
   async clearOwner(address = this._default) {
-    this._default = undefined;
+    this._default = null;
     const contract = await this.getContractByProxyAddress(address);
     return await contract.setOwner(
       '0x0000000000000000000000000000000000000000'

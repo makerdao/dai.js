@@ -1,5 +1,6 @@
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
+import addresses from '../../testchain/out/addresses.json';
 
 let service,
   accountCount = 20;
@@ -25,33 +26,71 @@ beforeEach(async () => {
   await setNewAccount();
 });
 
+// afterEach(async () => {
+//   if (service.defaultProxyAddress() && service.defaultProxyAddress().toLowerCase() !== addresses.DS_PROXY.toLowerCase())
+//     await service.clearOwner();
+// });
+
 test('should find the proxy registry', () => {
   expect(service.proxyRegistry()).toBeDefined();
 });
 
-test('should set the default proxy address', async () => {
-  const address = await service.getProxyAddress();
-  expect(service.defaultProxyAddress()).toEqual(address);
-});
-
 test('should build new proxies', async () => {
   await service.build();
-  const proxyAddress = await service.getProxyAddress();
-  expect(proxyAddress).not.toEqual(
-    '0x0000000000000000000000000000000000000000'
-  );
+  const newAddress = await service.defaultProxyAddress();
+  expect(newAddress).not.toEqual('0x0000000000000000000000000000000000000000');
+  expect(newAddress).not.toEqual(addresses.DS_PROXY.toLowerCase());
 });
 
-describe('querying the registry for the proxy address', () => {
+test("should get a proxy's owner", async () => {
+  await service.build();
+  await service.getProxyAddress();
+  const owner = await service.getOwner();
+
+  expect(owner.toLowerCase()).toEqual(service.get('web3').currentAccount());
+});
+
+test("should clear a proxy's owner", async () => {
+  await service.build();
+  await service.getProxyAddress();
+  await service.clearOwner();
+  expect(service.defaultProxyAddress()).toBeNull();
+});
+
+describe('querying registry for proxy address', () => {
   test('should return address when account has a proxy', async () => {
     await service.build();
     const proxyAddress = await service.getProxyAddress();
     expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 
-  test("should return undefined when the account doesn't have a proxy", async () => {
+  test("should return null when account doesn't have a proxy", async () => {
     const proxyAddress = await service.getProxyAddress();
-    console.log(proxyAddress);
-    expect(proxyAddress).not.toBeDefined();
+    expect(proxyAddress).toBeNull();
+  });
+});
+
+describe('querying service for default proxy address', () => {
+  test('should return address when account has a proxy', async () => {
+    await service.build();
+    const address = await service.getProxyAddress();
+    expect(service.defaultProxyAddress()).toEqual(address);
+  });
+
+  test("should return null when account doesn't have a proxy", async () => {
+    await service.getProxyAddress();
+    expect(service.defaultProxyAddress()).toBeNull();
+  });
+
+  test('should update default address after building new proxy', async () => {
+    await service.build();
+    const firstAddress = await service.defaultProxyAddress();
+    await service.clearOwner();
+    await service.build();
+    const secondAddress = await service.defaultProxyAddress();
+
+    expect(firstAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+    expect(secondAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+    expect(firstAddress).not.toEqual(secondAddress);
   });
 });
