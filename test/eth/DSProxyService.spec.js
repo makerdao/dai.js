@@ -25,6 +25,10 @@ beforeEach(async () => {
   await setNewAccount();
 });
 
+test('should find the proxy registry', () => {
+  expect(service.proxyRegistry()).toBeDefined();
+});
+
 test('should set the default proxy address', async () => {
   const address = await service.getProxyAddress();
   expect(service.defaultProxyAddress()).toEqual(address);
@@ -36,4 +40,18 @@ test('should build new proxies', async () => {
   expect(proxyAddress).not.toEqual(
     '0x0000000000000000000000000000000000000000'
   );
+});
+
+describe('querying the registry for the proxy address', () => {
+  test('should return address when account has a proxy', async () => {
+    await service.build();
+    const proxyAddress = await service.getProxyAddress();
+    expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test("should return undefined when the account doesn't have a proxy", async () => {
+    const proxyAddress = await service.getProxyAddress();
+    console.log(proxyAddress);
+    expect(proxyAddress).not.toBeDefined();
+  });
 });
