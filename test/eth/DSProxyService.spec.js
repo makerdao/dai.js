@@ -26,11 +26,6 @@ beforeEach(async () => {
   await setNewAccount();
 });
 
-// afterEach(async () => {
-//   if (service.defaultProxyAddress() && service.defaultProxyAddress().toLowerCase() !== addresses.DS_PROXY.toLowerCase())
-//     await service.clearOwner();
-// });
-
 test('should find the proxy registry', () => {
   expect(service.proxyRegistry()).toBeDefined();
 });

@@ -11,7 +11,7 @@ export default class DSProxyService extends PrivateService {
     this._default = await this.getProxyAddress();
   }
 
-  async _setNewDefault(transaction) {
+  _setNewDefault(transaction) {
     return new Promise(async resolve => {
       await transaction;
       resolve(await this.getProxyAddress());
@@ -49,11 +49,12 @@ export default class DSProxyService extends PrivateService {
   }
 
   async getContractByProxyAddress(address = this._default) {
-    return await this.get('smartContract').getContractByAddressAndAbi(
-      address,
-      dappHub.dsProxy,
-      { name: 'DS_PROXY' }
-    );
+    if (address)
+      return await this.get('smartContract').getContractByAddressAndAbi(
+        address,
+        dappHub.dsProxy,
+        { name: 'DS_PROXY' }
+      );
   }
 
   async getOwner(address = this._default) {
