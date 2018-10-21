@@ -12,17 +12,17 @@ export default class DSProxyService extends PrivateService {
   }
 
   defaultProxyAddress() {
-    return this._default;
+    return this._default ? this._default : this.getProxyAddress();
   }
 
-  proxyFactory() {
+  proxyRegistry() {
     return this.get('smartContract').getContractByName(
-      contracts.DS_PROXY_FACTORY
+      contracts.PROXY_REGISTRY
     );
   }
 
   build() {
-    return this.proxyFactory().build();
+    return this.proxyRegistry().build();
   }
 
   async getProxyAddress() {

@@ -30,6 +30,10 @@ test('should set the default proxy address', async () => {
   expect(service.defaultProxyAddress()).toEqual(address);
 });
 
-test('should be able to build a new proxy', async () => {
+test('should build new proxies', async () => {
   await service.build();
+  const proxyAddress = await service.getProxyAddress();
+  expect(proxyAddress).not.toEqual(
+    '0x0000000000000000000000000000000000000000'
+  );
 });
