@@ -10,7 +10,7 @@ function buildDisconnectingService(disconnectAfter = 25) {
     service
       .get('timer')
       .createTimer('disconnect', disconnectAfter, false, () => {
-        service._web3.version.getNetwork = () => {
+        service._web3.eth.net.getId = () => {
           throw new Error('fake disconnection error');
         };
       });
@@ -25,7 +25,7 @@ function buildNetworkChangingService(changeNetworkAfter = 25) {
     service
       .get('timer')
       .createTimer('changeNetwork', changeNetworkAfter, false, () => {
-        service._web3.version.getNetwork = cb => cb(undefined, 999); //fake network id
+        service._info.network = cb => cb(undefined, 999); //fake network id
       });
   });
   return service;
@@ -97,12 +97,12 @@ test('fetch version info on connect', done => {
     .manager()
     .connect()
     .then(() => {
-      expect(web3.version().api).toMatch(/^([0-9]+\.)*[0-9]+$/);
-      expect(web3.version().node).toMatch(
-        /^(Parity)|(MetaMask)|(EthereumJS.*)$/
+      expect(web3.info().api).toMatch(
+        /^([0-9]+\.)*[0-9]([-][b][e][t][a][.]([0-9])*)*$/
       );
-      expect(web3.version().network).toMatch(/^[0-9]+$/);
-      expect(web3.version().ethereum).toMatch(/^[0-9]+$/);
+      expect(web3.info().node).toMatch(/^(Parity)|(MetaMask)|(EthereumJS.*)$/);
+      expect(web3.info().network.toString()).toMatch(/^[0-9]+$/);
+      expect(web3.info().ethereum).toMatch(/^[0-9]+$/);
       done();
     });
 });
@@ -111,7 +111,7 @@ test('throw error on a failure to connect', async () => {
   expect.assertions(1);
   const service = buildTestService();
   await service.manager().initialize();
-  service._web3.version.getNode = cb => {
+  service._web3.eth.getNodeInfo = cb => {
     cb(new Error('fake connection failure error'));
   };
 
@@ -138,6 +138,25 @@ test('be authenticated and know default address when private key passed in', don
       );
       done();
     });
+});
+
+test('determine correct connection status', async done => {
+  const service = buildTestService();
+
+  expect(await service._isStillConnected()).toBe(false);
+  await service.manager().connect();
+  expect(await service._isStillConnected()).toBe(true);
+
+  service.manager().onDisconnected(async () => {
+    expect(await service._isStillConnected()).toBe(false);
+    done();
+  });
+
+  service.get('timer').createTimer('disconnect', 25, false, () => {
+    service._web3.eth.net.getId = () => {
+      throw new Error('fake disconnection error');
+    };
+  });
 });
 
 test('handle automatic disconnect', done => {
@@ -219,7 +238,8 @@ test('connect to ganache testnet with account 0x16fb9...', done => {
     .connect()
     .then(() => service.eth.getAccounts())
     .then(accounts => {
-      expect(accounts.slice(0, 2)).toEqual(expectedAccounts);
+      expect(accounts[0].toLowerCase()).toEqual(expectedAccounts[0]);
+      expect(accounts[1].toLowerCase()).toEqual(expectedAccounts[1]);
       done();
     })
     .catch(console.error);
@@ -233,7 +253,7 @@ test('have ETH in test account', done => {
     .connect()
     .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
-      expect(Number(service._web3.fromWei(balance))).toBeGreaterThan(50);
+      expect(Number(service._web3.utils.fromWei(balance))).toBeGreaterThan(50);
       done();
     });
 });
