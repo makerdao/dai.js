@@ -64,7 +64,7 @@ export default class AccountsService extends PublicService {
     const factory = this._accountFactories[type];
     invariant(factory, `no factory for type "${type}"`);
     const accountData = await factory(otherSettings, this._provider);
-    if (name === null) name = accountData.address;
+    if (!name) name = accountData.address;
     const account = { name, type, ...accountData };
     this._accounts[name] = account;
     if (!this._currentAccount || name === 'default') {
@@ -107,6 +107,7 @@ export default class AccountsService extends PublicService {
     const account = accountObjects.find(
       e => e.address.toUpperCase() === addr.toUpperCase()
     );
+    if (!account) throw new Error(`No account found with address ${addr}`);
     this.useAccount(account.name);
   }
 

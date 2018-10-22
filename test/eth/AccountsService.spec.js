@@ -117,6 +117,15 @@ test('useAccount', async () => {
   expect(service.currentAddress()).toEqual(a2.address);
 });
 
+test('useAccount throws with invalid name', async () => {
+  const service = new AccountsService();
+  try {
+    service.useAccount('f00');
+  } catch (err) {
+    expect(err.message).toMatch(/No account found with name/);
+  }
+});
+
 test('useAccountWithAddress', async () => {
   const service = new AccountsService();
   const engine = (service._engine = mockEngine());
@@ -132,6 +141,15 @@ test('useAccountWithAddress', async () => {
   expect(engine.start).toBeCalled();
   expect(engine.addProvider).toBeCalled();
   expect(service.currentAddress()).toEqual(a2.address);
+});
+
+test('useAccount throws with invalid address', async () => {
+  const service = new AccountsService();
+  try {
+    service.useAccountWithAddress('0xf00');
+  } catch (err) {
+    expect(err.message).toMatch(/No account found with address/);
+  }
 });
 
 test('add and use account with no name', async () => {
@@ -176,6 +194,26 @@ describe('mocking window', () => {
     Object.assign(window, origWindow);
     delete window.web3;
     delete window.ethereum;
+  });
+
+  test('use wrong browser account', async () => {
+    window.web3 = {
+      currentProvider: mockProvider,
+      eth: {
+        defaultAccount: '0xf00bae'
+      }
+    };
+
+    const service = new AccountsService();
+    service._engine = mockEngine();
+    try {
+      await service.addAccount('bar', { type: 'browser' });
+      service.useAccount('bar');
+    } catch (err) {
+      expect(err.message).toBe(
+        'cannot use a browser account that is not currently selected'
+      );
+    }
   });
 
   test('browserProviderAccountFactory with window.web3', async () => {
