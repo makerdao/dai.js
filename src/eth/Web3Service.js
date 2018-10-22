@@ -1,5 +1,5 @@
 import PrivateService from '../core/PrivateService';
-import { promisify, promisifyMethods, getNetworkName } from '../utils';
+import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
@@ -69,17 +69,25 @@ export default class Web3Service extends PrivateService {
 
     // TODO: is this still necessary? it seems confusing to have methods
     // that look like web3.eth methods but behave differently
-    this.eth = {};
-    Object.assign(
-      this.eth,
-      promisifyMethods(this._web3.eth, [
-        'getAccounts',
-        'estimateGas',
-        'getBlock',
-        'sendTransaction',
-        'getBalance'
-      ])
-    );
+    this.eth = await promiseProps({
+      getAccounts: this._web3.eth.getAccounts,
+      estimateGas: this._web3.eth.estimateGas,
+      getBlock: this._web3.eth.getBlock,
+      sendTransaction: this._web3.eth.sendTransaction,
+      getBalance: this._web3.eth.getBalance
+    });
+
+    // Object.assign(
+    //   this.eth,
+    //   promisifyMethods(this._web3.eth, [
+    //     'getAccounts',
+    //     'estimateGas',
+    //     'getBlock',
+    //     'sendTransaction',
+    //     'getBalance'
+    //   ])
+    // );
+
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
@@ -102,6 +110,7 @@ export default class Web3Service extends PrivateService {
     if (!this._info.node.includes('MetaMask')) {
       this._info.whisper = this._web3.shh;
     }
+
     this._setUpEthers(this.networkId());
     this._installDisconnectCheck();
     await this._initEventPolling();
