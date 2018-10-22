@@ -32,7 +32,7 @@ export default class OasisOrder {
 
     // TODO convert string to hex without web3
     const topic = utils.keccak256(
-      this._txMgr.get('web3')._web3.toHex(LogTrade.signature)
+      this._txMgr.get('web3')._web3.utils.toHex(LogTrade.signature)
     );
 
     const receiptEvents = logs.filter(
