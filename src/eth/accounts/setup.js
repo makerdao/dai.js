@@ -1,5 +1,6 @@
 import ProviderType from '../web3/ProviderType';
 import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
+import WebsocketSubprovider from 'web3-provider-engine/dist/es5/subproviders/websocket';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
@@ -10,6 +11,9 @@ export async function setupEngine(settings) {
 
   if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
     result.provider = await getBrowserProvider();
+  } else if (providerSettings.type === ProviderType.WS || !providerSettings) {
+    const rpcUrl = getRpcUrl(providerSettings);
+    result.provider = new WebsocketSubprovider({ rpcUrl });
   } else {
     const rpcUrl = getRpcUrl(providerSettings);
     result.provider = new RpcSource({ rpcUrl });
@@ -44,6 +48,8 @@ function getRpcUrl(providerSettings) {
   const { network, infuraApiKey, type, url } = providerSettings;
   switch (type) {
     case ProviderType.HTTP:
+      return url;
+    case ProviderType.WS:
       return url;
     case ProviderType.INFURA:
       return `https://${network}.infura.io/${infuraApiKey || ''}`;

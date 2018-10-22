@@ -1,6 +1,7 @@
 import test from './presets/test.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
+import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
 import browser from './presets/browser.json';
 import merge from 'lodash.merge';
@@ -43,6 +44,9 @@ function loadPreset(name) {
       break;
     case 'http':
       preset = http;
+      break;
+    case 'ws':
+      preset = ws;
       break;
     case 'kovan':
       preset = kovan;
