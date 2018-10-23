@@ -41,7 +41,23 @@ export default class Web3Service extends PrivateService {
   }
 
   ethersProvider() {
+    // STOP USING THIS
+    try {
+      throw new Error('hi');
+    } catch (err) {
+      console.warn(
+        'using ethers provider...\n' +
+          err.stack
+            .split('\n')
+            .slice(1, 8)
+            .join('\n')
+      );
+    }
     return this._ethersProvider;
+  }
+
+  getEthersSigner() {
+    return this.ethersProvider().getSigner();
   }
 
   web3Provider() {
