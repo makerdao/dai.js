@@ -60,7 +60,10 @@ function buildTestService(key, statusTimerDelay = 5000) {
   const config = {
     web3: {
       statusTimerDelay,
-      provider: { type: ProviderType.TEST },
+      provider: {
+        type: ProviderType.WS,
+        url: 'ws://localhost:2000'
+      },
       transactionSettings: {
         gasPrice: 1
       }
@@ -258,16 +261,20 @@ test('have ETH in test account', done => {
     });
 });
 
-test('connect to kovan', async () => {
-  const service = buildInfuraService('kovan');
-  try {
-    await service.manager().connect();
-  } catch (err) {
-    console.log(err);
-  }
-  expect(service.manager().isConnected()).toBe(true);
-  expect(service.networkId()).toBe(42);
-});
+test(
+  'connect to kovan',
+  async () => {
+    const service = buildInfuraService('kovan');
+    try {
+      await service.manager().connect();
+    } catch (err) {
+      console.log(err);
+    }
+    expect(service.manager().isConnected()).toBe(true);
+    expect(service.networkId()).toBe(42);
+  },
+  30000
+);
 
 test('stores transaction settings from config', async () => {
   const service = buildTestService();

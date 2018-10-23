@@ -11,7 +11,7 @@ export async function setupEngine(settings) {
 
   if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
     result.provider = await getBrowserProvider();
-  } else if (providerSettings.type === ProviderType.WS || !providerSettings) {
+  } else if (providerSettings.type === ProviderType.WS) {
     const rpcUrl = getRpcUrl(providerSettings);
     result.provider = new WebsocketSubprovider({ rpcUrl });
   } else {

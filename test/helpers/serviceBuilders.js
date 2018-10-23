@@ -22,6 +22,19 @@ export const defaultProviderConfig = {
   log: false
 };
 
+export const websocketProviderConfig = {
+  web3: {
+    provider: {
+      type: ProviderType.WS,
+      url: 'ws://localhost:2000'
+    },
+    transactionSettings: {
+      gasLimit: 4000000
+    }
+  },
+  log: false
+};
+
 const cache = { storage: {} };
 
 export function resetCache() {
@@ -30,7 +43,8 @@ export function resetCache() {
 
 export function buildTestContainer(settings) {
   return new DefaultServiceProvider({
-    ...defaultProviderConfig,
+    // ...defaultProviderConfig,
+    ...websocketProviderConfig,
     // ...kovanProviderConfig,
     // cache,
     ...settings
