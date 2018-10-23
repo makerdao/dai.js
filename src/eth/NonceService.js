@@ -5,7 +5,6 @@ export default class NonceService extends PublicService {
   constructor(name = 'nonce') {
     super(name, ['web3', 'accounts']);
     this._counts = {};
-    this._uniqueAddresses = [];
   }
 
   async connect() {
