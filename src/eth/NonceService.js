@@ -5,6 +5,7 @@ export default class NonceService extends PublicService {
   constructor(name = 'nonce') {
     super(name, ['web3', 'accounts']);
     this._counts = {};
+    this._uniqueAddresses = [];
   }
 
   async connect() {
@@ -28,15 +29,25 @@ export default class NonceService extends PublicService {
     }
   }
 
+  _removeDuplicateAddresses(accounts) {
+    const uniqueAddresses = [];
+    accounts.map(account => {
+      if (!uniqueAddresses.includes(account.address))
+        uniqueAddresses.push(account.address);
+    });
+    return uniqueAddresses;
+  }
+
   async setCounts() {
     const accountsList = await this._accountsService.listAccounts();
+    const uniqueAddresses = this._removeDuplicateAddresses(accountsList);
 
     return new Promise(resolve => {
       accountsList.map(async account => {
         const txCount = await this._getTxCount(account.address);
         this._counts[account.address] = txCount;
 
-        if (Object.keys(this._counts).length === accountsList.length) {
+        if (Object.keys(this._counts).length === uniqueAddresses.length) {
           resolve();
         }
       });
