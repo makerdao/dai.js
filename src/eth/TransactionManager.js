@@ -74,8 +74,11 @@ export default class TransactionManager extends PublicService {
     return this._createTransactionObject(
       (async () => {
         const txOptions = await this._buildTransactionOptions(data);
+        const tx = await this.get('web3').eth.sendTransaction(txOptions);
         return {
-          hash: await this.get('web3').eth.sendTransaction(txOptions)
+          ...tx,
+          // for backwards compatibility (used in TransactionObject)
+          hash: tx.transactionHash
         };
       })(),
       options
