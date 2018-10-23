@@ -247,7 +247,7 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().drip();
   }
 
-  async getGovernanceFee(cdpId, unit = USD) {
+  async getGovernanceFee(cdpId, unit = MKR) {
     const hexCdpId = numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `rap`

@@ -199,9 +199,9 @@ const sharedTests = openCdp => {
           await cdpService.get('price').setMkrPrice(600);
           // block.timestamp is measured in seconds, so we need to wait at least a
           // second for the fees to get updated
-          const usdFee = await cdp.getGovernanceFee();
+          const usdFee = await cdp.getGovernanceFee(USD);
           expect(usdFee.gt(0)).toBeTruthy();
-          const mkrFee = await cdp.getGovernanceFee(MKR);
+          const mkrFee = await cdp.getGovernanceFee();
           expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
         });
 
