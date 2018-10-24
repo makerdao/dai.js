@@ -86,7 +86,7 @@ class TransactionLifeCycle {
     const currentIndex = stateOrder.indexOf(currentState);
     const targetIndex = stateOrder.indexOf(state);
     if (currentIndex === -1 || targetIndex === -1) {
-      throw new Error(`Invalid state "${state}"`);
+      throw new Error('invalid state');
     }
     return currentIndex >= targetIndex;
   }
