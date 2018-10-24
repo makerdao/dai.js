@@ -3,6 +3,7 @@ import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
 import WebsocketSubprovider from 'web3-provider-engine/dist/es5/subproviders/websocket';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
+import Web3 from 'web3';
 
 export async function setupEngine(settings) {
   const { provider: providerSettings } = settings.web3;
@@ -14,6 +15,7 @@ export async function setupEngine(settings) {
   } else if (providerSettings.type === ProviderType.WS) {
     const rpcUrl = getRpcUrl(providerSettings);
     result.provider = new WebsocketSubprovider({ rpcUrl });
+    result.ws = new Web3.providers.WebsocketProvider(rpcUrl);
   } else {
     const rpcUrl = getRpcUrl(providerSettings);
     result.provider = new RpcSource({ rpcUrl });

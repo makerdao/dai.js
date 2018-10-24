@@ -40,11 +40,14 @@ export default class Cdp {
         contracts.SAI_TUB
       );
 
-      web3TubContract.events.LogNewCup({}, (err, event) => {
-        console.log(err, event);
-      }).on('data', event => {
-        console.log('LogNewCup:', event);
-      });
+      web3TubContract.events
+        .LogNewCup({}, (err, event) => {
+          console.log('Error : ', err);
+          console.log('Event : ', event);
+        })
+        .on('data', event => {
+          console.log('LogNewCup:', event);
+        });
 
       tubContract.onlognewcup = function(address, cdpIdBytes32) {
         if (currentAccount.toLowerCase() == address.toLowerCase()) {
