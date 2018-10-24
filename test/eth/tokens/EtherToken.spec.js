@@ -99,8 +99,7 @@ test(
         );
         done();
       });
-  },
-  5000
+  }
 );
 
 test(
@@ -118,9 +117,7 @@ test(
       .manager()
       .authenticate()
       .then(() => {
-        console.log('authenticated');
         sender = ethereumTokenService.get('web3').currentAccount();
-        console.log('got current account');
         token = ethereumTokenService.getToken(ETH);
         return Promise.all([
           token.balanceOf(sender),
@@ -130,12 +127,9 @@ test(
       .then(balances => {
         senderBalance = ETH(balances[0]);
         receiverBalance = ETH(balances[1]);
-        console.log(`balances: ${senderBalance.toString()}, ${receiverBalance.toString()}`);
-        console.log('about to xfer');
         return token.transferFrom(sender, receiver, '0.1');
       })
       .then(() => {
-        console.log('xferred');
         return Promise.all([
           token.balanceOf(sender),
           token.balanceOf(receiver)
@@ -152,6 +146,5 @@ test(
         );
         done();
       });
-  },
-  5000
+  }
 );

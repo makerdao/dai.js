@@ -43,7 +43,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await clearDsProxyOwner(dsProxyAddress);
+  if (dsProxyAddress) await clearDsProxyOwner(dsProxyAddress);
 });
 
 function getDsProxy(address) {
