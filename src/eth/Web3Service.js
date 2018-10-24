@@ -1,5 +1,5 @@
 import PrivateService from '../core/PrivateService';
-import { promisify, getNetworkName } from '../utils';
+import { promisify, promisifyMethods, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
@@ -57,7 +57,34 @@ export default class Web3Service extends PrivateService {
   }
 
   getEthersSigner() {
-    return this.ethersProvider().getSigner();
+    if (!this._ethersSigner) {
+      const provider = this.web3Provider();
+      const call = promisify(this._web3.eth.call);
+      this._ethersSigner = {
+        getAddress: () => this.currentAccount(),
+        estimateGas: tx => this.estimateGas(tx),
+        sendTransaction: tx => {
+          return this.sendTransaction({
+            ...tx,
+            from: this.currentAccount()
+          });
+        },
+        provider: new Proxy(provider, {
+          get(target, key) {
+            switch (key) {
+              case 'resolveName':
+                return address => address;
+              case 'call':
+                return call;
+              default:
+                return target[key];
+            }
+          }
+        })
+      };
+    }
+    return this._ethersSigner;
+    // return this.ethersProvider().getSigner();
   }
 
   web3Provider() {
@@ -83,26 +110,21 @@ export default class Web3Service extends PrivateService {
     this._web3 = new Web3();
     this._web3.setProvider(this.get('accounts').getProvider());
 
-    // TODO: is this still necessary? it seems confusing to have methods
-    // that look like web3.eth methods but behave differently
-    this.eth = await promiseProps({
-      getAccounts: this._web3.eth.getAccounts,
-      estimateGas: this._web3.eth.estimateGas,
-      getBlock: this._web3.eth.getBlock,
-      sendTransaction: this._web3.eth.sendTransaction,
-      getBalance: this._web3.eth.getBalance
-    });
-
-    // Object.assign(
-    //   this.eth,
-    //   promisifyMethods(this._web3.eth, [
-    //     'getAccounts',
-    //     'estimateGas',
-    //     'getBlock',
-    //     'sendTransaction',
-    //     'getBalance'
-    //   ])
-    // );
+    Object.assign(
+      this,
+      promisifyMethods(this._web3.eth, [
+        'estimateGas',
+        'getAccounts',
+        'getBalance',
+        'getBlock',
+        'getTransaction',
+        'getTransactionReceipt',
+        'sendTransaction'
+      ]),
+      {
+        subscribe: (...args) => this._web3.eth.subscribe(...args)
+      }
+    );
 
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
@@ -127,7 +149,8 @@ export default class Web3Service extends PrivateService {
       this._info.whisper = this._web3.shh;
     }
 
-    this._setUpEthers(this.networkId());
+    // FIXME set up block listening with web3 instead
+    // this._setUpEthers(this.networkId());
     this._installDisconnectCheck();
     await this._initEventPolling();
     this._defaultEmitter.emit('web3/CONNECTED', {

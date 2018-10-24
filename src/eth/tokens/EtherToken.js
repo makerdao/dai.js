@@ -15,9 +15,8 @@ export default class EtherToken {
   }
 
   balanceOf(owner) {
-    return this._web3.eth
-      .getBalance(owner)
-      .then(b => ETH(utils.formatEther(b))); // FIXME stop using ethers utils here
+    // FIXME stop using ethers utils
+    return this._web3.getBalance(owner).then(b => ETH(utils.formatEther(b)));
   }
 
   // eslint-disable-next-line
