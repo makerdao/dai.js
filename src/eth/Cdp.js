@@ -36,6 +36,16 @@ export default class Cdp {
       .currentAccount();
 
     const getId = new Promise(resolve => {
+      const web3TubContract = this._smartContractService.getWeb3ContractByName(
+        contracts.SAI_TUB
+      );
+
+      web3TubContract.events.LogNewCup({}, (err, event) => {
+        console.log(err, event);
+      }).on('data', event => {
+        console.log('LogNewCup:', event);
+      });
+
       tubContract.onlognewcup = function(address, cdpIdBytes32) {
         if (currentAccount.toLowerCase() == address.toLowerCase()) {
           this.removeListener();
