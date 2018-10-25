@@ -174,3 +174,50 @@ test('do not allow collisions in smartContract.addContracts', () => {
   }).toThrowError(/Contracts "foo", "bar" cannot be defined more than once/);
   // note that "baz" is not in this list
 });
+
+test('add options when smartContract.addContracts is not set on target', () => {
+  const testPlugin = {
+    addConfig: jest.fn(() => {
+      return {
+        smartContract: {
+          addContracts: {
+            foo: {
+              abi: [],
+              address: '0xbeefed1bedded2dabbed3defaced4decade5bead'
+            }
+          }
+        }
+      };
+    })
+  };
+
+  Maker.create('test', {
+    plugins: [testPlugin],
+    autoAuthenticate: false,
+    smartContract: {}
+  });
+});
+
+test('add options when smartContract.addContracts is not set on source', () => {
+  const testPlugin = {
+    addConfig: jest.fn(() => {
+      return {
+        smartContract: {}
+      };
+    })
+  };
+
+  Maker.create('test', {
+    plugins: [testPlugin],
+    additionalServices: ['mock1'],
+    autoAuthenticate: false,
+    smartContract: {
+      addContracts: {
+        foo: {
+          abi: [],
+          address: '0xbeefed1bedded2dabbed3defaced4decade5bead'
+        }
+      }
+    }
+  });
+});
