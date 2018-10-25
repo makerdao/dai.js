@@ -103,12 +103,29 @@ export default class Web3Service extends PrivateService {
     return new this._web3.eth.Contract(abi, address);
   }
 
+  web3wsContract(abi, address) {
+    return new this._web3ws.eth.Contract(abi, address);
+  }
+
+  contractEvent(event, contract, options, cb) {
+    contract.events[event](...options, cb);
+  }
+
+  subscribeNewBlocks(cb) {
+    this._web3ws.eth.subscribe('newBlockHeaders').on('data', blockHeader => {
+      cb(blockHeader);
+    });
+  }
+
   async initialize(settings) {
     this.get('log').info('Web3 is initializing...');
     this._defaultEmitter = this.get('event');
 
     this._web3 = new Web3();
-    this._web3.setProvider(this.get('accounts').getWebsocketProvider());
+    this._web3.setProvider(this.get('accounts').getProvider());
+
+    this._web3ws = new Web3();
+    this._web3ws.setProvider(this.get('accounts').getWebsocketProvider());
 
     Object.assign(
       this,
@@ -150,7 +167,13 @@ export default class Web3Service extends PrivateService {
     }
 
     // FIXME set up block listening with web3 instead
-    // this._setUpEthers(this.networkId());
+    //this._setUpEthers(this.networkId());
+
+    this.subscribeNewBlocks(data => {
+      console.log(data);
+      this._updateBlockNumber(data.number);
+    });
+
     this._installDisconnectCheck();
     await this._initEventPolling();
     this._defaultEmitter.emit('web3/CONNECTED', {

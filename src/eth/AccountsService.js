@@ -26,6 +26,7 @@ export default class AccountsService extends PublicService {
     const result = await setupEngine(settings);
     this._engine = result.engine;
     this._provider = result.provider;
+    this._wsprovider = result.ws;
   }
 
   async connect() {
@@ -37,6 +38,10 @@ export default class AccountsService extends PublicService {
       await this.addAccount('default', { type: AccountType.PROVIDER });
     }
     this._engine.start();
+  }
+
+  getWebsocketProvider() {
+    return this._wsprovider;
   }
 
   getProvider() {

@@ -6,6 +6,7 @@ export default class Cdp {
   constructor(cdpService, cdpId = null) {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
+    this._web3Service = this._smartContractService.get('web3');
 
     if (!cdpId) {
       this._create();
@@ -27,6 +28,7 @@ export default class Cdp {
   }
 
   _create() {
+    // Contract created using web3provider engine
     const tubContract = this._smartContractService.getContractByName(
       contracts.SAI_TUB
     );
@@ -36,25 +38,23 @@ export default class Cdp {
       .currentAccount();
 
     const getId = new Promise(resolve => {
-      const web3TubContract = this._smartContractService.getWeb3ContractByName(
+      // Contract created using web3 library provider
+      const web3TubContract = this._smartContractService.getWeb3wsContractByName(
         contracts.SAI_TUB
       );
 
-      web3TubContract.events
-        .LogNewCup({}, (err, event) => {
-          console.log('Error : ', err);
-          console.log('Event : ', event);
-        })
-        .on('data', event => {
-          console.log('LogNewCup:', event);
-        });
-
-      tubContract.onlognewcup = function(address, cdpIdBytes32) {
-        if (currentAccount.toLowerCase() == address.toLowerCase()) {
-          this.removeListener();
-          resolve(ethersUtils.bigNumberify(cdpIdBytes32).toNumber());
+      this._web3Service.contractEvent(
+        'LogNewCup',
+        web3TubContract,
+        {},
+        (err, res) => {
+          const address = res.returnValues.lad;
+          const cdpIdBytes32 = res.returnValues.cup;
+          if (currentAccount.toLowerCase() === address.toLowerCase()) {
+            resolve(ethersUtils.bigNumberify(cdpIdBytes32).toNumber());
+          }
         }
-      };
+      );
     });
 
     const promise = (async () => {
