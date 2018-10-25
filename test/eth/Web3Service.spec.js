@@ -120,7 +120,6 @@ test('throw error on a failure to connect', async () => {
 
   try {
     await service.manager().connect();
-    console.log(service._info);
   } catch (err) {
     expect(err).toBeInstanceOf(Error);
   }

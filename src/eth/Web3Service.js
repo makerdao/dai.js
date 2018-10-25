@@ -170,7 +170,6 @@ export default class Web3Service extends PrivateService {
     //this._setUpEthers(this.networkId());
 
     this.subscribeNewBlocks(data => {
-      console.log(data);
       this._updateBlockNumber(data.number);
     });
 

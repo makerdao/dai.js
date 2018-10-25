@@ -70,19 +70,21 @@ export default class ProxyCdp {
       // If a new DSProxy instance is being created at the same time as the cup,
       // listen for the give event (via DSNote) rather than the LogNewCup event
       else {
-        console.log('subscribing!');
         const subscription = this._smartContractService
           .get('web3')
-          .subscribe('logs', {
-            topics: [
-              ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56), // prettier-ignore
-              '0x000000000000000000000000' + saiProxyAddress.substring(2)
-            ]
-          }, (err, result) => {
-            console.log(err, result);
-          })
+          .subscribe(
+            'logs',
+            {
+              topics: [
+                ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56), // prettier-ignore
+                '0x000000000000000000000000' + saiProxyAddress.substring(2)
+              ]
+            },
+            (err, result) => {
+              console.log(err, result);
+            }
+          )
           .on('data', log => {
-            console.log('got logs:', log);
             Promise.resolve(dsProxyAddressPromise).then(() => {
               const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
               if (this.dsProxyAddress === proxyInLog) {
