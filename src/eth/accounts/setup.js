@@ -2,8 +2,8 @@ import ProviderType from '../web3/ProviderType';
 import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
 import WebsocketSubprovider from 'web3-provider-engine/dist/es5/subproviders/websocket';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
+import SubscriptionSubprovider from 'web3-provider-engine/dist/es5/subproviders/subscriptions';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
-import Web3 from 'web3';
 
 export async function setupEngine(settings) {
   const { provider: providerSettings } = settings.web3;
@@ -14,8 +14,12 @@ export async function setupEngine(settings) {
     result.provider = await getBrowserProvider();
   } else if (providerSettings.type === ProviderType.WS) {
     const rpcUrl = getRpcUrl(providerSettings);
+    const subscriptionProvider = new SubscriptionSubprovider();
+    subscriptionProvider.on('data', (err, notification) => {
+      engine.emit('data', err, notification);
+    });
+    engine.addProvider(subscriptionProvider);
     result.provider = new WebsocketSubprovider({ rpcUrl });
-    result.ws = new Web3.providers.WebsocketProvider(rpcUrl);
   } else {
     const rpcUrl = getRpcUrl(providerSettings);
     result.provider = new RpcSource({ rpcUrl });

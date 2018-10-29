@@ -37,24 +37,26 @@ export default class Cdp {
       .get('web3')
       .currentAccount();
 
-    const getId = new Promise(resolve => {
-      // Contract created using web3 library provider
-      const web3TubContract = this._smartContractService.getWeb3wsContractByName(
-        contracts.SAI_TUB
+    const getId = new Promise(async resolve => {
+      const log = await this._web3Service.subscribeEvent(
+        {
+          address: tubContract.address
+        },
+        1
       );
+      this._web3Service.unsubscribeEvent();
+      const rawData = ethersUtils.bigNumberify(log.data);
+      if (rawData._bn.bitLength() < 54) {
+        log.topics[2] = log.data;
+      }
+      const id = ethersUtils.bigNumberify(log.topics[2]).toNumber();
+      const rawAddress = log.topics[1];
+      const address =
+        '0x' + rawAddress.substring(rawAddress.length - 40, rawAddress.length);
 
-      this._web3Service.contractEvent(
-        'LogNewCup',
-        web3TubContract,
-        {},
-        (err, res) => {
-          const address = res.returnValues.lad;
-          const cdpIdBytes32 = res.returnValues.cup;
-          if (currentAccount.toLowerCase() === address.toLowerCase()) {
-            resolve(ethersUtils.bigNumberify(cdpIdBytes32).toNumber());
-          }
-        }
-      );
+      if (address === currentAccount) {
+        resolve(id);
+      }
     });
 
     const promise = (async () => {

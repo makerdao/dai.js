@@ -20,7 +20,8 @@ export default class Web3Service extends PrivateService {
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     this._defaultEmitter = null;
     this._transactionSettings = null;
-
+    this._blockSub = null;
+    this._eventSub = null;
     Web3ServiceList.push(this);
   }
 
@@ -103,17 +104,40 @@ export default class Web3Service extends PrivateService {
     return new this._web3.eth.Contract(abi, address);
   }
 
-  web3wsContract(abi, address) {
-    return new this._web3ws.eth.Contract(abi, address);
-  }
-
-  contractEvent(event, contract, options, cb) {
-    contract.events[event](...options, cb);
-  }
-
   subscribeNewBlocks(cb) {
-    this._web3ws.eth.subscribe('newBlockHeaders').on('data', blockHeader => {
-      cb(blockHeader);
+    this._blockSub = this._web3.eth
+      .subscribe('newBlockHeaders')
+      .on('data', blockHeader => {
+        cb(blockHeader);
+      });
+  }
+
+  unsubscribeNewBlocks() {
+    this._blockSub.unsubscribe((err, success) => {
+      if (!success) throw new Error(err);
+      this.get('log').info('Web3 unsubscribing from newBlockHeaders...');
+    });
+  }
+
+  subscribeEvent(options, txLogIndex) {
+    return new Promise((resolve, reject) => {
+      this._eventSub = this._web3.eth
+        .subscribe('logs', options, err => {
+          if (err) reject(err);
+        })
+        .on('data', log => {
+          if (log.transactionLogIndex === '0x' + txLogIndex) {
+            this.get('log').info('Web3 returning logs...', log);
+            resolve(log);
+          }
+        });
+    });
+  }
+
+  unsubscribeEvent() {
+    this._eventSub.unsubscribe((err, success) => {
+      if (!success) throw new Error(err);
+      this.get('log').info('Web3 unsubscribing from logs...');
     });
   }
 
@@ -123,9 +147,6 @@ export default class Web3Service extends PrivateService {
 
     this._web3 = new Web3();
     this._web3.setProvider(this.get('accounts').getProvider());
-
-    this._web3ws = new Web3();
-    this._web3ws.setProvider(this.get('accounts').getWebsocketProvider());
 
     Object.assign(
       this,
@@ -169,6 +190,7 @@ export default class Web3Service extends PrivateService {
     // FIXME set up block listening with web3 instead
     //this._setUpEthers(this.networkId());
 
+    this.get('log').info('Web3 subscribing to newBlockHeaders');
     this.subscribeNewBlocks(data => {
       this._updateBlockNumber(data.number);
     });
@@ -263,13 +285,6 @@ export default class Web3Service extends PrivateService {
       this._web3.currentProvider,
       { name: getNetworkName(chainId), chainId: chainId }
     );
-
-    provider.on('block', num => {
-      if (this._currentBlock !== num) {
-        this._updateBlockNumber(num);
-      }
-    });
-    this.manager().onDisconnected(() => provider.removeAllListeners('block'));
 
     return provider;
   }

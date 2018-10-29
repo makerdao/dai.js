@@ -161,11 +161,6 @@ export default class SmartContractService extends PublicService {
     return this.get('web3').web3Contract(abi, address);
   }
 
-  getWeb3wsContractByName(name) {
-    const { abi, address } = this._getContractInfo(name);
-    return this.get('web3').web3wsContract(abi, address);
-  }
-
   _getContractInfo(name, version) {
     if (!this.hasContract(name)) {
       throw new Error('Provided name "' + name + '" is not a contract');
