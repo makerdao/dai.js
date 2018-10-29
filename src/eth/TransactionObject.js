@@ -53,9 +53,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     if (parseInt(count) <= 0) return;
     const newBlockNumber = this.receipt.blockNumber + count;
     await this._web3Service.waitForBlockNumber(newBlockNumber);
-    const newReceipt = await this._web3Service.getTransactionReceipt(
-      this.hash
-    );
+    const newReceipt = await this._web3Service.getTransactionReceipt(this.hash);
     if (newReceipt.blockHash !== this.receipt.blockHash) {
       throw new Error('transaction block hash changed');
     }
@@ -73,7 +71,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       // be enough. but on a remote net, it may take multiple calls.
       for (let i = 0; i < 10; i++) {
         tx = await this._web3Service.getTransaction(this.hash);
-        if (tx) break;
+        if (tx && tx.blockHash) break;
         log('no tx yet');
         await promiseWait(1500);
       }
@@ -89,7 +87,8 @@ export default class TransactionObject extends TransactionLifeCycle {
       if (!tx.blockHash) {
         const startTime = new Date();
         log(`waiting for transaction ${this.hash.substring(8)}... to mine`);
-        for (let i = 0; i < 240; i++) { // 20 minutes max
+        for (let i = 0; i < 240; i++) {
+          // 20 minutes max
           tx = await this._web3Service.getTransaction(this.hash);
           if (tx.blockHash) break;
           log('not mined yet');
