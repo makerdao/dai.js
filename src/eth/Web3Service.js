@@ -96,8 +96,8 @@ export default class Web3Service extends PrivateService {
     return this._transactionSettings;
   }
 
-  providerSettings() {
-    return this._serviceManager._settings.provider;
+  usingWebsockets() {
+    return this._serviceManager._settings.provider.type === 'WS';
   }
 
   confirmedBlockCount() {
@@ -210,11 +210,7 @@ export default class Web3Service extends PrivateService {
     // FIXME set up block listening with web3 instead
     //this._setUpEthers(this.networkId());
 
-    this.get('log').info('Web3 subscribing to newBlockHeaders');
-    this.subscribeNewBlocks(data => {
-      this._updateBlockNumber(data.number);
-    });
-
+    this._listenBlocks();
     this._installDisconnectCheck();
     await this._initEventPolling();
     this._defaultEmitter.emit('web3/CONNECTED', {
@@ -238,6 +234,22 @@ export default class Web3Service extends PrivateService {
 
   blockNumber() {
     return this._currentBlock;
+  }
+
+  _listenBlocks() {
+    if (this.usingWebsockets()) {
+      this.subscribeNewBlocks(data => {
+        this._updateBlockNumber(data.number);
+      });
+    } else {
+      setInterval(async () => {
+        const blockNumber = await this._web3.eth.getBlockNumber();
+        console.log(blockNumber);
+        if (blockNumber !== this._currentBlock) {
+          this._updateBlockNumber(blockNumber);
+        }
+      }, 1000);
+    }
   }
 
   onNewBlock(callback) {
