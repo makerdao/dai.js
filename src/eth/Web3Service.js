@@ -120,7 +120,6 @@ export default class Web3Service extends PrivateService {
   }
 
   subscribeLog(info, event) {
-    const web3 = new Web3();
     const { address, abi } = info;
     const res = abi.reduce(
       (acc, target) => ({
@@ -140,7 +139,7 @@ export default class Web3Service extends PrivateService {
             log.topics.shift();
           }
           if (log.transactionLogIndex === '0x1') {
-            const decoded = web3.eth.abi.decodeLog(
+            const decoded = this._web3.eth.abi.decodeLog(
               res[event].inputs,
               log.data,
               log.topics
