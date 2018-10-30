@@ -96,6 +96,10 @@ export default class Web3Service extends PrivateService {
     return this._transactionSettings;
   }
 
+  providerSettings() {
+    return this._serviceManager._settings.provider;
+  }
+
   confirmedBlockCount() {
     return this._confirmedBlockCount;
   }
