@@ -119,26 +119,44 @@ export default class Web3Service extends PrivateService {
     });
   }
 
-  subscribeEvent(options, txLogIndex) {
+  subscribeLog(info, event) {
+    const web3 = new Web3();
+    const { address, abi } = info;
+    const res = abi.reduce(
+      (acc, target) => ({
+        ...acc,
+        [target.name]: target
+      }),
+      {}
+    );
+
     return new Promise((resolve, reject) => {
       this._eventSub = this._web3.eth
-        .subscribe('logs', options, err => {
+        .subscribe('logs', { address }, err => {
           if (err) reject(err);
         })
         .on('data', log => {
-          if (log.transactionLogIndex === '0x' + txLogIndex) {
-            this.get('log').info('Web3 returning logs...', log);
-            resolve(log);
+          if (!res[event].anonymous) {
+            log.topics.shift();
+          }
+          if (log.transactionLogIndex === '0x1') {
+            const decoded = web3.eth.abi.decodeLog(
+              res[event].inputs,
+              log.data,
+              log.topics
+            );
+            resolve(this.unsubscribeEvent(decoded));
           }
         });
     });
   }
 
-  unsubscribeEvent() {
+  unsubscribeEvent(log) {
     this._eventSub.unsubscribe((err, success) => {
       if (!success) throw new Error(err);
       this.get('log').info('Web3 unsubscribing from logs...');
     });
+    return log;
   }
 
   async initialize(settings) {

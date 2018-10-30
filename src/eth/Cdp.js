@@ -38,23 +38,13 @@ export default class Cdp {
       .currentAccount();
 
     const getId = new Promise(async resolve => {
-      const log = await this._web3Service.subscribeEvent(
-        {
-          address: tubContract.address
-        },
-        1
+      const sai_tub = this._smartContractService._getContractInfo(
+        contracts.SAI_TUB
       );
-      this._web3Service.unsubscribeEvent();
-      const rawData = ethersUtils.bigNumberify(log.data);
-      if (rawData._bn.bitLength() < 54) {
-        log.topics[2] = log.data;
-      }
-      const id = ethersUtils.bigNumberify(log.topics[2]).toNumber();
-      const rawAddress = log.topics[1];
-      const address =
-        '0x' + rawAddress.substring(rawAddress.length - 40, rawAddress.length);
-
-      if (address === currentAccount) {
+      const log = await this._web3Service.subscribeLog(sai_tub, 'LogNewCup');
+      const id = ethersUtils.bigNumberify(log.cup).toNumber();
+      const address = log.lad;
+      if (address.toLowerCase() === currentAccount.toLowerCase()) {
         resolve(id);
       }
     });
