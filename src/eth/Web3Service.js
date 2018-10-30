@@ -153,7 +153,6 @@ export default class Web3Service extends PrivateService {
   unsubscribeEvent(log) {
     this._eventSub.unsubscribe((err, success) => {
       if (!success) throw new Error(err);
-      this.get('log').info('Web3 unsubscribing from logs...');
     });
     return log;
   }
