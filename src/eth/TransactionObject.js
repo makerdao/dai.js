@@ -65,6 +65,12 @@ export default class TransactionObject extends TransactionLifeCycle {
     try {
       let gasPrice, tx;
       this.hash = await this._transaction;
+      if (this.hash.hash) {
+        // When using websockets, the transaction hash is returned from this._transaction
+        // Otherwise, the tx receipt is returned. This corrects in such cases
+        this.hash = this.hash.hash;
+      }
+
       this.setPending(); // set state to pending
 
       // when you're on a local testnet, a single call to getTransaction should

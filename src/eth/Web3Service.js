@@ -58,34 +58,37 @@ export default class Web3Service extends PrivateService {
   }
 
   getEthersSigner() {
-    if (!this._ethersSigner) {
-      const provider = this.web3Provider();
-      const call = promisify(this._web3.eth.call);
-      this._ethersSigner = {
-        getAddress: () => this.currentAccount(),
-        estimateGas: tx => this.estimateGas(tx),
-        sendTransaction: tx => {
-          return this.sendTransaction({
-            ...tx,
-            from: this.currentAccount()
-          });
-        },
-        provider: new Proxy(provider, {
-          get(target, key) {
-            switch (key) {
-              case 'resolveName':
-                return address => address;
-              case 'call':
-                return call;
-              default:
-                return target[key];
+    if (this.usingWebsockets()) {
+      if (!this._ethersSigner) {
+        const provider = this.web3Provider();
+        const call = promisify(this._web3.eth.call);
+        this._ethersSigner = {
+          getAddress: () => this.currentAccount(),
+          estimateGas: tx => this.estimateGas(tx),
+          sendTransaction: tx => {
+            return this.sendTransaction({
+              ...tx,
+              from: this.currentAccount()
+            });
+          },
+          provider: new Proxy(provider, {
+            get(target, key) {
+              switch (key) {
+                case 'resolveName':
+                  return address => address;
+                case 'call':
+                  return call;
+                default:
+                  return target[key];
+              }
             }
-          }
-        })
-      };
+          })
+        };
+      }
+      return this._ethersSigner;
+    } else {
+      return this.ethersProvider().getSigner();
     }
-    return this._ethersSigner;
-    // return this.ethersProvider().getSigner();
   }
 
   web3Provider() {
@@ -208,7 +211,7 @@ export default class Web3Service extends PrivateService {
     }
 
     // FIXME set up block listening with web3 instead
-    //this._setUpEthers(this.networkId());
+    this._setUpEthers(this.networkId());
 
     this._listenBlocks();
     this._installDisconnectCheck();
@@ -238,13 +241,14 @@ export default class Web3Service extends PrivateService {
 
   _listenBlocks() {
     if (this.usingWebsockets()) {
+      console.log('using subscribe to listen for blocks');
       this.subscribeNewBlocks(data => {
         this._updateBlockNumber(data.number);
       });
     } else {
+      console.log('using polling method to listen for blocks');
       setInterval(async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
-        console.log(blockNumber);
         if (blockNumber !== this._currentBlock) {
           this._updateBlockNumber(blockNumber);
         }
