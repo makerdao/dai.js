@@ -46,13 +46,13 @@ export default class Web3Service extends PrivateService {
     try {
       throw new Error('hi');
     } catch (err) {
-      console.warn(
-        'using ethers provider...\n' +
-          err.stack
-            .split('\n')
-            .slice(1, 8)
-            .join('\n')
-      );
+      // console.warn(
+      //   'using ethers provider...\n' +
+      //     err.stack
+      //       .split('\n')
+      //       .slice(1, 8)
+      //       .join('\n')
+      // );
     }
     return this._ethersProvider;
   }
@@ -136,23 +136,29 @@ export default class Web3Service extends PrivateService {
       {}
     );
 
+    const getTopics = () => {
+      const { sha3 } = this._web3.utils;
+      let topics = [];
+      let name = res[event].name + '(';
+      for (let i in res[event].inputs) {
+        name += res[event].inputs[i].type + ',';
+      }
+      topics[0] = sha3(name.substring(0, name.length - 1) + ')');
+      return topics;
+    };
+
     return new Promise((resolve, reject) => {
       this._eventSub = this._web3.eth
-        .subscribe('logs', { address }, err => {
+        .subscribe('logs', { address, topics: getTopics() }, err => {
           if (err) reject(err);
         })
         .on('data', log => {
-          if (!res[event].anonymous) {
-            log.topics.shift();
-          }
-          if (log.transactionLogIndex === '0x1') {
-            const decoded = this._web3.eth.abi.decodeLog(
-              res[event].inputs,
-              log.data,
-              log.topics
-            );
-            resolve(this.unsubscribeEvent(decoded));
-          }
+          const decoded = this._web3.eth.abi.decodeLog(
+            res[event].inputs,
+            log.data,
+            log.topics
+          );
+          resolve(this.unsubscribeEvent(decoded));
         });
     });
   }
@@ -241,12 +247,10 @@ export default class Web3Service extends PrivateService {
 
   _listenBlocks() {
     if (this.usingWebsockets()) {
-      console.log('using subscribe to listen for blocks');
       this.subscribeNewBlocks(data => {
         this._updateBlockNumber(data.number);
       });
     } else {
-      console.log('using polling method to listen for blocks');
       setInterval(async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
         if (blockNumber !== this._currentBlock) {
