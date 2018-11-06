@@ -146,20 +146,23 @@ export default class Web3Service extends PrivateService {
       topics[0] = sha3(name.substring(0, name.length - 1) + ')');
       return topics;
     };
-
     return new Promise((resolve, reject) => {
-      this._eventSub = this._web3.eth
-        .subscribe('logs', { address, topics: getTopics() }, err => {
+      this._eventSub = this._web3.eth.subscribe(
+        'logs',
+        { address, topics: getTopics() },
+        (err, log) => {
           if (err) reject(err);
-        })
-        .on('data', log => {
+          if (!res[event].anonymous) {
+            log.topics.shift();
+          }
           const decoded = this._web3.eth.abi.decodeLog(
             res[event].inputs,
             log.data,
             log.topics
           );
           resolve(this.unsubscribeEvent(decoded));
-        });
+        }
+      );
     });
   }
 
