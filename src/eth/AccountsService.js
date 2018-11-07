@@ -9,6 +9,8 @@ import {
 import { setupEngine } from './accounts/setup';
 import { AccountType } from '../utils/constants';
 
+const sanitizeAccount = pick(['name', 'type', 'address']);
+
 export default class AccountsService extends PublicService {
   constructor(name = 'accounts') {
     super(name, []);
@@ -74,7 +76,7 @@ export default class AccountsService extends PublicService {
   }
 
   listAccounts() {
-    return map(pick(['name', 'type', 'address']), this._accounts);
+    return map(sanitizeAccount, this._accounts);
   }
 
   useAccount(name) {
@@ -125,10 +127,7 @@ export default class AccountsService extends PublicService {
   // (sensitive info).
   currentAccount() {
     invariant(this.hasAccount(), 'No account is set up.');
-    return pick(
-      ['name', 'type', 'address'],
-      this._accounts[this._currentAccount]
-    );
+    return sanitizeAccount(this._accounts[this._currentAccount]);
   }
 
   currentAddress() {
