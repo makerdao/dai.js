@@ -23,6 +23,12 @@ export const defaultProviderConfig = {
 };
 
 export const websocketProviderConfig = {
+  accounts: {
+    default: {
+      key: '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e',
+      type: 'privateKey'
+    }
+  },
   web3: {
     provider: {
       type: ProviderType.WS,
