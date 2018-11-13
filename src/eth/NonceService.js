@@ -39,6 +39,7 @@ export default class NonceService extends PublicService {
 
   async setCounts() {
     const accountsList = await this._accountsService.listAccounts();
+    if (accountsList.length === 0) return;
     const uniqueAddresses = this._removeDuplicateAddresses(accountsList);
 
     return new Promise(resolve => {

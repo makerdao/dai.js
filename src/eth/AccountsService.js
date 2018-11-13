@@ -13,7 +13,7 @@ const sanitizeAccount = pick(['name', 'type', 'address']);
 
 export default class AccountsService extends PublicService {
   constructor(name = 'accounts') {
-    super(name, []);
+    super(name, ['log']);
     this._accounts = {};
     this._accountFactories = {
       privateKey: privateKeyAccountFactory,
@@ -66,6 +66,14 @@ export default class AccountsService extends PublicService {
     const factory = this._accountFactories[type];
     invariant(factory, `no factory for type "${type}"`);
     const accountData = await factory(otherSettings, this._provider);
+
+    // TODO allow this to silently fail only in situations where it's expected,
+    // e.g. when connecting to a read-only provider
+    if (!accountData.address) {
+      this.get('log').info(`Not adding account "${name}" (no address found)`);
+      return;
+    }
+
     if (!name) name = accountData.address;
     const account = { name, type, ...accountData };
     this._accounts[name] = account;
