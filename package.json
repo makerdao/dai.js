@@ -10,7 +10,7 @@
     "Joshua Levine <joshua@makerdao.com>",
     "Michael Elliot <mike@makerdao.com>"
   ],
-  "description": "JavaScript library for interacting with the Dai Stablecoin System.",
+  "description": "Library for interacting with the Dai Stablecoin System.",
   "license": "MIT",
   "keywords": [
     "makerdao",
