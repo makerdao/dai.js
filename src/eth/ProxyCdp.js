@@ -12,6 +12,7 @@ export default class ProxyCdp {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
     this._transactionManager = this._smartContractService.get('transactionManager'); // prettier-ignore
+    this._web3Service = this._smartContractService.get('web3');
 
     if (dsProxyAddress) this.dsProxyAddress = dsProxyAddress.toLowerCase();
     if (lockAndDraw) {
@@ -41,67 +42,102 @@ export default class ProxyCdp {
       .currentAccount();
 
     const self = this;
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
       // sender = ProxyRegistry, owner = you, proxy = new DSProxy address, cache = DSProxyCache
       // eslint-disable-next-line
-      dsProxyFactoryContract.oncreated = function(sender, owner, proxy, cache) {
-        if (currentAccount.toLowerCase() == owner.toLowerCase()) {
-          this.removeListener();
-          self.dsProxyAddress = proxy.toLowerCase();
-          resolve(self.getDsProxyAddress);
+
+      if (this._web3Service.usingWebsockets()) {
+        const ds_proxy_factory = this._smartContractService._getContractInfo(
+          contracts.DS_PROXY_FACTORY
+        );
+        const log = await this._web3Service.subscribeLog(
+          ds_proxy_factory,
+          'Created'
+        );
+        if (currentAccount.toLowerCase() == log.owner.toLowerCase()) {
+          self.dsProxyAddress = log.proxy;
+          resolve(self.dsProxyAddress);
         }
-      };
+      } else {
+        dsProxyFactoryContract.oncreated = function(
+          sender,
+          owner,
+          proxy,
+          cache
+        ) {
+          if (currentAccount.toLowerCase() == owner.toLowerCase()) {
+            this.removeListener();
+            self.dsProxyAddress = proxy.toLowerCase();
+            resolve(self.dsProxyAddress);
+          }
+        };
+      }
     });
   }
 
   _getCdpId(saiProxyAddress, tubContract, dsProxyAddressPromise) {
-    return new Promise(resolve => {
+    const sai_tub = this._smartContractService._getContractInfo(
+      contracts.SAI_TUB
+    );
+
+    return new Promise(async resolve => {
       // If using an existing DSProxy, listen for the LogNewCup event
       const existingDsProxyAddress = this.dsProxyAddress;
+
       if (existingDsProxyAddress) {
-        tubContract.onlognewcup = function(address, cdpIdBytes32) {
-          if (existingDsProxyAddress == address.toLowerCase()) {
-            const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
-            this.removeListener();
-            resolve(cdpId);
-          }
-        };
+        if (this._web3Service.usingWebsockets()) {
+          const { cup } = await this._web3Service.subscribeLog(
+            sai_tub,
+            'LogNewCup'
+          );
+          const cdpId = ethersUtils.bigNumberify(cup).toNumber();
+          resolve(cdpId);
+        } else {
+          tubContract.onlognewcup = function(address, cdpIdBytes32) {
+            if (existingDsProxyAddress == address.toLowerCase()) {
+              const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
+              this.removeListener();
+              resolve(cdpId);
+            }
+          };
+        }
       }
       // If a new DSProxy instance is being created at the same time as the cup,
       // listen for the give event (via DSNote) rather than the LogNewCup event
       else {
-        const subscription = this._smartContractService
-          .get('web3')
-          .subscribe(
-            'logs',
-            {
-              topics: [
-                ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56), // prettier-ignore
-                '0x000000000000000000000000' + saiProxyAddress.substring(2)
-              ]
-            },
-            (err, result) => {
-              console.log(err, result);
-            }
-          )
-          .on('data', log => {
-            Promise.resolve(dsProxyAddressPromise).then(() => {
-              const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
-              if (this.dsProxyAddress === proxyInLog) {
+        const _topics = [
+          ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56), // prettier-ignore
+          '0x000000000000000000000000' + saiProxyAddress.substring(2)
+        ];
+
+        if (this._web3Service.usingWebsockets()) {
+          const subscription = this._web3Service._web3.eth
+            .subscribe('logs', {
+              topics: _topics
+            })
+            .on('data', async log => {
+              const proxyInLog = '0x' + log.topics[3].substr(26);
+              await dsProxyAddressPromise; // wait for this to resolve first
+              if (
+                this.dsProxyAddress.toLowerCase() === proxyInLog.toLowerCase()
+              ) {
                 resolve(ethersUtils.bigNumberify(log.topics[2]).toNumber());
                 subscription.unsubscribe();
               }
             });
+        } else {
+          const provider = this._smartContractService
+            .get('web3')
+            .ethersProvider();
+          provider.on(_topics, log => {
+            Promise.resolve(dsProxyAddressPromise).then(() => {
+              const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
+              if (this.dsProxyAddress === proxyInLog) {
+                resolve(ethersUtils.bigNumberify(log.topics[2]).toNumber());
+              }
+            });
           });
-
-        // provider.on(topics, log => {
-        //   Promise.resolve(dsProxyAddressPromise).then(() => {
-        //     const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
-        //     if (this.dsProxyAddress === proxyInLog) {
-        //       resolve(ethersUtils.bigNumberify(log.topics[2]).toNumber());
-        //     }
-        //   });
-        // });
+        }
       }
     });
   }
