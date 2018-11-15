@@ -49,8 +49,8 @@ export function resetCache() {
 
 export function buildTestContainer(settings) {
   return new DefaultServiceProvider({
-    // ...defaultProviderConfig,
-    ...websocketProviderConfig,
+    ...defaultProviderConfig,
+    // ...websocketProviderConfig,
     // ...kovanProviderConfig,
     // cache,
     ...settings
