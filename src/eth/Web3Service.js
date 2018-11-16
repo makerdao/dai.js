@@ -22,6 +22,7 @@ export default class Web3Service extends PrivateService {
     this._transactionSettings = null;
     this._blockSub = null;
     this._eventSub = null;
+    this._interval = null;
     Web3ServiceList.push(this);
   }
 
@@ -254,12 +255,12 @@ export default class Web3Service extends PrivateService {
         this._updateBlockNumber(data.number);
       });
     } else {
-      setInterval(async () => {
+      this._interval = setInterval(async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
         if (blockNumber !== this._currentBlock) {
           this._updateBlockNumber(blockNumber);
         }
-      }, 1000);
+      }, 10);
     }
   }
 
@@ -308,12 +309,21 @@ export default class Web3Service extends PrivateService {
     this.onNewBlock(this.get('event').ping);
   }
 
+  _removeBlockUpdates() {
+    if(this.usingWebsockets()) {
+      this.unsubscribeNewBlocks();
+    } else {
+      clearInterval(this._interval);
+    }
+  }
   _installCleanUpHooks() {
     this.manager().onDisconnected(() => {
+      this._removeBlockUpdates();
       this.get('timer').disposeTimer(TIMER_CONNECTION);
     });
 
     this.manager().onDeauthenticated(() => {
+      this._removeBlockUpdates();
       this.get('timer').disposeTimer(TIMER_AUTHENTICATION);
     });
   }
