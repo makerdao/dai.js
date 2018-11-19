@@ -11,9 +11,26 @@ import debug from 'debug';
 const log = debug('dai:testing:TxMgr.spec');
 
 function buildTestServices() {
-  const container = buildTestContainer({
-    smartContract: true,
-    transactionManager: true,
+
+  const ws_config = {
+    accounts: {
+      default: {
+        key: '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e',
+        type: 'privateKey'
+      }
+    },
+    web3: {
+      provider: {
+        type: 'WS',
+        url: 'ws://localhost:2000'
+      },
+      transactionSettings: {
+        gasLimit: 1234567
+      }
+    }
+  };
+
+  const http_config = {
     web3: {
       provider: {
         type: 'TEST'
@@ -22,9 +39,21 @@ function buildTestServices() {
         gasLimit: 1234567
       }
     }
-  });
-  const smartContract = container.service('smartContract');
-  const transactionManager = container.service('transactionManager');
+  };
+
+  const container = () => {
+    // check if serviceBuilder is using websockets or http
+    const provider = (buildTestContainer()._config.web3.provider.type === 'WS') ? ws_config : http_config;
+    return buildTestContainer({
+      smartContract: true,
+      transactionManager: true,
+      web3: provider.web3,
+      accounts: provider.accounts
+    });
+  };
+
+  const smartContract = container().service('smartContract');
+  const transactionManager = container().service('transactionManager');
 
   return Promise.all([
     smartContract.manager().authenticate(),
@@ -45,7 +74,12 @@ beforeEach(async () => {
 test('reuse the same web3 and log service in test services', () => {
   expect(services.contract.manager().isConnected()).toBe(true);
   expect(services.txMgr.manager().isConnected()).toBe(true);
-  expect(services.txMgr.get('web3')).toBe(services.contract.get('web3'));
+
+  // Removing _web3 object as blockTrackerTimestamp varies based on
+  // milli/nanoseconds between code execution
+  const _tx = delete {... services.txMgr.get('web3')._web3 };
+  const _ct = delete {... services.contract.get('web3')._web3 };
+  expect(_tx).toBe(_ct);
   expect(services.txMgr.get('log')).toBe(
     services.contract.get('web3').get('log')
   );
