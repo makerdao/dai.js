@@ -72,6 +72,8 @@ const sharedTests = openCdp => {
     let id;
 
     beforeAll(async () => {
+      // useAccountWithProxy();
+      // dsProxyAddress = cdpService.get('proxy').defaultProxyAddress();
       id = await openCdp();
     });
 
@@ -402,7 +404,7 @@ describe.only('proxy cdp', () => {
     account,
     iteration = 0;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const tokenService = cdpService.get('token');
     ethToken = tokenService.getToken(ETH);
     await iterateAccounts();
@@ -413,10 +415,7 @@ describe.only('proxy cdp', () => {
       key: account.key
     });
     accountService.useAccount('newAccount' + lastAccount);
-    console.log(
-      'in proxy beforeEach',
-      tokenService.get('web3').currentAccount()
-    );
+    currentAccount = account.address;
   });
 
   async function iterateAccounts() {
@@ -460,6 +459,7 @@ describe.only('proxy cdp', () => {
   });
 
   test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
+    console.log(await cdpService.get('proxy').getOwner(dsProxyAddress));
     const balancePre = await ethToken.balanceOf(currentAccount);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
       0.1,
@@ -475,7 +475,7 @@ describe.only('proxy cdp', () => {
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 
-  xtest('use existing DSProxy to open CDP, then lock ETH and draw DAI (multi tx)', async () => {
+  test('use existing DSProxy to open CDP, then lock ETH and draw DAI (multi tx)', async () => {
     const cdp = await cdpService.openProxyCdp(dsProxyAddress);
     const balancePre = await ethToken.balanceOf(currentAccount);
     const cdpInfoPre = await cdp.getInfo();
