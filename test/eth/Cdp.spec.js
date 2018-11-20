@@ -13,6 +13,7 @@ import {
 import { promiseWait } from '../../src/utils';
 import { mineBlocks } from '../helpers/transactionConfirmation';
 
+// eslint-disable-next-line
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, ethToken;
 // lastAccount = 111,
 // account,
@@ -58,27 +59,13 @@ beforeEach(() => {
   );
 });
 
-afterAll(() => {
-  cdpService
-    .get('token')
-    .get('web3')
-    .get('accounts')
-    .useAccount('default');
-});
-
-// async function iterateAccounts() {
-//   lastAccount += 1;
-//   iteration += 1;
-//   account = TestAccountProvider.nextAccount(lastAccount);
-//   const proxy = await checkAccountForProxy();
-//   console.log('in iterate counts', iteration, proxy, !proxy);
-//   if (!proxy) return;
-//   return await iterateAccounts();
-// }
-
-// async function checkAccountForProxy() {
-//   return await cdpService.get('proxy').getProxyAddress(account.address);
-// }
+// afterAll(() => {
+//   cdpService
+//     .get('token')
+//     .get('web3')
+//     .get('accounts')
+//     .useAccount('default');
+// });
 
 const sharedTests = openCdp => {
   describe('basic checks', () => {
@@ -409,28 +396,49 @@ describe('non-proxy cdp', () => {
   });
 });
 
-xdescribe('proxy cdp', () => {
-  // let ethToken, lastAccount = 101, account, iteration = 0;
+describe.only('proxy cdp', () => {
+  let ethToken,
+    lastAccount = 111,
+    account,
+    iteration = 0;
 
-  // beforeAll(async () => {
-  //   const tokenService = cdpService.get('token');
-  //   ethToken = tokenService.getToken(ETH);
-  //   await iterateAccounts();
-  //   console.log('back from iterate, account is', account.address);
-  //   const accountService = tokenService.get('web3').get('accounts');
-  //   await accountService.addAccount('newAccount', {
-  //     type: 'privateKey',
-  //     key: account.key
-  //   });
-  //   accountService.useAccount('newAccount');
-  // });
+  beforeEach(async () => {
+    const tokenService = cdpService.get('token');
+    ethToken = tokenService.getToken(ETH);
+    await iterateAccounts();
+    // console.log('back from iterate, account is', account.address);
+    const accountService = tokenService.get('web3').get('accounts');
+    await accountService.addAccount('newAccount' + lastAccount, {
+      type: 'privateKey',
+      key: account.key
+    });
+    accountService.useAccount('newAccount' + lastAccount);
+    console.log(
+      'in proxy beforeEach',
+      tokenService.get('web3').currentAccount()
+    );
+  });
+
+  async function iterateAccounts() {
+    lastAccount += 1;
+    iteration += 1;
+    account = TestAccountProvider.nextAccount(lastAccount);
+    const proxy = await checkAccountForProxy();
+    console.log('in iterate counts', iteration, proxy, !proxy);
+    if (!proxy) return;
+    return await iterateAccounts();
+  }
+
+  async function checkAccountForProxy() {
+    return await cdpService.get('proxy').getProxyAddress(account.address);
+  }
 
   // async function openProxyCdp() {
   //   cdp = await cdpService.openProxyCdp(dsProxyAddress);
   //   return cdp.id;
   // }
 
-  xtest('create DSProxy and open CDP (single tx)', async () => {
+  test('create DSProxy and open CDP (single tx)', async () => {
     const cdp = await cdpService.openProxyCdp();
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
@@ -451,7 +459,7 @@ xdescribe('proxy cdp', () => {
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 
-  xtest('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
+  test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
     const balancePre = await ethToken.balanceOf(currentAccount);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
       0.1,

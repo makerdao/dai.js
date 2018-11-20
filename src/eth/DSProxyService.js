@@ -19,7 +19,9 @@ export default class DSProxyService extends PrivateService {
   }
 
   defaultProxyAddress() {
-    return this._default;
+    return this._currentAccount === this.get('web3').currentAccount()
+      ? this._default
+      : this.getProxyAddress();
   }
 
   proxyRegistry() {
@@ -40,6 +42,7 @@ export default class DSProxyService extends PrivateService {
       ? providedAccount
       : this.get('web3').currentAccount();
     console.log('in proxy service', account);
+    this._currentAccount = account;
     proxyAddress = await this.get('smartContract')
       .getContractByName(contracts.PROXY_REGISTRY)
       .proxies(account);
