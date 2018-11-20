@@ -56,23 +56,24 @@ function buildAccountChangingService(changeAccountAfter = 25) {
   return service;
 }
 
-function buildTestService(key, statusTimerDelay = 5000) {
+function buildTestService(keys, statusTimerDelay = 5000) {
   const config = {
     web3: {
       statusTimerDelay,
-      provider: {
-        type: ProviderType.WS,
-        url: 'ws://localhost:2000'
-      },
       transactionSettings: {
         gasPrice: 1
       }
-    }
+    },
+    accounts: {}
   };
-  if (key) {
-    config.accounts = {
-      default: { type: 'privateKey', key }
-    };
+  if (keys && keys.length) {
+    if(keys.length === 1) {
+      config.accounts['default'] = { type: 'privateKey', key: keys[0]};
+    } else {
+      for(let i = 0; i < keys.length; i++) {
+        config.accounts[i] = { type: 'privateKey', key: keys[i]};
+      }
+    }
   }
   return buildTestServiceCore('web3', config);
 }
@@ -127,7 +128,7 @@ test('throw error on a failure to connect', async () => {
 
 test('be authenticated and know default address when private key passed in', done => {
   const service = buildTestService(
-    '0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700'
+    ['0xa69d30145491b4c1d55e52453cabb2e73a9daff6326078d49376449614d2f700']
   );
 
   service
@@ -215,12 +216,14 @@ test('handle automatic change of account as a deauthenticate', async done => {
 });
 
 test('connect to ganache testnet with account 0x16fb9...', done => {
-  const service = buildTestService(),
+  const service = buildTestService([
+    '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e',
+    '0xb3ae65f191aac33f3e3f662b8411cabf14f91f2b48cf338151d6021ea1c08541'
+  ]),
     expectedAccounts = [
       '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6',
       '0x81431b69b1e0e334d4161a13c2955e0f3599381e'
     ];
-
   service
     .manager()
     .connect()
@@ -265,13 +268,12 @@ test('stores transaction settings from config', async () => {
   const service = buildTestService();
   await service.manager().authenticate();
   const settings = service.transactionSettings();
-  expect(settings).toEqual({ gasPrice: 1 });
+  expect(settings).toEqual({ gasLimit: 4000000, gasPrice: 1 });
 });
 
 test('stores confirmed block count from config', async () => {
   const config = {
     web3: {
-      provider: { type: ProviderType.TEST },
       confirmedBlockCount: 8
     }
   };
@@ -282,7 +284,7 @@ test('stores confirmed block count from config', async () => {
 });
 
 test('sets default confirmed block count', async () => {
-  const service = buildTestService();
+  const service = buildTestServiceCore('web3', {});
   await service.manager().authenticate();
   const count = service.confirmedBlockCount();
   expect(count).toEqual(5);

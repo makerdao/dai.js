@@ -1,5 +1,6 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
+import { merge } from 'lodash';
 
 export const kovanProviderConfig = {
   web3: {
@@ -12,7 +13,7 @@ export const kovanProviderConfig = {
   }
 };
 
-export const defaultProviderConfig = {
+export const defaultProviderConfig = () => ({
   web3: {
     provider: { type: ProviderType.TEST },
     transactionSettings: {
@@ -20,9 +21,9 @@ export const defaultProviderConfig = {
     }
   },
   log: false
-};
+});
 
-export const websocketProviderConfig = {
+export const websocketProviderConfig = () => ({
   accounts: {
     default: {
       key: '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e',
@@ -39,7 +40,7 @@ export const websocketProviderConfig = {
     }
   },
   log: false
-};
+});
 
 const cache = { storage: {} };
 
@@ -47,13 +48,19 @@ export function resetCache() {
   cache.storage = {};
 }
 
+const useWebsocketsForTests = true;
+
 export function buildTestContainer(settings) {
+  // flip between using websockets for tests is simplified
+  const provider = useWebsocketsForTests ? websocketProviderConfig() : defaultProviderConfig();
+  if(settings && settings.accounts) {
+    delete provider.accounts;
+  }
+  merge(provider, settings);
   return new DefaultServiceProvider({
-    ...defaultProviderConfig,
-    // ...websocketProviderConfig,
+    ...provider,    
     // ...kovanProviderConfig,
-    // cache,
-    ...settings
+    // cache
   });
 }
 
@@ -63,6 +70,14 @@ export function buildTestService(name, settings) {
 
 export function buildTestEthereumCdpService() {
   return buildTestService('cdp', { cdp: true });
+}
+
+export function buildTestTransactionManagerService() {
+  return buildTestContainer({
+    smartContract: true,
+    transactionManager: true,
+    web3: { transactionSettings: { gasLimit: 1234567 }}
+  });
 }
 
 export function buildTestEthereumTokenService() {

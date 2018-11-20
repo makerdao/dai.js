@@ -185,7 +185,6 @@ export default class Web3Service extends PrivateService {
       this,
       promisifyMethods(this._web3.eth, [
         'estimateGas',
-        'getAccounts',
         'getBalance',
         'getBlock',
         'getTransaction',
@@ -193,6 +192,9 @@ export default class Web3Service extends PrivateService {
         'sendTransaction'
       ]),
       {
+        getAccounts: () => this.get('accounts').listAccounts().map(account => {
+          return account.address;
+        }),
         subscribe: (...args) => this._web3.eth.subscribe(...args)
       }
     );
