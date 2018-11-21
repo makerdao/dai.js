@@ -50,6 +50,10 @@ export default class Web3Service extends PrivateService {
     return this._web3.currentProvider;
   }
 
+  getPastLogs(options) {
+    return this._web3.eth.getPastLogs(options);
+  }
+
   transactionSettings() {
     return this._transactionSettings;
   }
@@ -79,7 +83,8 @@ export default class Web3Service extends PrivateService {
         'estimateGas',
         'getBlock',
         'sendTransaction',
-        'getBalance'
+        'getBalance',
+        'getPastLogs'
       ])
     );
     this._setStatusTimerDelay(settings.statusTimerDelay);
