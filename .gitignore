@@ -10,3 +10,4 @@ npm-debug.log
 ganache.out
 yarn.lock
 package-lock.json
+.vscode/
