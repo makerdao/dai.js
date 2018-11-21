@@ -13,11 +13,14 @@ import {
 import { promiseWait } from '../../src/utils';
 import { mineBlocks } from '../helpers/transactionConfirmation';
 
-// eslint-disable-next-line
-let cdpService, cdp, currentAccount, dai, dsProxyAddress, ethToken;
-// lastAccount = 111,
-// account,
-// iteration = 0;
+let cdpService,
+  cdp,
+  currentAccount,
+  dai,
+  dsProxyAddress,
+  // eslint-disable-next-line
+  ethToken,
+  accountService;
 
 // this function should be called again after reverting a snapshot; otherwise,
 // you may get errors about account and transaction nonces not matching.
@@ -31,22 +34,29 @@ async function init() {
   if (cdp) cdp._cdpService = cdpService;
 }
 
+async function setNewAccount() {
+  const account = TestAccountProvider.nextAccount();
+  accountService = cdpService
+    .get('token')
+    .get('web3')
+    .get('accounts');
+  await accountService.addAccount(account.address, {
+    type: 'privateKey',
+    key: account.key
+  });
+  accountService.useAccount(account.address);
+  currentAccount = account.address;
+}
+
+function setExistingAccount(name) {
+  accountService.useAccount(name);
+}
+
 beforeAll(async () => {
   await init();
   dai = cdpService.get('token').getToken(DAI);
   const tokenService = cdpService.get('token');
   ethToken = tokenService.getToken(ETH);
-  // await iterateAccounts();
-  // console.log('back from iterate, account is', account.address);
-  // account = TestAccountProvider.nextAccount(lastAccount);
-  // const accountService = tokenService.get('web3').get('accounts');
-  // await accountService.addAccount('newAccount', {
-  //   type: 'privateKey',
-  //   key: account.key
-  // });
-  // accountService.useAccount('newAccount');
-  // console.log(accountService.listAccounts());
-  // console.log('done with the beforeAll and moving on')
 });
 
 beforeEach(() => {
@@ -59,284 +69,299 @@ beforeEach(() => {
   );
 });
 
-// afterAll(() => {
-//   cdpService
-//     .get('token')
-//     .get('web3')
-//     .get('accounts')
-//     .useAccount('default');
-// });
+async function buildProxy() {
+  return await cdpService.get('proxy').build();
+}
 
-const sharedTests = openCdp => {
-  describe('basic checks', () => {
-    let id;
-
+const sharedTests = (openCdp, proxy = false) => {
+  describe('shared tests', () => {
     beforeAll(async () => {
-      // useAccountWithProxy();
-      // dsProxyAddress = cdpService.get('proxy').defaultProxyAddress();
-      id = await openCdp();
+      if (proxy) {
+        setNewAccount();
+        await buildProxy();
+        currentAccount = cdpService
+          .get('token')
+          .get('web3')
+          .currentAccount();
+        dsProxyAddress = await cdpService.get('proxy').defaultProxyAddress();
+      }
     });
 
-    test('check properties', () => {
-      expect(typeof id).toBe('number');
-      expect(id).toBeGreaterThan(0);
-      expect(cdp._cdpService).toBeDefined();
-      expect(cdp._smartContractService).toBeDefined();
-    });
+    xdescribe('basic checks', () => {
+      let id;
 
-    test('lookup by ID', async () => {
-      expect.assertions(2);
-      const info = await cdpService.getInfo(id);
-      expect(info).toBeTruthy();
-      expect(info.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-    });
-
-    test('shut', async () => {
-      await cdp.shut();
-      const info = await cdp.getInfo();
-      expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
-    });
-  });
-
-  test('transfer ownership', async () => {
-    const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
-    await openCdp();
-    const info = await cdp.getInfo();
-    await cdp.give(newAddress);
-    const info2 = await cdp.getInfo();
-    expect(info2.lad).not.toEqual(info.lad);
-    expect(info2.lad).toEqual(newAddress);
-  });
-
-  test('read liquidation price with 0 collateral', async () => {
-    const price = await cdp.getLiquidationPrice();
-    expect(price).toEqual(USD_ETH(Infinity));
-  });
-
-  describe('bite', () => {
-    beforeAll(async () => {
-      await openCdp();
-      const tx = cdp.lockEth(0.1);
-      mineBlocks(cdpService);
-      await tx;
-      await cdp.drawDai(13);
-    });
-
-    afterAll(async () => {
-      // other tests expect this to be the case
-      await cdpService.get('price').setEthPrice(400);
-    });
-
-    // FIXME this breaks other tests, possibly because it leaves the test chain in
-    // a broken state
-    test.skip('when safe', async () => {
-      await expect(cdp.bite()).rejects;
-    });
-
-    test('when unsafe', async () => {
-      await cdpService.get('price').setEthPrice(0.01);
-      const result = await cdp.bite();
-      expect(typeof result).toEqual('object');
-    });
-  });
-
-  describe('a cdp with collateral', () => {
-    beforeAll(async () => {
-      await openCdp();
-      const tx = cdp.lockEth(0.2);
-      mineBlocks(cdpService);
-      await tx;
-    });
-
-    test('read ink', async () => {
-      const info = await cdp.getInfo();
-      expect(info.ink.toString()).toBe('200000000000000000');
-    });
-
-    test('read locked collateral in peth', async () => {
-      const collateral = await cdp.getCollateralValue(PETH);
-      expect(collateral).toEqual(PETH(0.2));
-    });
-
-    test('read locked collateral in eth', async () => {
-      const collateral = await cdp.getCollateralValue();
-      expect(collateral).toEqual(ETH(0.2));
-    });
-
-    test('read locked collateral in USD', async () => {
-      const collateral = await cdp.getCollateralValue(USD);
-      expect(collateral).toEqual(USD(80));
-    });
-
-    test('read collateralization ratio with no debt', async () => {
-      const ratio = await cdp.getCollateralizationRatio();
-      expect(ratio).toEqual(Infinity);
-    });
-
-    describe('with debt', () => {
-      beforeAll(() => cdp.drawDai(5));
-
-      test('read debt in dai', async () => {
-        const debt = await cdp.getDebtValue();
-        expect(debt).toEqual(DAI(5));
+      beforeAll(async () => {
+        id = await openCdp();
       });
 
-      test('read debt in usd', async () => {
-        const debt = await cdp.getDebtValue(USD);
-        expect(debt).toEqual(USD(5));
+      test('check properties', () => {
+        expect(typeof id).toBe('number');
+        expect(id).toBeGreaterThan(0);
+        expect(cdp._cdpService).toBeDefined();
+        expect(cdp._smartContractService).toBeDefined();
       });
 
-      describe('with drip', () => {
-        let snapshotId;
-
-        beforeEach(async () => {
-          snapshotId = await takeSnapshot();
-          await promiseWait(1100);
-          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-        });
-
-        afterEach(async () => {
-          await restoreSnapshot(snapshotId);
-          await init();
-        });
-
-        test('read MKR fee', async () => {
-          await cdpService.get('price').setMkrPrice(600);
-          // block.timestamp is measured in seconds, so we need to wait at least a
-          // second for the fees to get updated
-          const usdFee = await cdp.getGovernanceFee();
-          expect(usdFee.gt(0)).toBeTruthy();
-          const mkrFee = await cdp.getGovernanceFee(MKR);
-          expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
-        });
-
-        test('wipe debt with non-zero stability fee', async () => {
-          const mkr = cdpService.get('token').getToken(MKR);
-          const debt1 = await cdp.getDebtValue();
-          const balance1 = await mkr.balanceOf(currentAccount);
-          await cdp.wipeDai(1);
-          const debt2 = await cdp.getDebtValue();
-          const balance2 = await mkr.balanceOf(currentAccount);
-          expect(debt1.minus(debt2)).toEqual(DAI(1));
-          expect(balance1.gt(balance2)).toBeTruthy();
-        });
-
-        test('fail to wipe debt due to lack of MKR', async () => {
-          expect.assertions(2);
-          const mkr = cdpService.get('token').getToken(MKR);
-          const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, await mkr.balanceOf(currentAccount));
-          try {
-            await cdp.wipeDai(1);
-          } catch (err) {
-            expect(err).toBeTruthy();
-            expect(err.message).toBe(
-              'not enough MKR balance to cover governance fee'
-            );
-          }
-        });
-
-        test('fail to wipe debt due to lack of MKR, despite having MKR', async () => {
-          expect.assertions(3);
-          const amountToWipe = DAI(1);
-          const mkr = cdpService.get('token').getToken(MKR);
-          const [fee, debt, balance] = await Promise.all([
-            cdp.getGovernanceFee(MKR),
-            cdp.getDebtValue(),
-            mkr.balanceOf(currentAccount)
-          ]);
-          const mkrOwed = amountToWipe
-            .div(debt)
-            .toBigNumber()
-            .times(fee.toBigNumber());
-          const mkrToSendAway = balance.minus(mkrOwed.times(0.99)); //keep 99% of MKR needed
-          const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, mkrToSendAway);
-          const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
-          expect(enoughMkrToWipe).toBe(false);
-          try {
-            await cdp.wipeDai(1);
-          } catch (err) {
-            expect(err).toBeTruthy();
-            expect(err.message).toBe(
-              'not enough MKR balance to cover governance fee'
-            );
-          }
-        });
-
-        test('fail to shut due to lack of MKR', async () => {
-          expect.assertions(2);
-          const mkr = cdpService.get('token').getToken(MKR);
-          const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, await mkr.balanceOf(currentAccount));
-          try {
-            await cdp.shut();
-          } catch (err) {
-            expect(err).toBeTruthy();
-            expect(err.message).toBe(
-              'not enough MKR balance to cover governance fee'
-            );
-          }
-        });
-
-        test('fail to shut due to lack of MKR, despite having MKR', async () => {
-          expect.assertions(3);
-          const mkr = cdpService.get('token').getToken(MKR);
-          const [fee, debt, balance] = await Promise.all([
-            cdp.getGovernanceFee(MKR),
-            cdp.getDebtValue(),
-            mkr.balanceOf(currentAccount)
-          ]);
-          const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
-          const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, mkrToSendAway);
-          const enoughMkrToWipe = await cdp.enoughMkrToWipe(debt);
-          expect(enoughMkrToWipe).toBe(false);
-          try {
-            await cdp.shut();
-          } catch (err) {
-            expect(err).toBeTruthy();
-            expect(err.message).toBe(
-              'not enough MKR balance to cover governance fee'
-            );
-          }
-        });
-      });
-
-      test('read liquidation price', async () => {
-        const price = await cdp.getLiquidationPrice();
-        expect(price).toEqual(USD_ETH(37.5));
-      });
-
-      test('check if cdp is safe', async () => {
-        expect(await cdp.isSafe()).toBe(true);
-      });
-
-      test('read collateralization ratio', async () => {
-        const ethPerPeth = await cdpService.get('price').getWethToPethRatio();
-        const collateralizationRatio = await cdp.getCollateralizationRatio();
-        expect(collateralizationRatio).toBeCloseTo(16 * ethPerPeth);
-      });
-
-      test('wipe', async () => {
-        const balance1 = parseFloat(await dai.balanceOf(currentAccount));
-        await cdp.wipeDai('5');
-        const balance2 = parseFloat(await dai.balanceOf(currentAccount));
-        expect(balance2 - balance1).toBeCloseTo(-5);
-        const debt = await cdp.getDebtValue();
-        expect(debt).toEqual(DAI(0));
-      });
-
-      test('free', async () => {
-        await cdp.freeEth(0.1);
-        const info = await cdp.getInfo();
-        expect(info.ink.toString()).toEqual('100000000000000000');
+      test('lookup by ID', async () => {
+        expect.assertions(2);
+        const info = await cdpService.getInfo(id);
+        expect(info).toBeTruthy();
+        expect(info.lad).toMatch(/^0x[A-Fa-f0-9]{40}$/);
       });
 
       test('shut', async () => {
         await cdp.shut();
         const info = await cdp.getInfo();
         expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+      });
+    });
+
+    xtest('transfer ownership', async () => {
+      const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
+      await openCdp();
+      const info = await cdp.getInfo();
+      await cdp.give(newAddress);
+      const info2 = await cdp.getInfo();
+      expect(info2.lad).not.toEqual(info.lad);
+      expect(info2.lad).toEqual(newAddress);
+    });
+
+    xtest('read liquidation price with 0 collateral', async () => {
+      const price = await cdp.getLiquidationPrice();
+      expect(price).toEqual(USD_ETH(Infinity));
+    });
+
+    describe('bite', () => {
+      let proxyAccount;
+
+      beforeAll(async () => {
+        proxyAccount = currentAccount;
+        await openCdp();
+        const tx = cdp.lockEth(0.1);
+        mineBlocks(cdpService);
+        await tx;
+        await cdp.drawDai(13);
+      });
+
+      afterAll(async () => {
+        // other tests expect this to be the case
+        if (proxy) setExistingAccount('default');
+        await cdpService.get('price').setEthPrice(400);
+        if (proxy) setExistingAccount(proxyAccount);
+      });
+
+      // FIXME this breaks other tests, possibly because it leaves the test chain in
+      // a broken state
+      test.skip('when safe', async () => {
+        await expect(cdp.bite()).rejects;
+      });
+
+      test('when unsafe', async () => {
+        if (proxy) setExistingAccount('default');
+        await cdpService.get('price').setEthPrice(0.01);
+        if (proxy) setExistingAccount(proxyAccount);
+        const result = await cdp.bite();
+        expect(typeof result).toEqual('object');
+      });
+    });
+
+    xdescribe('a cdp with collateral', () => {
+      beforeAll(async () => {
+        await openCdp();
+        const tx = cdp.lockEth(0.2);
+        mineBlocks(cdpService);
+        await tx;
+      });
+
+      test('read ink', async () => {
+        const info = await cdp.getInfo();
+        expect(info.ink.toString()).toBe('200000000000000000');
+      });
+
+      test('read locked collateral in peth', async () => {
+        const collateral = await cdp.getCollateralValue(PETH);
+        expect(collateral).toEqual(PETH(0.2));
+      });
+
+      test('read locked collateral in eth', async () => {
+        const collateral = await cdp.getCollateralValue();
+        expect(collateral).toEqual(ETH(0.2));
+      });
+
+      test('read locked collateral in USD', async () => {
+        const collateral = await cdp.getCollateralValue(USD);
+        expect(collateral).toEqual(USD(80));
+      });
+
+      test('read collateralization ratio with no debt', async () => {
+        const ratio = await cdp.getCollateralizationRatio();
+        expect(ratio).toEqual(Infinity);
+      });
+
+      describe('with debt', () => {
+        beforeAll(() => cdp.drawDai(5));
+
+        test('read debt in dai', async () => {
+          const debt = await cdp.getDebtValue();
+          expect(debt).toEqual(DAI(5));
+        });
+
+        test('read debt in usd', async () => {
+          const debt = await cdp.getDebtValue(USD);
+          expect(debt).toEqual(USD(5));
+        });
+
+        describe('with drip', () => {
+          let snapshotId;
+
+          beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+            await promiseWait(1100);
+            await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+          });
+
+          afterEach(async () => {
+            await restoreSnapshot(snapshotId);
+            await init();
+          });
+
+          test('read MKR fee', async () => {
+            await cdpService.get('price').setMkrPrice(600);
+            // block.timestamp is measured in seconds, so we need to wait at least a
+            // second for the fees to get updated
+            const usdFee = await cdp.getGovernanceFee();
+            expect(usdFee.gt(0)).toBeTruthy();
+            const mkrFee = await cdp.getGovernanceFee(MKR);
+            expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
+          });
+
+          test('wipe debt with non-zero stability fee', async () => {
+            const mkr = cdpService.get('token').getToken(MKR);
+            const debt1 = await cdp.getDebtValue();
+            const balance1 = await mkr.balanceOf(currentAccount);
+            await cdp.wipeDai(1);
+            const debt2 = await cdp.getDebtValue();
+            const balance2 = await mkr.balanceOf(currentAccount);
+            expect(debt1.minus(debt2)).toEqual(DAI(1));
+            expect(balance1.gt(balance2)).toBeTruthy();
+          });
+
+          test('fail to wipe debt due to lack of MKR', async () => {
+            expect.assertions(2);
+            const mkr = cdpService.get('token').getToken(MKR);
+            const other = TestAccountProvider.nextAddress();
+            await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+            try {
+              await cdp.wipeDai(1);
+            } catch (err) {
+              expect(err).toBeTruthy();
+              expect(err.message).toBe(
+                'not enough MKR balance to cover governance fee'
+              );
+            }
+          });
+
+          test('fail to wipe debt due to lack of MKR, despite having MKR', async () => {
+            expect.assertions(3);
+            const amountToWipe = DAI(1);
+            const mkr = cdpService.get('token').getToken(MKR);
+            const [fee, debt, balance] = await Promise.all([
+              cdp.getGovernanceFee(MKR),
+              cdp.getDebtValue(),
+              mkr.balanceOf(currentAccount)
+            ]);
+            const mkrOwed = amountToWipe
+              .div(debt)
+              .toBigNumber()
+              .times(fee.toBigNumber());
+            const mkrToSendAway = balance.minus(mkrOwed.times(0.99)); //keep 99% of MKR needed
+            const other = TestAccountProvider.nextAddress();
+            await mkr.transfer(other, mkrToSendAway);
+            const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
+            expect(enoughMkrToWipe).toBe(false);
+            try {
+              await cdp.wipeDai(1);
+            } catch (err) {
+              expect(err).toBeTruthy();
+              expect(err.message).toBe(
+                'not enough MKR balance to cover governance fee'
+              );
+            }
+          });
+
+          test('fail to shut due to lack of MKR', async () => {
+            expect.assertions(2);
+            const mkr = cdpService.get('token').getToken(MKR);
+            const other = TestAccountProvider.nextAddress();
+            await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+            try {
+              await cdp.shut();
+            } catch (err) {
+              expect(err).toBeTruthy();
+              expect(err.message).toBe(
+                'not enough MKR balance to cover governance fee'
+              );
+            }
+          });
+
+          test('fail to shut due to lack of MKR, despite having MKR', async () => {
+            expect.assertions(3);
+            const mkr = cdpService.get('token').getToken(MKR);
+            const [fee, debt, balance] = await Promise.all([
+              cdp.getGovernanceFee(MKR),
+              cdp.getDebtValue(),
+              mkr.balanceOf(currentAccount)
+            ]);
+            const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
+            const other = TestAccountProvider.nextAddress();
+            await mkr.transfer(other, mkrToSendAway);
+            const enoughMkrToWipe = await cdp.enoughMkrToWipe(debt);
+            expect(enoughMkrToWipe).toBe(false);
+            try {
+              await cdp.shut();
+            } catch (err) {
+              expect(err).toBeTruthy();
+              expect(err.message).toBe(
+                'not enough MKR balance to cover governance fee'
+              );
+            }
+          });
+        });
+
+        test('read liquidation price', async () => {
+          const price = await cdp.getLiquidationPrice();
+          expect(price).toEqual(USD_ETH(37.5));
+        });
+
+        test('check if cdp is safe', async () => {
+          expect(await cdp.isSafe()).toBe(true);
+        });
+
+        test('read collateralization ratio', async () => {
+          const ethPerPeth = await cdpService.get('price').getWethToPethRatio();
+          const collateralizationRatio = await cdp.getCollateralizationRatio();
+          expect(collateralizationRatio).toBeCloseTo(16 * ethPerPeth);
+        });
+
+        test('wipe', async () => {
+          const balance1 = parseFloat(await dai.balanceOf(currentAccount));
+          await cdp.wipeDai('5');
+          const balance2 = parseFloat(await dai.balanceOf(currentAccount));
+          expect(balance2 - balance1).toBeCloseTo(-5);
+          const debt = await cdp.getDebtValue();
+          expect(debt).toEqual(DAI(0));
+        });
+
+        test('free', async () => {
+          await cdp.freeEth(0.1);
+          const info = await cdp.getInfo();
+          expect(info.ink.toString()).toEqual('100000000000000000');
+        });
+
+        test('shut', async () => {
+          await cdp.shut();
+          const info = await cdp.getInfo();
+          expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+        });
       });
     });
   });
@@ -399,43 +424,17 @@ describe('non-proxy cdp', () => {
 });
 
 describe.only('proxy cdp', () => {
-  let ethToken,
-    lastAccount = 111,
-    account,
-    iteration = 0;
+  let ethToken;
 
   beforeAll(async () => {
-    const tokenService = cdpService.get('token');
-    ethToken = tokenService.getToken(ETH);
-    await iterateAccounts();
-    // console.log('back from iterate, account is', account.address);
-    const accountService = tokenService.get('web3').get('accounts');
-    await accountService.addAccount('newAccount' + lastAccount, {
-      type: 'privateKey',
-      key: account.key
-    });
-    accountService.useAccount('newAccount' + lastAccount);
-    currentAccount = account.address;
+    ethToken = cdpService.get('token').getToken(ETH);
+    setNewAccount();
   });
 
-  async function iterateAccounts() {
-    lastAccount += 1;
-    iteration += 1;
-    account = TestAccountProvider.nextAccount(lastAccount);
-    const proxy = await checkAccountForProxy();
-    console.log('in iterate counts', iteration, proxy, !proxy);
-    if (!proxy) return;
-    return await iterateAccounts();
+  async function openProxyCdp() {
+    cdp = await cdpService.openProxyCdp(dsProxyAddress);
+    return cdp.id;
   }
-
-  async function checkAccountForProxy() {
-    return await cdpService.get('proxy').getProxyAddress(account.address);
-  }
-
-  // async function openProxyCdp() {
-  //   cdp = await cdpService.openProxyCdp(dsProxyAddress);
-  //   return cdp.id;
-  // }
 
   test('create DSProxy and open CDP (single tx)', async () => {
     const cdp = await cdpService.openProxyCdp();
@@ -489,5 +488,5 @@ describe.only('proxy cdp', () => {
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
   });
 
-  // sharedTests(openProxyCdp);
+  sharedTests(openProxyCdp, true);
 });
