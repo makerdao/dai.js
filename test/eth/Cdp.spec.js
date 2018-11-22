@@ -44,8 +44,10 @@ async function setNewAccount() {
     type: 'privateKey',
     key: account.key
   });
+  console.log('previous account was', currentAccount);
   accountService.useAccount(account.address);
   currentAccount = account.address;
+  console.log('after setting new account, currentAccount is', currentAccount);
 }
 
 function setExistingAccount(name) {
@@ -69,25 +71,41 @@ beforeEach(() => {
   );
 });
 
-async function buildProxy() {
-  return await cdpService.get('proxy').build();
-}
+// async function buildProxy() {
+//   return await cdpService.get('proxy').build();
+// }
 
 const sharedTests = (openCdp, proxy = false) => {
   describe('shared tests', () => {
+    // let cdp, id;
+
     beforeAll(async () => {
-      if (proxy) {
-        setNewAccount();
-        await buildProxy();
-        currentAccount = cdpService
+      console.log('in shared beforeAll', currentAccount);
+      console.log('ummmmmmmmmmmm', cdp);
+      // console.log('in shared beforeAll', cdp.id);
+      // console.log(dsProxyAddress);
+      // if (proxy) {
+      //   setNewAccount();
+      //   // await buildProxy();
+      //   currentAccount = cdpService
+      //     .get('token')
+      //     .get('web3')
+      //     .currentAccount();
+      //   dsProxyAddress = await cdpService.get('proxy').defaultProxyAddress();
+      // }
+      // id = await openCdp();
+      // console.log('id', id);
+      console.log(
+        'IN SHARED BEFOREALL',
+        cdpService
           .get('token')
           .get('web3')
-          .currentAccount();
-        dsProxyAddress = await cdpService.get('proxy').defaultProxyAddress();
-      }
+          .get('accounts')
+          .listAccounts()
+      );
     });
 
-    xdescribe('basic checks', () => {
+    describe('basic checks', () => {
       let id;
 
       beforeAll(async () => {
@@ -115,7 +133,7 @@ const sharedTests = (openCdp, proxy = false) => {
       });
     });
 
-    xtest('transfer ownership', async () => {
+    test('transfer ownership', async () => {
       const newAddress = '0x046Ce6b8eCb159645d3A605051EE37BA93B6efCc';
       await openCdp();
       const info = await cdp.getInfo();
@@ -126,6 +144,17 @@ const sharedTests = (openCdp, proxy = false) => {
     });
 
     xtest('read liquidation price with 0 collateral', async () => {
+      const info = await cdp.getInfo();
+      console.log('in failing test');
+      console.log('lad', info.lad);
+      console.log('currentAccount', currentAccount);
+      console.log(
+        'currentAccount from service',
+        cdpService
+          .get('token')
+          .get('web3')
+          .currentAccount()
+      );
       const price = await cdp.getLiquidationPrice();
       expect(price).toEqual(USD_ETH(Infinity));
     });
@@ -432,7 +461,17 @@ describe.only('proxy cdp', () => {
   });
 
   async function openProxyCdp() {
-    cdp = await cdpService.openProxyCdp(dsProxyAddress);
+    console.log('calling openProxyCdp');
+    // console.log('dsProxyAddress', dsProxyAddress);
+    // console.log('currentAccount', currentAccount);
+    try {
+      cdp = await cdpService.openProxyCdp(dsProxyAddress);
+      // console.log(cdp);
+      // const info = await cdp.getInfo();
+      // console.log('lad', info.lad);
+    } catch (err) {
+      console.error(err);
+    }
     return cdp.id;
   }
 
@@ -440,6 +479,8 @@ describe.only('proxy cdp', () => {
     const cdp = await cdpService.openProxyCdp();
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+    console.log('in passing test', cdp.id);
+    console.log(dsProxyAddress);
 
     // this value is used in the proxy cdp tests below
     dsProxyAddress = cdp.dsProxyAddress;
@@ -458,7 +499,6 @@ describe.only('proxy cdp', () => {
   });
 
   test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
-    console.log(await cdpService.get('proxy').getOwner(dsProxyAddress));
     const balancePre = await ethToken.balanceOf(currentAccount);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
       0.1,
