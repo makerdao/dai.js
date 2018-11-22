@@ -13,17 +13,12 @@ import {
 import { promiseWait } from '../../src/utils';
 import { mineBlocks } from '../helpers/transactionConfirmation';
 
-let cdpService,
-  cdp,
-  currentAccount,
-  dai,
-  dsProxyAddress,
-  // eslint-disable-next-line
-  ethToken;
+// eslint-disable-next-line
+let cdpService, cdp, currentAccount, dai, dsProxyAddress, ethToken;
 
 // this function should be called again after reverting a snapshot; otherwise,
 // you may get errors about account and transaction nonces not matching.
-async function init() {
+async function init(previousAccount, proxy = false) {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
   currentAccount = cdpService
@@ -31,7 +26,12 @@ async function init() {
     .get('web3')
     .currentAccount();
   if (cdp) cdp._cdpService = cdpService;
+  // if (proxy) await setExistingAccount(previousAccount);
 }
+
+// beforeEach(() => {
+//   console.log('beforeEach', currentAccount);
+// });
 
 async function setNewAccount() {
   const account = TestAccountProvider.nextAccount();
@@ -43,11 +43,27 @@ async function setNewAccount() {
     type: 'privateKey',
     key: account.key
   });
+  // await transferMkr(account.address);
   console.log('previous account was', currentAccount);
   accountService.useAccount(account.address);
   currentAccount = account.address;
   console.log('after setting new account, currentAccount is', currentAccount);
 }
+
+// async function transferMkr(newAccount) {
+//   const mkr = cdpService
+//     .get('token')
+//     .getToken(tokens.MKR);
+
+// try {
+//   await mkr.approveUnlimited(currentAccount);
+//   const balance = await mkr.balanceOf(currentAccount);
+//   console.log(balance.toString());
+//   await mkr.transfer(newAccount, 1);
+// } catch (err) {
+//   console.error(err);
+// }
+// }
 
 function setExistingAccount(name) {
   const accountService = cdpService
@@ -103,18 +119,7 @@ const sharedTests = (openCdp, proxy = false) => {
     expect(info2.lad).toEqual(newAddress);
   });
 
-  xtest('read liquidation price with 0 collateral', async () => {
-    const info = await cdp.getInfo();
-    console.log('in failing test');
-    console.log('lad', info.lad);
-    console.log('currentAccount', currentAccount);
-    console.log(
-      'currentAccount from service',
-      cdpService
-        .get('token')
-        .get('web3')
-        .currentAccount()
-    );
+  test('read liquidation price with 0 collateral', async () => {
     const price = await cdp.getLiquidationPrice();
     expect(price).toEqual(USD_ETH(Infinity));
   });
@@ -203,14 +208,19 @@ const sharedTests = (openCdp, proxy = false) => {
         let snapshotId;
 
         beforeEach(async () => {
+          console.log('with drip', currentAccount);
+          // Restoring the snapshot resets the account here.
+          // This causes any following tests that call
+          // authenticated functions to fail
           snapshotId = await takeSnapshot();
           await promiseWait(1100);
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
         });
 
         afterEach(async () => {
+          const previousAccount = currentAccount;
           await restoreSnapshot(snapshotId);
-          await init();
+          await init(previousAccount, proxy);
         });
 
         test('read MKR fee', async () => {
@@ -420,17 +430,7 @@ describe.only('proxy cdp', () => {
   });
 
   async function openProxyCdp() {
-    console.log('calling openProxyCdp');
-    // console.log('dsProxyAddress', dsProxyAddress);
-    // console.log('currentAccount', currentAccount);
-    try {
-      cdp = await cdpService.openProxyCdp(dsProxyAddress);
-      // console.log(cdp);
-      // const info = await cdp.getInfo();
-      // console.log('lad', info.lad);
-    } catch (err) {
-      console.error(err);
-    }
+    cdp = await cdpService.openProxyCdp(dsProxyAddress);
     return cdp.id;
   }
 
