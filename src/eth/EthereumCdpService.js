@@ -17,9 +17,6 @@ import {
 } from './Currency';
 import { numberToBytes32 } from '../utils/conversion';
 import tracksTransactions from '../utils/tracksTransactions';
-import debug from 'debug';
-// eslint-disable-next-line
-const log = debug('dai:testing:cdp');
 
 export default class EthereumCdpService extends PrivateService {
   /**
@@ -27,14 +24,13 @@ export default class EthereumCdpService extends PrivateService {
    */
   constructor(name = 'cdp') {
     super(name, [
-      'smartContract',
-      'token',
-      'conversion',
       'allowance',
-      'price',
+      'conversion',
       'event',
+      'price',
       'proxy',
-      'log'
+      'smartContract',
+      'token'
     ]);
 
     // aliases
