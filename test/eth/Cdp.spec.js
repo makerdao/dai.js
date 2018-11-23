@@ -12,6 +12,7 @@ import {
 } from '../../src/eth/Currency';
 import { promiseWait } from '../../src/utils';
 import { mineBlocks } from '../helpers/transactionConfirmation';
+// import tokens from '../../contracts/tokens';
 
 // eslint-disable-next-line
 let cdpService,
@@ -27,11 +28,15 @@ let cdpService,
 async function init(proxy) {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
-  if (proxy) await setNewAccount(proxy);
   currentAccount = cdpService
     .get('token')
     .get('web3')
     .currentAccount();
+
+  if (proxy) {
+    await transferMkr();
+    await setNewAccount(proxy);
+  }
   if (cdp) cdp._cdpService = cdpService;
 }
 
@@ -51,6 +56,7 @@ async function setNewAccount(proxy) {
     account = TestAccountProvider.nextAccount();
     proxyAccount = account.address;
     proxyKey = account.key;
+    await transferMkr();
   }
   currentAccount = account.address;
 
@@ -58,24 +64,20 @@ async function setNewAccount(proxy) {
     type: 'privateKey',
     key: account.key
   });
-  // await transferMkr(account.address);
   accountService.useAccount(account.address);
 }
 
-// async function transferMkr(newAccount) {
-//   const mkr = cdpService
-//     .get('token')
-//     .getToken(tokens.MKR);
-
-// try {
-//   await mkr.approveUnlimited(currentAccount);
-//   const balance = await mkr.balanceOf(currentAccount);
-//   console.log(balance.toString());
-//   await mkr.transfer(newAccount, 1);
-// } catch (err) {
-//   console.error(err);
-// }
-// }
+// It's not just the transfer--
+// Any interaction with mkr at all
+// (including balanceOf) causes
+// 27 failures
+async function transferMkr() {
+  // const mkr = cdpService.get('token').getToken(tokens.MKR);
+  // const currentBalance = await mkr.balanceOf(currentAccount);
+  // console.log('currentBalance', currentBalance.toString());
+  // await mkr.approveUnlimited(currentAccount);
+  // await mkr.transfer(proxyAccount, MKR(1));
+}
 
 function setExistingAccount(name) {
   const accountService = cdpService
@@ -135,10 +137,7 @@ const sharedTests = (openCdp, proxy = false) => {
   });
 
   describe('bite', () => {
-    let proxyAccount;
-
     beforeAll(async () => {
-      proxyAccount = currentAccount;
       await openCdp();
       const tx = cdp.lockEth(0.1);
       mineBlocks(cdpService);
