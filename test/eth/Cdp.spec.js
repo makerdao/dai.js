@@ -14,40 +14,52 @@ import { promiseWait } from '../../src/utils';
 import { mineBlocks } from '../helpers/transactionConfirmation';
 
 // eslint-disable-next-line
-let cdpService, cdp, currentAccount, dai, dsProxyAddress, ethToken;
+let cdpService,
+  cdp,
+  currentAccount,
+  dai,
+  dsProxyAddress,
+  proxyAccount,
+  proxyKey;
 
 // this function should be called again after reverting a snapshot; otherwise,
 // you may get errors about account and transaction nonces not matching.
-async function init(previousAccount, proxy = false) {
+async function init(proxy) {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
+  if (proxy) await setNewAccount(proxy);
   currentAccount = cdpService
     .get('token')
     .get('web3')
     .currentAccount();
   if (cdp) cdp._cdpService = cdpService;
-  // if (proxy) await setExistingAccount(previousAccount);
 }
 
-// beforeEach(() => {
-//   console.log('beforeEach', currentAccount);
-// });
-
-async function setNewAccount() {
-  const account = TestAccountProvider.nextAccount();
+async function setNewAccount(proxy) {
+  let account;
   const accountService = cdpService
     .get('token')
     .get('web3')
     .get('accounts');
+
+  if (proxy) {
+    account = {
+      address: proxyAccount,
+      key: proxyKey
+    };
+  } else {
+    account = TestAccountProvider.nextAccount();
+    proxyAccount = account.address;
+    proxyKey = account.key;
+  }
+  currentAccount = account.address;
+
   await accountService.addAccount(account.address, {
     type: 'privateKey',
     key: account.key
   });
   // await transferMkr(account.address);
-  console.log('previous account was', currentAccount);
   accountService.useAccount(account.address);
-  currentAccount = account.address;
-  console.log('after setting new account, currentAccount is', currentAccount);
 }
 
 // async function transferMkr(newAccount) {
@@ -76,8 +88,6 @@ function setExistingAccount(name) {
 beforeAll(async () => {
   await init();
   dai = cdpService.get('token').getToken(DAI);
-  const tokenService = cdpService.get('token');
-  ethToken = tokenService.getToken(ETH);
 });
 
 const sharedTests = (openCdp, proxy = false) => {
@@ -218,9 +228,8 @@ const sharedTests = (openCdp, proxy = false) => {
         });
 
         afterEach(async () => {
-          const previousAccount = currentAccount;
           await restoreSnapshot(snapshotId);
-          await init(previousAccount, proxy);
+          await init(proxy);
         });
 
         test('read MKR fee', async () => {
