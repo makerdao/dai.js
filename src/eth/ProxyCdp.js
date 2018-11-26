@@ -62,8 +62,8 @@ export default class ProxyCdp {
         dsProxyFactoryContract.oncreated = function(
           sender,
           owner,
-          proxy,
-          cache
+          proxy
+          //cache
         ) {
           if (currentAccount.toLowerCase() == owner.toLowerCase()) {
             this.removeListener();
