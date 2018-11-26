@@ -1,6 +1,7 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import { merge } from 'lodash';
+import testAccounts from './testAccounts.json';
 
 export const kovanProviderConfig = {
   web3: {
@@ -26,7 +27,7 @@ export const defaultProviderConfig = () => ({
 export const websocketProviderConfig = () => ({
   accounts: {
     default: {
-      key: '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e',
+      key: '0x' + testAccounts.keys[0],
       type: 'privateKey'
     }
   },
