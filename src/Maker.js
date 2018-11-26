@@ -79,7 +79,7 @@ function mergeOptions(object, source) {
   return mergeWith(object, source, (objValue, srcValue, key) => {
     if (key === 'addContracts') {
       const dupes = intersection(
-        Object.keys(objValue),
+        Object.keys(objValue || {}),
         Object.keys(srcValue)
       ).filter(key => !isEqual(objValue[key], srcValue[key]));
 

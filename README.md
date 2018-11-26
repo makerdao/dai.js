@@ -1,11 +1,10 @@
 # Dai.js
 
-[![node][node]][node-url]
-[![npm][npm]][npm-url]
-<!-- these will work once the repo is public
-[![tests][tests]][tests-url]
-[![coverage][cover]][cover-url]
--->
+[![GitHub License][license]][license-url]
+[![NPM][npm]][npm-url]
+[![Build Status][build]][build-url]
+[![Coverage Status][cover]][cover-url]
+
 
 **Dai.js** is a JavaScript library that makes it easy to build applications on top of [MakerDAO][makerdao]'s Dai Stablecoin System. You can use Maker's contracts to open Collateralized Debt Positions, withdraw loans in Dai, trade tokens on OasisDEX, and more.
 
@@ -111,17 +110,20 @@ If you have deployed contract code changes to the testchain, run `scripts/instal
 
 **Dai.js** is available under the MIT license included with the code.
 
-[npm]: https://img.shields.io/badge/npm-5.6.0-blue.svg
-[npm-url]: https://npmjs.com/
-
-[node]: https://img.shields.io/node/v/latest.svg
-[node-url]: https://nodejs.org
+[npm]: https://img.shields.io/npm/v/@makerdao/dai.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/@makerdao/dai
 
 [tests]: http://img.shields.io/travis/makerdao/dai.js.svg
 [tests-url]: https://travis-ci.org/makerdao/dai.js
 
-[cover]: https://codecov.io/gh/makerdao/dai.js/branch/master/graph/badge.svg
-[cover-url]: https://codecov.io/gh/makerdao/dai.js
+[license]: https://img.shields.io/badge/license-MIT-blue.svg
+[license-url]: https://github.com/makerdao/dai.js/blob/dev/LICENSE
+
+[build]: https://travis-ci.com/makerdao/dai.js.svg?branch=dev
+[build-url]: https://travis-ci.com/makerdao/dai.js
+
+[cover]: https://codecov.io/gh/makerdao/dai.js/branch/dev/graph/badge.svg
+[cover-url]: https://codecov.io/github/makerdao/dai.js?branch=dev
 
 [makerdao]: https://makerdao.com
 [docs]: https://makerdao.com/documentation

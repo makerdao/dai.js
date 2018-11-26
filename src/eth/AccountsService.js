@@ -9,9 +9,11 @@ import {
 import { setupEngine } from './accounts/setup';
 import { AccountType } from '../utils/constants';
 
+const sanitizeAccount = pick(['name', 'type', 'address']);
+
 export default class AccountsService extends PublicService {
   constructor(name = 'accounts') {
-    super(name, []);
+    super(name, ['log']);
     this._accounts = {};
     this._accountFactories = {
       privateKey: privateKeyAccountFactory,
@@ -64,7 +66,15 @@ export default class AccountsService extends PublicService {
     const factory = this._accountFactories[type];
     invariant(factory, `no factory for type "${type}"`);
     const accountData = await factory(otherSettings, this._provider);
-    if (name === null) name = accountData.address;
+
+    // TODO allow this to silently fail only in situations where it's expected,
+    // e.g. when connecting to a read-only provider
+    if (!accountData.address) {
+      this.get('log').info(`Not adding account "${name}" (no address found)`);
+      return;
+    }
+
+    if (!name) name = accountData.address;
     const account = { name, type, ...accountData };
     this._accounts[name] = account;
     if (!this._currentAccount || name === 'default') {
@@ -74,11 +84,23 @@ export default class AccountsService extends PublicService {
   }
 
   listAccounts() {
-    return map(pick(['name', 'type', 'address']), this._accounts);
+    return map(sanitizeAccount, this._accounts);
   }
 
   useAccount(name) {
-    invariant(this._accounts[name], `No account found with name "${name}".`);
+    const account = this._accounts[name];
+    invariant(account, `No account found with name "${name}".`);
+    //if using metamask, need to use the currently selected account
+    if (
+      account.type === AccountType.BROWSER &&
+      window.web3.eth.defaultAccount.toLowerCase() !=
+        account.address.toLowerCase()
+    ) {
+      throw new Error(
+        'cannot use a browser account that is not currently selected'
+      );
+    }
+
     if (this._currentAccount) {
       this._engine.stop();
       this._engine.removeProvider(this.currentWallet());
@@ -95,6 +117,7 @@ export default class AccountsService extends PublicService {
     const account = accountObjects.find(
       e => e.address.toUpperCase() === addr.toUpperCase()
     );
+    if (!account) throw new Error(`No account found with address ${addr}`);
     this.useAccount(account.name);
   }
 
@@ -112,10 +135,7 @@ export default class AccountsService extends PublicService {
   // (sensitive info).
   currentAccount() {
     invariant(this.hasAccount(), 'No account is set up.');
-    return pick(
-      ['name', 'type', 'address'],
-      this._accounts[this._currentAccount]
-    );
+    return sanitizeAccount(this._accounts[this._currentAccount]);
   }
 
   currentAddress() {

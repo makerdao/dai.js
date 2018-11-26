@@ -38,6 +38,8 @@ export default class Web3Service extends PrivateService {
     return parseInt(result);
   }
 
+  // FIXME this name is confusing--see if this can be gotten rid of entirely; if
+  // not, just rename it to currentAddress
   currentAccount() {
     return this.get('accounts').currentAddress();
   }
@@ -187,6 +189,7 @@ export default class Web3Service extends PrivateService {
         'estimateGas',
         'getBalance',
         'getBlock',
+        'getPastLogs',
         'getTransaction',
         'getTransactionReceipt',
         'sendTransaction'

@@ -103,7 +103,16 @@ export default class TransactionManager extends PublicService {
   }
 
   listen(promise, handlers) {
-    this._tracker.listen(uniqueId(promise), handlers);
+    if (typeof handlers === 'function') {
+      this._tracker.listen(uniqueId(promise), {
+        pending: tx => handlers(tx, 'pending'),
+        mined: tx => handlers(tx, 'mined'),
+        confirmed: tx => handlers(tx, 'confirmed'),
+        error: (tx, err) => handlers(tx, 'error', err)
+      });
+    } else {
+      this._tracker.listen(uniqueId(promise), handlers);
+    }
   }
 
   // if options.dsProxyAddress is set, execute this contract method through the

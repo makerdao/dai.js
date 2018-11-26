@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.9.5",
+  "version": "0.9.7",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -10,7 +10,7 @@
     "Joshua Levine <joshua@makerdao.com>",
     "Michael Elliot <mike@makerdao.com>"
   ],
-  "description": "JavaScript library for interacting with the Dai Stablecoin System.",
+  "description": "Library for interacting with the Dai Stablecoin System.",
   "license": "MIT",
   "keywords": [
     "makerdao",
