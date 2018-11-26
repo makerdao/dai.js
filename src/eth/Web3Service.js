@@ -3,6 +3,7 @@ import { promisify, promisifyMethods, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
+import ProviderType from './web3/ProviderType';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -103,7 +104,7 @@ export default class Web3Service extends PrivateService {
   }
 
   usingWebsockets() {
-    return this._serviceManager._settings.provider.type === 'WS';
+    return this._serviceManager._settings.provider.type === ProviderType.WEBSOCKET;
   }
 
   confirmedBlockCount() {

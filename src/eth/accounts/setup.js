@@ -12,7 +12,7 @@ export async function setupEngine(settings) {
 
   if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
     result.provider = await getBrowserProvider();
-  } else if (providerSettings.type === ProviderType.WS) {
+  } else if (providerSettings.type === ProviderType.WEBSOCKET) {
     const rpcUrl = getRpcUrl(providerSettings);
     const subscriptionProvider = new SubscriptionSubprovider();
     subscriptionProvider.on('data', (err, notification) => {
@@ -55,7 +55,7 @@ function getRpcUrl(providerSettings) {
   switch (type) {
     case ProviderType.HTTP:
       return url;
-    case ProviderType.WS:
+    case ProviderType.WEBSOCKET:
       return url;
     case ProviderType.INFURA:
       return `https://${network}.infura.io/${infuraApiKey || ''}`;

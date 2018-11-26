@@ -33,7 +33,7 @@ export const websocketProviderConfig = () => ({
   },
   web3: {
     provider: {
-      type: ProviderType.WS,
+      type: ProviderType.WEBSOCKET,
       url: 'ws://localhost:2000'
     },
     transactionSettings: {

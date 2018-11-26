@@ -1,7 +1,7 @@
 {
   "web3": {
     "provider": {
-      "type": "WS"
+      "type": "WEBSOCKET"
     },
     "transactionSettings": {
       "gasLimit": 4000000
