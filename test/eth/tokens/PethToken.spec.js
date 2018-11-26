@@ -32,21 +32,15 @@ test('should successfully join and exit PETH', async () => {
     .getContractByName(contracts.SAI_TUB);
   await weth.approveUnlimited(tub.address);
   await peth.approveUnlimited(tub.address);
-  console.log('approved');
 
   await weth.deposit(0.1);
-  console.log('deposited');
   const balance1 = await peth.balanceOf(owner);
 
   await peth.join(0.1);
-  console.log('joined');
-
   const balance2 = await peth.balanceOf(owner);
   expect(balance1.plus(0.1)).toEqual(balance2);
 
   await peth.exit(0.1);
-  console.log('exited');
-
   const balance3 = await peth.balanceOf(owner);
   expect(balance2.minus(0.1)).toEqual(balance3);
   console.log('end');
