@@ -46,6 +46,7 @@ function loadPreset(name) {
       preset = http;
       break;
     case 'ws':
+    case 'websocket':
       preset = ws;
       break;
     case 'kovan':
