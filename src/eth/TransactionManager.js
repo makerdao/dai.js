@@ -151,10 +151,11 @@ export default class TransactionManager extends PublicService {
   }
 
   async _buildTransactionOptions(data) {
+    const nonce = data.nonce || (await this.get('nonce').getNonce());
     return {
       ...this.get('web3').transactionSettings(),
       ...data,
-      nonce: await this.get('nonce').getNonce()
+      nonce: nonce
     };
   }
 }

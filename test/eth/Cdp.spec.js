@@ -19,13 +19,15 @@ let cdpService,
   dai,
   dsProxyAddress,
   proxyAccount,
-  proxyKey;
+  proxyKey,
+  transactionCount;
 
 // this function should be called again after reverting a snapshot; otherwise,
 // you may get errors about account and transaction nonces not matching.
 async function init(proxy = false) {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
+  console.log('tx count in init:', transactionCount);
   if (proxy) {
     await setNewAccount();
   } else {
@@ -200,6 +202,13 @@ const sharedTests = (openCdp, proxy = false) => {
       describe('with drip', () => {
         let snapshotId;
 
+        beforeAll(() => {
+          transactionCount = cdpService
+            .get('smartContract')
+            .get('transactionManager')
+            .get('nonce')._counts[currentAccount];
+        });
+
         beforeEach(async () => {
           // Restoring the snapshot resets the account here.
           // This causes any following tests that call
@@ -207,32 +216,29 @@ const sharedTests = (openCdp, proxy = false) => {
           snapshotId = await takeSnapshot();
           await promiseWait(1100);
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+          const nonceCounts = cdpService
+            .get('smartContract')
+            .get('transactionManager')
+            .get('nonce')._counts;
+          nonceCounts[proxyAccount] = transactionCount;
         });
 
         afterEach(async () => {
           await restoreSnapshot(snapshotId);
           await init(proxy);
+          console.log('still doing init here');
         });
 
         test('read MKR fee', async () => {
+          if (proxy) setExistingAccount('default');
           await cdpService.get('price').setMkrPrice(600);
+          if (proxy) setExistingAccount(proxyAccount);
           // block.timestamp is measured in seconds, so we need to wait at least a
           // second for the fees to get updated
           const usdFee = await cdp.getGovernanceFee();
           expect(usdFee.gt(0)).toBeTruthy();
           const mkrFee = await cdp.getGovernanceFee(MKR);
           expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
-        });
-
-        test('wipe debt with non-zero stability fee', async () => {
-          const mkr = cdpService.get('token').getToken(MKR);
-          const debt1 = await cdp.getDebtValue();
-          const balance1 = await mkr.balanceOf(currentAccount);
-          await cdp.wipeDai(1);
-          const debt2 = await cdp.getDebtValue();
-          const balance2 = await mkr.balanceOf(currentAccount);
-          expect(debt1.minus(debt2)).toEqual(DAI(1));
-          expect(balance1.gt(balance2)).toBeTruthy();
         });
 
         test('fail to wipe debt due to lack of MKR', async () => {
@@ -332,11 +338,23 @@ const sharedTests = (openCdp, proxy = false) => {
         expect(collateralizationRatio).toBeCloseTo(16 * ethPerPeth);
       });
 
+      test('wipe debt with non-zero stability fee', async () => {
+        const mkr = cdpService.get('token').getToken(MKR);
+        const debt1 = await cdp.getDebtValue();
+        const balance1 = await mkr.balanceOf(currentAccount);
+        await cdp.wipeDai(1);
+        const debt2 = await cdp.getDebtValue();
+        const balance2 = await mkr.balanceOf(currentAccount);
+        expect(debt1.minus(debt2)).toEqual(DAI(1));
+        expect(balance1.gt(balance2)).toBeTruthy();
+      });
+
       test('wipe', async () => {
+        // You just need to reset the transaction count in NonceService here
+        // to account for the snapshot reversion
         const balance1 = parseFloat(await dai.balanceOf(currentAccount));
-        console.log(balance1);
         try {
-          await cdp.wipeDai('5');
+          await cdp.wipeDai('5', { nonce: 1 });
         } catch (err) {
           console.error(err);
         }
