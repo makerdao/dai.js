@@ -225,7 +225,7 @@ const sharedTests = (openCdp, proxy = false) => {
           await promiseWait(1100);
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
 
-          nonceService._counts[proxyAccount] = transactionCount;
+          nonceService._counts[currentAccount] = transactionCount;
         });
 
         afterEach(async () => {
@@ -327,6 +327,7 @@ const sharedTests = (openCdp, proxy = false) => {
         });
 
         test('wipe debt with non-zero stability fee', async () => {
+          // if (!proxy) nonceService._counts[currentAccount] -= 1;
           const mkr = cdpService.get('token').getToken(MKR);
           const debt1 = await cdp.getDebtValue();
           const balance1 = await mkr.balanceOf(currentAccount);
@@ -433,7 +434,7 @@ describe('non-proxy cdp', () => {
   });
 });
 
-describe.only('proxy cdp', () => {
+describe('proxy cdp', () => {
   let ethToken;
 
   beforeAll(async () => {
