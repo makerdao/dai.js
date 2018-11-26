@@ -192,9 +192,12 @@ export default class Web3Service extends PrivateService {
         'sendTransaction'
       ]),
       {
-        getAccounts: () => this.get('accounts').listAccounts().map(account => {
-          return account.address;
-        }),
+        getAccounts: () =>
+          this.get('accounts')
+            .listAccounts()
+            .map(account => {
+              return account.address;
+            }),
         subscribe: (...args) => this._web3.eth.subscribe(...args)
       }
     );
@@ -253,16 +256,23 @@ export default class Web3Service extends PrivateService {
 
   _listenBlocks() {
     if (this.usingWebsockets()) {
-      this.subscribeNewBlocks(data => {
-        this._updateBlockNumber(data.number);
+      this.subscribeNewBlocks(async data => {
+        await this._updateBlockNumber(data.number);
       });
     } else {
-      this._interval = setInterval(async () => {
+      this._interval = async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
-        if (blockNumber !== this._currentBlock) {
-          this._updateBlockNumber(blockNumber);
+        if (this._currentBlock !== null && blockNumber > this._currentBlock) {
+          // If any blocks are not caught, iterate through those that are missed to the newest retrieved
+          for (let i = this._currentBlock + 1; i < blockNumber + 1; i++) {
+            await this._updateBlockNumber(i);
+          }
+        } else {
+          await this._updateBlockNumber(blockNumber);
         }
-      }, 10);
+        setTimeout(this._interval, 50);
+      };
+      this._interval();
     }
   }
 
@@ -295,16 +305,19 @@ export default class Web3Service extends PrivateService {
 
   _updateBlockNumber(blockNumber) {
     this.get('log').info('New block:', blockNumber);
-    this._currentBlock = blockNumber;
 
-    if (this._blockListeners[blockNumber]) {
-      this._blockListeners[blockNumber].forEach(c => c(blockNumber));
-      this._blockListeners[blockNumber] = undefined;
-    }
+    return new Promise(resolve => {
+      this._currentBlock = blockNumber;
+      if (this._blockListeners[blockNumber]) {
+        this._blockListeners[blockNumber].forEach(c => c(blockNumber));
+        this._blockListeners[blockNumber] = undefined;
+      }
 
-    if (this._blockListeners['*']) {
-      this._blockListeners['*'].forEach(c => c(blockNumber));
-    }
+      if (this._blockListeners['*']) {
+        this._blockListeners['*'].forEach(c => c(blockNumber));
+      }
+      resolve();
+    });
   }
 
   _initEventPolling() {
@@ -312,12 +325,13 @@ export default class Web3Service extends PrivateService {
   }
 
   _removeBlockUpdates() {
-    if(this.usingWebsockets()) {
+    if (this.usingWebsockets()) {
       this.unsubscribeNewBlocks();
     } else {
-      clearInterval(this._interval);
+      clearTimeout(this._interval);
     }
   }
+
   _installCleanUpHooks() {
     this.manager().onDisconnected(() => {
       this._removeBlockUpdates();

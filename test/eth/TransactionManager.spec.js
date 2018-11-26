@@ -37,8 +37,8 @@ test('reuse the same web3 and log service in test services', () => {
 
   // Removing _web3 object as blockTrackerTimestamp varies based on
   // milli/nanoseconds between code execution
-  const _tx = delete {... services.txMgr.get('web3')._web3 };
-  const _ct = delete {... services.contract.get('web3')._web3 };
+  const _tx = delete { ...services.txMgr.get('web3')._web3 };
+  const _ct = delete { ...services.contract.get('web3')._web3 };
   expect(_tx).toBe(_ct);
   expect(services.txMgr.get('log')).toBe(
     services.contract.get('web3').get('log')
@@ -86,39 +86,25 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
   );
 });
 
-describe('lifecycle hooks', () => {
-  let service, txMgr, priceService, open, cdp;
+let service, txMgr, priceService, open, cdp;
 
-  const makeListener = (label, state) =>
-    jest.fn(tx => {
-      const { contract, method } = tx.metadata;
-      log(`${label}: ${contract}.${method}: ${state}`);
-    });
-
-  const makeHandlers = label => ({
-    initialized: makeListener(label, 'initialized'),
-    pending: makeListener(label, 'pending'),
-    mined: makeListener(label, 'mined'),
-    confirmed: makeListener(label, 'confirmed'),
-    error: makeListener(label, 'error')
+const makeListener = (label, state) =>
+  jest.fn(tx => {
+    const { contract, method } = tx.metadata;
+    log(`${label}: ${contract}.${method}: ${state}`);
   });
 
+const makeHandlers = label => ({
+  initialized: makeListener(label, 'initialized'),
+  pending: makeListener(label, 'pending'),
+  mined: makeListener(label, 'mined'),
+  confirmed: makeListener(label, 'confirmed'),
+  error: makeListener(label, 'error')
+});
+
+describe('lifecycle hooks', () => {
   beforeAll(async () => {
-    // This test will fail if unlimited approval for WETH and PETH is already set
-    // for the current account. so we pick an account near the end of all the test
-    // accounts to make it unlikely that some other test in the suite will use it.
-    TestAccountProvider.setIndex(900);
-
-    service = buildTestEthereumCdpService({
-      accounts: {
-        default: {
-          type: 'privateKey',
-          privateKey: TestAccountProvider.nextAccount().key
-        }
-      },
-      log: true
-    });
-
+    service = buildTestEthereumCdpService();
     await service.manager().authenticate();
     txMgr = service.get('smartContract').get('transactionManager');
     priceService = service.get('price');
@@ -227,6 +213,38 @@ describe('lifecycle hooks', () => {
     );
   });
 
+  test('finalized Tx is set to correct state without without requiring a call to confirm()', async () => {
+    const openHandlers = makeHandlers('open');
+    txMgr.listen(open, openHandlers);
+    const openTx = txMgr._tracker.get(uniqueId(open));
+
+    await mineBlocks(service);
+
+    expect(openTx.isFinalized()).toBe(true);
+    expect(openHandlers.confirmed).toBeCalled();
+  });
+});
+
+describe('lifecycle hooks errors', () => {
+  beforeAll(async () => {
+    service = buildTestEthereumCdpService({
+      web3: { provider: { type: 'TEST' } }
+    });
+    await service.manager().authenticate();
+    txMgr = service.get('smartContract').get('transactionManager');
+    priceService = service.get('price');
+  });
+
+  beforeEach(async () => {
+    open = service.openCdp();
+    cdp = await open;
+  });
+
+  afterAll(async () => {
+    // set price back to 400
+    await priceService.setEthPrice(400);
+  });
+
   test('clear Tx when state is error and older than 5 minutes', async () => {
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
@@ -254,17 +272,6 @@ describe('lifecycle hooks', () => {
 
     await mineBlocks(service);
     expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
-  });
-
-  test('finalized Tx is set to correct state without without requiring a call to confirm()', async () => {
-    const openHandlers = makeHandlers('open');
-    txMgr.listen(open, openHandlers);
-    const openTx = txMgr._tracker.get(uniqueId(open));
-
-    await mineBlocks(service);
-
-    expect(openTx.isFinalized()).toBe(true);
-    expect(openHandlers.confirmed).toBeCalled();
   });
 
   test('return error message with error callback', async () => {

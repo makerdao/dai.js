@@ -48,17 +48,19 @@ export function resetCache() {
   cache.storage = {};
 }
 
-const useWebsocketsForTests = true;
+const useWebsocketsForTests = false;
 
 export function buildTestContainer(settings) {
-  // flip between using websockets for tests is simplified
-  const provider = useWebsocketsForTests ? websocketProviderConfig() : defaultProviderConfig();
-  if(settings && settings.accounts) {
+  // switch between using websockets for tests is simplified
+  const provider = useWebsocketsForTests
+    ? websocketProviderConfig()
+    : defaultProviderConfig();
+  if (settings && settings.accounts) {
     delete provider.accounts;
   }
   merge(provider, settings);
   return new DefaultServiceProvider({
-    ...provider,    
+    ...provider
     // ...kovanProviderConfig,
     // cache
   });
@@ -68,20 +70,26 @@ export function buildTestService(name, settings) {
   return buildTestContainer(settings).service(name);
 }
 
-export function buildTestEthereumCdpService() {
-  return buildTestService('cdp', { cdp: true });
+export function buildTestEthereumCdpService(settings = {}) {
+  settings['cdp'] = true;
+  return buildTestService('cdp', settings);
 }
 
 export function buildTestTransactionManagerService() {
   return buildTestContainer({
     smartContract: true,
     transactionManager: true,
-    web3: { transactionSettings: { gasLimit: 1234567 }}
+    web3: {
+      transactionSettings: {
+        gasLimit: 1234567
+      }
+    }
   });
 }
 
-export function buildTestEthereumTokenService() {
-  return buildTestService('token', { token: true });
+export function buildTestEthereumTokenService(settings = {}) {
+  settings['token'] = true;
+  return buildTestService('token', settings);
 }
 
 export function buildTestSmartContractService() {

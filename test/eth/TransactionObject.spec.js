@@ -62,6 +62,20 @@ describe('normal web service behavior', () => {
   });
 
   describe('reverted transaction handling', () => {
+    beforeEach(async () => {
+      //enforcing http
+      service = buildTestEthereumTokenService({
+        web3: {
+          provider: {
+            type: 'TEST'
+          }
+        }
+      });
+      await service.manager().authenticate();
+      mkr = service.getToken(MKR);
+      testAddress = TestAccountProvider.nextAddress();
+    });
+
     const testErrorHandling = (
       operation,
       errorMessageMatch,

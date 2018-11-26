@@ -2,7 +2,7 @@ import Web3ServiceList from '../src/utils/Web3ServiceList';
 import { takeSnapshot, restoreSnapshot } from './helpers/ganache';
 
 beforeEach(() => {
-  jest.setTimeout(10000);
+  jest.setTimeout(50000);
 });
 
 afterEach(() => {
