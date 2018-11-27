@@ -43,7 +43,7 @@ export default class Cdp {
         const saiTub = this._smartContractService._getContractInfo(
           contracts.SAI_TUB
         );
-        log = await this._web3Service.subscribeLog(saiTub, 'LogNewCup');
+        log = await this._web3Service.waitForMatchingEvent(saiTub, 'LogNewCup');
       } else {
         log = await new Promise(resolve => {
           tubContract.onlognewcup = (address, cdpIdBytes32) => {

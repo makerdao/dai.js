@@ -50,7 +50,7 @@ export default class ProxyCdp {
         const dsProxyFactory = this._smartContractService._getContractInfo(
           contracts.DS_PROXY_FACTORY
         );
-        const log = await this._web3Service.subscribeLog(
+        const log = await this._web3Service.waitForMatchingEvent(
           dsProxyFactory,
           'Created'
         );
@@ -86,7 +86,7 @@ export default class ProxyCdp {
 
       if (existingDsProxyAddress) {
         if (this._web3Service.usingWebsockets()) {
-          const { cup } = await this._web3Service.subscribeLog(
+          const { cup } = await this._web3Service.waitForMatchingEvent(
             saiTub,
             'LogNewCup'
           );
