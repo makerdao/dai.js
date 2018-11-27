@@ -3,6 +3,11 @@ import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
 import { contractInfo } from '../../contracts/networks';
 
+// Throw error in execute if default is null
+// (since it can't wait for the call)
+
+// Remove default from getOwner (not needed)
+
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
     super(name, ['web3']);
@@ -12,11 +17,16 @@ export default class DSProxyService extends PrivateService {
     this._default = await this.getProxyAddress();
   }
 
-  _setNewDefault(transaction) {
+  _setDefaultProxy(transaction) {
     return new Promise(async resolve => {
       await transaction;
       resolve(await this.getProxyAddress());
     });
+  }
+
+  _resetDefaults(newProxy) {
+    this._default = newProxy;
+    this._currentAccount = this.get('web3').currentAccount();
   }
 
   _registryInfo() {
@@ -52,7 +62,7 @@ export default class DSProxyService extends PrivateService {
 
   build() {
     const transaction = this.proxyRegistry().build();
-    this._default = this._setNewDefault(transaction);
+    this._default = this._setDefaultProxy(transaction);
     return transaction;
   }
 
@@ -67,16 +77,13 @@ export default class DSProxyService extends PrivateService {
     const account = providedAccount
       ? providedAccount
       : this.get('web3').currentAccount();
-    let proxyAddress;
-    proxyAddress = await this.proxyRegistry().proxies(account);
 
-    if (proxyAddress === '0x0000000000000000000000000000000000000000')
+    let proxyAddress = await this.proxyRegistry().proxies(account);
+    if (proxyAddress === '0x0000000000000000000000000000000000000000') {
       proxyAddress = null;
-    if (!providedAccount) {
-      this._default = proxyAddress;
-      this._currentAccount = account;
     }
 
+    if (!providedAccount) this._resetDefaults(proxyAddress);
     return proxyAddress;
   }
 
@@ -94,8 +101,8 @@ export default class DSProxyService extends PrivateService {
     return contract.interface.functions[method](...args).data;
   }
 
-  async getOwner(address = this._default) {
-    const contract = await this.getContractByProxyAddress(address);
+  async getOwner(address) {
+    const contract = this.getContractByProxyAddress(address);
     return await contract.owner();
   }
 }

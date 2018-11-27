@@ -83,6 +83,7 @@ export default class AccountsService extends PublicService {
       this._engine.stop();
       this._engine.removeProvider(this.currentWallet());
     }
+
     this._currentAccount = name;
     // add the provider at index 0 so that it takes precedence over RpcSource
     this._engine.addProvider(this.currentWallet(), 0);
