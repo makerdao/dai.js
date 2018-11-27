@@ -23,7 +23,6 @@ export default class Web3Service extends PrivateService {
     this._defaultEmitter = null;
     this._transactionSettings = null;
     this._blockSub = null;
-    this._eventSub = null;
     this._interval = null;
     Web3ServiceList.push(this);
   }
@@ -79,7 +78,9 @@ export default class Web3Service extends PrivateService {
   }
 
   usingWebsockets() {
-    return this._serviceManager._settings.provider.type === ProviderType.WEBSOCKET;
+    return (
+      this._serviceManager._settings.provider.type === ProviderType.WEBSOCKET
+    );
   }
 
   confirmedBlockCount() {
@@ -105,9 +106,9 @@ export default class Web3Service extends PrivateService {
     });
   }
 
-  subscribeLog(info, event) {
+  waitForMatchingEvent(info, event) {
     const { address, abi } = info;
-    const res = abi.reduce(
+    const abiObj = abi.reduce(
       (acc, target) => ({
         ...acc,
         [target.name]: target
@@ -118,38 +119,47 @@ export default class Web3Service extends PrivateService {
     const getTopics = () => {
       const { sha3 } = this._web3.utils;
       let topics = [];
-      let name = res[event].name + '(';
-      for (let i in res[event].inputs) {
-        name += res[event].inputs[i].type + ',';
+      let name = abiObj[event].name + '(';
+      for (let i in abiObj[event].inputs) {
+        name += abiObj[event].inputs[i].type + ',';
       }
       topics[0] = sha3(name.substring(0, name.length - 1) + ')');
       return topics;
     };
+
+    const parseRawLog = (log, eventAbi) => {
+      if (!eventAbi.anonymous) {
+        log.topics.shift();
+      }
+      return this._web3.eth.abi.decodeLog(
+        eventAbi.inputs,
+        log.data,
+        log.topics
+      );
+    };
+
     return new Promise((resolve, reject) => {
-      this._eventSub = this._web3.eth.subscribe(
+      const sub = this._web3.eth.subscribe(
         'logs',
         { address, topics: getTopics() },
-        (err, log) => {
+        async (err, rawLogData) => {
           if (err) reject(err);
-          if (!res[event].anonymous) {
-            log.topics.shift();
-          }
-          const decoded = this._web3.eth.abi.decodeLog(
-            res[event].inputs,
-            log.data,
-            log.topics
+          const log = parseRawLog(rawLogData, abiObj[event]);
+          const blockTx = await this._web3.eth.getTransaction(
+            rawLogData.transactionHash
           );
-          resolve(this.unsubscribeEvent(decoded));
+          const sender = blockTx.from.toLowerCase();
+          if (sender === this.currentAccount()) {
+            sub.unsubscribe((err, success) => {
+              if (!success) {
+                reject(err);
+              }
+            });
+            resolve(log);
+          }
         }
       );
     });
-  }
-
-  unsubscribeEvent(log) {
-    this._eventSub.unsubscribe((err, success) => {
-      if (!success) throw new Error(err);
-    });
-    return log;
   }
 
   async initialize(settings) {
