@@ -1,6 +1,6 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
-import { merge } from 'lodash';
+import { has, merge } from 'lodash';
 import testAccounts from './testAccounts.json';
 
 export const kovanProviderConfig = {
@@ -25,6 +25,8 @@ export const defaultProviderConfig = () => ({
 });
 
 export const websocketProviderConfig = () => ({
+  // FIXME this hard-coded account data is here to work around some test
+  // failures, but it shouldn't be necessary
   accounts: {
     default: {
       key: '0x' + testAccounts.keys[0],
@@ -51,13 +53,16 @@ export function resetCache() {
 
 const useWebsocketsForTests = false;
 
-export function buildTestContainer(settings) {
+export function buildTestContainer(settings = {}) {
   // switch between using websockets for tests is simplified
-  const provider = useWebsocketsForTests
+  const provider = useWebsocketsForTests || settings.useWebsockets
     ? websocketProviderConfig()
     : defaultProviderConfig();
   if (settings && settings.accounts) {
     delete provider.accounts;
+  }
+  if (has(settings, 'useWebsockets')) {
+    delete settings.useWebsockets;
   }
   merge(provider, settings);
   return new DefaultServiceProvider({
@@ -72,12 +77,12 @@ export function buildTestService(name, settings) {
 }
 
 export function buildTestEthereumCdpService(settings = {}) {
-  settings['cdp'] = true;
-  return buildTestService('cdp', settings);
+  return buildTestService('cdp', { ...settings, cdp: true });
 }
 
-export function buildTestTransactionManagerService() {
+export function buildTestTransactionManagerService(settings = {}) {
   return buildTestContainer({
+    ...settings,
     smartContract: true,
     transactionManager: true,
     web3: {
@@ -89,8 +94,7 @@ export function buildTestTransactionManagerService() {
 }
 
 export function buildTestEthereumTokenService(settings = {}) {
-  settings['token'] = true;
-  return buildTestService('token', settings);
+  return buildTestService('token', { ...settings, token: true });
 }
 
 export function buildTestSmartContractService() {
