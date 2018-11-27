@@ -4,6 +4,7 @@ import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
 import ProviderType from './web3/ProviderType';
+import makeSigner from './web3/ShimEthersSigner';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -50,48 +51,23 @@ export default class Web3Service extends PrivateService {
     try {
       throw new Error('hi');
     } catch (err) {
-      // console.warn(
-      //   'using ethers provider...\n' +
-      //     err.stack
-      //       .split('\n')
-      //       .slice(1, 8)
-      //       .join('\n')
-      // );
+      console.warn(
+        'using ethers provider...\n' +
+          err.stack
+            .split('\n')
+            .slice(1, 7)
+            .join('\n')
+      );
     }
     return this._ethersProvider;
   }
 
   getEthersSigner() {
     if (this.usingWebsockets()) {
-      if (!this._ethersSigner) {
-        const provider = this.web3Provider();
-        const call = promisify(this._web3.eth.call);
-        this._ethersSigner = {
-          getAddress: () => this.currentAccount(),
-          estimateGas: tx => this.estimateGas(tx),
-          sendTransaction: tx => {
-            return this.sendTransaction({
-              ...tx,
-              from: this.currentAccount()
-            });
-          },
-          provider: new Proxy(provider, {
-            get(target, key) {
-              switch (key) {
-                case 'resolveName':
-                  return address => address;
-                case 'call':
-                  return call;
-                default:
-                  return target[key];
-              }
-            }
-          })
-        };
-      }
+      if (!this._ethersSigner) this._ethersSigner = makeSigner(this);
       return this._ethersSigner;
     } else {
-      return this.ethersProvider().getSigner();
+      return this._ethersProvider.getSigner();
     }
   }
 
