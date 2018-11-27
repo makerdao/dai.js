@@ -1,5 +1,6 @@
 import { ETH, WETH } from '../../src/eth/Currency';
 import TestAccountProvider from './TestAccountProvider';
+import { promiseWait } from '../../src/utils';
 import debug from 'debug';
 const log = debug('dai:testing:mineBlocks');
 
@@ -13,23 +14,15 @@ export async function mineBlocks(service, count) {
     count = web3Service.confirmedBlockCount() + 2;
   }
 
-  const finalBlock = web3Service.blockNumber() + count;
-
   for (let i = 0; i < count; i++) {
     await wethToken.approveUnlimited(TestAccountProvider.nextAddress());
     log(`block ${web3Service.blockNumber()}`);
   }
 
+  // the websocket implementation has a poller somewhere that only fires once
+  // every 4 seconds
   if (web3Service.usingWebsockets()) {
-    return new Promise(resolve => {
-      const poll = () => {
-        if (web3Service.blockNumber() >= finalBlock) {
-          resolve();
-        }
-        setTimeout(poll, 250);
-      };
-      poll();
-    });
+    await promiseWait(4000);
   }
 }
 
