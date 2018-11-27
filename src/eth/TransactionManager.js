@@ -1,16 +1,11 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
-import { Contract } from 'ethers';
-import { dappHub } from '../../contracts/abis';
 import { uniqueId } from '../utils';
 import { has, each } from 'lodash';
-import debug from 'debug';
-// eslint-disable-next-line
-const log = debug('dai:testing:txMgr');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log', 'nonce']);
+    super(name, ['web3', 'nonce', 'proxy']);
     this._newTxListeners = [];
     this._tracker = new Tracker();
   }
@@ -107,22 +102,19 @@ export default class TransactionManager extends PublicService {
   // if options.dsProxyAddress is set, execute this contract method through the
   // proxy contract at that address.
   _execute(contract, method, args, options) {
+    let providedAddress;
     if (!options.dsProxyAddress) return contract[method](...args, options);
-
-    const dsProxyAddress = options.dsProxyAddress;
+    if (typeof options.dsProxyAddress === 'string') {
+      providedAddress = options.dsProxyAddress;
+    }
     delete options.dsProxyAddress;
-
-    this.get('log').debug(`Calling ${method} vis DSProxy at ${dsProxyAddress}`);
-    const dsProxyContract = new Contract(
-      dsProxyAddress,
-      dappHub.dsProxy,
-      this.get('web3')
-        .ethersProvider()
-        .getSigner()
+    return this.get('proxy').execute(
+      contract,
+      method,
+      args,
+      options,
+      providedAddress
     );
-
-    const data = contract.interface.functions[method](...args).data;
-    return dsProxyContract.execute(contract.address, data, options);
   }
 
   _createTransactionObject(tx, { businessObject, metadata, promise } = {}) {

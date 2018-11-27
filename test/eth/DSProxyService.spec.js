@@ -45,7 +45,7 @@ test("should get a proxy's owner", async () => {
   expect(owner.toLowerCase()).toEqual(service.get('web3').currentAccount());
 });
 
-test("should clear a proxy's owner", async () => {
+xtest("should clear a proxy's owner", async () => {
   await service.build();
   await service.getProxyAddress();
   await service.clearOwner();
