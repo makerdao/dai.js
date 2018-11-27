@@ -5,7 +5,7 @@ import { has, each } from 'lodash';
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'nonce', 'proxy']);
+    super(name, ['web3', 'log', 'nonce', 'proxy']);
     this._newTxListeners = [];
     this._tracker = new Tracker();
   }
