@@ -40,10 +40,10 @@ export default class Cdp {
     const getId = new Promise(async resolve => {
       let log = {};
       if (this._web3Service.usingWebsockets()) {
-        const sai_tub = this._smartContractService._getContractInfo(
+        const saiTub = this._smartContractService._getContractInfo(
           contracts.SAI_TUB
         );
-        log = await this._web3Service.subscribeLog(sai_tub, 'LogNewCup');
+        log = await this._web3Service.subscribeLog(saiTub, 'LogNewCup');
       } else {
         log = await new Promise(resolve => {
           tubContract.onlognewcup = (address, cdpIdBytes32) => {

@@ -47,11 +47,11 @@ export default class ProxyCdp {
       // eslint-disable-next-line
 
       if (this._web3Service.usingWebsockets()) {
-        const ds_proxy_factory = this._smartContractService._getContractInfo(
+        const dsProxyFactory = this._smartContractService._getContractInfo(
           contracts.DS_PROXY_FACTORY
         );
         const log = await this._web3Service.subscribeLog(
-          ds_proxy_factory,
+          dsProxyFactory,
           'Created'
         );
         if (currentAccount.toLowerCase() == log.owner.toLowerCase()) {
@@ -76,7 +76,7 @@ export default class ProxyCdp {
   }
 
   _getCdpId(saiProxyAddress, tubContract, dsProxyAddressPromise) {
-    const sai_tub = this._smartContractService._getContractInfo(
+    const saiTub = this._smartContractService._getContractInfo(
       contracts.SAI_TUB
     );
 
@@ -87,7 +87,7 @@ export default class ProxyCdp {
       if (existingDsProxyAddress) {
         if (this._web3Service.usingWebsockets()) {
           const { cup } = await this._web3Service.subscribeLog(
-            sai_tub,
+            saiTub,
             'LogNewCup'
           );
           const cdpId = ethersUtils.bigNumberify(cup).toNumber();
