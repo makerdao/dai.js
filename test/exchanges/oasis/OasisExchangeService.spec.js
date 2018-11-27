@@ -112,14 +112,6 @@ describe('oasis proxy', () => {
     exchange = await buildTestOasisExchangeService();
   });
 
-  test('experimenting with proxy addresses', async () => {
-    const proxyRegistry = exchange
-      .get('smartContract')
-      .getContractByName(contracts.PROXY_REGISTRY);
-    const account = exchange.get('web3').currentAccount();
-    console.log(await proxyRegistry.proxies(account));
-  });
-
   xtest('create proxy and sell dai', async () => {
     let tx, error;
 

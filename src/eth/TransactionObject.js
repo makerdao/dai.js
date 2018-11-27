@@ -98,7 +98,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       this._timeStampMined = new Date();
       this._blockNumberWhenMined = tx.blockNumber;
       this.receipt = await this._waitForReceipt();
-      // console.log(this.receipt);
       if (!!this.receipt.gasUsed && !!gasPrice) {
         this._fees = ETH.wei(this.receipt.gasUsed.mul(gasPrice));
       } else {

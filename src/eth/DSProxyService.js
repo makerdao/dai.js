@@ -1,6 +1,7 @@
 import PrivateService from '../core/PrivateService';
 import { Contract } from 'ethers';
-import { dappHub, proxies } from '../../contracts/abis';
+import { dappHub } from '../../contracts/abis';
+import { contractInfo } from '../../contracts/networks';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
@@ -18,8 +19,19 @@ export default class DSProxyService extends PrivateService {
     });
   }
 
-  _registryAddress() {
-    return '0x9706786bf567796647d9428076fbc219830116ae';
+  _registryInfo() {
+    return contractInfo(this._network()).PROXY_REGISTRY[0];
+  }
+
+  _network() {
+    switch (this.get('web3').networkId()) {
+      case 1:
+        return 'mainnet';
+      case 42:
+        return 'kovan';
+      case 999:
+        return 'test';
+    }
   }
 
   defaultProxyAddress() {
@@ -30,8 +42,8 @@ export default class DSProxyService extends PrivateService {
 
   proxyRegistry() {
     return new Contract(
-      this._registryAddress(),
-      proxies.proxyRegistry,
+      this._registryInfo().address,
+      this._registryInfo().abi,
       this.get('web3')
         .ethersProvider()
         .getSigner()
@@ -48,7 +60,6 @@ export default class DSProxyService extends PrivateService {
     const proxyAddress = address ? address : this.defaultProxyAddress();
     const proxyContract = this.getContractByProxyAddress(proxyAddress);
     const data = this.getCallData(contract, method, args);
-    console.log(options);
     return proxyContract.execute(contract.address, data, options);
   }
 
@@ -58,13 +69,14 @@ export default class DSProxyService extends PrivateService {
       : this.get('web3').currentAccount();
     let proxyAddress;
     proxyAddress = await this.proxyRegistry().proxies(account);
+
     if (proxyAddress === '0x0000000000000000000000000000000000000000')
       proxyAddress = null;
-
     if (!providedAccount) {
       this._default = proxyAddress;
       this._currentAccount = account;
     }
+
     return proxyAddress;
   }
 

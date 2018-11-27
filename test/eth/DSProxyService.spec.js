@@ -26,6 +26,15 @@ beforeEach(async () => {
   await setNewAccount();
 });
 
+test('should get the correct network', () => {
+  expect(service._network()).toEqual('test');
+});
+
+test('should get the correct registry info', () => {
+  const expected = ['version', 'address', 'abi'];
+  expect(Object.keys(service._registryInfo())).toEqual(expected);
+});
+
 test('should find the proxy registry', () => {
   expect(service.proxyRegistry()).toBeDefined();
 });
