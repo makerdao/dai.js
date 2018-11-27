@@ -43,7 +43,6 @@ test('should successfully join and exit PETH', async () => {
   await peth.exit(0.1);
   const balance3 = await peth.balanceOf(owner);
   expect(balance2.minus(0.1)).toEqual(balance3);
-  console.log('end');
 });
 
 test('should return the wrapper ratio', async () => {
