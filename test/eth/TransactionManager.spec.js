@@ -4,7 +4,6 @@ import {
 } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 import { uniqueId } from '../../src/utils';
-import TestAccountProvider from '../helpers/TestAccountProvider';
 import { mineBlocks } from '../helpers/transactionConfirmation';
 import { size } from 'lodash';
 import debug from 'debug';
