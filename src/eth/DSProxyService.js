@@ -86,12 +86,4 @@ export default class DSProxyService extends PrivateService {
     const contract = await this.getContractByProxyAddress(address);
     return await contract.owner();
   }
-
-  async clearOwner(address = this._default) {
-    this._default = null;
-    const contract = await this.getContractByProxyAddress(address);
-    return await contract.setOwner(
-      '0x0000000000000000000000000000000000000000'
-    );
-  }
 }

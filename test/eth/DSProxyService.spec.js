@@ -45,13 +45,6 @@ test("should get a proxy's owner", async () => {
   expect(owner.toLowerCase()).toEqual(service.get('web3').currentAccount());
 });
 
-xtest("should clear a proxy's owner", async () => {
-  await service.build();
-  await service.getProxyAddress();
-  await service.clearOwner();
-  expect(service.defaultProxyAddress()).toBeNull();
-});
-
 describe('querying registry for proxy address', () => {
   test('should return address when account has a proxy', async () => {
     await service.build();
@@ -78,14 +71,11 @@ describe('querying service for default proxy address', () => {
   });
 
   test('should update default address after building new proxy', async () => {
+    const defaultBeforeBuilding = await service.defaultProxyAddress();
     await service.build();
-    const firstAddress = await service.defaultProxyAddress();
-    await service.clearOwner();
-    await service.build();
-    const secondAddress = await service.defaultProxyAddress();
+    const address = await service.defaultProxyAddress();
 
-    expect(firstAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-    expect(secondAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-    expect(firstAddress).not.toEqual(secondAddress);
+    expect(defaultBeforeBuilding).toBeNull();
+    expect(address).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 });
