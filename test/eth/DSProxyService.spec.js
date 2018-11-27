@@ -2,8 +2,7 @@ import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import addresses from '../../testchain/out/addresses.json';
 
-let service,
-  accountCount = 20;
+let service;
 
 async function buildTestProxyService() {
   service = buildTestService('proxy', { proxy: true });
@@ -11,8 +10,7 @@ async function buildTestProxyService() {
 }
 
 async function setNewAccount() {
-  accountCount += 1;
-  const account = TestAccountProvider.nextAccount(accountCount);
+  const account = TestAccountProvider.nextAccount();
   const accountService = service.get('web3').get('accounts');
   await accountService.addAccount('newAccount', {
     type: 'privateKey',
@@ -36,7 +34,7 @@ test('should get the correct registry info', () => {
 });
 
 test('should find the proxy registry', () => {
-  expect(service.proxyRegistry()).toBeDefined();
+  expect(service._proxyRegistry()).toBeDefined();
 });
 
 test('should build new proxies', async () => {
@@ -48,8 +46,8 @@ test('should build new proxies', async () => {
 
 test("should get a proxy's owner", async () => {
   await service.build();
-  await service.getProxyAddress();
-  const owner = await service.getOwner();
+  const address = await service.getProxyAddress();
+  const owner = await service.getOwner(address);
 
   expect(owner.toLowerCase()).toEqual(service.get('web3').currentAccount());
 });

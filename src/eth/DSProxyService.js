@@ -3,11 +3,6 @@ import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
 import { contractInfo } from '../../contracts/networks';
 
-// Throw error in execute if default is null
-// (since it can't wait for the call)
-
-// Remove default from getOwner (not needed)
-
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
     super(name, ['web3']);
@@ -17,16 +12,14 @@ export default class DSProxyService extends PrivateService {
     this._default = await this.getProxyAddress();
   }
 
-  _setDefaultProxy(transaction) {
-    return new Promise(async resolve => {
-      await transaction;
-      resolve(await this.getProxyAddress());
-    });
-  }
-
-  _resetDefaults(newProxy) {
-    this._default = newProxy;
-    this._currentAccount = this.get('web3').currentAccount();
+  _proxyRegistry() {
+    return new Contract(
+      this._registryInfo().address,
+      this._registryInfo().abi,
+      this.get('web3')
+        .ethersProvider()
+        .getSigner()
+    );
   }
 
   _registryInfo() {
@@ -44,29 +37,33 @@ export default class DSProxyService extends PrivateService {
     }
   }
 
+  _setDefaultProxy(transaction) {
+    return new Promise(async resolve => {
+      await transaction;
+      resolve(await this.getProxyAddress());
+    });
+  }
+
+  _resetDefaults(newProxy) {
+    this._default = newProxy;
+    this._currentAccount = this.get('web3').currentAccount();
+  }
+
   defaultProxyAddress() {
     return this._currentAccount === this.get('web3').currentAccount()
       ? this._default
       : this.getProxyAddress();
   }
 
-  proxyRegistry() {
-    return new Contract(
-      this._registryInfo().address,
-      this._registryInfo().abi,
-      this.get('web3')
-        .ethersProvider()
-        .getSigner()
-    );
-  }
-
   build() {
-    const transaction = this.proxyRegistry().build();
+    const transaction = this._proxyRegistry().build();
     this._default = this._setDefaultProxy(transaction);
     return transaction;
   }
 
   execute(contract, method, args, options, address) {
+    if (!address && !this._default)
+      throw new Error('No proxy found for current account');
     const proxyAddress = address ? address : this.defaultProxyAddress();
     const proxyContract = this.getContractByProxyAddress(proxyAddress);
     const data = this.getCallData(contract, method, args);
@@ -78,7 +75,7 @@ export default class DSProxyService extends PrivateService {
       ? providedAccount
       : this.get('web3').currentAccount();
 
-    let proxyAddress = await this.proxyRegistry().proxies(account);
+    let proxyAddress = await this._proxyRegistry().proxies(account);
     if (proxyAddress === '0x0000000000000000000000000000000000000000') {
       proxyAddress = null;
     }
