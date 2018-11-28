@@ -7,7 +7,9 @@ import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/prov
 
 export async function setupEngine(settings) {
   const { provider: providerSettings } = settings.web3;
-  const engine = new Web3ProviderEngine();
+  const engine = new Web3ProviderEngine({
+    pollingInterval: 100 // defaults to 4000 millis
+  });
   const result = { engine };
 
   if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
