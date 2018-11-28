@@ -106,7 +106,7 @@ export default class Web3Service extends PrivateService {
     });
   }
 
-  waitForMatchingEvent(info, event) {
+  waitForMatchingEvent(info, event, predicateFn = () => true) {
     const { address, abi } = info;
     const abiObj = abi.reduce(
       (acc, target) => ({
@@ -127,15 +127,11 @@ export default class Web3Service extends PrivateService {
       return topics;
     };
 
-    const parseRawLog = (log, eventAbi) => {
-      if (!eventAbi.anonymous) {
+    const parseRawLog = (log, event) => {
+      if (!event.anonymous) {
         log.topics.shift();
       }
-      return this._web3.eth.abi.decodeLog(
-        eventAbi.inputs,
-        log.data,
-        log.topics
-      );
+      return this._web3.eth.abi.decodeLog(event.inputs, log.data, log.topics);
     };
 
     return new Promise((resolve, reject) => {
@@ -145,11 +141,7 @@ export default class Web3Service extends PrivateService {
         async (err, rawLogData) => {
           if (err) reject(err);
           const log = parseRawLog(rawLogData, abiObj[event]);
-          const blockTx = await this._web3.eth.getTransaction(
-            rawLogData.transactionHash
-          );
-          const sender = blockTx.from.toLowerCase();
-          if (sender === this.currentAccount()) {
+          if (predicateFn(log)) {
             sub.unsubscribe((err, success) => {
               if (!success) {
                 reject(err);

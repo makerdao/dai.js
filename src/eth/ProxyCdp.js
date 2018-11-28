@@ -52,12 +52,13 @@ export default class ProxyCdp {
         );
         const log = await this._web3Service.waitForMatchingEvent(
           dsProxyFactory,
-          'Created'
+          'Created',
+          log => {
+            return currentAccount.toLowerCase() == log.owner.toLowerCase();
+          }
         );
-        if (currentAccount.toLowerCase() == log.owner.toLowerCase()) {
-          self.dsProxyAddress = log.proxy;
-          resolve(self.dsProxyAddress);
-        }
+        self.dsProxyAddress = log.proxy;
+        resolve(self.dsProxyAddress);
       } else {
         dsProxyFactoryContract.oncreated = function(
           sender,
@@ -88,16 +89,19 @@ export default class ProxyCdp {
         if (this._web3Service.usingWebsockets()) {
           const { cup } = await this._web3Service.waitForMatchingEvent(
             saiTub,
-            'LogNewCup'
+            'LogNewCup',
+            log => {
+              return (
+                log.lad.toLowerCase() === existingDsProxyAddress.toLowerCase()
+              );
+            }
           );
-          const cdpId = ethersUtils.bigNumberify(cup).toNumber();
-          resolve(cdpId);
+          resolve(ethersUtils.bigNumberify(cup).toNumber());
         } else {
-          tubContract.onlognewcup = function(address, cdpIdBytes32) {
-            if (existingDsProxyAddress == address.toLowerCase()) {
-              const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
+          tubContract.onlognewcup = function(lad, cup) {
+            if (existingDsProxyAddress == lad.toLowerCase()) {
               this.removeListener();
-              resolve(cdpId);
+              resolve(ethersUtils.bigNumberify(cup).toNumber());
             }
           };
         }
