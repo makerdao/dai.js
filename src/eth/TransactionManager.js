@@ -12,6 +12,7 @@ export default class TransactionManager extends PublicService {
 
   // this method must not be async
   sendContractCall(contract, method, args, name) {
+    console.log('in tx manager');
     if (!args) args = [];
     let options,
       promise,

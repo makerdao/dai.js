@@ -1,6 +1,7 @@
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
-import addresses from '../../testchain/out/addresses.json';
+import addresses from '../../contracts/addresses/testnet';
+import Maker from '../../src/index';
 
 let service;
 
@@ -77,7 +78,7 @@ describe('querying registry for proxy address', () => {
   });
 });
 
-describe('querying service for default proxy address', () => {
+describe('querying service for current proxy address', () => {
   test('should return address when account has a proxy', async () => {
     await service.build();
     const address = await service.getProxyAddress();
@@ -97,4 +98,58 @@ describe('querying service for default proxy address', () => {
     expect(defaultBeforeBuilding).toBeNull();
     expect(address).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
+});
+
+describe('execute', () => {
+  let maker, tubContract;
+  const keys = [
+    'hash',
+    'blockHash',
+    'blockNumber',
+    'transactionIndex',
+    'from',
+    'gasPrice',
+    'gasLimit',
+    'to',
+    'value',
+    'nonce',
+    'data',
+    'creates',
+    'networkId',
+    'wait'
+  ];
+
+  beforeEach(async () => {
+    maker = Maker.create('test', {
+      web3: {
+        transactionSettings: { gasLimit: 4000000 },
+        confirmedBlockCount: '0'
+      },
+      provider: { type: 'TEST' }
+    });
+    await maker.authenticate();
+    tubContract = maker.service('smartContract').getContractByName('SAI_TUB');
+  });
+
+  test('should execute without a provided proxy address', async () => {
+    const tx = await maker
+      .service('proxy')
+      .execute(tubContract, 'open', [], { gasLimit: 4000000 });
+    expect(Object.keys(tx)).toEqual(keys);
+  });
+
+  test('should execute with a provided proxy address', async () => {
+    const tx = await maker
+      .service('proxy')
+      .execute(
+        tubContract,
+        'open',
+        [],
+        { gasLimit: 4000000 },
+        maker.service('proxy').currentProxy()
+      );
+    expect(Object.keys(tx)).toEqual(keys);
+  });
+
+  test('should throw error if no proxy is available', async () => {});
 });
