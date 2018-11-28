@@ -52,6 +52,18 @@ test("should get a proxy's owner", async () => {
   expect(owner.toLowerCase()).toEqual(service.get('web3').currentAccount());
 });
 
+test("should set a proxy's owner", async () => {
+  await service.build();
+  const proxyAddress = await service.getProxyAddress();
+  const originalOwner = await service.getOwner(proxyAddress);
+  const newAddress = TestAccountProvider.nextAccount().address;
+  await service.setOwner(newAddress);
+  const newOwner = await service.getOwner(proxyAddress);
+
+  expect(newOwner.toLowerCase()).toEqual(newAddress.toLowerCase());
+  expect(newOwner.toLowerCase()).not.toEqual(originalOwner.toLowerCase());
+});
+
 describe('querying registry for proxy address', () => {
   test('should return address when account has a proxy', async () => {
     await service.build();
