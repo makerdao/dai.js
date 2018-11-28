@@ -9,7 +9,7 @@ export default class DSProxyService extends PrivateService {
   }
 
   async authenticate() {
-    this._default = await this.getProxyAddress();
+    this._currentProxy = await this.getProxyAddress();
   }
 
   _proxyRegistry() {
@@ -37,7 +37,7 @@ export default class DSProxyService extends PrivateService {
     }
   }
 
-  _setDefaultProxy(transaction) {
+  _setCurrentProxy(transaction) {
     return new Promise(async resolve => {
       await transaction;
       resolve(await this.getProxyAddress());
@@ -45,26 +45,26 @@ export default class DSProxyService extends PrivateService {
   }
 
   _resetDefaults(newProxy) {
-    this._default = newProxy;
+    this._currentProxy = newProxy;
     this._currentAccount = this.get('web3').currentAccount();
   }
 
-  defaultProxyAddress() {
+  currentProxy() {
     return this._currentAccount === this.get('web3').currentAccount()
-      ? this._default
+      ? this._currentProxy
       : this.getProxyAddress();
   }
 
   build() {
     const transaction = this._proxyRegistry().build();
-    this._default = this._setDefaultProxy(transaction);
+    this._currentProxy = this._setCurrentProxy(transaction);
     return transaction;
   }
 
   execute(contract, method, args, options, address) {
-    if (!address && !this._default)
+    if (!address && !this._currentProxy)
       throw new Error('No proxy found for current account');
-    const proxyAddress = address ? address : this.defaultProxyAddress();
+    const proxyAddress = address ? address : this.currentProxy();
     const proxyContract = this.getContractByProxyAddress(proxyAddress);
     const data = this.getCallData(contract, method, args);
     return proxyContract.execute(contract.address, data, options);

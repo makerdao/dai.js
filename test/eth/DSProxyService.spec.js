@@ -39,7 +39,7 @@ test('should find the proxy registry', () => {
 
 test('should build new proxies', async () => {
   await service.build();
-  const newAddress = await service.defaultProxyAddress();
+  const newAddress = await service.currentProxy();
   expect(newAddress).not.toEqual('0x0000000000000000000000000000000000000000');
   expect(newAddress).not.toEqual(addresses.DS_PROXY.toLowerCase());
 });
@@ -69,18 +69,18 @@ describe('querying service for default proxy address', () => {
   test('should return address when account has a proxy', async () => {
     await service.build();
     const address = await service.getProxyAddress();
-    expect(service.defaultProxyAddress()).toEqual(address);
+    expect(service.currentProxy()).toEqual(address);
   });
 
   test("should return null when account doesn't have a proxy", async () => {
     await service.getProxyAddress();
-    expect(service.defaultProxyAddress()).toBeNull();
+    expect(service.currentProxy()).toBeNull();
   });
 
   test('should update default address after building new proxy', async () => {
-    const defaultBeforeBuilding = await service.defaultProxyAddress();
+    const defaultBeforeBuilding = await service.currentProxy();
     await service.build();
-    const address = await service.defaultProxyAddress();
+    const address = await service.currentProxy();
 
     expect(defaultBeforeBuilding).toBeNull();
     expect(address).toMatch(/^0x[A-Fa-f0-9]{40}$/);
