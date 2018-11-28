@@ -151,5 +151,15 @@ describe('execute', () => {
     expect(Object.keys(tx)).toEqual(keys);
   });
 
-  test('should throw error if no proxy is available', async () => {});
+  test('should throw error if no proxy is available', async () => {
+    expect.assertions(1);
+    maker.service('proxy')._currentProxy = null;
+    try {
+      maker
+        .service('proxy')
+        .execute(tubContract, 'open', [], { gasLimit: 4000000 });
+    } catch (err) {
+      expect(err.message).toEqual('No proxy found for current account');
+    }
+  });
 });
