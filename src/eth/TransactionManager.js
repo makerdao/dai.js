@@ -12,7 +12,6 @@ export default class TransactionManager extends PublicService {
 
   // this method must not be async
   sendContractCall(contract, method, args, name) {
-    console.log('in tx manager');
     if (!args) args = [];
     let options,
       promise,
@@ -140,11 +139,10 @@ export default class TransactionManager extends PublicService {
   }
 
   async _buildTransactionOptions(data) {
-    const nonce = data.nonce || (await this.get('nonce').getNonce());
     return {
       ...this.get('web3').transactionSettings(),
       ...data,
-      nonce: nonce
+      nonce: await this.get('nonce').getNonce()
     };
   }
 }

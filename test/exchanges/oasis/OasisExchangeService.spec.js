@@ -104,26 +104,3 @@ test('buy Dai with wei amount', async () => {
   expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
   expect(order.fillAmount()).toEqual(DAI(0.04));
 });
-
-describe('oasis proxy', () => {
-  let exchange;
-
-  beforeEach(async () => {
-    exchange = await buildTestOasisExchangeService();
-  });
-
-  xtest('create proxy and sell dai', async () => {
-    let tx, error;
-
-    try {
-      await createDaiAndPlaceLimitOrder(exchange);
-      tx = await exchange.createProxyAndBuyTokenWithEth('0.01', DAI);
-    } catch (err) {
-      error = err;
-      console.error(err);
-    }
-
-    expect(tx).toBeDefined();
-    expect(error).toBeUndefined();
-  });
-});

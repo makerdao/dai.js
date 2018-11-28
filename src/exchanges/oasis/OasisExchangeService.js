@@ -18,10 +18,6 @@ export default class OasisExchangeService extends PrivateService {
     ]);
   }
 
-  _oasisProxy() {
-    return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
-  }
-
   /*
   daiAmount: amount of Dai to sell
   currency: currency to buy
@@ -43,26 +39,6 @@ export default class OasisExchangeService extends PrivateService {
       [daiAddress, daiAmountEVM, buyToken.address(), minFillAmountEVM],
       this.get('transactionManager'),
       currency
-    );
-  }
-
-  async createProxyAndBuyTokenWithEth(amount, buyToken, minAmount = 0) {
-    const proxyFactory = this.get('smartContract').getContractByName(
-      contracts.DS_PROXY_FACTORY
-    ).address;
-    const otc = this.get('smartContract').getContractByName(contracts.MAKER_OTC)
-      .address;
-    const token = this.get('token').getToken(buyToken)._contract.address;
-    const formattedAmount = daiValueForContract(minAmount);
-
-    return this._oasisProxy().createAndSellAllAmountPayEth(
-      proxyFactory,
-      otc,
-      token,
-      formattedAmount,
-      {
-        value: daiValueForContract(amount)
-      }
     );
   }
 
