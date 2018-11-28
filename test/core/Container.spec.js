@@ -1,7 +1,6 @@
 import Container, {
   InvalidServiceError,
   ServiceAlreadyRegisteredError,
-  ServiceDependencyLoopError,
   ServiceNotFoundError,
   orderServices
 } from '../../src/core/Container';
@@ -122,16 +121,16 @@ test('orderServices() sorts services so dependencies come first', () => {
 test('orderServices() throws on dependency loops', () => {
   expect(() => {
     orderServices([serviceG]);
-  }).toThrow(ServiceDependencyLoopError.Error);
+  }).toThrow();
 
   expect(() => {
     orderServices([serviceE, serviceF]);
-  }).toThrow(ServiceDependencyLoopError.Error);
+  }).toThrow();
 
   const badServiceA = new ServiceManager('ServiceA', [
     'ServiceD'
   ]).createService();
   expect(() => {
     orderServices([serviceD, serviceC, serviceB, badServiceA]);
-  }).toThrow(ServiceDependencyLoopError.Error);
+  }).toThrow();
 });
