@@ -143,6 +143,11 @@ export default class ConfigFactory {
       config.confirmedBlockCount = options.confirmedBlockCount;
     }
 
+    // interval in ms to send block update requests
+    if (options.pollingInterval) {
+      config.pollingInterval = options.pollingInterval;
+    }
+
     return config;
   }
 }

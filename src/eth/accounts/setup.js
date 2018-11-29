@@ -6,9 +6,10 @@ import SubscriptionSubprovider from 'web3-provider-engine/dist/es5/subproviders/
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
 export async function setupEngine(settings) {
-  const { provider: providerSettings } = settings.web3;
+  const { provider: providerSettings, pollingInterval } = settings.web3;
+
   const engine = new Web3ProviderEngine({
-    pollingInterval: 100 // defaults to 4000 millis
+    pollingInterval: pollingInterval ? pollingInterval : 2000
   });
   const result = { engine };
 

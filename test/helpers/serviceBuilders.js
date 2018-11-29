@@ -40,7 +40,8 @@ export const websocketProviderConfig = () => ({
     },
     transactionSettings: {
       gasLimit: 4000000
-    }
+    },
+    pollingInterval: 50
   },
   log: false
 });
@@ -51,13 +52,14 @@ export function resetCache() {
   cache.storage = {};
 }
 
-const useWebsocketsForTests = false;
+const useWebsocketsForTests = true;
 
 export function buildTestContainer(settings = {}) {
   // switch between using websockets for tests is simplified
-  const provider = useWebsocketsForTests || settings.useWebsockets
-    ? websocketProviderConfig()
-    : defaultProviderConfig();
+  const provider =
+    useWebsocketsForTests || settings.useWebsockets
+      ? websocketProviderConfig()
+      : defaultProviderConfig();
   if (settings && settings.accounts) {
     delete provider.accounts;
   }
