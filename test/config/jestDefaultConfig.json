@@ -10,6 +10,7 @@
   ],
   "globalSetup": "<rootDir>/test/setup-global.js",
   "roots": [
+    "lib",
     "src",
     "test"
   ],
