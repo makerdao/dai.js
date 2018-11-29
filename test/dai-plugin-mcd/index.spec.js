@@ -1,16 +1,28 @@
 import Maker from '../../src';
-import McdPlugin from '../../lib/dai-plugin-mcd/src';
+import McdPlugin, { REP } from '../../lib/dai-plugin-mcd/src';
+import addresses from '../../lib/dai-plugin-mcd/contracts/addresses/testnet.json';
 
-test('MCD contract address mapping', async () => {
-  const maker = Maker.create('test', {
+let maker;
+
+beforeAll(async () => {
+  maker = Maker.create('test', {
     plugins: [McdPlugin],
     log: false
   });
 
   await maker.authenticate();
+});
 
+test('contract address mapping', async () => {
   const address = maker
     .service('smartContract')
     .getContractAddressByName('PIP_DGX');
-  expect(address).toEqual('0x174666d4101f6294eba19d0846ec85176d28f2e6');
+  expect(address).toEqual(addresses.PIP_DGX);
+});
+
+test('REP token basic functionality', async () => {
+  const rep = maker.getToken('REP');
+  expect(rep.address()).toEqual(addresses.REP);
+  const balance = await rep.balanceOf(maker.currentAddress());
+  expect(balance).toEqual(REP(0));
 });

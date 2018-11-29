@@ -3,6 +3,9 @@ import contracts from '../../contracts/contracts';
 import { PETH, WETH } from './Currency';
 import tracksTransactions from '../utils/tracksTransactions';
 
+// FIXME we should probably just get rid of this service entirely and move the
+// functions into WethToken and PethToken
+
 export default class TokenConversionService extends PrivateService {
   constructor(name = 'conversion') {
     super(name, ['smartContract', 'token', 'allowance']);

@@ -1,12 +1,12 @@
 import { currencies, getCurrency } from '../Currency';
 
 export default class Erc20Token {
-  constructor(contract, web3Service, decimals = 18, symbol) {
+  constructor(contract, web3Service, decimals = 18, symbol, currency) {
     this._contract = contract;
     this._web3 = web3Service;
     this._decimals = decimals;
     this.symbol = symbol;
-    this._currency = currencies[symbol];
+    this._currency = currency || currencies[symbol];
   }
 
   async allowance(tokenOwner, spender) {

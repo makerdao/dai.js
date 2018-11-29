@@ -12,7 +12,7 @@ function amountToBigNumber(amount) {
   return value;
 }
 
-export class Currency {
+class Currency {
   constructor(amount, shift = 0) {
     if (shift === 'wei') shift = -18;
     if (shift === 'ray') shift = -27;
@@ -158,7 +158,7 @@ const makeCreatorFnWithShift = (creatorFn, symbol, shift) => {
   return fn;
 };
 
-function setupWrapper(symbol) {
+export function createCurrency(symbol) {
   class CurrencyX extends Currency {
     constructor(amount, shift) {
       super(amount, shift);
@@ -178,7 +178,8 @@ function setupWrapper(symbol) {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
     ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
     symbol,
-    wrappedClass: CurrencyX
+    wrappedClass: CurrencyX,
+    isInstance: obj => obj instanceof CurrencyX
   });
 
   return creatorFn;
@@ -186,11 +187,11 @@ function setupWrapper(symbol) {
 
 export const currencies = values(tokens).reduce(
   (output, symbol) => {
-    output[symbol] = setupWrapper(symbol);
+    output[symbol] = createCurrency(symbol);
     return output;
   },
   {
-    USD: setupWrapper('USD')
+    USD: createCurrency('USD')
   }
 );
 
@@ -212,7 +213,7 @@ export function getCurrency(amount, unit) {
 // could either create subclasses for each ratio, or refactor Currency so it
 // also just stores its symbol in the instance rather than the subclass.
 
-export class CurrencyRatio extends Currency {
+class CurrencyRatio extends Currency {
   constructor(amount, numerator, denominator, shift) {
     super(amount, shift);
     this.numerator = numerator.wrappedClass || numerator;
@@ -230,7 +231,8 @@ const setupRatioWrapper = (numerator, denominator) => {
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
     ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
-    symbol
+    symbol,
+    isInstance: obj => obj instanceof CurrencyRatio && obj.symbol === symbol
   });
 
   return creatorFn;

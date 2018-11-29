@@ -6,6 +6,7 @@ import Erc20Token from './tokens/Erc20Token';
 import EtherToken from './tokens/EtherToken';
 import WethToken from './tokens/WethToken';
 import PethToken from './tokens/PethToken';
+import ERC20TokenAbi from '../../contracts/abis/ERC20.json';
 
 export default class EthereumTokenService extends PrivateService {
   constructor(name = 'token') {
@@ -16,10 +17,21 @@ export default class EthereumTokenService extends PrivateService {
       'gasEstimator',
       'transactionManager'
     ]);
+    this._tokens = tokens;
+    this._addedTokens = {};
+  }
+
+  initialize(settings = {}) {
+    if (settings.erc20) {
+      for (const token of settings.erc20) {
+        this._tokens[token.symbol] = token.symbol;
+        this._addedTokens[token.symbol] = [token];
+      }
+    }
   }
 
   getTokens() {
-    return Object.keys(tokens);
+    return Object.keys(this._tokens);
   }
 
   getTokenVersions() {
@@ -27,7 +39,7 @@ export default class EthereumTokenService extends PrivateService {
     return this._selectTokenVersions(mapping);
   }
 
-  getToken(symbol, version = null) {
+  getToken(symbol, version) {
     // support passing in Currency constructors
     if (symbol.symbol) symbol = symbol.symbol;
 
@@ -41,42 +53,40 @@ export default class EthereumTokenService extends PrivateService {
         this.get('gasEstimator'),
         this.get('transactionManager')
       );
-    } else {
-      const mapping = this._getCurrentNetworkMapping(),
-        tokenInfo = mapping[symbol],
-        tokenVersionData =
-          version === null
-            ? tokenInfo[tokenInfo.length - 1]
-            : tokenInfo[version - 1],
-        smartContractService = this.get('smartContract'),
-        contract = smartContractService.getContractByAddressAndAbi(
-          tokenVersionData.address,
-          tokenVersionData.abi
-        );
-
-      if (symbol === tokens.WETH) {
-        return new WethToken(
-          contract,
-          this.get('web3'),
-          tokenVersionData.decimals
-        );
-      }
-
-      if (symbol === tokens.PETH) {
-        if (tokenVersionData.decimals !== 18) {
-          throw new Error('PethToken code hardcodes 18 decimal places.');
-        }
-        const tub = smartContractService.getContractByName(contracts.SAI_TUB);
-        return new PethToken(contract, this.get('web3'), tub);
-      }
-
-      return new Erc20Token(
-        contract,
-        this.get('web3'),
-        tokenVersionData.decimals,
-        symbol
-      );
     }
+
+    const tokenInfo =
+      this._addedTokens[symbol] || this._getCurrentNetworkMapping()[symbol];
+
+    const { address, decimals, abi, currency } = !version
+      ? tokenInfo[tokenInfo.length - 1]
+      : tokenInfo[version - 1];
+
+    const scs = this.get('smartContract');
+    const contract = scs.getContractByAddressAndAbi(
+      address,
+      abi || ERC20TokenAbi
+    );
+
+    if (symbol === tokens.WETH) {
+      return new WethToken(contract, this.get('web3'), decimals);
+    }
+
+    if (symbol === tokens.PETH) {
+      if (decimals !== 18) {
+        throw new Error('PethToken code hardcodes 18 decimal places.');
+      }
+      const tub = scs.getContractByName(contracts.SAI_TUB);
+      return new PethToken(contract, this.get('web3'), tub);
+    }
+
+    return new Erc20Token(
+      contract,
+      this.get('web3'),
+      decimals || 18,
+      symbol,
+      currency
+    );
   }
 
   _getCurrentNetworkMapping() {
