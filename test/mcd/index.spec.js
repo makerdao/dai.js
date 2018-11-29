@@ -1,14 +1,14 @@
-import addresses from './addresses.json';
-import abiMap from './abiMap.json';
-import { mapValues } from 'lodash';
-import Maker from '../../src';
+// import addresses from './addresses.json';
+// import abiMap from './abiMap.json';
+// import { mapValues } from 'lodash';
+// import Maker from '../../src';
+//
+// const mcdContracts = mapValues(addresses, (address, name) => ({
+//   address,
+//   abi: require(`./abi/${abiMap[name]}.json`)
+// }));
 
-const mcdContracts = mapValues(addresses, (address, name) => ({
-  address,
-  abi: require(`./abi/${abiMap[name]}.json`)
-}));
-
-test('mcd contract availability', async () => {
+test.skip('mcd contract availability', async () => {
   const maker = Maker.create('test', {
     smartContract: { addContracts: mcdContracts },
     log: false
