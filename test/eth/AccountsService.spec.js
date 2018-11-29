@@ -117,6 +117,58 @@ test('useAccount', async () => {
   expect(service.currentAddress()).toEqual(a2.address);
 });
 
+test('useAccount throws with invalid name', async () => {
+  const service = new AccountsService();
+  try {
+    service.useAccount('f00');
+  } catch (err) {
+    expect(err.message).toMatch(/No account found with name/);
+  }
+});
+
+test('useAccountWithAddress', async () => {
+  const service = new AccountsService();
+  const engine = (service._engine = mockEngine());
+  const a1 = TestAccountProvider.nextAccount();
+  const a2 = TestAccountProvider.nextAccount();
+  await service.addAccount('foo', { type: 'privateKey', key: a1.key });
+  await service.addAccount('bar', { type: 'privateKey', key: a2.key });
+  service.useAccount('foo');
+  service.useAccountWithAddress(a2.address);
+
+  expect(engine.stop).toBeCalled();
+  expect(engine.removeProvider).toBeCalled();
+  expect(engine.start).toBeCalled();
+  expect(engine.addProvider).toBeCalled();
+  expect(service.currentAddress()).toEqual(a2.address);
+});
+
+test('useAccount throws with invalid address', async () => {
+  const service = new AccountsService();
+  try {
+    service.useAccountWithAddress('0xf00');
+  } catch (err) {
+    expect(err.message).toMatch(/No account found with address/);
+  }
+});
+
+test('add and use account with no name', async () => {
+  const service = new AccountsService();
+  const engine = (service._engine = mockEngine());
+  const a1 = TestAccountProvider.nextAccount();
+  const a2 = TestAccountProvider.nextAccount();
+  await service.addAccount('foo', { type: 'privateKey', key: a1.key });
+  await service.addAccount({ type: 'privateKey', key: a2.key });
+  service.useAccount('foo');
+  service.useAccount(a2.address);
+
+  expect(engine.stop).toBeCalled();
+  expect(engine.removeProvider).toBeCalled();
+  expect(engine.start).toBeCalled();
+  expect(engine.addProvider).toBeCalled();
+  expect(service.currentAddress()).toEqual(a2.address);
+});
+
 test('providerAccountFactory', async () => {
   const rpc = new RpcSource({ rpcUrl: 'http://localhost:2000' });
   const account = await providerAccountFactory(null, rpc);
@@ -127,13 +179,6 @@ describe('mocking window', () => {
   const origWindow = {};
 
   let mockProvider;
-
-  beforeAll(() => {
-    // preserve the original versions of the methods that we will overwrite
-    // with mocks during tests
-    const { postMessage, addEventListener } = window;
-    Object.assign(origWindow, { postMessage, addEventListener });
-  });
 
   beforeEach(() => {
     mockProvider = {
@@ -151,6 +196,26 @@ describe('mocking window', () => {
     delete window.ethereum;
   });
 
+  test('use wrong browser account', async () => {
+    window.web3 = {
+      currentProvider: mockProvider,
+      eth: {
+        defaultAccount: '0xf00bae'
+      }
+    };
+
+    const service = new AccountsService();
+    service._engine = mockEngine();
+    try {
+      await service.addAccount('bar', { type: 'browser' });
+      service.useAccount('bar');
+    } catch (err) {
+      expect(err.message).toBe(
+        'cannot use a browser account that is not currently selected'
+      );
+    }
+  });
+
   test('browserProviderAccountFactory with window.web3', async () => {
     window.web3 = {
       currentProvider: mockProvider
@@ -161,23 +226,29 @@ describe('mocking window', () => {
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
   });
 
-  test('browserProviderAccountFactory with postMessage', async () => {
-    window.postMessage = jest.fn((...args) => {
-      expect(args[0]).toEqual({ type: 'ETHEREUM_PROVIDER_REQUEST' });
-      expect(args[1]).toEqual('*');
-      window.ethereum = mockProvider;
-      document.dispatchEvent(
-        new window.MessageEvent('message', {
-          bubbles: true,
-          data: {
-            type: 'ETHEREUM_PROVIDER_SUCCESS'
-          }
-        })
-      );
-    });
-
+  test('browserProviderAccountFactory with window.ethereum, user accepts provider', async () => {
+    window.ethereum = {
+      enable: () => {
+        window.ethereum['sendAsync'] = mockProvider.sendAsync;
+      }
+    };
     const account = await browserProviderAccountFactory();
     expect(account.address).toEqual('0xf00');
     expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
+  });
+
+  test('browserProviderAccountFactory with window.ethereum, user rejects provider', async () => {
+    window.ethereum = {
+      enable: async () => {
+        window.ethereum['sendAsync'] = mockProvider.sendAsync;
+        throw new Error('nope');
+      }
+    };
+    expect.assertions(1);
+    try {
+      await browserProviderAccountFactory();
+    } catch (err) {
+      expect(err.message).toMatch(/nope/);
+    }
   });
 });

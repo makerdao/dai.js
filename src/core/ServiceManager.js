@@ -109,7 +109,7 @@ class ServiceManager extends ServiceManagerBase {
   }
 
   dependency(name) {
-    if (this._injections[name] === null) {
+    if (!this._injections[name]) {
       throw new DependencyNotResolvedError(this.name(), name);
     }
 

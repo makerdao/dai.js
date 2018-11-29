@@ -56,3 +56,31 @@ test('should return a nonce even when own count is undefined', async () => {
 
   expect(typeof nonce).toEqual('number');
 });
+
+test('should not compare duplicate addresses and nonce counts', async () => {
+  const accountsList = [
+    {
+      name: 'duplicate1',
+      type: 'test',
+      address: '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6'
+    },
+    {
+      name: 'duplicate2',
+      type: 'test',
+      address: '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6'
+    }
+  ];
+
+  const mockListAccounts = jest.fn(() => accountsList);
+  nonceService._accountsService.listAccounts = mockListAccounts;
+
+  const uniqueAddresses = nonceService._removeDuplicateAddresses(accountsList);
+
+  const spy = jest.spyOn(nonceService, '_getTxCount');
+  await nonceService.setCounts();
+
+  expect(spy).toBeCalledTimes(2);
+  expect(Object.keys(nonceService._counts).length).toEqual(
+    uniqueAddresses.length
+  );
+});

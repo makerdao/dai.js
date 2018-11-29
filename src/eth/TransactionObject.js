@@ -10,16 +10,16 @@ export default class TransactionObject extends TransactionLifeCycle {
     transaction,
     web3Service,
     nonceService,
-    businessObject,
-    logsParser = logs => logs
+    { businessObject, metadata } = {}
   ) {
     super(businessObject);
     this._transaction = transaction;
     this._web3Service = web3Service;
     this._nonceService = nonceService;
     this._ethersProvider = web3Service.ethersProvider();
-    this._logsParser = logsParser;
     this._timeStampSubmitted = new Date();
+    this.metadata = metadata;
+    this._confirmedBlockCount = this._web3Service.confirmedBlockCount();
   }
 
   timeStampSubmitted() {
@@ -34,25 +34,30 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this._fees;
   }
 
-  hash() {
-    return this._hash;
-  }
-
-  async mine() {
+  mine() {
     if (!this._dataPromise) this._dataPromise = this._getTransactionData();
-    await this._dataPromise;
-    return this._returnValue();
+    return this._dataPromise.then(() => this._returnValue());
   }
 
-  async confirm(count = 3) {
-    await this.mine();
+  isFinalized() {
+    if (
+      this._blockNumberWhenMined + this._confirmedBlockCount <=
+      this._web3Service.blockNumber()
+    )
+      this.setFinalized();
+    return super.isFinalized();
+  }
 
-    const newBlockNumber = this._receipt.blockNumber + count;
+  async confirm(count = this._confirmedBlockCount) {
+    this._confirmedBlockCount = count;
+    await this.mine();
+    if (parseInt(count) <= 0) return;
+    const newBlockNumber = this.receipt.blockNumber + count;
     await this._web3Service.waitForBlockNumber(newBlockNumber);
     const newReceipt = await this._ethersProvider.getTransactionReceipt(
-      this._hash
+      this.hash
     );
-    if (newReceipt.blockHash !== this._receipt.blockHash) {
+    if (newReceipt.blockHash !== this.receipt.blockHash) {
       throw new Error('transaction block hash changed');
     }
     this.setFinalized();
@@ -63,13 +68,13 @@ export default class TransactionObject extends TransactionLifeCycle {
     try {
       let gasPrice = null;
       let tx = await this._transaction;
-      this._hash = tx.hash;
+      this.hash = tx.hash;
       this.setPending(); // set state to pending
 
       // when you're on a local testnet, a single call to getTransaction should
       // be enough. but on a remote net, it may take multiple calls.
       for (let i = 0; i < 10; i++) {
-        tx = await this._ethersProvider.getTransaction(this._hash);
+        tx = await this._ethersProvider.getTransaction(this.hash);
         if (tx) break;
         await promiseWait(1500);
       }
@@ -83,22 +88,19 @@ export default class TransactionObject extends TransactionLifeCycle {
       // it to be mined.
       if (!tx.blockHash) {
         const startTime = new Date();
-        log(`waitForTransaction ${this._hash}`);
-        tx = await this._ethersProvider.waitForTransaction(this._hash);
+        log(`waitForTransaction ${this.hash}`);
+        tx = await this._ethersProvider.waitForTransaction(this.hash);
         const elapsed = (new Date() - startTime) / 1000;
-        log(`waitForTransaction ${this._hash} done in ${elapsed}s`);
+        log(`waitForTransaction ${this.hash} done in ${elapsed}s`);
       }
 
       gasPrice = tx.gasPrice;
       this._timeStampMined = new Date();
-      const receipt = (this._receipt = await this._waitForReceipt());
+      this._blockNumberWhenMined = tx.blockNumber;
+      this.receipt = await this._waitForReceipt();
 
-      if (typeof this._logsParser === 'function') {
-        this._logsParser(receipt.logs);
-      }
-
-      if (!!receipt.gasUsed && !!gasPrice) {
-        this._fees = ETH.wei(receipt.gasUsed.mul(gasPrice));
+      if (!!this.receipt.gasUsed && !!gasPrice) {
+        this._fees = ETH.wei(this.receipt.gasUsed.mul(gasPrice));
       } else {
         /*
           console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',
@@ -107,7 +109,14 @@ export default class TransactionObject extends TransactionLifeCycle {
           );
         */
       }
-      this.setMined();
+      if (this.receipt.status == '0x1' || this.receipt.status == 1) {
+        this.setMined();
+      } else {
+        //transaction reverted
+        const revertMsg = `transaction with hash ${this.hash} reverted`;
+        log(revertMsg);
+        throw new Error(revertMsg);
+      }
     } catch (err) {
       await this._nonceService.setCounts();
       this.setError(err);
@@ -118,7 +127,7 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   _waitForReceipt(retries = 5) {
     const result = Promise.resolve(
-      this._ethersProvider.getTransactionReceipt(this._hash)
+      this._ethersProvider.getTransactionReceipt(this.hash)
     );
 
     if (retries < 1) return result;

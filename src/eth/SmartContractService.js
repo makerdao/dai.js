@@ -1,9 +1,10 @@
 import PublicService from '../core/PublicService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import networks from '../../contracts/networks';
+import networks, { TESTNET_ID } from '../../contracts/networks';
 import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
+import { mapValues } from 'lodash';
 
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
@@ -23,7 +24,7 @@ export default class SmartContractService extends PublicService {
     }
   }
 
-  getContractByAddressAndAbi(address, abi, { name, hybrid = true } = {}) {
+  getContractByAddressAndAbi(address, abi, { name, wrap = true } = {}) {
     if (!address) throw Error('Contract address is required');
     if (!name) name = this.lookupContractName(address);
 
@@ -32,7 +33,7 @@ export default class SmartContractService extends PublicService {
       .ethersProvider()
       .getSigner();
     const contract = new Contract(address, abi, signer);
-    const txManager = hybrid ? this.get('transactionManager') : null;
+    const txManager = wrap && this.get('transactionManager');
     return wrapContract(contract, name, abi, txManager);
   }
 
@@ -41,11 +42,11 @@ export default class SmartContractService extends PublicService {
     return address;
   }
 
-  getContractByName(name, { version, hybrid = true } = {}) {
+  getContractByName(name, { version, wrap = true } = {}) {
     const info = this._getContractInfo(name, version);
     return this.getContractByAddressAndAbi(info.address, info.abi, {
       name,
-      hybrid
+      wrap
     });
   }
 
@@ -187,7 +188,20 @@ export default class SmartContractService extends PublicService {
     if (!mapping) throw new Error(`Network ID ${id} not found in mapping.`);
     const infos = mapping.contracts;
     if (this._addedContracts) {
-      const infos2 = { ...infos, ...this._addedContracts };
+      const networkName = {
+        [TESTNET_ID]: 'testnet',
+        [42]: 'kovan',
+        [1]: 'mainnet'
+      }[id];
+
+      const infos2 = {
+        ...infos,
+        ...mapValues(this._addedContracts, ([definition]) => {
+          const { address, ...otherProps } = definition;
+          if (typeof address === 'string') return [definition];
+          return [{ address: address[networkName], ...otherProps }];
+        })
+      };
       return infos2;
     }
     return infos;

@@ -16,7 +16,7 @@ export default class Web3Service extends PrivateService {
     this._ethersProvider = null;
     this._blockListeners = {};
     this._currentBlock = null;
-    this._info = { version: {} };
+    this._info = {};
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     this._defaultEmitter = null;
     this._transactionSettings = null;
@@ -24,18 +24,20 @@ export default class Web3Service extends PrivateService {
     Web3ServiceList.push(this);
   }
 
-  version() {
-    return this._info.version;
+  info() {
+    return this._info;
   }
 
   networkId() {
-    const result = this.version().network;
+    const result = this.info().network;
     if (!result) {
       throw new Error('Cannot resolve network ID. Are you connected?');
     }
     return parseInt(result);
   }
 
+  // FIXME this name is confusing--see if this can be gotten rid of entirely; if
+  // not, just rename it to currentAddress
   currentAccount() {
     return this.get('accounts').currentAddress();
   }
@@ -52,8 +54,12 @@ export default class Web3Service extends PrivateService {
     return this._transactionSettings;
   }
 
+  confirmedBlockCount() {
+    return this._confirmedBlockCount;
+  }
+
   web3Contract(abi, address) {
-    return this._web3.eth.contract(abi).at(address);
+    return new this._web3.eth.Contract(abi, address);
   }
 
   async initialize(settings) {
@@ -73,40 +79,39 @@ export default class Web3Service extends PrivateService {
         'estimateGas',
         'getBlock',
         'sendTransaction',
-        'getBalance'
+        'getBalance',
+        'getPastLogs'
       ])
     );
-
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
       provider: { ...settings.provider }
     });
     this._transactionSettings = settings.transactionSettings;
+    this._confirmedBlockCount = settings.confirmedBlockCount || 5;
   }
 
   async connect() {
     this.get('log').info('Web3 is connecting...');
 
-    this._info.version = await promiseProps({
-      api: this._web3.version.api,
-      node: promisify(this._web3.version.getNode)(),
-      network: promisify(this._web3.version.getNetwork)(),
-      ethereum: promisify(this._web3.version.getEthereum)()
+    this._info = await promiseProps({
+      api: this._web3.version,
+      node: promisify(this._web3.eth.getNodeInfo)(),
+      network: promisify(this._web3.eth.net.getId)(),
+      ethereum: promisify(this._web3.eth.getProtocolVersion)()
     });
 
-    if (!this._info.version.node.includes('MetaMask')) {
-      this._info.version.whisper = await promisify(
-        this._web3.version.getWhisper
-      )().catch(() => '');
+    if (!this._info.node.includes('MetaMask')) {
+      this._info.whisper = this._web3.shh;
     }
     this._setUpEthers(this.networkId());
     this._installDisconnectCheck();
     await this._initEventPolling();
     this._defaultEmitter.emit('web3/CONNECTED', {
-      ...this._info.version
+      ...this._info
     });
-    this.get('log').info('Web3 version: ', this._info.version);
+    this.get('log').info('Web3 version: ', this._info.api);
   }
 
   async authenticate() {
@@ -119,7 +124,7 @@ export default class Web3Service extends PrivateService {
   }
 
   getNetwork() {
-    return this._info.version.network;
+    return this._info.network;
   }
 
   blockNumber() {
@@ -136,7 +141,8 @@ export default class Web3Service extends PrivateService {
 
   async waitForBlockNumber(blockNumber) {
     if (blockNumber < this._currentBlock) {
-      throw new Error('Cannot wait for past block ' + blockNumber);
+      console.error('Attempted to wait for past block ' + blockNumber);
+      return;
     }
 
     if (blockNumber === this._currentBlock) {
@@ -153,7 +159,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _updateBlockNumber(blockNumber) {
-    this.get('log').info('New block: ', blockNumber);
+    this.get('log').info('New block:', blockNumber);
     this._currentBlock = blockNumber;
 
     if (this._blockListeners[blockNumber]) {
@@ -221,8 +227,12 @@ export default class Web3Service extends PrivateService {
   }
 
   _isStillConnected() {
-    return promisify(this._web3.version.getNetwork)()
-      .then(network => network === this._info.version['network'])
+    // only determine network change as disconnect if service is connected
+    if (!this.manager().isConnected()) {
+      return false;
+    }
+    return promisify(this._web3.eth.net.getId)()
+      .then(network => network === this._info['network'])
       .catch(() => false);
   }
 

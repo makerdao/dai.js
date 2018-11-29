@@ -1,6 +1,7 @@
 import PrivateService from '../core/PrivateService';
 import contracts from '../../contracts/contracts';
-import { getCurrency, ETH, PETH, WETH } from './Currency';
+import { PETH, WETH } from './Currency';
+import tracksTransactions from '../utils/tracksTransactions';
 
 export default class TokenConversionService extends PrivateService {
   constructor(name = 'conversion') {
@@ -11,22 +12,47 @@ export default class TokenConversionService extends PrivateService {
     return this.get('token').getToken(token);
   }
 
-  convertEthToWeth(amount, unit = ETH) {
-    return this._getToken(WETH).deposit(getCurrency(amount, unit));
+  convertEthToWeth(amount, options) {
+    return this._getToken(WETH).deposit(amount, options);
   }
 
-  async convertWethToPeth(amount, unit = WETH) {
-    const pethToken = this._getToken(PETH);
+  @tracksTransactions
+  async convertWethToPeth(amount, { unit = WETH, promise } = {}) {
+    const pethContract = this._getToken(PETH);
 
     await this.get('allowance').requireAllowance(
       WETH,
-      this.get('smartContract').getContractByName(contracts.SAI_TUB).address
+      this.get('smartContract').getContractByName(contracts.SAI_TUB).address,
+      { promise }
     );
-    return pethToken.join(amount, unit);
+    return pethContract.join(amount, { unit, promise });
   }
 
-  async convertEthToPeth(value) {
-    await this.convertEthToWeth(value);
-    return this.convertWethToPeth(value);
+  @tracksTransactions
+  async convertEthToPeth(value, { promise }) {
+    await this.convertEthToWeth(value, { promise });
+    return this.convertWethToPeth(value, { promise });
+  }
+
+  convertWethToEth(amount, options) {
+    return this._getToken(WETH).withdraw(amount, options);
+  }
+
+  @tracksTransactions
+  async convertPethToWeth(amount, { unit = WETH, promise }) {
+    const pethToken = this._getToken(PETH);
+
+    await this.get('allowance').requireAllowance(
+      PETH,
+      this.get('smartContract').getContractByName(contracts.SAI_TUB).address,
+      { promise }
+    );
+    return pethToken.exit(amount, { unit, promise });
+  }
+
+  @tracksTransactions
+  async convertPethToEth(amount, { promise }) {
+    await this.convertPethToWeth(amount, { promise });
+    return this.convertWethToEth(amount, { promise });
   }
 }

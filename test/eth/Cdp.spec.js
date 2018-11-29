@@ -13,6 +13,7 @@ import {
 import { promiseWait } from '../../src/utils';
 import { dappHub } from '../../contracts/abis';
 import testnetAddresses from '../../contracts/addresses/testnet.json';
+import { mineBlocks } from '../helpers/transactionConfirmation';
 
 let cdpService, cdp, currentAccount, dai, dsProxyAddress, smartContractService;
 
@@ -49,7 +50,7 @@ function getDsProxy(address) {
   return smartContractService.getContractByAddressAndAbi(
     address,
     dappHub.dsProxy,
-    { name: 'DS_PROXY', hybrid: true }
+    { name: 'DS_PROXY' }
   );
 }
 
@@ -110,7 +111,9 @@ const sharedTests = openCdp => {
   describe('bite', () => {
     beforeAll(async () => {
       await openCdp();
-      await cdp.lockEth(0.1);
+      const tx = cdp.lockEth(0.1);
+      mineBlocks(cdpService);
+      await tx;
       await cdp.drawDai(13);
     });
 
@@ -135,7 +138,9 @@ const sharedTests = openCdp => {
   describe('a cdp with collateral', () => {
     beforeAll(async () => {
       await openCdp();
-      await cdp.lockEth(0.2);
+      const tx = cdp.lockEth(0.2);
+      mineBlocks(cdpService);
+      await tx;
     });
 
     test('read ink', async () => {
@@ -194,9 +199,9 @@ const sharedTests = openCdp => {
           await cdpService.get('price').setMkrPrice(600);
           // block.timestamp is measured in seconds, so we need to wait at least a
           // second for the fees to get updated
-          const usdFee = await cdp.getGovernanceFee();
+          const usdFee = await cdp.getGovernanceFee(USD);
           expect(usdFee.gt(0)).toBeTruthy();
-          const mkrFee = await cdp.getGovernanceFee(MKR);
+          const mkrFee = await cdp.getGovernanceFee();
           expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
         });
 
@@ -220,7 +225,75 @@ const sharedTests = openCdp => {
             await cdp.wipeDai(1);
           } catch (err) {
             expect(err).toBeTruthy();
-            expect(err.message).toMatch(/revert/);
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
+        test('fail to wipe debt due to lack of MKR, despite having MKR', async () => {
+          expect.assertions(3);
+          const amountToWipe = DAI(1);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const [fee, debt, balance] = await Promise.all([
+            cdp.getGovernanceFee(MKR),
+            cdp.getDebtValue(),
+            mkr.balanceOf(currentAccount)
+          ]);
+          const mkrOwed = amountToWipe
+            .div(debt)
+            .toBigNumber()
+            .times(fee.toBigNumber());
+          const mkrToSendAway = balance.minus(mkrOwed.times(0.99)); //keep 99% of MKR needed
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, mkrToSendAway);
+          const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
+          expect(enoughMkrToWipe).toBe(false);
+          try {
+            await cdp.wipeDai(1);
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
+        test('fail to shut due to lack of MKR', async () => {
+          expect.assertions(2);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+          try {
+            await cdp.shut();
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
+          }
+        });
+
+        test('fail to shut due to lack of MKR, despite having MKR', async () => {
+          expect.assertions(3);
+          const mkr = cdpService.get('token').getToken(MKR);
+          const [fee, debt, balance] = await Promise.all([
+            cdp.getGovernanceFee(MKR),
+            cdp.getDebtValue(),
+            mkr.balanceOf(currentAccount)
+          ]);
+          const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
+          const other = TestAccountProvider.nextAddress();
+          await mkr.transfer(other, mkrToSendAway);
+          const enoughMkrToWipe = await cdp.enoughMkrToWipe(debt);
+          expect(enoughMkrToWipe).toBe(false);
+          try {
+            await cdp.shut();
+          } catch (err) {
+            expect(err).toBeTruthy();
+            expect(err.message).toBe(
+              'not enough MKR balance to cover governance fee'
+            );
           }
         });
       });
@@ -267,7 +340,7 @@ const sharedTests = openCdp => {
 describe('non-proxy cdp', () => {
   async function openNonProxyCdp() {
     cdp = await cdpService.openCdp();
-    return cdp.getId();
+    return cdp.id;
   }
 
   sharedTests(openNonProxyCdp);
@@ -320,25 +393,69 @@ describe('non-proxy cdp', () => {
   });
 });
 
-test('create DSProxy and open CDP', async () => {
-  try {
-    const cdp = await cdpService.openProxyCdp();
-    const id = await cdp.getId();
-    expect(id).toBeGreaterThan(0);
-
-    // this value is used in the proxy cdp tests below
-    dsProxyAddress = await cdp.getDsProxyAddress();
-    expect(dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-  } catch (err) {
-    console.error(err);
-  }
-});
-
 describe('proxy cdp', () => {
+  let ethToken;
+
+  beforeAll(() => {
+    const tokenService = cdpService.get('token');
+    ethToken = tokenService.getToken(ETH);
+  });
+
   async function openProxyCdp() {
     cdp = await cdpService.openProxyCdp(dsProxyAddress);
-    return cdp.getId();
+    return cdp.id;
   }
+
+  test('create DSProxy and open CDP (single tx)', async () => {
+    const cdp = await cdpService.openProxyCdp();
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+
+    // this value is used in the proxy cdp tests below
+    dsProxyAddress = cdp.dsProxyAddress;
+  });
+
+  test('create DSProxy, open CDP, lock ETH and draw DAI (single tx)', async () => {
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(0.1, 1);
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
+      0.1,
+      1,
+      dsProxyAddress
+    );
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
+
+  test('use existing DSProxy to open CDP, then lock ETH and draw DAI (multi tx)', async () => {
+    const cdp = await cdpService.openProxyCdp(dsProxyAddress);
+    const balancePre = await ethToken.balanceOf(currentAccount);
+    const cdpInfoPre = await cdp.getInfo();
+    await cdp.lockEthAndDrawDai(0.1, 1);
+    const cdpInfoPost = await cdp.getInfo();
+    const balancePost = await ethToken.balanceOf(currentAccount);
+
+    // ETH balance should now be reduced by (at least) 0.1 (plus gas)
+    expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
+    expect(cdpInfoPre.ink.toString()).toEqual('0');
+    expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
+  });
 
   sharedTests(openProxyCdp);
 });

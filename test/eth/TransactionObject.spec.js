@@ -3,74 +3,134 @@ import {
   buildTestService
 } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
+import {
+  //createOutOfEthTransaction,
+  mineBlocks
+} from '../helpers/transactionConfirmation';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';
-import { ETH, WETH } from '../../src/eth/Currency';
+import { ETH, MKR, WETH } from '../../src/eth/Currency';
 
-let service;
+let service, mkr, testAddress;
 
-beforeAll(async () => {
-  service = buildTestEthereumTokenService();
-  await service.manager().authenticate();
-});
-
-function createTestTransaction(srv = service) {
-  const wethToken = srv.getToken(WETH);
-  return wethToken.approveUnlimited(TestAccountProvider.nextAddress());
+function createTestTransaction(tokenService) {
+  const wethToken = tokenService.getToken(WETH);
+  const promise = wethToken.approveUnlimited(TestAccountProvider.nextAddress());
+  const txMgr = tokenService.get('transactionManager');
+  return [promise, txMgr.getTransaction(promise)];
 }
 
-test('event listeners work as promises', async () => {
-  expect.assertions(3);
-  const tx = createTestTransaction();
-  tx.onPending().then(tx => {
-    expect(tx.state()).toBe(TransactionState.pending);
+describe('normal web service behavior', () => {
+  beforeEach(async () => {
+    service = buildTestEthereumTokenService();
+    await service.manager().authenticate();
+    mkr = service.getToken(MKR);
+    testAddress = TestAccountProvider.nextAddress();
   });
 
-  tx.onMined().then(tx => {
-    expect(tx.state()).toBe(TransactionState.mined);
-
-    // create more blocks so that the original tx gets confirmed
-    for (let i = 0; i < 3; i++) {
-      createTestTransaction();
-    }
+  test('onConfirmed alias works like onFinalized', async () => {
+    expect.assertions(1);
+    const [promise, tx] = createTestTransaction(service);
+    tx.onConfirmed(tx => {
+      expect(tx.state()).toBe(TransactionState.finalized);
+    });
+    await promise;
+    await Promise.all([tx.confirm(), mineBlocks(service)]);
   });
 
-  tx.onFinalized().then(tx => {
-    expect(tx.state()).toBe(TransactionState.finalized);
+  test('get fees', async () => {
+    const [promise, tx] = createTestTransaction(service);
+    await promise;
+    expect(tx.fees().gt(ETH.wei(20000))).toBeTruthy();
   });
 
-  await tx.confirm();
-});
-
-test('get fees', async () => {
-  const tx = await createTestTransaction().mine();
-  expect(tx.fees().gt(ETH.wei(20000))).toBeTruthy();
-});
-
-test('event listeners work as callbacks', async () => {
-  expect.assertions(3);
-  const tx = createTestTransaction();
-  tx.onPending(() => {
-    expect(tx.state()).toBe(TransactionState.pending);
-  });
-  tx.onMined(() => {
-    expect(tx.state()).toBe(TransactionState.mined);
-
-    // create more blocks so that the original tx gets confirmed
-    for (let i = 0; i < 3; i++) {
-      createTestTransaction();
-    }
-  });
-  tx.onFinalized(() => {
-    expect(tx.state()).toBe(TransactionState.finalized);
+  test('event listeners work as callbacks', async () => {
+    expect.assertions(3);
+    const [promise, tx] = createTestTransaction(service);
+    tx.onPending(() => {
+      expect(tx.state()).toBe(TransactionState.pending);
+    });
+    tx.onMined(() => {
+      expect(tx.state()).toBe(TransactionState.mined);
+    });
+    tx.onFinalized(() => {
+      expect(tx.state()).toBe(TransactionState.finalized);
+    });
+    await promise;
+    await Promise.all([tx.confirm(), mineBlocks(service)]);
   });
 
-  await tx.confirm();
+  describe('reverted transaction handling', () => {
+    const testErrorHandling = (
+      operation,
+      errorMessageMatch,
+      checkPending = true
+    ) => async () => {
+      expect.assertions(checkPending ? 5 : 4);
+      let mined = false;
+      const promise = operation();
+      const tx = service.get('transactionManager').getTransaction(promise);
+
+      if (checkPending) {
+        tx.onPending(() => {
+          expect(tx.state()).toBe(TransactionState.pending);
+        });
+      }
+      tx.onMined(() => {
+        mined = true;
+      });
+      tx.onError(err => {
+        expect(err.message).toMatch(errorMessageMatch);
+      });
+
+      try {
+        await promise;
+      } catch (err) {
+        expect(tx.state()).toEqual(TransactionState.error);
+        expect(mined).toBe(false);
+        expect(err.message).toMatch(errorMessageMatch);
+      }
+    };
+
+    test(
+      'generic error',
+      testErrorHandling(() => mkr.transfer(testAddress, '2000000'), /reverted/)
+    );
+
+    test(
+      'out of gas',
+      testErrorHandling(
+        () => mkr.approveUnlimited(testAddress, { gasLimit: 40000 }),
+        /reverted/
+      )
+    );
+
+    test(
+      'gas limit below base fee',
+      testErrorHandling(
+        () => mkr.approveUnlimited(testAddress, { gasLimit: 20 }),
+        /base fee exceeds gas limit/,
+        false
+      )
+    );
+
+    test('not enough ETH', async () => {
+      expect.assertions(1);
+      const ether = service.getToken(ETH);
+      const promise = ether.transfer(testAddress, 20000);
+      try {
+        await promise;
+      } catch (err) {
+        expect(err.message).toMatch('enough funds');
+      }
+    });
+  });
 });
 
 class DelayingWeb3Service extends Web3Service {
   ethersProvider() {
+    if (!this.shouldDelay) return super.ethersProvider();
     return new Proxy(super.ethersProvider(), {
       get(target, key) {
         if (key === 'getTransaction') {
@@ -98,40 +158,8 @@ test('waitForTransaction', async () => {
     web3: [new DelayingWeb3Service(), { provider: { type: 'TEST' } }]
   });
   await service.manager().authenticate();
-
-  const tx = createTestTransaction(service);
-  await tx.mine();
+  service.get('web3').shouldDelay = true;
+  const [promise, tx] = createTestTransaction(service);
+  await promise;
   expect(tx.state()).toBe('mined');
-});
-
-class FailingWeb3Service extends Web3Service {
-  ethersProvider() {
-    return new Proxy(super.ethersProvider(), {
-      get(target, key) {
-        if (key === 'getTransactionReceipt') {
-          return async () => {
-            throw new Error('test error');
-          };
-        }
-        return target[key];
-      }
-    });
-  }
-}
-
-test('error event listener works', async () => {
-  expect.assertions(1);
-  const service = buildTestService('token', {
-    token: true,
-    web3: [new FailingWeb3Service(), { provider: { type: 'TEST' } }]
-  });
-  await service.manager().authenticate();
-  const tx = createTestTransaction(service);
-  tx.onError(error => expect(error).toEqual('test error'));
-  try {
-    await tx;
-  } catch (err) {
-    // FIXME not sure why this try/catch is necessary...
-    // console.log('hmm.', err);
-  }
 });

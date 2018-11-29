@@ -1,11 +1,10 @@
 # Dai.js
 
-[![node][node]][node-url]
-[![npm][npm]][npm-url]
-<!-- these will work once the repo is public
-[![tests][tests]][tests-url]
-[![coverage][cover]][cover-url]
--->
+[![GitHub License][license]][license-url]
+[![NPM][npm]][npm-url]
+[![Build Status][build]][build-url]
+[![Coverage Status][cover]][cover-url]
+
 
 **Dai.js** is a JavaScript library that makes it easy to build applications on top of [MakerDAO][makerdao]'s Dai Stablecoin System. You can use Maker's contracts to open Collateralized Debt Positions, withdraw loans in Dai, trade tokens on OasisDEX, and more.
 
@@ -65,14 +64,30 @@ For example code that consumes the library, check out [this repository](https://
 
 1. `git clone https://github.com/makerdao/dai.js`
 2. `yarn install`
+3. Install testchain - `git submodule update --init --recursive`
+4. Install [dapptools](https://dapp.tools/) - `curl https://dapp.tools/install | sh`
 
-### Running the tests
+### Running the unit tests
 
 The test suite is configured to run on a Ganache test chain. Before running the tests with `yarn test`, the test chain will start from a snapshot that has the Maker contracts deployed to it.
 
 If you want to re-run the tests whenever you make a change to the code, use `yarn test:watch`.
 
 If you want to start a test chain and leave it running, use `yarn test:net`.
+
+### Running the integration tests
+
+There are also automated tests that send transactions through either the Kovan test network or the Ethereum main network. To use them, first set your private key for the appropriate network to an environment variable:
+
+`export PRIVATE_KEY="0x..."`
+
+Then, use either `yarn test:kovan` or `yarn test:mainnet` to run the tests.
+
+Since these networks run much more slowly than Ganache, you might want to set the debug environment variable (in order to see some relevant output along the way):
+
+`export DEBUG="dai:testing"`
+
+You can also run these tests on the local test network with the command `yarn test:integration`.
 
 ### Handling changes to contract code
 
@@ -87,22 +102,28 @@ If you have deployed contract code changes to the testchain, run `scripts/instal
 - `yarn test` - start a test chain and run all tests
 - `yarn test:watch` - start a test chain and run all tests in watch mode
 - `yarn test:net` - just start a test chain
+- `yarn test:kovan` - run integration tests on Kovan
+- `yarn test:mainnet` - run integration tests on mainnet
+- `yarn test:integration` - run integration tests on Ganache
 
 ## License
 
 **Dai.js** is available under the MIT license included with the code.
 
-[npm]: https://img.shields.io/badge/npm-5.6.0-blue.svg
-[npm-url]: https://npmjs.com/
-
-[node]: https://img.shields.io/node/v/latest.svg
-[node-url]: https://nodejs.org
+[npm]: https://img.shields.io/npm/v/@makerdao/dai.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/@makerdao/dai
 
 [tests]: http://img.shields.io/travis/makerdao/dai.js.svg
 [tests-url]: https://travis-ci.org/makerdao/dai.js
 
-[cover]: https://codecov.io/gh/makerdao/dai.js/branch/master/graph/badge.svg
-[cover-url]: https://codecov.io/gh/makerdao/dai.js
+[license]: https://img.shields.io/badge/license-MIT-blue.svg
+[license-url]: https://github.com/makerdao/dai.js/blob/dev/LICENSE
+
+[build]: https://travis-ci.com/makerdao/dai.js.svg?branch=dev
+[build-url]: https://travis-ci.com/makerdao/dai.js
+
+[cover]: https://codecov.io/gh/makerdao/dai.js/branch/dev/graph/badge.svg
+[cover-url]: https://codecov.io/github/makerdao/dai.js?branch=dev
 
 [makerdao]: https://makerdao.com
 [docs]: https://makerdao.com/documentation

@@ -1,5 +1,6 @@
 import { utils } from 'ethers';
 import { getCurrency, ETH } from '../Currency';
+import tracksTransactions from '../../utils/tracksTransactions';
 
 export default class EtherToken {
   constructor(web3Service, gasEstimatorService, transactionManager) {
@@ -17,7 +18,7 @@ export default class EtherToken {
     return this._web3
       .ethersProvider()
       .getBalance(owner)
-      .then(b => utils.formatEther(b));
+      .then(b => ETH(utils.formatEther(b)));
   }
 
   // eslint-disable-next-line
@@ -30,37 +31,37 @@ export default class EtherToken {
     return Promise.resolve(true);
   }
 
-  async transfer(toAddress, amount, unit = ETH) {
-    const value = getCurrency(amount, unit)
-      .toEthersBigNumber('wei')
-      .toString();
-    const nonce = await this._transactionManager.get('nonce').getNonce();
-    const currentAccount = this._web3.currentAccount();
-    const tx = this._web3.eth.sendTransaction({
-      from: currentAccount,
-      to: toAddress,
-      value,
-      nonce: nonce
-      //gasPrice: 500000000
-    });
-
-    return this._transactionManager.createHybridTx(
-      tx.then(tx => ({ hash: tx }))
+  @tracksTransactions
+  async transfer(toAddress, amount, options) {
+    return this.transferFrom(
+      this._web3.currentAccount(),
+      toAddress,
+      amount,
+      options
     );
   }
 
-  async transferFrom(fromAddress, toAddress, transferValue) {
-    const nonce = await this._transactionManager.get('nonce').getNonce();
-    const valueInWei = utils.parseEther(transferValue).toString();
-    const tx = this._web3.eth.sendTransaction({
-      nonce: nonce,
-      from: fromAddress,
-      to: toAddress,
-      value: valueInWei
-    });
-
-    return this._transactionManager.createHybridTx(
-      tx.then(tx => ({ hash: tx }))
+  @tracksTransactions
+  async transferFrom(fromAddress, toAddress, amount, { unit = ETH, promise }) {
+    return this._transactionManager.sendTransaction(
+      {
+        from: fromAddress,
+        to: toAddress,
+        value: getCurrency(amount, unit)
+          .toEthersBigNumber('wei')
+          .toString()
+      },
+      {
+        metadata: {
+          action: {
+            name: 'transfer',
+            from: fromAddress,
+            to: toAddress,
+            amount: getCurrency(amount, unit)
+          }
+        },
+        promise
+      }
     );
   }
 }

@@ -8,4 +8,6 @@ npm-debug.log
 /out
 .DS_Store
 ganache.out
+yarn.lock
 package-lock.json
+.vscode/

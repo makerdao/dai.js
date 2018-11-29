@@ -10,7 +10,7 @@ function buildDisconnectingService(disconnectAfter = 25) {
     service
       .get('timer')
       .createTimer('disconnect', disconnectAfter, false, () => {
-        service._web3.version.getNetwork = () => {
+        service._web3.eth.net.getId = () => {
           throw new Error('fake disconnection error');
         };
       });
@@ -25,7 +25,7 @@ function buildNetworkChangingService(changeNetworkAfter = 25) {
     service
       .get('timer')
       .createTimer('changeNetwork', changeNetworkAfter, false, () => {
-        service._web3.version.getNetwork = cb => cb(undefined, 999); //fake network id
+        service._info.network = cb => cb(undefined, 999); //fake network id
       });
   });
   return service;
@@ -60,7 +60,10 @@ function buildTestService(key, statusTimerDelay = 5000) {
   const config = {
     web3: {
       statusTimerDelay,
-      provider: { type: ProviderType.TEST }
+      provider: { type: ProviderType.TEST },
+      transactionSettings: {
+        gasPrice: 1
+      }
     }
   };
   if (key) {
@@ -94,12 +97,12 @@ test('fetch version info on connect', done => {
     .manager()
     .connect()
     .then(() => {
-      expect(web3.version().api).toMatch(/^([0-9]+\.)*[0-9]+$/);
-      expect(web3.version().node).toMatch(
-        /^(Parity)|(MetaMask)|(EthereumJS.*)$/
+      expect(web3.info().api).toMatch(
+        /^([0-9]+\.)*[0-9]([-][b][e][t][a][.]([0-9])*)*$/
       );
-      expect(web3.version().network).toMatch(/^[0-9]+$/);
-      expect(web3.version().ethereum).toMatch(/^[0-9]+$/);
+      expect(web3.info().node).toMatch(/^(Parity)|(MetaMask)|(EthereumJS.*)$/);
+      expect(web3.info().network.toString()).toMatch(/^[0-9]+$/);
+      expect(web3.info().ethereum).toMatch(/^[0-9]+$/);
       done();
     });
 });
@@ -108,7 +111,7 @@ test('throw error on a failure to connect', async () => {
   expect.assertions(1);
   const service = buildTestService();
   await service.manager().initialize();
-  service._web3.version.getNode = cb => {
+  service._web3.eth.getNodeInfo = cb => {
     cb(new Error('fake connection failure error'));
   };
 
@@ -135,6 +138,25 @@ test('be authenticated and know default address when private key passed in', don
       );
       done();
     });
+});
+
+test('determine correct connection status', async done => {
+  const service = buildTestService();
+
+  expect(await service._isStillConnected()).toBe(false);
+  await service.manager().connect();
+  expect(await service._isStillConnected()).toBe(true);
+
+  service.manager().onDisconnected(async () => {
+    expect(await service._isStillConnected()).toBe(false);
+    done();
+  });
+
+  service.get('timer').createTimer('disconnect', 25, false, () => {
+    service._web3.eth.net.getId = () => {
+      throw new Error('fake disconnection error');
+    };
+  });
 });
 
 test('handle automatic disconnect', done => {
@@ -216,7 +238,8 @@ test('connect to ganache testnet with account 0x16fb9...', done => {
     .connect()
     .then(() => service.eth.getAccounts())
     .then(accounts => {
-      expect(accounts.slice(0, 2)).toEqual(expectedAccounts);
+      expect(accounts[0].toLowerCase()).toEqual(expectedAccounts[0]);
+      expect(accounts[1].toLowerCase()).toEqual(expectedAccounts[1]);
       done();
     })
     .catch(console.error);
@@ -230,7 +253,7 @@ test('have ETH in test account', done => {
     .connect()
     .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
-      expect(Number(service._web3.fromWei(balance))).toBeGreaterThan(50);
+      expect(Number(service._web3.utils.fromWei(balance))).toBeGreaterThan(50);
       done();
     });
 });
@@ -244,4 +267,31 @@ test('connect to kovan', async () => {
   }
   expect(service.manager().isConnected()).toBe(true);
   expect(service.networkId()).toBe(42);
+});
+
+test('stores transaction settings from config', async () => {
+  const service = buildTestService();
+  await service.manager().authenticate();
+  const settings = service.transactionSettings();
+  expect(settings).toEqual({ gasPrice: 1 });
+});
+
+test('stores confirmed block count from config', async () => {
+  const config = {
+    web3: {
+      provider: { type: ProviderType.TEST },
+      confirmedBlockCount: 8
+    }
+  };
+  const service = buildTestServiceCore('web3', config);
+  await service.manager().authenticate();
+  const count = service.confirmedBlockCount();
+  expect(count).toEqual(8);
+});
+
+test('sets default confirmed block count', async () => {
+  const service = buildTestService();
+  await service.manager().authenticate();
+  const count = service.confirmedBlockCount();
+  expect(count).toEqual(5);
 });

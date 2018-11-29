@@ -107,6 +107,15 @@ test('should capture transaction settings', () => {
   expect(config.web3[1].transactionSettings).toEqual(txSettings);
 });
 
+test('should capture confirmedBlockCount', () => {
+  const config = ConfigFactory.create('http', {
+    web3: {
+      confirmedBlockCount: 8
+    }
+  });
+  expect(config.web3[1].confirmedBlockCount).toEqual(8);
+});
+
 test('allow new service roles if specified', () => {
   const config = ConfigFactory.create('http', {
     additionalServices: ['foo'],

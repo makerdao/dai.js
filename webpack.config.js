@@ -10,10 +10,10 @@ module.exports = {
     filename: '[name].[hash].js',
     sourceMapFilename: '[name].[hash].js.map',
     library: '@makerdao/dai',
-    libraryTarget: 'umd',
+    libraryTarget: 'umd'
   },
   resolve: {
-    extensions: ['.js', '.json'],
+    extensions: ['.js', '.json']
   },
   module: {
     rules: [
@@ -24,16 +24,13 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['env', 'stage-2'],
-            // plugins: [
-            //   "syntax-async-functions",
-            //   "transform-regenerator"
-            // ]
-          },
-        },
+            plugins: ['transform-decorators-legacy']
+          }
+        }
       },
       {
         test: /\.json$/,
-        loader: 'json-loader',
+        loader: 'json-loader'
       },
       {
         enforce: 'pre', //to check source files, not modified by other loaders (like babel-loader)
@@ -41,7 +38,7 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'eslint-loader',
         options: {
-          'ignorePattern': '**/*.scss'
+          ignorePattern: '**/*.scss'
         }
       }
     ]
@@ -58,21 +55,20 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env': {
-        'NODE_ENV': JSON.stringify('production')
+        NODE_ENV: JSON.stringify('production')
       }
     }),
-    new UglifyJSPlugin({ uglifyOptions: {
-      beautify: false,
-      mangle: {
-        keep_fnames: true
-      },
-      comments: false
-    }
+    new UglifyJSPlugin({
+      uglifyOptions: {
+        beautify: false,
+        mangle: {
+          keep_fnames: true
+        },
+        comments: false
+      }
     })
   ],
-  externals: [
-    'child_process'
-  ]
+  externals: ['child_process']
 };
 
 if (process.env.ANALYZE_BUNDLE) {
