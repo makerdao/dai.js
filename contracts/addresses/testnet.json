@@ -1,4 +1,6 @@
 {
+  "ETH_RPC_URL": "127.0.0.1:2000",
+  "ETH_FROM": "0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6",
   "GEM": "0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238",
   "GOV": "0x1c3ac7216250edc5b9daa5598da0579688b9dbd5",
   "PIP": "0xb7092ee7a8c4c85431962662310bbdcd4fd519e9",
