@@ -5,6 +5,7 @@ import promiseProps from 'promise-props';
 import Web3 from 'web3';
 import ProviderType from './web3/ProviderType';
 import makeSigner from './web3/ShimEthersSigner';
+import getMatchingEvent from './web3/LogEvent';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -107,51 +108,7 @@ export default class Web3Service extends PrivateService {
   }
 
   waitForMatchingEvent(info, event, predicateFn = () => true) {
-    const { address, abi } = info;
-    const abiObj = abi.reduce(
-      (acc, target) => ({
-        ...acc,
-        [target.name]: target
-      }),
-      {}
-    );
-
-    const getTopics = () => {
-      const { sha3 } = this._web3.utils;
-      let topics = [];
-      let name = abiObj[event].name + '(';
-      for (let i in abiObj[event].inputs) {
-        name += abiObj[event].inputs[i].type + ',';
-      }
-      topics[0] = sha3(name.substring(0, name.length - 1) + ')');
-      return topics;
-    };
-
-    const parseRawLog = (log, event) => {
-      if (!event.anonymous) {
-        log.topics.shift();
-      }
-      return this._web3.eth.abi.decodeLog(event.inputs, log.data, log.topics);
-    };
-
-    return new Promise((resolve, reject) => {
-      const sub = this._web3.eth.subscribe(
-        'logs',
-        { address, topics: getTopics() },
-        async (err, rawLogData) => {
-          if (err) reject(err);
-          const log = parseRawLog(rawLogData, abiObj[event]);
-          if (predicateFn(log)) {
-            sub.unsubscribe((err, success) => {
-              if (!success) {
-                reject(err);
-              }
-            });
-            resolve(log);
-          }
-        }
-      );
-    });
+    return getMatchingEvent(this._web3, info, event, predicateFn);
   }
 
   async initialize(settings) {
