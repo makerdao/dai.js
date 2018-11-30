@@ -61,7 +61,7 @@ export default class EthereumCdpService extends PrivateService {
     return this.get('conversion');
   }
 
-  async _findCdp(id, dsProxyAddress = null) {
+  async _findCdp(id, dsProxy = null) {
     if (typeof id !== 'number') {
       throw new Error('ID must be a number.');
     }
@@ -69,9 +69,9 @@ export default class EthereumCdpService extends PrivateService {
     if (info.lad.toString() === '0x0000000000000000000000000000000000000000') {
       throw new Error("That CDP doesn't exist--try opening a new one.");
     }
-    return dsProxyAddress === null
+    return dsProxy === null
       ? new Cdp(this, id)
-      : new ProxyCdp(this, dsProxyAddress, id);
+      : new ProxyCdp(this, dsProxy, id);
   }
 
   async _throwIfNotEnoughMkrToWipe(cdpId, amountToWipe, unit = DAI) {
@@ -110,20 +110,20 @@ export default class EthereumCdpService extends PrivateService {
     return new Cdp(this).transactionObject();
   }
 
-  openProxyCdp(dsProxyAddress = null) {
-    return new ProxyCdp(this, dsProxyAddress).transactionObject();
+  openProxyCdp(dsProxy = null) {
+    return new ProxyCdp(this, dsProxy).transactionObject();
   }
 
-  openProxyCdpLockEthAndDrawDai(amountEth, amountDai, dsProxyAddress = null) {
-    return new ProxyCdp(this, dsProxyAddress, null, {
+  openProxyCdpLockEthAndDrawDai(amountEth, amountDai, dsProxy = null) {
+    return new ProxyCdp(this, dsProxy, null, {
       lockAndDraw: true,
       amountEth,
       amountDai
     }).transactionObject();
   }
 
-  getCdp(id, dsProxyAddress = null) {
-    return this._findCdp(id, dsProxyAddress);
+  getCdp(id, dsProxy = null) {
+    return this._findCdp(id, dsProxy);
   }
 
   async shut(cdpId) {
@@ -379,7 +379,7 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().bite(hexCdpId, options);
   }
 
-  freeEthProxy(dsProxyAddress, cdpId, amount) {
+  freeEthProxy(dsProxy, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, ETH).toEthersBigNumber('wei');
 
@@ -388,20 +388,20 @@ export default class EthereumCdpService extends PrivateService {
       hexCdpId,
       value,
       {
-        dsProxyAddress,
+        dsProxy,
         metadata: {
           action: {
             name: 'free',
             id: cdpId,
             amount: getCurrency(amount, ETH),
-            proxy: dsProxyAddress
+            proxy: dsProxy
           }
         }
       }
     );
   }
 
-  lockEthProxy(dsProxyAddress, cdpId, amount) {
+  lockEthProxy(dsProxy, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, ETH).toEthersBigNumber('wei');
 
@@ -409,21 +409,21 @@ export default class EthereumCdpService extends PrivateService {
       this._tubContract().address,
       hexCdpId,
       {
-        dsProxyAddress,
+        dsProxy,
         value,
         metadata: {
           action: {
             name: 'lock',
             id: cdpId,
             amount: getCurrency(amount, ETH),
-            proxy: dsProxyAddress
+            proxy: dsProxy
           }
         }
       }
     );
   }
 
-  lockEthAndDrawDaiProxy(dsProxyAddress, cdpId, amountEth, amountDai) {
+  lockEthAndDrawDaiProxy(dsProxy, cdpId, amountEth, amountDai) {
     const hexCdpId = numberToBytes32(cdpId);
     const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
     const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
@@ -433,7 +433,7 @@ export default class EthereumCdpService extends PrivateService {
       hexCdpId,
       valueDai,
       {
-        dsProxyAddress,
+        dsProxy,
         value: valueEth,
         metadata: {
           action: {
@@ -441,14 +441,14 @@ export default class EthereumCdpService extends PrivateService {
             id: cdpId,
             lockAmount: getCurrency(amountEth, ETH),
             drawAmount: getCurrency(amountDai, DAI),
-            proxy: dsProxyAddress
+            proxy: dsProxy
           }
         }
       }
     );
   }
 
-  drawDaiProxy(dsProxyAddress, cdpId, amount) {
+  drawDaiProxy(dsProxy, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
 
@@ -457,20 +457,20 @@ export default class EthereumCdpService extends PrivateService {
       hexCdpId,
       value,
       {
-        dsProxyAddress,
+        dsProxy,
         metadata: {
           action: {
             name: 'draw',
             id: cdpId,
             amount: getCurrency(amount, DAI),
-            proxy: dsProxyAddress
+            proxy: dsProxy
           }
         }
       }
     );
   }
 
-  giveProxy(dsProxyAddress, cdpId, newAddress) {
+  giveProxy(dsProxy, cdpId, newAddress) {
     const hexCdpId = numberToBytes32(cdpId);
 
     return this._saiProxyTubContract().give(
@@ -478,13 +478,13 @@ export default class EthereumCdpService extends PrivateService {
       hexCdpId,
       newAddress,
       {
-        dsProxyAddress,
+        dsProxy,
         metadata: {
           action: {
             name: 'give',
             id: cdpId,
             to: newAddress,
-            proxy: dsProxyAddress
+            proxy: dsProxy
           }
         }
       }
@@ -492,31 +492,31 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   @tracksTransactions
-  async wipeDaiProxy(dsProxyAddress, cdpId, amount, { useOtc, promise }) {
+  async wipeDaiProxy(dsProxy, cdpId, amount, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
 
-    await this.get('allowance').requireAllowance(DAI, dsProxyAddress, {
+    await this.get('allowance').requireAllowance(DAI, dsProxy, {
       promise
     });
     // Only require MKR allowance if paying fee using MKR (if using OTC, no need
     // to approve MKR right now)
     if (!useOtc) {
       await this._throwIfNotEnoughMkrToWipe(cdpId, amount, DAI);
-      await this.get('allowance').requireAllowance(MKR, dsProxyAddress, {
+      await this.get('allowance').requireAllowance(MKR, dsProxy, {
         promise
       });
     }
 
     const options = {
-      dsProxyAddress,
+      dsProxy,
       metadata: {
         action: {
           name: 'wipe',
           id: cdpId,
           amount: getCurrency(amount, DAI),
           otc: useOtc,
-          proxy: dsProxyAddress
+          proxy: dsProxy
         }
       },
       promise
@@ -540,10 +540,10 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   @tracksTransactions
-  async shutProxy(dsProxyAddress, cdpId, { useOtc, promise }) {
+  async shutProxy(dsProxy, cdpId, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
 
-    await this.get('allowance').requireAllowance(DAI, dsProxyAddress, {
+    await this.get('allowance').requireAllowance(DAI, dsProxy, {
       promise
     });
     // Only require MKR allowance and balance if paying fee using MKR (if using
@@ -551,19 +551,19 @@ export default class EthereumCdpService extends PrivateService {
     if (!useOtc) {
       const debt = await this.getDebtValue(cdpId, DAI);
       await this._throwIfNotEnoughMkrToWipe(cdpId, debt);
-      await this.get('allowance').requireAllowance(MKR, dsProxyAddress, {
+      await this.get('allowance').requireAllowance(MKR, dsProxy, {
         promise
       });
     }
 
     const options = {
-      dsProxyAddress,
+      dsProxy,
       metadata: {
         action: {
           name: 'close',
           id: cdpId,
           otc: useOtc,
-          proxy: dsProxyAddress
+          proxy: dsProxy
         }
       },
       promise

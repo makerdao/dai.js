@@ -108,17 +108,17 @@ export default class TransactionManager extends PublicService {
     }
   }
 
-  // if options.dsProxyAddress is set, execute this contract method through the
+  // if options.dsProxy is set, execute this contract method through the
   // proxy contract at that address.
   _execute(contract, method, args, options) {
-    if (!options.dsProxyAddress) return contract[method](...args, options);
+    if (!options.dsProxy) return contract[method](...args, options);
 
     let address;
-    if (typeof options.dsProxyAddress === 'string') {
-      address = options.dsProxyAddress;
+    if (typeof options.dsProxy === 'string') {
+      address = options.dsProxy;
     }
 
-    delete options.dsProxyAddress;
+    delete options.dsProxy;
     return this.get('proxy').execute(contract, method, args, options, address);
   }
 
