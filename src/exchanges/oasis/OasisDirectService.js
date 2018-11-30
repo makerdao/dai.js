@@ -1,5 +1,4 @@
 import PrivateService from '../../core/PrivateService';
-import tokens from '../../../contracts/tokens';
 import { getCurrency } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { contractInfo } from '../../../contracts/networks';
@@ -23,8 +22,8 @@ export default class OasisDirectService extends PrivateService {
       );
   }
 
-  _getTokenAddress(symbol) {
-    switch (symbol) {
+  _getContractAddress(name) {
+    switch (name) {
       case 'MKR':
         return this._contractInfo().MKR[1].address;
       case 'WETH':
@@ -33,6 +32,8 @@ export default class OasisDirectService extends PrivateService {
         return this._contractInfo().PETH[0].address;
       case 'DAI':
         return this._contractInfo().DAI[0].address;
+      case 'MAKER_OTC':
+        return this._contractInfo().MAKER_OTC[0].address;
     }
   }
 
@@ -40,27 +41,23 @@ export default class OasisDirectService extends PrivateService {
     return contractInfo(this.get('proxy')._network());
   }
 
-  _otc() {
-    return this.get('smartContract').getContractByName(contracts.MAKER_OTC);
-  }
-
   _oasisDirect() {
     return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
   }
 
-  async sellAllAmount(payTokenSymbol, buyTokenSymbol, payAmount) {
-    const payToken = this._getToken(payTokenSymbol);
-    const buyToken = this._getToken(buyTokenSymbol);
+  sellAllAmount(payTokenSymbol, buyTokenSymbol, payAmount) {
     const amount = this._valueForContract(payAmount, payTokenSymbol);
     const minBuyAmount = this._valueForContract(0, buyTokenSymbol);
-    // const otc =
 
     return this._oasisDirect().sellAllAmount(
-      addresses.MAKER_OTC,
-      payToken,
+      this._getContractAddress('MAKER_OTC'),
+      this._getContractAddress(payTokenSymbol),
       amount,
-      buyToken,
-      minBuyAmount
+      this._getContractAddress(buyTokenSymbol),
+      minBuyAmount,
+      {
+        dsProxy: true
+      }
     );
   }
 }
