@@ -24,12 +24,13 @@ export default class EthereumCdpService extends PrivateService {
    */
   constructor(name = 'cdp') {
     super(name, [
-      'smartContract',
-      'token',
-      'conversion',
       'allowance',
+      'conversion',
+      'event',
       'price',
-      'event'
+      'proxy',
+      'smartContract',
+      'token'
     ]);
 
     // aliases
