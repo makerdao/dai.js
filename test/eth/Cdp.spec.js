@@ -75,7 +75,6 @@ function setExistingAccount(name) {
 
 beforeAll(async () => {
   await init();
-  console.log(currentAccount);
   const account = TestAccountProvider.nextAccount();
   proxyAccount = account.address;
   proxyKey = account.key;
@@ -435,7 +434,7 @@ describe('non-proxy cdp', () => {
   });
 });
 
-describe.only('proxy cdp', () => {
+describe('proxy cdp', () => {
   let ethToken;
 
   beforeAll(async () => {
@@ -448,17 +447,6 @@ describe.only('proxy cdp', () => {
     cdp = await cdpService.openProxyCdp(dsProxyAddress);
     return cdp.id;
   }
-
-  test('create DSProxy and open CDP (single tx)', async () => {
-    let cdp;
-    try {
-      cdp = await cdpService.openProxyCdp();
-    } catch (err) {
-      console.error(err);
-    }
-    expect(cdp.id).toBeGreaterThan(0);
-    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-  });
 
   test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
     const balancePre = await ethToken.balanceOf(currentAccount);
@@ -491,6 +479,19 @@ describe.only('proxy cdp', () => {
   });
 
   sharedTests(openProxyCdp, true);
+
+  test('create DSProxy and open CDP (single tx)', async () => {
+    const newAccount = TestAccountProvider.nextAccount();
+    await setProxyAccount(newAccount);
+    let cdp;
+    try {
+      cdp = await cdpService.openProxyCdp();
+    } catch (err) {
+      console.error(err);
+    }
+    expect(cdp.id).toBeGreaterThan(0);
+    expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  });
 
   test('create DSProxy, open CDP, lock ETH and draw DAI (single tx)', async () => {
     const newAccount = TestAccountProvider.nextAccount();
