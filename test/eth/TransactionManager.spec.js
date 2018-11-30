@@ -28,8 +28,8 @@ function buildTestServices(settings) {
 let services;
 
 describe.each([
-  ['with websocket provider', true],
-  ['with http provider', false]
+  ['with websocket provider', true]
+  //['with http provider', false]
 ])('%s', (name, useWebsockets) => {
   beforeEach(async () => {
     services = await buildTestServices({ useWebsockets });
@@ -100,23 +100,23 @@ describe.each([
     );
   });
 
-  let service, txMgr, priceService, open, cdp;
+  describe('lifecycle hooks', () => {
+    let service, txMgr, priceService, open, cdp;
 
-  const makeListener = (label, state) =>
-    jest.fn(tx => {
-      const { contract, method } = tx.metadata;
-      log(`${label}: ${contract}.${method}: ${state}`);
+    const makeListener = (label, state) =>
+      jest.fn(tx => {
+        const { contract, method } = tx.metadata;
+        log(`${label}: ${contract}.${method}: ${state}`);
+      });
+
+    const makeHandlers = label => ({
+      initialized: makeListener(label, 'initialized'),
+      pending: makeListener(label, 'pending'),
+      mined: makeListener(label, 'mined'),
+      confirmed: makeListener(label, 'confirmed'),
+      error: makeListener(label, 'error')
     });
 
-  const makeHandlers = label => ({
-    initialized: makeListener(label, 'initialized'),
-    pending: makeListener(label, 'pending'),
-    mined: makeListener(label, 'mined'),
-    confirmed: makeListener(label, 'confirmed'),
-    error: makeListener(label, 'error')
-  });
-
-  describe('lifecycle hooks', () => {
     beforeAll(async () => {
       service = buildTestEthereumCdpService({ useWebsockets });
       await service.manager().authenticate();
@@ -237,27 +237,6 @@ describe.each([
       expect(openTx.isFinalized()).toBe(true);
       expect(openHandlers.confirmed).toBeCalled();
     });
-  });
-
-  describe('lifecycle hooks errors', () => {
-    beforeAll(async () => {
-      service = buildTestEthereumCdpService({
-        web3: { provider: { type: 'TEST' } }
-      });
-      await service.manager().authenticate();
-      txMgr = service.get('smartContract').get('transactionManager');
-      priceService = service.get('price');
-    });
-
-    beforeEach(async () => {
-      open = service.openCdp();
-      cdp = await open;
-    });
-
-    afterAll(async () => {
-      // set price back to 400
-      await priceService.setEthPrice(400);
-    });
 
     test('clear Tx when state is error and older than 5 minutes', async () => {
       await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
@@ -265,15 +244,15 @@ describe.each([
       const lock = cdp.lockEth(0.01);
       await Promise.all([lock, mineBlocks(service)]);
 
-      const draw = cdp.drawDai(1000);
-      const drawId = uniqueId(draw).toString();
-      const drawTx = txMgr._tracker.get(drawId);
-      const drawHandlers = makeHandlers('draw');
-
-      txMgr.listen(draw, drawHandlers);
-      expect(txMgr._tracker._transactions).toHaveProperty(drawId);
-
       try {
+        const draw = cdp.drawDai(1000);
+        const drawId = uniqueId(draw).toString();
+        const drawTx = txMgr._tracker.get(drawId);
+        const drawHandlers = makeHandlers('draw');
+
+        txMgr.listen(draw, drawHandlers);
+        expect(txMgr._tracker._transactions).toHaveProperty(drawId);
+
         await draw;
       } catch (err) {
         expect(drawTx.isError()).toBe(true);
@@ -298,19 +277,17 @@ describe.each([
         error: makeListener()
       });
       const drawHandlers = makeHandlers();
-
-      await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
-
-      const lock = cdp.lockEth(0.01);
-      await Promise.all([lock, mineBlocks(service)]);
-
-      const draw = cdp.drawDai(1000);
-      const drawId = uniqueId(draw).toString();
-      const drawTx = txMgr._tracker.get(drawId);
-
-      txMgr.listen(draw, drawHandlers);
-
       try {
+        await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
+
+        const lock = cdp.lockEth(0.01);
+        await Promise.all([lock, mineBlocks(service)]);
+
+        const draw = cdp.drawDai(1000);
+        const drawId = uniqueId(draw).toString();
+        const drawTx = txMgr._tracker.get(drawId);
+
+        txMgr.listen(draw, drawHandlers);
         await draw;
       } catch (err) {
         expect(drawTx.isError()).toBe(true);

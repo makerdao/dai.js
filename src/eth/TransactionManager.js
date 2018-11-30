@@ -59,7 +59,15 @@ export default class TransactionManager extends PublicService {
         // so we do our async operations inside this immediately-executed
         // async function.
         const txOptions = await this._buildTransactionOptions(options);
-        return this._execute(contract, method, args, txOptions);
+        return await new Promise((resolve, reject) => {
+          try {
+            resolve(this._execute(contract, method, args, txOptions));
+          } catch (err) {
+            // error not being caught?
+            console.error(err);
+            reject();
+          }
+        });
       })(),
       {
         businessObject,
