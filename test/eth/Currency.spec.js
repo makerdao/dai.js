@@ -157,3 +157,11 @@ test('creating a ratio from division', () => {
   const value2 = DAI(20);
   expect(value1.div(value2)).toEqual(USD_DAI(0.2));
 });
+
+test('isInstance provides instanceof functionality', () => {
+  expect(DAI.isInstance(DAI(1))).toBeTruthy();
+  expect(DAI.isInstance(MKR(1))).toBeFalsy();
+
+  expect(USD_DAI.isInstance(USD_DAI(1))).toBeTruthy();
+  expect(USD_DAI.isInstance(PETH(1))).toBeFalsy();
+});
