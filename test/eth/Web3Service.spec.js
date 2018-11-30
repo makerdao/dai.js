@@ -307,6 +307,19 @@ describe.each([
         await service.manager().authenticate();
         expect(service.usingWebsockets()).toBe(true);
       });
+
+      test('returns correct ethers signer', async () => {
+        const service = buildTestService();
+        await service.manager().authenticate();
+        const signer = service.getEthersSigner();
+
+        expect(Object.keys(signer)).toEqual([
+          'getAddress',
+          'estimateGas',
+          'sendTransaction',
+          'provider'
+        ]);
+      });
     });
   } else {
     describe('when provider is using http', () => {
@@ -314,6 +327,18 @@ describe.each([
         const service = buildTestService();
         await service.manager().authenticate();
         expect(service.usingWebsockets()).toBe(false);
+      });
+
+      test('returns correct ethers signer', async () => {
+        const service = buildTestService();
+        await service.manager().authenticate();
+        const signer = service.getEthersSigner();
+
+        expect(Object.keys(signer)).toEqual([
+          'provider',
+          'address',
+          '_syncAddress'
+        ]);
       });
     });
   }
