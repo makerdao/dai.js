@@ -320,6 +320,24 @@ describe.each([
           'provider'
         ]);
       });
+
+      test('will use subscriptions to track blocks', async () => {
+        const service = buildTestService();
+        await service.manager().authenticate();
+
+        // subscription is instantiated in service connect method
+        expect(service._blockSub.constructor.name).toEqual('Subscription');
+        expect(service._blockSub.subscriptionMethod).toEqual('newHeads');
+      });
+
+      test('will unsubscribe from subscriptions to track blocks', async () => {
+        const service = buildTestService();
+        expect(() => service.unsubscribeNewBlocks()).toThrow();
+
+        await service.manager().authenticate();
+        service.unsubscribeNewBlocks();
+        expect(service._blockSub._events).toEqual({});
+      });
     });
   } else {
     describe('when provider is using http', () => {
