@@ -440,8 +440,17 @@ describe('proxy cdp', () => {
   beforeAll(async () => {
     ethToken = cdpService.get('token').getToken(ETH);
     await setProxyAccount();
-    dsProxyAddress = await cdpService.get('proxy').currentProxy();
+    await setProxy();
   });
+
+  async function getProxy() {
+    return await cdpService.get('proxy').currentProxy();
+  }
+
+  async function setProxy() {
+    if (!(await getProxy())) await cdpService.get('proxy').build();
+    dsProxyAddress = await getProxy();
+  }
 
   async function openProxyCdp() {
     cdp = await cdpService.openProxyCdp(dsProxyAddress);
