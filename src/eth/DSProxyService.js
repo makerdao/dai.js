@@ -55,9 +55,9 @@ export default class DSProxyService extends PrivateService {
       : this.getProxyAddress();
   }
 
-  build() {
+  async build() {
     const transaction = this._proxyRegistry().build();
-    this._currentProxy = this._setCurrentProxy(transaction);
+    this._currentProxy = await this._setCurrentProxy(transaction);
     return transaction;
   }
 
