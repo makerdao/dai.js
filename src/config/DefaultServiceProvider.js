@@ -10,6 +10,7 @@ import GasEstimatorService from '../eth/GasEstimatorService';
 import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
+import OasisDirectService from '../exchanges/oasis/OasisDirectService';
 import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
 import PriceService from '../eth/PriceService';
 import ServiceProvider from './ServiceProvider';
@@ -28,10 +29,13 @@ export const resolver = {
     cdp: 'EthereumCdpService',
     conversion: 'TokenConversionService',
     event: 'EventService',
-    // exchange: intentionally omitted
+    // exchange: intentionally omitted,
     gasEstimator: 'GasEstimatorService',
     log: 'ConsoleLogger',
     nonce: 'NonceService',
+    // oasisDirect should be removed and included
+    // with config options for exchange
+    oasisDirect: 'OasisDirectService',
     price: 'PriceService',
     proxy: 'DSProxyService',
     smartContract: 'SmartContractService',
@@ -72,6 +76,7 @@ export default class DefaultServiceProvider extends ServiceProvider {
         NonceService,
         NullEventService,
         NullLogger,
+        OasisDirectService,
         OasisExchangeService,
         PriceService,
         SmartContractService,
