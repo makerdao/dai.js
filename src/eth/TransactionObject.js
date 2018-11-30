@@ -70,7 +70,6 @@ export default class TransactionObject extends TransactionLifeCycle {
         // Otherwise, the tx receipt is returned. This corrects in such cases
         this.hash = this.hash.hash;
       }
-
       this.setPending(); // set state to pending
 
       // when you're on a local testnet, a single call to getTransaction should
@@ -81,7 +80,6 @@ export default class TransactionObject extends TransactionLifeCycle {
         log('no tx yet');
         await promiseWait(1500);
       }
-      log('got tx:', tx);
 
       if (!tx) {
         throw new Error('Tried getTransaction 10 times and still failed');

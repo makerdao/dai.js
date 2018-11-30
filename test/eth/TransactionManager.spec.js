@@ -237,27 +237,6 @@ describe.each([
       expect(openTx.isFinalized()).toBe(true);
       expect(openHandlers.confirmed).toBeCalled();
     });
-  });
-
-  describe('lifecycle hooks errors', () => {
-    beforeAll(async () => {
-      service = buildTestEthereumCdpService({
-        web3: { provider: { type: 'TEST' } }
-      });
-      await service.manager().authenticate();
-      txMgr = service.get('smartContract').get('transactionManager');
-      priceService = service.get('price');
-    });
-
-    beforeEach(async () => {
-      open = service.openCdp();
-      cdp = await open;
-    });
-
-    afterAll(async () => {
-      // set price back to 400
-      await priceService.setEthPrice(400);
-    });
 
     test('clear Tx when state is error and older than 5 minutes', async () => {
       await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
@@ -310,6 +289,7 @@ describe.each([
 
       txMgr.listen(draw, drawHandlers);
 
+      expect.assertions(2);
       try {
         await draw;
       } catch (err) {

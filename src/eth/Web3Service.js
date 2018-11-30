@@ -1,5 +1,5 @@
 import PrivateService from '../core/PrivateService';
-import { promisify, promisifyMethods, getNetworkName } from '../utils';
+import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
@@ -120,15 +120,17 @@ export default class Web3Service extends PrivateService {
 
     Object.assign(
       this,
-      promisifyMethods(this._web3.eth, [
+      [
         'estimateGas',
         'getBalance',
         'getBlock',
         'getPastLogs',
         'getTransaction',
-        'getTransactionReceipt',
-        'sendTransaction'
-      ]),
+        'getTransactionReceipt'
+      ].reduce((acc, method) => {
+        acc[method] = (...args) => this._web3.eth[method](...args);
+        return acc;
+      }, {}),
       {
         getAccounts: () =>
           this.get('accounts')
@@ -192,6 +194,29 @@ export default class Web3Service extends PrivateService {
       account: this.currentAccount()
     });
     this._installDeauthenticationCheck();
+  }
+
+  /*
+  sendTransaction in web3 1.0 behaves differently from its counterpart in
+  0.2x.x. it doesn't resolve until the transaction has a receipt, and throws an
+  error if the receipt indicates that the transaction was reverted.
+
+  the setup below emulates the old behavior, because TransactionObject still
+  expects it. if there is an error due to the transaction being reverted, it
+  will be ignored, because the promise will have already resolved.
+
+  this can (and should) be refactored when we drop support for HTTP providers.
+
+  https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsendtransaction
+  https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction
+  */
+  sendTransaction(...args) {
+    return new Promise((resolve, reject) => {
+      this._web3.eth
+        .sendTransaction(...args)
+        .on('transactionHash', resolve)
+        .on('error', reject);
+    });
   }
 
   getNetwork() {
