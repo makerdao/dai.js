@@ -3,7 +3,7 @@ import ProviderType from '../../src/eth/web3/ProviderType';
 import { has, merge } from 'lodash';
 import testAccounts from './testAccounts.json';
 
-export const kovanProviderConfig = {
+export const kovanHttpProviderConfig = {
   web3: {
     privateKey: process.env.KOVAN_PRIVATE_KEY,
     provider: {
@@ -52,7 +52,7 @@ export function resetCache() {
   cache.storage = {};
 }
 
-const useWebsocketsForTests = true;
+const useWebsocketsForTests = false;
 
 export function buildTestContainer(settings = {}) {
   // switch between using websockets for tests is simplified
