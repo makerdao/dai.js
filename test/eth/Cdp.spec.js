@@ -75,6 +75,7 @@ function setExistingAccount(name) {
 
 beforeAll(async () => {
   await init();
+  console.log(currentAccount);
   const account = TestAccountProvider.nextAccount();
   proxyAccount = account.address;
   proxyKey = account.key;
@@ -434,12 +435,13 @@ describe('non-proxy cdp', () => {
   });
 });
 
-describe('proxy cdp', () => {
+describe.only('proxy cdp', () => {
   let ethToken;
 
   beforeAll(async () => {
     ethToken = cdpService.get('token').getToken(ETH);
     await setProxyAccount();
+    dsProxyAddress = await cdpService.get('proxy').currentProxy();
   });
 
   async function openProxyCdp() {
@@ -448,12 +450,14 @@ describe('proxy cdp', () => {
   }
 
   test('create DSProxy and open CDP (single tx)', async () => {
-    const cdp = await cdpService.openProxyCdp();
+    let cdp;
+    try {
+      cdp = await cdpService.openProxyCdp();
+    } catch (err) {
+      console.error(err);
+    }
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-
-    // this value is used in the proxy cdp tests below
-    dsProxyAddress = cdp.dsProxyAddress;
   });
 
   test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
