@@ -1,8 +1,9 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import { setProxyAccount, transferMkr } from '../../helpers/proxyHelpers';
+import { setProxyAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import addresses from '../../../contracts/addresses/testnet.json';
+import tokens from '../../../contracts/tokens';
 
 let service, proxyAccount;
 
@@ -18,8 +19,8 @@ async function buildTestOasisDirectService() {
   await service.manager().authenticate();
 }
 
-async function proxy() {
-  return await service.get('proxy').currentProxy();
+function proxy() {
+  return service.get('proxy').currentProxy();
 }
 
 function currentAccount() {
@@ -51,15 +52,18 @@ describe('trade with existing dsproxy', () => {
     if (!proxyAccount) {
       proxyAccount = TestAccountProvider.nextAccount();
     }
-    await transferMkr(service, proxyAccount.address);
     await setProxyAccount(service, proxyAccount.address, proxyAccount.key);
+    await service
+      .get('token')
+      .getToken(tokens.WETH)
+      .deposit(20);
     if (!(await proxy())) await service.get('proxy').build();
   });
 
   test('sell all amount', async () => {
     await createDaiAndPlaceLimitOrder(service.get('exchange'));
     try {
-      console.log(await service.sellAllAmount('MKR', 'DAI', 1));
+      console.log(await service.sellAllAmount('WETH', 'DAI', 20));
     } catch (err) {
       console.error(err);
     }

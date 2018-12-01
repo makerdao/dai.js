@@ -47,7 +47,7 @@ export default class OasisDirectService extends PrivateService {
 
   sellAllAmount(payToken, buyToken, payAmount) {
     const amount = this._valueForContract(payAmount, payToken);
-    const minBuyAmount = this._valueForContract(0, buyToken);
+    const minBuyAmount = this._valueForContract(1, buyToken);
 
     return this._oasisDirect().sellAllAmount(
       this._getContractAddress('MAKER_OTC'),
