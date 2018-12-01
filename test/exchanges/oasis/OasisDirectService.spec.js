@@ -1,6 +1,10 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
 
+// Extract proxy helpers
+// Set new proxy account
+// Build new proxy
+
 let service;
 
 async function buildTestOasisDirectService() {

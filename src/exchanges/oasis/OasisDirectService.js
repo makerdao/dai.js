@@ -45,15 +45,15 @@ export default class OasisDirectService extends PrivateService {
     return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
   }
 
-  sellAllAmount(payTokenSymbol, buyTokenSymbol, payAmount) {
-    const amount = this._valueForContract(payAmount, payTokenSymbol);
-    const minBuyAmount = this._valueForContract(0, buyTokenSymbol);
+  sellAllAmount(payToken, buyToken, payAmount) {
+    const amount = this._valueForContract(payAmount, payToken);
+    const minBuyAmount = this._valueForContract(0, buyToken);
 
     return this._oasisDirect().sellAllAmount(
       this._getContractAddress('MAKER_OTC'),
-      this._getContractAddress(payTokenSymbol),
+      this._getContractAddress(payToken),
       amount,
-      this._getContractAddress(buyTokenSymbol),
+      this._getContractAddress(buyToken),
       minBuyAmount,
       {
         dsProxy: true

@@ -12,6 +12,11 @@ import {
 } from '../../src/eth/Currency';
 import { promiseWait } from '../../src/utils';
 import { mineBlocks } from '../helpers/transactionConfirmation';
+import {
+  setProxyAccount,
+  transferMkr,
+  setExistingAccount
+} from '../helpers/proxyHelpers';
 
 let cdpService,
   cdp,
@@ -28,7 +33,8 @@ async function init(proxy = false) {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
   if (proxy) {
-    await setProxyAccount();
+    await setProxyAccount(cdpService, proxyAccount, proxyKey);
+    currentAccount = proxyAccount;
   } else {
     currentAccount = cdpService
       .get('token')
@@ -37,48 +43,12 @@ async function init(proxy = false) {
   }
 }
 
-async function setProxyAccount(newAccount = false) {
-  const accountService = cdpService
-    .get('token')
-    .get('web3')
-    .get('accounts');
-  const account = newAccount
-    ? {
-        address: newAccount.address,
-        key: newAccount.key
-      }
-    : {
-        address: proxyAccount,
-        key: proxyKey
-      };
-
-  await accountService.addAccount(account.address, {
-    type: 'privateKey',
-    key: account.key
-  });
-  accountService.useAccount(account.address);
-  currentAccount = account.address;
-}
-
-async function transferMkr() {
-  const mkr = cdpService.get('token').getToken(MKR);
-  await mkr.transfer(proxyAccount, MKR(1));
-}
-
-function setExistingAccount(name) {
-  const accountService = cdpService
-    .get('token')
-    .get('web3')
-    .get('accounts');
-  accountService.useAccount(name);
-}
-
 beforeAll(async () => {
   await init();
   const account = TestAccountProvider.nextAccount();
   proxyAccount = account.address;
   proxyKey = account.key;
-  transferMkr();
+  transferMkr(cdpService, proxyAccount);
   dai = cdpService.get('token').getToken(DAI);
 });
 
@@ -97,7 +67,7 @@ const sharedTests = (openCdp, proxy = false) => {
       expect(cdp._smartContractService).toBeDefined();
     });
 
-    test('lookup by ID', async () => {
+    test.only('lookup by ID', async () => {
       expect.assertions(2);
       const info = await cdpService.getInfo(id);
       expect(info).toBeTruthy();
@@ -137,9 +107,9 @@ const sharedTests = (openCdp, proxy = false) => {
 
     afterAll(async () => {
       // other tests expect this to be the case
-      if (proxy) setExistingAccount('default');
+      if (proxy) setExistingAccount(cdpService, 'default');
       await cdpService.get('price').setEthPrice(400);
-      if (proxy) setExistingAccount(proxyAccount);
+      if (proxy) setExistingAccount(cdpService, proxyAccount);
     });
 
     // FIXME this breaks other tests, possibly because it leaves the test chain in
@@ -149,9 +119,9 @@ const sharedTests = (openCdp, proxy = false) => {
     });
 
     test('when unsafe', async () => {
-      if (proxy) setExistingAccount('default');
+      if (proxy) setExistingAccount(cdpService, 'default');
       await cdpService.get('price').setEthPrice(0.01);
-      if (proxy) setExistingAccount(proxyAccount);
+      if (proxy) setExistingAccount(cdpService, proxyAccount);
       const result = await cdp.bite();
       expect(typeof result).toEqual('object');
     });
@@ -234,9 +204,9 @@ const sharedTests = (openCdp, proxy = false) => {
         });
 
         test('read MKR fee', async () => {
-          if (proxy) setExistingAccount('default');
+          if (proxy) setExistingAccount(cdpService, 'default');
           await cdpService.get('price').setMkrPrice(600);
-          if (proxy) setExistingAccount(proxyAccount);
+          if (proxy) setExistingAccount(cdpService, proxyAccount);
           // block.timestamp is measured in seconds, so we need to wait at least a
           // second for the fees to get updated
           const usdFee = await cdp.getGovernanceFee(USD);
@@ -439,7 +409,8 @@ describe('proxy cdp', () => {
 
   beforeAll(async () => {
     ethToken = cdpService.get('token').getToken(ETH);
-    await setProxyAccount();
+    await setProxyAccount(cdpService, proxyAccount, proxyKey);
+    currentAccount = proxyAccount;
     await setProxy();
   });
 
@@ -491,20 +462,17 @@ describe('proxy cdp', () => {
 
   test('create DSProxy and open CDP (single tx)', async () => {
     const newAccount = TestAccountProvider.nextAccount();
-    await setProxyAccount(newAccount);
-    let cdp;
-    try {
-      cdp = await cdpService.openProxyCdp();
-    } catch (err) {
-      console.error(err);
-    }
+    await setProxyAccount(cdpService, newAccount.address, newAccount.key);
+    currentAccount = newAccount.address;
+    const cdp = await cdpService.openProxyCdp();
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 
   test('create DSProxy, open CDP, lock ETH and draw DAI (single tx)', async () => {
     const newAccount = TestAccountProvider.nextAccount();
-    await setProxyAccount(newAccount);
+    await setProxyAccount(cdpService, newAccount.address, newAccount.key);
+    currentAccount = newAccount.address;
     const balancePre = await ethToken.balanceOf(currentAccount);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(0.1, 1);
     const cdpInfoPost = await cdp.getInfo();
