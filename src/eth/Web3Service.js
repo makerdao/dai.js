@@ -118,6 +118,8 @@ export default class Web3Service extends PrivateService {
     this._web3 = new Web3();
     this._web3.setProvider(this.get('accounts').getProvider());
 
+    this._listenBlocks();
+
     Object.assign(
       this,
       promisifyMethods(this._web3.eth, [
@@ -176,7 +178,6 @@ export default class Web3Service extends PrivateService {
     // FIXME set up block listening with web3 instead
     this._setUpEthers(this.networkId());
 
-    this._listenBlocks();
     this._installDisconnectCheck();
     await this._initEventPolling();
     this._defaultEmitter.emit('web3/CONNECTED', {
@@ -202,7 +203,10 @@ export default class Web3Service extends PrivateService {
     return this._currentBlock;
   }
 
-  _listenBlocks() {
+  async _listenBlocks() {
+    // on startup, immediately send request for currentBlock
+    this._currentBlock = await this._web3.eth.getBlockNumber();
+
     if (this.usingWebsockets()) {
       this.subscribeNewBlocks(async data => {
         await this._updateBlockNumber(data.number);

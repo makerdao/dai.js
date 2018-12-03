@@ -1,6 +1,7 @@
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole } from '../../src/utils';
+import { waitForBlocks } from '../helpers/transactionConfirmation';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 
 describe.each([
@@ -323,9 +324,8 @@ describe.each([
 
       test('will use subscriptions to track blocks', async () => {
         const service = buildTestService();
-        await service.manager().authenticate();
+        await service.manager().initialize();
 
-        // subscription is instantiated in service connect method
         expect(service._blockSub.constructor.name).toEqual('Subscription');
         expect(service._blockSub.subscriptionMethod).toEqual('newHeads');
       });
@@ -334,9 +334,27 @@ describe.each([
         const service = buildTestService();
         expect(() => service.unsubscribeNewBlocks()).toThrow();
 
-        await service.manager().authenticate();
+        await service.manager().initialize();
         service.unsubscribeNewBlocks();
         expect(service._blockSub._events).toEqual({});
+      });
+
+      test('will listen and update new blocks using subscription', async () => {
+        const service = buildTestServiceCore('cdp', { cdp: true });
+        // using cdp so access to both token and web3 services is supported
+
+        await service.manager().authenticate();
+
+        const web3Service = service.get('smartContract').get('web3');
+        const currentBlock = web3Service.blockNumber();
+
+        await waitForBlocks(service, 1);
+        expect(web3Service.blockNumber()).toEqual(currentBlock + 1);
+      });
+
+      describe('event subscriptions', () => {
+        // all testing for subscriptions to contract events go here
+        test('wait for matching events', () => {});
       });
     });
   } else {
