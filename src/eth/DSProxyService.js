@@ -62,8 +62,12 @@ export default class DSProxyService extends PrivateService {
   }
 
   execute(contract, method, args, options, address) {
-    if (!address && !this._currentProxy)
+    if (!address && typeof this._currentProxy !== 'string')
       throw new Error('No proxy found for current account');
+    // console.log('contract', contract);
+    // console.log('method:', method);
+    // console.log('args', args);
+    // console.log('options', options);
     const proxyAddress = address ? address : this.currentProxy();
     const proxyContract = this.getContractByProxyAddress(proxyAddress);
     const data = this.getCallData(contract, method, args);

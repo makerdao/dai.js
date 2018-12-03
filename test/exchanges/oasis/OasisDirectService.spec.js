@@ -61,6 +61,7 @@ describe('trade with existing dsproxy', () => {
   });
 
   test('sell all amount', async () => {
+    // service._trade();
     await createDaiAndPlaceLimitOrder(service.get('exchange'));
     try {
       console.log(await service.sellAllAmount('WETH', 'DAI', 20));
