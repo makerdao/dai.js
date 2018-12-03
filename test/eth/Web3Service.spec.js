@@ -3,6 +3,7 @@ import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole } from '../../src/utils';
 import { waitForBlocks } from '../helpers/transactionConfirmation';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
+import { getTopics } from '../../src/eth/web3/LogEvent';
 
 describe.each([
   ['with websocket provider', true],
@@ -340,7 +341,10 @@ describe.each([
       });
 
       test('will listen and update new blocks using subscription', async () => {
-        const service = buildTestServiceCore('cdp', { cdp: true });
+        const service = buildTestServiceCore('cdp', {
+          cdp: true,
+          useWebsockets
+        });
         // using cdp so access to both token and web3 services is supported
 
         await service.manager().authenticate();
@@ -353,8 +357,24 @@ describe.each([
       });
 
       describe('event subscriptions', () => {
-        // all testing for subscriptions to contract events go here
-        test('wait for matching events', () => {});
+        test('topics will be generated correctly from event abi', async () => {
+          const service = buildTestService();
+          await service.manager().initialize();
+          const eventAbi = {
+            anonymous: false,
+            inputs: [
+              { indexed: true, name: 'lad', type: 'address' },
+              { indexed: false, name: 'cup', type: 'bytes32' }
+            ],
+            name: 'LogNewCup',
+            type: 'event'
+          };
+          const { sha3 } = service._web3.utils;
+          const res = [
+            '0x89b8893b806db50897c8e2362c71571cfaeb9761ee40727f683f1793cda9df16'
+          ];
+          expect(getTopics(eventAbi, sha3)).toEqual(res);
+        });
       });
     });
   } else {
