@@ -7,9 +7,7 @@ import tokens from '../../../contracts/tokens';
 
 let service, proxyAccount;
 
-// The testnet seems to have deployed without
-// minting MKR? For some reason, default account
-// has none.
+// Error is happening on lockEth in oasisHelpers
 
 async function buildTestOasisDirectService() {
   service = buildTestService('oasisDirect', {
@@ -61,14 +59,42 @@ describe('trade with existing dsproxy', () => {
   });
 
   test('sell all amount', async () => {
-    // service._trade();
-    await createDaiAndPlaceLimitOrder(service.get('exchange'));
     try {
-      console.log(await service.sellAllAmount('WETH', 'DAI', 20));
+      await createDaiAndPlaceLimitOrder(service.get('exchange'));
     } catch (err) {
       console.error(err);
     }
+    // await service.sellAllAmount('WETH', 'DAI', 20);
   });
+
+  xtest('sell all amount, pay eth', async () => {});
+
+  xtest('sell all amount, buy eth', async () => {});
+
+  test('buy all amount', async () => {
+    try {
+      await createDaiAndPlaceLimitOrder(service.get('exchange'), true);
+    } catch (err) {
+      console.error(err);
+    }
+    // await service.buyAllAmount('DAI', 'MKR', 20);
+  });
+
+  xtest('buy all amount, pay eth', async () => {});
+
+  xtest('buy all amount, buy eth', async () => {});
 });
 
-describe('create and execute', () => {});
+describe('create dsproxy and execute', () => {
+  xtest('sell all amount', async () => {});
+
+  xtest('sell all amount, pay eth', async () => {});
+
+  xtest('sell all amount, buy eth', async () => {});
+
+  xtest('buy all amount', async () => {});
+
+  xtest('buy all amount, pay eth', async () => {});
+
+  xtest('buy all amount, buy eth', async () => {});
+});

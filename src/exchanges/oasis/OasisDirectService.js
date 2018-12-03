@@ -8,6 +8,59 @@ export default class OasisDirectService extends PrivateService {
     super(name, ['proxy', 'smartContract', 'token', 'exchange']);
   }
 
+  _oasisDirect() {
+    return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
+  }
+
+  async _checkProxy() {
+    // Add optional callback for build here
+    return this.get('proxy').currentProxy()
+      ? true
+      : await this.get('proxy').build();
+  }
+
+  _setTradeState(operation, payToken, buyToken, amount) {
+    this._operation = operation;
+    this._payToken = payToken;
+    this._buyToken = buyToken;
+    this._value = amount;
+  }
+
+  _trade() {
+    const params = this._buildTradeParams();
+    return this._oasisDirect()[this._operation](...params, { dsProxy: true });
+  }
+
+  _buildTradeParams() {
+    return [
+      this._getContractAddress('MAKER_OTC'),
+      this._getContractAddress(this._payToken),
+      this._valueForContract(this._value, this._payToken),
+      this._getContractAddress(this._buyToken),
+      this._limit()
+    ];
+  }
+
+  _threshold() {
+    if (
+      (this._payToken === 'DAI' && this._buyToken === 'ETH') ||
+      (this._payToken === 'DAI' && this._buyToken === 'ETH')
+    ) {
+      return 2;
+    } else {
+      return 1;
+    }
+  }
+
+  _limit() {
+    return this._operation.includes('sellAll')
+      ? this._valueForContract(this._value * (1 - this._threshold()), 'eth')
+      : this._valueForContract(
+          this._value * (1 + this._threshold()).round(0),
+          'eth'
+        );
+  }
+
   _valueForContract(amount, symbol) {
     return getCurrency(amount, symbol).toEthersBigNumber('wei');
   }
@@ -40,55 +93,22 @@ export default class OasisDirectService extends PrivateService {
   _contractInfo() {
     return contractInfo(this.get('proxy')._network());
   }
-
-  _oasisDirect() {
-    return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
-  }
-
-  _buildParams() {
-    return [
-      this._getContractAddress('MAKER_OTC'),
-      this._getContractAddress(this._payToken),
-      this._valueForContract(this._value, this._payToken),
-      this._getContractAddress(this._buyToken),
-      this._limit()
-    ];
-  }
-
-  _limit() {
-    let threshold;
-    if (
-      (this._payToken === 'DAI' && this._buyToken === 'ETH') ||
-      (this._payToken === 'DAI' && this._buyToken === 'ETH')
-    ) {
-      threshold = 2;
-    } else {
-      threshold = 1;
-    }
-    return this._operation.includes('sellAll')
-      ? this._valueForContract(this._value * (1 - threshold), 'eth')
-      : this._valueForContract(this._value * (1 + threshold).round(0), 'eth');
-  }
-
-  _setTradeState(operation, payToken, buyToken, amount) {
-    this._operation = operation;
-    this._payToken = payToken;
-    this._buyToken = buyToken;
-    this._value = amount;
-  }
-
-  _trade() {
-    const params = this._buildParams();
-    return this._oasisDirect()[this._operation](...params, { dsProxy: true });
-  }
 }
 
-const tradeOps = ['sellAllAmount'];
+const tradeOps = [
+  'sellAllAmount',
+  'sellAllAmountPayEth',
+  'sellAllAmountBuyEth',
+  'buyAllAmount',
+  'buyAllAmountPayEth',
+  'buyAllAmountBuyEth'
+];
 
 Object.assign(
   OasisDirectService.prototype,
   tradeOps.reduce((exchange, name) => {
-    exchange[name] = function(...args) {
+    exchange[name] = async function(...args) {
+      await this._checkProxy();
       this._setTradeState(name, ...args);
       return this._trade();
     };
