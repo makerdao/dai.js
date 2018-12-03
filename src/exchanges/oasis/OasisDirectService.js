@@ -26,6 +26,13 @@ export default class OasisDirectService extends PrivateService {
     this._value = amount;
   }
 
+  _setEthTradeState(operation, token, value) {
+    this._operation = operation;
+    this._value = value;
+    (this._payToken = token), (this._buyToken = 'WETH');
+    console.log(this._operation);
+  }
+
   _trade() {
     const params = this._buildTradeParams();
     return this._oasisDirect()[this._operation](...params, { dsProxy: true });
@@ -44,7 +51,7 @@ export default class OasisDirectService extends PrivateService {
   _threshold() {
     if (
       (this._payToken === 'DAI' && this._buyToken === 'ETH') ||
-      (this._payToken === 'DAI' && this._buyToken === 'ETH')
+      (this._payToken === 'ETH' && this._buyToken === 'DAI')
     ) {
       return 2;
     } else {
@@ -56,7 +63,7 @@ export default class OasisDirectService extends PrivateService {
     return this._operation.includes('sellAll')
       ? this._valueForContract(this._value * (1 - this._threshold()), 'eth')
       : this._valueForContract(
-          this._value * (1 + this._threshold()).round(0),
+          (this._value * (1 + this._threshold())).round(0),
           'eth'
         );
   }
@@ -93,14 +100,35 @@ export default class OasisDirectService extends PrivateService {
   _contractInfo() {
     return contractInfo(this.get('proxy')._network());
   }
+
+  sellAllAmountPayEth(token, amount, options) {
+    return this._oasisDirect().sellAllAmountPayEth(
+      this._getContractAddress('MAKER_OTC'),
+      this._getContractAddress('WETH'),
+      this._getContractAddress(token),
+      this._valueForContract(amount, 'eth'),
+      {
+        value: options.value,
+        dsProxy: true
+      }
+    );
+  }
+
+  buyAllAmountPayEth(token, amount) {
+    return this._oasisDirect().buyAllAmountPayEth(
+      this._getContractAddress('MAKER_OTC'),
+      this._getContractAddress(token),
+      this._getContractAddress('WETH'),
+      this._valueForContract(amount, token),
+      { dsProxy: true }
+    );
+  }
 }
 
 const tradeOps = [
   'sellAllAmount',
-  'sellAllAmountPayEth',
   'sellAllAmountBuyEth',
   'buyAllAmount',
-  'buyAllAmountPayEth',
   'buyAllAmountBuyEth'
 ];
 
@@ -109,7 +137,9 @@ Object.assign(
   tradeOps.reduce((exchange, name) => {
     exchange[name] = async function(...args) {
       await this._checkProxy();
-      this._setTradeState(name, ...args);
+      name.includes('Eth')
+        ? this._setEthTradeState(name, ...args)
+        : this._setTradeState(name, ...args);
       return this._trade();
     };
     return exchange;

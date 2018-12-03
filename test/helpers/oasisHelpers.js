@@ -7,6 +7,7 @@ export default async function createDaiAndPlaceLimitOrder(
   oasisExchangeService,
   sellDai = false
 ) {
+  console.log(oasisExchangeService.get('web3').currentAccount());
   const cdp = await oasisExchangeService.get('cdp').openCdp();
   const tx = cdp.lockEth(0.1);
   mineBlocks(oasisExchangeService);

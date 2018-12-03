@@ -1,6 +1,9 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import { setProxyAccount } from '../../helpers/proxyHelpers';
+import {
+  setProxyAccount,
+  setExistingAccount
+} from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import addresses from '../../../contracts/addresses/testnet.json';
 import tokens from '../../../contracts/tokens';
@@ -8,6 +11,9 @@ import tokens from '../../../contracts/tokens';
 let service, proxyAccount;
 
 // Error is happening on lockEth in oasisHelpers
+// What denomination is the limit in? eth?
+// What's the difference between buy and sell functions?
+// What are the two defined limits in OD used for?
 
 async function buildTestOasisDirectService() {
   service = buildTestService('oasisDirect', {
@@ -64,20 +70,31 @@ describe('trade with existing dsproxy', () => {
     } catch (err) {
       console.error(err);
     }
-    // await service.sellAllAmount('WETH', 'DAI', 20);
+    await service.sellAllAmount('WETH', 'DAI', 20);
   });
 
-  xtest('sell all amount, pay eth', async () => {});
+  xtest('sell all amount, pay eth', async () => {
+    try {
+      await setExistingAccount(service.get('exchange'), 'default');
+      await createDaiAndPlaceLimitOrder(service.get('exchange'));
+      await setExistingAccount(proxyAccount.address);
+    } catch (err) {
+      console.error(err);
+    }
+    await service.sellAllAmountPayEth('DAI', 200, { value: 1 });
+  });
 
   xtest('sell all amount, buy eth', async () => {});
 
   test('buy all amount', async () => {
     try {
+      // This needs to be done here by calling oasis contract
+      // directly
       await createDaiAndPlaceLimitOrder(service.get('exchange'), true);
     } catch (err) {
       console.error(err);
     }
-    // await service.buyAllAmount('DAI', 'MKR', 20);
+    await service.buyAllAmount('DAI', 'MKR', 20);
   });
 
   xtest('buy all amount, pay eth', async () => {});
