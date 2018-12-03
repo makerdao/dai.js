@@ -93,11 +93,12 @@ export default class Web3Service extends PrivateService {
   }
 
   subscribeNewBlocks(cb) {
-    this._blockSub = this._web3.eth
-      .subscribe('newBlockHeaders')
-      .on('data', blockHeader => {
+    this._blockSub = this.subscribe('newBlockHeaders').on(
+      'data',
+      blockHeader => {
         cb(blockHeader);
-      });
+      }
+    );
   }
 
   unsubscribeNewBlocks() {
@@ -111,14 +112,12 @@ export default class Web3Service extends PrivateService {
     return getMatchingEvent(this._web3, info, event, predicateFn);
   }
 
-  async initialize(settings) {
+  initialize(settings) {
     this.get('log').info('Web3 is initializing...');
     this._defaultEmitter = this.get('event');
 
     this._web3 = new Web3();
     this._web3.setProvider(this.get('accounts').getProvider());
-
-    this._listenBlocks();
 
     Object.assign(
       this,
@@ -144,7 +143,8 @@ export default class Web3Service extends PrivateService {
       }
     );
 
-    // remove this after a while
+    this._listenBlocks();
+    //remove this after a while
     this.eth = new Proxy(this, {
       get: (target, key) => {
         console.warn(
@@ -198,18 +198,17 @@ export default class Web3Service extends PrivateService {
   }
 
   /*
-  sendTransaction in web3 1.0 behaves differently from its counterpart in
-  0.2x.x. it doesn't resolve until the transaction has a receipt, and throws an
-  error if the receipt indicates that the transaction was reverted.
+    sendTransaction in web3 1.0 behaves differently from its counterpart in
+    0.2x.x. it doesn't resolve until the transaction has a receipt, and throws an
+    error if the receipt indicates that the transaction was reverted.
+    the setup below emulates the old behavior, because TransactionObject still
+    expects it. if there is an error due to the transaction being reverted, it
+    will be ignored, because the promise will have already resolved.
 
-  the setup below emulates the old behavior, because TransactionObject still
-  expects it. if there is an error due to the transaction being reverted, it
-  will be ignored, because the promise will have already resolved.
+    this can (and should) be refactored when we drop support for HTTP providers.
 
-  this can (and should) be refactored when we drop support for HTTP providers.
-
-  https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsendtransaction
-  https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction
+    https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsendtransaction
+    https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction
   */
   sendTransaction(...args) {
     return new Promise((resolve, reject) => {
@@ -228,10 +227,7 @@ export default class Web3Service extends PrivateService {
     return this._currentBlock;
   }
 
-  async _listenBlocks() {
-    // on startup, immediately send request for currentBlock
-    this._currentBlock = await this._web3.eth.getBlockNumber();
-
+  _listenBlocks() {
     if (this.usingWebsockets()) {
       this.subscribeNewBlocks(async data => {
         await this._updateBlockNumber(data.number);
