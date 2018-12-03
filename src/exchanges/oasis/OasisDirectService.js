@@ -28,9 +28,9 @@ export default class OasisDirectService extends PrivateService {
 
   _setEthTradeState(operation, token, value) {
     this._operation = operation;
+    this._payToken = token;
     this._value = value;
-    (this._payToken = token), (this._buyToken = 'WETH');
-    console.log(this._operation);
+    this._buyToken = 'WETH';
   }
 
   _trade() {
