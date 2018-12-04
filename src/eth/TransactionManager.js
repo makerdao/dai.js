@@ -235,7 +235,7 @@ class Tracker {
         const txAge =
           (new Date().getTime() - new Date(tx._timeStampMined).getTime()) /
           60000;
-        if ((tx.isFinalized() || tx.isError()) && txAge > 5) {
+        if ((tx.isError() || tx.isFinalized()) && txAge > 5) {
           const indexToRemove = this._transactions[key].indexOf(tx);
           this._transactions[key].splice(indexToRemove, 1);
           if (this._transactions[key].length === 0) {
