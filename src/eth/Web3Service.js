@@ -227,11 +227,12 @@ export default class Web3Service extends PrivateService {
     return this._currentBlock;
   }
 
-  _listenBlocks() {
+  async _listenBlocks() {
     if (this.usingWebsockets()) {
       this.subscribeNewBlocks(async data => {
         await this._updateBlockNumber(data.number);
       });
+      this._currentBlock = await this._web3.eth.getBlockNumber();
     } else {
       this._interval = async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
