@@ -10,6 +10,7 @@ import dsProxy from './abis/DSProxy.json';
 import dsProxyFactory from './abis/DSProxyFactory.json';
 
 import makerOtc from './abis/MatchingMarket.json';
+import oasisProxy from './abis/ProxyCreationAndExecute.json';
 import saiProxy from './abis/SaiProxyCreateAndExecute.json';
 import proxyRegistry from './abis/ProxyRegistry.json';
 
@@ -48,6 +49,7 @@ const general = {
 };
 
 const proxies = {
+  oasisProxy,
   saiProxy,
   dsProxyFactory,
   proxyRegistry
