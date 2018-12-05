@@ -47,6 +47,16 @@ describe('event subscriptions', () => {
     };
   };
 
+  function fireMockEvent(web3Service, eventObj, timeout, expects) {
+    return new Promise(resolve => {
+      const mockEventEmitter = web3Service.web3Provider();
+      setTimeout(() => {
+        expects();
+        resolve(mockEventEmitter.emit('data', (null, eventObj)));
+      }, timeout);
+    });
+  }
+
   let service;
 
   beforeEach(async () => {
@@ -92,16 +102,6 @@ describe('event subscriptions', () => {
     await smartContractService.manager().authenticate();
     const web3Service = smartContractService.get('web3');
 
-    const mockEventEmitter = web3Service.web3Provider();
-
-    const logEmitter = new Promise(resolve => {
-      setTimeout(() => {
-        const { subscriptions } = web3Service._web3.eth._requestManager;
-        expect(subscriptions['0x2'].name).toEqual('logs');
-        resolve(mockEventEmitter.emit('data', (null, rawLogNewCup())));
-      }, 100);
-    });
-
     const contractAbi = smartContractService._getContractInfo(
       contracts.SAI_TUB
     );
@@ -111,10 +111,11 @@ describe('event subscriptions', () => {
       contractAbi,
       'LogNewCup'
     );
-    await logEmitter;
 
-    const { subscriptions } = web3Service._web3.eth._requestManager;
-    expect(subscriptions['0x2']).toBe(undefined);
+    await fireMockEvent(web3Service, rawLogNewCup(), 100, () => {
+      const { subscriptions } = web3Service._web3.eth._requestManager;
+      expect(subscriptions['0x2'].name).toEqual('logs');
+    });
 
     const expectedEvent = {
       '0': '0x16Fb96a5fa0427Af0C8F7cF1eB4870231c8154B6',
@@ -123,7 +124,9 @@ describe('event subscriptions', () => {
       cup: '0x0000000000000000000000000000000000000000000000000000000000000001',
       lad: '0x16Fb96a5fa0427Af0C8F7cF1eB4870231c8154B6'
     };
-
     expect(eventPromise).resolves.toEqual(expectedEvent);
+
+    const { subscriptions } = web3Service._web3.eth._requestManager;
+    expect(subscriptions['0x2']).toBe(undefined);
   });
 });
