@@ -20,8 +20,11 @@ export default class Maker {
     for (let plugin of plugins) {
       if (typeof plugin === 'function') {
         plugin(this, config);
-      } else if (plugin.afterCreate) {
-        plugin.afterCreate(this, config);
+      } else {
+        if (plugin.afterCreate) plugin.afterCreate(this, config);
+        if (plugin.delegateToServices) {
+          delegateToServices(this, plugin.delegateToServices);
+        }
       }
     }
 
