@@ -1,6 +1,7 @@
 {
   "MCD_ADM": "DSRoles",
   "MCD_CAT": "Cat",
+  "MCD_CDP_LIB": "CdpLib",
   "MCD_CDP_REGISTRY": "CdpRegistry",
   "MCD_DAI": "DSToken",
   "MCD_DAI_GUARD": "DSGuard",
