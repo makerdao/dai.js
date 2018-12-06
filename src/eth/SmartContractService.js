@@ -196,9 +196,12 @@ export default class SmartContractService extends PublicService {
 
       const infos2 = {
         ...infos,
-        ...mapValues(this._addedContracts, ([definition]) => {
+        ...mapValues(this._addedContracts, ([definition], name) => {
           const { address, ...otherProps } = definition;
           if (typeof address === 'string') return [definition];
+          if (!address || !address[networkName]) {
+            throw new Error(`Missing address for ${name} on ${networkName}`);
+          }
           return [{ address: address[networkName], ...otherProps }];
         })
       };
