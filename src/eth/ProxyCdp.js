@@ -76,76 +76,6 @@ export default class ProxyCdp {
     });
   }
 
-  _getCdpId(saiProxyAddress, tubContract, dsProxyAddressPromise) {
-    const saiTub = this._smartContractService._getContractInfo(
-      contracts.SAI_TUB
-    );
-
-    return new Promise(async resolve => {
-      // If using an existing DSProxy, listen for the LogNewCup event
-      const existingDsProxyAddress = this.dsProxyAddress;
-
-      if (existingDsProxyAddress) {
-        if (this._web3Service.usingWebsockets()) {
-          const { cup } = await this._web3Service.waitForMatchingEvent(
-            saiTub,
-            'LogNewCup',
-            log => {
-              return (
-                log.lad.toLowerCase() === existingDsProxyAddress.toLowerCase()
-              );
-            }
-          );
-          resolve(ethersUtils.bigNumberify(cup).toNumber());
-        } else {
-          tubContract.onlognewcup = function(lad, cup) {
-            if (existingDsProxyAddress == lad.toLowerCase()) {
-              this.removeListener();
-              resolve(ethersUtils.bigNumberify(cup).toNumber());
-            }
-          };
-        }
-      }
-      // If a new DSProxy instance is being created at the same time as the cup,
-      // listen for the give event (via DSNote) rather than the LogNewCup event
-      else {
-        const _topics = [
-          ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56), // prettier-ignore
-          '0x000000000000000000000000' + saiProxyAddress.substring(2)
-        ];
-
-        if (this._web3Service.usingWebsockets()) {
-          const subscription = this._web3Service._web3.eth
-            .subscribe('logs', {
-              topics: _topics
-            })
-            .on('data', async log => {
-              const proxyInLog = '0x' + log.topics[3].substr(26);
-              await dsProxyAddressPromise; // wait for this to resolve first
-              if (
-                this.dsProxyAddress.toLowerCase() === proxyInLog.toLowerCase()
-              ) {
-                resolve(ethersUtils.bigNumberify(log.topics[2]).toNumber());
-                subscription.unsubscribe();
-              }
-            });
-        } else {
-          const provider = this._smartContractService
-            .get('web3')
-            .ethersProvider();
-          provider.on(_topics, log => {
-            Promise.resolve(dsProxyAddressPromise).then(() => {
-              const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
-              if (this.dsProxyAddress === proxyInLog) {
-                resolve(ethersUtils.bigNumberify(log.topics[2]).toNumber());
-              }
-            });
-          });
-        }
-      }
-    });
-  }
-
   _create({ lockAndDraw = false, amountEth = null, amountDai = null } = {}) {
     const tub = this._smartContractService.getContractByName(contracts.SAI_TUB);
     const saiProxy = this._smartContractService.getContractByName(contracts.SAI_PROXY); // prettier-ignore
@@ -230,15 +160,35 @@ export default class ProxyCdp {
       }
     }
 
+    const getId = async () => {
+      const txObj = this._transactionManager.getTransaction(
+        this._transactionObject
+      );
+      return new Promise(resolve => {
+        txObj.onMined(async () => {
+          let log;
+          switch (txObj.metadata.method) {
+            case 'createAndOpen':
+              log = txObj.receipt.logs[5];
+              break;
+            case 'createOpenLockAndDraw':
+              log = txObj.receipt.logs[5];
+              break;
+            case 'lockAndDraw':
+              log = txObj.receipt.logs[2];
+              break;
+            case 'open':
+              log = txObj.receipt.logs[2];
+          }
+
+          resolve(this._web3Service._web3.utils.hexToNumber(log.data));
+        });
+      });
+    };
+
     const promise = (async () => {
-      // this "no-op await" is necessary for the inner reference to the
-      // outer promise to become valid
-      await 0;
-      const results = await Promise.all([
-        this._getCdpId(saiProxy.address, tub, dsProxyAddressPromise),
-        saiProxy[method](...args)
-      ]);
-      this.id = results[0];
+      this._transactionObject = saiProxy[method](...args);
+      this.id = await getId();
       return this;
     })();
     this._transactionObject = promise;

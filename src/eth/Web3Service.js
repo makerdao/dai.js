@@ -144,15 +144,6 @@ export default class Web3Service extends PrivateService {
     );
 
     this._listenBlocks();
-    //remove this after a while
-    this.eth = new Proxy(this, {
-      get: (target, key) => {
-        console.warn(
-          `use web3Service.${key} instead of web3Service.eth.${key}`
-        );
-        return target[key];
-      }
-    });
 
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();

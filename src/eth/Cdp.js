@@ -7,6 +7,9 @@ export default class Cdp {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
     this._web3Service = this._smartContractService.get('web3');
+    this._transactionManager = this._smartContractService.get(
+      'transactionManager'
+    );
 
     if (!cdpId) {
       this._create();
@@ -37,47 +40,27 @@ export default class Cdp {
       .get('web3')
       .currentAccount();
 
-    const getId = new Promise(async resolve => {
-      let id;
-      if (this._web3Service.usingWebsockets()) {
-        const saiTub = this._smartContractService._getContractInfo(
-          contracts.SAI_TUB
-        );
-        id = (await this._web3Service.waitForMatchingEvent(
-          saiTub,
-          'LogNewCup',
-          log => {
-            return log.lad.toLowerCase() === currentAccount.toLowerCase();
-          }
-        )).cup;
-      } else {
-        id = await new Promise(resolve => {
-          tubContract.onlognewcup = (lad, cup) => {
-            if (lad.toLowerCase() === currentAccount.toLowerCase()) {
-              resolve(cup);
-            }
-          };
+    const getId = async () => {
+      const txObj = this._transactionManager.getTransaction(
+        this._transactionObject
+      );
+      return new Promise(resolve => {
+        txObj.onMined(async () => {
+          const log = txObj.receipt.logs[1];
+          resolve(this._web3Service._web3.utils.hexToNumber(log.data));
         });
-      }
-      resolve(ethersUtils.bigNumberify(id).toNumber());
-    });
+      });
+    };
 
     const promise = (async () => {
-      // this "no-op await" is necessary for the inner reference to the
-      // outer promise to become valid
-      await 0;
-      const results = await Promise.all([
-        getId,
-        tubContract.open({
-          metadata: {
-            action: {
-              name: 'open'
-            }
-          },
-          promise
-        })
-      ]);
-      this.id = results[0];
+      this._transactionObject = tubContract.open({
+        metadata: {
+          action: {
+            name: 'open'
+          }
+        }
+      });
+      this.id = await getId();
       return this;
     })();
 
