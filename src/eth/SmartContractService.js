@@ -32,7 +32,7 @@ export default class SmartContractService extends PublicService {
 
     // If no account, use the provider so we can still read from the contract.
     // The signer just delegates to the provider
-    let signer = this.get('web3')
+    const signer = this.get('web3')
       .get('accounts')
       .hasAccount()
       ? provider.getSigner()
