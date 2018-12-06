@@ -146,7 +146,7 @@ test('getContractByName returns contract with a valid signer', done => {
     .manager()
     .authenticate()
     .then(() => {
-      let provider = service.get('web3').ethersProvider();
+      const provider = service.get('web3').ethersProvider();
       const contract = service.getContractByName(contracts.SAI_TOP);
       expect(contract.signer.provider).toBe(provider);
       done();
