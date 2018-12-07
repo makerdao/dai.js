@@ -46,7 +46,7 @@ test('parses an amount + currency as ray', () => {
 test('throws an error if there is no unit', () => {
   expect(() => {
     getCurrency(1);
-  }).toThrowError('Unit not specified');
+  }).toThrowError('Amount is not a Currency');
 });
 
 test('throws an error if amount is negative', () => {
