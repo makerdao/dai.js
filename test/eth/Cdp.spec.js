@@ -20,23 +20,22 @@ import {
 
 let cdpService,
   cdp,
-  currentAccount,
+  currentAddress,
   dai,
   dsProxyAddress,
   proxyAccount,
-  proxyKey,
   transactionCount;
 
 // this function should be called again after reverting a snapshot; otherwise,
 // you may get errors about account and transaction nonces not matching.
-async function init(proxy = false) {
+async function init(useProxy = false) {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
-  if (proxy) {
-    await setProxyAccount(cdpService, proxyAccount, proxyKey);
-    currentAccount = proxyAccount;
+  if (useProxy) {
+    await setProxyAccount(cdpService, proxyAccount);
+    currentAddress = proxyAccount.address;
   } else {
-    currentAccount = cdpService
+    currentAddress = cdpService
       .get('token')
       .get('web3')
       .currentAccount();
@@ -46,13 +45,12 @@ async function init(proxy = false) {
 beforeAll(async () => {
   await init();
   const account = TestAccountProvider.nextAccount();
-  proxyAccount = account.address;
-  proxyKey = account.key;
-  transferMkr(cdpService, proxyAccount);
+  proxyAccount = { address: account.address, key: account.key };
+  transferMkr(cdpService, proxyAccount.address);
   dai = cdpService.get('token').getToken(DAI);
 });
 
-const sharedTests = (openCdp, proxy = false) => {
+const sharedTests = (openCdp, useProxy = false) => {
   describe('basic checks', () => {
     let id;
 
@@ -107,9 +105,9 @@ const sharedTests = (openCdp, proxy = false) => {
 
     afterAll(async () => {
       // other tests expect this to be the case
-      if (proxy) setExistingAccount(cdpService, 'default');
+      if (useProxy) setExistingAccount(cdpService, 'default');
       await cdpService.get('price').setEthPrice(400);
-      if (proxy) setExistingAccount(cdpService, proxyAccount);
+      if (useProxy) setExistingAccount(cdpService, proxyAccount.address);
     });
 
     // FIXME this breaks other tests, possibly because it leaves the test chain in
@@ -119,9 +117,9 @@ const sharedTests = (openCdp, proxy = false) => {
     });
 
     test('when unsafe', async () => {
-      if (proxy) setExistingAccount(cdpService, 'default');
+      if (useProxy) setExistingAccount(cdpService, 'default');
       await cdpService.get('price').setEthPrice(0.01);
-      if (proxy) setExistingAccount(cdpService, proxyAccount);
+      if (useProxy) setExistingAccount(cdpService, proxyAccount.address);
       const result = await cdp.bite();
       expect(typeof result).toEqual('object');
     });
@@ -177,14 +175,11 @@ const sharedTests = (openCdp, proxy = false) => {
         let snapshotId, nonceService;
 
         beforeAll(() => {
-          transactionCount = cdpService
-            .get('smartContract')
-            .get('transactionManager')
-            .get('nonce')._counts[currentAccount];
           nonceService = cdpService
             .get('smartContract')
             .get('transactionManager')
             .get('nonce');
+          transactionCount = nonceService._counts[currentAddress];
         });
 
         beforeEach(async () => {
@@ -195,18 +190,18 @@ const sharedTests = (openCdp, proxy = false) => {
           await promiseWait(1100);
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
 
-          nonceService._counts[currentAccount] = transactionCount;
+          nonceService._counts[currentAddress] = transactionCount;
         });
 
         afterEach(async () => {
           await restoreSnapshot(snapshotId);
-          await init(proxy);
+          await init(useProxy);
         });
 
         test('read MKR fee', async () => {
-          if (proxy) setExistingAccount(cdpService, 'default');
+          if (useProxy) setExistingAccount(cdpService, 'default');
           await cdpService.get('price').setMkrPrice(600);
-          if (proxy) setExistingAccount(cdpService, proxyAccount);
+          if (useProxy) setExistingAccount(cdpService, proxyAccount.address);
           // block.timestamp is measured in seconds, so we need to wait at least a
           // second for the fees to get updated
           const usdFee = await cdp.getGovernanceFee(USD);
@@ -219,7 +214,7 @@ const sharedTests = (openCdp, proxy = false) => {
           expect.assertions(2);
           const mkr = cdpService.get('token').getToken(MKR);
           const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+          await mkr.transfer(other, await mkr.balanceOf(currentAddress));
           try {
             await cdp.wipeDai(1);
           } catch (err) {
@@ -237,7 +232,7 @@ const sharedTests = (openCdp, proxy = false) => {
           const [fee, debt, balance] = await Promise.all([
             cdp.getGovernanceFee(MKR),
             cdp.getDebtValue(),
-            mkr.balanceOf(currentAccount)
+            mkr.balanceOf(currentAddress)
           ]);
           const mkrOwed = amountToWipe
             .div(debt)
@@ -262,7 +257,7 @@ const sharedTests = (openCdp, proxy = false) => {
           expect.assertions(2);
           const mkr = cdpService.get('token').getToken(MKR);
           const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, await mkr.balanceOf(currentAccount));
+          await mkr.transfer(other, await mkr.balanceOf(currentAddress));
           try {
             await cdp.shut();
           } catch (err) {
@@ -279,7 +274,7 @@ const sharedTests = (openCdp, proxy = false) => {
           const [fee, debt, balance] = await Promise.all([
             cdp.getGovernanceFee(MKR),
             cdp.getDebtValue(),
-            mkr.balanceOf(currentAccount)
+            mkr.balanceOf(currentAddress)
           ]);
           const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
           const other = TestAccountProvider.nextAddress();
@@ -297,21 +292,20 @@ const sharedTests = (openCdp, proxy = false) => {
         });
 
         test('wipe debt with non-zero stability fee', async () => {
-          // if (!proxy) nonceService._counts[currentAccount] -= 1;
           const mkr = cdpService.get('token').getToken(MKR);
           const debt1 = await cdp.getDebtValue();
-          const balance1 = await mkr.balanceOf(currentAccount);
+          const balance1 = await mkr.balanceOf(currentAddress);
           await cdp.wipeDai(1);
           const debt2 = await cdp.getDebtValue();
-          const balance2 = await mkr.balanceOf(currentAccount);
+          const balance2 = await mkr.balanceOf(currentAddress);
           expect(debt1.minus(debt2)).toEqual(DAI(1));
           expect(balance1.gt(balance2)).toBeTruthy();
         });
 
         test('wipe', async () => {
-          const balance1 = parseFloat(await dai.balanceOf(currentAccount));
+          const balance1 = parseFloat(await dai.balanceOf(currentAddress));
           await cdp.wipeDai('5');
-          const balance2 = parseFloat(await dai.balanceOf(currentAccount));
+          const balance2 = parseFloat(await dai.balanceOf(currentAddress));
           expect(balance2 - balance1).toBeCloseTo(-5);
           const debt = await cdp.getDebtValue();
           expect(debt).toEqual(DAI(0));
@@ -376,11 +370,11 @@ describe('non-proxy cdp', () => {
     });
 
     test('lock weth in a cdp', async () => {
-      const balancePre = await wethToken.balanceOf(currentAccount);
+      const balancePre = await wethToken.balanceOf(currentAddress);
       const cdpInfoPre = await cdp.getInfo();
       await cdp.lockWeth(0.1);
       const cdpInfoPost = await cdp.getInfo();
-      const balancePost = await wethToken.balanceOf(currentAccount);
+      const balancePost = await wethToken.balanceOf(currentAddress);
 
       expect(cdpInfoPre.ink.toString()).toEqual('0');
       expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
@@ -391,11 +385,11 @@ describe('non-proxy cdp', () => {
       await wethToken.approve(cdpService._tubContract().address, '0.1');
       await pethToken.join('0.1');
 
-      const balancePre = await pethToken.balanceOf(currentAccount);
+      const balancePre = await pethToken.balanceOf(currentAddress);
       const cdpInfoPre = await cdp.getInfo();
       await cdp.lockPeth(0.1);
       const cdpInfoPost = await cdp.getInfo();
-      const balancePost = await pethToken.balanceOf(currentAccount);
+      const balancePost = await pethToken.balanceOf(currentAddress);
 
       expect(cdpInfoPre.ink.toString()).toEqual('0');
       expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
@@ -409,8 +403,8 @@ describe('proxy cdp', () => {
 
   beforeAll(async () => {
     ethToken = cdpService.get('token').getToken(ETH);
-    await setProxyAccount(cdpService, proxyAccount, proxyKey);
-    currentAccount = proxyAccount;
+    await setProxyAccount(cdpService, proxyAccount);
+    currentAddress = proxyAccount.address;
     await setProxy();
   });
 
@@ -429,14 +423,14 @@ describe('proxy cdp', () => {
   }
 
   test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
-    const balancePre = await ethToken.balanceOf(currentAccount);
+    const balancePre = await ethToken.balanceOf(currentAddress);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
       0.1,
       1,
       dsProxyAddress
     );
     const cdpInfoPost = await cdp.getInfo();
-    const balancePost = await ethToken.balanceOf(currentAccount);
+    const balancePost = await ethToken.balanceOf(currentAddress);
 
     expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
@@ -446,11 +440,11 @@ describe('proxy cdp', () => {
 
   test('use existing DSProxy to open CDP, then lock ETH and draw DAI (multi tx)', async () => {
     const cdp = await cdpService.openProxyCdp(dsProxyAddress);
-    const balancePre = await ethToken.balanceOf(currentAccount);
+    const balancePre = await ethToken.balanceOf(currentAddress);
     const cdpInfoPre = await cdp.getInfo();
     await cdp.lockEthAndDrawDai(0.1, 1);
     const cdpInfoPost = await cdp.getInfo();
-    const balancePost = await ethToken.balanceOf(currentAccount);
+    const balancePost = await ethToken.balanceOf(currentAddress);
 
     // ETH balance should now be reduced by (at least) 0.1 (plus gas)
     expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
@@ -462,8 +456,8 @@ describe('proxy cdp', () => {
 
   test('create DSProxy and open CDP (single tx)', async () => {
     const newAccount = TestAccountProvider.nextAccount();
-    await setProxyAccount(cdpService, newAccount.address, newAccount.key);
-    currentAccount = newAccount.address;
+    await setProxyAccount(cdpService, newAccount);
+    currentAddress = newAccount.address;
     const cdp = await cdpService.openProxyCdp();
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
@@ -471,12 +465,12 @@ describe('proxy cdp', () => {
 
   test('create DSProxy, open CDP, lock ETH and draw DAI (single tx)', async () => {
     const newAccount = TestAccountProvider.nextAccount();
-    await setProxyAccount(cdpService, newAccount.address, newAccount.key);
-    currentAccount = newAccount.address;
-    const balancePre = await ethToken.balanceOf(currentAccount);
+    await setProxyAccount(cdpService, newAccount);
+    currentAddress = newAccount.address;
+    const balancePre = await ethToken.balanceOf(currentAddress);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(0.1, 1);
     const cdpInfoPost = await cdp.getInfo();
-    const balancePost = await ethToken.balanceOf(currentAccount);
+    const balancePost = await ethToken.balanceOf(currentAddress);
 
     expect(balancePre.minus(balancePost).toNumber()).toBeGreaterThanOrEqual(0.1); // prettier-ignore
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');

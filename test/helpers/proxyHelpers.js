@@ -3,16 +3,16 @@ import { MKR } from '../../src/eth/Currency';
 // Provided service for all functions must directly
 // depend on the token service.
 
-export async function setProxyAccount(service, address, key) {
+export async function setProxyAccount(service, account) {
   const accountService = service
     .get('token')
     .get('web3')
     .get('accounts');
-  await accountService.addAccount(address, {
+  await accountService.addAccount(account.address, {
     type: 'privateKey',
-    key: key
+    key: account.key
   });
-  accountService.useAccount(address);
+  accountService.useAccount(account.address);
 }
 
 export async function transferMkr(service, address) {
