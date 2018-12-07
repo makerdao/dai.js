@@ -65,7 +65,7 @@ const sharedTests = (openCdp, useProxy = false) => {
       expect(cdp._smartContractService).toBeDefined();
     });
 
-    test.only('lookup by ID', async () => {
+    test('lookup by ID', async () => {
       expect.assertions(2);
       const info = await cdpService.getInfo(id);
       expect(info).toBeTruthy();
