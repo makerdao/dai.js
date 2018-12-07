@@ -9,6 +9,10 @@ import { mapValues } from 'lodash';
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log', 'transactionManager']);
+
+    // aliases
+    this.getContract = this.getContractByName;
+    this.getContractAddress = this.getContractAddressByName;
   }
 
   initialize(settings = {}) {

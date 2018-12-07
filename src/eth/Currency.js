@@ -12,7 +12,7 @@ function amountToBigNumber(amount) {
   return value;
 }
 
-class Currency {
+export class Currency {
   constructor(amount, shift = 0) {
     if (shift === 'wei') shift = -18;
     if (shift === 'ray') shift = -27;
@@ -197,7 +197,7 @@ export const currencies = values(tokens).reduce(
 
 export function getCurrency(amount, unit) {
   if (amount instanceof Currency) return amount;
-  if (!unit) throw new Error('Unit not specified');
+  if (!unit) throw new Error('Amount is not a Currency');
   const key = typeof unit === 'string' ? unit.toUpperCase() : unit.symbol;
   const ctor = currencies[key];
   if (!ctor) {
