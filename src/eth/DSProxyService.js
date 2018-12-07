@@ -1,11 +1,12 @@
 import PrivateService from '../core/PrivateService';
+import TransactionObject from './TransactionObject';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
 import { contractInfo } from '../../contracts/networks';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
-    super(name, ['web3']);
+    super(name, ['web3', 'nonce']);
   }
 
   async authenticate() {
@@ -56,9 +57,14 @@ export default class DSProxyService extends PrivateService {
   }
 
   async build() {
-    const transaction = this._proxyRegistry().build();
-    this._currentProxy = await this._setCurrentProxy(transaction);
-    return transaction;
+    const txo = await new TransactionObject(
+      this._proxyRegistry().build(),
+      this.get('web3'),
+      this.get('nonce'),
+      { contract: 'PROXY_REGISTRY', method: 'build' }
+    ).mine();
+    this._currentProxy = await this.getProxyAddress();
+    return txo;
   }
 
   execute(contract, method, args, options, address) {
@@ -106,5 +112,12 @@ export default class DSProxyService extends PrivateService {
   async setOwner(newOwner, proxyAddress = this._currentProxy) {
     const contract = this.getContractByProxyAddress(proxyAddress);
     return contract.setOwner(newOwner);
+  }
+
+  _createTransactionObject(tx, { metadata } = {}) {
+    const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
+      metadata
+    });
+    return txo.mine();
   }
 }
