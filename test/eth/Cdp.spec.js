@@ -23,10 +23,10 @@ let cdpService,
 
 // this function should be called again after reverting a snapshot; otherwise,
 // you may get errors about account and transaction nonces not matching.
-async function init(proxy = false) {
+async function init(useProxy = false) {
   cdpService = buildTestEthereumCdpService();
   await cdpService.manager().authenticate();
-  if (proxy) {
+  if (useProxy) {
     await setProxyAccount();
   } else {
     currentAddress = cdpService
@@ -80,7 +80,7 @@ beforeAll(async () => {
   dai = cdpService.get('token').getToken(DAI);
 });
 
-const sharedTests = (openCdp, proxy = false) => {
+const sharedTests = (openCdp, useProxy = false) => {
   describe('basic checks', () => {
     let id;
 
@@ -135,9 +135,9 @@ const sharedTests = (openCdp, proxy = false) => {
 
     afterAll(async () => {
       // other tests expect this to be the case
-      if (proxy) setExistingAccount('default');
+      if (useProxy) setExistingAccount('default');
       await cdpService.get('price').setEthPrice(400);
-      if (proxy) setExistingAccount(proxyAccount.address);
+      if (useProxy) setExistingAccount(proxyAccount.address);
     });
 
     // FIXME this breaks other tests, possibly because it leaves the test chain in
@@ -147,9 +147,9 @@ const sharedTests = (openCdp, proxy = false) => {
     });
 
     test('when unsafe', async () => {
-      if (proxy) setExistingAccount('default');
+      if (useProxy) setExistingAccount('default');
       await cdpService.get('price').setEthPrice(0.01);
-      if (proxy) setExistingAccount(proxyAccount.address);
+      if (useProxy) setExistingAccount(proxyAccount.address);
       const result = await cdp.bite();
       expect(typeof result).toEqual('object');
     });
@@ -225,13 +225,13 @@ const sharedTests = (openCdp, proxy = false) => {
 
         afterEach(async () => {
           await restoreSnapshot(snapshotId);
-          await init(proxy);
+          await init(useProxy);
         });
 
         test('read MKR fee', async () => {
-          if (proxy) setExistingAccount('default');
+          if (useProxy) setExistingAccount('default');
           await cdpService.get('price').setMkrPrice(600);
-          if (proxy) setExistingAccount(proxyAccount.address);
+          if (useProxy) setExistingAccount(proxyAccount.address);
           // block.timestamp is measured in seconds, so we need to wait at least a
           // second for the fees to get updated
           const usdFee = await cdp.getGovernanceFee(USD);
