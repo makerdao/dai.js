@@ -111,6 +111,13 @@ export function contractInfo(network) {
         abi: abis.proxies.saiProxy
       }
     ],
+    [contracts.OASIS_PROXY]: [
+      {
+        version: 1,
+        address: addresses.OASIS_PROXY,
+        abi: abis.proxies.oasisProxy
+      }
+    ],
     [contracts.DS_PROXY_FACTORY]: [
       {
         version: 1,
