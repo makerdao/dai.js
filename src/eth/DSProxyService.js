@@ -106,11 +106,4 @@ export default class DSProxyService extends PrivateService {
     const contract = this.getContractByProxyAddress(proxyAddress);
     return contract.setOwner(newOwner);
   }
-
-  _createTransactionObject(tx, { metadata } = {}) {
-    const txo = new TransactionObject(tx, this.get('web3'), this.get('nonce'), {
-      metadata
-    });
-    return txo.mine();
-  }
 }
