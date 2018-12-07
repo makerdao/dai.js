@@ -1,5 +1,5 @@
 import PrivateService from '../../core/PrivateService';
-import { getCurrency } from '../../eth/Currency';
+import { getCurrency, WETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { contractInfo } from '../../../contracts/networks';
 
@@ -38,6 +38,28 @@ export default class OasisDirectService extends PrivateService {
     return this._oasisDirect()[this._operation](...params, { dsProxy: true });
   }
 
+  async getBuyAmount() {
+    const otc = this.get('smartContract').getContractByName(
+      contracts.MAKER_OTC
+    );
+    return await otc.getBuyAmount(
+      this._getContractAddress(this._buyToken),
+      this._getContractAddress(this._payToken),
+      this._valueForContract(this._value, this._buyToken)
+    );
+  }
+
+  async getPayAmount() {
+    const otc = this.get('smartContract').getContractByName(
+      contracts.MAKER_OTC
+    );
+    return await otc.getPayAmount(
+      this._getContractAddress(this._buyToken),
+      this._getContractAddress(this._payToken),
+      this._valueForContract(this._value, this._payToken)
+    );
+  }
+
   _buildTradeParams() {
     return [
       this._getContractAddress('MAKER_OTC'),
@@ -59,11 +81,13 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  _limit() {
+  async _limit() {
+    const buyAmount = await this.getBuyAmount();
+    const payAmount = await this.getPayAmount();
     return this._operation.includes('sellAll')
-      ? this._valueForContract(this._value * (1 - this._threshold()), 'eth')
+      ? this._valueForContract(buyAmount * (1 - this._threshold()), 'eth')
       : this._valueForContract(
-          (this._value * (1 + this._threshold())).round(0),
+          (payAmount * (1 + this._threshold())).round(0),
           'eth'
         );
   }

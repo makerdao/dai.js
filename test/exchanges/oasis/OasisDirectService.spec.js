@@ -27,6 +27,13 @@ function proxy() {
   return service.get('proxy').currentProxy();
 }
 
+function setMockTradeState() {
+  service._operation = 'sellAllAmount';
+  service._payToken = 'DAI';
+  service._buyToken = 'WETH';
+  service._value = 1;
+}
+
 function currentAccount() {
   return service
     .get('smartContract')
@@ -49,6 +56,11 @@ test('get token addresses', () => {
 test('get token balances', async () => {
   const balance = await service.getBalance('WETH');
   expect(balance.toString()).toEqual('0.00 WETH');
+});
+
+test('get buy amount', async () => {
+  setMockTradeState();
+  await service.getBuyAmount();
 });
 
 describe('trade with existing dsproxy', () => {
