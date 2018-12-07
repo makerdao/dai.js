@@ -5,9 +5,9 @@ import { waitForBlocks } from '../helpers/transactionConfirmation';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 
 describe.each([
-  ['with websocket provider', true],
-  ['with http provider', false]
-])('%s', (name, useWebsockets) => {
+  ['with http provider', true],
+  ['with websocket provider', false]
+])('%s', (name, useHttp) => {
   function buildDisconnectingService(disconnectAfter = 25) {
     const service = buildTestService(null, disconnectAfter + 25);
 
@@ -69,7 +69,7 @@ describe.each([
           gasPrice: 1
         }
       },
-      useWebsockets,
+      useHttp,
       accounts: {}
     };
     if (keys && keys.length) {
@@ -85,14 +85,13 @@ describe.each([
   }
 
   function buildInfuraService(network) {
-    const config = useWebsockets
+    const config = useHttp
       ? {
           web3: {
             provider: {
               url: `wss://${network}.infura.io/ws`
             }
-          },
-          useWebsockets
+          }
         }
       : {
           web3: {
@@ -100,7 +99,8 @@ describe.each([
               type: ProviderType.INFURA,
               network
             }
-          }
+          },
+          useHttp
         };
     return buildTestServiceCore('web3', config);
   }
@@ -301,7 +301,7 @@ describe.each([
     expect(count).toEqual(5);
   });
 
-  if (useWebsockets) {
+  if (!useHttp) {
     describe('when provider is using websockets', () => {
       test('should return true if using websockets', async () => {
         const service = buildTestService();
@@ -342,8 +342,7 @@ describe.each([
       test('will listen and update new blocks using subscription', async () => {
         // using cdp so access to both token and web3 services is supported
         const service = buildTestServiceCore('cdp', {
-          cdp: true,
-          useWebsockets
+          cdp: true
         });
         await service.manager().authenticate();
 

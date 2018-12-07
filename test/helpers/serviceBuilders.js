@@ -52,19 +52,19 @@ export function resetCache() {
   cache.storage = {};
 }
 
-const useWebsocketsForTests = false;
+const useHttpForTests = false;
 
 export function buildTestContainer(settings = {}) {
   // switch between using websockets for tests is simplified
   const provider =
-    useWebsocketsForTests || settings.useWebsockets
-      ? websocketProviderConfig()
-      : defaultProviderConfig();
+        useHttpForTests || settings.useHttp
+        ? defaultProviderConfig()
+        : websocketProviderConfig();
   if (settings && settings.accounts) {
     delete provider.accounts;
   }
-  if (has(settings, 'useWebsockets')) {
-    delete settings.useWebsockets;
+  if (has(settings, 'useHttp')) {
+    delete settings.useHttp;
   }
   merge(provider, settings);
   return new DefaultServiceProvider({

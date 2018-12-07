@@ -95,7 +95,7 @@ describe('event subscriptions', () => {
   let service;
 
   beforeEach(async () => {
-    service = buildTestService('web3', { useWebsockets: true });
+    service = buildTestService('web3');
     await service.manager().authenticate();
   });
 
@@ -131,8 +131,7 @@ describe('event subscriptions', () => {
 
   test('mock subscription event firing and catching', async () => {
     const smartContractService = buildTestService('smartContract', {
-      smartContract: true,
-      useWebsockets: true
+      smartContract: true
     });
     await smartContractService.manager().authenticate();
     const web3Service = smartContractService.get('web3');
@@ -163,8 +162,7 @@ describe('event subscriptions', () => {
 
   test('mock subscription event with predicate', async () => {
     const smartContractService = buildTestService('smartContract', {
-      smartContract: true,
-      useWebsockets: true
+      smartContract: true
     });
     await smartContractService.manager().authenticate();
     const web3Service = smartContractService.get('web3');
