@@ -1,5 +1,4 @@
 import contracts from '../../contracts/contracts';
-import { utils as ethersUtils } from 'ethers';
 import { USD } from './Currency';
 
 export default class Cdp {
@@ -36,14 +35,8 @@ export default class Cdp {
       contracts.SAI_TUB
     );
 
-    const currentAccount = this._smartContractService
-      .get('web3')
-      .currentAccount();
-
-    const getId = async () => {
-      const txObj = this._transactionManager.getTransaction(
-        this._transactionObject
-      );
+    const getId = open => {
+      const txObj = this._transactionManager.getTransaction(open);
       return new Promise(resolve => {
         txObj.onMined(async () => {
           const log = txObj.receipt.logs[1];
@@ -53,14 +46,16 @@ export default class Cdp {
     };
 
     const promise = (async () => {
-      this._transactionObject = tubContract.open({
+      await 0;
+      const open = tubContract.open({
         metadata: {
           action: {
             name: 'open'
           }
-        }
+        },
+        promise
       });
-      this.id = await getId();
+      this.id = await getId(open);
       return this;
     })();
 

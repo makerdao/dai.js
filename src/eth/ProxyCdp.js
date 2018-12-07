@@ -1,5 +1,4 @@
 import contracts from '../../contracts/contracts';
-import { utils as ethersUtils } from 'ethers';
 import { getCurrency, DAI, ETH, USD } from './Currency';
 
 export default class ProxyCdp {
@@ -160,10 +159,8 @@ export default class ProxyCdp {
       }
     }
 
-    const getId = async () => {
-      const txObj = this._transactionManager.getTransaction(
-        this._transactionObject
-      );
+    const getId = proxy => {
+      const txObj = this._transactionManager.getTransaction(proxy);
       return new Promise(resolve => {
         txObj.onMined(async () => {
           let log;
@@ -187,8 +184,8 @@ export default class ProxyCdp {
     };
 
     const promise = (async () => {
-      this._transactionObject = saiProxy[method](...args);
-      this.id = await getId();
+      const proxy = saiProxy[method](...args);
+      this.id = await getId(proxy);
       return this;
     })();
     this._transactionObject = promise;
