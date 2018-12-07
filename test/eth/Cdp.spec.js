@@ -452,8 +452,6 @@ describe('proxy cdp', () => {
   }
 
   test('use existing DSProxy to open CDP, lock ETH and draw DAI (single tx)', async () => {
-    console.log(currentAddress);
-    console.log(cdpService.get('proxy').currentProxy());
     const balancePre = await ethToken.balanceOf(currentAddress);
     const cdp = await cdpService.openProxyCdpLockEthAndDrawDai(
       0.1,
