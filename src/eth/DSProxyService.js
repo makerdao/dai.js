@@ -1,11 +1,12 @@
 import PrivateService from '../core/PrivateService';
+import TransactionObject from './TransactionObject';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
 import { contractInfo } from '../../contracts/networks';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
-    super(name, ['web3']);
+    super(name, ['web3', 'nonce']);
   }
 
   async authenticate() {
@@ -37,13 +38,6 @@ export default class DSProxyService extends PrivateService {
     }
   }
 
-  _setCurrentProxy(transaction) {
-    return new Promise(async resolve => {
-      await transaction;
-      resolve(await this.getProxyAddress());
-    });
-  }
-
   _resetDefaults(newProxy) {
     this._currentProxy = newProxy;
     this._currentAccount = this.get('web3').currentAccount();
@@ -56,9 +50,18 @@ export default class DSProxyService extends PrivateService {
   }
 
   async build() {
-    const transaction = this._proxyRegistry().build();
-    this._currentProxy = await this._setCurrentProxy(transaction);
-    return transaction;
+    const nonce = await this.get('nonce').getNonce();
+    const txo = await new TransactionObject(
+      this._proxyRegistry().build({
+        ...this.get('web3').transactionSettings(),
+        nonce: nonce
+      }),
+      this.get('web3'),
+      this.get('nonce'),
+      { contract: 'PROXY_REGISTRY', method: 'build' }
+    ).mine();
+    this._currentProxy = await this.getProxyAddress();
+    return txo;
   }
 
   execute(contract, method, args, options, address) {
@@ -66,7 +69,7 @@ export default class DSProxyService extends PrivateService {
       throw new Error('No proxy found for current account');
     const proxyAddress = address ? address : this.currentProxy();
     const proxyContract = this.getContractByProxyAddress(proxyAddress);
-    const data = this.getCallData(contract, method, args);
+    const data = contract.interface.functions[method](...args).data;
     return proxyContract.execute(contract.address, data, options);
   }
 
@@ -92,10 +95,6 @@ export default class DSProxyService extends PrivateService {
         .ethersProvider()
         .getSigner()
     );
-  }
-
-  getCallData(contract, method, args) {
-    return contract.interface.functions[method](...args).data;
   }
 
   async getOwner(address) {
