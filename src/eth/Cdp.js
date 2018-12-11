@@ -38,7 +38,7 @@ export default class Cdp {
     const getId = open => {
       const txObj = this._transactionManager.getTransaction(open);
       return new Promise(resolve => {
-        txObj.onMined(async () => {
+        txObj.onMined(() => {
           const log = txObj.receipt.logs[1];
           resolve(this._web3Service._web3.utils.hexToNumber(log.data));
         });
