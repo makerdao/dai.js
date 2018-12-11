@@ -5,6 +5,7 @@ import { waitForBlocks } from '../helpers/transactionConfirmation';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 import { WETH } from '../../src/eth/Currency';
 import tokens from '../../contracts/tokens';
+import contracts from '../../contracts/contracts';
 import util from 'util';
 
 describe.each([
@@ -356,17 +357,19 @@ describe.each([
       });
 
       describe('can subscribe to contract events', () => {
-        let tokenService, web3Service, smartContractService;
+        let ethereumCdpService, tokenService, web3Service, smartContractService;
+
         beforeEach(async () => {
-          tokenService = buildTestServiceCore('token', { token: true });
-          await tokenService.manager().authenticate();
+          ethereumCdpService = buildTestServiceCore('cdp', { cdp: true });
+          await ethereumCdpService.manager().authenticate();
+          tokenService = ethereumCdpService.get('token');
           web3Service = tokenService.get('web3');
-          smartContractService = tokenService.get('smartContract');
+          smartContractService = ethereumCdpService.get('smartContract');
         });
 
-        test('erc-20: transfer', async () => {
+        test('weth: transfer', async () => {
           const weth = tokenService.getToken(WETH);
-          const a1 = tokenService.get('web3').currentAccount();
+          const a1 = web3Service.currentAccount();
           const a2 = TestAccountProvider.nextAddress();
           await weth.deposit(0.1);
           const wethAbi = smartContractService._getContractInfo(tokens.WETH);
@@ -381,9 +384,9 @@ describe.each([
           expect(log.wad).toEqual('100000000000000000');
         });
 
-        test('erc-20: transfer with predicate', async () => {
+        test('weth: transfer with predicate', async () => {
           const weth = tokenService.getToken(WETH);
-          const a1 = tokenService.get('web3').currentAccount();
+          const a1 = web3Service.currentAccount();
           const a2 = TestAccountProvider.nextAddress();
           const a3 = TestAccountProvider.nextAddress();
           await weth.deposit(0.2);
@@ -407,6 +410,26 @@ describe.each([
           expect(log.src.toLowerCase()).toEqual(a1);
           expect(log.dst.toLowerCase()).toEqual(a3);
           expect(log.wad).toEqual('100000000000000000');
+        });
+
+        test('dsNote: LogNote', async () => {
+          const tubAbi = smartContractService._getContractInfo(
+            contracts.SAI_TUB
+          );
+
+          const promise = web3Service.waitForMatchingEvent(tubAbi, 'LogNote');
+          const res = await Promise.all([
+            promise,
+            ethereumCdpService.openCdp()
+          ]);
+          expect(Object.keys(res[0]).splice(7)).toEqual([
+            'sig',
+            'guy',
+            'foo',
+            'bar',
+            'wad',
+            'fax'
+          ]);
         });
       });
     });

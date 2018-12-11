@@ -5,6 +5,7 @@ export function getTopics(event, sha3) {
     name += event.inputs[i].type + ',';
   }
   topics[0] = sha3(name.substring(0, name.length - 1) + ')');
+  if (event.anonymous) topics.shift();
   return topics;
 }
 
