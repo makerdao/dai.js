@@ -92,18 +92,18 @@ describe.each([
       ? {
           web3: {
             provider: {
-              url: `wss://${network}.infura.io/ws`
-            }
-          }
-        }
-      : {
-          web3: {
-            provider: {
               type: ProviderType.INFURA,
               network
             }
           },
           useHttp
+        }
+      : {
+          web3: {
+            provider: {
+              url: `wss://${network}.infura.io/ws`
+            }
+          }
         };
     return buildTestServiceCore('web3', config);
   }
