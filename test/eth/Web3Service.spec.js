@@ -3,6 +3,9 @@ import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole } from '../../src/utils';
 import { waitForBlocks } from '../helpers/transactionConfirmation';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
+import { WETH } from '../../src/eth/Currency';
+import tokens from '../../contracts/tokens';
+import util from 'util';
 
 describe.each([
   ['with http provider', true],
@@ -350,6 +353,61 @@ describe.each([
         const currentBlock = web3Service.blockNumber();
         await waitForBlocks(service, 1);
         expect(web3Service.blockNumber()).toEqual(currentBlock + 1);
+      });
+
+      describe('can subscribe to contract events', () => {
+        let tokenService, web3Service, smartContractService;
+        beforeEach(async () => {
+          tokenService = buildTestServiceCore('token', { token: true });
+          await tokenService.manager().authenticate();
+          web3Service = tokenService.get('web3');
+          smartContractService = tokenService.get('smartContract');
+        });
+
+        test('erc-20: transfer', async () => {
+          const weth = tokenService.getToken(WETH);
+          const a1 = tokenService.get('web3').currentAccount();
+          const a2 = TestAccountProvider.nextAddress();
+          await weth.deposit(0.1);
+          const wethAbi = smartContractService._getContractInfo(tokens.WETH);
+          const promise = web3Service.waitForMatchingEvent(wethAbi, 'Transfer');
+          expect(util.inspect(promise)).toMatch(/<pending>/);
+          await weth.transfer(a2, '0.1');
+          const log = await promise;
+
+          expect(util.inspect(promise)).toMatch(/Result/);
+          expect(log.src.toLowerCase()).toEqual(a1);
+          expect(log.dst.toLowerCase()).toEqual(a2);
+          expect(log.wad).toEqual('100000000000000000');
+        });
+
+        test('erc-20: transfer with predicate', async () => {
+          const weth = tokenService.getToken(WETH);
+          const a1 = tokenService.get('web3').currentAccount();
+          const a2 = TestAccountProvider.nextAddress();
+          const a3 = TestAccountProvider.nextAddress();
+          await weth.deposit(0.2);
+          const wethAbi = smartContractService._getContractInfo(tokens.WETH);
+
+          const promise = web3Service.waitForMatchingEvent(
+            wethAbi,
+            'Transfer',
+            log => {
+              return log.dst.toLowerCase() === a3;
+            }
+          );
+
+          expect(util.inspect(promise)).toMatch(/<pending>/);
+          await weth.transfer(a2, '0.1');
+          expect(util.inspect(promise)).toMatch(/<pending>/);
+          await weth.transfer(a3, '0.1');
+          const log = await promise;
+
+          expect(util.inspect(promise)).toMatch(/Result/);
+          expect(log.src.toLowerCase()).toEqual(a1);
+          expect(log.dst.toLowerCase()).toEqual(a3);
+          expect(log.wad).toEqual('100000000000000000');
+        });
       });
     });
   } else {
