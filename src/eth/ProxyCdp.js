@@ -79,7 +79,7 @@ export default class ProxyCdp {
     const tub = this._smartContractService.getContractByName(contracts.SAI_TUB);
     const saiProxy = this._smartContractService.getContractByName(contracts.SAI_PROXY); // prettier-ignore
 
-    let method, args, dsProxyAddressPromise;
+    let method, args;
     if (!this.dsProxyAddress) {
       const proxyRegistryAddress = this._smartContractService.getContractAddressByName(contracts.PROXY_REGISTRY); // prettier-ignore
 
@@ -118,7 +118,7 @@ export default class ProxyCdp {
           }
         ];
       }
-      dsProxyAddressPromise = this._getDsProxyAddress();
+      this._getDsProxyAddress();
     } else {
       if (lockAndDraw) {
         const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
