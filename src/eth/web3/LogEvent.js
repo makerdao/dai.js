@@ -20,8 +20,8 @@ export default function getMatchingEvent(
   web3,
   info,
   event,
-  timeout = 30000,
-  predicateFn = () => true
+  timeout,
+  predicate = () => true
 ) {
   const { address, abi } = info;
   const decoder = web3.eth.abi;
@@ -45,7 +45,7 @@ export default function getMatchingEvent(
         if (err) reject(err);
         const log = parseRawLog(rawLogData, abiObj[event], decoder);
 
-        if (predicateFn(log)) {
+        if (predicate(log)) {
           sub.unsubscribe((err, success) => {
             if (!success) {
               reject(err);

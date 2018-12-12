@@ -143,7 +143,8 @@ describe('event subscriptions', () => {
     const eventPromise = getMatchingEvent(
       web3Service._web3,
       contractAbi,
-      'LogNewCup'
+      'LogNewCup',
+      300000
     );
 
     expect(util.inspect(eventPromise)).toMatch(/<pending>/);
@@ -175,6 +176,7 @@ describe('event subscriptions', () => {
       web3Service._web3,
       contractAbi,
       'LogNewCup',
+      30000,
       log => {
         const hexConvertAndPad = num => {
           return web3Service._web3.utils.padLeft(

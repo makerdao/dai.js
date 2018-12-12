@@ -108,8 +108,8 @@ export default class Web3Service extends PrivateService {
     });
   }
 
-  waitForMatchingEvent(info, event, predicateFn = () => true) {
-    return getMatchingEvent(this._web3, info, event, predicateFn);
+  waitForMatchingEvent(info, event, predicate = () => true, timeout = 30000) {
+    return getMatchingEvent(this._web3, info, event, timeout, predicate);
   }
 
   initialize(settings) {
