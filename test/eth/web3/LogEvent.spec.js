@@ -207,4 +207,27 @@ describe('event subscriptions', () => {
     const { subscriptions } = web3Service._web3.eth._requestManager;
     expect(subscriptions['0x2']).toBe(undefined);
   });
+
+  test('getMatchingEvent should timeout if not resolved', async () => {
+    expect.assertions(1);
+    const smartContractService = buildTestService('smartContract', {
+      smartContract: true
+    });
+    await smartContractService.manager().authenticate();
+    const web3Service = smartContractService.get('web3');
+
+    const contractAbi = smartContractService._getContractInfo(
+      contracts.SAI_TUB
+    );
+
+    const eventPromise = getMatchingEvent(
+      web3Service._web3,
+      contractAbi,
+      'LogNewCup',
+      2000
+    );
+    await eventPromise.catch(e => {
+      expect(e).toEqual(Error('event did not resolve after 2 seconds'));
+    });
+  });
 });

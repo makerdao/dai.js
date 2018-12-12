@@ -20,6 +20,7 @@ export default function getMatchingEvent(
   web3,
   info,
   event,
+  timeout = 30000,
   predicateFn = () => true
 ) {
   const { address, abi } = info;
@@ -43,6 +44,7 @@ export default function getMatchingEvent(
       (err, rawLogData) => {
         if (err) reject(err);
         const log = parseRawLog(rawLogData, abiObj[event], decoder);
+
         if (predicateFn(log)) {
           sub.unsubscribe((err, success) => {
             if (!success) {
@@ -53,5 +55,12 @@ export default function getMatchingEvent(
         }
       }
     );
+
+    setTimeout(() => {
+      sub.unsubscribe();
+      reject(
+        new Error(`event did not resolve after ${timeout / 1000} seconds`)
+      );
+    }, timeout);
   });
 }
