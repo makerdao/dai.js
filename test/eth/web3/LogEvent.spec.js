@@ -3,8 +3,8 @@ import getMatchingEvent, {
   parseRawLog
 } from '../../../src/eth/web3/LogEvent';
 import { buildTestService } from '../../helpers/serviceBuilders';
+import { observePromise } from '../../../src/utils';
 import contracts from '../../../contracts/contracts';
-import util from 'util';
 
 describe('event subscriptions', () => {
   const event = isAnonymous => {
@@ -140,21 +140,19 @@ describe('event subscriptions', () => {
       contracts.SAI_TUB
     );
 
-    const eventPromise = getMatchingEvent(
-      web3Service._web3,
-      contractAbi,
-      'LogNewCup',
-      300000
+    const eventPromise = observePromise(
+      getMatchingEvent(web3Service._web3, contractAbi, 'LogNewCup', 300000)
     );
 
-    expect(util.inspect(eventPromise)).toMatch(/<pending>/);
+    expect(eventPromise.isSettled()).toEqual(false);
     await fireMockEvent(web3Service, rawLogNewCup(), 100, () => {
       const { subscriptions } = web3Service._web3.eth._requestManager;
       expect(subscriptions['0x2'].name).toEqual('logs');
     });
 
     // eventPromise callback will be triggered and will resolve itself
-    expect(util.inspect(eventPromise)).toMatch(/Result/);
+    expect(eventPromise.isSettled()).toEqual(true);
+    expect(eventPromise.isResolved()).toEqual(true);
     expect(eventPromise).resolves.toEqual(expectedEvent);
 
     const { subscriptions } = web3Service._web3.eth._requestManager;
@@ -172,30 +170,32 @@ describe('event subscriptions', () => {
       contracts.SAI_TUB
     );
 
-    const eventPromise = getMatchingEvent(
-      web3Service._web3,
-      contractAbi,
-      'LogNewCup',
-      30000,
-      log => {
-        const hexConvertAndPad = num => {
-          return web3Service._web3.utils.padLeft(
-            web3Service._web3.utils.numberToHex(num),
-            64
-          );
-        };
-        return log.cup === hexConvertAndPad(2);
-      }
+    const eventPromise = observePromise(
+      getMatchingEvent(
+        web3Service._web3,
+        contractAbi,
+        'LogNewCup',
+        30000,
+        log => {
+          const hexConvertAndPad = num => {
+            return web3Service._web3.utils.padLeft(
+              web3Service._web3.utils.numberToHex(num),
+              64
+            );
+          };
+          return log.cup === hexConvertAndPad(2);
+        }
+      )
     );
 
-    expect(util.inspect(eventPromise)).toMatch(/<pending>/);
+    expect(eventPromise.isSettled()).toEqual(false);
     await fireMockEvent(web3Service, rawLogNewCup(), 100, () => {
       const { subscriptions } = web3Service._web3.eth._requestManager;
       expect(subscriptions['0x2'].name).toEqual('logs');
     });
 
     // eventPromise should not resolve as predicate is not satisfied
-    expect(util.inspect(eventPromise)).toMatch(/<pending>/);
+    expect(eventPromise.isSettled()).toEqual(false);
 
     await fireMockEvent(web3Service, correctLogNewCup(), 100, () => {
       const { subscriptions } = web3Service._web3.eth._requestManager;
@@ -203,7 +203,8 @@ describe('event subscriptions', () => {
     });
 
     // eventPromise should now be resolved as predicate is satisfied
-    expect(util.inspect(eventPromise)).toMatch(/Result/);
+    expect(eventPromise.isSettled()).toEqual(true);
+    expect(eventPromise.isResolved()).toEqual(true);
     expect(eventPromise).resolves.toEqual(correctEvent);
 
     const { subscriptions } = web3Service._web3.eth._requestManager;
@@ -211,25 +212,26 @@ describe('event subscriptions', () => {
   });
 
   test('getMatchingEvent should timeout if not resolved', async () => {
-    expect.assertions(1);
     const smartContractService = buildTestService('smartContract', {
       smartContract: true
     });
     await smartContractService.manager().authenticate();
     const web3Service = smartContractService.get('web3');
-
     const contractAbi = smartContractService._getContractInfo(
       contracts.SAI_TUB
     );
 
-    const eventPromise = getMatchingEvent(
-      web3Service._web3,
-      contractAbi,
-      'LogNewCup',
-      2000
+    const eventPromise = observePromise(
+      getMatchingEvent(web3Service._web3, contractAbi, 'LogNewCup', 2000)
     );
-    await eventPromise.catch(e => {
+
+    try {
+      expect(eventPromise.isSettled()).toEqual(false);
+      await eventPromise; // wait for promise to timeout
+    } catch (e) {
       expect(e).toEqual(Error('event did not resolve after 2 seconds'));
-    });
+    }
+    expect(eventPromise.isSettled()).toEqual(true);
+    expect(eventPromise.isRejected()).toEqual(true);
   });
 });

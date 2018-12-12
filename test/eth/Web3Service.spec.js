@@ -1,12 +1,11 @@
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
-import { captureConsole } from '../../src/utils';
+import { captureConsole, observePromise, promiseWait } from '../../src/utils';
 import { waitForBlocks } from '../helpers/transactionConfirmation';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 import { WETH } from '../../src/eth/Currency';
 import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
-import util from 'util';
 
 describe.each([
   ['with http provider', true],
@@ -373,12 +372,19 @@ describe.each([
           const a2 = TestAccountProvider.nextAddress();
           await weth.deposit(0.1);
           const wethAbi = smartContractService._getContractInfo(tokens.WETH);
-          const promise = web3Service.waitForMatchingEvent(wethAbi, 'Transfer');
-          expect(util.inspect(promise)).toMatch(/<pending>/);
-          await weth.transfer(a2, '0.1');
-          const log = await promise;
 
-          expect(util.inspect(promise)).toMatch(/Result/);
+          const eventPromise = observePromise(
+            web3Service.waitForMatchingEvent(wethAbi, 'Transfer')
+          );
+
+          expect(eventPromise.isSettled()).toEqual(false);
+          await weth.transfer(a2, '0.1');
+          await promiseWait(100); // let transfer trigger the eventPromise to resolve rather than waiting on it
+
+          expect(eventPromise.isSettled()).toEqual(true);
+          expect(eventPromise.isResolved()).toEqual(true);
+
+          const log = await eventPromise;
           expect(log.src.toLowerCase()).toEqual(a1);
           expect(log.dst.toLowerCase()).toEqual(a2);
           expect(log.wad).toEqual('100000000000000000');
@@ -392,21 +398,23 @@ describe.each([
           await weth.deposit(0.2);
           const wethAbi = smartContractService._getContractInfo(tokens.WETH);
 
-          const promise = web3Service.waitForMatchingEvent(
-            wethAbi,
-            'Transfer',
-            log => {
+          const eventPromise = observePromise(
+            web3Service.waitForMatchingEvent(wethAbi, 'Transfer', log => {
               return log.dst.toLowerCase() === a3;
-            }
+            })
           );
 
-          expect(util.inspect(promise)).toMatch(/<pending>/);
+          expect(eventPromise.isSettled()).toEqual(false);
           await weth.transfer(a2, '0.1');
-          expect(util.inspect(promise)).toMatch(/<pending>/);
-          await weth.transfer(a3, '0.1');
-          const log = await promise;
+          expect(eventPromise.isSettled()).toEqual(false);
 
-          expect(util.inspect(promise)).toMatch(/Result/);
+          await weth.transfer(a3, '0.1');
+          await promiseWait(100);
+
+          expect(eventPromise.isSettled()).toEqual(true);
+          expect(eventPromise.isResolved()).toEqual(true);
+
+          const log = await eventPromise;
           expect(log.src.toLowerCase()).toEqual(a1);
           expect(log.dst.toLowerCase()).toEqual(a3);
           expect(log.wad).toEqual('100000000000000000');
@@ -417,12 +425,18 @@ describe.each([
             contracts.SAI_TUB
           );
 
-          const promise = web3Service.waitForMatchingEvent(tubAbi, 'LogNote');
-          const res = await Promise.all([
-            promise,
-            ethereumCdpService.openCdp()
-          ]);
-          expect(Object.keys(res[0]).splice(7)).toEqual([
+          const eventPromise = observePromise(
+            web3Service.waitForMatchingEvent(tubAbi, 'LogNote')
+          );
+          expect(eventPromise.isSettled()).toEqual(false);
+          await ethereumCdpService.openCdp();
+          await promiseWait(100);
+
+          expect(eventPromise.isSettled()).toEqual(true);
+          expect(eventPromise.isResolved()).toEqual(true);
+
+          const log = await eventPromise;
+          expect(Object.keys(log).splice(7)).toEqual([
             'sig',
             'guy',
             'foo',
