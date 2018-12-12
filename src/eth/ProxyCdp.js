@@ -137,7 +137,7 @@ export default class ProxyCdp {
               }
             },
             value: valueEth,
-            dsProxyAddress: this.dsProxyAddress,
+            dsProxy: this.dsProxyAddress,
             promise
           }
         ];
@@ -152,7 +152,7 @@ export default class ProxyCdp {
                 proxy: this.dsProxyAddress
               }
             },
-            dsProxyAddress: this.dsProxyAddress,
+            dsProxy: this.dsProxyAddress,
             promise
           }
         ];

@@ -24,6 +24,7 @@ const serviceRoles = [
   'gasEstimator',
   'log',
   'price',
+  'proxy',
   'smartContract',
   'timer',
   'token',

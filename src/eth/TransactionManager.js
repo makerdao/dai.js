@@ -1,16 +1,11 @@
 import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
-import { Contract } from 'ethers';
-import { dappHub } from '../../contracts/abis';
 import { uniqueId } from '../utils';
 import { has, each } from 'lodash';
-import debug from 'debug';
-// eslint-disable-next-line
-const log = debug('dai:testing:txMgr');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log', 'nonce']);
+    super(name, ['web3', 'log', 'nonce', 'proxy']);
     this._newTxListeners = [];
     this._tracker = new Tracker();
   }
@@ -115,23 +110,18 @@ export default class TransactionManager extends PublicService {
     }
   }
 
-  // if options.dsProxyAddress is set, execute this contract method through the
+  // if options.dsProxy is set, execute this contract method through the
   // proxy contract at that address.
   _execute(contract, method, args, options) {
-    if (!options.dsProxyAddress) return contract[method](...args, options);
+    if (!options.dsProxy) return contract[method](...args, options);
 
-    const dsProxyAddress = options.dsProxyAddress;
-    delete options.dsProxyAddress;
+    let address;
+    if (typeof options.dsProxy === 'string') {
+      address = options.dsProxy;
+    }
 
-    this.get('log').debug(`Calling ${method} vis DSProxy at ${dsProxyAddress}`);
-    const dsProxyContract = new Contract(
-      dsProxyAddress,
-      dappHub.dsProxy,
-      this.get('web3').getEthersSigner()
-    );
-
-    const data = contract.interface.functions[method](...args).data;
-    return dsProxyContract.execute(contract.address, data, options);
+    delete options.dsProxy;
+    return this.get('proxy').execute(contract, method, args, options, address);
   }
 
   _createTransactionObject(tx, { businessObject, metadata, promise } = {}) {
@@ -235,7 +225,7 @@ class Tracker {
         const txAge =
           (new Date().getTime() - new Date(tx._timeStampMined).getTime()) /
           60000;
-        if ((tx.isFinalized() || tx.isError()) && txAge > 5) {
+        if ((tx.isError() || tx.isFinalized()) && txAge > 5) {
           const indexToRemove = this._transactions[key].indexOf(tx);
           this._transactions[key].splice(indexToRemove, 1);
           if (this._transactions[key].length === 0) {

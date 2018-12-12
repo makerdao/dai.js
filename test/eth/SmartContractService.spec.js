@@ -52,14 +52,14 @@ test("should get a contract's public constant member values in a state object", 
     .authenticate()
     .then(() => service.getContractState(contracts.SAI_MOM))
     .then(r => {
-      expect(r).toEqual({
-        __self: '0x603d52d6ae2b98a49f8f32817ad4effe7e8a2502; SAI_MOM',
-        authority: '0x4986C24C7f752C2ac2D738F1270639Dd9E9D7BF5',
-        tub: '0xE82CE3D6Bf40F2F9414C8d01A35E3d9eb16a1761; SAI_TUB',
-        vox: '0xE16bf7AaFeB33cC921d6D311E0ff33C4faA836dD; SAI_VOX',
-        owner: '0x0000000000000000000000000000000000000000',
-        tap: '0x6896659267C3C9FD055d764327199A98E571e00D; SAI_TAP'
-      });
+      expect(Object.keys(r)).toEqual([
+        '__self',
+        'tub',
+        'vox',
+        'owner',
+        'authority',
+        'tap'
+      ]);
       done();
     });
 });
@@ -138,4 +138,32 @@ test('parameterized smart contract input with multiple addresses', async () => {
   const contract = service.getContractByName('mock');
   expect(contract.address).toEqual(mockContractDefinition.address.testnet);
   expect(typeof contract.foo).toBe('function');
+});
+
+test('getContractByName returns contract with a valid signer', done => {
+  const service = buildTestSmartContractService();
+  service
+    .manager()
+    .authenticate()
+    .then(() => {
+      const signer = service.get('web3').getEthersSigner();
+      const contract = service.getContractByName(contracts.SAI_TOP);
+      expect(contract.signer).toBe(signer);
+      done();
+    });
+});
+
+xtest('getContractByName returns contract that can call constant functions even without accounts', done => {
+  const service = buildTestSmartContractService();
+  service.get('web3').get('accounts').hasAccount = jest.fn(() => false);
+  service
+    .manager()
+    .authenticate()
+    .then(async () => {
+      const contract = service.getContractByName(contracts.SAI_TOP);
+      const readOnlyValue = await contract.gem();
+      expect(contract.signer).toBeNull();
+      expect(readOnlyValue).toBeTruthy();
+      done();
+    });
 });
