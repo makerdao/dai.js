@@ -21,7 +21,7 @@ test('can take an options object as first argument', () => {
   expect(config.log).toEqual(false);
 });
 
-test('it handles url, privateKey, provider, and web3 options', () => {
+test('it handles url, privateKey, provider, and web3 options using http', () => {
   const config = ConfigFactory.create(
     'http',
     {
@@ -56,6 +56,51 @@ test('it handles url, privateKey, provider, and web3 options', () => {
           timeout: 1000,
           type: 'HTTP',
           url: 'http://foo.net'
+        },
+        transactionSettings: {
+          gasLimit: 4000000
+        }
+      }
+    ],
+    exchange: 'OasisExchangeService'
+  });
+});
+
+test('it handles url, privateKey, provider, and web3 options using websockets', () => {
+  const config = ConfigFactory.create(
+    'ws',
+    {
+      url: 'wss://foo.net',
+      privateKey: '0xf00',
+      provider: {
+        timeout: 1000
+      },
+      web3: {
+        statusTimerDelay: 10000
+      }
+    },
+    {
+      defaults: {
+        web3: 'Web3Service'
+      }
+    }
+  );
+
+  expect(config).toEqual({
+    accounts: {
+      default: {
+        type: 'privateKey',
+        key: '0xf00'
+      }
+    },
+    web3: [
+      'Web3Service',
+      {
+        statusTimerDelay: 10000,
+        provider: {
+          timeout: 1000,
+          type: 'WEBSOCKET',
+          url: 'wss://foo.net'
         },
         transactionSettings: {
           gasLimit: 4000000
