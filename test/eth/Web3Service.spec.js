@@ -356,6 +356,13 @@ describe.each([
         expect(web3Service.blockNumber()).toEqual(currentBlock + 1);
       });
 
+      test('removeblockUpdates will pause newBlock subscription', async () => {
+        const service = buildTestService();
+        await service.manager().authenticate();
+        service._removeBlockUpdates();
+        expect(service._blockSub._events).toEqual({});
+      });
+
       describe('can subscribe to contract events', () => {
         let ethereumCdpService, tokenService, web3Service, smartContractService;
 
@@ -477,10 +484,7 @@ describe.each([
         // to altering ganache state
         callGanache('evm_mine');
 
-        // service should not update until 50ms has passed since mine instruction was issued
-        expect(service.blockNumber()).toEqual(blockNumber);
-
-        await promiseWait(50);
+        await service.waitForBlockNumber(blockNumber + 1);
         expect(service.blockNumber()).toEqual(blockNumber + 1);
       });
 
@@ -500,6 +504,21 @@ describe.each([
           callGanache('evm_mine');
         }
         await service.waitForBlockNumber(blockNumber + 10);
+      });
+
+      test('removeblockUpdates will stop service polling', async () => {
+        const service = buildTestService();
+        await service.manager().authenticate();
+        const blockNumber = service.blockNumber();
+
+        callGanache('evm_mine');
+        await service.waitForBlockNumber(blockNumber + 1);
+        expect(service.blockNumber()).toEqual(blockNumber + 1);
+
+        service._removeBlockUpdates();
+        callGanache('evm_mine');
+        await promiseWait(100); // service polls 50 ms so wait 100 to be sure it doesn't update
+        expect(service.blockNumber()).toEqual(blockNumber + 1);
       });
     });
   }

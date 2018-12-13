@@ -225,7 +225,7 @@ export default class Web3Service extends PrivateService {
       });
       this._currentBlock = await this._web3.eth.getBlockNumber();
     } else {
-      this._interval = async () => {
+      const updateBlocks = async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
         if (this._currentBlock !== null && blockNumber > this._currentBlock) {
           // If any blocks are not caught, iterate through those that are missed to the newest retrieved
@@ -235,9 +235,9 @@ export default class Web3Service extends PrivateService {
         } else {
           await this._updateBlockNumber(blockNumber);
         }
-        setTimeout(this._interval, 50);
+        this._interval = setTimeout(updateBlocks, 50);
       };
-      this._interval();
+      updateBlocks();
     }
   }
 
