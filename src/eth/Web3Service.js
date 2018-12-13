@@ -249,6 +249,19 @@ export default class Web3Service extends PrivateService {
     this._blockListeners['*'].push(callback);
   }
 
+  onBlock(number, callback) {
+    // schedule a function to execute on a block ahead in time
+    if (number < this.blockNumber()) {
+      throw new Error('cannot schedule a callback back in time');
+    }
+
+    if (!this._blockListeners[number]) {
+      this._blockListeners[number] = [];
+    }
+
+    this._blockListeners[number].push(callback);
+  }
+
   async waitForBlockNumber(blockNumber) {
     if (blockNumber < this._currentBlock) {
       console.error('Attempted to wait for past block ' + blockNumber);

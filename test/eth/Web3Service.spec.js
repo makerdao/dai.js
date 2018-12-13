@@ -2,6 +2,7 @@ import TestAccountProvider from '../helpers/TestAccountProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole, observePromise, promiseWait } from '../../src/utils';
 import { waitForBlocks } from '../helpers/transactionConfirmation';
+import { callGanache } from '../helpers/ganache';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 import { WETH } from '../../src/eth/Currency';
 import tokens from '../../contracts/tokens';
@@ -465,6 +466,40 @@ describe.each([
           'address',
           '_syncAddress'
         ]);
+      });
+
+      test('will poll to check for block updates', async () => {
+        const service = buildTestService();
+        await service.manager().authenticate();
+        const blockNumber = service.blockNumber();
+
+        // 'evm_mine' forces ganache to mine a single block. This is used so the services are seperate
+        // to altering ganache state
+        callGanache('evm_mine');
+
+        // service should not update until 50ms has passed since mine instruction was issued
+        expect(service.blockNumber()).toEqual(blockNumber);
+
+        await promiseWait(50);
+        expect(service.blockNumber()).toEqual(blockNumber + 1);
+      });
+
+      test('will iterate through missed blocks', async () => {
+        expect.assertions(10);
+        const service = buildTestService();
+        await service.manager().authenticate();
+        const blockNumber = service.blockNumber();
+
+        const check = (expected, actual) => {
+          expect(expected).toEqual(actual);
+        };
+        for (let i = 1; i <= 10; i++) {
+          service.onBlock(blockNumber + i, () => {
+            check(blockNumber + i, service.blockNumber());
+          });
+          callGanache('evm_mine');
+        }
+        await service.waitForBlockNumber(blockNumber + 10);
       });
     });
   }
