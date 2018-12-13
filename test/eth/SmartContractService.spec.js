@@ -153,7 +153,7 @@ test('getContractByName returns contract with a valid signer', done => {
     });
 });
 
-xtest('getContractByName returns contract that can call constant functions even without accounts', done => {
+test('getContractByName returns contract that can call constant functions even without accounts', done => {
   const service = buildTestSmartContractService();
   service.get('web3').get('accounts').hasAccount = jest.fn(() => false);
   service
