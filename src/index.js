@@ -8,6 +8,7 @@ import {
 import LocalService from './core/LocalService';
 import PrivateService from './core/PrivateService';
 import PublicService from './core/PublicService';
+import { stringToBytes32 } from './utils/conversion';
 
 for (let symbol in currencies) {
   Maker[symbol] = currencies[symbol];
@@ -20,5 +21,9 @@ Maker.PublicService = PublicService;
 Maker.Currency = Currency;
 Maker.createCurrency = createCurrency;
 Maker.getCurrency = getCurrency;
+
+Maker.utils = {
+  stringToBytes32
+};
 
 module.exports = Maker;

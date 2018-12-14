@@ -9,11 +9,11 @@ export function bytes32ToNumber(bytes32) {
   return ethersUtils.bigNumberify(bytes32).toNumber();
 }
 
-export function stringToBytes32(text) {
+export function stringToBytes32(text, pad = true) {
   var data = ethersUtils.toUtf8Bytes(text);
   if (data.length > 32) {
     throw new Error('too long');
   }
-  data = ethersUtils.padZeros(data, 32);
+  if (pad) data = ethersUtils.padZeros(data, 32);
   return ethersUtils.hexlify(data);
 }
