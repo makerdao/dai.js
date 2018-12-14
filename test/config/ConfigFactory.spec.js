@@ -1,8 +1,18 @@
 import testPreset from '../../src/config/presets/test';
+import httpPreset from '../../src/config/presets/http';
+import mainPreset from '../../src/config/presets/mainnet';
+import wsPreset from '../../src/config/presets/ws';
+import browserPreset from '../../src/config/presets/browser';
+import kovanPreset from '../../src/config/presets/kovan';
 import ConfigFactory from '../../src/config/ConfigFactory';
 
 test('returns a preset by name', () => {
   expect(ConfigFactory.create('test')).toEqual(testPreset);
+  expect(ConfigFactory.create('http')).toEqual(httpPreset);
+  expect(ConfigFactory.create('mainnet')).toEqual(mainPreset);
+  expect(ConfigFactory.create('ws')).toEqual(wsPreset);
+  expect(ConfigFactory.create('browser')).toEqual(browserPreset);
+  expect(ConfigFactory.create('kovan')).toEqual(kovanPreset);
 });
 
 test('throws an error when requesting a non-existing preset', () => {
