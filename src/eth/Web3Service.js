@@ -104,7 +104,6 @@ export default class Web3Service extends PrivateService {
   unsubscribeNewBlocks() {
     this._blockSub.unsubscribe((err, success) => {
       if (!success) throw new Error(err);
-      this.get('log').info('Web3 unsubscribing from newBlockHeaders...');
     });
   }
 
