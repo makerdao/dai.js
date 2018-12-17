@@ -76,7 +76,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       // be enough. but on a remote net, it may take multiple calls.
       for (let i = 0; i < 10; i++) {
         tx = await this._web3Service.getTransaction(this.hash);
-        if (tx && tx.blockHash) break;
+        if (tx) break;
         log('no tx yet');
         await promiseWait(1500);
       }

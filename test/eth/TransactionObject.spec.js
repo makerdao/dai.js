@@ -8,8 +8,6 @@ import {
   mineBlocks
 } from '../helpers/transactionConfirmation';
 import TransactionState from '../../src/eth/TransactionState';
-import Web3Service from '../../src/eth/Web3Service';
-import { promiseWait } from '../../src/utils';
 import { ETH, MKR, WETH } from '../../src/eth/Currency';
 
 let service, mkr, testAddress;
@@ -149,37 +147,37 @@ describe('normal web service behavior', () => {
   });
 });
 
-class DelayingWeb3Service extends Web3Service {
-  ethersProvider() {
-    if (!this.shouldDelay) return super.ethersProvider();
-    return new Proxy(super.ethersProvider(), {
-      get(target, key) {
-        if (key === 'getTransaction') {
-          return async hash => {
-            const tx = await target.getTransaction(hash);
-            if (!tx) return;
-            this._originalTx = tx;
-            return { ...tx, blockHash: null };
-          };
-        }
-
-        if (key === 'waitForTransaction') {
-          return () => promiseWait(1000).then(() => this._originalTx);
-        }
-
-        return target[key];
-      }
-    });
-  }
-}
-
 test('waitForTransaction', async () => {
   const service = buildTestService('token', {
-    token: true,
-    web3: [new DelayingWeb3Service(), { provider: { type: 'TEST' } }]
+    token: true
   });
   await service.manager().authenticate();
   service.get('web3').shouldDelay = true;
+
+  const getOriginalTx = service.get('web3').getTransaction;
+  let originalTx = false;
+  let flag = true;
+  service.get('web3').getTransaction = async hash => {
+    if (!originalTx) {
+      originalTx = true;
+      return;
+    }
+
+    if (originalTx && originalTx.blockHash) {
+      return originalTx;
+    }
+
+    const tx = await getOriginalTx(hash);
+    if (!tx) return;
+
+    if (flag) {
+      flag = false;
+      return { ...tx, blockHash: null };
+    }
+    originalTx = tx;
+    return { ...tx, blockHash: null };
+  };
+
   const [promise, tx] = createTestTransaction(service);
   await promise;
   expect(tx.state()).toBe('mined');
