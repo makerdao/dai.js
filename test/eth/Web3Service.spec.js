@@ -128,6 +128,20 @@ describe.each([
       });
   });
 
+  test('detects correct network on connection', async () => {
+    const testService = buildTestService();
+    await testService.manager().connect();
+    expect(testService.getNetwork()).toEqual(999);
+
+    const kovanService = buildInfuraService('kovan');
+    await kovanService.manager().connect();
+    expect(kovanService.getNetwork()).toEqual(42);
+
+    const mainService = buildInfuraService('mainnet');
+    await mainService.manager().connect();
+    expect(mainService.getNetwork()).toEqual(1);
+  });
+
   test('throw error on a failure to connect', async () => {
     expect.assertions(1);
     const service = buildTestService();
