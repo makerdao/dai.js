@@ -321,6 +321,29 @@ describe.each([
     expect(count).toEqual(5);
   });
 
+  test('waitForBlockNumber returns promise which resolves on correct block', async () => {
+    const service = buildTestServiceCore('cdp', { cdp: true });
+    await service.manager().authenticate();
+    const web3Service = service.get('smartContract').get('web3');
+
+    jest.spyOn(global.console, 'error');
+    await web3Service.waitForBlockNumber(web3Service.blockNumber() - 1);
+    expect(console.error).toBeCalled();
+
+    const calledWithCurrentBlock = await web3Service.waitForBlockNumber(
+      web3Service._currentBlock
+    );
+    expect(calledWithCurrentBlock).toEqual(web3Service.blockNumber());
+
+    const currentBlock = web3Service.blockNumber();
+    await Promise.all([
+      waitForBlocks(service, 1),
+      web3Service.waitForBlockNumber(currentBlock + 1)
+    ]);
+    expect(typeof web3Service._blockListeners[currentBlock]).toBeDefined();
+    expect(web3Service.blockNumber()).toEqual(currentBlock + 1);
+  });
+
   test('trigger a callback on future block', async () => {
     expect.assertions(2);
     const service = buildTestServiceCore('cdp', { cdp: true });
