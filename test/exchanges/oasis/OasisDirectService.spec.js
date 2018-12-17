@@ -57,7 +57,7 @@ test.only('get buy amount', async () => {
   setMockTradeState();
   await createDaiAndPlaceLimitOrder(service);
   const buyAmount = await service.getBuyAmount();
-  console.log('buyAmount:', buyAmount.toString());
+  expect(Object.keys(buyAmount)).toEqual(['_bn']);
 });
 
 describe('trade with existing dsproxy', () => {
