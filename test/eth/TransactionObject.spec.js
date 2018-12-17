@@ -45,6 +45,13 @@ describe('normal web service behavior', () => {
     expect(tx.fees().gt(ETH.wei(20000))).toBeTruthy();
   });
 
+  test('adds timestamps', async () => {
+    const [promise, tx] = createTestTransaction(service);
+    await promise;
+    expect(tx.timeStampSubmitted() instanceof Date).toBe(true);
+    expect(tx.timeStamp() instanceof Date).toBe(true);
+  });
+
   test('event listeners work as callbacks', async () => {
     expect.assertions(3);
     const [promise, tx] = createTestTransaction(service);
