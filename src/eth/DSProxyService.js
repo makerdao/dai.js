@@ -50,6 +50,7 @@ export default class DSProxyService extends PrivateService {
   }
 
   async build() {
+    // Catch error if account has proxy
     const nonce = await this.get('nonce').getNonce();
     const txo = await new TransactionObject(
       this._proxyRegistry().build({
@@ -91,6 +92,8 @@ export default class DSProxyService extends PrivateService {
     return proxyAddress;
   }
 
+  // Change the name to indicate this is a
+  // private method
   getContractByProxyAddress(address) {
     return new Contract(
       address,
@@ -106,7 +109,8 @@ export default class DSProxyService extends PrivateService {
     return await contract.owner();
   }
 
-  async setOwner(newOwner, proxyAddress = this._currentProxy) {
+  // Return transaction object here
+  setOwner(newOwner, proxyAddress = this._currentProxy) {
     const contract = this.getContractByProxyAddress(proxyAddress);
     return contract.setOwner(newOwner);
   }

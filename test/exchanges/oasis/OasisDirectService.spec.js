@@ -11,9 +11,6 @@ import tokens from '../../../contracts/tokens';
 let service, proxyAccount;
 
 // Error is happening on lockEth in oasisHelpers
-// What denomination is the limit in? eth?
-// What's the difference between buy and sell functions?
-// What are the two defined limits in OD used for?
 
 async function buildTestOasisDirectService() {
   service = buildTestService('oasisDirect', {
@@ -85,14 +82,14 @@ describe('trade with existing dsproxy', () => {
     await service.sellAllAmount('WETH', 'DAI', 20);
   });
 
-  xtest('sell all amount, pay eth', async () => {
-    try {
-      await setExistingAccount(service.get('exchange'), 'default');
-      await createDaiAndPlaceLimitOrder(service.get('exchange'));
-      await setExistingAccount(proxyAccount.address);
-    } catch (err) {
-      console.error(err);
-    }
+  test.only('sell all amount, pay eth', async () => {
+    // try {
+    //   await setExistingAccount(service.get('exchange'), 'default');
+    //   await createDaiAndPlaceLimitOrder(service.get('exchange'));
+    //   await setExistingAccount(proxyAccount.address);
+    // } catch (err) {
+    //   console.error(err);
+    // }
     await service.sellAllAmountPayEth('DAI', 200, { value: 1 });
   });
 
