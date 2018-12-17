@@ -139,3 +139,31 @@ test('parameterized smart contract input with multiple addresses', async () => {
   expect(contract.address).toEqual(mockContractDefinition.address.testnet);
   expect(typeof contract.foo).toBe('function');
 });
+
+test('getContractByName returns contract with a valid signer', done => {
+  const service = buildTestSmartContractService();
+  service
+    .manager()
+    .authenticate()
+    .then(() => {
+      const provider = service.get('web3').ethersProvider();
+      const contract = service.getContractByName(contracts.SAI_TOP);
+      expect(contract.signer.provider).toBe(provider);
+      done();
+    });
+});
+
+test('getContractByName returns contract that can call constant functions even without accounts', done => {
+  const service = buildTestSmartContractService();
+  service.get('web3').get('accounts').hasAccount = jest.fn(() => false);
+  service
+    .manager()
+    .authenticate()
+    .then(async () => {
+      const contract = service.getContractByName(contracts.SAI_TOP);
+      const readOnlyValue = await contract.gem();
+      expect(contract.signer).toBeNull();
+      expect(readOnlyValue).toBeTruthy();
+      done();
+    });
+});

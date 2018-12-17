@@ -16,12 +16,6 @@ class ServiceNotFoundError extends Error {
   }
 }
 
-class ServiceDependencyLoopError extends Error {
-  constructor(names) {
-    super('Service dependency loop in {' + names.join(', ') + '}');
-  }
-}
-
 // exported just for testing
 export function orderServices(services) {
   const edges = [];
@@ -57,7 +51,6 @@ class Container {
     return this;
   }
 
-  // export just this function
   service(name, throwIfMissing = true) {
     if (!name) {
       throw new Error('Provide a service name.');
@@ -118,6 +111,5 @@ export {
   Container as default,
   InvalidServiceError,
   ServiceAlreadyRegisteredError,
-  ServiceNotFoundError,
-  ServiceDependencyLoopError
+  ServiceNotFoundError
 };
