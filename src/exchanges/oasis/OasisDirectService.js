@@ -1,5 +1,5 @@
 import PrivateService from '../../core/PrivateService';
-import { getCurrency, WETH } from '../../eth/Currency';
+import { getCurrency } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { contractInfo } from '../../../contracts/networks';
 
@@ -82,14 +82,17 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async _limit() {
-    const buyAmount = await this.getBuyAmount();
-    const payAmount = await this.getPayAmount();
-    return this._operation.includes('sellAll')
-      ? this._valueForContract(buyAmount * (1 - this._threshold()), 'eth')
-      : this._valueForContract(
-          (payAmount * (1 + this._threshold())).round(0),
-          'eth'
-        );
+    // The results don't look right for sellAll...
+    if (this._operation.includes('sellAll')) {
+      const buyAmount = await this.getBuyAmount();
+      return this._valueForContract(buyAmount * (1 - this._threshold()), 'eth');
+    } else {
+      const payAmount = await this.getPayAmount();
+      return this._valueForContract(
+        (payAmount * (1 + this._threshold())).round(0),
+        'eth'
+      );
+    }
   }
 
   _valueForContract(amount, symbol) {

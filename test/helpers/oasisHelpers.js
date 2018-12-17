@@ -27,6 +27,7 @@ async function placeLimitOrder(oasisExchangeService, sellDai) {
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC).address;
 
+  const payAmount = sellDai ? utils.parseEther('0.1') : utils.parseEther('0.5');
   const sellToken = sellDai ? daiAddress : wethAddress;
   const buyToken = sellDai ? wethAddress : daiAddress;
   const value = sellDai ? utils.parseEther('2.0') : utils.parseEther('10.0');
@@ -37,7 +38,7 @@ async function placeLimitOrder(oasisExchangeService, sellDai) {
 
   return offer(
     oasisExchangeService,
-    utils.parseEther('0.5'),
+    payAmount,
     sellToken,
     value,
     buyToken,
@@ -56,6 +57,12 @@ async function offer(
   const oasisContract = oasisExchangeService
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC);
+
+  // const dai = oasisExchangeService.get('token').getToken(DAI);
+  // const balance = await dai.balanceOf(
+  //   oasisExchangeService.get('web3').currentAccount()
+  // );
+  // console.log('trade possible?', balance > payAmount);
 
   return oasisContract.offer(
     payAmount,
