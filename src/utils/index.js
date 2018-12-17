@@ -25,13 +25,6 @@ export function promisify(fn) {
   };
 }
 
-export function promisifyMethods(target, methods) {
-  return methods.reduce((output, method) => {
-    output[method] = promisify.call(target, target[method]);
-    return output;
-  }, {});
-}
-
 export function getNetworkName(networkId) {
   const result = networks.filter(n => n.networkId === networkId);
 
