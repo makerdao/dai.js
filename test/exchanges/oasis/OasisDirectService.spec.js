@@ -7,23 +7,15 @@ import TestAccountProvider from '../../helpers/TestAccountProvider';
 import addresses from '../../../contracts/addresses/testnet.json';
 import tokens from '../../../contracts/tokens';
 import Maker from '../../../src/index';
+import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
 
 let service, proxyAccount, maker;
 
-// Error is happening on lockEth in oasisHelpers
-
 async function buildTestOasisDirectService() {
-  maker = Maker.create('kovan', {
-    privateKey: process.env.PRIVATE_KEY,
-    web3: {
-      transactionSettings: {
-        gasPrice: 15000000000
-      }
-    },
+  service = buildTestService('exchange', {
     exchange: 'OasisDirectService'
   });
-  await maker.authenticate();
-  service = maker.service('exchange');
+  await service.manager().authenticate();
 }
 
 function proxy() {
@@ -61,9 +53,11 @@ test('get token balances', async () => {
   expect(balance.toString()).toEqual('0.00 WETH');
 });
 
-test('get buy amount', async () => {
+test.only('get buy amount', async () => {
   setMockTradeState();
-  await service.getBuyAmount();
+  await createDaiAndPlaceLimitOrder(service);
+  const buyAmount = await service.getBuyAmount();
+  console.log('buyAmount:', buyAmount.toString());
 });
 
 describe('trade with existing dsproxy', () => {
@@ -83,7 +77,7 @@ describe('trade with existing dsproxy', () => {
     await service.sellAllAmount('WETH', 'DAI', 20);
   });
 
-  test.only('sell all amount, pay eth', async () => {
+  test('sell all amount, pay eth', async () => {
     await service.sellAllAmountPayEth('DAI', 200, { value: 1 });
   });
 

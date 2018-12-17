@@ -5,7 +5,7 @@ import { contractInfo } from '../../../contracts/networks';
 
 export default class OasisDirectService extends PrivateService {
   constructor(name = 'exchange') {
-    super(name, ['proxy', 'smartContract', 'token']);
+    super(name, ['proxy', 'smartContract', 'token', 'cdp', 'web3']);
   }
 
   _oasisDirect() {
