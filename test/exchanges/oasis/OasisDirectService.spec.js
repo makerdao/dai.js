@@ -1,5 +1,4 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
-import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
 import {
   setProxyAccount,
   setExistingAccount
@@ -7,17 +6,24 @@ import {
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import addresses from '../../../contracts/addresses/testnet.json';
 import tokens from '../../../contracts/tokens';
+import Maker from '../../../src/index';
 
-let service, proxyAccount;
+let service, proxyAccount, maker;
 
 // Error is happening on lockEth in oasisHelpers
 
 async function buildTestOasisDirectService() {
-  service = buildTestService('oasisDirect', {
-    oasisDirect: true,
-    exchange: 'OasisExchangeService'
+  maker = Maker.create('kovan', {
+    privateKey: process.env.PRIVATE_KEY,
+    web3: {
+      transactionSettings: {
+        gasPrice: 15000000000
+      }
+    },
+    exchange: 'OasisDirectService'
   });
-  await service.manager().authenticate();
+  await maker.authenticate();
+  service = maker.service('exchange');
 }
 
 function proxy() {
@@ -61,48 +67,29 @@ test('get buy amount', async () => {
 });
 
 describe('trade with existing dsproxy', () => {
-  beforeEach(async () => {
-    if (!proxyAccount) {
-      proxyAccount = TestAccountProvider.nextAccount();
-    }
-    await setProxyAccount(service, proxyAccount.address, proxyAccount.key);
-    await service
-      .get('token')
-      .getToken(tokens.WETH)
-      .deposit(20);
-    if (!(await proxy())) await service.get('proxy').build();
-  });
+  // beforeEach(async () => {
+  //   if (!proxyAccount) {
+  //     proxyAccount = TestAccountProvider.nextAccount();
+  //   }
+  //   await setProxyAccount(service, proxyAccount.address, proxyAccount.key);
+  //   await service
+  //     .get('token')
+  //     .getToken(tokens.WETH)
+  //     .deposit(20);
+  //   if (!(await proxy())) await service.get('proxy').build();
+  // });
 
   test('sell all amount', async () => {
-    try {
-      await createDaiAndPlaceLimitOrder(service.get('exchange'));
-    } catch (err) {
-      console.error(err);
-    }
     await service.sellAllAmount('WETH', 'DAI', 20);
   });
 
   test.only('sell all amount, pay eth', async () => {
-    // try {
-    //   await setExistingAccount(service.get('exchange'), 'default');
-    //   await createDaiAndPlaceLimitOrder(service.get('exchange'));
-    //   await setExistingAccount(proxyAccount.address);
-    // } catch (err) {
-    //   console.error(err);
-    // }
     await service.sellAllAmountPayEth('DAI', 200, { value: 1 });
   });
 
   xtest('sell all amount, buy eth', async () => {});
 
   test('buy all amount', async () => {
-    try {
-      // This needs to be done here by calling oasis contract
-      // directly
-      await createDaiAndPlaceLimitOrder(service.get('exchange'), true);
-    } catch (err) {
-      console.error(err);
-    }
     await service.buyAllAmount('DAI', 'MKR', 20);
   });
 

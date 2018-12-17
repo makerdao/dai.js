@@ -33,9 +33,6 @@ export const resolver = {
     gasEstimator: 'GasEstimatorService',
     log: 'ConsoleLogger',
     nonce: 'NonceService',
-    // oasisDirect should be removed and included
-    // with config options for exchange
-    oasisDirect: 'OasisDirectService',
     price: 'PriceService',
     proxy: 'DSProxyService',
     smartContract: 'SmartContractService',
