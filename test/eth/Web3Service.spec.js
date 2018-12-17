@@ -363,6 +363,18 @@ describe.each([
         expect(service._blockSub._events).toEqual({});
       });
 
+      test('unsubscribeNewBlocks will throw error', async () => {
+        const service = buildTestService();
+        await service.manager().authenticate();
+
+        service._blockSub.unsubscribe = jest
+          .fn()
+          .mockImplementation(cb => cb('unsubscribe error', false));
+        expect(() => service.unsubscribeNewBlocks()).toThrowError(
+          /unsubscribe/
+        );
+      });
+
       describe('can subscribe to contract events', () => {
         let ethereumCdpService, tokenService, web3Service, smartContractService;
 
