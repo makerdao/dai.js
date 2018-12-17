@@ -67,7 +67,7 @@ export function observePromise(promise) {
   let isRejected = false;
 
   // Observe the promise, saving the fulfillment in a closure scope.
-  var result = promise.then(
+  let result = promise.then(
     v => {
       isResolved = true;
       return v;
