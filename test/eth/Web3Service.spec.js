@@ -130,15 +130,17 @@ describe.each([
 
   test('detects correct network on connection', async () => {
     const testService = buildTestService();
-    await testService.manager().connect();
-    expect(testService.getNetwork()).toEqual(999);
-
     const kovanService = buildInfuraService('kovan');
-    await kovanService.manager().connect();
-    expect(kovanService.getNetwork()).toEqual(42);
-
     const mainService = buildInfuraService('mainnet');
-    await mainService.manager().connect();
+
+    await Promise.all([
+      testService.manager().connect(),
+      kovanService.manager().connect(),
+      mainService.manager().connect()
+    ]);
+
+    expect(testService.getNetwork()).toEqual(999);
+    expect(kovanService.getNetwork()).toEqual(42);
     expect(mainService.getNetwork()).toEqual(1);
   });
 
@@ -317,6 +319,24 @@ describe.each([
     await service.manager().authenticate();
     const count = service.confirmedBlockCount();
     expect(count).toEqual(5);
+  });
+
+  test('trigger a callback on future block', async () => {
+    expect.assertions(2);
+    const service = buildTestServiceCore('cdp', { cdp: true });
+    await service.manager().authenticate();
+    const web3Service = service.get('smartContract').get('web3');
+    const currentBlock = web3Service.blockNumber();
+
+    expect(() => web3Service.onBlock(currentBlock - 1, null)).toThrowError(
+      /cannot schedule a callback back in time/
+    );
+
+    const cb = () => {
+      expect(true).toBe(true);
+    };
+    web3Service.onBlock(currentBlock + 1, cb);
+    await waitForBlocks(service, 1);
   });
 
   if (!useHttp) {
