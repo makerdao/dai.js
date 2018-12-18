@@ -83,7 +83,6 @@ export default class OasisDirectService extends PrivateService {
 
   async _limit() {
     if (this._operation.includes('sellAll')) {
-      console.log('got here');
       const buyAmount = await this.getBuyAmount();
       return this._valueForContract(
         buyAmount * (1 - this._threshold()),

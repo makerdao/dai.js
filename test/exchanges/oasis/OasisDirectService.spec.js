@@ -86,11 +86,11 @@ describe('trade with existing dsproxy', () => {
   });
 
   test('sell all amount', async () => {
-    await service.sellAllAmount('DAI', 'WETH', 20);
+    await service.sellAllAmount('DAI', 'WETH', 1);
   });
 
-  xtest('sell all amount, pay eth', async () => {
-    await service.sellAllAmountPayEth('DAI', 200, { value: 1 });
+  test('sell all amount, pay eth', async () => {
+    await service.sellAllAmountPayEth('DAI', 1, { value: 1 });
   });
 
   xtest('sell all amount, buy eth', async () => {});
