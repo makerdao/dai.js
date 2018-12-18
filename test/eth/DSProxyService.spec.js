@@ -45,6 +45,20 @@ test('should build new proxies', async () => {
   expect(newAddress).not.toEqual(addresses.DS_PROXY.toLowerCase());
 });
 
+test('should throw error when attempting to build duplicate proxy', async () => {
+  let error;
+  await service.build();
+  const address = await service.currentProxy();
+  try {
+    await service.build();
+  } catch (err) {
+    error = err.message;
+  }
+  expect(error).toEqual(
+    'This account already has a proxy deployed at ' + address
+  );
+});
+
 test("should get a proxy's owner", async () => {
   await service.build();
   const address = await service.getProxyAddress();

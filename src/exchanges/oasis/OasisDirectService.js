@@ -33,8 +33,8 @@ export default class OasisDirectService extends PrivateService {
     this._buyToken = 'WETH';
   }
 
-  _trade() {
-    const params = this._buildTradeParams();
+  async _trade() {
+    const params = await this._buildTradeParams();
     return this._oasisDirect()[this._operation](...params, { dsProxy: true });
   }
 
@@ -60,13 +60,13 @@ export default class OasisDirectService extends PrivateService {
     );
   }
 
-  _buildTradeParams() {
+  async _buildTradeParams() {
     return [
       this._getContractAddress('MAKER_OTC'),
       this._getContractAddress(this._payToken),
       this._valueForContract(this._value, this._payToken),
       this._getContractAddress(this._buyToken),
-      this._limit()
+      await this._limit()
     ];
   }
 
@@ -83,6 +83,7 @@ export default class OasisDirectService extends PrivateService {
 
   async _limit() {
     if (this._operation.includes('sellAll')) {
+      console.log('got here');
       const buyAmount = await this.getBuyAmount();
       return this._valueForContract(
         buyAmount * (1 - this._threshold()),
@@ -167,7 +168,7 @@ Object.assign(
       name.includes('Eth')
         ? this._setEthTradeState(name, ...args)
         : this._setTradeState(name, ...args);
-      return this._trade();
+      return await this._trade();
     };
     return exchange;
   }, {})
