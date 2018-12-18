@@ -54,8 +54,8 @@ export default class OasisDirectService extends PrivateService {
       contracts.MAKER_OTC
     );
     return await otc.getPayAmount(
-      this._getContractAddress(this._buyToken),
       this._getContractAddress(this._payToken),
+      this._getContractAddress(this._buyToken),
       this._valueForContract(this._value, this._payToken)
     );
   }
@@ -82,16 +82,16 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async _limit() {
-    // The results don't look right for sellAll...
     if (this._operation.includes('sellAll')) {
       const buyAmount = await this.getBuyAmount();
-      return this._valueForContract(buyAmount * (1 - this._threshold()), 'eth');
+      return this._valueForContract(
+        buyAmount * (1 - this._threshold()),
+        this._buyToken
+      );
     } else {
       const payAmount = await this.getPayAmount();
-      return this._valueForContract(
-        (payAmount * (1 + this._threshold())).round(0),
-        'eth'
-      );
+      const limit = Math.round(payAmount * (1 + this._threshold()));
+      return this._valueForContract(limit, this._payToken);
     }
   }
 

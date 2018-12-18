@@ -29,7 +29,7 @@ export const resolver = {
     cdp: 'EthereumCdpService',
     conversion: 'TokenConversionService',
     event: 'EventService',
-    // exchange: intentionally omitted,
+    // exchange: intentionally omitted
     gasEstimator: 'GasEstimatorService',
     log: 'ConsoleLogger',
     nonce: 'NonceService',

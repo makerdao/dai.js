@@ -21,7 +21,7 @@ function proxy() {
 function setMockTradeState() {
   service._payToken = 'DAI';
   service._buyToken = 'WETH';
-  service._value = 10;
+  service._value = 1;
 }
 
 beforeEach(async () => {
@@ -48,11 +48,11 @@ test('get buy amount', async () => {
   expect(Object.keys(buyAmount)).toEqual(['_bn']);
 });
 
-xtest('get pay amount', async () => {
+test('get pay amount', async () => {
   setMockTradeState();
-  await createDaiAndPlaceLimitOrder(service, true);
+  await createDaiAndPlaceLimitOrder(service);
   const payAmount = await service.getPayAmount();
-  console.log('payAmount:', payAmount);
+  expect(Object.keys(payAmount)).toEqual(['_bn']);
 });
 
 test('get minBuyAmount (limit)', async () => {
@@ -63,19 +63,21 @@ test('get minBuyAmount (limit)', async () => {
   expect(Object.keys(limit)).toEqual(['_bn']);
 });
 
-xtest('get maxPayAmount (limit', async () => {
+test('get maxPayAmount (limit)', async () => {
+  service._operation = 'buyAllAmount';
   setMockTradeState();
-  await createDaiAndPlaceLimitOrder(service, true);
+  await createDaiAndPlaceLimitOrder(service);
   const limit = await service._limit();
   expect(Object.keys(limit)).toEqual(['_bn']);
 });
 
-xdescribe('trade with existing dsproxy', () => {
+describe('trade with existing dsproxy', () => {
   beforeEach(async () => {
+    await createDaiAndPlaceLimitOrder(service);
     if (!proxyAccount) {
       proxyAccount = TestAccountProvider.nextAccount();
     }
-    await setProxyAccount(service, proxyAccount.address, proxyAccount.key);
+    await setProxyAccount(service, proxyAccount);
     await service
       .get('token')
       .getToken(tokens.WETH)
@@ -84,22 +86,22 @@ xdescribe('trade with existing dsproxy', () => {
   });
 
   test('sell all amount', async () => {
-    await service.sellAllAmount('WETH', 'DAI', 20);
+    await service.sellAllAmount('DAI', 'WETH', 20);
   });
 
-  test('sell all amount, pay eth', async () => {
+  xtest('sell all amount, pay eth', async () => {
     await service.sellAllAmountPayEth('DAI', 200, { value: 1 });
   });
 
-  test('sell all amount, buy eth', async () => {});
+  xtest('sell all amount, buy eth', async () => {});
 
-  test('buy all amount', async () => {
+  xtest('buy all amount', async () => {
     await service.buyAllAmount('DAI', 'MKR', 20);
   });
 
-  test('buy all amount, pay eth', async () => {});
+  xtest('buy all amount, pay eth', async () => {});
 
-  test('buy all amount, buy eth', async () => {});
+  xtest('buy all amount, buy eth', async () => {});
 });
 
 xdescribe('create dsproxy and execute', () => {
