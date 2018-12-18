@@ -50,10 +50,11 @@ export default class DSProxyService extends PrivateService {
   }
 
   async build() {
-    if (await this.currentProxy())
+    if (await this.currentProxy()) {
       throw new Error(
         'This account already has a proxy deployed at ' + this.currentProxy()
       );
+    }
     const nonce = await this.get('nonce').getNonce();
     const txo = await new TransactionObject(
       this._proxyRegistry().build({
@@ -69,14 +70,11 @@ export default class DSProxyService extends PrivateService {
   }
 
   execute(contract, method, args, options, address) {
-    if (!address && typeof this._currentProxy !== 'string')
+    if (!address && typeof this._currentProxy !== 'string') {
       throw new Error('No proxy found for current account');
-    // console.log('contract', contract);
-    // console.log('method:', method);
-    // console.log('args', args);
-    // console.log('options', options);
+    }
     const proxyAddress = address ? address : this.currentProxy();
-    const proxyContract = this.getContractByProxyAddress(proxyAddress);
+    const proxyContract = this._getContractByProxyAddress(proxyAddress);
     const data = contract.interface.functions[method](...args).data;
     return proxyContract.execute(contract.address, data, options);
   }
@@ -95,9 +93,7 @@ export default class DSProxyService extends PrivateService {
     return proxyAddress;
   }
 
-  // Change the name to indicate this is a
-  // private method
-  getContractByProxyAddress(address) {
+  _getContractByProxyAddress(address) {
     return new Contract(
       address,
       dappHub.dsProxy,
@@ -108,13 +104,21 @@ export default class DSProxyService extends PrivateService {
   }
 
   async getOwner(address) {
-    const contract = this.getContractByProxyAddress(address);
+    const contract = this._getContractByProxyAddress(address);
     return await contract.owner();
   }
 
-  // Return transaction object here
-  setOwner(newOwner, proxyAddress = this._currentProxy) {
-    const contract = this.getContractByProxyAddress(proxyAddress);
-    return contract.setOwner(newOwner);
+  async setOwner(newOwner, proxyAddress = this._currentProxy) {
+    const nonce = await this.get('nonce').getNonce();
+    const contract = this._getContractByProxyAddress(proxyAddress);
+    return await new TransactionObject(
+      contract.setOwner(newOwner, {
+        ...this.get('web3').transactionSettings(),
+        nonce: nonce
+      }),
+      this.get('web3'),
+      this.get('nonce'),
+      { contract: 'PROXY_REGISTRY', method: 'setOwner' }
+    ).mine();
   }
 }
