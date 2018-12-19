@@ -125,7 +125,8 @@ describe('execute', () => {
         transactionSettings: { gasLimit: 4000000 },
         confirmedBlockCount: '0'
       },
-      provider: { type: 'TEST' }
+      provider: { type: 'TEST' },
+      log: false
     });
     await maker.authenticate();
     tubContract = maker.service('smartContract').getContractByName('SAI_TUB');
