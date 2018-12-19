@@ -94,7 +94,8 @@ export default class TransactionObject extends TransactionLifeCycle {
         for (let i = 0; i < 240; i++) {
           // 20 minutes max
           tx = await this._web3Service.getTransaction(this.hash);
-          if (tx.blockHash) break;
+          if ((tx || {}).blockHash) break;
+          console.log(tx);
           log('not mined yet');
           await promiseWait(5000);
         }
