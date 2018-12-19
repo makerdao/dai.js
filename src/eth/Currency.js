@@ -160,9 +160,10 @@ const makeCreatorFnWithShift = (creatorFn, symbol, shift) => {
 
 export function createCurrency(symbol) {
   class CurrencyX extends Currency {
-    constructor(amount, shift) {
+    constructor(amount, shift, creatorFn) {
       super(amount, shift);
       this.symbol = symbol;
+      this.currencyType = creatorFn;
     }
   }
 
@@ -172,7 +173,7 @@ export function createCurrency(symbol) {
 
   // This provides short syntax, e.g. ETH(6). We need a wrapper function because
   // you can't call an ES6 class consructor without `new`
-  const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
+  const creatorFn = (amount, shift) => new CurrencyX(amount, shift, creatorFn);
 
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
