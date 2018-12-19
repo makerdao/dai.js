@@ -16,14 +16,9 @@ test('getContractByName should have proper error checking', async () => {
   );
 
   await service.manager().authenticate();
-
-  let error;
-  try {
-    await service.getContractByName(contracts.SAI_TOP, { version: 999 });
-  } catch (err) {
-    error = err;
-  }
-  expect(error).toEqual(new Error('Cannot find contract SAI_TOP, version 999'));
+  expect(() =>
+    service.getContractByName(contracts.SAI_TOP, { version: 999 })
+  ).toThrow(new Error('Cannot find contract SAI_TOP, version 999'));
 });
 
 test('getContractByName should return a functioning contract', async () => {
