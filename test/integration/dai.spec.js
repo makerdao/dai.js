@@ -8,7 +8,7 @@ import { uniqueId } from '../../src/utils';
 const log = debug('dai:testing:integration');
 
 describe.each([
-  //['with http provider', true],
+  ['with http provider', true],
   ['with websocket provider', false]
 ])('%s', (name, useHttp) => {
   let maker, cdp, exchange, address, tokenService, txMgr;
