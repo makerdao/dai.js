@@ -160,10 +160,9 @@ const makeCreatorFnWithShift = (creatorFn, symbol, shift) => {
 
 export function createCurrency(symbol) {
   class CurrencyX extends Currency {
-    constructor(amount, shift, creatorFn) {
+    constructor(amount, shift) {
       super(amount, shift);
       this.symbol = symbol;
-      this.currencyType = creatorFn;
     }
   }
 
@@ -173,16 +172,16 @@ export function createCurrency(symbol) {
 
   // This provides short syntax, e.g. ETH(6). We need a wrapper function because
   // you can't call an ES6 class consructor without `new`
-  const creatorFn = (amount, shift) => new CurrencyX(amount, shift, creatorFn);
+  const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
 
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
     ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
     symbol,
-    wrappedClass: CurrencyX,
     isInstance: obj => obj instanceof CurrencyX
   });
 
+  Object.assign(CurrencyX, { wei: creatorFn.wei, ray: creatorFn.ray });
   return creatorFn;
 }
 
@@ -217,13 +216,16 @@ export function getCurrency(amount, unit) {
 class CurrencyRatio extends Currency {
   constructor(amount, numerator, denominator, shift) {
     super(amount, shift);
-    this.numerator = numerator.wrappedClass || numerator;
-    this.denominator = denominator.wrappedClass || denominator;
+    this.numerator = numerator;
+    this.denominator = denominator;
     this.symbol = `${numerator.symbol}/${denominator.symbol}`;
   }
 }
 
-const setupRatioWrapper = (numerator, denominator) => {
+const createCurrencyRatio = (wrappedNumerator, wrappedDenominator) => {
+  const numerator = wrappedNumerator(0).constructor;
+  const denominator = wrappedDenominator(0).constructor;
+
   const creatorFn = (amount, shift) =>
     new CurrencyRatio(amount, numerator, denominator, shift);
 
@@ -250,11 +252,11 @@ export const PETH = currencies.PETH;
 export const WETH = currencies.WETH;
 export const USD = currencies.USD;
 
-export const USD_DAI = setupRatioWrapper(USD, DAI);
-export const USD_ETH = setupRatioWrapper(USD, ETH);
-export const USD_MKR = setupRatioWrapper(USD, MKR);
-export const USD_PETH = setupRatioWrapper(USD, PETH);
-export const USD_WETH = setupRatioWrapper(USD, WETH);
+export const USD_DAI = createCurrencyRatio(USD, DAI);
+export const USD_ETH = createCurrencyRatio(USD, ETH);
+export const USD_MKR = createCurrencyRatio(USD, MKR);
+export const USD_PETH = createCurrencyRatio(USD, PETH);
+export const USD_WETH = createCurrencyRatio(USD, WETH);
 
 Object.assign(currencies, {
   USD_DAI,
