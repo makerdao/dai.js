@@ -73,6 +73,9 @@ export default class AccountsService extends PublicService {
       this.get('log').info(`Not adding account "${name}" (no address found)`);
       return;
     }
+    if (this._getAccountWithAddress(accountData.address)) {
+      throw new Error('An account with this address already exists.');
+    }
 
     if (!name) name = accountData.address;
     const account = { name, type, ...accountData };
@@ -112,11 +115,15 @@ export default class AccountsService extends PublicService {
     this._engine.start();
   }
 
-  useAccountWithAddress(addr) {
+  _getAccountWithAddress(addr) {
     const accountObjects = Object.values(this._accounts);
-    const account = accountObjects.find(
+    return accountObjects.find(
       e => e.address.toUpperCase() === addr.toUpperCase()
     );
+  }
+
+  useAccountWithAddress(addr) {
+    const account = this._getAccountWithAddress(addr);
     if (!account) throw new Error(`No account found with address ${addr}`);
     this.useAccount(account.name);
   }
