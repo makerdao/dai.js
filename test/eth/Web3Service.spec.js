@@ -1,9 +1,11 @@
 import TestAccountProvider from '../helpers/TestAccountProvider';
-import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole, observePromise, promiseWait } from '../../src/utils';
 import { waitForBlocks } from '../helpers/transactionConfirmation';
 import { callGanache } from '../helpers/ganache';
-import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
+import {
+  buildTestService as buildTestServiceCore,
+  buildTestInfuraService
+} from '../helpers/serviceBuilders';
 import { WETH } from '../../src/eth/Currency';
 import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
@@ -89,25 +91,7 @@ describe.each([
   }
 
   function buildInfuraService(network) {
-    const config = useHttp
-      ? {
-          web3: {
-            provider: {
-              type: ProviderType.INFURA,
-              network,
-              protocol: 'https'
-            }
-          },
-          useHttp
-        }
-      : {
-          web3: {
-            provider: {
-              url: `wss://${network}.infura.io/ws`
-            }
-          }
-        };
-    return buildTestServiceCore('web3', config);
+    return buildTestInfuraService(network, useHttp);
   }
 
   test('fetch version info on connect', done => {

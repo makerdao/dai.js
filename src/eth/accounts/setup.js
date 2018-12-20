@@ -13,25 +13,40 @@ export async function setupEngine(settings) {
   });
   const result = { engine };
 
-  if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
-    result.provider = await getBrowserProvider();
-  } else if (
-    providerSettings.type === ProviderType.WEBSOCKET ||
-    providerSettings.protocol === 'ws' ||
-    providerSettings.protocol === 'wss'
-  ) {
+  const getHttpProvider = () => {
+    const rpcUrl = getRpcUrl(providerSettings);
+    return new RpcSource({ rpcUrl });
+  };
+
+  const getWebsocketProvider = () => {
     const rpcUrl = getRpcUrl(providerSettings);
     const subscriptionProvider = new SubscriptionSubprovider();
     subscriptionProvider.on('data', (err, notification) => {
       engine.emit('data', err, notification);
     });
     engine.addProvider(subscriptionProvider);
-    result.provider = new WebsocketSubprovider({ rpcUrl });
-  } else {
-    const rpcUrl = getRpcUrl(providerSettings);
-    result.provider = new RpcSource({ rpcUrl });
-  }
+    return new WebsocketSubprovider({ rpcUrl });
+  };
 
+  switch (providerSettings.type) {
+    case ProviderType.BROWSER:
+      result.provider = await getBrowserProvider();
+      break;
+    case ProviderType.WEBSOCKET:
+      result.provider = getWebsocketProvider();
+      break;
+    case ProviderType.HTTP:
+      result.provider = getHttpProvider();
+      break;
+    case ProviderType.INFURA:
+      result.provider =
+        providerSettings.protocol === 'wss'
+          ? getWebsocketProvider()
+          : getHttpProvider();
+      break;
+    default:
+      throw new Error('provider type must be defined');
+  }
   engine.addProvider(result.provider);
   return result;
 }
@@ -57,6 +72,13 @@ export async function getBrowserProvider() {
   }
 }
 
+function getInfuraUrl(protocol, network, infuraApiKey) {
+  let url = `${protocol}://${network}.infura.io`;
+  url += protocol === 'wss' ? '/ws' : '';
+  url += infuraApiKey ? '/v3/infuraApiKey' : '';
+  return url;
+}
+
 function getRpcUrl(providerSettings) {
   const { network, protocol, infuraApiKey, type, url } = providerSettings;
   switch (type) {
@@ -65,9 +87,7 @@ function getRpcUrl(providerSettings) {
     case ProviderType.WEBSOCKET:
       return url;
     case ProviderType.INFURA:
-      return `${protocol}://${network}.infura.io/${
-        protocol === 'wss' ? 'ws' : ''
-      }/${infuraApiKey || ''}`;
+      return getInfuraUrl(protocol, network, infuraApiKey);
     default:
       throw new Error('Invalid web3 provider type: ' + type);
   }

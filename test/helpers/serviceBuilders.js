@@ -96,3 +96,27 @@ export function buildTestSmartContractService() {
 export function buildTestEventService() {
   return buildTestService('event', { event: true });
 }
+
+export function buildTestInfuraService(network, useHttp = false) {
+  const config = useHttp
+    ? {
+        web3: {
+          provider: {
+            type: ProviderType.INFURA,
+            network,
+            protocol: 'https'
+          }
+        },
+        useHttp
+      }
+    : {
+        web3: {
+          provider: {
+            type: ProviderType.INFURA,
+            network,
+            protocol: 'wss'
+          }
+        }
+      };
+  return buildTestService('web3', config);
+}
