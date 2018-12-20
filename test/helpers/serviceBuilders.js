@@ -16,7 +16,10 @@ export const kovanHttpProviderConfig = {
 
 export const defaultProviderConfig = () => ({
   web3: {
-    provider: { type: ProviderType.TEST },
+    provider: {
+      type: ProviderType.TEST,
+      protocol: 'http'
+    },
     transactionSettings: {
       gasLimit: 4000000
     }
@@ -57,9 +60,9 @@ const useHttpForTests = false;
 export function buildTestContainer(settings = {}) {
   // switch between using websockets for tests is simplified
   const provider =
-        useHttpForTests || settings.useHttp
-        ? defaultProviderConfig()
-        : websocketProviderConfig();
+    useHttpForTests || settings.useHttp
+      ? defaultProviderConfig()
+      : websocketProviderConfig();
   if (settings && settings.accounts) {
     delete provider.accounts;
   }

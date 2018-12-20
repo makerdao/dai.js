@@ -72,7 +72,8 @@ describe('normal web service behavior', () => {
       service = buildTestEthereumTokenService({
         web3: {
           provider: {
-            type: 'TEST'
+            type: 'TEST',
+            protocol: 'http'
           }
         }
       });

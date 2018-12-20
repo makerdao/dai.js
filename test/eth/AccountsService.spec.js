@@ -56,7 +56,12 @@ test('invalid private keys', async () => {
 test('account with custom subprovider implementation', async () => {
   const service = buildTestService('accounts', {
     accounts: true,
-    web3: { provider: { type: 'TEST' } }
+    web3: {
+      provider: {
+        type: 'TEST',
+        protocol: 'http'
+      }
+    }
   });
   await service.manager().connect();
   const setEngine = jest.fn();

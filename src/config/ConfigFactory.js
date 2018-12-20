@@ -1,8 +1,11 @@
 import test from './presets/test.json';
+import testHttp from './presets/testHttp.json';
 import kovan from './presets/kovan.json';
+import kovanHttp from './presets/kovanHttp.json';
 import http from './presets/http.json';
 import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
+import mainnetHttp from './presets/mainnetHttp.json';
 import browser from './presets/browser.json';
 import merge from 'lodash.merge';
 import intersection from 'lodash.intersection';
@@ -43,6 +46,9 @@ function loadPreset(name) {
     case 'test':
       preset = test;
       break;
+    case 'test-http':
+      preset = testHttp;
+      break;
     case 'http':
       preset = http;
       break;
@@ -53,8 +59,14 @@ function loadPreset(name) {
     case 'kovan':
       preset = kovan;
       break;
+    case 'kovan-http':
+      preset = kovanHttp;
+      break;
     case 'mainnet':
       preset = mainnet;
+      break;
+    case 'mainnet-http':
+      preset = mainnetHttp;
       break;
     case 'browser':
       preset = browser;

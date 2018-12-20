@@ -15,7 +15,11 @@ export async function setupEngine(settings) {
 
   if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
     result.provider = await getBrowserProvider();
-  } else if (providerSettings.type === ProviderType.WEBSOCKET) {
+  } else if (
+    providerSettings.type === ProviderType.WEBSOCKET ||
+    providerSettings.protocol === 'ws' ||
+    providerSettings.protocol === 'wss'
+  ) {
     const rpcUrl = getRpcUrl(providerSettings);
     const subscriptionProvider = new SubscriptionSubprovider();
     subscriptionProvider.on('data', (err, notification) => {
@@ -54,16 +58,18 @@ export async function getBrowserProvider() {
 }
 
 function getRpcUrl(providerSettings) {
-  const { network, infuraApiKey, type, url } = providerSettings;
+  const { network, protocol, infuraApiKey, type, url } = providerSettings;
   switch (type) {
     case ProviderType.HTTP:
       return url;
     case ProviderType.WEBSOCKET:
       return url;
     case ProviderType.INFURA:
-      return `https://${network}.infura.io/${infuraApiKey || ''}`;
+      return `${protocol}://${network}.infura.io/${
+        protocol === 'wss' ? 'ws' : ''
+      }/${infuraApiKey || ''}`;
     case ProviderType.TEST:
-      return 'http://127.1:2000';
+      return `${protocol}://localhost:2000`;
     default:
       throw new Error('Invalid web3 provider type: ' + type);
   }
