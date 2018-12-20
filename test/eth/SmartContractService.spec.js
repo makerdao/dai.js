@@ -5,7 +5,7 @@ import {
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
 
-test('getContractByName should have proper error checking', done => {
+test('getContractByName should have proper error checking', async () => {
   const service = buildTestSmartContractService();
 
   expect(() => service.getContractByName('NOT_A_CONTRACT')).toThrow(
@@ -15,65 +15,43 @@ test('getContractByName should have proper error checking', done => {
     'Cannot resolve network ID. Are you connected?'
   );
 
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      expect(() =>
-        service.getContractByName(contracts.SAI_TOP, { version: 999 })
-      ).toThrow('Cannot find contract SAI_TOP, version 999');
-      done();
-    });
+  await service.manager().authenticate();
+  expect(() =>
+    service.getContractByName(contracts.SAI_TOP, { version: 999 })
+  ).toThrow(new Error('Cannot find contract SAI_TOP, version 999'));
 });
 
-test('getContractByName should return a functioning contract', done => {
+test('getContractByName should return a functioning contract', async () => {
   const service = buildTestSmartContractService();
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      // Read the PETH address by calling TOP.skr(). Confirm that it's the same as the configured address.
-      service
-        .getContractByName(contracts.SAI_TOP)
-        .gem()
-        .then(data => {
-          expect(data.toString().toUpperCase()).toEqual(
-            service.getContractByName(tokens.WETH).address.toUpperCase()
-          );
-          done();
-        });
-    });
+  await service.manager().authenticate();
+  // Read the PETH address by calling TOP.skr(). Confirm that it's the same as the configured address.
+  const gem = await service.getContractByName(contracts.SAI_TOP).gem();
+
+  expect(gem.toString().toUpperCase()).toEqual(
+    service.getContractByName(tokens.WETH).address.toUpperCase()
+  );
 });
 
-test("should get a contract's public constant member values in a state object", done => {
+test("should get a contract's public constant member values in a state object", async () => {
   const service = buildTestSmartContractService();
-  service
-    .manager()
-    .authenticate()
-    .then(() => service.getContractState(contracts.SAI_MOM))
-    .then(r => {
-      expect(Object.keys(r)).toEqual([
-        '__self',
-        'tub',
-        'vox',
-        'owner',
-        'authority',
-        'tap'
-      ]);
-      done();
-    });
+  await service.manager().authenticate();
+
+  const state = await service.getContractState(contracts.SAI_MOM);
+  expect(Object.keys(state)).toEqual([
+    '__self',
+    'tub',
+    'vox',
+    'owner',
+    'authority',
+    'tap'
+  ]);
 });
 
-test('should support recursive smart contract state inspection', done => {
+test('should support recursive smart contract state inspection', async () => {
   const service = buildTestSmartContractService();
-  service
-    .manager()
-    .authenticate()
-    .then(() => service.getContractState(contracts.SAI_TOP, 5, true, []))
-    .then(top => {
-      expect(top.tub.gem.symbol).toEqual('WETH');
-      done();
-    });
+  await service.manager().authenticate();
+  const state = await service.getContractState(contracts.SAI_TOP, 5, true, []);
+  expect(state.tub.gem.symbol).toEqual('WETH');
 });
 
 test('parameterized smart contract input', async () => {
@@ -140,30 +118,22 @@ test('parameterized smart contract input with multiple addresses', async () => {
   expect(typeof contract.foo).toBe('function');
 });
 
-test('getContractByName returns contract with a valid signer', done => {
+test('getContractByName returns contract with a valid signer', async () => {
   const service = buildTestSmartContractService();
-  service
-    .manager()
-    .authenticate()
-    .then(() => {
-      const provider = service.get('web3').ethersProvider();
-      const contract = service.getContractByName(contracts.SAI_TOP);
-      expect(contract.signer.provider).toBe(provider);
-      done();
-    });
+
+  await service.manager().authenticate();
+  const provider = service.get('web3').ethersProvider();
+  const contract = service.getContractByName(contracts.SAI_TOP);
+  expect(contract.signer.provider).toBe(provider);
 });
 
-test('getContractByName returns contract that can call constant functions even without accounts', done => {
+test('getContractByName returns contract that can call constant functions even without accounts', async () => {
   const service = buildTestSmartContractService();
   service.get('web3').get('accounts').hasAccount = jest.fn(() => false);
-  service
-    .manager()
-    .authenticate()
-    .then(async () => {
-      const contract = service.getContractByName(contracts.SAI_TOP);
-      const readOnlyValue = await contract.gem();
-      expect(contract.signer).toBeNull();
-      expect(readOnlyValue).toBeTruthy();
-      done();
-    });
+
+  await service.manager().authenticate();
+  const contract = service.getContractByName(contracts.SAI_TOP);
+  const readOnlyValue = await contract.gem();
+  expect(contract.signer).toBeNull();
+  expect(readOnlyValue).toBeTruthy();
 });
