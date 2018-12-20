@@ -1,7 +1,8 @@
 {
   "web3": {
     "provider": {
-      "type": "TEST"
+      "type": "TEST",
+      "protocol": "ws"
     },
     "transactionSettings": {
       "gasLimit": 4000000

@@ -2,7 +2,8 @@
   "web3": {
     "provider": {
       "type": "INFURA",
-      "network": "mainnet"
+      "network": "mainnet",
+      "protocol": "wss"
     },
     "transactionSettings": {
       "gasLimit": 4000000
