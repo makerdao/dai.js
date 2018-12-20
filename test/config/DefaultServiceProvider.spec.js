@@ -1,6 +1,12 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
-import config from '../../src/config/presets/test';
 import LocalService from '../../src/core/LocalService';
+
+const config = {
+  provider: {
+    type: 'WEBSOCKET',
+    url: 'ws://localhost:2000'
+  }
+};
 
 test('support services in mapping', () => {
   expect(new DefaultServiceProvider().supports('SmartContractService')).toBe(
@@ -34,7 +40,8 @@ test('add web3 config into accounts config', () => {
 
 test('create a container from a service configuration', async () => {
   const container = new DefaultServiceProvider({
-    ...config,
+    web3: config,
+    exchange: 'OasisExchangeService', // enforces all services to be used
     log: false
   }).buildContainer();
 
@@ -53,7 +60,7 @@ test('create a container from a service configuration', async () => {
 
 test('throw an error when config has an unsupported service', () => {
   const servicesCopy = {
-    ...config,
+    web3: config,
     missingService: 'DoesNotExist'
   };
   expect(() =>

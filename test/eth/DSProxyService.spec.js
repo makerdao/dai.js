@@ -120,12 +120,12 @@ describe('execute', () => {
   ];
 
   beforeAll(async () => {
-    maker = Maker.create('test', {
+    maker = Maker.create('http', {
+      url: 'http://localhost:2000',
       web3: {
         transactionSettings: { gasLimit: 4000000 },
         confirmedBlockCount: '0'
       },
-      provider: { type: 'TEST', protocol: 'http' },
       log: false
     });
     await maker.authenticate();

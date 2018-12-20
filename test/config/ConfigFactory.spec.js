@@ -1,18 +1,20 @@
-import testPreset from '../../src/config/presets/test';
 import httpPreset from '../../src/config/presets/http';
 import mainPreset from '../../src/config/presets/mainnet';
+import mainHttpPreset from '../../src/config/presets/mainnetHttp';
 import wsPreset from '../../src/config/presets/ws';
 import browserPreset from '../../src/config/presets/browser';
 import kovanPreset from '../../src/config/presets/kovan';
+import kovanHttpPreset from '../../src/config/presets/kovanHttp';
 import ConfigFactory from '../../src/config/ConfigFactory';
 
 test('returns a preset by name', () => {
-  expect(ConfigFactory.create('test')).toEqual(testPreset);
   expect(ConfigFactory.create('http')).toEqual(httpPreset);
   expect(ConfigFactory.create('mainnet')).toEqual(mainPreset);
+  expect(ConfigFactory.create('mainnet-http')).toEqual(mainHttpPreset);
   expect(ConfigFactory.create('ws')).toEqual(wsPreset);
   expect(ConfigFactory.create('browser')).toEqual(browserPreset);
   expect(ConfigFactory.create('kovan')).toEqual(kovanPreset);
+  expect(ConfigFactory.create('kovan-http')).toEqual(kovanHttpPreset);
 });
 
 test('throws an error when requesting a non-existing preset', () => {
@@ -22,20 +24,20 @@ test('throws an error when requesting a non-existing preset', () => {
 });
 
 test('can take an options object in addition to a preset name', () => {
-  const config = ConfigFactory.create('test', { log: false });
+  const config = ConfigFactory.create('ws', { log: false });
   expect(config.log).toEqual(false);
 });
 
 test('can take an options object as first argument', () => {
-  const config = ConfigFactory.create({ preset: 'test', log: false });
+  const config = ConfigFactory.create({ preset: 'ws', log: false });
   expect(config.log).toEqual(false);
 });
 
 test('it handles url, privateKey, provider, and web3 options using http', () => {
   const config = ConfigFactory.create(
-    'http',
+    'ws',
     {
-      url: 'http://foo.net',
+      url: 'ws://foo.net',
       privateKey: '0xf00',
       provider: {
         timeout: 1000
@@ -64,8 +66,8 @@ test('it handles url, privateKey, provider, and web3 options using http', () => 
         statusTimerDelay: 10000,
         provider: {
           timeout: 1000,
-          type: 'HTTP',
-          url: 'http://foo.net'
+          type: 'WEBSOCKET',
+          url: 'ws://foo.net'
         },
         transactionSettings: {
           gasLimit: 4000000
@@ -122,17 +124,17 @@ test('it handles url, privateKey, provider, and web3 options using websockets', 
 });
 
 test('it overwrites a service name', () => {
-  const config = ConfigFactory.create('http', { exchange: 'OtherService' });
+  const config = ConfigFactory.create('ws', { exchange: 'OtherService' });
   expect(config.exchange).toEqual(['OtherService', {}]);
 });
 
 test('it adds service options', () => {
-  const config = ConfigFactory.create('http', { exchange: { foo: 'bar' } });
+  const config = ConfigFactory.create('ws', { exchange: { foo: 'bar' } });
   expect(config.exchange).toEqual(['OasisExchangeService', { foo: 'bar' }]);
 });
 
 test('it passes service options for an omitted service', () => {
-  const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
+  const config = ConfigFactory.create('ws', { cdp: { foo: 'bar' } });
   expect(config.cdp).toEqual({ foo: 'bar' });
 });
 
@@ -143,7 +145,7 @@ test('it preserves the preset service name', () => {
 });
 
 test('skip unknown service roles', () => {
-  const config = ConfigFactory.create('http', {
+  const config = ConfigFactory.create('ws', {
     foo: 'FooService'
   });
   expect(config.foo).toBeFalsy();
@@ -154,7 +156,7 @@ test('should capture transaction settings', () => {
     gasPrice: 12000000000,
     gasLimit: 4000000
   };
-  const config = ConfigFactory.create('http', {
+  const config = ConfigFactory.create('ws', {
     web3: {
       transactionSettings: txSettings
     }
@@ -163,7 +165,7 @@ test('should capture transaction settings', () => {
 });
 
 test('should capture confirmedBlockCount', () => {
-  const config = ConfigFactory.create('http', {
+  const config = ConfigFactory.create('ws', {
     web3: {
       confirmedBlockCount: 8
     }
@@ -172,7 +174,7 @@ test('should capture confirmedBlockCount', () => {
 });
 
 test('allow new service roles if specified', () => {
-  const config = ConfigFactory.create('http', {
+  const config = ConfigFactory.create('ws', {
     additionalServices: ['foo'],
     foo: 'FooService'
   });
@@ -181,7 +183,7 @@ test('allow new service roles if specified', () => {
 
 test('reject invalid service roles', () => {
   expect(() => {
-    ConfigFactory.create('http', {
+    ConfigFactory.create('ws', {
       additionalServices: ['url']
     });
   }).toThrow(/cannot be used as service role names/);

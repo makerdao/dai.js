@@ -68,8 +68,6 @@ function getRpcUrl(providerSettings) {
       return `${protocol}://${network}.infura.io/${
         protocol === 'wss' ? 'ws' : ''
       }/${infuraApiKey || ''}`;
-    case ProviderType.TEST:
-      return `${protocol}://localhost:2000`;
     default:
       throw new Error('Invalid web3 provider type: ' + type);
   }

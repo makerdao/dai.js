@@ -3,22 +3,11 @@ import ProviderType from '../../src/eth/web3/ProviderType';
 import { has, merge } from 'lodash';
 import testAccounts from './testAccounts.json';
 
-export const kovanHttpProviderConfig = {
-  web3: {
-    privateKey: process.env.KOVAN_PRIVATE_KEY,
-    provider: {
-      type: ProviderType.INFURA,
-      network: 'kovan',
-      infuraApiKey: process.env.INFURA_API_KEY
-    }
-  }
-};
-
-export const defaultProviderConfig = () => ({
+export const httpProviderConfig = () => ({
   web3: {
     provider: {
-      type: ProviderType.TEST,
-      protocol: 'http'
+      type: ProviderType.HTTP,
+      url: 'http://localhost:2000'
     },
     transactionSettings: {
       gasLimit: 4000000
@@ -61,7 +50,7 @@ export function buildTestContainer(settings = {}) {
   // switch between using websockets for tests is simplified
   const provider =
     useHttpForTests || settings.useHttp
-      ? defaultProviderConfig()
+      ? httpProviderConfig()
       : websocketProviderConfig();
   if (settings && settings.accounts) {
     delete provider.accounts;
@@ -72,8 +61,6 @@ export function buildTestContainer(settings = {}) {
   merge(provider, settings);
   return new DefaultServiceProvider({
     ...provider
-    // ...kovanProviderConfig,
-    // cache
   });
 }
 
