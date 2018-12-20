@@ -122,7 +122,7 @@ test('getContractByName returns contract with a valid signer', async () => {
   const service = buildTestSmartContractService();
 
   await service.manager().authenticate();
-  const provider = service.get('web3').getEthersSigner();
+  const signer = service.get('web3').getEthersSigner();
   const contract = service.getContractByName(contracts.SAI_TOP);
   expect(contract.signer).toBe(signer);
 });
