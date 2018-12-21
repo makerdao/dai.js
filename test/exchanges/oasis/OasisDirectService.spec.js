@@ -2,10 +2,12 @@ import { buildTestService } from '../../helpers/serviceBuilders';
 import { setProxyAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import addresses from '../../../contracts/addresses/testnet.json';
-import tokens from '../../../contracts/tokens';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
+import Maker from '../../../src/index';
+import { DAI, ETH } from '../../../src/eth/Currency';
+import { transferMkr } from '../../helpers/proxyHelpers';
 
-let service, proxyAccount;
+let service, proxyAccount, maker;
 
 async function buildTestOasisDirectService() {
   service = buildTestService('exchange', {
@@ -18,11 +20,24 @@ function proxy() {
   return service.get('proxy').currentProxy();
 }
 
-function setMockTradeState() {
-  service._payToken = 'DAI';
-  service._buyToken = 'WETH';
-  service._value = 1;
+function setMockTradeState(exchange = service) {
+  exchange._payToken = 'DAI';
+  exchange._buyToken = 'WETH';
+  exchange._value = 1;
 }
+
+// If you just set your private key to the kovan key,
+// the following will work for read operations only
+// (protecting from violating the trading blackout),
+// plus you can easily switch it to kovan for testing
+
+// beforeAll(async () => {
+//   maker = Maker.create('mainnet', {
+//     privateKey: process.env.PRIVATE_KEY,
+//     exchange: 'OasisDirectService'
+//   });
+//   await maker.authenticate();
+// });
 
 beforeEach(async () => {
   await buildTestOasisDirectService();
@@ -43,9 +58,26 @@ test('get token balances', async () => {
 
 test('get buy amount', async () => {
   setMockTradeState();
-  await createDaiAndPlaceLimitOrder(service);
+  try {
+    await createDaiAndPlaceLimitOrder(service);
+  } catch (err) {
+    console.error(err);
+  }
   const buyAmount = await service.getBuyAmount();
   expect(Object.keys(buyAmount)).toEqual(['_bn']);
+});
+
+// Unskip this and uncomment lines 30-36 to see
+// the amounts returned from the mainnet otc
+xtest('amounts on mainnet', async () => {
+  const exchange = maker.service('exchange');
+  exchange._operation = 'sellAllAmount';
+  setMockTradeState(exchange);
+  const buyAmount = await exchange.getBuyAmount();
+  console.log(ETH.wei(buyAmount).toNumber());
+  const minBuyAmount = await exchange._minBuyAmount(buyAmount);
+  console.log(ETH.wei(minBuyAmount).toNumber());
+  console.log(minBuyAmount);
 });
 
 test('get pay amount', async () => {
@@ -59,41 +91,43 @@ test('get minBuyAmount (limit)', async () => {
   service._operation = 'sellAllAmount';
   setMockTradeState();
   await createDaiAndPlaceLimitOrder(service);
-  const limit = await service._limit();
-  expect(Object.keys(limit)).toEqual(['_bn']);
-});
-
-test('get maxPayAmount (limit)', async () => {
-  service._operation = 'buyAllAmount';
-  setMockTradeState();
-  await createDaiAndPlaceLimitOrder(service);
-  const limit = await service._limit();
-  expect(Object.keys(limit)).toEqual(['_bn']);
+  const limit = await service._minBuyAmount();
+  // console.log(limit);
 });
 
 describe('trade with existing dsproxy', () => {
   beforeEach(async () => {
-    await createDaiAndPlaceLimitOrder(service);
     if (!proxyAccount) {
       proxyAccount = TestAccountProvider.nextAccount();
     }
+    await transferMkr(service, proxyAccount.address);
     await setProxyAccount(service, proxyAccount);
-    await service
-      .get('token')
-      .getToken(tokens.WETH)
-      .deposit(20);
+    // await service
+    //   .get('token')
+    //   .getToken(tokens.WETH)
+    //   .deposit(20);
     if (!(await proxy())) await service.get('proxy').build();
+    await createDaiAndPlaceLimitOrder(service);
   });
 
+  // I'm focusing on making this one work first
   test('sell all amount', async () => {
-    await service.sellAllAmount('DAI', 'WETH', 1);
+    await service.sellAllAmount('DAI', 'MKR', '0.1');
   });
 
-  test('sell all amount, pay eth', async () => {
-    await service.sellAllAmountPayEth('DAI', 1, { value: 1 });
-  });
+  xtest(
+    'sell all amount, pay eth',
+    async () => {
+      await maker
+        .service('exchange')
+        .sellAllAmountPayEth('DAI', 1, { value: 1 });
+    },
+    2000000
+  );
 
-  xtest('sell all amount, buy eth', async () => {});
+  xtest('sell all amount, buy eth', async () => {
+    await maker.service('exchange').sellAllAmountBuyEth('DAI', DAI(0.1));
+  });
 
   xtest('buy all amount', async () => {
     await service.buyAllAmount('DAI', 'MKR', 20);

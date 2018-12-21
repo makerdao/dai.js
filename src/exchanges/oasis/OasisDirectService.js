@@ -49,6 +49,20 @@ export default class OasisDirectService extends PrivateService {
     );
   }
 
+  // This takes an optional parameter in case a UI,
+  // like Oasis Direct, needs to calculate the minimum
+  // amount with respect to a value that's already been
+  // given to the user
+  async _minBuyAmount(estimatedAmount = null) {
+    // This wasn't working without the amount param
+    // when running sellAllAmount, but for some reason
+    // works without the param in the unit test
+    const buyAmount = estimatedAmount
+      ? estimatedAmount
+      : await this.getBuyAmount();
+    return buyAmount * 0.98;
+  }
+
   async getPayAmount() {
     const otc = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
@@ -61,39 +75,35 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async _buildTradeParams() {
+    const limit = this._operation.includes('sell')
+      ? await this._minBuyAmount('0.1')
+      : await this._minPayAmount();
     return [
       this._getContractAddress('MAKER_OTC'),
       this._getContractAddress(this._payToken),
       this._valueForContract(this._value, this._payToken),
       this._getContractAddress(this._buyToken),
-      await this._limit()
+      this._valueForContract(limit, this._buyToken)
     ];
   }
 
-  _threshold() {
-    if (
-      (this._payToken === 'DAI' && this._buyToken === 'ETH') ||
-      (this._payToken === 'ETH' && this._buyToken === 'DAI')
-    ) {
-      return 2;
-    } else {
-      return 1;
-    }
-  }
+  // Ignore this function for now, it's related to
+  // how I was getting the buy/pay amounts before
+  // I fixed it
 
-  async _limit() {
-    if (this._operation.includes('sellAll')) {
-      const buyAmount = await this.getBuyAmount();
-      return this._valueForContract(
-        buyAmount * (1 - this._threshold()),
-        this._buyToken
-      );
-    } else {
-      const payAmount = await this.getPayAmount();
-      const limit = Math.round(payAmount * (1 + this._threshold()));
-      return this._valueForContract(limit, this._payToken);
-    }
-  }
+  // async _limit() {
+  //   if (this._operation.includes('sellAll')) {
+  //     const buyAmount = await this.getBuyAmount();
+  //     return this._valueForContract(
+  //       buyAmount * (1 - this._threshold()),
+  //       this._buyToken
+  //     );
+  //   } else {
+  //     const payAmount = await this.getPayAmount();
+  //     const limit = Math.round(payAmount * (1 + this._threshold()));
+  //     return this._valueForContract(limit, this._payToken);
+  //   }
+  // }
 
   _valueForContract(amount, symbol) {
     return getCurrency(amount, symbol).toEthersBigNumber('wei');

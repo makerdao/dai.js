@@ -7,7 +7,6 @@ export default async function createDaiAndPlaceLimitOrder(
   oasisExchangeService,
   sellDai = false
 ) {
-  console.log(oasisExchangeService.get('web3').currentAccount());
   const cdp = await oasisExchangeService.get('cdp').openCdp();
   const tx = cdp.lockEth(0.1);
   mineBlocks(oasisExchangeService);
@@ -57,18 +56,12 @@ async function offer(
   const oasisContract = oasisExchangeService
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC);
-
-  // const dai = oasisExchangeService.get('token').getToken(DAI);
-  // const balance = await dai.balanceOf(
-  //   oasisExchangeService.get('web3').currentAccount()
-  // );
-  // console.log('trade possible?', balance > payAmount);
-
-  return oasisContract.offer(
+  const tx = await oasisContract.offer(
     payAmount,
     payTokenAddress,
     buyAmount,
     buyTokenAddress,
     position
   );
+  return await tx.mine();
 }
