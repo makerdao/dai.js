@@ -17,7 +17,8 @@ export const defaultProviderConfig = {
     provider: { type: ProviderType.TEST },
     transactionSettings: {
       gasLimit: 4000000
-    }
+    },
+    pollingInterval: 50
   },
   log: false
 };
