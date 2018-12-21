@@ -4,62 +4,52 @@ import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
 import { uniqueId } from '../../src/utils';
+import { takeSnapshot, restoreSnapshot } from '../helpers/ganache';
 
 const log = debug('dai:testing:integration');
+
+if (!process.env.PRIVATE_KEY && process.env.NETWORK !== 'test') {
+  throw new Error('Please set a private key to run integration tests.');
+}
+
+let maker, cdp, exchange, address, tokenService, txMgr, snapshotId;
+
+async function convert(symbol) {
+  const token = tokenService.getToken(tokens[symbol]);
+  const balance = await token.balanceOf(address);
+
+  if (balance.gt(0.009)) {
+    console.info(`Remaining ${symbol} balance is`, balance.toString());
+    const method = symbol === 'PETH' ? 'exit' : 'withdraw';
+    const op = token[method](balance.toNumber().toFixed(2));
+    await txMgr.confirm(op);
+    console.info(`Converted remaining ${symbol}`);
+  } else {
+    console.info(`No remaining ${symbol} to convert`);
+  }
+}
+
+async function checkWethBalance() {
+  const weth = tokenService.getToken(tokens.WETH);
+  const wethBalance = await weth.balanceOf(address);
+
+  if (wethBalance.toNumber() < 0.01) {
+    console.log(
+      'Current balance is ' + wethBalance.toString() + ', depositing 0.01'
+    );
+    const convert = maker.service('conversion').convertEthToWeth(0.01);
+    await txMgr.confirm(convert);
+  } else {
+    return;
+  }
+}
 
 describe.each([
   ['with http provider', true],
   ['with websocket provider', false]
 ])('%s', (name, useHttp) => {
-  let maker, cdp, exchange, address, tokenService, txMgr;
-
-  async function convertPeth() {
-    const peth = tokenService.getToken(tokens.PETH);
-    const pethBalance = await peth.balanceOf(address);
-
-    if (pethBalance.toNumber() > 0.009) {
-      console.info('Remaining PETH balance is', pethBalance.toString());
-      const exit = peth.exit(pethBalance.toNumber().toFixed(2));
-      await txMgr.confirm(exit);
-      console.info('Exited remaining PETH');
-    } else {
-      console.info('No remaining PETH to exit');
-    }
-  }
-
-  async function convertWeth() {
-    const weth = tokenService.getToken(tokens.WETH);
-    const wethBalance = await weth.balanceOf(address);
-
-    if (wethBalance.toNumber() > 0.009) {
-      console.info('Remaining WETH balance is', wethBalance.toString());
-      const withdraw = weth.withdraw(wethBalance.toNumber().toFixed(2));
-      await txMgr.confirm(withdraw);
-      console.info('Withdrew remaining WETH');
-    } else {
-      console.info('No remaining WETH to withdraw');
-    }
-  }
-
-  async function checkWethBalance() {
-    const weth = tokenService.getToken(tokens.WETH);
-    const wethBalance = await weth.balanceOf(address);
-
-    if (wethBalance.toNumber() < 0.01) {
-      console.log(
-        'Current balance is ' + wethBalance.toString() + ', depositing 0.01'
-      );
-      const convert = maker.service('conversion').convertEthToWeth(0.01);
-      await txMgr.confirm(convert);
-    } else {
-      return;
-    }
-  }
-
   beforeAll(async () => {
-    if (!process.env.PRIVATE_KEY && process.env.NETWORK !== 'test') {
-      throw new Error('Please set a private key to run integration tests.');
-    }
+    if (process.env.NETWORK === 'test') snapshotId = await takeSnapshot();
 
     const settings =
       process.env.NETWORK === 'test'
@@ -85,7 +75,7 @@ describe.each([
           };
 
     const preset = useHttp ? 'http' : 'ws';
-    maker = Maker.create(preset, settings);
+    maker = Maker.create(preset, { ...settings, log: false });
 
     await maker.authenticate();
     tokenService = maker.service('token');
@@ -103,6 +93,12 @@ describe.each([
       txo.onMined(() => log(`${label}: mined`));
       txo.onFinalized(() => log(`${label}: confirmed`));
     });
+  });
+
+  afterAll(async () => {
+    await convert('PETH');
+    await convert('WETH');
+    if (process.env.NETWORK === 'test') await restoreSnapshot(snapshotId);
   });
 
   test('can create Maker instance', () => {
@@ -208,8 +204,6 @@ describe.each([
     'can shut a CDP',
     async () => {
       await cdp.shut();
-      await convertPeth();
-      await convertWeth();
       const info = await cdp.getInfo();
       expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
     },

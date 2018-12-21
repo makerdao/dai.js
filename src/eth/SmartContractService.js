@@ -29,11 +29,11 @@ export default class SmartContractService extends PublicService {
     if (!name) name = this.lookupContractName(address);
 
     const web3Service = this.get('web3');
-    const signer = web3Service.get('accounts').hasAccount()
+    const signerOrProvider = web3Service.get('accounts').hasAccount()
       ? web3Service.getEthersSigner()
-      : web3Service.ethersProvider();
+      : web3Service.getEthersSigner().provider;
 
-    const contract = new Contract(address, abi, signer);
+    const contract = new Contract(address, abi, signerOrProvider);
     const txManager = wrap && this.get('transactionManager');
     return wrapContract(contract, name, abi, txManager);
   }
