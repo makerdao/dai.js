@@ -30,32 +30,14 @@ export default class Cdp {
   }
 
   _create() {
-    // Contract created using web3provider engine
     const tubContract = this._smartContractService.getContractByName(
       contracts.SAI_TUB
     );
 
-    const getId = open => {
-      const txObj = this._transactionManager.getTransaction(open);
-      return new Promise(resolve => {
-        txObj.onMined(() => {
-          const log = txObj.receipt.logs[1];
-          resolve(this._web3Service._web3.utils.hexToNumber(log.data));
-        });
-      });
-    };
-
     const promise = (async () => {
       await 0;
-      const open = tubContract.open({
-        metadata: {
-          action: {
-            name: 'open'
-          }
-        },
-        promise
-      });
-      this.id = await getId(open);
+      const txo = await tubContract.open({ promise });
+      this.id = parseInt(txo.receipt.logs[1].data, 16);
       return this;
     })();
 
