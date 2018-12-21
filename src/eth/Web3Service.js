@@ -144,8 +144,6 @@ export default class Web3Service extends PrivateService {
       }
     });
 
-    this._listenBlocks();
-
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
@@ -153,6 +151,7 @@ export default class Web3Service extends PrivateService {
     });
     this._transactionSettings = settings.transactionSettings;
     this._confirmedBlockCount = settings.confirmedBlockCount || 5;
+    this._pollingInterval = settings.pollingInterval || 2000;
   }
 
   async connect() {
@@ -171,6 +170,9 @@ export default class Web3Service extends PrivateService {
 
     // FIXME set up block listening with web3 instead
     this._setUpEthers(this.networkId());
+
+    this._currentBlock = await this._web3.eth.getBlockNumber();
+    this._listenForNewBlocks();
 
     this._installDisconnectCheck();
     await this._initEventPolling();
@@ -219,26 +221,27 @@ export default class Web3Service extends PrivateService {
     return this._currentBlock;
   }
 
-  async _listenBlocks() {
+  _listenForNewBlocks() {
     if (this.usingWebsockets()) {
       this.subscribeNewBlocks(async data => {
-        await this._updateBlockNumber(data.number);
+        this._updateBlockNumber(data.number);
       });
-      this._currentBlock = await this._web3.eth.getBlockNumber();
     } else {
       const updateBlocks = async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
         if (this._currentBlock !== null && blockNumber > this._currentBlock) {
           // If any blocks are not caught, iterate through those that are missed to the newest retrieved
           for (let i = this._currentBlock + 1; i < blockNumber + 1; i++) {
-            await this._updateBlockNumber(i);
+            this._updateBlockNumber(i);
           }
         } else {
-          await this._updateBlockNumber(blockNumber);
+          this._updateBlockNumber(blockNumber);
         }
-        this._interval = setTimeout(updateBlocks, 50);
       };
-      updateBlocks();
+      this._updateBlocksInterval = setInterval(
+        updateBlocks,
+        this._pollingInterval
+      );
     }
   }
 
@@ -285,18 +288,15 @@ export default class Web3Service extends PrivateService {
   _updateBlockNumber(blockNumber) {
     this.get('log').info('New block:', blockNumber);
 
-    return new Promise(resolve => {
-      this._currentBlock = blockNumber;
-      if (this._blockListeners[blockNumber]) {
-        this._blockListeners[blockNumber].forEach(c => c(blockNumber));
-        this._blockListeners[blockNumber] = undefined;
-      }
+    this._currentBlock = blockNumber;
+    if (this._blockListeners[blockNumber]) {
+      this._blockListeners[blockNumber].forEach(c => c(blockNumber));
+      this._blockListeners[blockNumber] = undefined;
+    }
 
-      if (this._blockListeners['*']) {
-        this._blockListeners['*'].forEach(c => c(blockNumber));
-      }
-      resolve();
-    });
+    if (this._blockListeners['*']) {
+      this._blockListeners['*'].forEach(c => c(blockNumber));
+    }
   }
 
   _initEventPolling() {
