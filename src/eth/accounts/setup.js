@@ -83,9 +83,9 @@ function getRpcUrl(providerSettings) {
   const { network, protocol, infuraApiKey, type, url } = providerSettings;
   switch (type) {
     case ProviderType.HTTP:
-      return url;
+      return url ? url : 'http://localhost:2000';
     case ProviderType.WEBSOCKET:
-      return url;
+      return url ? url : 'ws://localhost:2000';
     case ProviderType.INFURA:
       return getInfuraUrl(protocol, network, infuraApiKey);
     default:
