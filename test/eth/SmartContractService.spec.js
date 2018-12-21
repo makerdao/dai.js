@@ -118,22 +118,30 @@ test('parameterized smart contract input with multiple addresses', async () => {
   expect(typeof contract.foo).toBe('function');
 });
 
-test('getContractByName returns contract with a valid signer', async () => {
-  const service = buildTestSmartContractService();
+describe.each([
+  ['with http provider', true],
+  ['with websocket provider', false]
+])('%s', (name, useHttp) => {
+  test('getContractByName returns contract with a valid signer', async () => {
+    const service = buildTestSmartContractService({ useHttp });
 
-  await service.manager().authenticate();
-  const signer = service.get('web3').getEthersSigner();
-  const contract = service.getContractByName(contracts.SAI_TOP);
-  expect(contract.signer).toBe(signer);
-});
+    await service.manager().authenticate();
+    const signer = service.get('web3').getEthersSigner();
+    const contract = service.getContractByName(contracts.SAI_TOP);
+    // checking signer directly causes issues with one of its object properties
+    expect(contract.signer.provider).toBe(signer.provider);
+  });
 
-test('getContractByName returns contract that can call constant functions even without accounts', async () => {
-  const service = buildTestSmartContractService();
-  service.get('web3').get('accounts').hasAccount = jest.fn(() => false);
+  test('getContractByName returns contract that can call constant functions even without accounts', async () => {
+    const service = buildTestSmartContractService({ useHttp });
+    service.get('web3').get('accounts').hasAccount = jest.fn(() => false);
 
-  await service.manager().authenticate();
-  const contract = service.getContractByName(contracts.SAI_TOP);
-  const readOnlyValue = await contract.gem();
-  expect(contract.signer).toBeNull();
-  expect(readOnlyValue).toBeTruthy();
+    await service.manager().authenticate();
+    const contract = service.getContractByName(contracts.SAI_TOP);
+    const readOnlyValue = await contract.gem();
+    expect(contract.signer).toBeNull();
+    expect(readOnlyValue.toLowerCase()).toEqual(
+      service.getContractAddressByName(tokens.WETH)
+    );
+  });
 });
