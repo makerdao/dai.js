@@ -1,8 +1,11 @@
 import PrivateService from '../core/PrivateService';
-import { promisify, promisifyMethods, getNetworkName } from '../utils';
+import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
+import ProviderType from './web3/ProviderType';
+import makeSigner from './web3/ShimEthersSigner';
+import getMatchingEvent from './web3/LogEvent';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -20,7 +23,8 @@ export default class Web3Service extends PrivateService {
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     this._defaultEmitter = null;
     this._transactionSettings = null;
-
+    this._blockSub = null;
+    this._interval = null;
     Web3ServiceList.push(this);
   }
 
@@ -43,7 +47,27 @@ export default class Web3Service extends PrivateService {
   }
 
   ethersProvider() {
+    try {
+      throw new Error('hi');
+    } catch (err) {
+      console.warn(
+        'using ethers provider is deprecated...\n' +
+          err.stack
+            .split('\n')
+            .slice(1, 7)
+            .join('\n')
+      );
+    }
     return this._ethersProvider;
+  }
+
+  getEthersSigner() {
+    if (this.usingWebsockets()) {
+      if (!this._ethersSigner) this._ethersSigner = makeSigner(this);
+      return this._ethersSigner;
+    } else {
+      return this._ethersProvider.getSigner();
+    }
   }
 
   web3Provider() {
@@ -54,6 +78,12 @@ export default class Web3Service extends PrivateService {
     return this._transactionSettings;
   }
 
+  usingWebsockets() {
+    return (
+      this._serviceManager._settings.provider.type === ProviderType.WEBSOCKET
+    );
+  }
+
   confirmedBlockCount() {
     return this._confirmedBlockCount;
   }
@@ -62,27 +92,60 @@ export default class Web3Service extends PrivateService {
     return new this._web3.eth.Contract(abi, address);
   }
 
-  async initialize(settings) {
+  subscribeNewBlocks(cb) {
+    this._blockSub = this.subscribe('newBlockHeaders').on(
+      'data',
+      blockHeader => {
+        cb(blockHeader);
+      }
+    );
+  }
+
+  unsubscribeNewBlocks() {
+    this._blockSub.unsubscribe((err, success) => {
+      if (!success) throw new Error(err);
+    });
+  }
+
+  waitForMatchingEvent(info, event, predicate = () => true, timeout = 30000) {
+    return getMatchingEvent(this._web3, info, event, timeout, predicate);
+  }
+
+  initialize(settings) {
     this.get('log').info('Web3 is initializing...');
     this._defaultEmitter = this.get('event');
 
     this._web3 = new Web3();
     this._web3.setProvider(this.get('accounts').getProvider());
 
-    // TODO: is this still necessary? it seems confusing to have methods
-    // that look like web3.eth methods but behave differently
-    this.eth = {};
     Object.assign(
-      this.eth,
-      promisifyMethods(this._web3.eth, [
-        'getAccounts',
+      this,
+      [
         'estimateGas',
-        'getBlock',
-        'sendTransaction',
+        'getAccounts',
         'getBalance',
-        'getPastLogs'
-      ])
+        'getBlock',
+        'getPastLogs',
+        'getTransaction',
+        'getTransactionReceipt'
+      ].reduce((acc, method) => {
+        acc[method] = (...args) => this._web3.eth[method](...args);
+        return acc;
+      }, {}),
+      {
+        subscribe: (...args) => this._web3.eth.subscribe(...args)
+      }
     );
+
+    this.eth = new Proxy(this, {
+      get(target, key) {
+        console.warn(`use .${key} instead of .eth.${key}`);
+        return target[key];
+      }
+    });
+
+    this._listenBlocks();
+
     this._setStatusTimerDelay(settings.statusTimerDelay);
     this._installCleanUpHooks();
     this._defaultEmitter.emit('web3/INITIALIZED', {
@@ -105,7 +168,10 @@ export default class Web3Service extends PrivateService {
     if (!this._info.node.includes('MetaMask')) {
       this._info.whisper = this._web3.shh;
     }
+
+    // FIXME set up block listening with web3 instead
     this._setUpEthers(this.networkId());
+
     this._installDisconnectCheck();
     await this._initEventPolling();
     this._defaultEmitter.emit('web3/CONNECTED', {
@@ -123,6 +189,28 @@ export default class Web3Service extends PrivateService {
     this._installDeauthenticationCheck();
   }
 
+  /*
+    sendTransaction in web3 1.0 behaves differently from its counterpart in
+    0.2x.x. it doesn't resolve until the transaction has a receipt, and throws an
+    error if the receipt indicates that the transaction was reverted.
+    the setup below emulates the old behavior, because TransactionObject still
+    expects it. if there is an error due to the transaction being reverted, it
+    will be ignored, because the promise will have already resolved.
+
+    this can (and should) be refactored when we drop support for HTTP providers.
+
+    https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethsendtransaction
+    https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction
+  */
+  sendTransaction(...args) {
+    return new Promise((resolve, reject) => {
+      this._web3.eth
+        .sendTransaction(...args)
+        .on('transactionHash', resolve)
+        .on('error', reject);
+    });
+  }
+
   getNetwork() {
     return this._info.network;
   }
@@ -131,12 +219,48 @@ export default class Web3Service extends PrivateService {
     return this._currentBlock;
   }
 
+  async _listenBlocks() {
+    if (this.usingWebsockets()) {
+      this.subscribeNewBlocks(async data => {
+        await this._updateBlockNumber(data.number);
+      });
+      this._currentBlock = await this._web3.eth.getBlockNumber();
+    } else {
+      const updateBlocks = async () => {
+        const blockNumber = await this._web3.eth.getBlockNumber();
+        if (this._currentBlock !== null && blockNumber > this._currentBlock) {
+          // If any blocks are not caught, iterate through those that are missed to the newest retrieved
+          for (let i = this._currentBlock + 1; i < blockNumber + 1; i++) {
+            await this._updateBlockNumber(i);
+          }
+        } else {
+          await this._updateBlockNumber(blockNumber);
+        }
+        this._interval = setTimeout(updateBlocks, 50);
+      };
+      updateBlocks();
+    }
+  }
+
   onNewBlock(callback) {
     if (!this._blockListeners['*']) {
       this._blockListeners['*'] = [];
     }
 
     this._blockListeners['*'].push(callback);
+  }
+
+  onBlock(number, callback) {
+    // schedule a function to execute on a block ahead in time
+    if (number < this.blockNumber()) {
+      throw new Error('cannot schedule a callback back in time');
+    }
+
+    if (!this._blockListeners[number]) {
+      this._blockListeners[number] = [];
+    }
+
+    this._blockListeners[number].push(callback);
   }
 
   async waitForBlockNumber(blockNumber) {
@@ -160,28 +284,41 @@ export default class Web3Service extends PrivateService {
 
   _updateBlockNumber(blockNumber) {
     this.get('log').info('New block:', blockNumber);
-    this._currentBlock = blockNumber;
 
-    if (this._blockListeners[blockNumber]) {
-      this._blockListeners[blockNumber].forEach(c => c(blockNumber));
-      this._blockListeners[blockNumber] = undefined;
-    }
+    return new Promise(resolve => {
+      this._currentBlock = blockNumber;
+      if (this._blockListeners[blockNumber]) {
+        this._blockListeners[blockNumber].forEach(c => c(blockNumber));
+        this._blockListeners[blockNumber] = undefined;
+      }
 
-    if (this._blockListeners['*']) {
-      this._blockListeners['*'].forEach(c => c(blockNumber));
-    }
+      if (this._blockListeners['*']) {
+        this._blockListeners['*'].forEach(c => c(blockNumber));
+      }
+      resolve();
+    });
   }
 
   _initEventPolling() {
     this.onNewBlock(this.get('event').ping);
   }
 
+  _removeBlockUpdates() {
+    if (this.usingWebsockets()) {
+      this.unsubscribeNewBlocks();
+    } else {
+      clearTimeout(this._interval);
+    }
+  }
+
   _installCleanUpHooks() {
     this.manager().onDisconnected(() => {
+      this._removeBlockUpdates();
       this.get('timer').disposeTimer(TIMER_CONNECTION);
     });
 
     this.manager().onDeauthenticated(() => {
+      this._removeBlockUpdates();
       this.get('timer').disposeTimer(TIMER_AUTHENTICATION);
     });
   }
@@ -196,13 +333,6 @@ export default class Web3Service extends PrivateService {
       this._web3.currentProvider,
       { name: getNetworkName(chainId), chainId: chainId }
     );
-
-    provider.on('block', num => {
-      if (this._currentBlock !== num) {
-        this._updateBlockNumber(num);
-      }
-    });
-    this.manager().onDisconnected(() => provider.removeAllListeners('block'));
 
     return provider;
   }

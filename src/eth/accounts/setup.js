@@ -1,20 +1,58 @@
 import ProviderType from '../web3/ProviderType';
 import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
+import WebsocketSubprovider from 'web3-provider-engine/dist/es5/subproviders/websocket';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
+import SubscriptionSubprovider from 'web3-provider-engine/dist/es5/subproviders/subscriptions';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
 export async function setupEngine(settings) {
-  const { provider: providerSettings } = settings.web3;
-  const engine = new Web3ProviderEngine();
+  const { provider: providerSettings, pollingInterval } = settings.web3;
+
+  const engine = new Web3ProviderEngine({
+    pollingInterval: pollingInterval ? pollingInterval : 2000
+  });
   const result = { engine };
 
-  if (providerSettings.type === ProviderType.BROWSER || !providerSettings) {
-    result.provider = await getBrowserProvider();
-  } else {
-    const rpcUrl = getRpcUrl(providerSettings);
-    result.provider = new RpcSource({ rpcUrl });
-  }
+  const getHttpProvider = (settings = {}) => {
+    const rpcUrl = getRpcUrl({ ...providerSettings, ...settings });
+    return new RpcSource({ rpcUrl });
+  };
 
+  const getWebsocketProvider = () => {
+    const rpcUrl = getRpcUrl(providerSettings);
+    const subscriptionProvider = new SubscriptionSubprovider();
+    subscriptionProvider.on('data', (err, notification) => {
+      engine.emit('data', err, notification);
+    });
+    engine.addProvider(subscriptionProvider);
+    return new WebsocketSubprovider({ rpcUrl });
+  };
+
+  switch (providerSettings.type) {
+    case ProviderType.BROWSER:
+      result.provider = await getBrowserProvider();
+      break;
+    case ProviderType.WEBSOCKET:
+      result.provider = getWebsocketProvider();
+      break;
+    case ProviderType.HTTP:
+      result.provider = getHttpProvider();
+      break;
+    case ProviderType.INFURA:
+      result.provider =
+        providerSettings.protocol === 'wss'
+          ? getWebsocketProvider()
+          : getHttpProvider();
+      break;
+    case ProviderType.TEST:
+      result.provider = getHttpProvider({
+        type: ProviderType.HTTP,
+        url: 'http://localhost:2000'
+      });
+      break;
+    default:
+      throw new Error('provider type must be defined');
+  }
   engine.addProvider(result.provider);
   return result;
 }
@@ -40,15 +78,22 @@ export async function getBrowserProvider() {
   }
 }
 
+function getInfuraUrl(protocol = 'https', network, infuraApiKey) {
+  let url = `${protocol}://${network}.infura.io`;
+  url += protocol === 'wss' ? '/ws' : '';
+  url += infuraApiKey ? `/${infuraApiKey}` : '';
+  return url;
+}
+
 function getRpcUrl(providerSettings) {
-  const { network, infuraApiKey, type, url } = providerSettings;
+  const { network, protocol, infuraApiKey, type, url } = providerSettings;
   switch (type) {
     case ProviderType.HTTP:
       return url;
+    case ProviderType.WEBSOCKET:
+      return url;
     case ProviderType.INFURA:
-      return `https://${network}.infura.io/${infuraApiKey || ''}`;
-    case ProviderType.TEST:
-      return 'http://127.1:2000';
+      return getInfuraUrl(protocol, network, infuraApiKey);
     default:
       throw new Error('Invalid web3 provider type: ' + type);
   }

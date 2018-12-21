@@ -2,8 +2,8 @@
   "web3": {
     "provider": {
       "type": "INFURA",
-      "network": "kovan",
-      "protocol": "wss"
+      "network": "mainnet",
+      "protocol": "https"
     },
     "transactionSettings": {
       "gasLimit": 4000000

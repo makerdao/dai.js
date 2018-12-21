@@ -69,9 +69,7 @@ export default class TransactionManager extends PublicService {
     return this._createTransactionObject(
       (async () => {
         const txOptions = await this._buildTransactionOptions(data);
-        return {
-          hash: await this.get('web3').eth.sendTransaction(txOptions)
-        };
+        return this.get('web3').sendTransaction(txOptions);
       })(),
       options
     );
@@ -88,7 +86,11 @@ export default class TransactionManager extends PublicService {
   async confirm(promise, count) {
     await promise;
     const txs = this._tracker.getAll(uniqueId(promise));
-    return Promise.all(txs.map(tx => tx.confirm(count)));
+    const confirms = Promise.all(txs.map(tx => tx.confirm(count))).then(() => {
+      // remove any txs from the tracker when confirmed
+      this._tracker.clearExpiredTransactions();
+    });
+    return confirms;
   }
 
   isMined(promise) {

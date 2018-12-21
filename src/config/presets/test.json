@@ -1,7 +1,8 @@
 {
   "web3": {
     "provider": {
-      "type": "TEST"
+      "type": "HTTP",
+      "url": "http://localhost:2000"
     },
     "transactionSettings": {
       "gasLimit": 4000000
