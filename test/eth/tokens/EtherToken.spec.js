@@ -58,93 +58,78 @@ test('approve and approveUnlimited should resolve to true', done => {
     });
 });
 
-test(
-  'ether transfer should move transferValue from sender to receiver',
-  done => {
-    const ethereumTokenService = buildTestEthereumTokenService(),
-      receiver = TestAccountProvider.nextAddress();
+test('ether transfer should move transferValue from sender to receiver', done => {
+  const ethereumTokenService = buildTestEthereumTokenService(),
+    receiver = TestAccountProvider.nextAddress();
 
-    let sender = null,
-      token = null,
-      senderBalance = null,
-      receiverBalance = null;
+  let sender = null,
+    token = null,
+    senderBalance = null,
+    receiverBalance = null;
 
-    ethereumTokenService
-      .manager()
-      .authenticate()
-      .then(() => {
-        sender = ethereumTokenService.get('web3').currentAccount();
-        token = ethereumTokenService.getToken(ETH);
-        return Promise.all([
-          token.balanceOf(sender),
-          token.balanceOf(receiver)
-        ]);
-      })
-      .then(balances => {
-        senderBalance = ETH(balances[0]);
-        receiverBalance = ETH(balances[1]);
-        return token.transfer(receiver, '0.1');
-      })
-      .then(() =>
-        Promise.all([token.balanceOf(sender), token.balanceOf(receiver)])
-      )
-      .then(balances => {
-        const newSenderBalance = ETH(balances[0]),
-          newReceiverBalance = ETH(balances[1]);
-        expect(newReceiverBalance.minus(0.1).eq(receiverBalance)).toBeTruthy();
-        // sender also pays tx fee, so their balance is lower
-        expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
-          senderBalance.toNumber(),
-          3
-        );
-        done();
-      });
-  }
-);
+  ethereumTokenService
+    .manager()
+    .authenticate()
+    .then(() => {
+      sender = ethereumTokenService.get('web3').currentAccount();
+      token = ethereumTokenService.getToken(ETH);
+      return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
+    })
+    .then(balances => {
+      senderBalance = ETH(balances[0]);
+      receiverBalance = ETH(balances[1]);
+      return token.transfer(receiver, '0.1');
+    })
+    .then(() =>
+      Promise.all([token.balanceOf(sender), token.balanceOf(receiver)])
+    )
+    .then(balances => {
+      const newSenderBalance = ETH(balances[0]),
+        newReceiverBalance = ETH(balances[1]);
+      expect(newReceiverBalance.minus(0.1).eq(receiverBalance)).toBeTruthy();
+      // sender also pays tx fee, so their balance is lower
+      expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
+        senderBalance.toNumber(),
+        3
+      );
+      done();
+    });
+});
 
-test(
-  'ether transferFrom should move transferValue from sender to receiver',
-  done => {
-    const ethereumTokenService = buildTestEthereumTokenService(),
-      receiver = TestAccountProvider.nextAddress();
+test('ether transferFrom should move transferValue from sender to receiver', done => {
+  const ethereumTokenService = buildTestEthereumTokenService(),
+    receiver = TestAccountProvider.nextAddress();
 
-    let sender = null,
-      token = null,
-      senderBalance = null,
-      receiverBalance = null;
+  let sender = null,
+    token = null,
+    senderBalance = null,
+    receiverBalance = null;
 
-    ethereumTokenService
-      .manager()
-      .authenticate()
-      .then(() => {
-        sender = ethereumTokenService.get('web3').currentAccount();
-        token = ethereumTokenService.getToken(ETH);
-        return Promise.all([
-          token.balanceOf(sender),
-          token.balanceOf(receiver)
-        ]);
-      })
-      .then(balances => {
-        senderBalance = ETH(balances[0]);
-        receiverBalance = ETH(balances[1]);
-        return token.transferFrom(sender, receiver, '0.1');
-      })
-      .then(() => {
-        return Promise.all([
-          token.balanceOf(sender),
-          token.balanceOf(receiver)
-        ]);
-      })
-      .then(balances => {
-        const newSenderBalance = ETH(balances[0]),
-          newReceiverBalance = ETH(balances[1]);
-        expect(newReceiverBalance.minus(0.1).eq(receiverBalance)).toBeTruthy();
-        // sender also pays tx fee, so their balance is lower
-        expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
-          senderBalance.toNumber(),
-          3
-        );
-        done();
-      });
-  }
-);
+  ethereumTokenService
+    .manager()
+    .authenticate()
+    .then(() => {
+      sender = ethereumTokenService.get('web3').currentAccount();
+      token = ethereumTokenService.getToken(ETH);
+      return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
+    })
+    .then(balances => {
+      senderBalance = ETH(balances[0]);
+      receiverBalance = ETH(balances[1]);
+      return token.transferFrom(sender, receiver, '0.1');
+    })
+    .then(() => {
+      return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
+    })
+    .then(balances => {
+      const newSenderBalance = ETH(balances[0]),
+        newReceiverBalance = ETH(balances[1]);
+      expect(newReceiverBalance.minus(0.1).eq(receiverBalance)).toBeTruthy();
+      // sender also pays tx fee, so their balance is lower
+      expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
+        senderBalance.toNumber(),
+        3
+      );
+      done();
+    });
+});
