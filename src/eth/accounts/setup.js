@@ -13,8 +13,8 @@ export async function setupEngine(settings) {
   });
   const result = { engine };
 
-  const getHttpProvider = () => {
-    const rpcUrl = getRpcUrl(providerSettings);
+  const getHttpProvider = (settings = {}) => {
+    const rpcUrl = getRpcUrl({ ...providerSettings, ...settings });
     return new RpcSource({ rpcUrl });
   };
 
@@ -44,6 +44,12 @@ export async function setupEngine(settings) {
           ? getWebsocketProvider()
           : getHttpProvider();
       break;
+    case ProviderType.TEST:
+      result.provider = getHttpProvider({
+        type: ProviderType.HTTP,
+        url: 'http://localhost:2000'
+      });
+      break;
     default:
       throw new Error('provider type must be defined');
   }
@@ -72,10 +78,10 @@ export async function getBrowserProvider() {
   }
 }
 
-function getInfuraUrl(protocol, network, infuraApiKey) {
+function getInfuraUrl(protocol = 'https', network, infuraApiKey) {
   let url = `${protocol}://${network}.infura.io`;
   url += protocol === 'wss' ? '/ws' : '';
-  url += infuraApiKey ? '/v3/infuraApiKey' : '';
+  url += infuraApiKey ? `/${infuraApiKey}` : '';
   return url;
 }
 
@@ -83,9 +89,9 @@ function getRpcUrl(providerSettings) {
   const { network, protocol, infuraApiKey, type, url } = providerSettings;
   switch (type) {
     case ProviderType.HTTP:
-      return url ? url : 'http://localhost:2000';
+      return url;
     case ProviderType.WEBSOCKET:
-      return url ? url : 'ws://localhost:2000';
+      return url;
     case ProviderType.INFURA:
       return getInfuraUrl(protocol, network, infuraApiKey);
     default:
