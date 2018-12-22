@@ -3,11 +3,7 @@ import TestAccountProvider from './helpers/TestAccountProvider';
 const Maker2 = require('../src/index');
 
 function createMaker(privateKey) {
-  return Maker.create('ws', {
-    url: 'ws://localhost:2000',
-    privateKey,
-    log: false
-  });
+  return Maker.create('test', { privateKey, log: false });
 }
 
 test('import vs require', () => {

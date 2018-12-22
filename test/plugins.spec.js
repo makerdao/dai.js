@@ -10,10 +10,7 @@ test('function plugin', () => {
     expect(maker).toBeInstanceOf(Maker);
   });
 
-  Maker.create('ws', {
-    plugins: [testPlugin],
-    autoAuthenticate: false
-  });
+  Maker.create('test', { plugins: [testPlugin], autoAuthenticate: false });
   expect(testPlugin).toBeCalled();
 });
 
@@ -30,7 +27,7 @@ test('object plugin with addConfig and afterCreate', () => {
     })
   };
 
-  Maker.create('ws', {
+  Maker.create('test', {
     plugins: [testPlugin],
     autoAuthenticate: false,
     log: false
@@ -75,7 +72,7 @@ test('add options, merging correctly', () => {
     })
   };
 
-  Maker.create('ws', {
+  Maker.create('test', {
     plugins: [testPlugin],
     additionalServices: ['mock1'],
     mock1: MockService1,
@@ -151,7 +148,7 @@ test('do not allow collisions in smartContract.addContracts', () => {
   };
 
   expect(() => {
-    Maker.create('ws', {
+    Maker.create('test', {
       autoAuthenticate: false,
       plugins: [testPlugin],
       smartContract: {
@@ -194,7 +191,7 @@ test('add options when smartContract.addContracts is not set on target', () => {
     })
   };
 
-  Maker.create('ws', {
+  Maker.create('test', {
     plugins: [testPlugin],
     autoAuthenticate: false,
     smartContract: {}
@@ -210,7 +207,7 @@ test('add options when smartContract.addContracts is not set on source', () => {
     })
   };
 
-  Maker.create('ws', {
+  Maker.create('test', {
     plugins: [testPlugin],
     additionalServices: ['mock1'],
     autoAuthenticate: false,
