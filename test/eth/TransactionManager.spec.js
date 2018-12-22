@@ -20,7 +20,8 @@ function buildTestServices() {
       },
       transactionSettings: {
         gasLimit: 1234567
-      }
+      },
+      pollingInterval: 50
     }
   });
   const smartContract = container.service('smartContract');
@@ -131,6 +132,7 @@ describe('lifecycle hooks', () => {
   });
 
   beforeEach(async () => {
+    jest.setTimeout(15000);
     open = service.openCdp();
     cdp = await open;
   });
@@ -227,13 +229,15 @@ describe('lifecycle hooks', () => {
     // after calling confirm, Tx state will become 'finalized' and be deleted from list.
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
-    expect(txMgr._tracker._transactions).not.toHaveProperty(openId);
+    txMgr._tracker.clearExpiredTransactions();
+    expect(Object.keys(txMgr._tracker._transactions)).not.toContain(openId);
     expect(size(txMgr._tracker._listeners)).toEqual(
       size(txMgr._tracker._transactions)
     );
   });
 
   test('clear Tx when state is error and older than 5 minutes', async () => {
+    expect.assertions(4);
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
     const lock = cdp.lockEth(0.01);
@@ -258,8 +262,8 @@ describe('lifecycle hooks', () => {
     const minedDate = new Date(drawTx._timeStampMined);
     drawTx._timeStampMined = new Date(minedDate.getTime() - 600000);
 
-    await mineBlocks(service);
-    expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
+    txMgr._tracker.clearExpiredTransactions();
+    expect(Object.keys(txMgr._tracker._transactions)).not.toContain(drawId);
   });
 
   test('finalized Tx is set to correct state without without requiring a call to confirm()', async () => {

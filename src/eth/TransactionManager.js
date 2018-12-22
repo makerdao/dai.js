@@ -86,11 +86,7 @@ export default class TransactionManager extends PublicService {
   async confirm(promise, count) {
     await promise;
     const txs = this._tracker.getAll(uniqueId(promise));
-    const confirms = Promise.all(txs.map(tx => tx.confirm(count))).then(() => {
-      // remove any txs from the tracker when confirmed
-      this._tracker.clearExpiredTransactions();
-    });
-    return confirms;
+    return Promise.all(txs.map(tx => tx.confirm(count)));
   }
 
   isMined(promise) {
