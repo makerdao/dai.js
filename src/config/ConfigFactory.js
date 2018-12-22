@@ -1,3 +1,4 @@
+import test from './presets/test.json';
 import kovan from './presets/kovan.json';
 import kovanHttp from './presets/kovanHttp.json';
 import http from './presets/http.json';
@@ -41,6 +42,9 @@ function loadPreset(name) {
 
   let preset;
   switch (name) {
+    case 'test':
+      preset = test;
+      break;
     case 'http':
       preset = http;
       break;
