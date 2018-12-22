@@ -99,10 +99,10 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
 let service, txMgr, priceService, open, cdp;
 
 const makeListener = (label, state) =>
-      jest.fn(tx => {
-        const { contract, method } = tx.metadata;
-        log(`${label}: ${contract}.${method}: ${state}`);
-      });
+  jest.fn(tx => {
+    const { contract, method } = tx.metadata;
+    log(`${label}: ${contract}.${method}: ${state}`);
+  });
 
 const makeHandlers = label => ({
   initialized: makeListener(label, 'initialized'),
@@ -265,9 +265,9 @@ describe('lifecycle hooks', () => {
 
   test('return error message with error callback', async () => {
     const makeListener = () =>
-          jest.fn((tx, err) => {
-            log('Tx error:', err);
-          });
+      jest.fn((tx, err) => {
+        log('Tx error:', err);
+      });
 
     const makeHandlers = () => ({
       error: makeListener()
@@ -294,4 +294,3 @@ describe('lifecycle hooks', () => {
     }
   });
 });
-

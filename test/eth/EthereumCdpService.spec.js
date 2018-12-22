@@ -52,7 +52,7 @@ test('can calculate system collateralization', async () => {
   await cdp.drawDai(1);
   const scC = await cdpService.getSystemCollateralization();
   expect(scC).toBeLessThan(scB);
-}, 20000);
+});
 
 test('openCdp returns the transaction object', async () => {
   const txo = cdpService.openCdp();
