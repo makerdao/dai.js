@@ -8,6 +8,6 @@ test('accepts a constructor', () => {
 
 test('accepts a constructor + settings pair', () => {
   class FakeService {}
-  const config = standardizeConfig('timer', [FakeService, {foo: 3}]);
-  expect(config).toEqual([FakeService, {foo: 3}]);
+  const config = standardizeConfig('timer', [FakeService, { foo: 3 }]);
+  expect(config).toEqual([FakeService, { foo: 3 }]);
 });
