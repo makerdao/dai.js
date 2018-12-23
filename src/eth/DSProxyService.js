@@ -3,6 +3,7 @@ import TransactionObject from './TransactionObject';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
 import { contractInfo } from '../../contracts/networks';
+import { ETH } from '../eth/Currency';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {

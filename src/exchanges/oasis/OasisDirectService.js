@@ -1,11 +1,19 @@
 import PrivateService from '../../core/PrivateService';
-import { getCurrency } from '../../eth/Currency';
+import { getCurrency, DAI } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { contractInfo } from '../../../contracts/networks';
 
 export default class OasisDirectService extends PrivateService {
   constructor(name = 'exchange') {
-    super(name, ['proxy', 'smartContract', 'token', 'cdp', 'web3']);
+    super(name, [
+      'proxy',
+      'smartContract',
+      'token',
+      'cdp',
+      'web3',
+      'transactionManager',
+      'allowance'
+    ]);
   }
 
   _oasisDirect() {
@@ -35,6 +43,8 @@ export default class OasisDirectService extends PrivateService {
 
   async _trade() {
     const params = await this._buildTradeParams();
+    // await this.get('allowance').requireAllowance(DAI, this._oasisDirect().address);
+    console.log(DAI.wei(params[2]).toNumber());
     return this._oasisDirect()[this._operation](...params, { dsProxy: true });
   }
 
@@ -76,14 +86,15 @@ export default class OasisDirectService extends PrivateService {
 
   async _buildTradeParams() {
     const limit = this._operation.includes('sell')
-      ? await this._minBuyAmount('0.1')
+      ? await this._minBuyAmount('0.01')
       : await this._minPayAmount();
+    console.log(this._value);
     return [
       this._getContractAddress('MAKER_OTC'),
       this._getContractAddress(this._payToken),
       this._valueForContract(this._value, this._payToken),
       this._getContractAddress(this._buyToken),
-      this._valueForContract(limit, this._buyToken)
+      this._valueForContract('0', this._buyToken)
     ];
   }
 
@@ -106,7 +117,7 @@ export default class OasisDirectService extends PrivateService {
   // }
 
   _valueForContract(amount, symbol) {
-    return getCurrency(amount, symbol).toEthersBigNumber('wei');
+    return getCurrency(amount, DAI).toEthersBigNumber('wei');
   }
 
   async getBalance(token) {

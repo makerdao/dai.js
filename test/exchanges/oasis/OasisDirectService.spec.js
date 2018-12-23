@@ -4,8 +4,9 @@ import TestAccountProvider from '../../helpers/TestAccountProvider';
 import addresses from '../../../contracts/addresses/testnet.json';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
 import Maker from '../../../src/index';
-import { DAI, ETH } from '../../../src/eth/Currency';
+import { DAI, ETH, MKR, WETH } from '../../../src/eth/Currency';
 import { transferMkr } from '../../helpers/proxyHelpers';
+import { OasisSellOrder } from '../../../src/exchanges/oasis/OasisOrder';
 
 let service, proxyAccount, maker;
 
@@ -112,7 +113,38 @@ describe('trade with existing dsproxy', () => {
 
   // I'm focusing on making this one work first
   test('sell all amount', async () => {
-    await service.sellAllAmount('DAI', 'MKR', '0.1');
+    // await createDaiAndPlaceLimitOrder(service);
+    console.log(proxy());
+    await service.get('allowance').requireAllowance(DAI, proxy());
+    const dai = service.get('token').getToken('DAI');
+    const mkr = service.get('token').getToken('MKR');
+    const weth = service.get('token').getToken('WETH');
+    const otc = service.get('smartContract').getContractByName('MAKER_OTC');
+    let tx;
+    try {
+      const daiBalance = await dai.balanceOf(
+        service.get('web3').currentAccount()
+      );
+      const mkrBalance = await mkr.balanceOf(
+        service.get('web3').currentAccount()
+      );
+      console.log(DAI(daiBalance).toString());
+      console.log(MKR(mkrBalance).toString());
+      console.log(service.get('web3').currentAccount());
+      // await dai.transfer(proxy(), '0.01');
+      // tx = await OasisSellOrder.build(
+      //   otc,
+      //   'sellAllAmount',
+      //   [dai.address(), service._valueForContract('0.01'), weth.address(), service._valueForContract('0')],
+      //   service.get('transactionManager'),
+      //   WETH
+      // );
+      tx = await service.sellAllAmount('DAI', 'MKR', '0.01');
+      // tx = await otc.sellAllAmount(dai.address(), service._valueForContract(0.01, 'eth'), weth.address(), service._valueForContract(0, 'eth') );
+    } catch (err) {
+      console.error(err);
+    }
+    console.log(tx);
   });
 
   xtest(
