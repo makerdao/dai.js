@@ -1,7 +1,8 @@
 import PrivateService from '../../core/PrivateService';
-import { getCurrency, DAI } from '../../eth/Currency';
+import { getCurrency, DAI, MKR, WETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { contractInfo } from '../../../contracts/networks';
+import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
 export default class OasisDirectService extends PrivateService {
   constructor(name = 'exchange') {
@@ -39,6 +40,27 @@ export default class OasisDirectService extends PrivateService {
     this._payToken = token;
     this._value = value;
     this._buyToken = 'WETH';
+  }
+
+  async sell(sellToken, buyToken, sellAmount, minFillAmount = 0) {
+    // oasis proxy
+    // method
+    // [sellToken, sellAmount, buyToken, minFillAmount]
+    // txManager
+    // buy currency object
+    const params = await this._buildTradeParams(
+      sellToken,
+      sellAmount,
+      buyToken,
+      minFillAmount
+    );
+    return OasisSellOrder.build(
+      this._oasisDirect(),
+      'sellAllAmount',
+      params,
+      this.get('transactionManager'),
+      WETH
+    );
   }
 
   async _trade() {
@@ -84,17 +106,17 @@ export default class OasisDirectService extends PrivateService {
     );
   }
 
-  async _buildTradeParams() {
-    const limit = this._operation.includes('sell')
-      ? await this._minBuyAmount('0.01')
-      : await this._minPayAmount();
-    console.log(this._value);
+  async _buildTradeParams(sellToken, sellAmount, buyToken, minFillAmount) {
+    // const limit = this._operation.includes('sell')
+    //   ? await this._minBuyAmount('0.01')
+    //   : await this._minPayAmount();
+    console.log(buyToken);
     return [
       this._getContractAddress('MAKER_OTC'),
-      this._getContractAddress(this._payToken),
-      this._valueForContract(this._value, this._payToken),
-      this._getContractAddress(this._buyToken),
-      this._valueForContract('0', this._buyToken)
+      this._getContractAddress(sellToken),
+      this._valueForContract(sellAmount),
+      this._getContractAddress(buyToken),
+      this._valueForContract('0')
     ];
   }
 

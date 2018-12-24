@@ -139,7 +139,8 @@ describe('trade with existing dsproxy', () => {
       //   service.get('transactionManager'),
       //   WETH
       // );
-      tx = await service.sellAllAmount('DAI', 'MKR', '0.01');
+      tx = await service.sell('DAI', 'WETH', '0.01');
+      // tx = await service.sellAllAmount('DAI', 'MKR', '0.01');
       // tx = await otc.sellAllAmount(dai.address(), service._valueForContract(0.01, 'eth'), weth.address(), service._valueForContract(0, 'eth') );
     } catch (err) {
       console.error(err);

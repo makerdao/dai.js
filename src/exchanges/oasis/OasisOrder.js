@@ -19,7 +19,10 @@ export default class OasisOrder {
     this._txMgr = transactionManager;
     const promise = (async () => {
       await 0;
-      const txo = await contract[method](...[...args, { promise }]);
+      // const txo = await contract[method](...args, { dsProxy: true });
+      const txo = await contract[method](
+        ...[...args, { dsProxy: true, promise }]
+      );
       this._parseLogs(txo.receipt.logs);
       return this;
     })();
@@ -40,7 +43,6 @@ export default class OasisOrder {
         e.topics[0].toLowerCase() === topic.toLowerCase() &&
         e.address.toLowerCase() === this._contract.address.toLowerCase()
     );
-
     const total = receiptEvents.reduce((acc, event) => {
       const parsedLog = LogTrade.parse(event.data);
       return acc.add(parsedLog[this._logKey]);
