@@ -14,9 +14,10 @@ export default class OasisOrder {
     return this._txMgr.getTransaction(this.promise).timestamp();
   }
 
-  transact(contract, method, args, transactionManager) {
+  transact(contract, method, args, transactionManager, otc) {
     this._contract = contract;
     this._txMgr = transactionManager;
+    this._otc = otc;
     const promise = (async () => {
       await 0;
       // const txo = await contract[method](...args, { dsProxy: true });
@@ -31,7 +32,8 @@ export default class OasisOrder {
   }
 
   _parseLogs(logs) {
-    const { LogTrade } = this._contract.interface.events;
+    const contract = this._otc ? this._otc : this._contract;
+    const { LogTrade } = contract.interface.events;
 
     // TODO convert string to hex without web3
     const topic = utils.keccak256(
@@ -72,9 +74,16 @@ export class OasisSellOrder extends OasisOrder {
     this._unit = currency;
   }
 
-  static build(contract, method, args, transactionManager, currency) {
+  static build(
+    contract,
+    method,
+    args,
+    transactionManager,
+    currency,
+    otc = null
+  ) {
     const order = new OasisSellOrder(currency);
-    order.transact(contract, method, args, transactionManager);
+    order.transact(contract, method, args, transactionManager, otc);
     return order.promise;
   }
 }

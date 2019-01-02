@@ -43,11 +43,6 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async sell(sellToken, buyToken, sellAmount, minFillAmount = 0) {
-    // oasis proxy
-    // method
-    // [sellToken, sellAmount, buyToken, minFillAmount]
-    // txManager
-    // buy currency object
     const params = await this._buildTradeParams(
       sellToken,
       sellAmount,
@@ -59,7 +54,8 @@ export default class OasisDirectService extends PrivateService {
       'sellAllAmount',
       params,
       this.get('transactionManager'),
-      WETH
+      WETH,
+      this.get('smartContract').getContractByName('MAKER_OTC')
     );
   }
 
