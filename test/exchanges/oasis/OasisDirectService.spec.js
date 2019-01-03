@@ -52,11 +52,6 @@ test('get token addresses', () => {
   expect(service._getContractAddress('MKR_OTC')).toEqual(addresses.MKR_OTC);
 });
 
-test('get token balances', async () => {
-  const balance = await service.getBalance('WETH');
-  expect(balance.toString()).toEqual('0.00 WETH');
-});
-
 test('get buy amount', async () => {
   setMockTradeState();
   try {

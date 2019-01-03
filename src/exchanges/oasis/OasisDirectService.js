@@ -28,42 +28,31 @@ export default class OasisDirectService extends PrivateService {
       : await this.get('proxy').build();
   }
 
-  _setTradeState(operation, payToken, buyToken, amount) {
-    this._operation = operation;
-    this._payToken = payToken;
-    this._buyToken = buyToken;
-    this._value = amount;
-  }
-
-  _setEthTradeState(operation, token, value) {
-    this._operation = operation;
-    this._payToken = token;
-    this._value = value;
-    this._buyToken = 'WETH';
-  }
-
   async sell(sellToken, buyToken, sellAmount, minFillAmount = 0) {
+    let method;
     const params = await this._buildTradeParams(
       sellToken,
       sellAmount,
       buyToken,
       minFillAmount
     );
+    
+    if (buyToken === 'ETH') {
+      method = 'sellAllAmountBuyEth';
+    } else if (sellToken === 'ETH') {
+      method = 'sellAllAmountPayEth';
+    } else {
+      method = 'sellAllAmount';
+    }
+
     return OasisSellOrder.build(
       this._oasisDirect(),
-      'sellAllAmount',
+      method,
       params,
       this.get('transactionManager'),
       WETH,
       this.get('smartContract').getContractByName('MAKER_OTC')
     );
-  }
-
-  async _trade() {
-    const params = await this._buildTradeParams();
-    // await this.get('allowance').requireAllowance(DAI, this._oasisDirect().address);
-    console.log(DAI.wei(params[2]).toNumber());
-    return this._oasisDirect()[this._operation](...params, { dsProxy: true });
   }
 
   async getBuyAmount() {
@@ -138,16 +127,6 @@ export default class OasisDirectService extends PrivateService {
     return getCurrency(amount, DAI).toEthersBigNumber('wei');
   }
 
-  async getBalance(token) {
-    return await this.get('token')
-      .getToken(token)
-      .balanceOf(
-        this.get('smartContract')
-          .get('web3')
-          .currentAccount()
-      );
-  }
-
   _getContractAddress(name) {
     switch (name) {
       case 'MKR':
@@ -166,48 +145,4 @@ export default class OasisDirectService extends PrivateService {
   _contractInfo() {
     return contractInfo(this.get('proxy')._network());
   }
-
-  sellAllAmountPayEth(token, amount, options) {
-    return this._oasisDirect().sellAllAmountPayEth(
-      this._getContractAddress('MAKER_OTC'),
-      this._getContractAddress('WETH'),
-      this._getContractAddress(token),
-      this._valueForContract(amount, 'eth'),
-      {
-        value: options.value,
-        dsProxy: true
-      }
-    );
-  }
-
-  buyAllAmountPayEth(token, amount) {
-    return this._oasisDirect().buyAllAmountPayEth(
-      this._getContractAddress('MAKER_OTC'),
-      this._getContractAddress(token),
-      this._getContractAddress('WETH'),
-      this._valueForContract(amount, token),
-      { dsProxy: true }
-    );
-  }
 }
-
-const tradeOps = [
-  'sellAllAmount',
-  'sellAllAmountBuyEth',
-  'buyAllAmount',
-  'buyAllAmountBuyEth'
-];
-
-Object.assign(
-  OasisDirectService.prototype,
-  tradeOps.reduce((exchange, name) => {
-    exchange[name] = async function(...args) {
-      await this._checkProxy();
-      name.includes('Eth')
-        ? this._setEthTradeState(name, ...args)
-        : this._setTradeState(name, ...args);
-      return await this._trade();
-    };
-    return exchange;
-  }, {})
-);
