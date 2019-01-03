@@ -15,17 +15,7 @@ export default class OasisDirectService extends PrivateService {
       'transactionManager',
       'allowance'
     ]);
-  }
-
-  _oasisDirect() {
-    return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
-  }
-
-  async _checkProxy() {
-    // Add optional callback for build here
-    return this.get('proxy').currentProxy()
-      ? true
-      : await this.get('proxy').build();
+    this._slippage = 0.02;
   }
 
   async sell(sellToken, buyToken, sellAmount) {
@@ -52,6 +42,10 @@ export default class OasisDirectService extends PrivateService {
     );
   }
 
+  setSlippageLimit(limit) {
+    return (this._slippage = limit);
+  }
+
   async getBuyAmount(buyToken, payToken, sellAmount) {
     const otc = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
@@ -68,7 +62,7 @@ export default class OasisDirectService extends PrivateService {
     const buyAmount = this._buyAmount
       ? this._buyAmount
       : await this.getBuyAmount(buyToken, payToken, payAmount);
-    return buyAmount * 0.98;
+    return buyAmount * (1 - this._slippage);
   }
 
   _setMethod(buyToken, sellToken, method) {
@@ -100,6 +94,17 @@ export default class OasisDirectService extends PrivateService {
       this._getContractAddress(buyToken),
       this._valueForContract(minFillAmount)
     ];
+  }
+
+  _oasisDirect() {
+    return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
+  }
+
+  async _checkProxy() {
+    // Add optional callback for build here
+    return this.get('proxy').currentProxy()
+      ? true
+      : await this.get('proxy').build();
   }
 
   // Ignore this function for now, it's related to
