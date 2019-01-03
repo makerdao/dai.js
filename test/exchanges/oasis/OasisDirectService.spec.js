@@ -107,9 +107,8 @@ describe('trade with existing dsproxy', () => {
   });
 
   // I'm focusing on making this one work first
-  test('sell all amount', async () => {
+  test.only('sell all amount', async () => {
     // await createDaiAndPlaceLimitOrder(service);
-    console.log(proxy());
     await service.get('allowance').requireAllowance(DAI, proxy());
     const dai = service.get('token').getToken('DAI');
     const mkr = service.get('token').getToken('MKR');
@@ -123,9 +122,6 @@ describe('trade with existing dsproxy', () => {
       const mkrBalance = await mkr.balanceOf(
         service.get('web3').currentAccount()
       );
-      console.log(DAI(daiBalance).toString());
-      console.log(MKR(mkrBalance).toString());
-      console.log(service.get('web3').currentAccount());
       // await dai.transfer(proxy(), '0.01');
       // tx = await OasisSellOrder.build(
       //   otc,
@@ -140,7 +136,6 @@ describe('trade with existing dsproxy', () => {
     } catch (err) {
       console.error(err);
     }
-    console.log(tx);
   });
 
   xtest(

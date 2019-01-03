@@ -28,22 +28,19 @@ export default class OasisDirectService extends PrivateService {
       : await this.get('proxy').build();
   }
 
-  async sell(sellToken, buyToken, sellAmount, minFillAmount = 0) {
-    let method;
+  async sell(sellToken, buyToken, sellAmount) {
+    const method = this._setMethod(buyToken, sellToken, 'sellAllAmount');
+    const minFillAmount = await this._minBuyAmount(
+      buyToken,
+      sellToken,
+      sellAmount
+    );
     const params = await this._buildTradeParams(
       sellToken,
       sellAmount,
       buyToken,
       minFillAmount
     );
-    
-    if (buyToken === 'ETH') {
-      method = 'sellAllAmountBuyEth';
-    } else if (sellToken === 'ETH') {
-      method = 'sellAllAmountPayEth';
-    } else {
-      method = 'sellAllAmount';
-    }
 
     return OasisSellOrder.build(
       this._oasisDirect(),
@@ -55,29 +52,33 @@ export default class OasisDirectService extends PrivateService {
     );
   }
 
-  async getBuyAmount() {
+  async getBuyAmount(buyToken, payToken, sellAmount) {
     const otc = this.get('smartContract').getContractByName(
       contracts.MAKER_OTC
     );
-    return await otc.getBuyAmount(
-      this._getContractAddress(this._buyToken),
-      this._getContractAddress(this._payToken),
-      this._valueForContract(this._value, this._buyToken)
+    this._buyAmount = await otc.getBuyAmount(
+      this._getContractAddress(buyToken),
+      this._getContractAddress(payToken),
+      this._valueForContract(sellAmount, buyToken)
     );
+    return this._buyAmount;
   }
 
-  // This takes an optional parameter in case a UI,
-  // like Oasis Direct, needs to calculate the minimum
-  // amount with respect to a value that's already been
-  // given to the user
-  async _minBuyAmount(estimatedAmount = null) {
-    // This wasn't working without the amount param
-    // when running sellAllAmount, but for some reason
-    // works without the param in the unit test
-    const buyAmount = estimatedAmount
-      ? estimatedAmount
-      : await this.getBuyAmount();
+  async _minBuyAmount(buyToken, payToken, payAmount) {
+    const buyAmount = this._buyAmount
+      ? this._buyAmount
+      : await this.getBuyAmount(buyToken, payToken, payAmount);
     return buyAmount * 0.98;
+  }
+
+  _setMethod(buyToken, sellToken, method) {
+    if (buyToken === 'ETH') {
+      return (method += 'BuyEth');
+    } else if (sellToken === 'ETH') {
+      return (method += 'PayEth');
+    } else {
+      return method;
+    }
   }
 
   async getPayAmount() {
@@ -92,16 +93,12 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async _buildTradeParams(sellToken, sellAmount, buyToken, minFillAmount) {
-    // const limit = this._operation.includes('sell')
-    //   ? await this._minBuyAmount('0.01')
-    //   : await this._minPayAmount();
-    console.log(buyToken);
     return [
       this._getContractAddress('MAKER_OTC'),
       this._getContractAddress(sellToken),
       this._valueForContract(sellAmount),
       this._getContractAddress(buyToken),
-      this._valueForContract('0')
+      this._valueForContract(minFillAmount)
     ];
   }
 
