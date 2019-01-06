@@ -1,7 +1,6 @@
 import PrivateService from '../../core/PrivateService';
 import { getCurrency, DAI, MKR, WETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
-import { contractInfo } from '../../../contracts/networks';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
 export default class OasisDirectService extends PrivateService {
@@ -51,8 +50,12 @@ export default class OasisDirectService extends PrivateService {
       contracts.MAKER_OTC
     );
     this._buyAmount = await otc.getBuyAmount(
-      this._getContractAddress(buyToken),
-      this._getContractAddress(payToken),
+      this.get('token')
+        .getToken(buyToken)
+        .address(),
+      this.get('token')
+        .getToken(payToken)
+        .address(),
       this._valueForContract(sellAmount, buyToken)
     );
     return this._buyAmount;
@@ -75,24 +78,28 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  async getPayAmount() {
-    const otc = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
-    );
-    return await otc.getPayAmount(
-      this._getContractAddress(this._payToken),
-      this._getContractAddress(this._buyToken),
-      this._valueForContract(this._value, this._payToken)
-    );
-  }
+  // async getPayAmount() {
+  //   const otc = this.get('smartContract').getContractByName(
+  //     contracts.MAKER_OTC
+  //   );
+  //   return await otc.getPayAmount(
+  //     this._getContractAddress(this._payToken),
+  //     this._getContractAddress(this._buyToken),
+  //     this._valueForContract(this._value, this._payToken)
+  //   );
+  // }
 
   async _buildTradeParams(sellToken, sellAmount, buyToken, minFillAmount) {
     return [
-      this._getContractAddress('MAKER_OTC'),
-      this._getContractAddress(sellToken),
-      this._valueForContract(sellAmount),
-      this._getContractAddress(buyToken),
-      this._valueForContract(minFillAmount)
+      this.get('smartContract').getContractByName('MAKER_OTC').address,
+      this.get('token')
+        .getToken(sellToken)
+        .address(),
+      this._valueForContract(sellAmount, sellToken),
+      this.get('token')
+        .getToken(buyToken)
+        .address(),
+      this._valueForContract(minFillAmount, buyToken)
     ];
   }
 
@@ -126,25 +133,7 @@ export default class OasisDirectService extends PrivateService {
   // }
 
   _valueForContract(amount, symbol) {
-    return getCurrency(amount, DAI).toEthersBigNumber('wei');
-  }
-
-  _getContractAddress(name) {
-    switch (name) {
-      case 'MKR':
-        return this._contractInfo().MKR[1].address;
-      case 'WETH':
-        return this._contractInfo().WETH[0].address;
-      case 'PETH':
-        return this._contractInfo().PETH[0].address;
-      case 'DAI':
-        return this._contractInfo().DAI[0].address;
-      case 'MAKER_OTC':
-        return this._contractInfo().MAKER_OTC[0].address;
-    }
-  }
-
-  _contractInfo() {
-    return contractInfo(this.get('proxy')._network());
+    const token = this.get('token').getToken(symbol);
+    return getCurrency(amount, token).toEthersBigNumber('wei');
   }
 }
