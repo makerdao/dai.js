@@ -85,10 +85,7 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async getBuyAmount(buyToken, payToken, sellAmount) {
-    const otc = this.get('smartContract').getContractByName(
-      contracts.MAKER_OTC
-    );
-    this._buyAmount = await otc.getBuyAmount(
+    this._buyAmount = await this._otc().getBuyAmount(
       this.get('token')
         .getToken(buyToken)
         .address(),
@@ -101,8 +98,7 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async getPayAmount(payToken, buyToken, buyAmount) {
-    const otc = this.get('smartContract').getContractByName(conracts.MAKER_OTC);
-    this._payAmount = await otc.getPayAmount(
+    this._payAmount = await this._otc().getPayAmount(
       this.get('token')
         .getToken(payToken)
         .address(),
@@ -148,7 +144,7 @@ export default class OasisDirectService extends PrivateService {
   ) {
     if (sellToken === 'ETH') {
       return [
-        this.get('smartContract').getContractByName('MAKER_OTC').address,
+        this._otc().address,
         this.get('token')
           .getToken('WETH')
           .address(),
@@ -159,7 +155,7 @@ export default class OasisDirectService extends PrivateService {
       ];
     } else {
       return [
-        this.get('smartContract').getContractByName('MAKER_OTC').address,
+        this._otc().address,
         this.get('token')
           .getToken(sendToken)
           .address(),
@@ -178,13 +174,17 @@ export default class OasisDirectService extends PrivateService {
     } else {
       delete options.value;
     }
-    options.otc = this.get('smartContract').getContractByName('MAKER_OTC');
+    options.otc = this._otc();
     options.dsProxy = true;
     return options;
   }
 
   _oasisDirect() {
     return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
+  }
+
+  _otc() {
+    return this.get('smartContract').getContractByName(contracts.MAKER_OTC);
   }
 
   _valueForContract(amount, symbol) {
