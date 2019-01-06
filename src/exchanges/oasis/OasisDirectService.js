@@ -3,6 +3,11 @@ import { getCurrency, DAI, MKR, WETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
+// require pay token allowance for dsproxy before sell/buy
+// require dsproxy
+// use create and execute for pay eth functions
+// execute optional callbacks for allowance and build txns
+
 export default class OasisDirectService extends PrivateService {
   constructor(name = 'exchange') {
     super(name, [
@@ -17,22 +22,22 @@ export default class OasisDirectService extends PrivateService {
     this._slippage = 0.02;
   }
 
-  async sell(sellToken, buyToken, options) {
-    const method = this._setMethod(buyToken, sellToken, 'sellAllAmount');
-    const sendToken = sellToken === 'ETH' ? 'WETH' : sellToken;
-    const receiveToken = buyToken === 'ETH' ? 'WETH' : buyToken;
+  async sell(sell, buy, options) {
+    const method = this._setMethod(buy, sell, 'sellAllAmount');
+    const sellToken = sell === 'ETH' ? 'WETH' : sell;
+    const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const sellAmount = options.value;
     const minFillAmount = await this._minBuyAmount(
-      receiveToken,
-      sendToken,
+      buyToken,
+      sellToken,
       sellAmount
     );
-    const txOptions = this._buildTransactionOptions(options, sellToken);
-    const params = await this._buildTradeParams(
+    const txOptions = this._buildOptions(options, sell);
+    const params = await this._buildParams(
+      sell,
       sellToken,
-      sendToken,
       sellAmount,
-      receiveToken,
+      buyToken,
       minFillAmount
     );
 
@@ -66,11 +71,33 @@ export default class OasisDirectService extends PrivateService {
     return this._buyAmount;
   }
 
+  async getPayAmount(payToken, buyToken, buyAmount) {
+    const otc = this.get('smartContract').getContractByName(conracts.MAKER_OTC);
+    this._payAmount = await otc.getPayAmount(
+      this.get('token')
+        .getToken(payToken)
+        .address(),
+      this.get('token')
+        .getToken(buyToken)
+        .address(),
+      this._valueForContract(buyAmount, buyToken)
+    );
+    return this._payAmount;
+  }
+
   async _minBuyAmount(buyToken, payToken, payAmount) {
     const buyAmount = this._buyAmount
       ? this._buyAmount
       : await this.getBuyAmount(buyToken, payToken, payAmount);
     return buyAmount * (1 - this._slippage);
+  }
+
+  async _maxPayAmount(payToken, buyToken, buyAmount) {
+    // Double check if this should handle rounding
+    const payAmount = this._payAmount
+      ? this._payAmount
+      : await this.getPayAmount(payToken, buyToken, buyAmount);
+    return payAmount * (1 + this._slippage);
   }
 
   _setMethod(buyToken, sellToken, method) {
@@ -83,18 +110,7 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  // async getPayAmount() {
-  //   const otc = this.get('smartContract').getContractByName(
-  //     contracts.MAKER_OTC
-  //   );
-  //   return await otc.getPayAmount(
-  //     this._getContractAddress(this._payToken),
-  //     this._getContractAddress(this._buyToken),
-  //     this._valueForContract(this._value, this._payToken)
-  //   );
-  // }
-
-  async _buildTradeParams(
+  async _buildParams(
     sellToken,
     sendToken,
     sellAmount,
@@ -127,7 +143,7 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  _buildTransactionOptions(options, sellToken) {
+  _buildOptions(options, sellToken) {
     if (sellToken === 'ETH') {
       options.value = this._valueForContract(options.value, 'WETH');
     } else {
@@ -141,31 +157,6 @@ export default class OasisDirectService extends PrivateService {
   _oasisDirect() {
     return this.get('smartContract').getContractByName(contracts.OASIS_PROXY);
   }
-
-  async _checkProxy() {
-    // Add optional callback for build here
-    return this.get('proxy').currentProxy()
-      ? true
-      : await this.get('proxy').build();
-  }
-
-  // Ignore this function for now, it's related to
-  // how I was getting the buy/pay amounts before
-  // I fixed it
-
-  // async _limit() {
-  //   if (this._operation.includes('sellAll')) {
-  //     const buyAmount = await this.getBuyAmount();
-  //     return this._valueForContract(
-  //       buyAmount * (1 - this._threshold()),
-  //       this._buyToken
-  //     );
-  //   } else {
-  //     const payAmount = await this.getPayAmount();
-  //     const limit = Math.round(payAmount * (1 + this._threshold()));
-  //     return this._valueForContract(limit, this._payToken);
-  //   }
-  // }
 
   _valueForContract(amount, symbol) {
     const token = this.get('token').getToken(symbol);
