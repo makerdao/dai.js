@@ -22,14 +22,14 @@ export default class OasisDirectService extends PrivateService {
     const sendToken = sellToken === 'ETH' ? 'WETH' : sellToken;
     const receiveToken = buyToken === 'ETH' ? 'WETH' : buyToken;
     const sellAmount = options.value;
-    if (sellToken !== 'ETH') delete options.value;
-    options.otc = this.get('smartContract').getContractByName('MAKER_OTC');
     const minFillAmount = await this._minBuyAmount(
       receiveToken,
       sendToken,
       sellAmount
     );
+    const txOptions = this._buildTransactionOptions(options, sellToken);
     const params = await this._buildTradeParams(
+      sellToken,
       sendToken,
       sellAmount,
       receiveToken,
@@ -42,7 +42,7 @@ export default class OasisDirectService extends PrivateService {
       params,
       this.get('transactionManager'),
       WETH,
-      options
+      txOptions
     );
   }
 
@@ -94,18 +94,48 @@ export default class OasisDirectService extends PrivateService {
   //   );
   // }
 
-  async _buildTradeParams(sellToken, sellAmount, buyToken, minFillAmount) {
-    return [
-      this.get('smartContract').getContractByName('MAKER_OTC').address,
-      this.get('token')
-        .getToken(sellToken)
-        .address(),
-      this._valueForContract(sellAmount, sellToken),
-      this.get('token')
-        .getToken(buyToken)
-        .address(),
-      this._valueForContract(minFillAmount, buyToken)
-    ];
+  async _buildTradeParams(
+    sellToken,
+    sendToken,
+    sellAmount,
+    buyToken,
+    minFillAmount
+  ) {
+    if (sellToken === 'ETH') {
+      return [
+        this.get('smartContract').getContractByName('MAKER_OTC').address,
+        this.get('token')
+          .getToken('WETH')
+          .address(),
+        this.get('token')
+          .getToken(buyToken)
+          .address(),
+        this._valueForContract(minFillAmount, buyToken)
+      ];
+    } else {
+      return [
+        this.get('smartContract').getContractByName('MAKER_OTC').address,
+        this.get('token')
+          .getToken(sendToken)
+          .address(),
+        this._valueForContract(sellAmount, sellToken),
+        this.get('token')
+          .getToken(buyToken)
+          .address(),
+        this._valueForContract(minFillAmount, buyToken)
+      ];
+    }
+  }
+
+  _buildTransactionOptions(options, sellToken) {
+    if (sellToken === 'ETH') {
+      options.value = this._valueForContract(options.value, 'WETH');
+    } else {
+      delete options.value;
+    }
+    options.otc = this.get('smartContract').getContractByName('MAKER_OTC');
+    options.dsProxy = true;
+    return options;
   }
 
   _oasisDirect() {

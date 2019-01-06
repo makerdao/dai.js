@@ -21,10 +21,7 @@ export default class OasisOrder {
     delete options.otc;
     const promise = (async () => {
       await 0;
-      // const txo = await contract[method](...args, { dsProxy: true });
-      const txo = await contract[method](
-        ...[...args, { ...options, dsProxy: true, promise }]
-      );
+      const txo = await contract[method](...[...args, { ...options, promise }]);
       this._parseLogs(txo.receipt.logs);
       return this;
     })();
