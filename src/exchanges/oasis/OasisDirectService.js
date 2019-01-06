@@ -23,7 +23,7 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async sell(sell, buy, options) {
-    const method = this._setMethod(buy, sell, 'sellAllAmount');
+    const method = this._setMethod(sell, buy, 'sellAllAmount');
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const sellAmount = options.value;
@@ -42,6 +42,35 @@ export default class OasisDirectService extends PrivateService {
     );
 
     return OasisSellOrder.build(
+      this._oasisDirect(),
+      method,
+      params,
+      this.get('transactionManager'),
+      WETH,
+      txOptions
+    );
+  }
+
+  async buy(buy, sell, options) {
+    const method = this._setMethod(sell, buy, 'buyAllAmount');
+    const buyToken = buy === 'ETH' ? 'WETH' : buy;
+    const sellToken = sell === 'ETH' ? 'WETH' : sell;
+    const buyAmount = options.value;
+    const maxPayAmount = await this._maxPayAmount(
+      sellToken,
+      buyToken,
+      buyAmount
+    );
+    const txOptions = this._buildOptions(options, sell);
+    const params = await this._buildParams(
+      sell,
+      sellToken,
+      sellAmount,
+      buyToken,
+      maxPayAmount
+    );
+
+    return OasisBuyOrder.build(
       this._oasisDirect(),
       method,
       params,
@@ -100,7 +129,7 @@ export default class OasisDirectService extends PrivateService {
     return payAmount * (1 + this._slippage);
   }
 
-  _setMethod(buyToken, sellToken, method) {
+  _setMethod(sellToken, buyToken, method) {
     if (buyToken === 'ETH') {
       return (method += 'BuyEth');
     } else if (sellToken === 'ETH') {
