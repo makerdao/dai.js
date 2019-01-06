@@ -14,15 +14,16 @@ export default class OasisOrder {
     return this._txMgr.getTransaction(this.promise).timestamp();
   }
 
-  transact(contract, method, args, transactionManager, otc) {
+  transact(contract, method, args, transactionManager, options) {
     this._contract = contract;
     this._txMgr = transactionManager;
-    this._otc = otc;
+    this._otc = options.otc;
+    delete options.otc;
     const promise = (async () => {
       await 0;
       // const txo = await contract[method](...args, { dsProxy: true });
       const txo = await contract[method](
-        ...[...args, { dsProxy: true, promise }]
+        ...[...args, { ...options, dsProxy: true, promise }]
       );
       this._parseLogs(txo.receipt.logs);
       return this;
@@ -80,10 +81,10 @@ export class OasisSellOrder extends OasisOrder {
     args,
     transactionManager,
     currency,
-    otc = null
+    options = {}
   ) {
     const order = new OasisSellOrder(currency);
-    order.transact(contract, method, args, transactionManager, otc);
+    order.transact(contract, method, args, transactionManager, options);
     return order.promise;
   }
 }

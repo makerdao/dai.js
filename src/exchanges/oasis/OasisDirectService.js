@@ -17,17 +17,22 @@ export default class OasisDirectService extends PrivateService {
     this._slippage = 0.02;
   }
 
-  async sell(sellToken, buyToken, sellAmount) {
+  async sell(sellToken, buyToken, options) {
     const method = this._setMethod(buyToken, sellToken, 'sellAllAmount');
+    const sendToken = sellToken === 'ETH' ? 'WETH' : sellToken;
+    const receiveToken = buyToken === 'ETH' ? 'WETH' : buyToken;
+    const sellAmount = options.value;
+    if (sellToken !== 'ETH') delete options.value;
+    options.otc = this.get('smartContract').getContractByName('MAKER_OTC');
     const minFillAmount = await this._minBuyAmount(
-      buyToken,
-      sellToken,
+      receiveToken,
+      sendToken,
       sellAmount
     );
     const params = await this._buildTradeParams(
-      sellToken,
+      sendToken,
       sellAmount,
-      buyToken,
+      receiveToken,
       minFillAmount
     );
 
@@ -37,7 +42,7 @@ export default class OasisDirectService extends PrivateService {
       params,
       this.get('transactionManager'),
       WETH,
-      this.get('smartContract').getContractByName('MAKER_OTC')
+      options
     );
   }
 
