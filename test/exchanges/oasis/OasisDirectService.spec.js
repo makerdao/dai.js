@@ -27,68 +27,34 @@ function setMockTradeState(exchange = service) {
   exchange._value = 1;
 }
 
-// If you just set your private key to the kovan key,
-// the following will work for read operations only
-// (protecting from violating the trading blackout),
-// plus you can easily switch it to kovan for testing
-
-// beforeAll(async () => {
-//   maker = Maker.create('mainnet', {
-//     privateKey: process.env.PRIVATE_KEY,
-//     exchange: 'OasisDirectService'
-//   });
-//   await maker.authenticate();
-// });
-
 beforeEach(async () => {
   await buildTestOasisDirectService();
 });
 
-test('get token addresses', () => {
-  expect(service._getContractAddress('MKR')).toEqual(addresses.GOV);
-  expect(service._getContractAddress('WETH')).toEqual(addresses.GEM);
-  expect(service._getContractAddress('PETH')).toEqual(addresses.SKR);
-  expect(service._getContractAddress('DAI')).toEqual(addresses.SAI);
-  expect(service._getContractAddress('MKR_OTC')).toEqual(addresses.MKR_OTC);
-});
-
 test('get buy amount', async () => {
-  setMockTradeState();
-  try {
-    await createDaiAndPlaceLimitOrder(service);
-  } catch (err) {
-    console.error(err);
-  }
-  const buyAmount = await service.getBuyAmount();
+  await createDaiAndPlaceLimitOrder(service);
+  const buyAmount = await service.getBuyAmount('WETH', 'DAI', '0.01');
   expect(Object.keys(buyAmount)).toEqual(['_bn']);
-});
-
-// Unskip this and uncomment lines 30-36 to see
-// the amounts returned from the mainnet otc
-xtest('amounts on mainnet', async () => {
-  const exchange = maker.service('exchange');
-  exchange._operation = 'sellAllAmount';
-  setMockTradeState(exchange);
-  const buyAmount = await exchange.getBuyAmount();
-  console.log(ETH.wei(buyAmount).toNumber());
-  const minBuyAmount = await exchange._minBuyAmount(buyAmount);
-  console.log(ETH.wei(minBuyAmount).toNumber());
-  console.log(minBuyAmount);
+  expect(buyAmount.toString()).toEqual('500000000000000');
 });
 
 test('get pay amount', async () => {
-  setMockTradeState();
   await createDaiAndPlaceLimitOrder(service);
-  const payAmount = await service.getPayAmount();
+  const payAmount = await service.getPayAmount('DAI', 'WETH', '0.01');
   expect(Object.keys(payAmount)).toEqual(['_bn']);
+  expect(payAmount.toString()).toEqual('200000000000000000');
 });
 
-test('get minBuyAmount (limit)', async () => {
-  service._operation = 'sellAllAmount';
-  setMockTradeState();
+test('get minBuyAmount', async () => {
   await createDaiAndPlaceLimitOrder(service);
-  const limit = await service._minBuyAmount();
-  // console.log(limit);
+  const limit = await service._minBuyAmount('WETH', 'DAI', '0.01');
+  expect(limit).toEqual(490000000000000);
+});
+
+test('get maxPayAmount', async () => {
+  await createDaiAndPlaceLimitOrder(service);
+  const limit = await service._maxPayAmount('DAI', 'WETH', '0.01');
+  expect(limit).toEqual(204000000000000000);
 });
 
 describe('trade with existing dsproxy', () => {
@@ -107,7 +73,7 @@ describe('trade with existing dsproxy', () => {
   });
 
   // I'm focusing on making this one work first
-  test.only('sell all amount', async () => {
+  test('sell all amount', async () => {
     // await createDaiAndPlaceLimitOrder(service);
     await service.get('allowance').requireAllowance(DAI, proxy());
     const dai = service.get('token').getToken('DAI');
