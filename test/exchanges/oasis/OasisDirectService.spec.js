@@ -64,6 +64,7 @@ describe('trade with existing dsproxy', () => {
     await service.sell('DAI', 'WETH', { value: '0.01' });
   });
 
+  // Something needs approval that's not getting it
   test('sell all amount, buy eth', async () => {
     await createDaiAndPlaceLimitOrder(service);
     await service.get('allowance').requireAllowance(DAI, proxy());
@@ -74,6 +75,7 @@ describe('trade with existing dsproxy', () => {
     }
   });
 
+  // Something needs approval that's not getting it
   test('sell all amount, pay eth', async () => {
     try {
       await createDaiAndPlaceLimitOrder(service, true);
@@ -83,6 +85,7 @@ describe('trade with existing dsproxy', () => {
     }
   });
 
+  // The order of params is wrong here
   test('buy all amount', async () => {
     await createDaiAndPlaceLimitOrder(service);
     await service.get('allowance').requireAllowance(DAI, proxy());
