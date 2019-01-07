@@ -1,14 +1,11 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
 import { setProxyAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
-import addresses from '../../../contracts/addresses/testnet.json';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import Maker from '../../../src/index';
-import { DAI, ETH, MKR, WETH } from '../../../src/eth/Currency';
+import { DAI } from '../../../src/eth/Currency';
 import { transferMkr } from '../../helpers/proxyHelpers';
-import { OasisSellOrder } from '../../../src/exchanges/oasis/OasisOrder';
 
-let service, proxyAccount, maker;
+let service, proxyAccount;
 
 async function buildTestOasisDirectService() {
   service = buildTestService('exchange', {
@@ -19,12 +16,6 @@ async function buildTestOasisDirectService() {
 
 function proxy() {
   return service.get('proxy').currentProxy();
-}
-
-function setMockTradeState(exchange = service) {
-  exchange._payToken = 'DAI';
-  exchange._buyToken = 'WETH';
-  exchange._value = 1;
 }
 
 beforeEach(async () => {
@@ -64,62 +55,42 @@ describe('trade with existing dsproxy', () => {
     }
     await transferMkr(service, proxyAccount.address);
     await setProxyAccount(service, proxyAccount);
-    // await service
-    //   .get('token')
-    //   .getToken(tokens.WETH)
-    //   .deposit(20);
     if (!(await proxy())) await service.get('proxy').build();
-    await createDaiAndPlaceLimitOrder(service);
   });
 
-  // I'm focusing on making this one work first
   test('sell all amount', async () => {
-    // await createDaiAndPlaceLimitOrder(service);
+    await createDaiAndPlaceLimitOrder(service);
     await service.get('allowance').requireAllowance(DAI, proxy());
-    const dai = service.get('token').getToken('DAI');
-    const mkr = service.get('token').getToken('MKR');
-    const weth = service.get('token').getToken('WETH');
-    const otc = service.get('smartContract').getContractByName('MAKER_OTC');
-    let tx;
+    await service.sell('DAI', 'WETH', { value: '0.01' });
+  });
+
+  test('sell all amount, buy eth', async () => {
+    await createDaiAndPlaceLimitOrder(service);
+    await service.get('allowance').requireAllowance(DAI, proxy());
     try {
-      const daiBalance = await dai.balanceOf(
-        service.get('web3').currentAccount()
-      );
-      const mkrBalance = await mkr.balanceOf(
-        service.get('web3').currentAccount()
-      );
-      // await dai.transfer(proxy(), '0.01');
-      // tx = await OasisSellOrder.build(
-      //   otc,
-      //   'sellAllAmount',
-      //   [dai.address(), service._valueForContract('0.01'), weth.address(), service._valueForContract('0')],
-      //   service.get('transactionManager'),
-      //   WETH
-      // );
-      tx = await service.sell('DAI', 'WETH', { value: '0.01' });
-      // tx = await service.sellAllAmount('DAI', 'MKR', '0.01');
-      // tx = await otc.sellAllAmount(dai.address(), service._valueForContract(0.01, 'eth'), weth.address(), service._valueForContract(0, 'eth') );
+      await service.sell('DAI', 'ETH', { value: '0.01' });
     } catch (err) {
       console.error(err);
     }
   });
 
-  xtest(
-    'sell all amount, pay eth',
-    async () => {
-      await maker
-        .service('exchange')
-        .sellAllAmountPayEth('DAI', 1, { value: 1 });
-    },
-    2000000
-  );
-
-  xtest('sell all amount, buy eth', async () => {
-    await maker.service('exchange').sellAllAmountBuyEth('DAI', DAI(0.1));
+  test('sell all amount, pay eth', async () => {
+    try {
+      await createDaiAndPlaceLimitOrder(service, true);
+      await service.sell('ETH', 'DAI', { value: '0.01' });
+    } catch (err) {
+      console.error(err);
+    }
   });
 
-  xtest('buy all amount', async () => {
-    await service.buyAllAmount('DAI', 'MKR', 20);
+  test('buy all amount', async () => {
+    await createDaiAndPlaceLimitOrder(service);
+    await service.get('allowance').requireAllowance(DAI, proxy());
+    try {
+      await service.buy('WETH', 'DAI', { value: '0.01' });
+    } catch (err) {
+      console.error(err);
+    }
   });
 
   xtest('buy all amount, pay eth', async () => {});

@@ -19,6 +19,11 @@ export default class OasisOrder {
     this._txMgr = transactionManager;
     this._otc = options.otc;
     delete options.otc;
+    console.log({
+      method: method,
+      args: args,
+      options: options
+    });
     const promise = (async () => {
       await 0;
       const txo = await contract[method](...[...args, { ...options, promise }]);
@@ -58,9 +63,9 @@ export class OasisBuyOrder extends OasisOrder {
     this._unit = DAI;
   }
 
-  static build(contract, method, args, transactionManager) {
+  static build(contract, method, args, transactionManager, options = {}) {
     const order = new OasisBuyOrder();
-    order.transact(contract, method, args, transactionManager);
+    order.transact(contract, method, args, transactionManager, options);
     return order.promise;
   }
 }

@@ -1,5 +1,5 @@
 import PrivateService from '../../core/PrivateService';
-import { getCurrency, DAI, MKR, WETH } from '../../eth/Currency';
+import { getCurrency, WETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
@@ -26,20 +26,19 @@ export default class OasisDirectService extends PrivateService {
     const method = this._setMethod(sell, buy, 'sellAllAmount');
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
-    const sellAmount = options.value;
     const minFillAmount = await this._minBuyAmount(
       buyToken,
       sellToken,
-      sellAmount
+      options.value
     );
-    const txOptions = this._buildOptions(options, sell);
     const params = await this._buildParams(
       sell,
       sellToken,
-      sellAmount,
+      options.value,
       buyToken,
       minFillAmount
     );
+    this._buildOptions(options, sell);
 
     return OasisSellOrder.build(
       this._oasisDirect(),
@@ -47,7 +46,7 @@ export default class OasisDirectService extends PrivateService {
       params,
       this.get('transactionManager'),
       WETH,
-      txOptions
+      options
     );
   }
 
@@ -55,28 +54,26 @@ export default class OasisDirectService extends PrivateService {
     const method = this._setMethod(sell, buy, 'buyAllAmount');
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
-    const buyAmount = options.value;
     const maxPayAmount = await this._maxPayAmount(
       sellToken,
       buyToken,
-      buyAmount
+      options.value
     );
-    const txOptions = this._buildOptions(options, sell);
     const params = await this._buildParams(
       sell,
       sellToken,
-      sellAmount,
+      options.value,
       buyToken,
       maxPayAmount
     );
+    this._buildOptions(options, sell);
 
     return OasisBuyOrder.build(
       this._oasisDirect(),
       method,
       params,
       this.get('transactionManager'),
-      WETH,
-      txOptions
+      options
     );
   }
 
