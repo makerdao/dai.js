@@ -76,10 +76,12 @@ describe('format contract call', () => {
   });
 
   test('set transaction options', () => {
-    const normalOptions = service._buildOptions({ value: 1 }, 'DAI');
-    const ethOptions = service._buildOptions({ value: 1 }, 'ETH');
+    const normalOptions = service._buildOptions({ value: 1 }, 'DAI', 'method');
+    const ethOptions = service._buildOptions({ value: 1 }, 'ETH', 'method');
+    const createOptions = service._buildOptions({ value: 1 }, 'ETH', 'create');
     expect(Object.keys(normalOptions)).toEqual(['otc', 'dsProxy']);
     expect(Object.keys(ethOptions)).toEqual(['value', 'otc', 'dsProxy']);
+    expect(Object.keys(createOptions)).toEqual(['value', 'otc']);
   });
 });
 
@@ -134,30 +136,34 @@ const sharedTests = () => {
     await createDaiAndPlaceLimitOrder(service);
   });
 
-  describe('sell', () => {
-    test('sell all amount', async () => {
-      await service.sell('DAI', 'WETH', { value: '0.01' });
-    });
+  describe(
+    'sell',
+    () => {
+      test('sell all amount', async () => {
+        await service.sell('DAI', 'WETH', { value: '0.01' });
+      });
 
-    // Something needs approval that's not getting it
-    test('sell all amount, buy eth', async () => {
-      try {
-        await service.sell('DAI', 'ETH', { value: '0.01' });
-      } catch (err) {
-        console.error(err.message);
-      }
-    });
+      // Something needs approval that's not getting it
+      test('sell all amount, buy eth', async () => {
+        try {
+          await service.sell('DAI', 'ETH', { value: '0.01' });
+        } catch (err) {
+          console.error(err.message);
+        }
+      });
 
-    // Something needs approval that's not getting it
-    test.only('sell all amount, pay eth', async () => {
-      try {
-        await createDaiAndPlaceLimitOrder(service, true);
-        await service.sell('ETH', 'DAI', { value: '0.01' });
-      } catch (err) {
-        console.error(err.message);
-      }
-    });
-  });
+      // Something needs approval that's not getting it
+      test('sell all amount, pay eth', async () => {
+        try {
+          await createDaiAndPlaceLimitOrder(service, true);
+          await service.sell('ETH', 'DAI', { value: '0.01' });
+        } catch (err) {
+          console.error(err.message);
+        }
+      });
+    },
+    50000
+  );
 
   describe('buy', () => {
     test('buy all amount', async () => {
@@ -168,9 +174,31 @@ const sharedTests = () => {
       }
     });
 
-    xtest('buy all amount, pay eth', async () => {});
+    test(
+      'buy all amount, buy eth',
+      async () => {
+        try {
+          await service.buy('ETH', 'DAI', { value: '0.01' });
+        } catch (err) {
+          console.error(err.message);
+        }
+      },
+      50000
+    );
 
-    xtest('buy all amount, buy eth', async () => {});
+    // the params are in the wrong order for this one
+    test(
+      'buy all amount, pay eth',
+      async () => {
+        try {
+          await createDaiAndPlaceLimitOrder(service, true);
+          await service.buy('DAI', 'ETH', { value: '0.01' });
+        } catch (err) {
+          console.error(err.message);
+        }
+      },
+      50000
+    );
   });
 };
 
@@ -184,7 +212,7 @@ describe('trade with existing dsproxy', () => {
     if (!(await proxy())) await service.get('proxy').build();
   });
 
-  // sharedTests();
+  sharedTests();
 });
 
 describe('create dsproxy and execute', () => {
