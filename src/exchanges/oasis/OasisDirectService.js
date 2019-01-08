@@ -1,5 +1,5 @@
 import PrivateService from '../../core/PrivateService';
-import { getCurrency, WETH } from '../../eth/Currency';
+import { getCurrency, WETH, DAI, MKR } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
@@ -40,13 +40,12 @@ export default class OasisDirectService extends PrivateService {
     this._buildOptions(options, sell, method);
 
     if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
-    // FIXME: make currency (WETH) dynamic
     return OasisSellOrder.build(
       this._oasisDirect(),
       method,
       params,
       this.get('transactionManager'),
-      WETH,
+      this._setCurrencyUnit(buyToken),
       options
     );
   }
@@ -239,6 +238,17 @@ export default class OasisDirectService extends PrivateService {
 
   _otc() {
     return this.get('smartContract').getContractByName(contracts.MAKER_OTC);
+  }
+
+  _setCurrencyUnit(token) {
+    switch (token) {
+      case 'DAI':
+        return DAI;
+      case 'WETH':
+        return WETH;
+      case 'MKR':
+        return MKR;
+    }
   }
 
   _valueForContract(amount, symbol) {
