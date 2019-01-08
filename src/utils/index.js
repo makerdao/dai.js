@@ -51,38 +51,6 @@ export function promiseWait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function observePromise(promise) {
-  // https://stackoverflow.com/questions/21485545/is-there-a-way-to-tell-if-an-es6-promise-is-fulfilled-rejected-resolved
-  // Don't create a wrapper for promises that can already be queried.
-  if (promise.isResolved) return promise;
-
-  let isResolved = false;
-  let isRejected = false;
-
-  // Observe the promise, saving the fulfillment in a closure scope.
-  let result = promise.then(
-    v => {
-      isResolved = true;
-      return v;
-    },
-    e => {
-      isRejected = true;
-      throw e;
-    }
-  );
-
-  result.isSettled = () => {
-    return isResolved || isRejected;
-  };
-  result.isResolved = () => {
-    return isResolved;
-  };
-  result.isRejected = () => {
-    return isRejected;
-  };
-  return result;
-}
-
 // https://stackoverflow.com/a/43963612/56817
 export const uniqueId = (() => {
   let currentId = 0;
