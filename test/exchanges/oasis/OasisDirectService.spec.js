@@ -19,7 +19,7 @@ function proxy() {
 
 beforeEach(async () => {
   await buildTestOasisDirectService();
-  jest.setTimeout(100000);
+  jest.setTimeout(20000);
 });
 
 describe('format contract call', () => {
@@ -55,7 +55,7 @@ describe('format contract call', () => {
       'DAI',
       '0.01',
       'WETH',
-      0,
+      service._valueForContract(0, 'WETH'),
       'sellAllAmount'
     );
     const ethParams = await service._buildParams(
@@ -63,7 +63,7 @@ describe('format contract call', () => {
       'WETH',
       '0.01',
       'DAI',
-      100,
+      service._valueForContract(100, 'WETH'),
       'sellAllAmountPayEth'
     );
     const createParams = await service._buildParams(
@@ -71,7 +71,7 @@ describe('format contract call', () => {
       'WETH',
       '0.01',
       'DAI',
-      100,
+      service._valueForContract(100, 'WETH'),
       'createAndSellAllAmountPayEth'
     );
 
@@ -105,15 +105,13 @@ describe('format contract call', () => {
   });
 });
 
-describe('buyAmount', () => {
-  let buyAmount;
-
-  beforeEach(async () => {
+describe('values from otc', () => {
+  beforeAll(async () => {
     await createDaiAndPlaceLimitOrder(service);
-    buyAmount = await service.getBuyAmount('WETH', 'DAI', '0.01');
   });
 
   test('get buy amount', async () => {
+    const buyAmount = await service.getBuyAmount('WETH', 'DAI', '0.01');
     expect(Object.keys(buyAmount)).toEqual(['_bn']);
     expect(buyAmount.toString()).toEqual('500000000000000');
   });
@@ -123,20 +121,8 @@ describe('buyAmount', () => {
     expect(limit.toString()).toEqual('490000000000000000000000000000000');
   });
 
-  test('use cached buyAmount to determine limit', () => {
-    expect(buyAmount).toEqual(service._buyAmount);
-  });
-});
-
-describe('payAmount', () => {
-  let payAmount;
-
-  beforeEach(async () => {
-    await createDaiAndPlaceLimitOrder(service);
-    payAmount = await service.getPayAmount('DAI', 'WETH', '0.01');
-  });
-
-  test('get pay amount', () => {
+  test('get pay amount', async () => {
+    const payAmount = await service.getPayAmount('DAI', 'WETH', '0.01');
     expect(Object.keys(payAmount)).toEqual(['_bn']);
     expect(payAmount.toString()).toEqual('200000000000000000');
   });
@@ -144,10 +130,6 @@ describe('payAmount', () => {
   test('get maxPayAmount', async () => {
     const limit = await service._maxPayAmount('DAI', 'WETH', '0.01');
     expect(limit.toString()).toEqual('204000000000000000000000000000000000');
-  });
-
-  test('use cached payAmount to determine limit', () => {
-    expect(payAmount).toEqual(service._payAmount);
   });
 });
 
