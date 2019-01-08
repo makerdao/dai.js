@@ -39,6 +39,9 @@ describe('format contract call', () => {
     const otcAddress = service
       .get('smartContract')
       .getContractByName('MAKER_OTC').address;
+    const registryAddress = service
+      .get('smartContract')
+      .getContractByName('PROXY_REGISTRY').address;
     const daiAddress = service
       .get('token')
       .getToken('DAI')
@@ -52,14 +55,24 @@ describe('format contract call', () => {
       'DAI',
       '0.01',
       'WETH',
-      0
+      0,
+      'sellAllAmount'
     );
     const ethParams = await service._buildParams(
       'ETH',
       'WETH',
       '0.01',
       'DAI',
-      100
+      100,
+      'sellAllAmountPayEth'
+    );
+    const createParams = await service._buildParams(
+      'ETH',
+      'WETH',
+      '0.01',
+      'DAI',
+      100,
+      'createAndSellAllAmountPayEth'
     );
 
     expect(normalParams.length).toEqual(5);
@@ -74,6 +87,12 @@ describe('format contract call', () => {
     expect(ethParams[1]).toEqual(wethAddress);
     expect(ethParams[2]).toEqual(daiAddress);
     expect(Object.keys(ethParams[3])).toEqual(['_bn']);
+
+    expect(createParams.length).toEqual(4);
+    expect(createParams[0]).toEqual(registryAddress);
+    expect(createParams[1]).toEqual(otcAddress);
+    expect(createParams[2]).toEqual(daiAddress);
+    expect(Object.keys(createParams[3])).toEqual(['_bn']);
   });
 
   test('set transaction options', () => {
