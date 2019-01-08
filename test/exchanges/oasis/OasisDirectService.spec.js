@@ -22,12 +22,15 @@ beforeEach(async () => {
 });
 
 describe('format contract call', () => {
-  test('set contract method', () => {
+  test('set contract method', async () => {
+    const proxy = await service.get('proxy').currentProxy();
     const buyEth = service._setMethod('DAI', 'ETH', 'sellAllAmount');
-    const payEth = service._setMethod('ETH', 'DAI', 'sellAllAmount');
+    const payEth = service._setMethod('ETH', 'DAI', 'sellAllAmount', proxy);
+    const createAndPayEth = service._setMethod('ETH', 'DAI', 'sellAllAmount');
     const sell = service._setMethod('DAI', 'MKR', 'sellAllAmount');
     expect(buyEth).toEqual('sellAllAmountBuyEth');
     expect(payEth).toEqual('sellAllAmountPayEth');
+    expect(createAndPayEth).toEqual('createAndSellAllAmountPayEth');
     expect(sell).toEqual('sellAllAmount');
   });
 

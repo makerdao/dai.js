@@ -3,7 +3,6 @@ import { getCurrency, WETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
-// require pay token allowance for dsproxy before sell/buy
 // require dsproxy
 // use create and execute for pay eth functions
 // execute optional callbacks for allowance and build txns
@@ -23,7 +22,8 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async sell(sell, buy, options) {
-    const method = this._setMethod(sell, buy, 'sellAllAmount');
+    const proxy = await this._requireProxy(sell);
+    const method = this._setMethod(sell, buy, 'sellAllAmount', proxy);
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const minFillAmount = await this._minBuyAmount(
@@ -40,8 +40,7 @@ export default class OasisDirectService extends PrivateService {
     );
     this._buildOptions(options, sell);
 
-    const proxy = this.get('proxy').currentProxy();
-    await this.get('allowance').requireAllowance(sellToken, proxy);
+    if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisSellOrder.build(
       this._oasisDirect(),
       method,
@@ -53,7 +52,8 @@ export default class OasisDirectService extends PrivateService {
   }
 
   async buy(buy, sell, options) {
-    const method = this._setMethod(sell, buy, 'buyAllAmount');
+    const proxy = await this._requireProxy(sell);
+    const method = this._setMethod(sell, buy, 'buyAllAmount', proxy);
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const maxPayAmount = await this._maxPayAmount(
@@ -70,8 +70,7 @@ export default class OasisDirectService extends PrivateService {
     );
     this._buildOptions(options, sell);
 
-    const proxy = this.get('proxy').currentProxy();
-    await this.get('allowance').requireAllowance(sellToken, proxy);
+    if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisBuyOrder.build(
       this._oasisDirect(),
       method,
@@ -126,13 +125,32 @@ export default class OasisDirectService extends PrivateService {
     return payAmount * (1 + this._slippage);
   }
 
-  _setMethod(sellToken, buyToken, method) {
+  _setMethod(sellToken, buyToken, method, proxy) {
     if (buyToken === 'ETH') {
       return (method += 'BuyEth');
+    } else if (sellToken === 'ETH' && !proxy) {
+      return (
+        'createAnd' +
+        method.charAt(0).toUpperCase() +
+        method.slice(1) +
+        'PayEth'
+      );
     } else if (sellToken === 'ETH') {
       return (method += 'PayEth');
     } else {
       return method;
+    }
+  }
+
+  async _requireProxy(sellCurrency) {
+    const proxy = await this.get('proxy').currentProxy();
+
+    if (proxy) {
+      return proxy;
+    } else if (!proxy && sellCurrency !== 'ETH') {
+      return await this.get('proxy').requireProxy();
+    } else {
+      return false;
     }
   }
 

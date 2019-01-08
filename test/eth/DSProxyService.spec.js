@@ -1,4 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
+import { setNewAccount } from '../helpers/proxyHelpers';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import addresses from '../../contracts/addresses/testnet';
 import Maker from '../../src/index';
@@ -10,19 +11,9 @@ async function buildTestProxyService() {
   await service.manager().authenticate();
 }
 
-async function setNewAccount() {
-  const account = TestAccountProvider.nextAccount();
-  const accountService = service.get('web3').get('accounts');
-  await accountService.addAccount('newAccount', {
-    type: 'privateKey',
-    key: account.key
-  });
-  accountService.useAccount('newAccount');
-}
-
 beforeEach(async () => {
   await buildTestProxyService();
-  await setNewAccount();
+  await setNewAccount(service.get('web3').get('accounts'));
 });
 
 test('should get the correct network', () => {
@@ -77,6 +68,15 @@ test("should set a proxy's owner", async () => {
 
   expect(newOwner.toLowerCase()).toEqual(newAddress.toLowerCase());
   expect(newOwner.toLowerCase()).not.toEqual(originalOwner.toLowerCase());
+});
+
+test('should be able to require a dsproxy', async () => {
+  let proxyAddress = await service.currentProxy();
+  expect(proxyAddress).toBeNull();
+  proxyAddress = await service.requireProxy();
+  expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+  proxyAddress = await service.requireProxy();
+  expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
 });
 
 describe('querying registry for proxy address', () => {
