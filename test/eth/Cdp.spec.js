@@ -438,11 +438,20 @@ describe('proxy cdp', () => {
   });
 
   async function getProxy() {
-    return await cdpService.get('proxy').currentProxy();
+    return await cdpService
+      .get('smartContract')
+      .get('transactionManager')
+      .get('proxy')
+      .currentProxy();
   }
 
   async function setProxy() {
-    if (!(await getProxy())) await cdpService.get('proxy').build();
+    if (!(await getProxy()))
+      await cdpService
+        .get('smartContract')
+        .get('transactionManager')
+        .get('proxy')
+        .build();
     dsProxyAddress = await getProxy();
   }
 
