@@ -40,6 +40,8 @@ export default class OasisDirectService extends PrivateService {
     );
     this._buildOptions(options, sell);
 
+    const proxy = this.get('proxy').currentProxy();
+    await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisSellOrder.build(
       this._oasisDirect(),
       method,
@@ -68,6 +70,8 @@ export default class OasisDirectService extends PrivateService {
     );
     this._buildOptions(options, sell);
 
+    const proxy = this.get('proxy').currentProxy();
+    await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisBuyOrder.build(
       this._oasisDirect(),
       method,

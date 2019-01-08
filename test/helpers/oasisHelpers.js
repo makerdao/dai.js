@@ -31,6 +31,7 @@ async function placeLimitOrder(oasisExchangeService, sellDai) {
   await wethToken.deposit('1');
   await wethToken.approveUnlimited(oasisAddress);
   await daiToken.approveUnlimited(oasisAddress);
+
   return offer(
     oasisExchangeService,
     utils.parseEther('0.5'),

@@ -2,7 +2,6 @@ import { buildTestService } from '../../helpers/serviceBuilders';
 import { setProxyAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import { DAI, WETH } from '../../../src/eth/Currency';
 import { transferMkr } from '../../helpers/proxyHelpers';
 
 let service, proxyAccount;
@@ -130,8 +129,6 @@ describe('payAmount', () => {
 const sharedTests = () => {
   beforeEach(async () => {
     await createDaiAndPlaceLimitOrder(service);
-    await service.get('allowance').requireAllowance(DAI, proxy());
-    await service.get('allowance').requireAllowance(WETH, proxy());
   });
 
   describe('sell', () => {
