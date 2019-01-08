@@ -64,7 +64,8 @@ export default class OasisDirectService extends PrivateService {
       buyToken,
       options.value,
       sellToken,
-      maxPayAmount
+      maxPayAmount,
+      false
     );
     this._buildOptions(options, sell, method);
 
@@ -157,31 +158,31 @@ export default class OasisDirectService extends PrivateService {
     sendToken,
     sellAmount,
     buyToken,
-    minFillAmount
+    minOrMax,
+    sell = true
   ) {
+    const otcAddress = this._otc().address;
+    const wethAddress = this.get('token')
+      .getToken('WETH')
+      .address();
+    const buyTokenAddress = this.get('token')
+      .getToken(buyToken)
+      .address();
+    const sellTokenAddress = this.get('token')
+      .getToken(sendToken)
+      .address();
+    const amount = this._valueForContract(sellAmount, sendToken);
+    const limit = this._valueForContract(minOrMax, buyToken);
+
     if (sellToken === 'ETH') {
       return [
-        this._otc().address,
-        this.get('token')
-          .getToken('WETH')
-          .address(),
-        this.get('token')
-          .getToken(buyToken)
-          .address(),
-        this._valueForContract(minFillAmount, buyToken)
+        otcAddress,
+        sell ? wethAddress : buyTokenAddress,
+        sell ? buyTokenAddress : limit,
+        sell ? limit : wethAddress
       ];
     } else {
-      return [
-        this._otc().address,
-        this.get('token')
-          .getToken(sendToken)
-          .address(),
-        this._valueForContract(sellAmount, sellToken),
-        this.get('token')
-          .getToken(buyToken)
-          .address(),
-        this._valueForContract(minFillAmount, buyToken)
-      ];
+      return [otcAddress, sellTokenAddress, amount, buyTokenAddress, limit];
     }
   }
 
