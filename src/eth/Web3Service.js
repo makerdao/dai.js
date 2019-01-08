@@ -5,7 +5,6 @@ import promiseProps from 'promise-props';
 import Web3 from 'web3';
 import ProviderType from './web3/ProviderType';
 import makeSigner from './web3/ShimEthersSigner';
-import getMatchingEvent from './web3/LogEvent';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -105,10 +104,6 @@ export default class Web3Service extends PrivateService {
     this._blockSub.unsubscribe((err, success) => {
       if (!success) throw new Error(err);
     });
-  }
-
-  waitForMatchingEvent(info, event, predicate = () => true, timeout = 30000) {
-    return getMatchingEvent(this._web3, info, event, timeout, predicate);
   }
 
   initialize(settings) {
