@@ -120,7 +120,7 @@ describe('execute', () => {
   ];
 
   beforeAll(async () => {
-    maker = Maker.create('test', {
+    maker = await Maker.create('test', {
       web3: {
         transactionSettings: { gasLimit: 4000000 },
         confirmedBlockCount: '0'

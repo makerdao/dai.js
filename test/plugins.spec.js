@@ -5,16 +5,19 @@ beforeEach(() => {
   jest.spyOn(ConfigFactory, 'create');
 });
 
-test('function plugin', () => {
+test('function plugin', async () => {
   const testPlugin = jest.fn(maker => {
     expect(maker).toBeInstanceOf(Maker);
   });
 
-  Maker.create('test', { plugins: [testPlugin], autoAuthenticate: false });
+  await Maker.create('test', {
+    plugins: [testPlugin],
+    autoAuthenticate: false
+  });
   expect(testPlugin).toBeCalled();
 });
 
-test('object plugin with addConfig and afterCreate', () => {
+test('object plugin with addConfig and afterCreate', async () => {
   const testPlugin = {
     addConfig: jest.fn(config => {
       expect(config.autoAuthenticate).toBe(false);
@@ -27,7 +30,7 @@ test('object plugin with addConfig and afterCreate', () => {
     })
   };
 
-  Maker.create('test', {
+  await Maker.create('test', {
     plugins: [testPlugin],
     autoAuthenticate: false,
     log: false
@@ -51,7 +54,7 @@ const makeMockService = role => {
   return MockService;
 };
 
-test('add options, merging correctly', () => {
+test('add options, merging correctly', async () => {
   const MockService1 = makeMockService('mock1');
   const MockService2 = makeMockService('mock2');
 
@@ -72,7 +75,7 @@ test('add options, merging correctly', () => {
     })
   };
 
-  Maker.create('test', {
+  await Maker.create('test', {
     plugins: [testPlugin],
     additionalServices: ['mock1'],
     mock1: MockService1,
@@ -110,7 +113,7 @@ test('add options, merging correctly', () => {
   });
 });
 
-test('do not allow collisions in smartContract.addContracts', () => {
+test('do not allow collisions in smartContract.addContracts', async () => {
   const exampleAbiItem = {
     constant: true,
     inputs: [],
@@ -147,35 +150,40 @@ test('do not allow collisions in smartContract.addContracts', () => {
     })
   };
 
-  expect(() => {
-    Maker.create('test', {
-      autoAuthenticate: false,
-      plugins: [testPlugin],
-      smartContract: {
-        addContracts: {
-          // different address
-          foo: {
-            abi: [],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5bead'
-          },
-          // different ABI
-          bar: {
-            abi: [{ ...exampleAbiItem, name: 'zest' }],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5bade'
-          },
-          // same address and ABI -- will not cause error
-          baz: {
-            abi: [],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5abed'
-          }
+  expect.assertions(1);
+
+  return await Maker.create('test', {
+    autoAuthenticate: false,
+    plugins: [testPlugin],
+    smartContract: {
+      addContracts: {
+        // different address
+        foo: {
+          abi: [],
+          address: '0xbeefed1bedded2dabbed3defaced4decade5bead'
+        },
+        // different ABI
+        bar: {
+          abi: [{ ...exampleAbiItem, name: 'zest' }],
+          address: '0xbeefed1bedded2dabbed3defaced4decade5bade'
+        },
+        // same address and ABI -- will not cause error
+        baz: {
+          abi: [],
+          address: '0xbeefed1bedded2dabbed3defaced4decade5abed'
         }
       }
-    });
-  }).toThrowError(/Contracts "foo", "bar" cannot be defined more than once/);
-  // note that "baz" is not in this list
+    }
+  }).catch(
+    err =>
+      expect(err).toEqual(
+        new Error('Contracts "foo", "bar" cannot be defined more than once')
+      )
+    // note that "baz" is not in this list
+  );
 });
 
-test('add options when smartContract.addContracts is not set on target', () => {
+test('add options when smartContract.addContracts is not set on target', async () => {
   const testPlugin = {
     addConfig: jest.fn(() => {
       return {
@@ -191,14 +199,14 @@ test('add options when smartContract.addContracts is not set on target', () => {
     })
   };
 
-  Maker.create('test', {
+  await Maker.create('test', {
     plugins: [testPlugin],
     autoAuthenticate: false,
     smartContract: {}
   });
 });
 
-test('add options when smartContract.addContracts is not set on source', () => {
+test('add options when smartContract.addContracts is not set on source', async () => {
   const testPlugin = {
     addConfig: jest.fn(() => {
       return {
@@ -207,7 +215,7 @@ test('add options when smartContract.addContracts is not set on source', () => {
     })
   };
 
-  Maker.create('test', {
+  await Maker.create('test', {
     plugins: [testPlugin],
     additionalServices: ['mock1'],
     autoAuthenticate: false,
