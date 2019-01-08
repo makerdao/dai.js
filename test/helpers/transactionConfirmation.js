@@ -21,7 +21,7 @@ export async function mineBlocks(service, count) {
   const initialNumber = web3Service.blockNumber();
 
   for (let i = 0; i < count; i++) {
-    callGanache('evm_mine');
+    await callGanache('evm_mine');
     await promiseWait(WAIT_AFTER_MINE_CALL);
   }
 

@@ -14,16 +14,9 @@ export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
     super(name, ['accounts', 'log', 'timer', 'cache', 'event']);
 
-    this._web3 = null;
-    this._ethersProvider = null;
     this._blockListeners = {};
-    this._currentBlock = null;
     this._info = {};
     this._statusTimerDelay = TIMER_DEFAULT_DELAY;
-    this._defaultEmitter = null;
-    this._transactionSettings = null;
-    this._blockSub = null;
-    this._interval = null;
     Web3ServiceList.push(this);
   }
 
@@ -91,21 +84,6 @@ export default class Web3Service extends PrivateService {
     return new this._web3.eth.Contract(abi, address);
   }
 
-  subscribeNewBlocks(cb) {
-    this._blockSub = this.subscribe('newBlockHeaders').on(
-      'data',
-      blockHeader => {
-        cb(blockHeader);
-      }
-    );
-  }
-
-  unsubscribeNewBlocks() {
-    this._blockSub.unsubscribe((err, success) => {
-      if (!success) throw new Error(err);
-    });
-  }
-
   initialize(settings) {
     this.get('log').info('Web3 is initializing...');
     this._defaultEmitter = this.get('event');
@@ -122,14 +100,12 @@ export default class Web3Service extends PrivateService {
         'getBlock',
         'getPastLogs',
         'getTransaction',
-        'getTransactionReceipt'
+        'getTransactionReceipt',
+        'subscribe'
       ].reduce((acc, method) => {
         acc[method] = (...args) => this._web3.eth[method](...args);
         return acc;
-      }, {}),
-      {
-        subscribe: (...args) => this._web3.eth.subscribe(...args)
-      }
+      }, {})
     );
 
     this.eth = new Proxy(this, {
@@ -218,19 +194,16 @@ export default class Web3Service extends PrivateService {
 
   _listenForNewBlocks() {
     if (this.usingWebsockets()) {
-      this.subscribeNewBlocks(async data => {
-        this._updateBlockNumber(data.number);
-      });
+      this._newBlocksSubscription = this.subscribe('newBlockHeaders').on(
+        'data',
+        data => this._updateBlockNumber(data.number)
+      );
     } else {
       const updateBlocks = async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
-        if (this._currentBlock !== null && blockNumber > this._currentBlock) {
-          // If any blocks are not caught, iterate through those that are missed to the newest retrieved
-          for (let i = this._currentBlock + 1; i < blockNumber + 1; i++) {
-            this._updateBlockNumber(i);
-          }
-        } else {
-          this._updateBlockNumber(blockNumber);
+        if (!this._currentBlock) this._currentBlock = blockNumber - 1;
+        for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
+          this._updateBlockNumber(i);
         }
       };
       this._updateBlocksInterval = setInterval(
@@ -246,19 +219,6 @@ export default class Web3Service extends PrivateService {
     }
 
     this._blockListeners['*'].push(callback);
-  }
-
-  onBlock(number, callback) {
-    // schedule a function to execute on a block ahead in time
-    if (number < this.blockNumber()) {
-      throw new Error('cannot schedule a callback back in time');
-    }
-
-    if (!this._blockListeners[number]) {
-      this._blockListeners[number] = [];
-    }
-
-    this._blockListeners[number].push(callback);
   }
 
   async waitForBlockNumber(blockNumber) {
@@ -300,9 +260,11 @@ export default class Web3Service extends PrivateService {
 
   _removeBlockUpdates() {
     if (this.usingWebsockets()) {
-      this.unsubscribeNewBlocks();
+      this._newBlocksSubscription.unsubscribe((err, success) => {
+        if (!success) throw new Error(err);
+      });
     } else {
-      clearTimeout(this._interval);
+      clearInterval(this._updateBlocksInterval);
     }
   }
 
@@ -313,7 +275,6 @@ export default class Web3Service extends PrivateService {
     });
 
     this.manager().onDeauthenticated(() => {
-      this._removeBlockUpdates();
       this.get('timer').disposeTimer(TIMER_AUTHENTICATION);
     });
   }
