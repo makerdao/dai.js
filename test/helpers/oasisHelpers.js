@@ -18,10 +18,8 @@ export default async function createDaiAndPlaceLimitOrder(
 async function placeLimitOrder(oasisExchangeService, sellDai) {
   const wethToken = oasisExchangeService.get('token').getToken(WETH);
   const wethAddress = wethToken.address();
-  const daiAddress = oasisExchangeService
-    .get('token')
-    .getToken(DAI)
-    .address();
+  const daiToken = oasisExchangeService.get('token').getToken(DAI);
+  const daiAddress = daiToken.address();
   const oasisAddress = oasisExchangeService
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC).address;
@@ -32,7 +30,7 @@ async function placeLimitOrder(oasisExchangeService, sellDai) {
 
   await wethToken.deposit('1');
   await wethToken.approveUnlimited(oasisAddress);
-
+  await daiToken.approveUnlimited(oasisAddress);
   return offer(
     oasisExchangeService,
     utils.parseEther('0.5'),
@@ -54,6 +52,7 @@ async function offer(
   const oasisContract = oasisExchangeService
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC);
+
   const tx = await oasisContract.offer(
     payAmount,
     payTokenAddress,
