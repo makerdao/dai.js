@@ -273,7 +273,7 @@ test('stores transaction settings from config', async () => {
   const service = buildTestService();
   await service.manager().authenticate();
   const settings = service.transactionSettings();
-  expect(settings).toEqual({ gasPrice: 1 });
+  expect(settings).toEqual({ gasLimit: 4000000, gasPrice: 1 });
 });
 
 test('stores confirmed block count from config', async () => {
