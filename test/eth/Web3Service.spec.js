@@ -60,7 +60,6 @@ function buildTestService(key, statusTimerDelay = 5000) {
   const config = {
     web3: {
       statusTimerDelay,
-      provider: { type: ProviderType.TEST },
       transactionSettings: {
         gasPrice: 1
       }
@@ -273,15 +272,12 @@ test('stores transaction settings from config', async () => {
   const service = buildTestService();
   await service.manager().authenticate();
   const settings = service.transactionSettings();
-  expect(settings).toEqual({ gasPrice: 1 });
+  expect(settings).toEqual({ gasLimit: 4000000, gasPrice: 1 });
 });
 
 test('stores confirmed block count from config', async () => {
   const config = {
-    web3: {
-      provider: { type: ProviderType.TEST },
-      confirmedBlockCount: 8
-    }
+    web3: { confirmedBlockCount: 8 }
   };
   const service = buildTestServiceCore('web3', config);
   await service.manager().authenticate();

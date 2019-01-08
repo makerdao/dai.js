@@ -1,5 +1,4 @@
 import contracts from '../../contracts/contracts';
-import { utils as ethersUtils } from 'ethers';
 import { getCurrency, DAI, ETH, USD } from './Currency';
 
 export default class ProxyCdp {
@@ -34,66 +33,11 @@ export default class ProxyCdp {
     });
   }
 
-  _getDsProxyAddress() {
-    const dsProxyFactoryContract = this._smartContractService.getContractByName(contracts.DS_PROXY_FACTORY); // prettier-ignore
-    const currentAccount = this._smartContractService
-      .get('web3')
-      .currentAccount();
-
-    const self = this;
-    return new Promise(resolve => {
-      // sender = ProxyRegistry, owner = you, proxy = new DSProxy address, cache = DSProxyCache
-      // eslint-disable-next-line
-      dsProxyFactoryContract.oncreated = function(sender, owner, proxy, cache) {
-        if (currentAccount.toLowerCase() == owner.toLowerCase()) {
-          this.removeListener();
-          self.dsProxyAddress = proxy.toLowerCase();
-          resolve(self.getDsProxyAddress);
-        }
-      };
-    });
-  }
-
-  _getCdpId(saiProxyAddress, tubContract, dsProxyAddressPromise) {
-    return new Promise(resolve => {
-      // If using an existing DSProxy, listen for the LogNewCup event
-      const existingDsProxyAddress = this.dsProxyAddress;
-      if (existingDsProxyAddress) {
-        tubContract.onlognewcup = function(address, cdpIdBytes32) {
-          if (existingDsProxyAddress == address.toLowerCase()) {
-            const cdpId = ethersUtils.bigNumberify(cdpIdBytes32).toNumber();
-            this.removeListener();
-            resolve(cdpId);
-          }
-        };
-      }
-      // If a new DSProxy instance is being created at the same time as the cup,
-      // listen for the give event (via DSNote) rather than the LogNewCup event
-      else {
-        const provider = this._smartContractService
-          .get('web3')
-          .ethersProvider();
-        const topics = [
-          ethersUtils.id('give(bytes32,address)').substring(0, 10) + '0'.repeat(56), // prettier-ignore
-          '0x000000000000000000000000' + saiProxyAddress.substring(2)
-        ];
-        provider.on(topics, log => {
-          Promise.resolve(dsProxyAddressPromise).then(() => {
-            const proxyInLog = '0x' + log.topics[3].substr(26).toLowerCase();
-            if (this.dsProxyAddress === proxyInLog) {
-              resolve(ethersUtils.bigNumberify(log.topics[2]).toNumber());
-            }
-          });
-        });
-      }
-    });
-  }
-
   _create({ lockAndDraw = false, amountEth = null, amountDai = null } = {}) {
     const tub = this._smartContractService.getContractByName(contracts.SAI_TUB);
     const saiProxy = this._smartContractService.getContractByName(contracts.SAI_PROXY); // prettier-ignore
 
-    let method, args, dsProxyAddressPromise;
+    let method, args;
     if (!this.dsProxyAddress) {
       const proxyRegistryAddress = this._smartContractService.getContractAddressByName(contracts.PROXY_REGISTRY); // prettier-ignore
 
@@ -132,7 +76,6 @@ export default class ProxyCdp {
           }
         ];
       }
-      dsProxyAddressPromise = this._getDsProxyAddress();
     } else {
       if (lockAndDraw) {
         const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
@@ -173,15 +116,32 @@ export default class ProxyCdp {
       }
     }
 
+    const getId = txo => {
+      let log;
+      switch (txo.metadata.method) {
+        case 'createAndOpen':
+          log = txo.receipt.logs[5];
+          break;
+        case 'createOpenLockAndDraw':
+          log = txo.receipt.logs[5];
+          break;
+        case 'lockAndDraw':
+          log = txo.receipt.logs[2];
+          break;
+        case 'open':
+          log = txo.receipt.logs[2];
+      }
+
+      if (!this.dsProxyAddress) {
+        this.dsProxyAddress = txo.receipt.logs[0].address;
+      }
+
+      return parseInt(log.data, 16);
+    };
+
     const promise = (async () => {
-      // this "no-op await" is necessary for the inner reference to the
-      // outer promise to become valid
-      await 0;
-      const results = await Promise.all([
-        this._getCdpId(saiProxy.address, tub, dsProxyAddressPromise),
-        saiProxy[method](...args)
-      ]);
-      this.id = results[0];
+      const txo = await saiProxy[method](...args);
+      this.id = getId(txo);
       return this;
     })();
     this._transactionObject = promise;

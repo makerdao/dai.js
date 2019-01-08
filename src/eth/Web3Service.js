@@ -3,6 +3,8 @@ import { promisify, promisifyMethods, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
+import ProviderType from './web3/ProviderType';
+import makeSigner from './web3/ShimEthersSigner';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -46,12 +48,27 @@ export default class Web3Service extends PrivateService {
     return this._ethersProvider;
   }
 
+  getEthersSigner() {
+    if (this.usingWebsockets()) {
+      if (!this._ethersSigner) this._ethersSigner = makeSigner(this);
+      return this._ethersSigner;
+    } else {
+      return this._ethersProvider.getSigner();
+    }
+  }
+
   web3Provider() {
     return this._web3.currentProvider;
   }
 
   transactionSettings() {
     return this._transactionSettings;
+  }
+
+  usingWebsockets() {
+    return (
+      this._serviceManager._settings.provider.type === ProviderType.WEBSOCKET
+    );
   }
 
   confirmedBlockCount() {

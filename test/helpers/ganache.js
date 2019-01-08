@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 const ganacheAddress = 'http://localhost:2000';
 let requestCount = 0;
 
-function callGanache(method, params = []) {
+export function callGanache(method, params = []) {
   return fetch(ganacheAddress, {
     method: 'POST',
     headers: {
