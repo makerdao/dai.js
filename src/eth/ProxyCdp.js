@@ -11,7 +11,6 @@ export default class ProxyCdp {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
     this._transactionManager = this._smartContractService.get('transactionManager'); // prettier-ignore
-    this._web3Service = this._smartContractService.get('web3');
 
     if (dsProxyAddress) this.dsProxyAddress = dsProxyAddress.toLowerCase();
     if (lockAndDraw) {
@@ -30,47 +29,6 @@ export default class ProxyCdp {
       },
       DEBT: {
         dai: () => this.getDebtValue()
-      }
-    });
-  }
-
-  _getDsProxyAddress() {
-    const dsProxyFactoryContract = this._smartContractService.getContractByName(contracts.DS_PROXY_FACTORY); // prettier-ignore
-    const currentAccount = this._smartContractService
-      .get('web3')
-      .currentAccount();
-
-    const self = this;
-    return new Promise(async resolve => {
-      // sender = ProxyRegistry, owner = you, proxy = new DSProxy address, cache = DSProxyCache
-      // eslint-disable-next-line
-
-      if (this._web3Service.usingWebsockets()) {
-        const dsProxyFactory = this._smartContractService._getContractInfo(
-          contracts.DS_PROXY_FACTORY
-        );
-        const log = await this._web3Service.waitForMatchingEvent(
-          dsProxyFactory,
-          'Created',
-          log => {
-            return currentAccount.toLowerCase() == log.owner.toLowerCase();
-          }
-        );
-        self.dsProxyAddress = log.proxy;
-        resolve(self.dsProxyAddress);
-      } else {
-        dsProxyFactoryContract.oncreated = function(
-          sender,
-          owner,
-          proxy
-          //cache
-        ) {
-          if (currentAccount.toLowerCase() == owner.toLowerCase()) {
-            this.removeListener();
-            self.dsProxyAddress = proxy.toLowerCase();
-            resolve(self.dsProxyAddress);
-          }
-        };
       }
     });
   }
@@ -118,7 +76,6 @@ export default class ProxyCdp {
           }
         ];
       }
-      this._getDsProxyAddress();
     } else {
       if (lockAndDraw) {
         const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
@@ -159,33 +116,32 @@ export default class ProxyCdp {
       }
     }
 
-    const getId = proxy => {
-      const txObj = this._transactionManager.getTransaction(proxy);
-      return new Promise(resolve => {
-        txObj.onMined(async () => {
-          let log;
-          switch (txObj.metadata.method) {
-            case 'createAndOpen':
-              log = txObj.receipt.logs[5];
-              break;
-            case 'createOpenLockAndDraw':
-              log = txObj.receipt.logs[5];
-              break;
-            case 'lockAndDraw':
-              log = txObj.receipt.logs[2];
-              break;
-            case 'open':
-              log = txObj.receipt.logs[2];
-          }
+    const getId = txo => {
+      let log;
+      switch (txo.metadata.method) {
+        case 'createAndOpen':
+          log = txo.receipt.logs[5];
+          break;
+        case 'createOpenLockAndDraw':
+          log = txo.receipt.logs[5];
+          break;
+        case 'lockAndDraw':
+          log = txo.receipt.logs[2];
+          break;
+        case 'open':
+          log = txo.receipt.logs[2];
+      }
 
-          resolve(this._web3Service._web3.utils.hexToNumber(log.data));
-        });
-      });
+      if (!this.dsProxyAddress) {
+        this.dsProxyAddress = txo.receipt.logs[0].address;
+      }
+
+      return parseInt(log.data, 16);
     };
 
     const promise = (async () => {
-      const proxy = saiProxy[method](...args);
-      this.id = await getId(proxy);
+      const txo = await saiProxy[method](...args);
+      this.id = getId(txo);
       return this;
     })();
     this._transactionObject = promise;
