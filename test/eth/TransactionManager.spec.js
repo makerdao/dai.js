@@ -15,13 +15,7 @@ function buildTestServices() {
     smartContract: true,
     transactionManager: true,
     web3: {
-      provider: {
-        type: 'TEST'
-      },
-      transactionSettings: {
-        gasLimit: 1234567
-      },
-      pollingInterval: 50
+      transactionSettings: { gasLimit: 1234567 }
     }
   });
   const smartContract = container.service('smartContract');

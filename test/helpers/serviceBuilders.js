@@ -46,20 +46,18 @@ export function resetCache() {
   cache.storage = {};
 }
 
-const defaultProviderConfig = process.env.TEST_WS
+export const defaultConfig = process.env.TEST_WS
   ? websocketProviderConfig
   : httpProviderConfig;
 
 export function buildTestContainer(settings = {}) {
-  let providerConfig = defaultProviderConfig;
+  let config = defaultConfig;
   if (has(settings, 'useHttp')) {
-    providerConfig = settings.useHttp
-      ? httpProviderConfig
-      : websocketProviderConfig;
+    config = settings.useHttp ? httpProviderConfig : websocketProviderConfig;
     delete settings.useHttp;
   }
 
-  return new DefaultServiceProvider(merge({}, providerConfig, settings));
+  return new DefaultServiceProvider(merge({}, config, settings));
 }
 
 export function buildTestService(name, settings) {

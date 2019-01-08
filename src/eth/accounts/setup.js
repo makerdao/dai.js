@@ -44,12 +44,6 @@ export async function setupEngine(settings) {
           ? getWebsocketProvider()
           : getHttpProvider();
       break;
-    case ProviderType.TEST:
-      result.provider = getHttpProvider({
-        type: ProviderType.HTTP,
-        url: 'http://localhost:2000'
-      });
-      break;
     default:
       throw new Error('provider type must be defined');
   }
