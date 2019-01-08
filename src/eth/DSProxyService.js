@@ -17,9 +17,7 @@ export default class DSProxyService extends PrivateService {
     return new Contract(
       this._registryInfo().address,
       this._registryInfo().abi,
-      this.get('web3')
-        .ethersProvider()
-        .getSigner()
+      this.get('web3').getEthersSigner()
     );
   }
 
@@ -91,9 +89,7 @@ export default class DSProxyService extends PrivateService {
     return new Contract(
       address,
       dappHub.dsProxy,
-      this.get('web3')
-        .ethersProvider()
-        .getSigner()
+      this.get('web3').getEthersSigner()
     );
   }
 

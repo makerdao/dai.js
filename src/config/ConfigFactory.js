@@ -128,17 +128,6 @@ export default class ConfigFactory {
       };
     }
 
-    // default settings for transactions
-    if (options.transactionSettings) {
-      config.transactionSettings = options.transactionSettings;
-    }
-
-    // default blocks to wait before resolving transactions
-    // as confirmed
-    if (options.confirmedBlockCount) {
-      config.confirmedBlockCount = options.confirmedBlockCount;
-    }
-
     return config;
   }
 }
