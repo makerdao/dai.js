@@ -22,58 +22,109 @@ beforeEach(async () => {
   await buildTestOasisDirectService();
 });
 
-test('get buy amount', async () => {
-  await createDaiAndPlaceLimitOrder(service);
-  const buyAmount = await service.getBuyAmount('WETH', 'DAI', '0.01');
-  expect(Object.keys(buyAmount)).toEqual(['_bn']);
-  expect(buyAmount.toString()).toEqual('500000000000000');
+describe('format contract call', () => {
+  test('set contract method', () => {
+    const buyEth = service._setMethod('DAI', 'ETH', 'sellAllAmount');
+    const payEth = service._setMethod('ETH', 'DAI', 'sellAllAmount');
+    const sell = service._setMethod('DAI', 'MKR', 'sellAllAmount');
+    expect(buyEth).toEqual('sellAllAmountBuyEth');
+    expect(payEth).toEqual('sellAllAmountPayEth');
+    expect(sell).toEqual('sellAllAmount');
+  });
+
+  test('set contract parameters', async () => {
+    const otcAddress = service
+      .get('smartContract')
+      .getContractByName('MAKER_OTC').address;
+    const daiAddress = service
+      .get('token')
+      .getToken('DAI')
+      .address();
+    const wethAddress = service
+      .get('token')
+      .getToken('WETH')
+      .address();
+    const normalParams = await service._buildParams(
+      'DAI',
+      'DAI',
+      '0.01',
+      'WETH',
+      0
+    );
+    const ethParams = await service._buildParams(
+      'ETH',
+      'WETH',
+      '0.01',
+      'DAI',
+      100
+    );
+
+    expect(normalParams.length).toEqual(5);
+    expect(normalParams[0]).toEqual(otcAddress);
+    expect(normalParams[1]).toEqual(daiAddress);
+    expect(Object.keys(normalParams[2])).toEqual(['_bn']);
+    expect(normalParams[3]).toEqual(wethAddress);
+    expect(Object.keys(normalParams[4])).toEqual(['_bn']);
+
+    expect(ethParams.length).toEqual(4);
+    expect(ethParams[0]).toEqual(otcAddress);
+    expect(ethParams[1]).toEqual(wethAddress);
+    expect(ethParams[2]).toEqual(daiAddress);
+    expect(Object.keys(ethParams[3])).toEqual(['_bn']);
+  });
+
+  test('set transaction options', () => {
+    const normalOptions = service._buildOptions({ value: 1 }, 'DAI');
+    const ethOptions = service._buildOptions({ value: 1 }, 'ETH');
+    expect(Object.keys(normalOptions)).toEqual(['otc', 'dsProxy']);
+    expect(Object.keys(ethOptions)).toEqual(['value', 'otc', 'dsProxy']);
+  });
 });
 
-test('get pay amount', async () => {
-  await createDaiAndPlaceLimitOrder(service);
-  const payAmount = await service.getPayAmount('DAI', 'WETH', '0.01');
-  expect(Object.keys(payAmount)).toEqual(['_bn']);
-  expect(payAmount.toString()).toEqual('200000000000000000');
+describe('buyAmount', () => {
+  let buyAmount;
+
+  beforeEach(async () => {
+    await createDaiAndPlaceLimitOrder(service);
+    buyAmount = await service.getBuyAmount('WETH', 'DAI', '0.01');
+  });
+
+  test('get buy amount', async () => {
+    expect(Object.keys(buyAmount)).toEqual(['_bn']);
+    expect(buyAmount.toString()).toEqual('500000000000000');
+  });
+
+  test('get minBuyAmount', async () => {
+    const limit = await service._minBuyAmount('WETH', 'DAI', '0.01');
+    expect(limit).toEqual(490000000000000);
+  });
+
+  test('use cached buyAmount to determine limit', () => {
+    expect(buyAmount).toEqual(service._buyAmount);
+  });
 });
 
-test('get minBuyAmount', async () => {
-  await createDaiAndPlaceLimitOrder(service);
-  const limit = await service._minBuyAmount('WETH', 'DAI', '0.01');
-  expect(limit).toEqual(490000000000000);
-});
+describe('payAmount', () => {
+  let payAmount;
 
-test('get maxPayAmount', async () => {
-  await createDaiAndPlaceLimitOrder(service);
-  const limit = await service._maxPayAmount('DAI', 'WETH', '0.01');
-  expect(limit).toEqual(204000000000000000);
-});
+  beforeEach(async () => {
+    await createDaiAndPlaceLimitOrder(service);
+    payAmount = await service.getPayAmount('DAI', 'WETH', '0.01');
+  });
 
-test('set contract method automatically', () => {
-  const buyEth = service._setMethod('DAI', 'ETH', 'sellAllAmount');
-  const payEth = service._setMethod('ETH', 'DAI', 'sellAllAmount');
-  const sell = service._setMethod('DAI', 'MKR', 'sellAllAmount');
-  expect(buyEth).toEqual('sellAllAmountBuyEth');
-  expect(payEth).toEqual('sellAllAmountPayEth');
-  expect(sell).toEqual('sellAllAmount');
-});
+  test('get pay amount', () => {
+    expect(Object.keys(payAmount)).toEqual(['_bn']);
+    expect(payAmount.toString()).toEqual('200000000000000000');
+  });
 
-test('set contract parameters', async () => {
-  const normalParams = await service._buildParams(
-    'DAI',
-    'DAI',
-    '0.01',
-    'WETH',
-    0
-  );
-  const ethParams = await service._buildParams(
-    'ETH',
-    'WETH',
-    '0.01',
-    'DAI',
-    100
-  );
-  expect(normalParams.length).toEqual(5);
-  expect(ethParams.length).toEqual(4);
+  test('get maxPayAmount', async () => {
+    const limit = await service._maxPayAmount('DAI', 'WETH', '0.01');
+    expect(limit).toEqual(204000000000000000);
+  });
+
+  test('use cached payAmount to determine limit', () => {
+    expect(payAmount).toEqual(service._payAmount);
+  });
 });
 
 describe('trade with existing dsproxy', () => {
