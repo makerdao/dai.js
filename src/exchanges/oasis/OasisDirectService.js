@@ -36,7 +36,7 @@ export default class OasisDirectService extends PrivateService {
       buyToken,
       minFillAmount
     );
-    this._buildOptions(options, sell);
+    this._buildOptions(options, sell, method);
 
     if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisSellOrder.build(
@@ -66,7 +66,7 @@ export default class OasisDirectService extends PrivateService {
       sellToken,
       maxPayAmount
     );
-    this._buildOptions(options, sell);
+    this._buildOptions(options, sell, method);
 
     if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisBuyOrder.build(
@@ -185,14 +185,14 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  _buildOptions(options, sellToken) {
+  _buildOptions(options, sellToken, method) {
     if (sellToken === 'ETH') {
       options.value = this._valueForContract(options.value, 'WETH');
     } else {
       delete options.value;
     }
     options.otc = this._otc();
-    options.dsProxy = true;
+    if (!method.includes('create')) options.dsProxy = true;
     return options;
   }
 

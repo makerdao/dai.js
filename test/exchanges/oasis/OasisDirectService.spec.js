@@ -149,7 +149,7 @@ const sharedTests = () => {
     });
 
     // Something needs approval that's not getting it
-    test('sell all amount, pay eth', async () => {
+    test.only('sell all amount, pay eth', async () => {
       try {
         await createDaiAndPlaceLimitOrder(service, true);
         await service.sell('ETH', 'DAI', { value: '0.01' });
@@ -184,7 +184,7 @@ describe('trade with existing dsproxy', () => {
     if (!(await proxy())) await service.get('proxy').build();
   });
 
-  sharedTests();
+  // sharedTests();
 });
 
 describe('create dsproxy and execute', () => {
