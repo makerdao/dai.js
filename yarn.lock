@@ -8894,9 +8894,9 @@ web3-provider-engine@^13.3.2:
     xhr "^2.2.0"
     xtend "^4.0.1"
 
-web3-provider-engine@makerdao/provider-engine#dist-difficulty:
+web3-provider-engine@makerdao/provider-engine#kovan-fix-dist:
   version "14.0.4"
-  resolved "https://codeload.github.com/makerdao/provider-engine/tar.gz/00b09a477099390e4ae6a2dbd27b88d1c10b2157"
+  resolved "https://codeload.github.com/makerdao/provider-engine/tar.gz/7c4b187809f156409473246de15dc595e1fe3356"
   dependencies:
     async "^2.5.0"
     backoff "^2.5.0"
