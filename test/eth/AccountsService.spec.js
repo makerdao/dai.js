@@ -71,6 +71,31 @@ test('account with custom subprovider implementation', async () => {
   expect(setEngine).toBeCalled();
 });
 
+test('addAccount throws with duplicate name', async () => {
+  const service = new AccountsService();
+  service._engine = mockEngine();
+  const a1 = TestAccountProvider.nextAccount();
+  const a2 = TestAccountProvider.nextAccount();
+  try {
+    await service.addAccount('f00', { type: 'privateKey', key: a1.key });
+    await service.addAccount('f00', { type: 'privateKey', key: a2.key });
+  } catch (err) {
+    expect(err.message).toMatch(/An account with this name already exists/);
+  }
+});
+
+test('addAccount throws with duplicate address', async () => {
+  const service = new AccountsService();
+  service._engine = mockEngine();
+  const a1 = TestAccountProvider.nextAccount();
+  try {
+    await service.addAccount('f00', { type: 'privateKey', key: a1.key });
+    await service.addAccount('bar', { type: 'privateKey', key: a1.key });
+  } catch (err) {
+    expect(err.message).toMatch(/An account with this address already exists/);
+  }
+});
+
 test('currentAccount', async () => {
   const service = new AccountsService();
   service._engine = mockEngine();
