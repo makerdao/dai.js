@@ -120,7 +120,7 @@ describe('buyAmount', () => {
 
   test('get minBuyAmount', async () => {
     const limit = await service._minBuyAmount('WETH', 'DAI', '0.01');
-    expect(limit).toEqual(490000000000000);
+    expect(limit.toString()).toEqual('490000000000000000000000000000000');
   });
 
   test('use cached buyAmount to determine limit', () => {
@@ -143,7 +143,7 @@ describe('payAmount', () => {
 
   test('get maxPayAmount', async () => {
     const limit = await service._maxPayAmount('DAI', 'WETH', '0.01');
-    expect(limit).toEqual(204000000000000000);
+    expect(limit.toString()).toEqual('204000000000000000000000000000000000');
   });
 
   test('use cached payAmount to determine limit', () => {

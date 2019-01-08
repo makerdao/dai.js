@@ -116,7 +116,7 @@ export default class OasisDirectService extends PrivateService {
     const buyAmount = this._buyAmount
       ? this._buyAmount
       : await this.getBuyAmount(buyToken, payToken, payAmount);
-    return buyAmount * (1 - this._slippage);
+    return this._valueForContract(buyAmount * (1 - this._slippage), buyToken);
   }
 
   async _maxPayAmount(payToken, buyToken, buyAmount) {
@@ -124,7 +124,7 @@ export default class OasisDirectService extends PrivateService {
     const payAmount = this._payAmount
       ? this._payAmount
       : await this.getPayAmount(payToken, buyToken, buyAmount);
-    return payAmount * (1 + this._slippage);
+    return this._valueForContract(payAmount * (1 + this._slippage), payToken);
   }
 
   _setMethod(sellToken, buyToken, method, proxy) {
@@ -161,7 +161,7 @@ export default class OasisDirectService extends PrivateService {
     sendToken,
     amount,
     buyToken,
-    minOrMax,
+    limit,
     method,
     sell = true
   ) {
@@ -176,10 +176,6 @@ export default class OasisDirectService extends PrivateService {
       .getToken(sendToken)
       .address();
     const orderAmount = this._valueForContract(amount, sendToken);
-
-    // FIXME: limit functions should return valueForContract
-    // since buyToken isn't always the correct second parameter
-    const limit = this._valueForContract(minOrMax, buyToken, orderAmount);
 
     if (method.includes('create')) {
       return this._createAndExecuteParams(
