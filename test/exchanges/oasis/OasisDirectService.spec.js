@@ -48,6 +48,34 @@ test('get maxPayAmount', async () => {
   expect(limit).toEqual(204000000000000000);
 });
 
+test('set contract method automatically', () => {
+  const buyEth = service._setMethod('DAI', 'ETH', 'sellAllAmount');
+  const payEth = service._setMethod('ETH', 'DAI', 'sellAllAmount');
+  const sell = service._setMethod('DAI', 'MKR', 'sellAllAmount');
+  expect(buyEth).toEqual('sellAllAmountBuyEth');
+  expect(payEth).toEqual('sellAllAmountPayEth');
+  expect(sell).toEqual('sellAllAmount');
+});
+
+test('set contract parameters', async () => {
+  const normalParams = await service._buildParams(
+    'DAI',
+    'DAI',
+    '0.01',
+    'WETH',
+    0
+  );
+  const ethParams = await service._buildParams(
+    'ETH',
+    'WETH',
+    '0.01',
+    'DAI',
+    100
+  );
+  expect(normalParams.length).toEqual(5);
+  expect(ethParams.length).toEqual(4);
+});
+
 describe('trade with existing dsproxy', () => {
   beforeEach(async () => {
     if (!proxyAccount) {
@@ -77,7 +105,7 @@ describe('trade with existing dsproxy', () => {
   });
 
   // Something needs approval that's not getting it
-  test.only('sell all amount, pay eth', async () => {
+  test('sell all amount, pay eth', async () => {
     try {
       await service
         .get('allowance')
