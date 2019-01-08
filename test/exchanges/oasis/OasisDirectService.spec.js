@@ -127,6 +127,53 @@ describe('payAmount', () => {
   });
 });
 
+const sharedTests = () => {
+  beforeEach(async () => {
+    await createDaiAndPlaceLimitOrder(service);
+    await service.get('allowance').requireAllowance(DAI, proxy());
+    await service.get('allowance').requireAllowance(WETH, proxy());
+  });
+
+  describe('sell', () => {
+    test('sell all amount', async () => {
+      await service.sell('DAI', 'WETH', { value: '0.01' });
+    });
+
+    // Something needs approval that's not getting it
+    test('sell all amount, buy eth', async () => {
+      try {
+        await service.sell('DAI', 'ETH', { value: '0.01' });
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    // Something needs approval that's not getting it
+    test('sell all amount, pay eth', async () => {
+      try {
+        await createDaiAndPlaceLimitOrder(service, true);
+        await service.sell('ETH', 'DAI', { value: '0.01' });
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+
+  describe('buy', () => {
+    test('buy all amount', async () => {
+      try {
+        await service.buy('WETH', 'DAI', { value: '0.01' });
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    xtest('buy all amount, pay eth', async () => {});
+
+    xtest('buy all amount, buy eth', async () => {});
+  });
+};
+
 describe('trade with existing dsproxy', () => {
   beforeEach(async () => {
     if (!proxyAccount) {
@@ -137,64 +184,7 @@ describe('trade with existing dsproxy', () => {
     if (!(await proxy())) await service.get('proxy').build();
   });
 
-  test('sell all amount', async () => {
-    await createDaiAndPlaceLimitOrder(service);
-    await service.get('allowance').requireAllowance(DAI, proxy());
-    await service.sell('DAI', 'WETH', { value: '0.01' });
-  });
-
-  // Something needs approval that's not getting it
-  test('sell all amount, buy eth', async () => {
-    await createDaiAndPlaceLimitOrder(service);
-    await service.get('allowance').requireAllowance(DAI, proxy());
-    await service.get('allowance').requireAllowance(WETH, proxy());
-    try {
-      await service.sell('DAI', 'ETH', { value: '0.01' });
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  // Something needs approval that's not getting it
-  test('sell all amount, pay eth', async () => {
-    try {
-      await service
-        .get('allowance')
-        .requireAllowance(DAI, service.get('web3').currentAccount());
-      await service.get('allowance').requireAllowance(DAI, proxy());
-      await service.get('allowance').requireAllowance(WETH, proxy());
-      await createDaiAndPlaceLimitOrder(service, true);
-      await service.sell('ETH', 'DAI', { value: '0.01' });
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  test('buy all amount', async () => {
-    await createDaiAndPlaceLimitOrder(service);
-    await service.get('allowance').requireAllowance(DAI, proxy());
-    try {
-      await service.buy('WETH', 'DAI', { value: '0.01' });
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  xtest('buy all amount, pay eth', async () => {});
-
-  xtest('buy all amount, buy eth', async () => {});
+  sharedTests();
 });
 
-xdescribe('create dsproxy and execute', () => {
-  test('sell all amount', async () => {});
-
-  test('sell all amount, pay eth', async () => {});
-
-  test('sell all amount, buy eth', async () => {});
-
-  test('buy all amount', async () => {});
-
-  test('buy all amount, pay eth', async () => {});
-
-  test('buy all amount, buy eth', async () => {});
-});
+xdescribe('create dsproxy and execute', () => {});
