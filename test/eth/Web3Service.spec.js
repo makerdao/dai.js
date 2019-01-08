@@ -235,7 +235,7 @@ test('connect to ganache testnet with account 0x16fb9...', done => {
   service
     .manager()
     .connect()
-    .then(() => service.eth.getAccounts())
+    .then(() => service.getAccounts())
     .then(accounts => {
       expect(accounts[0].toLowerCase()).toEqual(expectedAccounts[0]);
       expect(accounts[1].toLowerCase()).toEqual(expectedAccounts[1]);
@@ -250,7 +250,7 @@ test('have ETH in test account', done => {
   service
     .manager()
     .connect()
-    .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
+    .then(() => service.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
       expect(Number(service._web3.utils.fromWei(balance))).toBeGreaterThan(50);
       done();

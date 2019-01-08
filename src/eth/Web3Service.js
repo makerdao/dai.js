@@ -54,12 +54,8 @@ export default class Web3Service extends PrivateService {
   }
 
   getEthersSigner() {
-    if (this.usingWebsockets()) {
-      if (!this._ethersSigner) this._ethersSigner = makeSigner(this);
-      return this._ethersSigner;
-    } else {
-      return this._ethersProvider.getSigner();
-    }
+    if (!this._ethersSigner) this._ethersSigner = makeSigner(this);
+    return this._ethersSigner;
   }
 
   web3Provider() {

@@ -28,7 +28,6 @@ export default class EthereumCdpService extends PrivateService {
       'conversion',
       'event',
       'price',
-      'proxy',
       'smartContract',
       'token'
     ]);

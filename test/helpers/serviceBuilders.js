@@ -40,12 +40,6 @@ export const httpProviderConfig = {
   log: false
 };
 
-const cache = { storage: {} };
-
-export function resetCache() {
-  cache.storage = {};
-}
-
 export const defaultConfig = process.env.TEST_WS
   ? websocketProviderConfig
   : httpProviderConfig;

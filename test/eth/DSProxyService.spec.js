@@ -102,22 +102,6 @@ describe('querying service for current proxy address', () => {
 
 describe('execute', () => {
   let maker, tubContract;
-  const expectedTxKeys = [
-    'hash',
-    'blockHash',
-    'blockNumber',
-    'transactionIndex',
-    'from',
-    'gasPrice',
-    'gasLimit',
-    'to',
-    'value',
-    'nonce',
-    'data',
-    'creates',
-    'networkId',
-    'wait'
-  ];
 
   beforeAll(async () => {
     maker = Maker.create('test', {
@@ -129,14 +113,14 @@ describe('execute', () => {
   });
 
   test('should execute without a provided proxy address', async () => {
-    const tx = await maker
+    const hash = await maker
       .service('proxy')
       .execute(tubContract, 'open', [], { gasLimit: 4000000 });
-    expect(Object.keys(tx)).toEqual(expectedTxKeys);
+    expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
 
   test('should execute with a provided proxy address', async () => {
-    const tx = await maker
+    const hash = await maker
       .service('proxy')
       .execute(
         tubContract,
@@ -145,7 +129,7 @@ describe('execute', () => {
         { gasLimit: 4000000 },
         maker.service('proxy').currentProxy()
       );
-    expect(Object.keys(tx)).toEqual(expectedTxKeys);
+    expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
 
   test('should throw error if no proxy is available', async () => {
