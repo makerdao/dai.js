@@ -193,10 +193,11 @@ describe('trade with existing dsproxy', () => {
 describe('create dsproxy and execute', () => {
   beforeEach(async () => {
     const accountService = service.get('web3').get('accounts');
-    await setNewAccount(accountService);
     await createDaiAndPlaceLimitOrder(service);
+    await setNewAccount(accountService);
   });
 
+  // Params are out of order for create
   test('sell all amount, pay eth', async () => {
     try {
       await createDaiAndPlaceLimitOrder(service, true);
