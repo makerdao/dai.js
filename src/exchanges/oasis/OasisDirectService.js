@@ -3,8 +3,6 @@ import { getCurrency, WETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
-// require dsproxy
-// use create and execute for pay eth functions
 // execute optional callbacks for allowance and build txns
 
 export default class OasisDirectService extends PrivateService {

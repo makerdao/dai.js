@@ -1,5 +1,5 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
-import { setProxyAccount } from '../../helpers/proxyHelpers';
+import { setProxyAccount, setNewAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
 import { transferMkr } from '../../helpers/proxyHelpers';
@@ -144,7 +144,7 @@ const sharedTests = () => {
       try {
         await service.sell('DAI', 'ETH', { value: '0.01' });
       } catch (err) {
-        console.error(err);
+        console.error(err.message);
       }
     });
 
@@ -154,7 +154,7 @@ const sharedTests = () => {
         await createDaiAndPlaceLimitOrder(service, true);
         await service.sell('ETH', 'DAI', { value: '0.01' });
       } catch (err) {
-        console.error(err);
+        console.error(err.message);
       }
     });
   });
@@ -164,7 +164,7 @@ const sharedTests = () => {
       try {
         await service.buy('WETH', 'DAI', { value: '0.01' });
       } catch (err) {
-        console.error(err);
+        console.error(err.message);
       }
     });
 
@@ -187,4 +187,11 @@ describe('trade with existing dsproxy', () => {
   sharedTests();
 });
 
-xdescribe('create dsproxy and execute', () => {});
+describe('create dsproxy and execute', () => {
+  beforeEach(async () => {
+    const accountService = service.get('web3').get('accounts');
+    await setNewAccount(accountService);
+  });
+
+  sharedTests();
+});
