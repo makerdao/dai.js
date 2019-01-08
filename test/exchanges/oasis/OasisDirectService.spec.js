@@ -2,7 +2,7 @@ import { buildTestService } from '../../helpers/serviceBuilders';
 import { setProxyAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import { DAI } from '../../../src/eth/Currency';
+import { DAI, WETH } from '../../../src/eth/Currency';
 import { transferMkr } from '../../helpers/proxyHelpers';
 
 let service, proxyAccount;
@@ -68,6 +68,7 @@ describe('trade with existing dsproxy', () => {
   test('sell all amount, buy eth', async () => {
     await createDaiAndPlaceLimitOrder(service);
     await service.get('allowance').requireAllowance(DAI, proxy());
+    await service.get('allowance').requireAllowance(WETH, proxy());
     try {
       await service.sell('DAI', 'ETH', { value: '0.01' });
     } catch (err) {
@@ -86,7 +87,7 @@ describe('trade with existing dsproxy', () => {
   });
 
   // The order of params is wrong here
-  test('buy all amount', async () => {
+  test.only('buy all amount', async () => {
     await createDaiAndPlaceLimitOrder(service);
     await service.get('allowance').requireAllowance(DAI, proxy());
     try {

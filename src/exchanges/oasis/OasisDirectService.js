@@ -61,9 +61,9 @@ export default class OasisDirectService extends PrivateService {
     );
     const params = await this._buildParams(
       sell,
-      sellToken,
-      options.value,
       buyToken,
+      options.value,
+      sellToken,
       maxPayAmount
     );
     this._buildOptions(options, sell);
