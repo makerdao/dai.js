@@ -1,0 +1,11 @@
+{
+  "web3": {
+    "provider": {
+      "type": "WEBSOCKET"
+    },
+    "transactionSettings": {
+      "gasLimit": 4000000
+    }
+  },
+  "exchange": "OasisExchangeService"
+}
