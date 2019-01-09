@@ -60,7 +60,6 @@ function buildTestService(key, statusTimerDelay = 5000) {
   const config = {
     web3: {
       statusTimerDelay,
-      provider: { type: ProviderType.TEST },
       transactionSettings: {
         gasPrice: 1
       }
@@ -236,7 +235,7 @@ test('connect to ganache testnet with account 0x16fb9...', done => {
   service
     .manager()
     .connect()
-    .then(() => service.eth.getAccounts())
+    .then(() => service.getAccounts())
     .then(accounts => {
       expect(accounts[0].toLowerCase()).toEqual(expectedAccounts[0]);
       expect(accounts[1].toLowerCase()).toEqual(expectedAccounts[1]);
@@ -251,7 +250,7 @@ test('have ETH in test account', done => {
   service
     .manager()
     .connect()
-    .then(() => service.eth.getBalance(TestAccountProvider.nextAddress()))
+    .then(() => service.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
       expect(Number(service._web3.utils.fromWei(balance))).toBeGreaterThan(50);
       done();
@@ -273,15 +272,12 @@ test('stores transaction settings from config', async () => {
   const service = buildTestService();
   await service.manager().authenticate();
   const settings = service.transactionSettings();
-  expect(settings).toEqual({ gasPrice: 1 });
+  expect(settings).toEqual({ gasLimit: 4000000, gasPrice: 1 });
 });
 
 test('stores confirmed block count from config', async () => {
   const config = {
-    web3: {
-      provider: { type: ProviderType.TEST },
-      confirmedBlockCount: 8
-    }
+    web3: { confirmedBlockCount: 8 }
   };
   const service = buildTestServiceCore('web3', config);
   await service.manager().authenticate();

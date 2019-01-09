@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -101,7 +101,7 @@
     "lodash.values": "^4.3.0",
     "promise-props": "^1.0.0",
     "toposort": "^2.0.2",
-    "web3": "^1.0.0-beta.36",
-    "web3-provider-engine": "makerdao/provider-engine#remove-provider-dist"
+    "web3": "1.0.0-beta.34",
+    "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
   }
 }

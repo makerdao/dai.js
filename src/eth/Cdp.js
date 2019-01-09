@@ -1,5 +1,4 @@
 import contracts from '../../contracts/contracts';
-import { utils as ethersUtils } from 'ethers';
 import { USD } from './Currency';
 
 export default class Cdp {
@@ -31,35 +30,10 @@ export default class Cdp {
       contracts.SAI_TUB
     );
 
-    const currentAccount = this._smartContractService
-      .get('web3')
-      .currentAccount();
-
-    const getId = new Promise(resolve => {
-      tubContract.onlognewcup = function(address, cdpIdBytes32) {
-        if (currentAccount.toLowerCase() == address.toLowerCase()) {
-          this.removeListener();
-          resolve(ethersUtils.bigNumberify(cdpIdBytes32).toNumber());
-        }
-      };
-    });
-
     const promise = (async () => {
-      // this "no-op await" is necessary for the inner reference to the
-      // outer promise to become valid
       await 0;
-      const results = await Promise.all([
-        getId,
-        tubContract.open({
-          metadata: {
-            action: {
-              name: 'open'
-            }
-          },
-          promise
-        })
-      ]);
-      this.id = results[0];
+      const txo = await tubContract.open({ promise });
+      this.id = parseInt(txo.receipt.logs[1].data, 16);
       return this;
     })();
 

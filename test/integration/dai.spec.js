@@ -2,7 +2,6 @@ import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
 import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
-import ProviderType from '../../src/eth/web3/ProviderType';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
 import { uniqueId } from '../../src/utils';
 
@@ -62,9 +61,9 @@ beforeAll(async () => {
       ? {
           web3: {
             transactionSettings: { gasLimit: 4000000 },
-            confirmedBlockCount: '0'
-          },
-          provider: { type: ProviderType.TEST }
+            confirmedBlockCount: '0',
+            pollingInterval: 50
+          }
         }
       : {
           privateKey: process.env.PRIVATE_KEY,
