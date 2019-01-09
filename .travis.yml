@@ -3,8 +3,6 @@ sudo: required
 language: node_js
 node_js:
 - '10'
-git:
-  submodules: false
 before_cache:
 - nix-collect-garbage -d
 - rm -rf node_modules/secp256k1/build
@@ -17,7 +15,6 @@ cache:
 before_install:
 - . scripts/install-dapptools.sh
 - npm i -g npm@latest yarn
-- git submodule update --init --recursive
 install:
 - yarn
 before_script:
