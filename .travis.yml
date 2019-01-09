@@ -3,24 +3,29 @@ sudo: required
 language: node_js
 node_js:
 - '10'
+git:
+  submodules: false
 before_cache:
 - nix-collect-garbage -d
+- rm -rf node_modules/secp256k1/build
 cache:
+  npm: true
   directories:
-  - node_modules
   - nix
+  - testchain
   timeout: 9000
 before_install:
 - . scripts/install-dapptools.sh
-- npm i -g npm@latest
+- npm i -g npm@latest yarn
+- git submodule update --init --recursive
 install:
-- npm install
-- npm run build:backend
-- npm run build:frontend
+- yarn
 before_script:
 - npm install -g codecov
 script:
-- npm run coverage
+- yarn build:backend
+- yarn build:frontend
+- yarn coverage
 - codecov
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
