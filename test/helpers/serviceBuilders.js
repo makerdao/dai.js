@@ -54,7 +54,8 @@ export function buildTestContainer(settings = {}) {
   return new DefaultServiceProvider(merge({}, config, settings));
 }
 
-export function buildTestService(name, settings) {
+export function buildTestService(name, settings = {}) {
+  if (!settings[name]) settings[name] = true;
   return buildTestContainer(settings).service(name);
 }
 

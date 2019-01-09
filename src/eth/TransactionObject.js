@@ -17,7 +17,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._web3Service = web3Service;
     this._nonceService = nonceService;
     this._timeStampSubmitted = new Date();
-    this.metadata = metadata;
+    this.metadata = metadata || {};
     this._confirmedBlockCount = this._web3Service.confirmedBlockCount();
   }
 
@@ -119,8 +119,10 @@ export default class TransactionObject extends TransactionLifeCycle {
       if (this.receipt.status == '0x1' || this.receipt.status == 1) {
         this.setMined();
       } else {
-        //transaction reverted
-        const revertMsg = `transaction with hash ${this.hash} reverted`;
+        const label = this.metadata.contract
+          ? `${this.metadata.contract}.${this.metadata.method}`
+          : 'transaction';
+        const revertMsg = `${label} ${this.hash} reverted`;
         log(revertMsg);
         throw new Error(revertMsg);
       }
