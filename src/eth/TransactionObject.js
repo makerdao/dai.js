@@ -89,17 +89,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       // be mined by this point. but on other nets, you still have to wait for
       // it to be mined.
       if (!tx.blockHash) {
-        const startTime = new Date();
-        log(`waiting for transaction ${this.hash.substring(8)}... to mine`);
-        for (let i = 0; i < 240; i++) {
-          // 20 minutes max
-          tx = await this._web3Service.getTransaction(this.hash);
-          if ((tx || {}).blockHash) break;
-          log('not mined yet');
-          await promiseWait(5000);
-        }
-        const elapsed = (new Date() - startTime) / 1000;
-        log(`mined ${this.hash.substring(8)}... done in ${elapsed}s`);
+        tx = await this._keepWaitingForTx();
       }
 
       gasPrice = tx.gasPrice;
@@ -148,5 +138,21 @@ export default class TransactionObject extends TransactionLifeCycle {
         this._waitForReceipt(retries - 1)
       );
     });
+  }
+
+  async _keepWaitingForTx() {
+    let tx;
+    const startTime = new Date();
+    log(`waiting for transaction ${this.hash.substring(8)}... to mine`);
+    for (let i = 0; i < 240; i++) {
+      // 20 minutes max
+      tx = await this._web3Service.getTransaction(this.hash);
+      if ((tx || {}).blockHash) break;
+      log('not mined yet');
+      await promiseWait(5000);
+    }
+    const elapsed = (new Date() - startTime) / 1000;
+    log(`mined ${this.hash.substring(8)}... done in ${elapsed}s`);
+    return tx;
   }
 }
