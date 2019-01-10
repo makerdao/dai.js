@@ -1,6 +1,7 @@
 import test from './presets/test.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
+import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
 import browser from './presets/browser.json';
 import merge from 'lodash.merge';
@@ -44,6 +45,10 @@ function loadPreset(name) {
       break;
     case 'http':
       preset = http;
+      break;
+    case 'ws':
+    case 'websocket':
+      preset = ws;
       break;
     case 'kovan':
       preset = kovan;
@@ -126,17 +131,6 @@ export default class ConfigFactory {
         ...config.accounts,
         default: { type: AccountType.PRIVATE_KEY, key: options.privateKey }
       };
-    }
-
-    // default settings for transactions
-    if (options.transactionSettings) {
-      config.transactionSettings = options.transactionSettings;
-    }
-
-    // default blocks to wait before resolving transactions
-    // as confirmed
-    if (options.confirmedBlockCount) {
-      config.confirmedBlockCount = options.confirmedBlockCount;
     }
 
     return config;

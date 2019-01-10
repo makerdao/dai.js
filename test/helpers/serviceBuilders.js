@@ -1,5 +1,6 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
+import { has, merge } from 'lodash';
 
 export const kovanProviderConfig = {
   web3: {
@@ -11,33 +12,50 @@ export const kovanProviderConfig = {
     }
   }
 };
-
-export const defaultProviderConfig = {
+export const websocketProviderConfig = {
   web3: {
-    provider: { type: ProviderType.TEST },
+    provider: {
+      type: ProviderType.WEBSOCKET,
+      url: 'ws://localhost:2000'
+    },
     transactionSettings: {
       gasLimit: 4000000
-    }
+    },
+    pollingInterval: 50
   },
   log: false
 };
 
-const cache = { storage: {} };
+export const httpProviderConfig = {
+  web3: {
+    provider: {
+      type: ProviderType.HTTP,
+      url: 'http://localhost:2000'
+    },
+    transactionSettings: {
+      gasLimit: 4000000
+    },
+    pollingInterval: 50
+  },
+  log: false
+};
 
-export function resetCache() {
-  cache.storage = {};
+export const defaultConfig = process.env.TEST_WS
+  ? websocketProviderConfig
+  : httpProviderConfig;
+
+export function buildTestContainer(settings = {}) {
+  let config = defaultConfig;
+  if (has(settings, 'useHttp')) {
+    config = settings.useHttp ? httpProviderConfig : websocketProviderConfig;
+    delete settings.useHttp;
+  }
+
+  return new DefaultServiceProvider(merge({}, config, settings));
 }
 
-export function buildTestContainer(settings) {
-  return new DefaultServiceProvider({
-    ...defaultProviderConfig,
-    // ...kovanProviderConfig,
-    // cache,
-    ...settings
-  });
-}
-
-export function buildTestService(name, settings) {
+export function buildTestService(name, settings = {}) {
+  if (!settings[name]) settings[name] = true;
   return buildTestContainer(settings).service(name);
 }
 
