@@ -32,9 +32,7 @@ export default class Web3Service extends PrivateService {
     return parseInt(result);
   }
 
-  // FIXME this name is confusing--see if this can be gotten rid of entirely; if
-  // not, just rename it to currentAddress
-  currentAccount() {
+  currentAddress() {
     return this.get('accounts').currentAddress();
   }
 
@@ -153,7 +151,7 @@ export default class Web3Service extends PrivateService {
     this.get('log').info('Web3 is authenticating...');
 
     this._defaultEmitter.emit('web3/AUTHENTICATED', {
-      account: this.currentAccount()
+      account: this.currentAddress()
     });
     this._installDeauthenticationCheck();
   }
@@ -337,6 +335,6 @@ export default class Web3Service extends PrivateService {
     if (this.get('accounts').hasNonProviderAccount())
       return this._isStillConnected();
     const account = (await promisify(this._web3.eth.getAccounts)())[0];
-    return account === this.currentAccount();
+    return account === this.currentAddress();
   }
 }

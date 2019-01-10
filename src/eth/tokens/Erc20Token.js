@@ -43,7 +43,7 @@ export default class Erc20Token {
         metadata: {
           action: {
             name: 'approve',
-            spender: this._web3.currentAccount(),
+            spender: this._web3.currentAddress(),
             allowance: getCurrency(value, unit),
             allowing: value != '0'
           }
@@ -58,7 +58,7 @@ export default class Erc20Token {
       metadata: {
         action: {
           name: 'approve',
-          spender: this._web3.currentAccount(),
+          spender: this._web3.currentAddress(),
           allowance: Number.MAX_SAFE_INTEGER,
           allowing: true,
           unlimited: true
@@ -73,7 +73,7 @@ export default class Erc20Token {
       metadata: {
         action: {
           name: 'transfer',
-          from: this._web3.currentAccount(),
+          from: this._web3.currentAddress(),
           to,
           amount: getCurrency(value, unit)
         }

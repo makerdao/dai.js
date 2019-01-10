@@ -14,7 +14,7 @@ async function buildTestAllowanceService(max = true) {
   owner = allowanceService
     .get('token')
     .get('web3')
-    .currentAccount();
+    .currentAddress();
 }
 
 beforeEach(() => {

@@ -132,7 +132,7 @@ test('be authenticated and know default address when private key passed in', don
     .authenticate()
     .then(() => {
       expect(service.manager().isAuthenticated()).toBe(true);
-      expect(service.currentAccount()).toBe(
+      expect(service.currentAddress()).toBe(
         '0x717bc9648b627316718fe93f4cd98056e53a8c8d'
       );
       done();
