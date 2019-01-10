@@ -26,7 +26,7 @@ export default class AllowanceService extends PrivateService {
     const token = this.get('token').getToken(tokenSymbol);
     const ownerAddress = this.get('token')
       .get('web3')
-      .currentAccount();
+      .currentAddress();
     const allowance = await token.allowance(ownerAddress, receiverAddress);
 
     if (allowance.lt(maxAllowance.div(2)) && !this._shouldMinimizeAllowance) {
@@ -44,7 +44,7 @@ export default class AllowanceService extends PrivateService {
     const allowance = await token.allowance(
       this.get('token')
         .get('web3')
-        .currentAccount(),
+        .currentAddress(),
       spenderAddress
     );
     if (parseInt(allowance) != 0) {

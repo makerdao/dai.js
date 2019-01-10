@@ -50,7 +50,7 @@ test("should get a proxy's owner", async () => {
   const address = await service.getProxyAddress();
   const owner = await service.getOwner(address);
 
-  expect(owner.toLowerCase()).toEqual(service.get('web3').currentAccount());
+  expect(owner.toLowerCase()).toEqual(service.get('web3').currentAddress());
 });
 
 test("should set a proxy's owner", async () => {

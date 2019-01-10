@@ -32,7 +32,7 @@ export default class EtherToken {
   @tracksTransactions
   async transfer(toAddress, amount, options) {
     return this.transferFrom(
-      this._web3.currentAccount(),
+      this._web3.currentAddress(),
       toAddress,
       amount,
       options

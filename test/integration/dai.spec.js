@@ -79,7 +79,7 @@ beforeAll(async () => {
 
   await maker.authenticate();
   tokenService = maker.service('token');
-  address = maker.service('web3').currentAccount();
+  address = maker.service('web3').currentAddress();
   exchange = maker.service('exchange');
   txMgr = maker.service('transactionManager');
   txMgr.onNewTransaction(txo => {

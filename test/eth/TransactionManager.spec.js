@@ -27,7 +27,7 @@ function buildTestServices() {
   ]).then(() => ({
     contract: smartContract,
     txMgr: transactionManager,
-    currentAccount: smartContract.get('web3').currentAccount()
+    currentAddress: smartContract.get('web3').currentAddress()
   }));
 }
 
@@ -44,7 +44,7 @@ test('reuse the same web3 and log service in test services', () => {
   expect(services.txMgr.get('log')).toBe(
     services.contract.get('web3').get('log')
   );
-  expect(services.currentAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
+  expect(services.currentAddress).toMatch(/^0x[0-9A-Fa-f]+$/);
 });
 
 test('wrapped contract call accepts a businessObject option', async () => {
@@ -58,7 +58,7 @@ test('wrapped contract call accepts a businessObject option', async () => {
     }
   };
 
-  const txo = dai.approve(services.currentAccount, '1000000000000000000', {
+  const txo = dai.approve(services.currentAddress, '1000000000000000000', {
     businessObject
   });
 
@@ -73,16 +73,16 @@ test('wrapped contract call accepts a businessObject option', async () => {
 });
 
 test('wrapped contract call adds nonce, web3 settings', async () => {
-  const { txMgr, currentAccount, contract } = services;
+  const { txMgr, currentAddress, contract } = services;
   const dai = contract.getContractByName(tokens.DAI);
   jest.spyOn(txMgr, '_execute');
 
-  await dai.approve(currentAccount, 20000);
+  await dai.approve(currentAddress, 20000);
 
   expect(txMgr._execute).toHaveBeenCalledWith(
     dai.wrappedContract,
     'approve',
-    [currentAccount, 20000],
+    [currentAddress, 20000],
     { gasLimit: 1234567, nonce: expect.any(Number) }
   );
 });

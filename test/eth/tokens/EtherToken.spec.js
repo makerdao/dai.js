@@ -71,7 +71,7 @@ test('ether transfer should move transferValue from sender to receiver', done =>
     .manager()
     .authenticate()
     .then(() => {
-      sender = ethereumTokenService.get('web3').currentAccount();
+      sender = ethereumTokenService.get('web3').currentAddress();
       token = ethereumTokenService.getToken(ETH);
       return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
     })
@@ -109,7 +109,7 @@ test('ether transferFrom should move transferValue from sender to receiver', don
     .manager()
     .authenticate()
     .then(() => {
-      sender = ethereumTokenService.get('web3').currentAccount();
+      sender = ethereumTokenService.get('web3').currentAddress();
       token = ethereumTokenService.getToken(ETH);
       return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
     })

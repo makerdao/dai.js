@@ -10,7 +10,6 @@ cache:
   npm: true
   directories:
   - nix
-  - testchain
   timeout: 9000
 before_install:
 - . scripts/install-dapptools.sh
