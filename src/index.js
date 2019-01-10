@@ -21,6 +21,7 @@ Maker.PublicService = PublicService;
 Maker.Currency = Currency;
 Maker.createCurrency = createCurrency;
 Maker.getCurrency = getCurrency;
+Maker.currencies = currencies;
 
 Maker.utils = {
   stringToBytes32
