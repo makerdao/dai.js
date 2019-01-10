@@ -55,7 +55,7 @@ export default class NonceService extends PublicService {
   }
 
   async getNonce() {
-    const address = this._web3Service.currentAccount();
+    const address = this._web3Service.currentAddress();
     const txCount = await this._getTxCount(address);
     let nonce;
 

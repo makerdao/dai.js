@@ -6,12 +6,12 @@ export default function makeSigner(web3Service) {
   const provider = web3Service.web3Provider();
   const call = promisify(web3Service._web3.eth.call);
   return {
-    getAddress: () => web3Service.currentAccount(),
+    getAddress: () => web3Service.currentAddress(),
     estimateGas: tx => web3Service.estimateGas(tx),
     sendTransaction: tx => {
       return web3Service.sendTransaction({
         ...tx,
-        from: web3Service.currentAccount()
+        from: web3Service.currentAddress()
       });
     },
     provider: new Proxy(provider, {

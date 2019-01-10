@@ -8,7 +8,7 @@ let tokenService, owner, weth, peth;
 beforeAll(async () => {
   tokenService = buildTestEthereumTokenService();
   await tokenService.manager().authenticate();
-  owner = tokenService.get('web3').currentAccount();
+  owner = tokenService.get('web3').currentAddress();
   weth = tokenService.getToken(WETH);
   peth = tokenService.getToken(PETH);
 });

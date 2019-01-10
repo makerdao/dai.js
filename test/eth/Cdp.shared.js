@@ -24,7 +24,7 @@ export default function sharedTests(openCdp, initCdpService) {
     currentAddress = cdpService
       .get('token')
       .get('web3')
-      .currentAccount();
+      .currentAddress();
     dai = cdpService.get('token').getToken(DAI);
   });
 

@@ -16,7 +16,7 @@ async function buildTestTokenConversionService(maxAllowance = true) {
 beforeEach(async () => {
   conversionService = await buildTestTokenConversionService();
   tokenService = conversionService.get('token');
-  owner = tokenService.get('web3').currentAccount();
+  owner = tokenService.get('web3').currentAddress();
   weth = tokenService.getToken(WETH);
   peth = tokenService.getToken(PETH);
 });

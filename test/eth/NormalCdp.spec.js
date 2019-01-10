@@ -21,7 +21,7 @@ describe('weth and peth', () => {
     currentAddress = cdpService
       .get('token')
       .get('web3')
-      .currentAccount();
+      .currentAddress();
   });
 
   beforeEach(async () => {
