@@ -15,6 +15,10 @@ export default class Erc20Token {
     );
   }
 
+  async balance() {
+    return this.balanceOf(this._web3.currentAddress());
+  }
+
   async balanceOf(owner) {
     return this._valueFromContract(await this._contract.balanceOf(owner));
   }
