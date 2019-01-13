@@ -15,12 +15,7 @@ function buildTestServices() {
     smartContract: true,
     transactionManager: true,
     web3: {
-      provider: {
-        type: 'TEST'
-      },
-      transactionSettings: {
-        gasLimit: 1234567
-      }
+      transactionSettings: { gasLimit: 1234567 }
     }
   });
   const smartContract = container.service('smartContract');
@@ -32,7 +27,7 @@ function buildTestServices() {
   ]).then(() => ({
     contract: smartContract,
     txMgr: transactionManager,
-    currentAccount: smartContract.get('web3').currentAccount()
+    currentAddress: smartContract.get('web3').currentAddress()
   }));
 }
 
@@ -49,7 +44,7 @@ test('reuse the same web3 and log service in test services', () => {
   expect(services.txMgr.get('log')).toBe(
     services.contract.get('web3').get('log')
   );
-  expect(services.currentAccount).toMatch(/^0x[0-9A-Fa-f]+$/);
+  expect(services.currentAddress).toMatch(/^0x[0-9A-Fa-f]+$/);
 });
 
 test('wrapped contract call accepts a businessObject option', async () => {
@@ -63,7 +58,7 @@ test('wrapped contract call accepts a businessObject option', async () => {
     }
   };
 
-  const txo = dai.approve(services.currentAccount, '1000000000000000000', {
+  const txo = dai.approve(services.currentAddress, '1000000000000000000', {
     businessObject
   });
 
@@ -78,16 +73,16 @@ test('wrapped contract call accepts a businessObject option', async () => {
 });
 
 test('wrapped contract call adds nonce, web3 settings', async () => {
-  const { txMgr, currentAccount, contract } = services;
+  const { txMgr, currentAddress, contract } = services;
   const dai = contract.getContractByName(tokens.DAI);
   jest.spyOn(txMgr, '_execute');
 
-  await dai.approve(currentAccount, 20000);
+  await dai.approve(currentAddress, 20000);
 
   expect(txMgr._execute).toHaveBeenCalledWith(
     dai.wrappedContract,
     'approve',
-    [currentAccount, 20000],
+    [currentAddress, 20000],
     { gasLimit: 1234567, nonce: expect.any(Number) }
   );
 });
@@ -131,6 +126,7 @@ describe('lifecycle hooks', () => {
   });
 
   beforeEach(async () => {
+    jest.setTimeout(15000);
     open = service.openCdp();
     cdp = await open;
   });
@@ -227,13 +223,15 @@ describe('lifecycle hooks', () => {
     // after calling confirm, Tx state will become 'finalized' and be deleted from list.
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
-    expect(txMgr._tracker._transactions).not.toHaveProperty(openId);
+    txMgr._tracker.clearExpiredTransactions();
+    expect(Object.keys(txMgr._tracker._transactions)).not.toContain(openId);
     expect(size(txMgr._tracker._listeners)).toEqual(
       size(txMgr._tracker._transactions)
     );
   });
 
   test('clear Tx when state is error and older than 5 minutes', async () => {
+    expect.assertions(4);
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
     const lock = cdp.lockEth(0.01);
@@ -258,8 +256,8 @@ describe('lifecycle hooks', () => {
     const minedDate = new Date(drawTx._timeStampMined);
     drawTx._timeStampMined = new Date(minedDate.getTime() - 600000);
 
-    await mineBlocks(service);
-    expect(txMgr._tracker._transactions).not.toHaveProperty(drawId);
+    txMgr._tracker.clearExpiredTransactions();
+    expect(Object.keys(txMgr._tracker._transactions)).not.toContain(drawId);
   });
 
   test('finalized Tx is set to correct state without without requiring a call to confirm()', async () => {

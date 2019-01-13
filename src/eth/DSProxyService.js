@@ -17,9 +17,7 @@ export default class DSProxyService extends PrivateService {
     return new Contract(
       this._registryInfo().address,
       this._registryInfo().abi,
-      this.get('web3')
-        .ethersProvider()
-        .getSigner()
+      this.get('web3').getEthersSigner()
     );
   }
 
@@ -40,11 +38,11 @@ export default class DSProxyService extends PrivateService {
 
   _resetDefaults(newProxy) {
     this._currentProxy = newProxy;
-    this._currentAccount = this.get('web3').currentAccount();
+    this._currentAddress = this.get('web3').currentAddress();
   }
 
   currentProxy() {
-    return this._currentAccount === this.get('web3').currentAccount()
+    return this._currentAddress === this.get('web3').currentAddress()
       ? this._currentProxy
       : this.getProxyAddress();
   }
@@ -86,17 +84,17 @@ export default class DSProxyService extends PrivateService {
     return proxyContract.execute(contract.address, data, options);
   }
 
-  async getProxyAddress(providedAccount = false) {
-    const account = providedAccount
-      ? providedAccount
-      : this.get('web3').currentAccount();
+  async getProxyAddress(providedAddress = false) {
+    const address = providedAddress
+      ? providedAddress
+      : this.get('web3').currentAddress();
 
-    let proxyAddress = await this._proxyRegistry().proxies(account);
+    let proxyAddress = await this._proxyRegistry().proxies(address);
     if (proxyAddress === '0x0000000000000000000000000000000000000000') {
       proxyAddress = null;
     }
 
-    if (!providedAccount) this._resetDefaults(proxyAddress);
+    if (!providedAddress) this._resetDefaults(proxyAddress);
     return proxyAddress;
   }
 
@@ -104,9 +102,7 @@ export default class DSProxyService extends PrivateService {
     return new Contract(
       address,
       dappHub.dsProxy,
-      this.get('web3')
-        .ethersProvider()
-        .getSigner()
+      this.get('web3').getEthersSigner()
     );
   }
 

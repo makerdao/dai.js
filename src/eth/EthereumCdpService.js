@@ -28,7 +28,6 @@ export default class EthereumCdpService extends PrivateService {
       'conversion',
       'event',
       'price',
-      'proxy',
       'smartContract',
       'token'
     ]);
@@ -90,7 +89,7 @@ export default class EthereumCdpService extends PrivateService {
     const MkrToken = this.get('token').getToken(MKR);
     const ownerAddress = this.get('token')
       .get('web3')
-      .currentAccount();
+      .currentAddress();
     const [fee, balance, debt] = await Promise.all([
       this.getGovernanceFee(cdpId, MKR),
       MkrToken.balanceOf(ownerAddress),

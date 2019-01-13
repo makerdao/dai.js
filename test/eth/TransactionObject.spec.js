@@ -1,6 +1,7 @@
 import {
   buildTestEthereumTokenService,
-  buildTestService
+  buildTestService,
+  defaultConfig
 } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import {
@@ -155,7 +156,7 @@ class DelayingWeb3Service extends Web3Service {
 test('waitForTransaction', async () => {
   const service = buildTestService('token', {
     token: true,
-    web3: [new DelayingWeb3Service(), { provider: { type: 'TEST' } }]
+    web3: [new DelayingWeb3Service(), defaultConfig.web3]
   });
   await service.manager().authenticate();
   service.get('web3').shouldDelay = true;

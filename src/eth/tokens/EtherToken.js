@@ -15,10 +15,8 @@ export default class EtherToken {
   }
 
   balanceOf(owner) {
-    return this._web3
-      .ethersProvider()
-      .getBalance(owner)
-      .then(b => ETH(utils.formatEther(b)));
+    // FIXME stop using ethers utils
+    return this._web3.getBalance(owner).then(b => ETH(utils.formatEther(b)));
   }
 
   // eslint-disable-next-line
@@ -34,7 +32,7 @@ export default class EtherToken {
   @tracksTransactions
   async transfer(toAddress, amount, options) {
     return this.transferFrom(
-      this._web3.currentAccount(),
+      this._web3.currentAddress(),
       toAddress,
       amount,
       options

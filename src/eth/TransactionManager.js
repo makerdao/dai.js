@@ -69,9 +69,7 @@ export default class TransactionManager extends PublicService {
     return this._createTransactionObject(
       (async () => {
         const txOptions = await this._buildTransactionOptions(data);
-        return {
-          hash: await this.get('web3').eth.sendTransaction(txOptions)
-        };
+        return this.get('web3').sendTransaction(txOptions);
       })(),
       options
     );

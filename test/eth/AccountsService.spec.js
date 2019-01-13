@@ -54,10 +54,7 @@ test('invalid private keys', async () => {
 });
 
 test('account with custom subprovider implementation', async () => {
-  const service = buildTestService('accounts', {
-    accounts: true,
-    web3: { provider: { type: 'TEST' } }
-  });
+  const service = buildTestService('accounts', { accounts: true });
   await service.manager().connect();
   const setEngine = jest.fn();
 
@@ -72,6 +69,31 @@ test('account with custom subprovider implementation', async () => {
   service.useAccount('fakeaccount');
   expect(service.currentAddress()).toEqual('0xf00bae');
   expect(setEngine).toBeCalled();
+});
+
+test('addAccount throws with duplicate name', async () => {
+  const service = new AccountsService();
+  service._engine = mockEngine();
+  const a1 = TestAccountProvider.nextAccount();
+  const a2 = TestAccountProvider.nextAccount();
+  try {
+    await service.addAccount('f00', { type: 'privateKey', key: a1.key });
+    await service.addAccount('f00', { type: 'privateKey', key: a2.key });
+  } catch (err) {
+    expect(err.message).toMatch(/An account with this name already exists/);
+  }
+});
+
+test('addAccount throws with duplicate address', async () => {
+  const service = new AccountsService();
+  service._engine = mockEngine();
+  const a1 = TestAccountProvider.nextAccount();
+  try {
+    await service.addAccount('f00', { type: 'privateKey', key: a1.key });
+    await service.addAccount('bar', { type: 'privateKey', key: a1.key });
+  } catch (err) {
+    expect(err.message).toMatch(/An account with this address already exists/);
+  }
 });
 
 test('currentAccount', async () => {

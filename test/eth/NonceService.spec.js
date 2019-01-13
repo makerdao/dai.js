@@ -8,7 +8,7 @@ beforeEach(async () => {
 });
 
 function currentAccount() {
-  return nonceService._web3Service.currentAccount();
+  return nonceService._web3Service.currentAddress();
 }
 
 test('should properly fetch the transaction count', async () => {

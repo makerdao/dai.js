@@ -1,6 +1,7 @@
 import test from './presets/test.json';
 import kovan from './presets/kovan.json';
 import http from './presets/http.json';
+import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
 import browser from './presets/browser.json';
 import merge from 'lodash.merge';
@@ -45,6 +46,10 @@ function loadPreset(name) {
     case 'http':
       preset = http;
       break;
+    case 'ws':
+    case 'websocket':
+      preset = ws;
+      break;
     case 'kovan':
       preset = kovan;
       break;
@@ -70,6 +75,16 @@ const reservedWords = [
   'url'
 ];
 
+function checkForReservedWords(words) {
+  const usedReservedWords = intersection(words, reservedWords);
+  if (usedReservedWords.length > 0) {
+    throw new Error(
+      'The following words cannot be used as service role names: ' +
+        usedReservedWords.join(', ')
+    );
+  }
+}
+
 export default class ConfigFactory {
   /**
    * @param {string} preset
@@ -83,14 +98,7 @@ export default class ConfigFactory {
 
     const config = loadPreset(preset);
     const additionalServices = options.additionalServices || [];
-
-    const usedReservedWords = intersection(additionalServices, reservedWords);
-    if (usedReservedWords.length > 0) {
-      throw new Error(
-        'The following words cannot be used as service role names: ' +
-          usedReservedWords.join(', ')
-      );
-    }
+    checkForReservedWords(additionalServices);
 
     for (let role of serviceRoles.concat(additionalServices)) {
       if (!(role in options)) continue;
@@ -126,17 +134,6 @@ export default class ConfigFactory {
         ...config.accounts,
         default: { type: AccountType.PRIVATE_KEY, key: options.privateKey }
       };
-    }
-
-    // default settings for transactions
-    if (options.transactionSettings) {
-      config.transactionSettings = options.transactionSettings;
-    }
-
-    // default blocks to wait before resolving transactions
-    // as confirmed
-    if (options.confirmedBlockCount) {
-      config.confirmedBlockCount = options.confirmedBlockCount;
     }
 
     return config;
