@@ -1,5 +1,5 @@
 import PrivateService from '../../core/PrivateService';
-import { getCurrency, WETH, DAI } from '../../eth/Currency';
+import { getCurrency, WETH, DAI, ETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
@@ -118,8 +118,9 @@ export default class OasisDirectService extends PrivateService {
     const payAmount = this._payAmount
       ? this._payAmount
       : await this.getPayAmount(payToken, buyToken, buyAmount);
-    console.log(payAmount.toString());
-    return this._valueForContract(payAmount * (1 + this._slippage), payToken);
+    const adjustedAmount = payAmount * (1 + this._slippage);
+    console.log(adjustedAmount);
+    return ETH.wei(adjustedAmount).toEthersBigNumber('wei');
   }
 
   _setMethod(sellToken, buyToken, method, proxy) {
@@ -176,9 +177,9 @@ export default class OasisDirectService extends PrivateService {
       case 'createAndSellAllAmountPayEth':
         return [registryAddress, otcAddress, daiAddress, limit];
       case 'buyAllAmountPayEth':
-        return [otcAddress, daiAddress, limit, wethAddress];
+        return [otcAddress, daiAddress, orderAmount, wethAddress];
       case 'createAndBuyAllAmountPayEth':
-        return [registryAddress, otcAddress, daiAddress, limit];
+        return [registryAddress, otcAddress, daiAddress, orderAmount];
       default:
         return [
           otcAddress,
@@ -193,6 +194,7 @@ export default class OasisDirectService extends PrivateService {
   _buildOptions(options, sellToken, method, maxPayAmount) {
     if (method.toLowerCase().includes('buyallamountpayeth')) {
       options.value = maxPayAmount;
+      console.log('in hurr');
     } else if (sellToken === 'ETH') {
       options.value = this._valueForContract(options.value, 'WETH');
     } else {
