@@ -3,8 +3,6 @@ import { getCurrency, WETH, DAI } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
-// execute optional callbacks for allowance and build txns
-
 export default class OasisDirectService extends PrivateService {
   constructor(name = 'exchange') {
     super(name, [
@@ -66,7 +64,7 @@ export default class OasisDirectService extends PrivateService {
       maxPayAmount,
       method
     );
-    this._buildOptions(options, sell, method);
+    this._buildOptions(options, sell, method, maxPayAmount);
 
     if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisBuyOrder.build(
@@ -120,6 +118,7 @@ export default class OasisDirectService extends PrivateService {
     const payAmount = this._payAmount
       ? this._payAmount
       : await this.getPayAmount(payToken, buyToken, buyAmount);
+    console.log(payAmount.toString());
     return this._valueForContract(payAmount * (1 + this._slippage), payToken);
   }
 
@@ -177,9 +176,9 @@ export default class OasisDirectService extends PrivateService {
       case 'createAndSellAllAmountPayEth':
         return [registryAddress, otcAddress, daiAddress, limit];
       case 'buyAllAmountPayEth':
-        return [otcAddress, daiAddress, orderAmount, wethAddress];
+        return [otcAddress, daiAddress, limit, wethAddress];
       case 'createAndBuyAllAmountPayEth':
-        return [registryAddress, otcAddress, daiAddress, orderAmount];
+        return [registryAddress, otcAddress, daiAddress, limit];
       default:
         return [
           otcAddress,
@@ -191,8 +190,10 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  _buildOptions(options, sellToken, method) {
-    if (sellToken === 'ETH') {
+  _buildOptions(options, sellToken, method, maxPayAmount) {
+    if (method.toLowerCase().includes('buyallamountpayeth')) {
+      options.value = maxPayAmount;
+    } else if (sellToken === 'ETH') {
       options.value = this._valueForContract(options.value, 'WETH');
     } else {
       delete options.value;
