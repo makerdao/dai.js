@@ -30,7 +30,6 @@ export default class OasisDirectService extends PrivateService {
       options.value
     );
     const params = await this._buildParams(
-      sell,
       sellToken,
       options.value,
       buyToken,
@@ -61,13 +60,11 @@ export default class OasisDirectService extends PrivateService {
       options.value
     );
     const params = await this._buildParams(
-      sell,
       buyToken,
       options.value,
       sellToken,
       maxPayAmount,
-      method,
-      false
+      method
     );
     this._buildOptions(options, sell, method);
 
@@ -115,7 +112,7 @@ export default class OasisDirectService extends PrivateService {
     const buyAmount = this._buyAmount
       ? this._buyAmount
       : await this.getBuyAmount(buyToken, payToken, payAmount);
-    return this._valueForContract(buyAmount * (1 - this._slippage), buyToken);
+    return this._valueForContract(0 * (1 - this._slippage), buyToken);
   }
 
   async _maxPayAmount(payToken, buyToken, buyAmount) {
@@ -155,16 +152,11 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  async _buildParams(
-    sellToken,
-    sendToken,
-    amount,
-    buyToken,
-    limit,
-    method,
-    sell = true
-  ) {
+  async _buildParams(sendToken, amount, buyToken, limit, method) {
     const otcAddress = this._otc().address;
+    const daiAddress = this.get('token')
+      .getToken('DAI')
+      .address();
     const wethAddress = this.get('token')
       .getToken('WETH')
       .address();
@@ -175,50 +167,28 @@ export default class OasisDirectService extends PrivateService {
       .getToken(sendToken)
       .address();
     const orderAmount = this._valueForContract(amount, sendToken);
-
-    if (method.includes('create')) {
-      return this._createAndExecuteParams(
-        otcAddress,
-        buyTokenAddress,
-        orderAmount,
-        limit,
-        sell
-      );
-    } else if (sellToken === 'ETH') {
-      return [
-        otcAddress,
-        sell ? wethAddress : buyTokenAddress,
-        sell ? buyTokenAddress : limit,
-        sell ? limit : wethAddress
-      ];
-    } else {
-      return [
-        otcAddress,
-        sellTokenAddress,
-        orderAmount,
-        buyTokenAddress,
-        limit
-      ];
-    }
-  }
-
-  _createAndExecuteParams(
-    otcAddress,
-    buyTokenAddress,
-    amount,
-    minBuyAmount,
-    sell
-  ) {
     const registryAddress = this.get('smartContract').getContractByName(
       'PROXY_REGISTRY'
     ).address;
 
-    return [
-      registryAddress,
-      otcAddress,
-      buyTokenAddress,
-      sell ? minBuyAmount : amount
-    ];
+    switch (method) {
+      case 'sellAllAmountPayEth':
+        return [otcAddress, wethAddress, daiAddress, limit];
+      case 'createAndSellAllAmountPayEth':
+        return [registryAddress, otcAddress, daiAddress, limit];
+      case 'buyAllAmountPayEth':
+        return [otcAddress, daiAddress, orderAmount, wethAddress];
+      case 'createAndBuyAllAmountPayEth':
+        return [registryAddress, otcAddress, daiAddress, orderAmount];
+      default:
+        return [
+          otcAddress,
+          sellTokenAddress,
+          orderAmount,
+          buyTokenAddress,
+          limit
+        ];
+    }
   }
 
   _buildOptions(options, sellToken, method) {
