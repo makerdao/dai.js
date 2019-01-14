@@ -113,9 +113,9 @@ describe('values from otc', () => {
     expect(buyAmount.toString()).toEqual('500000000000000');
   });
 
-  xtest('get minBuyAmount', async () => {
+  test('get minBuyAmount', async () => {
     const limit = await service._minBuyAmount('WETH', 'DAI', '0.01');
-    expect(limit.toString()).toEqual('490000000000000000000000000000000');
+    expect(limit.toString()).toEqual('490000000000000');
   });
 
   test('get pay amount', async () => {
@@ -124,9 +124,9 @@ describe('values from otc', () => {
     expect(payAmount.toString()).toEqual('200000000000000000');
   });
 
-  xtest('get maxPayAmount', async () => {
+  test('get maxPayAmount', async () => {
     const limit = await service._maxPayAmount('DAI', 'WETH', '0.01');
-    expect(limit.toString()).toEqual('204000000000000000000000000000000000');
+    expect(limit.toString()).toEqual('204000000000000000');
   });
 });
 
@@ -180,7 +180,6 @@ describe('trade with existing dsproxy', () => {
     test('buy all amount, pay eth', async () => {
       try {
         await createDaiAndPlaceLimitOrder(service, true);
-        console.log('done here');
       } catch (err) {
         console.error(err.message);
       }

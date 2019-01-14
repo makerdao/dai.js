@@ -110,7 +110,8 @@ export default class OasisDirectService extends PrivateService {
     const buyAmount = this._buyAmount
       ? this._buyAmount
       : await this.getBuyAmount(buyToken, payToken, payAmount);
-    return this._valueForContract(0 * (1 - this._slippage), buyToken);
+    const adjustedAmount = buyAmount * (1 - this._slippage);
+    return ETH.wei(adjustedAmount).toEthersBigNumber('wei');
   }
 
   async _maxPayAmount(payToken, buyToken, buyAmount) {
@@ -194,7 +195,6 @@ export default class OasisDirectService extends PrivateService {
   _buildOptions(options, sellToken, method, maxPayAmount) {
     if (method.toLowerCase().includes('buyallamountpayeth')) {
       options.value = maxPayAmount;
-      console.log('in hurr');
     } else if (sellToken === 'ETH') {
       options.value = this._valueForContract(options.value, 'WETH');
     } else {
