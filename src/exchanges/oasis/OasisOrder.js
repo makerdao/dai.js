@@ -19,11 +19,6 @@ export default class OasisOrder {
     this._txMgr = transactionManager;
     this._otc = options.otc;
     delete options.otc;
-    console.log({
-      method: method,
-      args: args,
-      options: options
-    });
     const promise = (async () => {
       await 0;
       const txo = await contract[method](...[...args, { ...options, promise }]);

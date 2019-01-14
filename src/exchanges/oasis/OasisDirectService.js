@@ -120,7 +120,6 @@ export default class OasisDirectService extends PrivateService {
       ? this._payAmount
       : await this.getPayAmount(payToken, buyToken, buyAmount);
     const adjustedAmount = payAmount * (1 + this._slippage);
-    console.log(adjustedAmount);
     return ETH.wei(adjustedAmount).toEthersBigNumber('wei');
   }
 

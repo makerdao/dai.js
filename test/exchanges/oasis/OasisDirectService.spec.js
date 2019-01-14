@@ -143,51 +143,37 @@ describe('trade with existing dsproxy', () => {
 
   describe('sell', () => {
     test('sell all amount', async () => {
-      await service.sell('DAI', 'WETH', { value: '0.01' });
+      const order = await service.sell('DAI', 'WETH', { value: '0.01' });
+      expect(order.fees().toNumber()).toEqual(0.00330602);
     });
 
-    // Something needs approval that's not getting it
     test('sell all amount, buy eth', async () => {
-      try {
-        await service.sell('DAI', 'ETH', { value: '0.01' });
-      } catch (err) {
-        console.error(err.message);
-      }
+      const order = await service.sell('DAI', 'ETH', { value: '0.01' });
+      expect(order.fees().toNumber()).toEqual(0.00299192);
     });
 
-    // Something needs approval that's not getting it
     test('sell all amount, pay eth', async () => {
-      try {
-        await createDaiAndPlaceLimitOrder(service, true);
-        await service.sell('ETH', 'DAI', { value: '0.01' });
-      } catch (err) {
-        console.error(err.message);
-      }
+      await createDaiAndPlaceLimitOrder(service, true);
+      const order = await service.sell('ETH', 'DAI', { value: '0.01' });
+      expect(order.fees().toNumber()).toEqual(0.00328326);
     });
   });
 
   describe('buy', () => {
     test('buy all amount', async () => {
-      const tx = await service.buy('WETH', 'DAI', { value: '0.01' });
-      expect(tx).toBeDefined();
+      const order = await service.buy('WETH', 'DAI', { value: '0.01' });
+      expect(order.fees().toNumber()).toEqual(0.0029793);
     });
 
     test('buy all amount, buy eth', async () => {
-      const tx = await service.buy('ETH', 'DAI', { value: '0.01' });
-      expect(tx).toBeDefined();
+      const order = await service.buy('ETH', 'DAI', { value: '0.01' });
+      expect(order.fees().toNumber()).toEqual(0.0031075);
     });
 
     test('buy all amount, pay eth', async () => {
-      try {
-        await createDaiAndPlaceLimitOrder(service, true);
-      } catch (err) {
-        console.error(err.message);
-      }
-      try {
-        await service.buy('DAI', 'ETH', { value: '0.01' });
-      } catch (err) {
-        console.error(err);
-      }
+      await createDaiAndPlaceLimitOrder(service, true);
+      const order = await service.buy('DAI', 'ETH', { value: '0.01' });
+      expect(order.fees().toNumber()).toEqual(0.0033444);
     });
   });
 });
@@ -199,23 +185,15 @@ describe('create dsproxy and execute', () => {
     await setNewAccount(accountService);
   });
 
-  // Params are out of order for create
   test('sell all amount, pay eth', async () => {
-    try {
-      await createDaiAndPlaceLimitOrder(service, true);
-      await service.sell('ETH', 'DAI', { value: '0.01' });
-    } catch (err) {
-      console.error(err.message);
-    }
+    await createDaiAndPlaceLimitOrder(service, true);
+    const order = await service.sell('ETH', 'DAI', { value: '0.01' });
+    expect(order.fees().toNumber()).toEqual(0.0143975);
   });
 
-  // Params are out of order for create
   test('buy all amount, pay eth', async () => {
-    try {
-      await createDaiAndPlaceLimitOrder(service, true);
-      await service.buy('DAI', 'ETH', { value: '0.01' });
-    } catch (err) {
-      console.error(err.message);
-    }
+    await createDaiAndPlaceLimitOrder(service, true);
+    const order = await service.buy('DAI', 'ETH', { value: '0.01' });
+    expect(order.fees().toNumber()).toEqual(0.01446508);
   });
 });
