@@ -71,6 +71,11 @@ export default class DSProxyService extends PrivateService {
       { contract: 'PROXY_REGISTRY', method: 'build' }
     ).mine();
     this._currentProxy = await this.getProxyAddress();
+    this.get('web3')
+      .get('event')
+      .emit('dsproxy/BUILD', {
+        address: this._currentProxy
+      });
     return txo;
   }
 

@@ -19,7 +19,7 @@ function proxy() {
 
 beforeEach(async () => {
   await buildTestOasisDirectService();
-  jest.setTimeout(20000);
+  jest.setTimeout(30000);
 });
 
 describe('format contract call', () => {
