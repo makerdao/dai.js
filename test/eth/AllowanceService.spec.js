@@ -37,6 +37,9 @@ test('max allowance policy, no need to update', async () => {
 test('max allowance policy, need to update', async () => {
   await buildTestAllowanceService();
   await dai.approve(testAddress, 0);
+  allowanceService.get('event').on('allowance/APPROVE', eventObj => {
+    expect(eventObj.payload.transaction.hash).toBeDefined();
+  });
   await allowanceService.requireAllowance(DAI, testAddress);
 
   const allowance = await dai.allowance(owner, testAddress);
@@ -47,6 +50,9 @@ test('min allowance policy, need to update', async () => {
   buildTestAllowanceService(false);
   const estimate = DAI(100);
   await dai.approve(testAddress, DAI(50));
+  allowanceService.get('event').on('allowance/APPROVE', eventObj => {
+    expect(eventObj.payload.transaction.hash).toBeDefined();
+  });
   await allowanceService.requireAllowance(DAI, testAddress, { estimate });
 
   const allowance = await dai.allowance(owner, testAddress);

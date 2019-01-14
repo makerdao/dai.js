@@ -7,7 +7,7 @@ const maxAllowance = BigNumber(UINT256_MAX).shiftedBy(-18);
 
 export default class AllowanceService extends PrivateService {
   constructor(name = 'allowance') {
-    super(name, ['token']);
+    super(name, ['token', 'event']);
     this._shouldMinimizeAllowance = false;
   }
 
@@ -30,11 +30,18 @@ export default class AllowanceService extends PrivateService {
     const allowance = await token.allowance(ownerAddress, receiverAddress);
 
     if (allowance.lt(maxAllowance.div(2)) && !this._shouldMinimizeAllowance) {
-      return token.approveUnlimited(receiverAddress, { promise });
+      const tx = await token.approveUnlimited(receiverAddress, { promise });
+      this.get('event').emit('allowance/APPROVE', {
+        transaction: tx
+      });
+      return tx;
     }
 
     if (allowance.lt(estimate) && this._shouldMinimizeAllowance) {
-      return token.approve(receiverAddress, estimate, { promise });
+      const tx = await token.approve(receiverAddress, estimate, { promise });
+      this.get('event').emit('allowance/APPROVE', {
+        transaction: tx
+      });
     }
   }
 
