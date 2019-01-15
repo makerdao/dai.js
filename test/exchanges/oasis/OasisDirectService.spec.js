@@ -18,7 +18,6 @@ function proxy() {
 
 beforeEach(async () => {
   await buildTestOasisDirectService();
-  jest.setTimeout(30000);
 });
 
 describe('format contract call', () => {
@@ -149,13 +148,16 @@ describe('trade with existing dsproxy', () => {
     }
     await setProxyAccount(service, proxyAccount);
     if (!(await proxy())) await service.get('proxy').build();
-    await createDaiAndPlaceLimitOrder(service);
   });
 
-  describe('sell', () => {
+  describe('sell dai', () => {
+    beforeEach(async () => {
+      await createDaiAndPlaceLimitOrder(service);
+    });
+
     test('sell all amount', async () => {
       const order = await service.sell('DAI', 'WETH', '0.01');
-      expect(order.fees().toNumber()).toEqual(0.00330602);
+      expect(order.fees().toNumber()).toEqual(0.00281674);
     });
 
     test('sell all amount, buy eth', async () => {
@@ -163,14 +165,6 @@ describe('trade with existing dsproxy', () => {
       expect(order.fees().toNumber()).toEqual(0.00299192);
     });
 
-    test('sell all amount, pay eth', async () => {
-      await createDaiAndPlaceLimitOrder(service, true);
-      const order = await service.sell('ETH', 'DAI', '0.01');
-      expect(order.fees().toNumber()).toEqual(0.00328326);
-    });
-  });
-
-  describe('buy', () => {
     test('buy all amount', async () => {
       const order = await service.buy('WETH', 'DAI', '0.01');
       expect(order.fees().toNumber()).toEqual(0.0029793);
@@ -180,9 +174,19 @@ describe('trade with existing dsproxy', () => {
       const order = await service.buy('ETH', 'DAI', '0.01');
       expect(order.fees().toNumber()).toEqual(0.0031075);
     });
+  });
+
+  describe('buy dai', () => {
+    beforeEach(async () => {
+      await createDaiAndPlaceLimitOrder(service, true);
+    });
+
+    test('sell all amount, pay eth', async () => {
+      const order = await service.sell('ETH', 'DAI', '0.01');
+      expect(order.fees().toNumber()).toEqual(0.00280146);
+    });
 
     test('buy all amount, pay eth', async () => {
-      await createDaiAndPlaceLimitOrder(service, true);
       const order = await service.buy('DAI', 'ETH', '0.01');
       expect(order.fees().toNumber()).toEqual(0.0033444);
     });
@@ -192,19 +196,17 @@ describe('trade with existing dsproxy', () => {
 describe('create dsproxy and execute', () => {
   beforeEach(async () => {
     const accountService = service.get('web3').get('accounts');
-    await createDaiAndPlaceLimitOrder(service);
     await setNewAccount(accountService);
+    await createDaiAndPlaceLimitOrder(service, true);
   });
 
   test('sell all amount, pay eth', async () => {
-    await createDaiAndPlaceLimitOrder(service, true);
     const order = await service.sell('ETH', 'DAI', '0.01');
-    expect(order.fees().toNumber()).toEqual(0.0143975);
+    expect(order.fees().toNumber()).toEqual(0.00328326);
   });
 
   test('buy all amount, pay eth', async () => {
-    await createDaiAndPlaceLimitOrder(service, true);
     const order = await service.buy('DAI', 'ETH', '0.01');
-    expect(order.fees().toNumber()).toEqual(0.01446508);
+    expect(order.fees().toNumber()).toEqual(0.0038262);
   });
 });
