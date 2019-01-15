@@ -5,9 +5,9 @@ import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
 
 let service, proxyAccount;
 
-async function buildTestOasisDirectService() {
+async function buildTestEth2DaiDirectService() {
   service = buildTestService('exchange', {
-    exchange: 'OasisDirectService'
+    exchange: 'Eth2DaiDirect'
   });
   await service.manager().authenticate();
 }
@@ -17,7 +17,7 @@ function proxy() {
 }
 
 beforeEach(async () => {
-  await buildTestOasisDirectService();
+  await buildTestEth2DaiDirectService();
 });
 
 describe('format contract call', () => {

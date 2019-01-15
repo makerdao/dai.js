@@ -3,9 +3,7 @@ import { getCurrency, WETH, DAI, ETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
-// rename eth2daidirect
-
-export default class OasisDirectService extends PrivateService {
+export default class Eth2DaiDirect extends PrivateService {
   constructor(name = 'exchange') {
     super(name, [
       'proxy',
