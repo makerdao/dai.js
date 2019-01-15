@@ -20,24 +20,20 @@ export default class OasisDirectService extends PrivateService {
     this._slippage = 0.02;
   }
 
-  async sell(sell, buy, options) {
+  async sell(sell, buy, amount) {
     const proxy = await this._requireProxy(sell);
     const method = this._setMethod(sell, buy, 'sellAllAmount', proxy);
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
-    const minFillAmount = await this._minBuyAmount(
-      buyToken,
-      sellToken,
-      options.value
-    );
+    const minFillAmount = await this._minBuyAmount(buyToken, sellToken, amount);
     const params = await this._buildParams(
       sellToken,
-      options.value,
+      amount,
       buyToken,
       minFillAmount,
       method
     );
-    this._buildOptions(options, sell, method);
+    const options = this._buildOptions(amount, sell, method);
 
     if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisSellOrder.build(
@@ -50,24 +46,20 @@ export default class OasisDirectService extends PrivateService {
     );
   }
 
-  async buy(buy, sell, options) {
+  async buy(buy, sell, amount) {
     const proxy = await this._requireProxy(sell);
     const method = this._setMethod(sell, buy, 'buyAllAmount', proxy);
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
-    const maxPayAmount = await this._maxPayAmount(
-      sellToken,
-      buyToken,
-      options.value
-    );
+    const maxPayAmount = await this._maxPayAmount(sellToken, buyToken, amount);
     const params = await this._buildParams(
       buyToken,
-      options.value,
+      amount,
       sellToken,
       maxPayAmount,
       method
     );
-    this._buildOptions(options, sell, method, maxPayAmount);
+    const options = this._buildOptions(amount, sell, method, maxPayAmount);
 
     if (proxy) await this.get('allowance').requireAllowance(sellToken, proxy);
     return OasisBuyOrder.build(
@@ -194,13 +186,12 @@ export default class OasisDirectService extends PrivateService {
     }
   }
 
-  _buildOptions(options, sellToken, method, maxPayAmount) {
+  _buildOptions(amount, sellToken, method, maxPayAmount) {
+    const options = {};
     if (method.toLowerCase().includes('buyallamountpayeth')) {
       options.value = maxPayAmount;
     } else if (sellToken === 'ETH') {
-      options.value = this._valueForContract(options.value, 'WETH');
-    } else {
-      delete options.value;
+      options.value = this._valueForContract(amount, 'WETH');
     }
     options.otc = this._otc();
     if (!method.includes('create')) options.dsProxy = true;
