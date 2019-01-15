@@ -157,7 +157,7 @@ describe('trade with existing dsproxy', () => {
 
     test('sell all amount', async () => {
       const order = await service.sell('DAI', 'WETH', '0.01');
-      expect(order.fees().toNumber()).toEqual(0.00281674);
+      expect(order.fees().toNumber()).toEqual(0.00330602);
     });
 
     test('sell all amount, buy eth', async () => {
@@ -183,7 +183,7 @@ describe('trade with existing dsproxy', () => {
 
     test('sell all amount, pay eth', async () => {
       const order = await service.sell('ETH', 'DAI', '0.01');
-      expect(order.fees().toNumber()).toEqual(0.00280146);
+      expect(order.fees().toNumber()).toEqual(0.00328326);
     });
 
     test('buy all amount, pay eth', async () => {
@@ -202,11 +202,11 @@ describe('create dsproxy and execute', () => {
 
   test('sell all amount, pay eth', async () => {
     const order = await service.sell('ETH', 'DAI', '0.01');
-    expect(order.fees().toNumber()).toEqual(0.00328326);
+    expect(order.fees().toNumber()).toEqual(0.0143975);
   });
 
   test('buy all amount, pay eth', async () => {
     const order = await service.buy('DAI', 'ETH', '0.01');
-    expect(order.fees().toNumber()).toEqual(0.0038262);
+    expect(order.fees().toNumber()).toEqual(0.01446508);
   });
 });
