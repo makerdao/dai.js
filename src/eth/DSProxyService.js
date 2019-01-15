@@ -48,7 +48,7 @@ export default class DSProxyService extends PrivateService {
   }
 
   async requireProxy() {
-    if (!this._currentProxy) {
+    if (!(await this.currentProxy())) {
       await this.build();
     }
     return await this.currentProxy();

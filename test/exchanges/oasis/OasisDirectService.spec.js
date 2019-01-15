@@ -2,7 +2,6 @@ import { buildTestService } from '../../helpers/serviceBuilders';
 import { setProxyAccount, setNewAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
-import { transferMkr } from '../../helpers/proxyHelpers';
 
 let service, proxyAccount;
 
@@ -64,6 +63,13 @@ describe('format contract call', () => {
       service._valueForContract(100, 'WETH'),
       'sellAllAmountPayEth'
     );
+    const buyAndPayEthParams = await service._buildParams(
+      'WETH',
+      '0.01',
+      'DAI',
+      service._valueForContract(100, 'WETH'),
+      'buyAllAmountPayEth'
+    );
     const createParams = await service._buildParams(
       'WETH',
       '0.01',
@@ -84,6 +90,12 @@ describe('format contract call', () => {
     expect(ethParams[1]).toEqual(wethAddress);
     expect(ethParams[2]).toEqual(daiAddress);
     expect(Object.keys(ethParams[3])).toEqual(['_bn']);
+
+    expect(buyAndPayEthParams.length).toEqual(4);
+    expect(buyAndPayEthParams[0]).toEqual(otcAddress);
+    expect(buyAndPayEthParams[1]).toEqual(daiAddress);
+    expect(Object.keys(buyAndPayEthParams[2])).toEqual(['_bn']);
+    expect(buyAndPayEthParams[3]).toEqual(wethAddress);
 
     expect(createParams.length).toEqual(4);
     expect(createParams[0]).toEqual(registryAddress);
@@ -135,7 +147,6 @@ describe('trade with existing dsproxy', () => {
     if (!proxyAccount) {
       proxyAccount = TestAccountProvider.nextAccount();
     }
-    await transferMkr(service, proxyAccount.address);
     await setProxyAccount(service, proxyAccount);
     if (!(await proxy())) await service.get('proxy').build();
     await createDaiAndPlaceLimitOrder(service);

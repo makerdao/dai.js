@@ -3,6 +3,9 @@ import { getCurrency, WETH, DAI, ETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
 
+// remove options param, make amount third non-optional param in sell and buy
+// rename eth2daidirect
+
 export default class OasisDirectService extends PrivateService {
   constructor(name = 'exchange') {
     super(name, [
