@@ -1,4 +1,4 @@
 [submodule "testchain"]
 	path = testchain
-	url = https://github.com/makerdao/testchain.git
+	url = https://github.com/makerdao/testchain
 	branch = dai.js
