@@ -72,23 +72,10 @@ export default class TransactionObject extends TransactionLifeCycle {
       }
       this.setPending(); // set state to pending
 
-      // when you're on a local testnet, a single call to getTransaction should
-      // be enough. but on a remote net, it may take multiple calls.
-      for (let i = 0; i < 10; i++) {
-        tx = await this._web3Service.getTransaction(this.hash);
-        if (tx) break;
-        log('no tx yet');
-        await promiseWait(1500);
-      }
-
-      if (!tx) {
-        throw new Error('Tried getTransaction 10 times and still failed');
-      }
-
       // when you're on a local testnet, the transaction will probably already
       // be mined by this point. but on other nets, you still have to wait for
       // it to be mined.
-      if (!tx.blockHash) {
+      if (!tx || !tx.blockHash) {
         tx = await this._keepWaitingForTx();
       }
 
