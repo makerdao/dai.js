@@ -75,6 +75,16 @@ const reservedWords = [
   'url'
 ];
 
+function checkForReservedWords(words) {
+  const usedReservedWords = intersection(words, reservedWords);
+  if (usedReservedWords.length > 0) {
+    throw new Error(
+      'The following words cannot be used as service role names: ' +
+        usedReservedWords.join(', ')
+    );
+  }
+}
+
 export default class ConfigFactory {
   /**
    * @param {string} preset
@@ -88,14 +98,7 @@ export default class ConfigFactory {
 
     const config = loadPreset(preset);
     const additionalServices = options.additionalServices || [];
-
-    const usedReservedWords = intersection(additionalServices, reservedWords);
-    if (usedReservedWords.length > 0) {
-      throw new Error(
-        'The following words cannot be used as service role names: ' +
-          usedReservedWords.join(', ')
-      );
-    }
+    checkForReservedWords(additionalServices);
 
     for (let role of serviceRoles.concat(additionalServices)) {
       if (!(role in options)) continue;

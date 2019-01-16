@@ -29,6 +29,10 @@
         "semi": [
             "error",
             "always"
+        ],
+        "complexity": [
+            "error",
+            12
         ]
     }
 }
