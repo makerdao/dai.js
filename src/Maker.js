@@ -7,6 +7,7 @@ import { intersection, isEqual, mergeWith } from 'lodash';
 export default class Maker {
   constructor(preset, options = {}) {
     const { plugins = [], ...otherOptions } = options;
+
     for (let pluginTuple of plugins) {
       const [plugin, pluginOptions] = pluginTuple;
       if (plugin.addConfig) {

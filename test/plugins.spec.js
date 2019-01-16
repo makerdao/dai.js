@@ -229,3 +229,98 @@ test('add options when smartContract.addContracts is not set on source', async (
     }
   });
 });
+
+test('each plugin type can be created with an optional options object for additional processing', async () => {
+  const MockService1 = makeMockService('mock1');
+  const MockService2 = makeMockService('mock2');
+
+  const beforeCreatePlugin = {
+    beforeCreate: jest.fn(options => {
+      expect(options.testOption1).toBe('myOption1');
+      return {
+        additionalServices: ['mock1'],
+        mock1: MockService1,
+        testOption1: options.testOption1
+      };
+    })
+  };
+
+  const addConfigPlugin = {
+    addConfig: jest.fn((config, options) => {
+      expect(options.testOption2).toBe('myOption2');
+      return {
+        additionalServices: ['mock2'],
+        mock2: MockService2,
+        testOption2: options.testOption2
+      };
+    })
+  };
+
+  const afterCreatePlugin = {
+    afterCreate: jest.fn((maker, config, options) => {
+      expect(options.testOption3).toBe('myOption3');
+    })
+  };
+
+  const functionPlugin = jest.fn((maker, config, options) => {
+    const gasEstimatorService = maker.service('gasEstimator', true);
+    gasEstimatorService.setPercentage(options.percentage);
+    const percentage = gasEstimatorService.getPercentage();
+    expect(percentage).toBe(options.percentage);
+  });
+
+  await Maker.create('test', {
+    plugins: [
+      [addConfigPlugin, { testOption2: 'myOption2' }],
+      [beforeCreatePlugin, { testOption1: 'myOption1' }],
+      [functionPlugin, { percentage: 10 }],
+      [afterCreatePlugin, { testOption3: 'myOption3' }]
+    ],
+    autoAuthenticate: false
+  });
+
+  expect(addConfigPlugin.addConfig).toBeCalled();
+  expect(beforeCreatePlugin.beforeCreate).toBeCalled();
+  expect(afterCreatePlugin.afterCreate).toBeCalled();
+  expect(functionPlugin).toBeCalled();
+  expect(ConfigFactory.create).toBeCalled();
+  const last = ConfigFactory.create.mock.calls.length - 1;
+
+  //beforeCreate and addConfig plugins can modify the maker config
+  expect(ConfigFactory.create.mock.calls[last][1]).toEqual({
+    additionalServices: ['mock1', 'mock2'],
+    mock1: MockService1,
+    mock2: MockService2,
+    autoAuthenticate: false,
+    testOption1: 'myOption1',
+    testOption2: 'myOption2'
+  });
+});
+
+test('object plugin with beforeCreate can make an async call', async () => {
+  const mockAsyncCall = async () => {
+    return new Promise(resolve => {
+      setTimeout(1000);
+      resolve({ testOption: 'myOption' });
+    });
+  };
+
+  const testPlugin = {
+    beforeCreate: jest.fn(async () => {
+      return await mockAsyncCall();
+    })
+  };
+
+  await Maker.create('test', {
+    plugins: [testPlugin],
+    autoAuthenticate: false
+  });
+
+  expect(testPlugin.beforeCreate).toBeCalled();
+  expect(ConfigFactory.create).toBeCalled();
+  const last = ConfigFactory.create.mock.calls.length - 1;
+  expect(ConfigFactory.create.mock.calls[last][1]).toEqual({
+    autoAuthenticate: false,
+    testOption: 'myOption'
+  });
+});
