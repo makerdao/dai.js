@@ -8,20 +8,25 @@ export default class Maker {
   constructor(preset, options = {}) {
     const { plugins = [], ...otherOptions } = options;
 
-    for (let plugin of plugins) {
+    for (let pluginTuple of plugins) {
+      const [plugin, pluginOptions] = pluginTuple;
       if (plugin.addConfig) {
-        mergeOptions(otherOptions, plugin.addConfig(otherOptions));
+        mergeOptions(
+          otherOptions,
+          plugin.addConfig(otherOptions, pluginOptions)
+        );
       }
     }
 
     const config = ConfigFactory.create(preset, otherOptions, resolver);
     this._container = new DefaultServiceProvider(config).buildContainer();
 
-    for (let plugin of plugins) {
+    for (let pluginTuple of plugins) {
+      const [plugin, pluginOptions] = pluginTuple;
       if (typeof plugin === 'function') {
-        plugin(this, config);
+        plugin(this, config, pluginOptions);
       } else if (plugin.afterCreate) {
-        plugin.afterCreate(this, config);
+        plugin.afterCreate(this, config, pluginOptions);
       }
     }
 
@@ -97,8 +102,26 @@ function mergeOptions(object, source) {
   });
 }
 
-// This factory function doesn't do much at the moment, but it will give us
-// more flexibility for plugins and extensions in the future.
-Maker.create = function(...args) {
-  return new Maker(...args);
+Maker.create = async function(...args) {
+  const [preset, options] = args;
+  const { plugins } = options;
+
+  if (plugins) {
+    // If its not already, format the plugin to be a tuple
+    // of type [plugin, options object].
+    const pluginTuples = plugins.map(
+      plugin => (!Array.isArray(plugin) ? [plugin, {}] : plugin)
+    );
+    for (let pluginTuple of pluginTuples) {
+      const [plugin, pluginOptions] = pluginTuple;
+      if (plugin.beforeCreate) {
+        const resultOptions = await plugin.beforeCreate(pluginOptions);
+        Object.assign(options, resultOptions);
+      }
+    }
+    // reassign the plugins array in the options
+    options.plugins = pluginTuples;
+  }
+
+  return new Maker(preset, options);
 };

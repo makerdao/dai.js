@@ -2,8 +2,8 @@ import Maker, { ETH, LocalService } from '../src/index';
 import TestAccountProvider from './helpers/TestAccountProvider';
 const Maker2 = require('../src/index');
 
-function createMaker(privateKey) {
-  return Maker.create('test', { privateKey, log: false });
+async function createMaker(privateKey) {
+  return await Maker.create('test', { privateKey, log: false });
 }
 
 test('import vs require', () => {
@@ -13,7 +13,7 @@ test('import vs require', () => {
 });
 
 test('openCdp', async () => {
-  const maker = createMaker();
+  const maker = await createMaker();
   await maker.authenticate();
   const cdp = await maker.openCdp();
   const id = cdp.id;
@@ -26,7 +26,7 @@ test(
   async () => {
     const testAccount = TestAccountProvider.nextAccount();
 
-    const maker = createMaker(testAccount.key);
+    const maker = await createMaker(testAccount.key);
     await maker.authenticate();
     const cdp = await maker.openCdp();
     const id = cdp.id;
@@ -39,7 +39,7 @@ test(
 );
 
 test('creates a new CDP object for existing CDPs', async () => {
-  const maker = createMaker();
+  const maker = await createMaker();
   await maker.authenticate();
   const cdp = await maker.openCdp();
   const id = cdp.id;
@@ -50,7 +50,7 @@ test('creates a new CDP object for existing CDPs', async () => {
 });
 
 test('throws an error for an invalid id', async () => {
-  const maker = createMaker();
+  const maker = await createMaker();
   await maker.authenticate();
   expect.assertions(1);
   try {
