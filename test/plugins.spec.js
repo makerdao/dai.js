@@ -152,7 +152,7 @@ test('do not allow collisions in smartContract.addContracts', async () => {
 
   expect.assertions(1);
 
-  return await Maker.create('test', {
+  await Maker.create('test', {
     autoAuthenticate: false,
     plugins: [testPlugin],
     smartContract: {
@@ -300,7 +300,7 @@ test('each plugin type can be created with an optional options object for additi
 test('object plugin with beforeCreate can make an async call', async () => {
   const mockAsyncCall = async () => {
     return new Promise(resolve => {
-      setTimeout(1000);
+      setTimeout(50);
       resolve({ testOption: 'myOption' });
     });
   };
