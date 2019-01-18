@@ -20,6 +20,7 @@
   "MCD_JOIN_REP": "GemJoin",
   "MCD_MCD": "DSToken",
   "MCD_MOM": "DSProxy",
+  "MCD_MOM_LIB": "MomLib",
   "MCD_MOVE_DAI": "DaiMove",
   "MCD_MOVE_DGX": "GemMove",
   "MCD_MOVE_ETH": "GemMove",

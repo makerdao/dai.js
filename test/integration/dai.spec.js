@@ -75,7 +75,7 @@ beforeAll(async () => {
           }
         };
 
-  maker = Maker.create(process.env.NETWORK, settings);
+  maker = await Maker.create(process.env.NETWORK, settings);
 
   await maker.authenticate();
   tokenService = maker.service('token');
