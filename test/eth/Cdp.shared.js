@@ -148,22 +148,22 @@ export default function sharedTests(openCdp, initCdpService) {
       describe('with drip', () => {
         let snapshotId, nonceService, transactionCount;
 
-        beforeAll(() => {
+        beforeAll(async () => {
           nonceService = cdpService
             .get('smartContract')
             .get('transactionManager')
             .get('nonce');
           transactionCount = nonceService._counts[currentAddress];
+
+          // wait at least a second for the fees to get updated
+          await promiseWait(1100);
         });
 
         beforeEach(async () => {
-          // Restoring the snapshot resets the account here.
-          // This causes any following tests that call
-          // authenticated functions to fail
+          // Restoring the snapshot resets the account here. This causes any
+          // following tests that call authenticated functions to fail
           snapshotId = await takeSnapshot();
-          await promiseWait(1100);
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-
           nonceService._counts[currentAddress] = transactionCount;
         });
 
@@ -174,8 +174,6 @@ export default function sharedTests(openCdp, initCdpService) {
 
         test('read MKR fee', async () => {
           await setPrice(MKR, 600);
-          // block.timestamp is measured in seconds, so we need to wait at least a
-          // second for the fees to get updated
           const usdFee = await cdp.getGovernanceFee(USD);
           expect(usdFee.gt(0)).toBeTruthy();
           const mkrFee = await cdp.getGovernanceFee();
