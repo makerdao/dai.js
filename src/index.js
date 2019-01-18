@@ -1,6 +1,7 @@
 import Maker from './Maker';
 import {
   Currency,
+  CurrencyRatio,
   currencies,
   createCurrency,
   getCurrency
@@ -19,6 +20,7 @@ Maker.PrivateService = PrivateService;
 Maker.PublicService = PublicService;
 
 Maker.Currency = Currency;
+Maker.CurrencyRatio = CurrencyRatio;
 Maker.createCurrency = createCurrency;
 Maker.getCurrency = getCurrency;
 Maker.currencies = currencies;
