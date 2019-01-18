@@ -222,7 +222,7 @@ class CurrencyRatio extends Currency {
   }
 }
 
-const createCurrencyRatio = (wrappedNumerator, wrappedDenominator) => {
+export const createCurrencyRatio = (wrappedNumerator, wrappedDenominator) => {
   const numerator = wrappedNumerator(0).constructor;
   const denominator = wrappedDenominator(0).constructor;
 

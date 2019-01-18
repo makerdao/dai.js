@@ -4,6 +4,7 @@ import {
   CurrencyRatio,
   currencies,
   createCurrency,
+  createCurrencyRatio,
   getCurrency
 } from './eth/Currency';
 import LocalService from './core/LocalService';
@@ -22,6 +23,7 @@ Maker.PublicService = PublicService;
 Maker.Currency = Currency;
 Maker.CurrencyRatio = CurrencyRatio;
 Maker.createCurrency = createCurrency;
+Maker.createCurrencyRatio = createCurrencyRatio;
 Maker.getCurrency = getCurrency;
 Maker.currencies = currencies;
 

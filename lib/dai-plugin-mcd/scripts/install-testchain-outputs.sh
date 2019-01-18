@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+# TODO take the source directory as a parameter
+
 CWD=`dirname $0`
 CONTRACTS=$CWD/../contracts
 SOURCE=${1:-$CWD/../../../testchain}
