@@ -82,12 +82,12 @@ describe('querying service for current proxy address', () => {
   test('should return address when account has a proxy', async () => {
     await service.build();
     const address = await service.getProxyAddress();
-    expect(service.currentProxy()).toEqual(address);
+    expect(await service.currentProxy()).toEqual(address);
   });
 
   test("should return null when account doesn't have a proxy", async () => {
     await service.getProxyAddress();
-    expect(service.currentProxy()).toBeNull();
+    expect(await service.currentProxy()).toBeNull();
   });
 
   test('should update default address after building new proxy', async () => {
@@ -127,7 +127,7 @@ describe('execute', () => {
         'open',
         [],
         { gasLimit: 4000000 },
-        maker.service('proxy').currentProxy()
+        await maker.service('proxy').currentProxy()
       );
     expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
