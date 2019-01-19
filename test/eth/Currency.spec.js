@@ -165,3 +165,9 @@ test('isInstance provides instanceof functionality', () => {
   expect(USD_DAI.isInstance(USD_DAI(1))).toBeTruthy();
   expect(USD_DAI.isInstance(PETH(1))).toBeFalsy();
 });
+
+test('instance.type = short syntax creator', () => {
+  const val = ETH(1);
+  const val2 = val.type(1);
+  expect(val2).toEqual(val);
+});
