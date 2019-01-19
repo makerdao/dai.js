@@ -51,6 +51,10 @@ export default class DSProxyService extends PrivateService {
       : this.getProxyAddress();
   }
 
+  async ensureProxy() {
+    if (!(await this.currentProxy())) return this.build();
+  }
+
   async build() {
     const nonce = await this.get('nonce').getNonce();
     const txo = await new TransactionObject(
