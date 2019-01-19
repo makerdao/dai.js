@@ -43,6 +43,7 @@ export default class Maker {
       ],
       cdp: ['getCdp', 'openCdp'],
       event: ['on'],
+      proxy: ['currentProxy'],
       token: ['getToken']
     });
   }

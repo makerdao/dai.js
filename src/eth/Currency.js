@@ -159,20 +159,29 @@ const makeCreatorFnWithShift = (creatorFn, symbol, shift) => {
 };
 
 export function createCurrency(symbol) {
+  // This provides short syntax, e.g. ETH(6). We need a wrapper function because
+  // you can't call an ES6 class consructor without `new`
+  const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
+
   class CurrencyX extends Currency {
     constructor(amount, shift) {
       super(amount, shift);
       this.symbol = symbol;
+
+      // this.type can be used an alternative to `this.constructor` when you
+      // want to use the short syntax, e.g.:
+      //
+      //   var foo = ETH(1);
+      //   var bar = foo.type(2);
+      //   assert(foo.plus(bar).eq(ETH(3)));
+      //
+      this.type = creatorFn;
     }
   }
 
   // this changes the name of the class in stack traces
   Object.defineProperty(CurrencyX, 'name', { value: symbol });
   Object.defineProperty(CurrencyX, 'symbol', { value: symbol });
-
-  // This provides short syntax, e.g. ETH(6). We need a wrapper function because
-  // you can't call an ES6 class consructor without `new`
-  const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
 
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
@@ -222,7 +231,7 @@ class CurrencyRatio extends Currency {
   }
 }
 
-const createCurrencyRatio = (wrappedNumerator, wrappedDenominator) => {
+export const createCurrencyRatio = (wrappedNumerator, wrappedDenominator) => {
   const numerator = wrappedNumerator(0).constructor;
   const denominator = wrappedDenominator(0).constructor;
 

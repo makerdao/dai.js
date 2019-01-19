@@ -47,7 +47,7 @@ export default class Erc20Token {
         metadata: {
           action: {
             name: 'approve',
-            spender: this._web3.currentAddress(),
+            spender,
             allowance: getCurrency(value, unit),
             allowing: value != '0'
           }
@@ -58,11 +58,12 @@ export default class Erc20Token {
   }
 
   approveUnlimited(spender, options = {}) {
+    if (!spender) spender = this._web3.currentAddress();
     return this._contract.approve(spender, -1, {
       metadata: {
         action: {
           name: 'approve',
-          spender: this._web3.currentAddress(),
+          spender,
           allowance: Number.MAX_SAFE_INTEGER,
           allowing: true,
           unlimited: true

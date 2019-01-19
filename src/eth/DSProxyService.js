@@ -41,10 +41,18 @@ export default class DSProxyService extends PrivateService {
     this._currentAddress = this.get('web3').currentAddress();
   }
 
-  currentProxy() {
+  // this needs to be async so it can fetch the proxy address just-in-time after
+  // an account switch. if we don't want this to be async, we have to make
+  // maker.useAccount async and set up a hook so that this service can get the
+  // new proxy address as soon as the switch happens
+  async currentProxy() {
     return this._currentAddress === this.get('web3').currentAddress()
       ? this._currentProxy
       : this.getProxyAddress();
+  }
+
+  async ensureProxy() {
+    if (!(await this.currentProxy())) return this.build();
   }
 
   async build() {
@@ -65,7 +73,7 @@ export default class DSProxyService extends PrivateService {
   execute(contract, method, args, options, address) {
     if (!address && !this._currentProxy)
       throw new Error('No proxy found for current account');
-    const proxyAddress = address ? address : this.currentProxy();
+    const proxyAddress = address ? address : this._currentProxy;
     const proxyContract = this.getContractByProxyAddress(proxyAddress);
     const data = contract.interface.functions[method](...args).data;
     return proxyContract.execute(contract.address, data, options);
