@@ -3,7 +3,7 @@ import TransactionLifeCycle from '../eth/TransactionLifeCycle';
 import debug from 'debug';
 import { ETH } from './Currency';
 
-const log = debug('dai:transactionObject');
+const log = debug('dai:TransactionObject');
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(
@@ -101,7 +101,7 @@ export default class TransactionObject extends TransactionLifeCycle {
           ? `${this.metadata.contract}.${this.metadata.method}`
           : 'transaction';
         const revertMsg = `${label} ${this.hash} reverted`;
-        log(revertMsg);
+        log(revertMsg + '\n' + JSON.stringify(this.receipt, null, '  '));
         throw new Error(revertMsg);
       }
     } catch (err) {

@@ -158,11 +158,24 @@ const makeCreatorFnWithShift = (creatorFn, symbol, shift) => {
   return fn;
 };
 
-function setupWrapper(symbol) {
+export function createCurrency(symbol) {
+  // This provides short syntax, e.g. ETH(6). We need a wrapper function because
+  // you can't call an ES6 class consructor without `new`
+  const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
+
   class CurrencyX extends Currency {
     constructor(amount, shift) {
       super(amount, shift);
       this.symbol = symbol;
+
+      // this.type can be used an alternative to `this.constructor` when you
+      // want to use the short syntax, e.g.:
+      //
+      //   var foo = ETH(1);
+      //   var bar = foo.type(2);
+      //   assert(foo.plus(bar).eq(ETH(3)));
+      //
+      this.type = creatorFn;
     }
   }
 
@@ -170,33 +183,30 @@ function setupWrapper(symbol) {
   Object.defineProperty(CurrencyX, 'name', { value: symbol });
   Object.defineProperty(CurrencyX, 'symbol', { value: symbol });
 
-  // This provides short syntax, e.g. ETH(6). We need a wrapper function because
-  // you can't call an ES6 class consructor without `new`
-  const creatorFn = (amount, shift) => new CurrencyX(amount, shift);
-
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
     ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
     symbol,
-    wrappedClass: CurrencyX
+    isInstance: obj => obj instanceof CurrencyX
   });
 
+  Object.assign(CurrencyX, { wei: creatorFn.wei, ray: creatorFn.ray });
   return creatorFn;
 }
 
 export const currencies = values(tokens).reduce(
   (output, symbol) => {
-    output[symbol] = setupWrapper(symbol);
+    output[symbol] = createCurrency(symbol);
     return output;
   },
   {
-    USD: setupWrapper('USD')
+    USD: createCurrency('USD')
   }
 );
 
 export function getCurrency(amount, unit) {
   if (amount instanceof Currency) return amount;
-  if (!unit) throw new Error('Unit not specified');
+  if (!unit) throw new Error('Amount is not a Currency');
   const key = typeof unit === 'string' ? unit.toUpperCase() : unit.symbol;
   const ctor = currencies[key];
   if (!ctor) {
@@ -212,16 +222,19 @@ export function getCurrency(amount, unit) {
 // could either create subclasses for each ratio, or refactor Currency so it
 // also just stores its symbol in the instance rather than the subclass.
 
-export class CurrencyRatio extends Currency {
+class CurrencyRatio extends Currency {
   constructor(amount, numerator, denominator, shift) {
     super(amount, shift);
-    this.numerator = numerator.wrappedClass || numerator;
-    this.denominator = denominator.wrappedClass || denominator;
+    this.numerator = numerator;
+    this.denominator = denominator;
     this.symbol = `${numerator.symbol}/${denominator.symbol}`;
   }
 }
 
-const setupRatioWrapper = (numerator, denominator) => {
+export const createCurrencyRatio = (wrappedNumerator, wrappedDenominator) => {
+  const numerator = wrappedNumerator(0).constructor;
+  const denominator = wrappedDenominator(0).constructor;
+
   const creatorFn = (amount, shift) =>
     new CurrencyRatio(amount, numerator, denominator, shift);
 
@@ -230,7 +243,8 @@ const setupRatioWrapper = (numerator, denominator) => {
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
     ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
-    symbol
+    symbol,
+    isInstance: obj => obj instanceof CurrencyRatio && obj.symbol === symbol
   });
 
   return creatorFn;
@@ -247,11 +261,11 @@ export const PETH = currencies.PETH;
 export const WETH = currencies.WETH;
 export const USD = currencies.USD;
 
-export const USD_DAI = setupRatioWrapper(USD, DAI);
-export const USD_ETH = setupRatioWrapper(USD, ETH);
-export const USD_MKR = setupRatioWrapper(USD, MKR);
-export const USD_PETH = setupRatioWrapper(USD, PETH);
-export const USD_WETH = setupRatioWrapper(USD, WETH);
+export const USD_DAI = createCurrencyRatio(USD, DAI);
+export const USD_ETH = createCurrencyRatio(USD, ETH);
+export const USD_MKR = createCurrencyRatio(USD, MKR);
+export const USD_PETH = createCurrencyRatio(USD, PETH);
+export const USD_WETH = createCurrencyRatio(USD, WETH);
 
 Object.assign(currencies, {
   USD_DAI,

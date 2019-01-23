@@ -1,5 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
-import { Currency, ETH, USD_ETH, USD_MKR } from '../../src/eth/Currency';
+import { ETH, USD_ETH, USD_MKR, USD_PETH } from '../../src/eth/Currency';
 
 function buildTestPriceService() {
   return buildTestService('price', { price: true });
@@ -53,7 +53,7 @@ test('should return the peth price', done => {
     .authenticate()
     .then(() => {
       service.getPethPrice().then(value => {
-        expect(value instanceof Currency).toBeTruthy();
+        expect(USD_PETH.isInstance(value)).toBeTruthy();
         done();
       });
     });

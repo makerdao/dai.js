@@ -1,18 +1,22 @@
 import { currencies, getCurrency } from '../Currency';
 
 export default class Erc20Token {
-  constructor(contract, web3Service, decimals = 18, symbol) {
+  constructor(contract, web3Service, decimals = 18, symbol, currency) {
     this._contract = contract;
     this._web3 = web3Service;
     this._decimals = decimals;
     this.symbol = symbol;
-    this._currency = currencies[symbol];
+    this._currency = currency || currencies[symbol];
   }
 
   async allowance(tokenOwner, spender) {
     return this._valueFromContract(
       await this._contract.allowance(tokenOwner, spender)
     );
+  }
+
+  async balance() {
+    return this.balanceOf(this._web3.currentAddress());
   }
 
   async balanceOf(owner) {
@@ -43,7 +47,7 @@ export default class Erc20Token {
         metadata: {
           action: {
             name: 'approve',
-            spender: this._web3.currentAddress(),
+            spender,
             allowance: getCurrency(value, unit),
             allowing: value != '0'
           }
@@ -54,11 +58,12 @@ export default class Erc20Token {
   }
 
   approveUnlimited(spender, options = {}) {
+    if (!spender) spender = this._web3.currentAddress();
     return this._contract.approve(spender, -1, {
       metadata: {
         action: {
           name: 'approve',
-          spender: this._web3.currentAddress(),
+          spender,
           allowance: Number.MAX_SAFE_INTEGER,
           allowing: true,
           unlimited: true

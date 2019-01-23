@@ -1,15 +1,18 @@
 {
   "rootDir": "../../",
+  "verbose": true,
   "coverageReporters": [
     "json",
     "lcov",
     "text-summary"
   ],
   "collectCoverageFrom": [
+    "lib/**/*.js",
     "src/**/*.js"
   ],
   "globalSetup": "<rootDir>/test/setup-global.js",
   "roots": [
+    "lib",
     "src",
     "test"
   ],

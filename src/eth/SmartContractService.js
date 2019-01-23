@@ -9,6 +9,10 @@ import { mapValues } from 'lodash';
 export default class SmartContractService extends PublicService {
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log', 'transactionManager']);
+
+    // aliases
+    this.getContract = this.getContractByName;
+    this.getContractAddress = this.getContractAddressByName;
   }
 
   initialize(settings = {}) {
@@ -197,9 +201,12 @@ export default class SmartContractService extends PublicService {
 
       const infos2 = {
         ...infos,
-        ...mapValues(this._addedContracts, ([definition]) => {
+        ...mapValues(this._addedContracts, ([definition], name) => {
           const { address, ...otherProps } = definition;
           if (typeof address === 'string') return [definition];
+          if (!address || !address[networkName]) {
+            throw new Error(`Missing address for ${name} on ${networkName}`);
+          }
           return [{ address: address[networkName], ...otherProps }];
         })
       };

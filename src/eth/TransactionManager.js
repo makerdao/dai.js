@@ -2,6 +2,9 @@ import PublicService from '../core/PublicService';
 import TransactionObject from './TransactionObject';
 import { uniqueId } from '../utils';
 import { has, each } from 'lodash';
+import { inspect } from 'util';
+import debug from 'debug';
+const log = debug('dai:TransactionManager');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
@@ -12,6 +15,7 @@ export default class TransactionManager extends PublicService {
 
   // this method must not be async
   sendContractCall(contract, method, args, name) {
+    log(`sendContractCall: ${name}.${method} ${inspect(args)}`);
     if (!args) args = [];
     let options,
       promise,

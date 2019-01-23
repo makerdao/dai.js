@@ -46,7 +46,7 @@ test('parses an amount + currency as ray', () => {
 test('throws an error if there is no unit', () => {
   expect(() => {
     getCurrency(1);
-  }).toThrowError('Unit not specified');
+  }).toThrowError('Amount is not a Currency');
 });
 
 test('throws an error if amount is negative', () => {
@@ -156,4 +156,18 @@ test('creating a ratio from division', () => {
   const value1 = USD(4);
   const value2 = DAI(20);
   expect(value1.div(value2)).toEqual(USD_DAI(0.2));
+});
+
+test('isInstance provides instanceof functionality', () => {
+  expect(DAI.isInstance(DAI(1))).toBeTruthy();
+  expect(DAI.isInstance(MKR(1))).toBeFalsy();
+
+  expect(USD_DAI.isInstance(USD_DAI(1))).toBeTruthy();
+  expect(USD_DAI.isInstance(PETH(1))).toBeFalsy();
+});
+
+test('instance.type = short syntax creator', () => {
+  const val = ETH(1);
+  const val2 = val.type(1);
+  expect(val2).toEqual(val);
 });
