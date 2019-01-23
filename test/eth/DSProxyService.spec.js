@@ -124,7 +124,7 @@ describe('execute', () => {
   let maker, tubContract;
 
   beforeAll(async () => {
-    maker = Maker.create('test', {
+    maker = await Maker.create('test', {
       web3: { confirmedBlockCount: '0' },
       log: false
     });
