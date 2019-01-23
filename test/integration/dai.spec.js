@@ -183,9 +183,7 @@ xdescribe('OasisExchangeService', () => {
   );
 });
 
-// These will fail because of some issues with the transaction
-// object's logging functions, maybe because of dsproxy
-xdescribe('Eth2DaiDirect', () => {
+describe('Eth2DaiDirect', () => {
   test(
     'sell eth for dai',
     async () => {
