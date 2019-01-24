@@ -216,7 +216,7 @@ describe('create dsproxy and execute', () => {
       const order = await service.sell('ETH', 'DAI', '0.01');
       expect(Object.keys(order)).toEqual(orderKeys);
     },
-    20000
+    40000
   );
 
   test(
@@ -225,6 +225,6 @@ describe('create dsproxy and execute', () => {
       const order = await service.buy('DAI', 'ETH', '0.01');
       expect(Object.keys(order)).toEqual(orderKeys);
     },
-    20000
+    40000
   );
 });
