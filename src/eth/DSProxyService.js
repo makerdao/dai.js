@@ -52,13 +52,17 @@ export default class DSProxyService extends PrivateService {
   }
 
   async ensureProxy() {
-    if (!(await this.currentProxy())) return this.build();
+    if (!(await this.currentProxy())) {
+      await this.build();
+    }
+    return await this.currentProxy();
   }
 
   async build() {
     if (await this.currentProxy()) {
       throw new Error(
-        'This account already has a proxy deployed at ' + this.currentProxy()
+        'This account already has a proxy deployed at ' +
+          (await this.currentProxy())
       );
     }
     const nonce = await this.get('nonce').getNonce();

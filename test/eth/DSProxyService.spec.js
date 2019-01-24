@@ -79,9 +79,9 @@ test("should set a proxy's owner", async () => {
 test('should be able to require a dsproxy', async () => {
   let proxyAddress = await service.currentProxy();
   expect(proxyAddress).toBeNull();
-  proxyAddress = await service.requireProxy();
+  proxyAddress = await service.ensureProxy();
   expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-  proxyAddress = await service.requireProxy();
+  proxyAddress = await service.ensureProxy();
   expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
 });
 
