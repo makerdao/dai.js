@@ -107,7 +107,6 @@ export default class Eth2DaiDirect extends PrivateService {
   }
 
   async _maxPayAmount(payToken, buyToken, buyAmount) {
-    // Double check if this should handle rounding
     const payAmount = this._payAmount
       ? this._payAmount
       : await this.getPayAmount(payToken, buyToken, buyAmount);
