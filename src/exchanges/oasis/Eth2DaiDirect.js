@@ -18,7 +18,7 @@ export default class Eth2DaiDirect extends PrivateService {
   }
 
   async sell(sell, buy, amount) {
-    const proxy = await this._requireProxy(sell);
+    const proxy = await this._checkProxy(sell);
     const method = this._setMethod(sell, buy, 'sellAllAmount', proxy);
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
@@ -44,7 +44,7 @@ export default class Eth2DaiDirect extends PrivateService {
   }
 
   async buy(buy, sell, amount) {
-    const proxy = await this._requireProxy(sell);
+    const proxy = await this._checkProxy(sell);
     const method = this._setMethod(sell, buy, 'buyAllAmount', proxy);
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
@@ -131,13 +131,13 @@ export default class Eth2DaiDirect extends PrivateService {
     }
   }
 
-  async _requireProxy(sellCurrency) {
+  async _checkProxy(sellCurrency) {
     const proxy = await this.get('proxy').currentProxy();
 
     if (proxy) {
       return proxy;
-    } else if (!proxy && sellCurrency !== 'ETH') {
-      return await this.get('proxy').requireProxy();
+    } else if (sellCurrency !== 'ETH') {
+      return await this.get('proxy').ensureProxy();
     } else {
       return false;
     }
