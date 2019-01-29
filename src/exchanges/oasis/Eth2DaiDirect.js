@@ -74,12 +74,8 @@ export default class Eth2DaiDirect extends PrivateService {
 
   async getBuyAmount(buyToken, payToken, sellAmount) {
     this._buyAmount = await this._otc().getBuyAmount(
-      this.get('token')
-        .getToken(buyToken)
-        .address(),
-      this.get('token')
-        .getToken(payToken)
-        .address(),
+      this._getTokenAddress(buyToken),
+      this._getTokenAddress(payToken),
       this._valueForContract(sellAmount, buyToken)
     );
     return this._buyAmount;
@@ -87,12 +83,8 @@ export default class Eth2DaiDirect extends PrivateService {
 
   async getPayAmount(payToken, buyToken, buyAmount) {
     this._payAmount = await this._otc().getPayAmount(
-      this.get('token')
-        .getToken(payToken)
-        .address(),
-      this.get('token')
-        .getToken(buyToken)
-        .address(),
+      this._getTokenAddress(payToken),
+      this._getTokenAddress(buyToken),
       this._valueForContract(buyAmount, buyToken)
     );
     return this._payAmount;
@@ -114,6 +106,24 @@ export default class Eth2DaiDirect extends PrivateService {
     return ETH.wei(adjustedAmount).toEthersBigNumber('wei');
   }
 
+  // The only atomic createAndExecute functions that work
+  // are payEth orders, because the createAndExecute
+  // functions themselves cannot be `payable` with ERC20
+  // tokens. _checkProxy is necessary to determine
+  // whether a proxy should be built first (as a separate
+  // transaction) or if it can be done atomically
+  async _checkProxy(sellCurrency) {
+    const proxy = await this.get('proxy').currentProxy();
+
+    if (proxy) {
+      return proxy;
+    } else if (sellCurrency !== 'ETH') {
+      return await this.get('proxy').ensureProxy();
+    } else {
+      return false;
+    }
+  }
+
   _setMethod(sellToken, buyToken, method, proxy) {
     if (buyToken === 'ETH') {
       return (method += 'BuyEth');
@@ -131,32 +141,10 @@ export default class Eth2DaiDirect extends PrivateService {
     }
   }
 
-  async _checkProxy(sellCurrency) {
-    const proxy = await this.get('proxy').currentProxy();
-
-    if (proxy) {
-      return proxy;
-    } else if (sellCurrency !== 'ETH') {
-      return await this.get('proxy').ensureProxy();
-    } else {
-      return false;
-    }
-  }
-
   async _buildParams(sendToken, amount, buyToken, limit, method) {
     const otcAddress = this._otc().address;
-    const daiAddress = this.get('token')
-      .getToken('DAI')
-      .address();
-    const wethAddress = this.get('token')
-      .getToken('WETH')
-      .address();
-    const buyTokenAddress = this.get('token')
-      .getToken(buyToken)
-      .address();
-    const sellTokenAddress = this.get('token')
-      .getToken(sendToken)
-      .address();
+    const daiAddress = this._getTokenAddress('DAI');
+    const wethAddress = this._getTokenAddress('WETH');
     const orderAmount = this._valueForContract(amount, sendToken);
     const registryAddress = this.get('smartContract').getContractByName(
       'PROXY_REGISTRY'
@@ -174,9 +162,9 @@ export default class Eth2DaiDirect extends PrivateService {
       default:
         return [
           otcAddress,
-          sellTokenAddress,
+          this._getTokenAddress(sendToken),
           orderAmount,
-          buyTokenAddress,
+          this._getTokenAddress(buyToken),
           limit
         ];
     }
@@ -184,14 +172,20 @@ export default class Eth2DaiDirect extends PrivateService {
 
   _buildOptions(amount, sellToken, method, maxPayAmount) {
     const options = {};
+    options.otc = this._otc();
+    if (!method.includes('create')) options.dsProxy = true;
     if (method.toLowerCase().includes('buyallamountpayeth')) {
       options.value = maxPayAmount;
     } else if (sellToken === 'ETH') {
       options.value = this._valueForContract(amount, 'WETH');
     }
-    options.otc = this._otc();
-    if (!method.includes('create')) options.dsProxy = true;
     return options;
+  }
+
+  _getTokenAddress(token) {
+    return this.get('token')
+      .getToken(token)
+      .address();
   }
 
   _oasisDirect() {
