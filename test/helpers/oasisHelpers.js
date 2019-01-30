@@ -50,12 +50,6 @@ async function offer(
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC);
 
-  const account = oasisExchangeService.get('web3').currentAddress();
-  const dai = await oasisExchangeService.get('token').getToken('DAI');
-  const daiBalance = await dai.balanceOf(account);
-  console.log(daiBalance.toString());
-  console.log(account);
-
   const tx = await oasisContract.offer(
     payAmount,
     payTokenAddress,
@@ -71,6 +65,5 @@ export async function transferDaiBalance(service, newAccount) {
   const dai = await service.get('token').getToken('DAI');
   const daiBalance = await dai.balanceOf(originalAccount);
 
-  console.log(newAccount);
   return await dai.transfer(newAccount, daiBalance.toEthersBigNumber());
 }
