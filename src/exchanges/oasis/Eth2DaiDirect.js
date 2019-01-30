@@ -23,7 +23,7 @@ export default class Eth2DaiDirect extends PrivateService {
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const minFillAmount = await this._minBuyAmount(buyToken, sellToken, amount);
-    const params = await this._buildParams(
+    const params = this._buildParams(
       sellToken,
       amount,
       buyToken,
@@ -49,7 +49,7 @@ export default class Eth2DaiDirect extends PrivateService {
     const buyToken = buy === 'ETH' ? 'WETH' : buy;
     const sellToken = sell === 'ETH' ? 'WETH' : sell;
     const maxPayAmount = await this._maxPayAmount(sellToken, buyToken, amount);
-    const params = await this._buildParams(
+    const params = this._buildParams(
       buyToken,
       amount,
       sellToken,
@@ -69,7 +69,7 @@ export default class Eth2DaiDirect extends PrivateService {
   }
 
   setSlippageLimit(limit) {
-    return (this._slippage = limit);
+    this._slippage = limit;
   }
 
   async getBuyAmount(buyToken, payToken, sellAmount) {
@@ -141,7 +141,7 @@ export default class Eth2DaiDirect extends PrivateService {
     }
   }
 
-  async _buildParams(sendToken, amount, buyToken, limit, method) {
+  _buildParams(sendToken, amount, buyToken, limit, method) {
     const otcAddress = this._otc().address;
     const daiAddress = this._getTokenAddress('DAI');
     const wethAddress = this._getTokenAddress('WETH');

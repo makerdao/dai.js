@@ -111,7 +111,7 @@ export default class TransactionObject extends TransactionLifeCycle {
     return this;
   }
 
-  _waitForReceipt(retries = 15) {
+  _waitForReceipt(retries = 15, currentTry = 1) {
     const result = Promise.resolve(
       this._web3Service.getTransactionReceipt(this.hash)
     );
@@ -121,8 +121,8 @@ export default class TransactionObject extends TransactionLifeCycle {
       if (receipt) return receipt;
 
       log(`Receipt is null. Retrying ${retries} more time(s)`);
-      return promiseWait((16 - retries) * 1500).then(() =>
-        this._waitForReceipt(retries - 1)
+      return promiseWait(currentTry * 1500).then(() =>
+        this._waitForReceipt(retries - 1, currentTry + 1)
       );
     });
   }
