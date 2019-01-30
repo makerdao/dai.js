@@ -1,7 +1,11 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
-import { setProxyAccount, setNewAccount } from '../../helpers/proxyHelpers';
+import { setProxyAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
-import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
+import {
+  createDai,
+  placeLimitOrder,
+  transferDaiBalance
+} from '../../helpers/oasisHelpers';
 
 let service, proxyAccount;
 
@@ -25,6 +29,11 @@ const orderKeys = [
   'promise',
   '_fillAmount'
 ];
+
+beforeAll(async () => {
+  await buildTestEth2DaiDirectService();
+  await createDai(service);
+});
 
 beforeEach(async () => {
   jest.setTimeout(15000);
@@ -126,7 +135,7 @@ describe('format contract call', () => {
 
 describe('values from otc', () => {
   beforeAll(async () => {
-    await createDaiAndPlaceLimitOrder(service);
+    await placeLimitOrder(service);
   });
 
   test('get buy amount', async () => {
@@ -151,17 +160,18 @@ describe('values from otc', () => {
 });
 
 describe('trade with existing dsproxy', () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     if (!proxyAccount) {
       proxyAccount = TestAccountProvider.nextAccount();
     }
+    // await transferDaiBalance(service, proxyAccount.address);
     await setProxyAccount(service, proxyAccount);
     if (!(await proxy())) await service.get('proxy').build();
   });
 
   describe('sell dai', () => {
     beforeEach(async () => {
-      await createDaiAndPlaceLimitOrder(service);
+      await placeLimitOrder(service);
     });
 
     test('sell all amount', async () => {
@@ -187,7 +197,7 @@ describe('trade with existing dsproxy', () => {
 
   describe('buy dai', () => {
     beforeEach(async () => {
-      await createDaiAndPlaceLimitOrder(service, true);
+      await placeLimitOrder(service, true);
     });
 
     test('sell all amount, pay eth', async () => {
@@ -203,10 +213,11 @@ describe('trade with existing dsproxy', () => {
 });
 
 describe('create dsproxy and execute', () => {
-  beforeEach(async () => {
-    const accountService = service.get('web3').get('accounts');
-    await setNewAccount(accountService);
-    await createDaiAndPlaceLimitOrder(service, true);
+  beforeAll(async () => {
+    const newAccount = TestAccountProvider.nextAccount();
+    await transferDaiBalance(service, newAccount.address);
+    await setProxyAccount(service, newAccount);
+    await placeLimitOrder(service, true);
   });
 
   test('sell all amount, pay eth', async () => {

@@ -3,19 +3,15 @@ import contracts from '../../contracts/contracts';
 import { DAI, WETH } from '../../src/eth/Currency';
 import { mineBlocks } from './transactionConfirmation';
 
-export default async function createDaiAndPlaceLimitOrder(
-  oasisExchangeService,
-  sellDai = false
-) {
+export async function createDai(oasisExchangeService) {
   const cdp = await oasisExchangeService.get('cdp').openCdp();
-  const tx = cdp.lockEth(0.1);
+  const tx = cdp.lockEth(1);
   mineBlocks(oasisExchangeService);
   await tx;
-  await cdp.drawDai(1);
-  return placeLimitOrder(oasisExchangeService, sellDai);
+  return await cdp.drawDai(1);
 }
 
-async function placeLimitOrder(oasisExchangeService, sellDai) {
+export async function placeLimitOrder(oasisExchangeService, sellDai) {
   const wethToken = oasisExchangeService.get('token').getToken(WETH);
   const wethAddress = wethToken.address();
   const daiToken = oasisExchangeService.get('token').getToken(DAI);
@@ -54,6 +50,12 @@ async function offer(
     .get('smartContract')
     .getContractByName(contracts.MAKER_OTC);
 
+  const account = oasisExchangeService.get('web3').currentAddress();
+  const dai = await oasisExchangeService.get('token').getToken('DAI');
+  const daiBalance = await dai.balanceOf(account);
+  console.log(daiBalance.toString());
+  console.log(account);
+
   const tx = await oasisContract.offer(
     payAmount,
     payTokenAddress,
@@ -62,4 +64,13 @@ async function offer(
     position
   );
   return await tx.mine();
+}
+
+export async function transferDaiBalance(service, newAccount) {
+  const originalAccount = service.get('web3').currentAddress();
+  const dai = await service.get('token').getToken('DAI');
+  const daiBalance = await dai.balanceOf(originalAccount);
+
+  console.log(newAccount);
+  return await dai.transfer(newAccount, daiBalance.toEthersBigNumber());
 }
