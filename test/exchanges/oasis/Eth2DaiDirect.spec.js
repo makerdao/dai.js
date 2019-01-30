@@ -131,7 +131,6 @@ describe('values from otc', () => {
 
   test('get buy amount', async () => {
     const buyAmount = await service.getBuyAmount('WETH', 'DAI', '0.01');
-    expect(Object.keys(buyAmount)).toEqual(['_bn']);
     expect(buyAmount.toString()).toEqual('500000000000000');
   });
 
@@ -142,7 +141,6 @@ describe('values from otc', () => {
 
   test('get pay amount', async () => {
     const payAmount = await service.getPayAmount('DAI', 'WETH', '0.01');
-    expect(Object.keys(payAmount)).toEqual(['_bn']);
     expect(payAmount.toString()).toEqual('200000000000000000');
   });
 

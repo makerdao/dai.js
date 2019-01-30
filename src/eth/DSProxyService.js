@@ -55,15 +55,13 @@ export default class DSProxyService extends PrivateService {
     if (!(await this.currentProxy())) {
       await this.build();
     }
-    return await this.currentProxy();
+    return this.currentProxy();
   }
 
   async build() {
-    if (await this.currentProxy()) {
-      throw new Error(
-        'This account already has a proxy deployed at ' +
-          (await this.currentProxy())
-      );
+    const proxy = await this.currentProxy();
+    if (proxy) {
+      throw new Error('This account already has a proxy deployed at ' + proxy);
     }
     const nonce = await this.get('nonce').getNonce();
     const txo = await new TransactionObject(
