@@ -20,16 +20,6 @@ function proxy() {
   return service.get('proxy').currentProxy();
 }
 
-const orderKeys = [
-  '_logKey',
-  '_unit',
-  '_contract',
-  '_txMgr',
-  '_otc',
-  'promise',
-  '_fillAmount'
-];
-
 beforeAll(async () => {
   await buildTestEth2DaiDirectService();
   await createDai(service);
@@ -175,27 +165,22 @@ describe('trade with existing dsproxy', () => {
 
     test('sell all amount', async () => {
       const order = await service.sell('DAI', 'WETH', '0.01');
-      // const initialBalance = getBalance('DAI');
-      console.log(order.fillAmount().toNumber());
-      expect(Object.keys(order)).toEqual(orderKeys);
+      expect(order.fillAmount().toNumber()).toEqual(0.0005);
     });
 
     test('sell all amount, buy eth', async () => {
       const order = await service.sell('DAI', 'ETH', '0.01');
-      console.log(order.fillAmount().toNumber());
-      expect(Object.keys(order)).toEqual(orderKeys);
+      expect(order.fillAmount().toNumber()).toEqual(0.0005);
     });
 
     test('buy all amount', async () => {
       const order = await service.buy('WETH', 'DAI', '0.01');
-      console.log(order.fillAmount().toNumber());
-      expect(Object.keys(order)).toEqual(orderKeys);
+      expect(order.fillAmount().toNumber()).toEqual(0.2);
     });
 
     test('buy all amount, buy eth', async () => {
       const order = await service.buy('ETH', 'DAI', '0.01');
-      console.log(order.fillAmount().toNumber());
-      expect(Object.keys(order)).toEqual(orderKeys);
+      expect(order.fillAmount().toNumber()).toEqual(0.2);
     });
   });
 
@@ -206,14 +191,12 @@ describe('trade with existing dsproxy', () => {
 
     test('sell all amount, pay eth', async () => {
       const order = await service.sell('ETH', 'DAI', '0.01');
-      console.log(order.fillAmount().toNumber());
-      expect(Object.keys(order)).toEqual(orderKeys);
+      expect(order.fillAmount().toNumber()).toEqual(0.0025);
     });
 
     test('buy all amount, pay eth', async () => {
       const order = await service.buy('DAI', 'ETH', '0.01');
-      console.log(order.fillAmount().toNumber());
-      expect(Object.keys(order)).toEqual(orderKeys);
+      expect(order.fillAmount().toNumber()).toEqual(0.04);
     });
   });
 });
@@ -228,13 +211,11 @@ describe('create dsproxy and execute', () => {
 
   test('sell all amount, pay eth', async () => {
     const order = await service.sell('ETH', 'DAI', '0.01');
-    console.log(order.fillAmount().toNumber());
-    expect(Object.keys(order)).toEqual(orderKeys);
+    expect(order.fillAmount().toNumber()).toEqual(0.0025);
   });
 
   test('buy all amount, pay eth', async () => {
     const order = await service.buy('DAI', 'ETH', '0.01');
-    console.log(order.fillAmount().toNumber());
-    expect(Object.keys(order)).toEqual(orderKeys);
+    expect(order.fillAmount().toNumber()).toEqual(0.04);
   });
 });
