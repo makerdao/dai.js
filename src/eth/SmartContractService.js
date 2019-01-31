@@ -26,6 +26,9 @@ export default class SmartContractService extends PublicService {
         {}
       );
     }
+    this.get('transactionManager')
+      .get('proxy')
+      .setSmartContractService(this);
   }
 
   getContractByAddressAndAbi(address, abi, { name, wrap = true } = {}) {

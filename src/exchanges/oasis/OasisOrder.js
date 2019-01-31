@@ -43,7 +43,7 @@ export default class OasisOrder {
         e.topics[0].toLowerCase() === topic.toLowerCase() &&
         e.address.toLowerCase() === contract.address.toLowerCase()
     );
-    // console.log(logs.topics);
+
     const total = receiptEvents.reduce((acc, event) => {
       const parsedLog = LogTrade.parse(event.data);
       return acc.add(parsedLog[this._logKey]);

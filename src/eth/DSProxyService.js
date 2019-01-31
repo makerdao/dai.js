@@ -13,6 +13,10 @@ export default class DSProxyService extends PrivateService {
     this._currentProxy = await this.getProxyAddress();
   }
 
+  setSmartContractService(service) {
+    this._smartContractService = service;
+  }
+
   _proxyRegistry() {
     return new Contract(
       this._registryInfo().address,
