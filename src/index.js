@@ -7,9 +7,9 @@ import {
   createCurrencyRatio,
   getCurrency
 } from './eth/Currency';
-import LocalService from './core/LocalService';
-import PrivateService from './core/PrivateService';
-import PublicService from './core/PublicService';
+import { LocalService } from '@makerdao/services-core';
+import { PrivateService } from '@makerdao/services-core';
+import { PublicService } from '@makerdao/services-core';
 import { stringToBytes32 } from './utils/conversion';
 
 for (let symbol in currencies) {

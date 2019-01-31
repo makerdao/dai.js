@@ -1,4 +1,4 @@
-import PrivateService from '../core/PrivateService';
+import { PrivateService } from '@makerdao/services-core';
 import BigNumber from 'bignumber.js';
 import { UINT256_MAX } from '../utils/constants';
 import tracksTransactions from '../utils/tracksTransactions';

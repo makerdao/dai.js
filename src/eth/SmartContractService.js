@@ -1,4 +1,4 @@
-import PublicService from '../core/PublicService';
+import { PublicService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks, { TESTNET_ID } from '../../contracts/networks';

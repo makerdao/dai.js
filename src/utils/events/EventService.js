@@ -1,4 +1,4 @@
-import PrivateService from '../../core/PrivateService';
+import { PrivateService } from '@makerdao/services-core';
 import { slug } from '../index';
 import EventEmitter from './EventEmitter';
 

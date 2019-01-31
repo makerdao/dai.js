@@ -1,5 +1,5 @@
 /* eslint-disable */
-import PrivateService from '../../core/PrivateService';
+import { PrivateService } from '@makerdao/services-core';
 
 export default class ConsoleLogger extends PrivateService {
   /**

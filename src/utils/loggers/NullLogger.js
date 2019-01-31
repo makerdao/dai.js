@@ -1,5 +1,4 @@
-import ServiceManager from '../../core/ServiceManager';
-import LocalService from '../../core/LocalService';
+import { LocalService, ServiceManager } from '@makerdao/services-core';
 
 const _ = () => {};
 

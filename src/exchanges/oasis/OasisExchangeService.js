@@ -1,4 +1,4 @@
-import PrivateService from '../../core/PrivateService';
+import { PrivateService } from '@makerdao/services-core';
 import { OasisBuyOrder, OasisSellOrder } from './OasisOrder';
 import contracts from '../../../contracts/contracts';
 import { UINT256_MAX } from '../../utils/constants';

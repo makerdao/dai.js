@@ -1,0 +1,11 @@
+{
+  "name": "@makerdao/services-core",
+  "description": "Dependency injection framework",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "prepublish": "../../.bin/babel -d dist src",
+    "postinstall": "../../.bin/babel -d dist src"
+  }
+}

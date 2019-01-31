@@ -1,4 +1,4 @@
-import StateMachine from '../core/StateMachine';
+import { StateMachine } from '@makerdao/services-core';
 import transactionState from '../eth/TransactionState';
 import TransactionType, {
   transactionTypeTransitions

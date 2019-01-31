@@ -1,4 +1,4 @@
-import PrivateService from '../core/PrivateService';
+import { PrivateService } from '@makerdao/services-core';
 import TransactionObject from './TransactionObject';
 import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';

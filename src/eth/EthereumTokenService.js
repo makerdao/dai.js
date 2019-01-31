@@ -1,4 +1,4 @@
-import PrivateService from '../core/PrivateService';
+import { PrivateService } from '@makerdao/services-core';
 import tokens from '../../contracts/tokens';
 import contracts from '../../contracts/contracts';
 import networks from '../../contracts/networks';

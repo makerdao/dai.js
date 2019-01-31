@@ -1,4 +1,4 @@
-import PrivateService from '../core/PrivateService';
+import { PrivateService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import ProxyCdp from './ProxyCdp';

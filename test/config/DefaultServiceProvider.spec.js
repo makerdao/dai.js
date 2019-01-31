@@ -1,6 +1,6 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import config from '../../src/config/presets/test';
-import LocalService from '../../src/core/LocalService';
+import { LocalService } from '@makerdao/services-core';
 
 test('support services in mapping', () => {
   expect(new DefaultServiceProvider().supports('SmartContractService')).toBe(
