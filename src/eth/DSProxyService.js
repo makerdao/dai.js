@@ -18,15 +18,7 @@ export default class DSProxyService extends PrivateService {
   }
 
   _proxyRegistry() {
-    return new Contract(
-      this._registryInfo().address,
-      this._registryInfo().abi,
-      this.get('web3').getEthersSigner()
-    );
-  }
-
-  _registryInfo() {
-    return contractInfo(this._network()).PROXY_REGISTRY[0];
+    return this._smartContractService.getContract('PROXY_REGISTRY');
   }
 
   _network() {
@@ -56,10 +48,16 @@ export default class DSProxyService extends PrivateService {
   }
 
   async ensureProxy() {
-    if (!(await this.currentProxy())) {
+    let proxy = await this.currentProxy();
+    if (!proxy) {
+      this.get('web3')
+        .get('event')
+        .on('dsproxy/BUILD', obj => {
+          proxy = obj.payload.address;
+        });
       await this.build();
     }
-    return this.currentProxy();
+    return proxy;
   }
 
   async build() {
@@ -67,16 +65,7 @@ export default class DSProxyService extends PrivateService {
     if (proxy) {
       throw new Error('This account already has a proxy deployed at ' + proxy);
     }
-    const nonce = await this.get('nonce').getNonce();
-    const txo = await new TransactionObject(
-      this._proxyRegistry().build({
-        ...this.get('web3').transactionSettings(),
-        nonce: nonce
-      }),
-      this.get('web3'),
-      this.get('nonce'),
-      { contract: 'PROXY_REGISTRY', method: 'build' }
-    ).mine();
+    const txo = await this._proxyRegistry().build();
     this._currentProxy = await this.getProxyAddress();
     this.get('web3')
       .get('event')
@@ -111,10 +100,9 @@ export default class DSProxyService extends PrivateService {
   }
 
   _getContractByProxyAddress(address) {
-    return new Contract(
+    return this._smartContractService.getContractByAddressAndAbi(
       address,
-      dappHub.dsProxy,
-      this.get('web3').getEthersSigner()
+      dappHub.dsProxy
     );
   }
 
@@ -124,16 +112,7 @@ export default class DSProxyService extends PrivateService {
   }
 
   async setOwner(newOwner, proxyAddress = this._currentProxy) {
-    const nonce = await this.get('nonce').getNonce();
     const contract = this._getContractByProxyAddress(proxyAddress);
-    return await new TransactionObject(
-      contract.setOwner(newOwner, {
-        ...this.get('web3').transactionSettings(),
-        nonce: nonce
-      }),
-      this.get('web3'),
-      this.get('nonce'),
-      { contract: 'PROXY_REGISTRY', method: 'setOwner' }
-    ).mine();
+    return contract.setOwner(newOwner);
   }
 }

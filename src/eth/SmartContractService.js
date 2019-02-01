@@ -1,4 +1,4 @@
-import PublicService from '../core/PublicService';
+import PrivateService from '../core/PublicService';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks, { TESTNET_ID } from '../../contracts/networks';
@@ -6,7 +6,7 @@ import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
 import { mapValues } from 'lodash';
 
-export default class SmartContractService extends PublicService {
+export default class SmartContractService extends PrivateService {
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log', 'transactionManager']);
 
