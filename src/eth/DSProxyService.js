@@ -1,5 +1,6 @@
-import PrivateService from '@makerdao/services-core';
+import { PrivateService } from '@makerdao/services-core';
 import { dappHub } from '../../contracts/abis';
+import { Contract } from 'ethers';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
@@ -66,7 +67,7 @@ export default class DSProxyService extends PrivateService {
       throw new Error('No proxy found for current account');
     }
     const proxyAddress = address ? address : this._currentProxy;
-    const proxyContract = this._getContractByProxyAddress(proxyAddress);
+    const proxyContract = this._getUnwrappedProxyContract(proxyAddress);
     const data = contract.interface.functions[method](...args).data;
     return proxyContract.execute(contract.address, data, options);
   }
@@ -85,20 +86,28 @@ export default class DSProxyService extends PrivateService {
     return proxyAddress;
   }
 
-  _getContractByProxyAddress(address) {
+  async getOwner(address) {
+    const contract = this._getWrappedProxyContract(address);
+    return contract.owner();
+  }
+
+  async setOwner(newOwner, proxyAddress = this._currentProxy) {
+    const contract = this._getWrappedProxyContract(proxyAddress);
+    return contract.setOwner(newOwner);
+  }
+
+  _getWrappedProxyContract(address) {
     return this._smartContractService.getContractByAddressAndAbi(
       address,
       dappHub.dsProxy
     );
   }
 
-  async getOwner(address) {
-    const contract = this._getContractByProxyAddress(address);
-    return contract.owner();
-  }
-
-  async setOwner(newOwner, proxyAddress = this._currentProxy) {
-    const contract = this._getContractByProxyAddress(proxyAddress);
-    return contract.setOwner(newOwner);
+  _getUnwrappedProxyContract(address) {
+    return new Contract(
+      address,
+      dappHub.dsProxy,
+      this.get('web3').getEthersSigner()
+    );
   }
 }

@@ -1,4 +1,4 @@
-import PrivateService from '@makerdao/services-core';
+import { PrivateService } from '@makerdao/services-core';
 import { getCurrency, WETH, DAI, ETH } from '../../eth/Currency';
 import contracts from '../../../contracts/contracts';
 import { OasisSellOrder, OasisBuyOrder } from './OasisOrder';
