@@ -1,4 +1,4 @@
-import PrivateService from '../core/PrivateService';
+import PrivateService from '@makerdao/services-core';
 import { dappHub } from '../../contracts/abis';
 
 export default class DSProxyService extends PrivateService {

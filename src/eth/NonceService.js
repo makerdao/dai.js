@@ -1,4 +1,4 @@
-import PublicService from '../core/PublicService';
+import { PublicService } from '@makerdao/services-core';
 import { promisify } from '../utils';
 
 export default class NonceService extends PublicService {

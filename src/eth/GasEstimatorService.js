@@ -1,4 +1,4 @@
-import PublicService from '../core/PublicService';
+import { PublicService } from '@makerdao/services-core';
 
 export default class GasEstimatorService extends PublicService {
   constructor(name = 'gasEstimator') {

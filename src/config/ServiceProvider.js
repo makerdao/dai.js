@@ -1,5 +1,5 @@
 import uniq from 'lodash.uniq';
-import Container from '../core/Container';
+import { Container } from '@makerdao/services-core';
 import { standardizeConfig } from './index';
 
 export default class ServiceProvider {

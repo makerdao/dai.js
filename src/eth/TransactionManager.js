@@ -1,4 +1,4 @@
-import PublicService from '../core/PublicService';
+import { PublicService } from '@makerdao/services-core';
 import TransactionObject from './TransactionObject';
 import { uniqueId } from '../utils';
 import { has, each } from 'lodash';

@@ -1,4 +1,4 @@
-import LocalService from '../core/LocalService';
+import { LocalService } from '@makerdao/services-core';
 
 export default class TimerService extends LocalService {
   constructor(name = 'timer') {

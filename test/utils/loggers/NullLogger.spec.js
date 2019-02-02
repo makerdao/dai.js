@@ -1,4 +1,4 @@
-import ServiceManager from '../../../src/core/ServiceManager';
+import { ServiceManager } from '@makerdao/services-core';
 import NullLogger from '../../../src/utils/loggers/NullLogger';
 
 test('should have a valid logger interface', () => {
