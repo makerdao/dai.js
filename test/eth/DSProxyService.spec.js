@@ -1,9 +1,5 @@
-import {
-  buildTestService,
-  buildTestSmartContractService
-} from '../helpers/serviceBuilders';
-import { setNewAccount } from '../helpers/proxyHelpers';
-import TestAccountProvider from '../helpers/TestAccountProvider';
+import { buildTestSmartContractService } from '../helpers/serviceBuilders';
+import { getNewAccount, setNewAccount } from '../helpers/proxyHelpers';
 import addresses from '../../contracts/addresses/testnet';
 import Maker from '../../src/index';
 
@@ -15,16 +11,6 @@ beforeEach(async () => {
   service = contractService.get('transactionManager').get('proxy');
   service.setSmartContractService(contractService);
   await setNewAccount(service);
-  console.log(service.get('web3').currentAddress());
-});
-
-xtest('should get the correct network', () => {
-  expect(service._network()).toEqual('test');
-});
-
-xtest('should get the correct registry info', () => {
-  const expected = ['version', 'address', 'abi'];
-  expect(Object.keys(service._registryInfo())).toEqual(expected);
 });
 
 test('should find the proxy registry', () => {
@@ -68,14 +54,15 @@ test("should get a proxy's owner", async () => {
 });
 
 test("should set a proxy's owner", async () => {
-  await service.build();
+  await service.ensureProxy();
   const proxyAddress = await service.getProxyAddress();
   const originalOwner = await service.getOwner(proxyAddress);
-  const newAddress = TestAccountProvider.nextAccount().address;
-  await service.setOwner(newAddress);
+  const newAccount = await getNewAccount(service);
+
+  await service.setOwner(newAccount.address);
   const newOwner = await service.getOwner(proxyAddress);
 
-  expect(newOwner.toLowerCase()).toEqual(newAddress.toLowerCase());
+  expect(newOwner.toLowerCase()).toEqual(newAccount.address.toLowerCase());
   expect(newOwner.toLowerCase()).not.toEqual(originalOwner.toLowerCase());
 });
 
@@ -83,7 +70,6 @@ test('should ensure a dsproxy', async () => {
   let proxyAddress = await service.currentProxy();
   expect(proxyAddress).toBeNull();
   proxyAddress = await service.ensureProxy();
-  console.log(proxyAddress);
   expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   proxyAddress = await service.ensureProxy();
   expect(proxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
@@ -125,6 +111,9 @@ describe('querying service for current proxy address', () => {
 });
 
 describe('execute', () => {
+  // test the specific results of these once
+  // nonce issues are resolved
+
   let maker, tubContract;
 
   beforeAll(async () => {
@@ -134,17 +123,18 @@ describe('execute', () => {
     });
     await maker.authenticate();
     tubContract = maker.service('smartContract').getContractByName('SAI_TUB');
+    await maker.service('proxy').ensureProxy();
   });
 
   test('should execute without a provided proxy address', async () => {
-    const hash = await maker
+    const txo = await maker
       .service('proxy')
       .execute(tubContract, 'open', [], { gasLimit: 4000000 });
-    expect(hash).toMatch(/0x[a-f0-9]{64}/);
+    console.log(txo);
   });
 
   test('should execute with a provided proxy address', async () => {
-    const hash = await maker
+    const txo = await maker
       .service('proxy')
       .execute(
         tubContract,
@@ -153,7 +143,7 @@ describe('execute', () => {
         { gasLimit: 4000000 },
         await maker.service('proxy').currentProxy()
       );
-    expect(hash).toMatch(/0x[a-f0-9]{64}/);
+    console.log(txo);
   });
 
   test('should throw error if no proxy is available', async () => {

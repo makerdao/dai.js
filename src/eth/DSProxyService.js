@@ -1,12 +1,9 @@
 import PrivateService from '../core/PrivateService';
-import TransactionObject from './TransactionObject';
-import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
-import { contractInfo } from '../../contracts/networks';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
-    super(name, ['web3', 'nonce']);
+    super(name, ['web3']);
   }
 
   async authenticate() {
@@ -19,17 +16,6 @@ export default class DSProxyService extends PrivateService {
 
   _proxyRegistry() {
     return this._smartContractService.getContract('PROXY_REGISTRY');
-  }
-
-  _network() {
-    switch (this.get('web3').networkId()) {
-      case 1:
-        return 'mainnet';
-      case 42:
-        return 'kovan';
-      case 999:
-        return 'test';
-    }
   }
 
   _resetDefaults(newProxy) {
@@ -108,7 +94,7 @@ export default class DSProxyService extends PrivateService {
 
   async getOwner(address) {
     const contract = this._getContractByProxyAddress(address);
-    return await contract.owner();
+    return contract.owner();
   }
 
   async setOwner(newOwner, proxyAddress = this._currentProxy) {
