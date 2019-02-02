@@ -11,6 +11,7 @@ import { LocalService } from '@makerdao/services-core';
 import { PrivateService } from '@makerdao/services-core';
 import { PublicService } from '@makerdao/services-core';
 import { stringToBytes32 } from './utils/conversion';
+import QueryApi from './QueryApi';
 
 for (let symbol in currencies) {
   Maker[symbol] = currencies[symbol];
@@ -26,6 +27,8 @@ Maker.createCurrency = createCurrency;
 Maker.createCurrencyRatio = createCurrencyRatio;
 Maker.getCurrency = getCurrency;
 Maker.currencies = currencies;
+
+Maker.QueryApi = QueryApi;
 
 Maker.utils = {
   stringToBytes32
