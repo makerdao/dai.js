@@ -13,13 +13,13 @@ export async function setProxyAccount(service, account) {
   accountService.useAccount(account.address);
 }
 
-export async function getNewAccount(service, index = 20) {
+export async function getNewAccount(proxyService, index = 20) {
   const account = {
     address: accounts.addresses[index],
     key: accounts.keys[index]
   };
-  const proxy = await service.getProxyAddress(account.address);
-  if (proxy) return await getNewAccount(service, index + 5);
+  const proxy = await proxyService.getProxyAddress(account.address);
+  if (proxy) return await getNewAccount(proxyService, index + 5);
   return account;
 }
 

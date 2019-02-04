@@ -8,7 +8,7 @@ export async function createDai(oasisExchangeService) {
   const tx = cdp.lockEth(1);
   mineBlocks(oasisExchangeService);
   await tx;
-  return await cdp.drawDai(1);
+  return await cdp.drawDai(10);
 }
 
 export async function placeLimitOrder(oasisExchangeService, sellDai) {

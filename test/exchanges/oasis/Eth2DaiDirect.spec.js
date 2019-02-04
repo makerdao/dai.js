@@ -1,5 +1,5 @@
 import { buildTestService } from '../../helpers/serviceBuilders';
-import { setProxyAccount } from '../../helpers/proxyHelpers';
+import { getNewAccount, setProxyAccount } from '../../helpers/proxyHelpers';
 import TestAccountProvider from '../../helpers/TestAccountProvider';
 import {
   createDai,
@@ -7,7 +7,7 @@ import {
   transferDaiBalance
 } from '../../helpers/oasisHelpers';
 
-let service, proxyAccount;
+let service, proxyAccount, newAccount;
 
 async function buildTestEth2DaiDirectService() {
   service = buildTestService('exchange', {
@@ -202,14 +202,16 @@ describe('trade with existing dsproxy', () => {
 });
 
 describe('create dsproxy and execute', () => {
-  beforeAll(async () => {
-    const newAccount = TestAccountProvider.nextAccount();
+  beforeEach(async () => {
+    if (newAccount) await setProxyAccount(service, newAccount);
+    newAccount = await getNewAccount(service.get('proxy'));
     await transferDaiBalance(service, newAccount.address);
     await setProxyAccount(service, newAccount);
     await placeLimitOrder(service, true);
   });
 
   test('sell all amount, pay eth', async () => {
+    console.log(service.get('web3').currentAddress());
     const order = await service.sell('ETH', 'DAI', '0.01');
     expect(order.fillAmount().toNumber()).toEqual(0.0025);
   });
