@@ -51,7 +51,6 @@
   "lint-staged": {
     "./{src,web,test,contracts,lib}/**/*.js": [
       "prettier --single-quote --write",
-      "git add",
       "eslint"
     ]
   },
