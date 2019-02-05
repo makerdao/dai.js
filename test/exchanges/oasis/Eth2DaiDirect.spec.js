@@ -190,7 +190,7 @@ describe('trade with existing dsproxy', () => {
       expect(order.fillAmount().toNumber()).toEqual(0.0025);
     });
 
-    test.only('buy all amount, pay eth', async () => {
+    test('buy all amount, pay eth', async () => {
       const order = await service.buy('DAI', 'ETH', '0.01');
       expect(order.fillAmount().toNumber()).toEqual(0.04);
     });
