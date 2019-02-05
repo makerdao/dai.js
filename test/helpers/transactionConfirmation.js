@@ -7,10 +7,13 @@ import assert from 'assert';
 const WAIT_AFTER_MINE_CALL = 250;
 
 export async function mineBlocks(service, count) {
-  if (service.manager().name() !== 'token') {
+  let web3Service;
+  if (service.manager().name() === 'web3') {
+    web3Service = service;
+  } else if (service.manager().name() !== 'token') {
     service = service.get('token');
+    web3Service = service.get('web3');
   }
-  const web3Service = service.get('web3');
   if (!count) count = web3Service.confirmedBlockCount() + 2;
 
   assert(

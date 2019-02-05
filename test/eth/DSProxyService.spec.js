@@ -2,10 +2,6 @@ import { buildTestSmartContractService } from '../helpers/serviceBuilders';
 import { getNewAccount, setNewAccount } from '../helpers/proxyHelpers';
 import addresses from '../../contracts/addresses/testnet';
 import Maker from '../../src/index';
-import { ETH, DAI } from '../../src/eth/Currency';
-import TransactionObject from '../../src/eth/TransactionObject';
-import { createDai, placeLimitOrder } from '../helpers/oasisHelpers';
-import Eth2DaiDirect from '../../src/exchanges/oasis/Eth2DaiDirect';
 
 let service;
 
@@ -115,66 +111,45 @@ describe('querying service for current proxy address', () => {
 });
 
 describe('execute', () => {
-  let maker, args, currentAddress, eth, proxy;
+  let maker, tubContract;
 
   beforeAll(async () => {
     maker = await Maker.create('test', {
       web3: { confirmedBlockCount: '0' },
-      log: false,
-      exchange: Eth2DaiDirect
+      log: false
     });
     await maker.authenticate();
-    currentAddress = maker.service('web3').currentAddress();
-    eth = maker.service('token').getToken('ETH');
-    proxy = await maker.service('proxy').ensureProxy();
-    await maker.service('allowance').requireAllowance('WETH', proxy);
-    await createDai(maker.service('exchange'));
-    await placeLimitOrder(maker.service('exchange'), true);
-    const oasisDirect = maker
-      .service('smartContract')
-      .getContract('OASIS_PROXY');
-    args = [
-      oasisDirect,
-      'buyAllAmountPayEth',
-      [
-        '0x06ef37a95603cb52e2dff4c2b177c84cdb3ce989',
-        '0xc226f3cd13d508bc319f4f4290172748199d6612',
-        DAI(0.01).toEthersBigNumber(),
-        '0x7ba25f791fa76c3ef40ac98ed42634a8bc24c238'
-      ],
-      { gasLimit: 4000000, value: ETH.wei(20).toEthersBigNumber() }
-    ];
+    tubContract = maker.service('smartContract').getContractByName('SAI_TUB');
+    await maker.service('proxy').ensureProxy();
   });
 
   test('should execute without a provided proxy address', async () => {
-    const initialBalance = await eth.balanceOf(currentAddress);
-    const txo = new TransactionObject(
-      maker.service('proxy').execute(...args),
-      maker.service('web3'),
-      maker.service('nonce')
-    );
-    await txo.confirm();
-    const newBalance = await eth.balanceOf(currentAddress);
-    expect(newBalance.toNumber()).toBeLessThan(initialBalance.toNumber());
+    const hash = await maker
+      .service('proxy')
+      .execute(tubContract, 'open', [], { gasLimit: 4000000 });
+    expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
 
   test('should execute with a provided proxy address', async () => {
-    const initialBalance = await eth.balanceOf(currentAddress);
-    const txo = new TransactionObject(
-      maker.service('proxy').execute(...args, proxy),
-      maker.service('web3'),
-      maker.service('nonce')
-    );
-    await txo.confirm();
-    const newBalance = await eth.balanceOf(currentAddress);
-    expect(newBalance.toNumber()).toBeLessThan(initialBalance.toNumber());
+    const hash = await maker
+      .service('proxy')
+      .execute(
+        tubContract,
+        'open',
+        [],
+        { gasLimit: 4000000 },
+        await maker.service('proxy').currentProxy()
+      );
+    expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
 
   test('should throw error if no proxy is available', async () => {
     expect.assertions(1);
     maker.service('proxy')._currentProxy = null;
     try {
-      maker.service('proxy').execute(...args);
+      maker
+        .service('proxy')
+        .execute(tubContract, 'open', [], { gasLimit: 4000000 });
     } catch (err) {
       expect(err.message).toEqual('No proxy found for current account');
     }
