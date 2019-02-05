@@ -59,11 +59,3 @@ async function offer(
   );
   return await tx.mine();
 }
-
-export async function transferDaiBalance(service, newAccount) {
-  const originalAccount = service.get('web3').currentAddress();
-  const dai = await service.get('token').getToken('DAI');
-  const daiBalance = await dai.balanceOf(originalAccount);
-
-  return await dai.transfer(newAccount, daiBalance.toEthersBigNumber());
-}
