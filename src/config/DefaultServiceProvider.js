@@ -10,6 +10,7 @@ import GasEstimatorService from '../eth/GasEstimatorService';
 import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
+import Eth2DaiDirect from '../exchanges/oasis/Eth2DaiDirect';
 import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
 import PriceService from '../eth/PriceService';
 import ServiceProvider from './ServiceProvider';
@@ -65,6 +66,7 @@ export default class DefaultServiceProvider extends ServiceProvider {
         CacheService,
         ConsoleLogger,
         DSProxyService,
+        Eth2DaiDirect,
         EthereumCdpService,
         EthereumTokenService,
         EventService,

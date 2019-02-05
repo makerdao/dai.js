@@ -1,4 +1,4 @@
-import { PublicService } from '@makerdao/services-core';
+import { PrivateService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
 import networks, { TESTNET_ID } from '../../contracts/networks';
@@ -6,7 +6,7 @@ import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
 import { mapValues } from 'lodash';
 
-export default class SmartContractService extends PublicService {
+export default class SmartContractService extends PrivateService {
   constructor(name = 'smartContract') {
     super(name, ['web3', 'log', 'transactionManager']);
 
@@ -26,6 +26,9 @@ export default class SmartContractService extends PublicService {
         {}
       );
     }
+    this.get('transactionManager')
+      .get('proxy')
+      .setSmartContractService(this);
   }
 
   getContractByAddressAndAbi(address, abi, { name, wrap = true } = {}) {

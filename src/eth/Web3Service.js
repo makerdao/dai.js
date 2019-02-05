@@ -104,7 +104,8 @@ export default class Web3Service extends PrivateService {
 
     this.eth = new Proxy(this, {
       get(target, key) {
-        console.warn(`use .${key} instead of .eth.${key}`);
+        if (typeof key === 'string')
+          console.warn(`use .${key} instead of .eth.${key}`);
         return target[key];
       }
     });

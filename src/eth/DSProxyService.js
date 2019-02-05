@@ -1,39 +1,22 @@
 import { PrivateService } from '@makerdao/services-core';
-import TransactionObject from './TransactionObject';
-import { Contract } from 'ethers';
 import { dappHub } from '../../contracts/abis';
-import { contractInfo } from '../../contracts/networks';
+import { Contract } from 'ethers';
 
 export default class DSProxyService extends PrivateService {
   constructor(name = 'proxy') {
-    super(name, ['web3', 'nonce']);
+    super(name, ['web3']);
   }
 
   async authenticate() {
     this._currentProxy = await this.getProxyAddress();
   }
 
+  setSmartContractService(service) {
+    this._smartContractService = service;
+  }
+
   _proxyRegistry() {
-    return new Contract(
-      this._registryInfo().address,
-      this._registryInfo().abi,
-      this.get('web3').getEthersSigner()
-    );
-  }
-
-  _registryInfo() {
-    return contractInfo(this._network()).PROXY_REGISTRY[0];
-  }
-
-  _network() {
-    switch (this.get('web3').networkId()) {
-      case 1:
-        return 'mainnet';
-      case 42:
-        return 'kovan';
-      case 999:
-        return 'test';
-    }
+    return this._smartContractService.getContract('PROXY_REGISTRY');
   }
 
   _resetDefaults(newProxy) {
@@ -52,29 +35,39 @@ export default class DSProxyService extends PrivateService {
   }
 
   async ensureProxy() {
-    if (!(await this.currentProxy())) return this.build();
+    let proxy = await this.currentProxy();
+    if (!proxy) {
+      this.get('web3')
+        .get('event')
+        .on('dsproxy/BUILD', obj => {
+          proxy = obj.payload.address;
+        });
+      await this.build();
+    }
+    return proxy;
   }
 
   async build() {
-    const nonce = await this.get('nonce').getNonce();
-    const txo = await new TransactionObject(
-      this._proxyRegistry().build({
-        ...this.get('web3').transactionSettings(),
-        nonce: nonce
-      }),
-      this.get('web3'),
-      this.get('nonce'),
-      { contract: 'PROXY_REGISTRY', method: 'build' }
-    ).mine();
+    const proxy = await this.currentProxy();
+    if (proxy) {
+      throw new Error('This account already has a proxy deployed at ' + proxy);
+    }
+    const txo = await this._proxyRegistry().build();
     this._currentProxy = await this.getProxyAddress();
+    this.get('web3')
+      .get('event')
+      .emit('dsproxy/BUILD', {
+        address: this._currentProxy
+      });
     return txo;
   }
 
   execute(contract, method, args, options, address) {
-    if (!address && !this._currentProxy)
+    if (!address && typeof this._currentProxy !== 'string') {
       throw new Error('No proxy found for current account');
+    }
     const proxyAddress = address ? address : this._currentProxy;
-    const proxyContract = this.getContractByProxyAddress(proxyAddress);
+    const proxyContract = this._getUnwrappedProxyContract(proxyAddress);
     const data = contract.interface.functions[method](...args).data;
     return proxyContract.execute(contract.address, data, options);
   }
@@ -93,21 +86,28 @@ export default class DSProxyService extends PrivateService {
     return proxyAddress;
   }
 
-  getContractByProxyAddress(address) {
+  async getOwner(address) {
+    const contract = this._getWrappedProxyContract(address);
+    return contract.owner();
+  }
+
+  async setOwner(newOwner, proxyAddress = this._currentProxy) {
+    const contract = this._getWrappedProxyContract(proxyAddress);
+    return contract.setOwner(newOwner);
+  }
+
+  _getWrappedProxyContract(address) {
+    return this._smartContractService.getContractByAddressAndAbi(
+      address,
+      dappHub.dsProxy
+    );
+  }
+
+  _getUnwrappedProxyContract(address) {
     return new Contract(
       address,
       dappHub.dsProxy,
       this.get('web3').getEthersSigner()
     );
-  }
-
-  async getOwner(address) {
-    const contract = this.getContractByProxyAddress(address);
-    return await contract.owner();
-  }
-
-  async setOwner(newOwner, proxyAddress = this._currentProxy) {
-    const contract = this.getContractByProxyAddress(proxyAddress);
-    return contract.setOwner(newOwner);
   }
 }

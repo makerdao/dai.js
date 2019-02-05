@@ -1,7 +1,7 @@
 import contracts from '../../../contracts/contracts';
 import { buildTestService } from '../../helpers/serviceBuilders';
 import { DAI, ETH, WETH } from '../../../src/eth/Currency';
-import createDaiAndPlaceLimitOrder from '../../helpers/oasisHelpers';
+import { placeLimitOrder, createDai } from '../../helpers/oasisHelpers';
 
 let oasisExchangeService;
 
@@ -13,6 +13,11 @@ async function buildTestOasisExchangeService() {
   return oasisExchangeService;
 }
 
+beforeAll(async () => {
+  await buildTestOasisExchangeService();
+  await createDai(oasisExchangeService);
+});
+
 test('sell Dai, console log the balances (used for debugging)', async done => {
   const oasisExchangeService = await buildTestOasisExchangeService();
   let order;
@@ -22,7 +27,7 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
   let finalBalance;
   let daiToken;
 
-  return createDaiAndPlaceLimitOrder(oasisExchangeService)
+  return placeLimitOrder(oasisExchangeService)
     .then(() => {
       const oasisContract = oasisExchangeService
         .get('smartContract')
@@ -83,7 +88,7 @@ test('sell Dai, console log the balances (used for debugging)', async done => {
 
 test('sell Dai', async () => {
   const oasisExchangeService = await buildTestOasisExchangeService();
-  await createDaiAndPlaceLimitOrder(oasisExchangeService);
+  await placeLimitOrder(oasisExchangeService);
   const order = await oasisExchangeService.sellDai('0.01', WETH);
   expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
   expect(order.fillAmount()).toEqual(WETH(0.0005));
@@ -91,7 +96,7 @@ test('sell Dai', async () => {
 
 test('buy Dai', async () => {
   const oasisService = await buildTestOasisExchangeService();
-  await createDaiAndPlaceLimitOrder(oasisService, true);
+  await placeLimitOrder(oasisService, true);
   const order = await oasisService.buyDai('0.01', WETH);
   expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
   expect(order.fillAmount()).toEqual(DAI(0.04));
@@ -99,7 +104,7 @@ test('buy Dai', async () => {
 
 test('buy Dai with wei amount', async () => {
   const oasisService = await buildTestOasisExchangeService();
-  await createDaiAndPlaceLimitOrder(oasisService, true);
+  await placeLimitOrder(oasisService, true);
   const order = await oasisService.buyDai(DAI.wei(10000000000000000), WETH);
   expect(order.fees().gt(ETH.wei(80000))).toBeTruthy();
   expect(order.fillAmount()).toEqual(DAI(0.04));
