@@ -51,7 +51,7 @@ describe('with existing DSProxy', () => {
     expect(await cdp.getDebtValue()).toEqual(DAI(1));
   });
 
-  test('open CDP, lock ETH and draw DAI (multi tx)', async () => {
+  test.only('open CDP, lock ETH and draw DAI (multi tx)', async () => {
     const cdp = await cdpService.openProxyCdp(dsProxyAddress);
     const balancePre = await ethToken.balanceOf(currentAddress);
     const cdpInfoPre = await cdp.getInfo();
