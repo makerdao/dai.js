@@ -14,6 +14,10 @@ export default class EtherToken {
     return Promise.resolve(Number.MAX_SAFE_INTEGER);
   }
 
+  balance() {
+    return this.balanceOf(this._web3.currentAddress());
+  }
+
   balanceOf(owner) {
     // FIXME stop using ethers utils
     return this._web3.getBalance(owner).then(b => ETH(utils.formatEther(b)));
