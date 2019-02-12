@@ -5,6 +5,7 @@ import networks, { TESTNET_ID } from '../../contracts/networks';
 import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
 import { mapValues } from 'lodash';
+import assert from 'assert';
 
 export default class SmartContractService extends PrivateService {
   constructor(name = 'smartContract') {
@@ -32,7 +33,7 @@ export default class SmartContractService extends PrivateService {
   }
 
   getContractByAddressAndAbi(address, abi, { name, wrap = true } = {}) {
-    if (!address) throw Error('Contract address is required');
+    assert(address, `Missing address for contract "${name}"`);
     if (!name) name = this.lookupContractName(address);
 
     const web3Service = this.get('web3');
@@ -173,10 +174,7 @@ export default class SmartContractService extends PrivateService {
   }
 
   _getContractInfo(name, version) {
-    if (!this.hasContract(name)) {
-      throw new Error('Provided name "' + name + '" is not a contract');
-    }
-
+    assert(this.hasContract(name), `No contract found for "${name}"`);
     const contracts = this._getAllContractInfo();
     let versions = contracts[name];
     if (!version) version = Math.max(...versions.map(info => info.version));

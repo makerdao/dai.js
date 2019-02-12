@@ -10,7 +10,7 @@ test('getContractByName should have proper error checking', async () => {
   const service = buildTestSmartContractService();
 
   expect(() => service.getContractByName('NOT_A_CONTRACT')).toThrow(
-    'Provided name "NOT_A_CONTRACT" is not a contract'
+    'No contract found for "NOT_A_CONTRACT"'
   );
   expect(() => service.getContractByName(contracts.SAI_TOP)).toThrow(
     'Cannot resolve network ID. Are you connected?'
