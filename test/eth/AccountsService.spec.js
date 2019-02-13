@@ -72,7 +72,8 @@ test('account with custom subprovider implementation', async () => {
 });
 
 test('addAccount throws with duplicate name', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
@@ -85,7 +86,8 @@ test('addAccount throws with duplicate name', async () => {
 });
 
 test('addAccount throws with duplicate address', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   try {
@@ -97,7 +99,8 @@ test('addAccount throws with duplicate address', async () => {
 });
 
 test('currentAccount', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
@@ -110,20 +113,23 @@ test('currentAccount', async () => {
 });
 
 test('listAccounts', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
   await service.addAccount('bar', { type: 'privateKey', key: a2.key });
   expect(service.listAccounts()).toEqual([
+    { name: 'default', type: 'provider', address: expect.any(String) },
     { name: 'foo', type: 'privateKey', address: a1.address },
     { name: 'bar', type: 'privateKey', address: a2.address }
   ]);
 });
 
 test('useAccount', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   const engine = (service._engine = mockEngine());
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
@@ -140,7 +146,8 @@ test('useAccount', async () => {
 });
 
 test('useAccount throws with invalid name', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   try {
     service.useAccount('f00');
   } catch (err) {
@@ -149,7 +156,8 @@ test('useAccount throws with invalid name', async () => {
 });
 
 test('useAccountWithAddress', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   const engine = (service._engine = mockEngine());
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
@@ -166,7 +174,8 @@ test('useAccountWithAddress', async () => {
 });
 
 test('useAccount throws with invalid address', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   try {
     service.useAccountWithAddress('0xf00');
   } catch (err) {
@@ -175,7 +184,8 @@ test('useAccount throws with invalid address', async () => {
 });
 
 test('add and use account with no name', async () => {
-  const service = new AccountsService();
+  const service = buildTestService('accounts', { accounts: true });
+  await service.manager().authenticate();
   const engine = (service._engine = mockEngine());
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
@@ -226,7 +236,8 @@ describe('mocking window', () => {
       }
     };
 
-    const service = new AccountsService();
+    const service = buildTestService('accounts', { accounts: true });
+    await service.manager().authenticate();
     service._engine = mockEngine();
     try {
       await service.addAccount('bar', { type: 'browser' });
