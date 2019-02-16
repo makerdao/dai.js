@@ -6,6 +6,10 @@ async function createMaker(privateKey) {
   return await Maker.create('test', { privateKey, log: false });
 }
 
+test('create without any options', async () => {
+  await Maker.create('test');
+});
+
 test('import vs require', () => {
   expect(Maker2).toEqual(Maker);
   expect(Maker2.ETH).toEqual(ETH);
