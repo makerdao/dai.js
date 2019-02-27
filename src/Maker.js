@@ -104,7 +104,7 @@ function mergeOptions(object, source) {
 }
 
 Maker.create = async function(...args) {
-  const [preset, options] = args;
+  const [preset, options = {}] = args;
   const { plugins } = options;
 
   if (plugins) {

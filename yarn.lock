@@ -94,8 +94,14 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@makerdao/services-core@./lib/services-core/":
-  version "1.0.0"
+"@makerdao/services-core@^0.9.4":
+  version "0.9.4"
+  resolved "https://registry.yarnpkg.com/@makerdao/services-core/-/services-core-0.9.4.tgz#b89c43c31a8fb435e09f6cc4e8acf92b9ffc06c4"
+  integrity sha512-goo9Bt362Yrn/FWOTkcBpVK+3/SOroPYzQ+dbLYkt2Lpho+gERooJk20r6DreeClheh2FSDB1ULo/gJ9LNljWQ==
+  dependencies:
+    babel-runtime "^6.26.0"
+    lodash.values "^4.3.0"
+    toposort "^2.0.2"
 
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
