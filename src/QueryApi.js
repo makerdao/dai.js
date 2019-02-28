@@ -7,9 +7,11 @@ export default class QueryApi {
   constructor(network) {
     switch (network) {
       case 'mainnet':
+      case 1:
         this.serverUrl = MAINNET_SERVER_URL;
         break;
       case 'kovan':
+      case 42:
         this.serverUrl = KOVAN_SERVER_URL;
         break;
       default:
