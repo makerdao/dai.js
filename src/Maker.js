@@ -3,7 +3,6 @@ import DefaultServiceProvider, {
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
 import { intersection, isEqual, mergeWith } from 'lodash';
-import { LocalService, PublicService, PrivateService } from '@makerdao/services-core'; 
 
 export default class Maker {
   constructor(preset, options = {}) {
@@ -47,10 +46,6 @@ export default class Maker {
       proxy: ['currentProxy'],
       token: ['getToken']
     });
-
-    this.LocalService = LocalService;
-    this.PrivateService = PrivateService;
-    this.PublicService = PublicService;
   }
 
   authenticate() {

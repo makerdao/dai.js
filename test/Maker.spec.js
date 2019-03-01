@@ -16,7 +16,7 @@ test('import vs require', () => {
   expect(Maker2.LocalService).toEqual(LocalService);
 });
 
-test('should expose service classes as properties of Maker', async () => {
+test('expose service classes as properties', async () => {
   expect(typeof Maker.LocalService).toBe('function');
   expect(typeof Maker.PrivateService).toBe('function');
   expect(typeof Maker.PublicService).toBe('function');
