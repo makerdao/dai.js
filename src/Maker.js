@@ -4,12 +4,14 @@ import DefaultServiceProvider, {
 import ConfigFactory from './config/ConfigFactory';
 import { intersection, isEqual, mergeWith } from 'lodash';
 
+/**
+ * do not call `new Maker()` directly; use `Maker.create` instead
+ */
 export default class Maker {
   constructor(preset, options = {}) {
     const { plugins = [], ...otherOptions } = options;
 
-    for (let pluginTuple of plugins) {
-      const [plugin, pluginOptions] = pluginTuple;
+    for (const [plugin, pluginOptions] of plugins) {
       if (plugin.addConfig) {
         mergeOptions(
           otherOptions,
@@ -97,6 +99,7 @@ function mergeOptions(object, source) {
     }
 
     if (Array.isArray(objValue)) return objValue.concat(srcValue);
+
     // when this function returns undefined, mergeWith falls back to the
     // default merging behavior.
     // https://devdocs.io/lodash~4/index#mergeWith
@@ -113,8 +116,7 @@ Maker.create = async function(...args) {
     const pluginTuples = plugins.map(
       plugin => (!Array.isArray(plugin) ? [plugin, {}] : plugin)
     );
-    for (let pluginTuple of pluginTuples) {
-      const [plugin, pluginOptions] = pluginTuple;
+    for (const [plugin, pluginOptions] of pluginTuples) {
       if (plugin.beforeCreate) {
         const resultOptions = await plugin.beforeCreate(pluginOptions);
         Object.assign(options, resultOptions);
