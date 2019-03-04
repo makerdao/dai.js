@@ -18,9 +18,16 @@ export default class GasEstimatorService extends PublicService {
     if (this._percentage === null && this._absolute !== null) {
       options.gasLimit = Math.min(this._absolute, blockLimit);
     } else if (this._absolute === null) {
-      options.gasLimit = Math.min(parseInt(estimate * this._percentage), blockLimit);
+      options.gasLimit = Math.min(
+        parseInt(estimate * this._percentage),
+        blockLimit
+      );
     } else {
-      options.gasLimit = Math.min(parseInt(estimate * this._percentage), this._absolute, blockLimit);
+      options.gasLimit = Math.min(
+        parseInt(estimate * this._percentage),
+        this._absolute,
+        blockLimit
+      );
     }
 
     return options;
