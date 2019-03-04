@@ -57,7 +57,14 @@ export default class TransactionManager extends PublicService {
       (async () => {
         // so we do our async operations inside this immediately-executed
         // async function.
-        const txOptions = await this._buildTransactionOptions(options);
+        const data = contract.interface.functions[method](...args).data;
+        let txOptions;
+        try {
+          txOptions = await this._buildTransactionOptions(options, data, contract.address);
+        } catch (err) {
+          console.error(err);
+        }
+        console.log(txOptions);
         return this._execute(contract, method, args, txOptions);
       })(),
       {
@@ -69,13 +76,13 @@ export default class TransactionManager extends PublicService {
   }
 
   // this method must not be async
-  sendTransaction(data, options) {
+  sendTransaction(options, metadata) {
     return this._createTransactionObject(
       (async () => {
-        const txOptions = await this._buildTransactionOptions(data);
+        const txOptions = await this._buildTransactionOptions(options);
         return this.get('web3').sendTransaction(txOptions);
       })(),
-      options
+      metadata
     );
   }
 
@@ -149,11 +156,22 @@ export default class TransactionManager extends PublicService {
     return minePromise;
   }
 
-  async _buildTransactionOptions(data) {
+  async _buildTransactionOptions(options, data, address) {
+    const nonce = await this.get('nonce').getNonce();
+    if (data) {
+      const gas = await this.get('web3')._web3.eth.estimateGas({
+        from: this.get('web3').currentAddress(),
+        nonce: nonce,
+        to: address,
+        data: data
+      });
+      options.gasLimit = gas * 2;
+      console.log(options.gasLimit);
+    }
     return {
       ...this.get('web3').transactionSettings(),
-      ...data,
-      nonce: await this.get('nonce').getNonce()
+      ...options,
+      nonce: nonce
     };
   }
 }
