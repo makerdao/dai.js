@@ -60,8 +60,11 @@ export default class TransactionManager extends PublicService {
         let data = contract.interface.functions[method](...args).data;
         if (options.dsProxy) {
           const proxyAddress = await this.get('proxy').currentProxy();
-          const proxy = this.get('proxy')._getUnwrappedProxyContract(proxyAddress);
-          data = proxy.interface.functions['execute'](contract.address, data).data;
+          const proxy = this.get('proxy')._getUnwrappedProxyContract(
+            proxyAddress
+          );
+          data = proxy.interface.functions['execute'](contract.address, data)
+            .data;
         }
         const txOptions = await this._buildTransactionOptions(
           options,
@@ -161,21 +164,23 @@ export default class TransactionManager extends PublicService {
   }
 
   async _buildTransactionOptions(options, data, address) {
+    let transaction = {};
     const nonce = await this.get('nonce').getNonce();
     const proxyAddress = await this.get('proxy').currentProxy();
     const currentAddress = this.get('web3').currentAddress();
-    const transaction = {
-      from: currentAddress,
-      nonce: nonce,
-      to: options.dsProxy ? proxyAddress : address,
-      data: data
-    };
 
     if (options.value) {
       transaction.value = options.value;
     }
 
     if (data) {
+      transaction = {
+        from: currentAddress,
+        nonce: nonce,
+        to: options.dsProxy ? proxyAddress : address,
+        data: data,
+        ...transaction
+      };
       await this.get('gasEstimator').estimateGasLimit(transaction, options);
     }
 

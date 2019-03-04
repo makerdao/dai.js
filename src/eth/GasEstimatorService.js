@@ -7,7 +7,7 @@ export default class GasEstimatorService extends PublicService {
     this._absolute = null;
   }
 
-  async estimateGasLimit(transaction, options) {
+  async estimateGasLimit(transaction, options = {}) {
     const web3Data = await Promise.all([
       this.get('web3').getBlock('latest'),
       this.get('web3').estimateGas(transaction)

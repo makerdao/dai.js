@@ -24,7 +24,7 @@ test('policies initially null', done => {
     .manager()
     .connect()
     .then(() => {
-      expect(gasEstimator.getPercentage()).toBe(null);
+      expect(gasEstimator.getPercentage()).toBe(1.55);
       expect(gasEstimator.getAbsolute()).toBe(null);
       done();
     });
@@ -73,7 +73,7 @@ test('use percentage when absolute null', done => {
       return gasEstimator.estimateGasLimit(getDummyTransaction());
     })
     .then(estimate => {
-      expect(estimate).toBeCloseTo(21000 * 1.1, 12);
+      expect(estimate.gasLimit).toBeCloseTo(21000 * 1.1);
       done();
     });
 });
@@ -90,7 +90,7 @@ test('use absolute when percentage null', done => {
     })
     .then(transaction => gasEstimator.estimateGasLimit(transaction))
     .then(estimate => {
-      expect(estimate).toBe(20000);
+      expect(estimate.gasLimit).toBe(20000);
       done();
     });
 });
@@ -107,7 +107,7 @@ test('choose minimum when both policies set using percentage', done => {
       return gasEstimator.estimateGasLimit(getDummyTransaction());
     })
     .then(estimate => {
-      expect(estimate).toBeCloseTo(21000 * 1.1, 12);
+      expect(estimate.gasLimit).toBeCloseTo(21000 * 1.1);
       done();
     });
 });
@@ -129,20 +129,6 @@ test('does not set estimate greater than block gas limit', (done) => {
       done();
     });
 });*/
-
-test('throws when estimating without a policy', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      expect(() =>
-        gasEstimator.estimateGasLimit(getDummyTransaction())
-      ).toThrow();
-      done();
-    });
-});
 
 test('throws on setting policy less than zero', done => {
   const gasEstimator = buildTestGasEstimatorService();
