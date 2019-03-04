@@ -8,7 +8,7 @@ const log = debug('dai:TransactionManager');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log', 'nonce', 'proxy']);
+    super(name, ['web3', 'log', 'nonce', 'proxy', 'gasEstimator']);
     this._newTxListeners = [];
     this._tracker = new Tracker();
   }
@@ -58,12 +58,11 @@ export default class TransactionManager extends PublicService {
         // so we do our async operations inside this immediately-executed
         // async function.
         const data = contract.interface.functions[method](...args).data;
-        let txOptions;
-        try {
-          txOptions = await this._buildTransactionOptions(options, data, contract.address);
-        } catch (err) {
-          console.error(err);
-        }
+        const txOptions = await this._buildTransactionOptions(
+            options,
+            data,
+            contract.address
+          );
         console.log(txOptions);
         return this._execute(contract, method, args, txOptions);
       })(),
@@ -158,15 +157,16 @@ export default class TransactionManager extends PublicService {
 
   async _buildTransactionOptions(options, data, address) {
     const nonce = await this.get('nonce').getNonce();
+    const proxyAddress = await this.get('proxy').currentProxy();
+    const currentAddress = this.get('web3').currentAddress();
+
     if (data) {
-      const gas = await this.get('web3')._web3.eth.estimateGas({
-        from: this.get('web3').currentAddress(),
+      await this.get('gasEstimator').estimateGasLimit({
+        from: options.dsProxy ? proxyAddress : currentAddress,
         nonce: nonce,
         to: address,
         data: data
-      });
-      options.gasLimit = gas * 2;
-      console.log(options.gasLimit);
+      }, options);
     }
     return {
       ...this.get('web3').transactionSettings(),

@@ -3,32 +3,27 @@ import { PublicService } from '@makerdao/services-core';
 export default class GasEstimatorService extends PublicService {
   constructor(name = 'gasEstimator') {
     super(name, ['web3', 'log']);
-    this._percentage = null;
+    this._percentage = 1.55;
     this._absolute = null;
   }
 
-  estimateGasLimit(transaction) {
-    if (this._percentage === null && this._absolute === null) {
-      throw new Error('no gas limit policy set');
-    }
-
-    return Promise.all([
+  async estimateGasLimit(transaction, options) {
+    const web3Data = await Promise.all([
       this.get('web3').getBlock('latest'),
       this.get('web3').estimateGas(transaction)
-    ]).then(web3Data => {
-      const blockLimit = web3Data[0].gasLimit,
-        estimate = web3Data[1];
+    ]);
+    const blockLimit = web3Data[0].gasLimit;
+    const estimate = web3Data[1];
 
-      if (this._percentage === null && this._absolute !== null) {
-        return Math.min(this._absolute, blockLimit);
-      }
+    if (this._percentage === null && this._absolute !== null) {
+      options.gasLimit = Math.min(this._absolute, blockLimit);
+    } else if (this._absolute === null) {
+      options.gasLimit = Math.min(parseInt(estimate * this._percentage), blockLimit);
+    } else {
+      options.gasLimit = Math.min(parseInt(estimate * this._percentage), this._absolute, blockLimit);
+    }
 
-      if (this._absolute === null) {
-        return Math.min(estimate * this._percentage, blockLimit);
-      }
-
-      return Math.min(estimate * this._percentage, this._absolute, blockLimit);
-    });
+    return options;
   }
 
   setPercentage(number) {
