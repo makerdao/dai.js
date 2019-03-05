@@ -60,7 +60,6 @@ beforeAll(async () => {
     process.env.NETWORK === 'test'
       ? {
           web3: {
-            transactionSettings: { gasLimit: 4000000 },
             confirmedBlockCount: '0',
             pollingInterval: 50
           }

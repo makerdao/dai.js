@@ -173,7 +173,7 @@ export default class TransactionManager extends PublicService {
       transaction.value = options.value;
     }
 
-    if (data) {
+    if (data && !options.gasLimit) {
       transaction = {
         from: currentAddress,
         nonce: nonce,

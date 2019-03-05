@@ -2,9 +2,6 @@
   "web3": {
     "provider": {
       "type": "BROWSER"
-    },
-    "transactionSettings": {
-      "gasLimit": 4000000
     }
   },
   "exchange": "OasisExchangeService"

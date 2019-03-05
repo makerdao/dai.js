@@ -137,7 +137,7 @@ describe('execute', () => {
         tubContract,
         'open',
         [],
-        { gasLimit: 4000000 },
+        {},
         await maker.service('proxy').currentProxy()
       );
     expect(hash).toMatch(/0x[a-f0-9]{64}/);
