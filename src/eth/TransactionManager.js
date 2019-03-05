@@ -71,7 +71,6 @@ export default class TransactionManager extends PublicService {
           data,
           contract.address
         );
-        console.log(txOptions);
         return this._execute(contract, method, args, txOptions);
       })(),
       {

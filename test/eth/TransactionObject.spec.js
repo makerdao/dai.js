@@ -70,17 +70,11 @@ describe('normal web service behavior', () => {
     ) => async () => {
       expect.assertions(checkPending ? 5 : 4);
       let mined = false;
-      let promise;
-      try {
-        promise = operation();
-      } catch (err) {
-        console.error(err);
-      }
+      const promise = operation();
       const tx = service.get('transactionManager').getTransaction(promise);
 
       if (checkPending) {
         tx.onPending(() => {
-          console.log('checking pending');
           expect(tx.state()).toBe(TransactionState.pending);
         });
       }
@@ -88,23 +82,19 @@ describe('normal web service behavior', () => {
         mined = true;
       });
       tx.onError(err => {
-        console.log('checking err message');
         expect(err.message).toMatch(errorMessageMatch);
       });
 
       try {
         await promise;
       } catch (err) {
-        console.log('checking tx state');
         expect(tx.state()).toEqual(TransactionState.error);
-        console.log('checking that mined is false');
         expect(mined).toBe(false);
-        console.log('checking err message again for some reason');
         expect(err.message).toMatch(errorMessageMatch);
       }
     };
 
-    xtest(
+    test(
       'generic error',
       testErrorHandling(() => mkr.transfer(testAddress, '2000000'), /reverted/)
     );
