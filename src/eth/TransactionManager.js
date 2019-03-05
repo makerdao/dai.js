@@ -185,8 +185,8 @@ export default class TransactionManager extends PublicService {
     }
 
     return {
-      ...this.get('web3').transactionSettings(),
       ...options,
+      ...this.get('web3').transactionSettings(),
       nonce: nonce
     };
   }
