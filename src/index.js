@@ -7,9 +7,11 @@ import {
   createCurrencyRatio,
   getCurrency
 } from './eth/Currency';
-import { LocalService } from '@makerdao/services-core';
-import { PrivateService } from '@makerdao/services-core';
-import { PublicService } from '@makerdao/services-core';
+import {
+  LocalService,
+  PrivateService,
+  PublicService
+} from '@makerdao/services-core';
 import { stringToBytes32 } from './utils/conversion';
 import QueryApi from './QueryApi';
 

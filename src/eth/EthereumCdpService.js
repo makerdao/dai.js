@@ -2,6 +2,7 @@ import { PrivateService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import Cdp from './Cdp';
 import ProxyCdp from './ProxyCdp';
+import QueryApi from '../QueryApi';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from '../utils/constants';
 import {
@@ -119,6 +120,17 @@ export default class EthereumCdpService extends PrivateService {
       amountEth,
       amountDai
     }).transactionObject();
+  }
+
+  async getCdpIds(address) {
+    if (!address) {
+      address = this._web3Service()
+        .get('accounts')
+        .currentAddress();
+    }
+
+    const api = new QueryApi(this._web3Service().networkId());
+    return api.getCdpIdsForOwner(address);
   }
 
   getCdp(id, dsProxy = null) {
