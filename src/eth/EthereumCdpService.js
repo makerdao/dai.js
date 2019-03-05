@@ -125,8 +125,8 @@ export default class EthereumCdpService extends PrivateService {
   async getCdpIds(address) {
     if (!address) {
       address = this._web3Service()
-      .get('accounts')
-      .currentAddress();
+        .get('accounts')
+        .currentAddress();
     }
 
     const api = new QueryApi(this._web3Service().networkId());
