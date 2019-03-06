@@ -16,6 +16,7 @@ export class Currency {
   constructor(amount, shift = 0) {
     if (shift === 'wei') shift = -18;
     if (shift === 'ray') shift = -27;
+    if (shift === 'rad') shift = -45;
     this._amount = shift
       ? amountToBigNumber(amount).shiftedBy(shift)
       : amountToBigNumber(amount);
@@ -41,6 +42,7 @@ export class Currency {
   toEthersBigNumber(shift = 0) {
     if (shift === 'wei') shift = 18;
     if (shift === 'ray') shift = 27;
+    if (shift === 'rad') shift = 45;
 
     // always round down so that we never attempt to spend more than we have
     const val = this._amount
@@ -186,6 +188,7 @@ export function createCurrency(symbol) {
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
     ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
+    rad: makeCreatorFnWithShift(creatorFn, symbol, 'rad'),
     symbol,
     isInstance: obj => obj instanceof CurrencyX
   });
@@ -243,6 +246,7 @@ export const createCurrencyRatio = (wrappedNumerator, wrappedDenominator) => {
   Object.assign(creatorFn, {
     wei: makeCreatorFnWithShift(creatorFn, symbol, 'wei'),
     ray: makeCreatorFnWithShift(creatorFn, symbol, 'ray'),
+    rad: makeCreatorFnWithShift(creatorFn, symbol, 'rad'),
     symbol,
     isInstance: obj => obj instanceof CurrencyRatio && obj.symbol === symbol
   });
