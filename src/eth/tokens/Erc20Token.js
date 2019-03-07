@@ -32,7 +32,7 @@ export default class Erc20Token {
   }
 
   _valueForContract(value, unit = this._currency) {
-    return getCurrency(value, unit).toEthersBigNumber(this._decimals);
+    return getCurrency(value, unit).toFixed(this._decimals);
   }
 
   _valueFromContract(value) {

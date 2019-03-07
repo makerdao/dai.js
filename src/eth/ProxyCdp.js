@@ -42,8 +42,8 @@ export default class ProxyCdp {
       const proxyRegistryAddress = this._smartContractService.getContractAddressByName(contracts.PROXY_REGISTRY); // prettier-ignore
 
       if (lockAndDraw) {
-        const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
-        const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
+        const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
+        const valueDai = getCurrency(amountDai, DAI).toFixed('wei');
         method = 'createOpenLockAndDraw';
         args = [
           proxyRegistryAddress,
@@ -78,8 +78,8 @@ export default class ProxyCdp {
       }
     } else {
       if (lockAndDraw) {
-        const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
-        const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
+        const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
+        const valueDai = getCurrency(amountDai, DAI).toFixed('wei');
         method = 'lockAndDraw(address,uint256)';
         args = [
           tub.address,
