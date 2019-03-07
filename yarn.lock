@@ -94,6 +94,14 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@makerdao/currency@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.0.tgz#cdfad6513766a6d2fd2fe250aef6a74df52c05df"
+  integrity sha512-BITnTFODOLNCbris6wAu4cSwdKZkIy3jIqQZXKI7Rl20Z7/2klRaqgH4de73nrgz0AocdzCJHUuWuvKaMOOrJQ==
+  dependencies:
+    babel-runtime "^6.26.0"
+    bignumber.js "^8.1.1"
+
 "@makerdao/services-core@^0.9.4":
   version "0.9.4"
   resolved "https://registry.yarnpkg.com/@makerdao/services-core/-/services-core-0.9.4.tgz#b89c43c31a8fb435e09f6cc4e8acf92b9ffc06c4"
@@ -1138,6 +1146,11 @@ big.js@^3.1.3:
 bignumber.js@^7.2.1:
   version "7.2.1"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-7.2.1.tgz#80c048759d826800807c4bfd521e50edbba57a5f"
+
+bignumber.js@^8.1.1:
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-8.1.1.tgz#4b072ae5aea9c20f6730e4e5d529df1271c4d885"
+  integrity sha512-QD46ppGintwPGuL1KqmwhR0O+N2cZUg8JG/VzwI2e28sM9TqHjQB10lI4QAaMHVbLzwVLLAwEglpKPViWX+5NQ==
 
 binary-extensions@^1.0.0:
   version "1.11.0"
