@@ -126,5 +126,7 @@ Maker.create = async function(...args) {
     options.plugins = pluginTuples;
   }
 
-  return new Maker(preset, options);
+  const maker = new Maker(preset, options);
+  if (options.autoAuthenticate !== false) await maker.authenticate();
+  return maker;
 };
