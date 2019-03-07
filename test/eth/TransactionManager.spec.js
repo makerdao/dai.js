@@ -152,15 +152,12 @@ describe('lifecycle hooks', () => {
 
     const lockHandlers = makeHandlers('lock');
     txMgr.listen(lock, lockHandlers);
-
-    // we have to generate new blocks here because lockEth does `confirm`
-    await Promise.all([lock, mineBlocks(service)]);
+    await lock;
 
     // deposit, approve WETH, join, approve PETH, lock
     expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
-    expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
 
     log('\ndraw');
     const draw = cdp.drawDai(1);

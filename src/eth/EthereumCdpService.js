@@ -150,12 +150,12 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   @tracksTransactions
-  async lockEth(cdpId, amount, { unit = ETH, promise }) {
+  async lockEth(cdpId, amount, { unit = ETH, waitForConfirm, promise }) {
     const convert = this._conversionService().convertEthToWeth(amount, {
       unit,
       promise
     });
-    await this._txMgr().confirm(convert);
+    if (waitForConfirm) await this._txMgr().confirm(convert);
     return this.lockWeth(cdpId, amount, { promise });
   }
 
