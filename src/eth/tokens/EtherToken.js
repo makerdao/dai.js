@@ -49,9 +49,7 @@ export default class EtherToken {
       {
         from: fromAddress,
         to: toAddress,
-        value: getCurrency(amount, unit)
-          .toEthersBigNumber('wei')
-          .toString()
+        value: getCurrency(amount, unit).toFixed('wei')
       },
       {
         metadata: {
