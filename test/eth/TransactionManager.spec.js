@@ -161,14 +161,14 @@ describe('lifecycle hooks', () => {
 
     // we have to generate new blocks here because lockEth does `confirm`
     await Promise.all([lock, mineBlocks(service)]);
-    
+
     // deposit, approve WETH, join, approve PETH, lock
     expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
     expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
     console.log('ENDING LOCK LOGS & TESTS');
-    
+
     // log('\ndraw');
     // let draw;
     // try {
