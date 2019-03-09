@@ -1,4 +1,3 @@
-import { utils } from 'ethers';
 import { getCurrency, ETH } from '../Currency';
 import tracksTransactions from '../../utils/tracksTransactions';
 
@@ -18,9 +17,8 @@ export default class EtherToken {
     return this.balanceOf(this._web3.currentAddress());
   }
 
-  balanceOf(owner) {
-    // FIXME stop using ethers utils
-    return this._web3.getBalance(owner).then(b => ETH(utils.formatEther(b)));
+  async balanceOf(owner) {
+    return ETH.wei(await this._web3.getBalance(owner));
   }
 
   // eslint-disable-next-line
@@ -49,9 +47,7 @@ export default class EtherToken {
       {
         from: fromAddress,
         to: toAddress,
-        value: getCurrency(amount, unit)
-          .toEthersBigNumber('wei')
-          .toString()
+        value: getCurrency(amount, unit).toFixed('wei')
       },
       {
         metadata: {

@@ -1,9 +1,8 @@
 {
+  "CDP_MANAGER": "DssCdpManager",
   "DGX": "DSToken",
   "MCD_ADM": "DSRoles",
   "MCD_CAT": "Cat",
-  "MCD_CDP_MANAGER": "DssCdpManager",
-  "MCD_PROXY_ACTIONS": "DssProxyActions",
   "MCD_DAI": "DSToken",
   "MCD_DAI_GUARD": "DSGuard",
   "MCD_DEPLOY": "DssDeploy",
@@ -24,7 +23,6 @@
   "MCD_MOVE_DGX": "GemMove",
   "MCD_MOVE_ETH": "GemMove",
   "MCD_MOVE_REP": "GemMove",
-  "MCD_PIT": "Pit",
   "MCD_POT": "Pot",
   "MCD_SPOT": "Spotter",
   "MCD_VAT": "Vat",
@@ -32,5 +30,7 @@
   "PIP_DGX": "DSValue",
   "PIP_ETH": "DSValue",
   "PIP_REP": "DSValue",
-  "REP": "DSToken"
+  "PROXY_ACTIONS": "DssProxyActions",
+  "REP": "DSToken",
+  "WETH": "WETH9_"
 }

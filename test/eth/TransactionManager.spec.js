@@ -158,38 +158,20 @@ describe('lifecycle hooks', () => {
 
     const lockHandlers = makeHandlers('lock');
     txMgr.listen(lock, lockHandlers);
-
-    // we have to generate new blocks here because lockEth does `confirm`
-    await Promise.all([lock, mineBlocks(service)]);
+    await lock;
 
     // deposit, approve WETH, join, approve PETH, lock
     expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
-    expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
-    console.log('ENDING LOCK LOGS & TESTS');
 
-    // log('\ndraw');
-    // let draw;
-    // try {
-    //   console.log('BEGINNING DRAW LOGS');
-    //   draw = cdp.drawDai(1);
-    // } catch (err) {
-    //   console.error(err);
-    // }
-    // await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
-    // console.log('ENDING DRAW LOGS');
+    log('\ndraw');
+    const draw = cdp.drawDai(1);
+    await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
 
-    // log('\nwipe');
-    // let wipe;
-    // try {
-    //   console.log('BEGINNING WIPE LOGS');
-    //   wipe = cdp.wipeDai(1);
-    // } catch (err) {
-    //   console.error(err);
-    // }
-    // await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
-    // console.log('ENDING WIPE LOGS');
+    log('\nwipe');
+    const wipe = cdp.wipeDai(1);
+    await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
   });
 
   test('lifecycle hooks for give', async () => {

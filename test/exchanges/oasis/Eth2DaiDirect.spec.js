@@ -86,27 +86,29 @@ describe('format contract call', () => {
     expect(normalParams.length).toEqual(5);
     expect(normalParams[0]).toEqual(otcAddress);
     expect(normalParams[1]).toEqual(daiAddress);
-    expect(Object.keys(normalParams[2])).toEqual(['_bn']);
+    expect(normalParams[2]).toEqual(service._valueForContract(0.01, 'DAI'));
     expect(normalParams[3]).toEqual(wethAddress);
-    expect(Object.keys(normalParams[4])).toEqual(['_bn']);
+    expect(normalParams[4]).toEqual(service._valueForContract(0, 'WETH'));
 
     expect(ethParams.length).toEqual(4);
     expect(ethParams[0]).toEqual(otcAddress);
     expect(ethParams[1]).toEqual(wethAddress);
     expect(ethParams[2]).toEqual(daiAddress);
-    expect(Object.keys(ethParams[3])).toEqual(['_bn']);
+    expect(ethParams[3]).toEqual(service._valueForContract(100, 'WETH'));
 
     expect(buyAndPayEthParams.length).toEqual(4);
     expect(buyAndPayEthParams[0]).toEqual(otcAddress);
     expect(buyAndPayEthParams[1]).toEqual(daiAddress);
-    expect(Object.keys(buyAndPayEthParams[2])).toEqual(['_bn']);
+    expect(buyAndPayEthParams[2]).toEqual(
+      service._valueForContract(0.01, 'WETH')
+    );
     expect(buyAndPayEthParams[3]).toEqual(wethAddress);
 
     expect(createParams.length).toEqual(4);
     expect(createParams[0]).toEqual(registryAddress);
     expect(createParams[1]).toEqual(otcAddress);
     expect(createParams[2]).toEqual(daiAddress);
-    expect(Object.keys(createParams[3])).toEqual(['_bn']);
+    expect(createParams[3]).toEqual(service._valueForContract(100, 'WETH'));
   });
 
   test('set transaction options', () => {

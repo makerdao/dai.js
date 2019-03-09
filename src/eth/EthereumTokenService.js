@@ -24,8 +24,9 @@ export default class EthereumTokenService extends PrivateService {
   initialize(settings = {}) {
     if (settings.erc20) {
       for (const token of settings.erc20) {
-        this._tokens[token.symbol] = token.symbol;
-        this._addedTokens[token.symbol] = [token];
+        const symbol = token.symbol || token.currency.symbol;
+        this._tokens[symbol] = symbol;
+        this._addedTokens[symbol] = [token];
       }
     }
   }

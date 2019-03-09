@@ -153,12 +153,12 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   @tracksTransactions
-  async lockEth(cdpId, amount, { unit = ETH, promise }) {
+  async lockEth(cdpId, amount, { unit = ETH, waitForConfirm, promise }) {
     const convert = this._conversionService().convertEthToWeth(amount, {
       unit,
       promise
     });
-    await this._txMgr().confirm(convert);
+    if (waitForConfirm) await this._txMgr().confirm(convert);
     return this.lockWeth(cdpId, amount, { promise });
   }
 
@@ -176,7 +176,7 @@ export default class EthereumCdpService extends PrivateService {
   @tracksTransactions
   async lockPeth(cdpId, amount, { unit = PETH, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
+    const value = getCurrency(amount, unit).toFixed('wei');
     await this.get('allowance').requireAllowance(
       PETH,
       this._tubContract().address,
@@ -189,19 +189,19 @@ export default class EthereumCdpService extends PrivateService {
 
   freePeth(cdpId, amount, { unit = PETH, promise } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
+    const value = getCurrency(amount, unit).toFixed('wei');
     return this._tubContract().free(hexCdpId, value, { promise });
   }
 
   drawDai(cdpId, amount, { unit = DAI, promise } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
+    const value = getCurrency(amount, unit).toFixed('wei');
     return this._tubContract().draw(hexCdpId, value, { promise });
   }
 
   @tracksTransactions
   async wipeDai(cdpId, amount, { unit = DAI, promise }) {
-    const value = getCurrency(amount, unit).toEthersBigNumber('wei');
+    const value = getCurrency(amount, unit).toFixed('wei');
     await this._throwIfNotEnoughMkrToWipe(cdpId, amount, unit);
     const hexCdpId = numberToBytes32(cdpId);
     await this.get('allowance').requireAllowance(
@@ -399,7 +399,7 @@ export default class EthereumCdpService extends PrivateService {
 
   freeEthProxy(dsProxy, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, ETH).toEthersBigNumber('wei');
+    const value = getCurrency(amount, ETH).toFixed('wei');
 
     return this._saiProxyTubContract().free(
       this._tubContract().address,
@@ -421,7 +421,7 @@ export default class EthereumCdpService extends PrivateService {
 
   lockEthProxy(dsProxy, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, ETH).toEthersBigNumber('wei');
+    const value = getCurrency(amount, ETH).toFixed('wei');
 
     return this._saiProxyTubContract().lock(
       this._tubContract().address,
@@ -443,8 +443,8 @@ export default class EthereumCdpService extends PrivateService {
 
   lockEthAndDrawDaiProxy(dsProxy, cdpId, amountEth, amountDai) {
     const hexCdpId = numberToBytes32(cdpId);
-    const valueEth = getCurrency(amountEth, ETH).toEthersBigNumber('wei');
-    const valueDai = getCurrency(amountDai, DAI).toEthersBigNumber('wei');
+    const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
+    const valueDai = getCurrency(amountDai, DAI).toFixed('wei');
 
     return this._saiProxyTubContract().lockAndDraw(
       this._tubContract().address,
@@ -468,7 +468,7 @@ export default class EthereumCdpService extends PrivateService {
 
   drawDaiProxy(dsProxy, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
+    const value = getCurrency(amount, DAI).toFixed('wei');
 
     return this._saiProxyTubContract().draw(
       this._tubContract().address,
@@ -512,7 +512,7 @@ export default class EthereumCdpService extends PrivateService {
   @tracksTransactions
   async wipeDaiProxy(dsProxy, cdpId, amount, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, DAI).toEthersBigNumber('wei');
+    const value = getCurrency(amount, DAI).toFixed('wei');
 
     await this.get('allowance').requireAllowance(DAI, dsProxy, {
       promise
