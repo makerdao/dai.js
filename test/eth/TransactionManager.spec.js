@@ -147,7 +147,13 @@ describe('lifecycle hooks', () => {
     expect(openHandlers.mined).toBeCalled();
     expect(openHandlers.confirmed).toBeCalled();
 
-    const lock = cdp.lockEth(1);
+    let lock;
+    try {
+      console.log('BEGINNING LOCK LOGS');
+      lock = cdp.lockEth(1);
+    } catch (err) {
+      console.error(err);
+    }
     log('lock id:', uniqueId(lock));
 
     const lockHandlers = makeHandlers('lock');
@@ -155,20 +161,35 @@ describe('lifecycle hooks', () => {
 
     // we have to generate new blocks here because lockEth does `confirm`
     await Promise.all([lock, mineBlocks(service)]);
-
+    
     // deposit, approve WETH, join, approve PETH, lock
     expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
     expect(lockHandlers.confirmed).toBeCalledTimes(1); // for converEthToWeth
+    console.log('ENDING LOCK LOGS & TESTS');
+    
+    // log('\ndraw');
+    // let draw;
+    // try {
+    //   console.log('BEGINNING DRAW LOGS');
+    //   draw = cdp.drawDai(1);
+    // } catch (err) {
+    //   console.error(err);
+    // }
+    // await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
+    // console.log('ENDING DRAW LOGS');
 
-    log('\ndraw');
-    const draw = cdp.drawDai(1);
-    await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
-
-    log('\nwipe');
-    const wipe = cdp.wipeDai(1);
-    await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
+    // log('\nwipe');
+    // let wipe;
+    // try {
+    //   console.log('BEGINNING WIPE LOGS');
+    //   wipe = cdp.wipeDai(1);
+    // } catch (err) {
+    //   console.error(err);
+    // }
+    // await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
+    // console.log('ENDING WIPE LOGS');
   });
 
   test('lifecycle hooks for give', async () => {
@@ -230,7 +251,7 @@ describe('lifecycle hooks', () => {
     );
   });
 
-  test('clear Tx when state is error and older than 5 minutes', async () => {
+  test.only('clear Tx when state is error and older than 5 minutes', async () => {
     expect.assertions(4);
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 

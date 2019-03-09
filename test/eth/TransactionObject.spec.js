@@ -75,6 +75,7 @@ describe('normal web service behavior', () => {
 
       if (checkPending) {
         tx.onPending(() => {
+          console.log('checking');
           expect(tx.state()).toBe(TransactionState.pending);
         });
       }
@@ -96,7 +97,7 @@ describe('normal web service behavior', () => {
 
     test(
       'generic error',
-      testErrorHandling(() => mkr.transfer(testAddress, '2000000'), /reverted/)
+      testErrorHandling(() => mkr.transfer(testAddress, '2000000'), /reverted/, false)
     );
 
     test(

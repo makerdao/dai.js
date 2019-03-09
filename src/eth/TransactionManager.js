@@ -58,6 +58,7 @@ export default class TransactionManager extends PublicService {
         // so we do our async operations inside this immediately-executed
         // async function.
         let data = contract.interface.functions[method](...args).data;
+        console.log('data:', data);
         if (options.dsProxy) {
           const proxyAddress = await this.get('proxy').currentProxy();
           const proxy = this.get('proxy')._getUnwrappedProxyContract(
@@ -71,6 +72,7 @@ export default class TransactionManager extends PublicService {
           data,
           contract.address
         );
+        console.log('transaction options after estimation:', txOptions);
         return this._execute(contract, method, args, txOptions);
       })(),
       {

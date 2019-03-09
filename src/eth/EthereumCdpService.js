@@ -125,8 +125,8 @@ export default class EthereumCdpService extends PrivateService {
   async getCdpIds(address) {
     if (!address) {
       address = this._web3Service()
-      .get('accounts')
-      .currentAddress();
+        .get('accounts')
+        .currentAddress();
     }
 
     const api = new QueryApi(this._web3Service().networkId());
@@ -141,8 +141,14 @@ export default class EthereumCdpService extends PrivateService {
     const debt = await this.getDebtValue(cdpId, DAI);
     await this._throwIfNotEnoughMkrToWipe(cdpId, debt);
     const hexCdpId = numberToBytes32(cdpId);
-    await this.get('allowance').requireAllowance(MKR, this._tubContract().address),
-    await this.get('allowance').requireAllowance(DAI, this._tubContract().address)
+    await this.get('allowance').requireAllowance(
+      MKR,
+      this._tubContract().address
+    ),
+      await this.get('allowance').requireAllowance(
+        DAI,
+        this._tubContract().address
+      );
     return this._tubContract().shut(hexCdpId);
   }
 
@@ -198,8 +204,14 @@ export default class EthereumCdpService extends PrivateService {
     const value = getCurrency(amount, unit).toEthersBigNumber('wei');
     await this._throwIfNotEnoughMkrToWipe(cdpId, amount, unit);
     const hexCdpId = numberToBytes32(cdpId);
-    await this.get('allowance').requireAllowance(MKR, this._tubContract().address),
-    await this.get('allowance').requireAllowance(DAI, this._tubContract().address)
+    await this.get('allowance').requireAllowance(
+      MKR,
+      this._tubContract().address
+    ),
+      await this.get('allowance').requireAllowance(
+        DAI,
+        this._tubContract().address
+      );
     return this._tubContract().wipe(hexCdpId, value, { promise });
   }
 

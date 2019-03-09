@@ -8,10 +8,18 @@ export default class GasEstimatorService extends PublicService {
   }
 
   async estimateGasLimit(transaction, options = {}) {
-    const web3Data = await Promise.all([
-      this.get('web3').getBlock('latest'),
-      this.get('web3').estimateGas(transaction)
-    ]);
+    let web3Data;
+    try {
+      console.log('transaction:', transaction);
+      console.log('options:', options)
+      web3Data = await Promise.all([
+        this.get('web3').getBlock('latest'),
+        this.get('web3').estimateGas(transaction)
+      ]);
+    } catch (err) {
+      console.error(err);
+    }
+
     const blockLimit = web3Data[0].gasLimit;
     const estimate = web3Data[1];
 
