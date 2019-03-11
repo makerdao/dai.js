@@ -5,10 +5,11 @@ export default class GasEstimatorService extends PublicService {
     super(name, ['web3', 'log']);
     this._percentage = 1.55;
     this._absolute = null;
+    this._fallback = 4000000;
   }
 
   async estimateGasLimit(transaction, options = {}) {
-    let web3Data;
+    let web3Data = [];
     try {
       console.log('transaction:', transaction);
       console.log('options:', options);
@@ -18,6 +19,8 @@ export default class GasEstimatorService extends PublicService {
       ]);
     } catch (err) {
       console.error(err);
+      options.gasLimit = this._fallback;
+      return options;
     }
 
     const blockLimit = web3Data[0].gasLimit;
