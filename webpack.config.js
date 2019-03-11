@@ -23,8 +23,8 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env', 'stage-2'],
-            plugins: ['transform-decorators-legacy']
+            presets: ['@babel/env', '@babel/stage-2'],
+            plugins: ['@babel/transform-decorators-legacy']
           }
         }
       },
