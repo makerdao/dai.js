@@ -95,7 +95,7 @@ export default class Eth2DaiDirect extends PrivateService {
       ? this._buyAmount
       : await this.getBuyAmount(buyToken, payToken, payAmount);
     const adjustedAmount = buyAmount * (1 - this._slippage);
-    return ETH.wei(adjustedAmount).toEthersBigNumber('wei');
+    return ETH.wei(adjustedAmount).toFixed('wei');
   }
 
   async _maxPayAmount(payToken, buyToken, buyAmount) {
@@ -103,7 +103,7 @@ export default class Eth2DaiDirect extends PrivateService {
       ? this._payAmount
       : await this.getPayAmount(payToken, buyToken, buyAmount);
     const adjustedAmount = payAmount * (1 + this._slippage);
-    return ETH.wei(adjustedAmount).toEthersBigNumber('wei');
+    return ETH.wei(adjustedAmount).toFixed('wei');
   }
 
   // The only atomic createAndExecute functions that work
@@ -198,6 +198,6 @@ export default class Eth2DaiDirect extends PrivateService {
 
   _valueForContract(amount, symbol) {
     const token = this.get('token').getToken(symbol);
-    return getCurrency(amount, token).toEthersBigNumber('wei');
+    return getCurrency(amount, token).toFixed('wei');
   }
 }

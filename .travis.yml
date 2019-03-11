@@ -2,7 +2,7 @@ dist: trusty
 sudo: required
 language: node_js
 node_js:
-- '10'
+- '11.10'
 before_cache:
 - nix-collect-garbage -d
 - rm -rf node_modules/secp256k1/build

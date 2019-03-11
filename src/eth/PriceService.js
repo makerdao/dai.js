@@ -2,7 +2,7 @@ import { PrivateService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import { RAY } from '../utils/constants';
 import BigNumber from 'bignumber.js';
-import { utils } from 'ethers';
+import abi from 'web3-eth-abi';
 import { getCurrency, ETH, USD_PETH, MKR, USD_ETH, USD_MKR } from './Currency';
 
 export default class PriceService extends PrivateService {
@@ -33,8 +33,8 @@ export default class PriceService extends PrivateService {
   }
 
   _valueForContract(value, unit) {
-    const bn = getCurrency(value, unit).toEthersBigNumber('wei');
-    return utils.hexlify(utils.padZeros(bn, 32));
+    const str = getCurrency(value, unit).toFixed('wei');
+    return abi.encodeParameter('uint256', str);
   }
 
   getWethToPethRatio() {
