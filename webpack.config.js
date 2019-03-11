@@ -24,7 +24,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env', '@babel/stage-2'],
-            plugins: ['@babel/transform-decorators-legacy']
+            plugins: ['transform-decorators-legacy']
           }
         }
       },
