@@ -37,8 +37,6 @@ export default class TransactionManager extends PublicService {
         delete options.metadata;
       }
 
-      console.log('METADATA:', metadata);
-
       if (has(options, 'promise')) {
         if (options.promise) promise = options.promise;
         delete options.promise;
@@ -73,7 +71,6 @@ export default class TransactionManager extends PublicService {
           data,
           contract.address
         );
-        console.log('transaction options after estimation:', txOptions);
         return this._execute(contract, method, args, txOptions);
       })(),
       {

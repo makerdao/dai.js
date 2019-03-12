@@ -19,7 +19,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._timeStampSubmitted = new Date();
     this.metadata = metadata || {};
     this._confirmedBlockCount = this._web3Service.confirmedBlockCount();
-    console.log('!!!!!!!! CREATING TRANSACTION OBJECT !!!!!!!!!!!!!');
   }
 
   timeStampSubmitted() {
