@@ -144,11 +144,11 @@ export default class EthereumCdpService extends PrivateService {
     await this.get('allowance').requireAllowance(
       MKR,
       this._tubContract().address
-    ),
-      await this.get('allowance').requireAllowance(
-        DAI,
-        this._tubContract().address
-      );
+    )
+    await this.get('allowance').requireAllowance(
+      DAI,
+      this._tubContract().address
+    );
     return this._tubContract().shut(hexCdpId);
   }
 
@@ -207,11 +207,11 @@ export default class EthereumCdpService extends PrivateService {
     await this.get('allowance').requireAllowance(
       MKR,
       this._tubContract().address
-    ),
-      await this.get('allowance').requireAllowance(
-        DAI,
-        this._tubContract().address
-      );
+    )
+    await this.get('allowance').requireAllowance(
+      DAI,
+      this._tubContract().address
+    );
     return this._tubContract().wipe(hexCdpId, value, { promise });
   }
 
