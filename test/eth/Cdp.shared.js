@@ -13,7 +13,6 @@ async function setPrice(type, amount) {
     await priceService.manager().authenticate();
   }
   const method = type === MKR ? 'setMkrPrice' : 'setEthPrice';
-  console.log('FUCK', method, amount);
   await priceService[method](amount);
 }
 

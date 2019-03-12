@@ -75,7 +75,6 @@ describe('normal web service behavior', () => {
 
       if (checkPending) {
         tx.onPending(() => {
-          console.log('checking');
           expect(tx.state()).toBe(TransactionState.pending);
         });
       }

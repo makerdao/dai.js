@@ -16,6 +16,7 @@ export default class GasEstimatorService extends PublicService {
         this.get('web3').estimateGas(transaction)
       ]);
     } catch (err) {
+      console.warn('Estimating gas limit throws the following error:', '\n', err.message);
       options.gasLimit = this._fallback;
       return options;
     }
