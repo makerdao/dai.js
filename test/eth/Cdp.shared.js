@@ -145,139 +145,139 @@ export default function sharedTests(openCdp, initCdpService) {
         expect(debt).toEqual(USD(5));
       });
 
-      describe('with drip', () => {
-        let snapshotId, nonceService, transactionCount;
+      // describe('with drip', () => {
+      //   let snapshotId, nonceService, transactionCount;
 
-        beforeAll(async () => {
-          nonceService = cdpService
-            .get('smartContract')
-            .get('transactionManager')
-            .get('nonce');
-          transactionCount = nonceService._counts[currentAddress];
+      //   beforeAll(async () => {
+      //     nonceService = cdpService
+      //       .get('smartContract')
+      //       .get('transactionManager')
+      //       .get('nonce');
+      //     transactionCount = nonceService._counts[currentAddress];
 
-          // wait at least a second for the fees to get updated
-          await promiseWait(1100);
-        });
+      //     // wait at least a second for the fees to get updated
+      //     await promiseWait(1100);
+      //   });
 
-        beforeEach(async () => {
-          // Restoring the snapshot resets the account here. This causes any
-          // following tests that call authenticated functions to fail
-          snapshotId = await takeSnapshot();
-          await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
-          nonceService._counts[currentAddress] = transactionCount;
-        });
+      //   beforeEach(async () => {
+      //     // Restoring the snapshot resets the account here. This causes any
+      //     // following tests that call authenticated functions to fail
+      //     snapshotId = await takeSnapshot();
+      //     await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
+      //     nonceService._counts[currentAddress] = transactionCount;
+      //   });
 
-        afterEach(async () => {
-          await restoreSnapshot(snapshotId);
-          cdpService = await initCdpService();
-        });
+      //   afterEach(async () => {
+      //     await restoreSnapshot(snapshotId);
+      //     cdpService = await initCdpService();
+      //   });
 
-        test('read MKR fee', async () => {
-          await setPrice(MKR, 600);
-          const usdFee = await cdp.getGovernanceFee(USD);
-          expect(usdFee.gt(0)).toBeTruthy();
-          const mkrFee = await cdp.getGovernanceFee();
-          expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
-        });
+      //   test('read MKR fee', async () => {
+      //     await setPrice(MKR, 600);
+      //     const usdFee = await cdp.getGovernanceFee(USD);
+      //     expect(usdFee.gt(0)).toBeTruthy();
+      //     const mkrFee = await cdp.getGovernanceFee();
+      //     expect(mkrFee.toNumber()).toBeLessThan(usdFee.toNumber());
+      //   });
 
-        test('fail to wipe debt due to insufficient MKR', async () => {
-          expect.assertions(3);
-          const amountToWipe = DAI(1);
-          const mkr = cdpService.get('token').getToken(MKR);
-          const [fee, debt, balance] = await Promise.all([
-            cdp.getGovernanceFee(MKR),
-            cdp.getDebtValue(),
-            mkr.balanceOf(currentAddress)
-          ]);
-          const mkrOwed = amountToWipe
-            .div(debt)
-            .toBigNumber()
-            .times(fee.toBigNumber());
-          const mkrToSendAway = balance.minus(mkrOwed.times(0.99)); //keep 99% of MKR needed
-          const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, mkrToSendAway);
-          const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
-          expect(enoughMkrToWipe).toBe(false);
-          try {
-            await cdp.wipeDai(1);
-          } catch (err) {
-            expect(err).toBeTruthy();
-            expect(err.message).toBe(
-              'not enough MKR balance to cover governance fee'
-            );
-          }
-        });
+      //   test('fail to wipe debt due to insufficient MKR', async () => {
+      //     expect.assertions(3);
+      //     const amountToWipe = DAI(1);
+      //     const mkr = cdpService.get('token').getToken(MKR);
+      //     const [fee, debt, balance] = await Promise.all([
+      //       cdp.getGovernanceFee(MKR),
+      //       cdp.getDebtValue(),
+      //       mkr.balanceOf(currentAddress)
+      //     ]);
+      //     const mkrOwed = amountToWipe
+      //       .div(debt)
+      //       .toBigNumber()
+      //       .times(fee.toBigNumber());
+      //     const mkrToSendAway = balance.minus(mkrOwed.times(0.99)); //keep 99% of MKR needed
+      //     const other = TestAccountProvider.nextAddress();
+      //     await mkr.transfer(other, mkrToSendAway);
+      //     const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
+      //     expect(enoughMkrToWipe).toBe(false);
+      //     try {
+      //       await cdp.wipeDai(1);
+      //     } catch (err) {
+      //       expect(err).toBeTruthy();
+      //       expect(err.message).toBe(
+      //         'not enough MKR balance to cover governance fee'
+      //       );
+      //     }
+      //   });
 
-        test('fail to shut due to insufficient MKR', async () => {
-          expect.assertions(3);
-          const mkr = cdpService.get('token').getToken(MKR);
-          const [fee, debt, balance] = await Promise.all([
-            cdp.getGovernanceFee(MKR),
-            cdp.getDebtValue(),
-            mkr.balanceOf(currentAddress)
-          ]);
-          const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
-          const other = TestAccountProvider.nextAddress();
-          await mkr.transfer(other, mkrToSendAway);
-          const enoughMkrToWipe = await cdp.enoughMkrToWipe(debt);
-          expect(enoughMkrToWipe).toBe(false);
-          try {
-            await cdp.shut();
-          } catch (err) {
-            expect(err).toBeTruthy();
-            expect(err.message).toBe(
-              'not enough MKR balance to cover governance fee'
-            );
-          }
-        });
+      //   test('fail to shut due to insufficient MKR', async () => {
+      //     expect.assertions(3);
+      //     const mkr = cdpService.get('token').getToken(MKR);
+      //     const [fee, debt, balance] = await Promise.all([
+      //       cdp.getGovernanceFee(MKR),
+      //       cdp.getDebtValue(),
+      //       mkr.balanceOf(currentAddress)
+      //     ]);
+      //     const mkrToSendAway = balance.minus(fee.times(0.99)); //keep 99% of MKR needed
+      //     const other = TestAccountProvider.nextAddress();
+      //     await mkr.transfer(other, mkrToSendAway);
+      //     const enoughMkrToWipe = await cdp.enoughMkrToWipe(debt);
+      //     expect(enoughMkrToWipe).toBe(false);
+      //     try {
+      //       await cdp.shut();
+      //     } catch (err) {
+      //       expect(err).toBeTruthy();
+      //       expect(err.message).toBe(
+      //         'not enough MKR balance to cover governance fee'
+      //       );
+      //     }
+      //   });
 
-        test('wipe debt with non-zero stability fee', async () => {
-          const mkr = cdpService.get('token').getToken(MKR);
-          const debt1 = await cdp.getDebtValue();
-          const balance1 = await mkr.balanceOf(currentAddress);
-          await cdp.wipeDai(1);
-          const debt2 = await cdp.getDebtValue();
-          const balance2 = await mkr.balanceOf(currentAddress);
-          expect(debt1.minus(debt2)).toEqual(DAI(1));
-          expect(balance1.gt(balance2)).toBeTruthy();
-        });
+      //   test('wipe debt with non-zero stability fee', async () => {
+      //     const mkr = cdpService.get('token').getToken(MKR);
+      //     const debt1 = await cdp.getDebtValue();
+      //     const balance1 = await mkr.balanceOf(currentAddress);
+      //     await cdp.wipeDai(1);
+      //     const debt2 = await cdp.getDebtValue();
+      //     const balance2 = await mkr.balanceOf(currentAddress);
+      //     expect(debt1.minus(debt2)).toEqual(DAI(1));
+      //     expect(balance1.gt(balance2)).toBeTruthy();
+      //   });
 
-        test('wipe', async () => {
-          const balance1 = parseFloat(await dai.balanceOf(currentAddress));
-          await cdp.wipeDai('5');
-          const balance2 = parseFloat(await dai.balanceOf(currentAddress));
-          expect(balance2 - balance1).toBeCloseTo(-5);
-          const debt = await cdp.getDebtValue();
-          expect(debt).toEqual(DAI(0));
-        });
+      //   test('wipe', async () => {
+      //     const balance1 = parseFloat(await dai.balanceOf(currentAddress));
+      //     await cdp.wipeDai('5');
+      //     const balance2 = parseFloat(await dai.balanceOf(currentAddress));
+      //     expect(balance2 - balance1).toBeCloseTo(-5);
+      //     const debt = await cdp.getDebtValue();
+      //     expect(debt).toEqual(DAI(0));
+      //   });
 
-        test('free', async () => {
-          await cdp.freeEth(0.1);
-          const info = await cdp.getInfo();
-          expect(info.ink.toString()).toEqual('100000000000000000');
-        });
+      //   test('free', async () => {
+      //     await cdp.freeEth(0.1);
+      //     const info = await cdp.getInfo();
+      //     expect(info.ink.toString()).toEqual('100000000000000000');
+      //   });
 
-        test('shut', async () => {
-          await cdp.shut();
-          const info = await cdp.getInfo();
-          expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
-        });
-      });
+      //   test('shut', async () => {
+      //     await cdp.shut();
+      //     const info = await cdp.getInfo();
+      //     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+      //   });
+      // });
 
-      test('read liquidation price', async () => {
-        const price = await cdp.getLiquidationPrice();
-        expect(price).toEqual(USD_ETH(37.5));
-      });
+      // test('read liquidation price', async () => {
+      //   const price = await cdp.getLiquidationPrice();
+      //   expect(price).toEqual(USD_ETH(37.5));
+      // });
 
-      test('check if cdp is safe', async () => {
-        expect(await cdp.isSafe()).toBe(true);
-      });
+      // test('check if cdp is safe', async () => {
+      //   expect(await cdp.isSafe()).toBe(true);
+      // });
 
-      test('read collateralization ratio', async () => {
-        const ethPerPeth = await cdpService.get('price').getWethToPethRatio();
-        const collateralizationRatio = await cdp.getCollateralizationRatio();
-        expect(collateralizationRatio).toBeCloseTo(16 * ethPerPeth);
-      });
+      // test('read collateralization ratio', async () => {
+      //   const ethPerPeth = await cdpService.get('price').getWethToPethRatio();
+      //   const collateralizationRatio = await cdp.getCollateralizationRatio();
+      //   expect(collateralizationRatio).toBeCloseTo(16 * ethPerPeth);
+      // });
     });
   });
 }

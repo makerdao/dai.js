@@ -37,6 +37,8 @@ export default class TransactionManager extends PublicService {
         delete options.metadata;
       }
 
+      console.log('METADATA:', metadata);
+
       if (has(options, 'promise')) {
         if (options.promise) promise = options.promise;
         delete options.promise;
@@ -58,7 +60,6 @@ export default class TransactionManager extends PublicService {
         // so we do our async operations inside this immediately-executed
         // async function.
         let data = contract.interface.functions[method](...args).data;
-        console.log('data:', data);
         if (options.dsProxy) {
           const proxyAddress = await this.get('proxy').currentProxy();
           const proxy = this.get('proxy')._getUnwrappedProxyContract(

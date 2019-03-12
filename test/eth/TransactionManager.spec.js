@@ -136,7 +136,7 @@ describe('lifecycle hooks', () => {
     await priceService.setEthPrice(400);
   });
 
-  test('lifecycle hooks for open and lock', async () => {
+  test.only('lifecycle hooks for open and lock', async () => {
     log('open id:', uniqueId(open));
     const openHandlers = makeHandlers('open');
 
@@ -233,7 +233,7 @@ describe('lifecycle hooks', () => {
     );
   });
 
-  test.only('clear Tx when state is error and older than 5 minutes', async () => {
+  test('clear Tx when state is error and older than 5 minutes', async () => {
     expect.assertions(4);
     await Promise.all([txMgr.confirm(open), mineBlocks(service)]);
 
