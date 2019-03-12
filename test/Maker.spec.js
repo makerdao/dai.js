@@ -16,12 +16,6 @@ test('import vs require', () => {
   expect(Maker2.LocalService).toEqual(LocalService);
 });
 
-test('expose service classes as properties', async () => {
-  expect(typeof Maker.LocalService).toBe('function');
-  expect(typeof Maker.PrivateService).toBe('function');
-  expect(typeof Maker.PublicService).toBe('function');
-});
-
 test('openCdp', async () => {
   const maker = await createMaker();
   const cdp = await maker.openCdp();

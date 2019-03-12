@@ -1,5 +1,6 @@
 import Maker from '../src';
 import ConfigFactory from '../src/config/ConfigFactory';
+import { LocalService } from '@makerdao/services-core';
 
 beforeEach(() => {
   jest.spyOn(ConfigFactory, 'create');
@@ -45,7 +46,7 @@ test('object plugin with addConfig and afterCreate', async () => {
 });
 
 const makeMockService = role => {
-  class MockService extends Maker.LocalService {
+  class MockService extends LocalService {
     constructor(name = role) {
       super(name, []);
     }
