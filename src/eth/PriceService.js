@@ -57,6 +57,7 @@ export default class PriceService extends PrivateService {
 
   setEthPrice(newPrice, { unit = ETH, promise } = {}) {
     const value = this._valueForContract(newPrice, unit);
+    console.log(value);
     return this._getContract(contracts.SAI_PIP).poke(value, { promise });
   }
 

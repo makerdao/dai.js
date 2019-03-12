@@ -158,7 +158,7 @@ export default class EthereumCdpService extends PrivateService {
       unit,
       promise
     });
-    if (waitForConfirm) await this._txMgr().confirm(convert);
+    waitForConfirm ? await this._txMgr().confirm(convert) : await convert;
     return this.lockWeth(cdpId, amount, { promise });
   }
 
