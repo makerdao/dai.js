@@ -56,6 +56,14 @@ export default class GasEstimatorService extends PublicService {
     this._absolute = number;
   }
 
+  setFallback(number) {
+    if (number <= 0) {
+      throw new Error('gas limit fallback must be greater than 0');
+    }
+
+    this._fallback = number;
+  }
+
   removePercentage() {
     this._percentage = null;
   }
@@ -64,11 +72,19 @@ export default class GasEstimatorService extends PublicService {
     this._absolute = null;
   }
 
+  removeFallback() {
+    this._fallback = null;
+  }
+
   getPercentage() {
     return this._percentage;
   }
 
   getAbsolute() {
     return this._absolute;
+  }
+
+  getFallback() {
+    return this._fallback;
   }
 }

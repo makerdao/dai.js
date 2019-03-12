@@ -41,6 +41,8 @@ test('update policies', done => {
       expect(gasEstimator.getPercentage()).toBe(1);
       gasEstimator.setAbsolute(100000);
       expect(gasEstimator.getAbsolute()).toBe(100000);
+      gasEstimator.setFallback(100000);
+      expect(gasEstimator.getFallback()).toBe(100000);
       done();
     });
 });
@@ -52,12 +54,14 @@ test('clear policies', done => {
     .manager()
     .connect()
     .then(() => {
-      gasEstimator.setPercentage(1);
       gasEstimator.removePercentage();
       expect(gasEstimator.getPercentage()).toBe(null);
       gasEstimator.setAbsolute(100000);
       gasEstimator.removeAbsolute();
       expect(gasEstimator.getAbsolute()).toBe(null);
+      gasEstimator.removeFallback();
+      expect(gasEstimator.getFallback()).toBe(null);
+
       done();
     });
 });
@@ -112,24 +116,6 @@ test('choose minimum when both policies set using percentage', done => {
     });
 });
 
-//I'll implement this test once I create the SmartContractService.  Then I'll be able to deploy and call a contract that uses too much gas to test this
-/*
-test('does not set estimate greater than block gas limit', (done) => {
-  const gasEstimator = buildTestGasEstimatorService(),
-    web3 = gasEstimator.get('web3');
-
-  gasEstimator.manager().connect()
-    .then(()=>{
-      gasEstimator.setPercentage(1);
-      gasEstimator.setAbsolute(20000);
-      return getDummyTransaction();})
-    .then(transaction => gasEstimator.estimateGasLimit(transaction))
-    .then(estimate => {
-      expect(estimate).toBe(20000);
-      done();
-    });
-});*/
-
 test('throws on setting policy less than zero', done => {
   const gasEstimator = buildTestGasEstimatorService();
 
@@ -139,6 +125,7 @@ test('throws on setting policy less than zero', done => {
     .then(() => {
       expect(() => gasEstimator.setPercentage(-1)).toThrow();
       expect(() => gasEstimator.setAbsolute(-1)).toThrow();
+      expect(() => gasEstimator.setFallback(-1)).toThrow();
       done();
     });
 });
