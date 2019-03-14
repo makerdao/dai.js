@@ -3,7 +3,7 @@ import { PublicService } from '@makerdao/services-core';
 export default class GasEstimatorService extends PublicService {
   constructor(name = 'gasEstimator') {
     super(name, ['web3', 'log']);
-    this._percentage = 1.55;
+    this._multiplier = 1.55;
     this._absolute = null;
     this._fallback = 4000000;
   }
@@ -23,16 +23,16 @@ export default class GasEstimatorService extends PublicService {
     const blockLimit = web3Data[0].gasLimit;
     const estimate = web3Data[1];
 
-    if (this._percentage === null && this._absolute !== null) {
+    if (!this.multiplier && !this.absolute) {
       options.gasLimit = Math.min(this._absolute, blockLimit);
-    } else if (this._absolute === null) {
+    } else if (!this._absolute) {
       options.gasLimit = Math.min(
-        parseInt(estimate * this._percentage),
+        parseInt(estimate * this._multiplier),
         blockLimit
       );
     } else {
       options.gasLimit = Math.min(
-        parseInt(estimate * this._percentage),
+        parseInt(estimate * this._multiplier),
         this._absolute,
         blockLimit
       );
@@ -41,14 +41,22 @@ export default class GasEstimatorService extends PublicService {
     return options;
   }
 
-  setPercentage(number) {
-    if (number <= 0) {
-      throw new Error('gas limit percentage must be greater than 0');
-    }
-    this._percentage = number;
+  get multiplier() {
+    return this._multiplier;
   }
 
-  setAbsolute(number) {
+  set multiplier(number) {
+    if (number <= 0) {
+      throw new Error('gas limit multiplier must be greater than 0');
+    }
+    this._multiplier = number;
+  }
+
+  get absolute() {
+    return this._absolute;
+  }
+
+  set absolute(number) {
     if (number <= 0) {
       throw new Error('gas limit must be greater than 0');
     }
@@ -56,7 +64,11 @@ export default class GasEstimatorService extends PublicService {
     this._absolute = number;
   }
 
-  setFallback(number) {
+  get fallback() {
+    return this._fallback;
+  }
+
+  set fallback(number) {
     if (number <= 0) {
       throw new Error('gas limit fallback must be greater than 0');
     }
@@ -64,8 +76,8 @@ export default class GasEstimatorService extends PublicService {
     this._fallback = number;
   }
 
-  removePercentage() {
-    this._percentage = null;
+  removeMultiplier() {
+    this._multiplier = null;
   }
 
   removeAbsolute() {
@@ -74,17 +86,5 @@ export default class GasEstimatorService extends PublicService {
 
   removeFallback() {
     this._fallback = null;
-  }
-
-  getPercentage() {
-    return this._percentage;
-  }
-
-  getAbsolute() {
-    return this._absolute;
-  }
-
-  getFallback() {
-    return this._fallback;
   }
 }
