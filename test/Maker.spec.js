@@ -7,7 +7,7 @@ async function createMaker(privateKey) {
 }
 
 test('create without any options', async () => {
-  await Maker.create('test', { log: false });
+  await Maker.create('test');
 });
 
 test('import vs require', () => {

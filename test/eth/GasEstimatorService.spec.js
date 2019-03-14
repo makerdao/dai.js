@@ -68,7 +68,7 @@ test('choose minimum when both policies set using multiplier', async () => {
 });
 
 test('throws on setting policy less than zero', () => {
-  expect(() => gasEstimator.multiplier = -1).toThrow();
-  expect(() => gasEstimator.absolute = -1).toThrow();
-  expect(() => gasEstimator.fallback = -1).toThrow();
+  expect(() => (gasEstimator.multiplier = -1)).toThrow();
+  expect(() => (gasEstimator.absolute = -1)).toThrow();
+  expect(() => (gasEstimator.fallback = -1)).toThrow();
 });
