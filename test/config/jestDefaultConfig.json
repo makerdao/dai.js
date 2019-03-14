@@ -15,6 +15,6 @@
     "src",
     "test"
   ],
-  "setupTestFrameworkScriptFile": "<rootDir>/test/setup-test.js",
+  "setupFilesAfterEnv": ["<rootDir>/test/setup-test.js"],
   "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/test/integration/"]
 }
