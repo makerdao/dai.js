@@ -3,9 +3,6 @@
     "provider": {
       "type": "INFURA",
       "network": "kovan"
-    },
-    "transactionSettings": {
-      "gasLimit": 4000000
     }
   },
   "exchange": "OasisExchangeService"

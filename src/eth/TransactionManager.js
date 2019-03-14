@@ -8,7 +8,7 @@ const log = debug('dai:TransactionManager');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log', 'nonce', 'proxy']);
+    super(name, ['web3', 'log', 'nonce', 'proxy', 'gasEstimator']);
     this._newTxListeners = [];
     this._tracker = new Tracker();
   }
@@ -57,7 +57,12 @@ export default class TransactionManager extends PublicService {
       (async () => {
         // so we do our async operations inside this immediately-executed
         // async function.
-        const txOptions = await this._buildTransactionOptions(options);
+        const txOptions = await this._buildTransactionOptions(
+          options,
+          contract,
+          method,
+          args
+        );
         return this._execute(contract, method, args, txOptions);
       })(),
       {
@@ -69,13 +74,13 @@ export default class TransactionManager extends PublicService {
   }
 
   // this method must not be async
-  sendTransaction(data, options) {
+  sendTransaction(options, metadata) {
     return this._createTransactionObject(
       (async () => {
-        const txOptions = await this._buildTransactionOptions(data);
+        const txOptions = await this._buildTransactionOptions(options);
         return this.get('web3').sendTransaction(txOptions);
       })(),
-      options
+      metadata
     );
   }
 
@@ -149,12 +154,46 @@ export default class TransactionManager extends PublicService {
     return minePromise;
   }
 
-  async _buildTransactionOptions(data) {
+  async _buildTransactionOptions(options, contract, method, args) {
+    if (contract && !options.gasLimit) {
+      options.gasLimit = await this._getGasLimit(
+        options,
+        contract,
+        method,
+        args
+      );
+    }
+
     return {
+      ...options,
       ...this.get('web3').transactionSettings(),
-      ...data,
       nonce: await this.get('nonce').getNonce()
     };
+  }
+
+  async _getGasLimit(options, contract, method, args) {
+    let transaction = {};
+    let data = contract.interface.functions[method](...args).data;
+    let proxyAddress;
+
+    if (options.dsProxy) {
+      proxyAddress = await this.get('proxy').currentProxy();
+      const proxy = this.get('proxy').getUnwrappedProxyContract(proxyAddress);
+      data = proxy.interface.functions['execute'](contract.address, data).data;
+    }
+
+    if (options.value) {
+      transaction.value = options.value;
+    }
+
+    transaction = {
+      from: this.get('web3').currentAddress(),
+      to: options.dsProxy ? proxyAddress : contract.address,
+      data,
+      ...transaction
+    };
+
+    return this.get('gasEstimator').estimateGasLimit(transaction);
   }
 }
 

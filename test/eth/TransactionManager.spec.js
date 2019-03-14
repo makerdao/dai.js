@@ -149,7 +149,6 @@ describe('lifecycle hooks', () => {
 
     const lock = cdp.lockEth(1);
     log('lock id:', uniqueId(lock));
-
     const lockHandlers = makeHandlers('lock');
     txMgr.listen(lock, lockHandlers);
     await lock;
@@ -158,14 +157,6 @@ describe('lifecycle hooks', () => {
     expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
-
-    log('\ndraw');
-    const draw = cdp.drawDai(1);
-    await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
-
-    log('\nwipe');
-    const wipe = cdp.wipeDai(1);
-    await Promise.all([txMgr.confirm(wipe), mineBlocks(service)]);
   });
 
   test('lifecycle hooks for give', async () => {

@@ -1,7 +1,12 @@
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 
-let getDummyTransaction;
+let getDummyTransaction, gasEstimator;
+
+beforeEach(async () => {
+  gasEstimator = buildTestGasEstimatorService();
+  await gasEstimator.manager().authenticate();
+});
 
 function buildTestGasEstimatorService() {
   const service = buildTestService('gasEstimator', { gasEstimator: true });
@@ -17,142 +22,66 @@ function buildTestGasEstimatorService() {
   return service;
 }
 
-test('policies initially null', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      expect(gasEstimator.getPercentage()).toBe(null);
-      expect(gasEstimator.getAbsolute()).toBe(null);
-      done();
-    });
+test('initial values', () => {
+  expect(gasEstimator.multiplier).toBe(1.55);
+  expect(gasEstimator.absolute).toBe(null);
+  expect(gasEstimator.fallback).toBe(4000000);
 });
 
-test('update policies', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      gasEstimator.setPercentage(1);
-      expect(gasEstimator.getPercentage()).toBe(1);
-      gasEstimator.setAbsolute(100000);
-      expect(gasEstimator.getAbsolute()).toBe(100000);
-      done();
-    });
+test('update policies', () => {
+  gasEstimator.multiplier = 1;
+  expect(gasEstimator.multiplier).toBe(1);
+  gasEstimator.absolute = 100000;
+  expect(gasEstimator.absolute).toBe(100000);
+  gasEstimator.fallback = 100000;
+  expect(gasEstimator.fallback).toBe(100000);
 });
 
-test('clear policies', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      gasEstimator.setPercentage(1);
-      gasEstimator.removePercentage();
-      expect(gasEstimator.getPercentage()).toBe(null);
-      gasEstimator.setAbsolute(100000);
-      gasEstimator.removeAbsolute();
-      expect(gasEstimator.getAbsolute()).toBe(null);
-      done();
-    });
+test('clear policies', () => {
+  gasEstimator.removeMultiplier();
+  expect(gasEstimator.multiplier).toBe(null);
+  gasEstimator.absolute = 100000;
+  gasEstimator.removeAbsolute();
+  expect(gasEstimator.absolute).toBe(null);
+  gasEstimator.removeFallback();
+  expect(gasEstimator.fallback).toBe(null);
 });
 
-test('use percentage when absolute null', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      gasEstimator.setPercentage(1.1);
-      return gasEstimator.estimateGasLimit(getDummyTransaction());
-    })
-    .then(estimate => {
-      expect(estimate).toBeCloseTo(21000 * 1.1, 12);
-      done();
-    });
+test('uses transactionSettings as fallback', async () => {
+  const service = buildTestService('gasEstimator', {
+    gasEstimator: true,
+    web3: {
+      transactionSettings: {
+        gasLimit: 10
+      }
+    }
+  });
+  await service.manager().authenticate();
+  expect(service.fallback).toBe(10);
 });
 
-test('use absolute when percentage null', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      gasEstimator.setAbsolute(20000);
-      return getDummyTransaction();
-    })
-    .then(transaction => gasEstimator.estimateGasLimit(transaction))
-    .then(estimate => {
-      expect(estimate).toBe(20000);
-      done();
-    });
+test('use multiplier when absolute null', async () => {
+  gasEstimator.multiplier = 1.1;
+  const estimate = await gasEstimator.estimateGasLimit(getDummyTransaction());
+  expect(estimate).toBeCloseTo(21000 * 1.1);
 });
 
-test('choose minimum when both policies set using percentage', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      gasEstimator.setPercentage(1.1);
-      gasEstimator.setAbsolute(1000000);
-      return gasEstimator.estimateGasLimit(getDummyTransaction());
-    })
-    .then(estimate => {
-      expect(estimate).toBeCloseTo(21000 * 1.1, 12);
-      done();
-    });
+test('use absolute when multiplier null', async () => {
+  gasEstimator.absolute = 20000;
+  const transaction = await getDummyTransaction();
+  const estimate = await gasEstimator.estimateGasLimit(transaction);
+  expect(estimate).toBe(20000);
 });
 
-//I'll implement this test once I create the SmartContractService.  Then I'll be able to deploy and call a contract that uses too much gas to test this
-/*
-test('does not set estimate greater than block gas limit', (done) => {
-  const gasEstimator = buildTestGasEstimatorService(),
-    web3 = gasEstimator.get('web3');
-
-  gasEstimator.manager().connect()
-    .then(()=>{
-      gasEstimator.setPercentage(1);
-      gasEstimator.setAbsolute(20000);
-      return getDummyTransaction();})
-    .then(transaction => gasEstimator.estimateGasLimit(transaction))
-    .then(estimate => {
-      expect(estimate).toBe(20000);
-      done();
-    });
-});*/
-
-test('throws when estimating without a policy', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      expect(() =>
-        gasEstimator.estimateGasLimit(getDummyTransaction())
-      ).toThrow();
-      done();
-    });
+test('choose minimum when both policies set using multiplier', async () => {
+  gasEstimator.multiplier = 1.1;
+  gasEstimator.absolute = 1000000;
+  const estimate = await gasEstimator.estimateGasLimit(getDummyTransaction());
+  expect(estimate).toBeCloseTo(21000 * 1.1);
 });
 
-test('throws on setting policy less than zero', done => {
-  const gasEstimator = buildTestGasEstimatorService();
-
-  gasEstimator
-    .manager()
-    .connect()
-    .then(() => {
-      expect(() => gasEstimator.setPercentage(-1)).toThrow();
-      expect(() => gasEstimator.setAbsolute(-1)).toThrow();
-      done();
-    });
+test('throws on setting policy less than zero', () => {
+  expect(() => (gasEstimator.multiplier = -1)).toThrow();
+  expect(() => (gasEstimator.absolute = -1)).toThrow();
+  expect(() => (gasEstimator.fallback = -1)).toThrow();
 });

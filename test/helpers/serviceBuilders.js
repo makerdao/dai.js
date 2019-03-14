@@ -18,9 +18,6 @@ export const websocketProviderConfig = {
       type: ProviderType.WEBSOCKET,
       url: 'ws://localhost:2000'
     },
-    transactionSettings: {
-      gasLimit: 4000000
-    },
     pollingInterval: 50
   },
   log: false
@@ -31,9 +28,6 @@ export const httpProviderConfig = {
     provider: {
       type: ProviderType.HTTP,
       url: 'http://localhost:2000'
-    },
-    transactionSettings: {
-      gasLimit: 4000000
     },
     pollingInterval: 50
   },

@@ -67,7 +67,7 @@ export default class DSProxyService extends PrivateService {
       throw new Error('No proxy found for current account');
     }
     const proxyAddress = address ? address : this._currentProxy;
-    const proxyContract = this._getUnwrappedProxyContract(proxyAddress);
+    const proxyContract = this.getUnwrappedProxyContract(proxyAddress);
     const data = contract.interface.functions[method](...args).data;
     return proxyContract.execute(contract.address, data, options);
   }
@@ -103,7 +103,7 @@ export default class DSProxyService extends PrivateService {
     );
   }
 
-  _getUnwrappedProxyContract(address) {
+  getUnwrappedProxyContract(address) {
     return new Contract(
       address,
       dappHub.dsProxy,

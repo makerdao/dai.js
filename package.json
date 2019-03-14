@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -75,7 +75,7 @@
     "eslint-loader": "^1.9.0",
     "html-webpack-plugin": "^2.30.1",
     "husky": "^0.14.3",
-    "jest": "^24.1.0",
+    "jest": "^24.5.0",
     "lint-staged": "^7.1.0",
     "prettier": "^1.12.1",
     "sane": "^4.0.3",

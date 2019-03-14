@@ -1,14 +1,7 @@
 // we just do some quick tests of the exports here, since the core functionality
 // is being tested in @makerdao/currency
 
-import {
-  getCurrency,
-  ETH,
-  PETH,
-  WETH,
-  DAI,
-  MKR
-} from '../../src/eth/Currency';
+import { getCurrency, ETH, PETH, WETH, DAI, MKR } from '../../src/eth/Currency';
 
 test('parses an amount and currency symbol', () => {
   expect(getCurrency(1, 'dai').toString()).toBe('1.00 DAI');

@@ -56,9 +56,6 @@ test('it handles url, privateKey, provider, and web3 options', () => {
           timeout: 1000,
           type: 'HTTP',
           url: 'http://foo.net'
-        },
-        transactionSettings: {
-          gasLimit: 4000000
         }
       }
     ],

@@ -1,44 +1,62 @@
-import { PublicService } from '@makerdao/services-core';
+import { PrivateService } from '@makerdao/services-core';
 
-export default class GasEstimatorService extends PublicService {
+export default class GasEstimatorService extends PrivateService {
   constructor(name = 'gasEstimator') {
     super(name, ['web3', 'log']);
-    this._percentage = null;
+    this._multiplier = 1.55;
     this._absolute = null;
   }
 
-  estimateGasLimit(transaction) {
-    if (this._percentage === null && this._absolute === null) {
-      throw new Error('no gas limit policy set');
-    }
-
-    return Promise.all([
-      this.get('web3').getBlock('latest'),
-      this.get('web3').estimateGas(transaction)
-    ]).then(web3Data => {
-      const blockLimit = web3Data[0].gasLimit,
-        estimate = web3Data[1];
-
-      if (this._percentage === null && this._absolute !== null) {
-        return Math.min(this._absolute, blockLimit);
-      }
-
-      if (this._absolute === null) {
-        return Math.min(estimate * this._percentage, blockLimit);
-      }
-
-      return Math.min(estimate * this._percentage, this._absolute, blockLimit);
-    });
+  authenticate() {
+    const settings = this.get('web3').transactionSettings();
+    this._fallback = settings && settings.gasLimit
+      ? settings.gasLimit
+      : 4000000;
   }
 
-  setPercentage(number) {
+  async estimateGasLimit(transaction) {
+    let web3Data = [];
+    try {
+      web3Data = await Promise.all([
+        this.get('web3').getBlock('latest'),
+        this.get('web3').estimateGas(transaction)
+      ]);
+    } catch (err) {
+      return this._fallback;
+    }
+
+    const blockLimit = web3Data[0].gasLimit;
+    const estimate = web3Data[1];
+
+    if (!this.multiplier && !this.absolute) {
+      return Math.min(this._absolute, blockLimit);
+    } else if (!this._absolute) {
+      return Math.min(parseInt(estimate * this._multiplier), blockLimit);
+    } else {
+      return Math.min(
+        parseInt(estimate * this._multiplier),
+        this._absolute,
+        blockLimit
+      );
+    }
+  }
+
+  get multiplier() {
+    return this._multiplier;
+  }
+
+  set multiplier(number) {
     if (number <= 0) {
-      throw new Error('gas limit percentage must be greater than 0');
+      throw new Error('gas limit multiplier must be greater than 0');
     }
-    this._percentage = number;
+    this._multiplier = number;
   }
 
-  setAbsolute(number) {
+  get absolute() {
+    return this._absolute;
+  }
+
+  set absolute(number) {
     if (number <= 0) {
       throw new Error('gas limit must be greater than 0');
     }
@@ -46,19 +64,27 @@ export default class GasEstimatorService extends PublicService {
     this._absolute = number;
   }
 
-  removePercentage() {
-    this._percentage = null;
+  get fallback() {
+    return this._fallback;
+  }
+
+  set fallback(number) {
+    if (number <= 0) {
+      throw new Error('gas limit fallback must be greater than 0');
+    }
+
+    this._fallback = number;
+  }
+
+  removeMultiplier() {
+    this._multiplier = null;
   }
 
   removeAbsolute() {
     this._absolute = null;
   }
 
-  getPercentage() {
-    return this._percentage;
-  }
-
-  getAbsolute() {
-    return this._absolute;
+  removeFallback() {
+    this._fallback = null;
   }
 }
