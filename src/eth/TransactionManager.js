@@ -155,26 +155,23 @@ export default class TransactionManager extends PublicService {
   }
 
   async _buildTransactionOptions(options, contract, method, args) {
-    const nonce = await this.get('nonce').getNonce();
-
     if (contract && !options.gasLimit) {
       options.gasLimit = await this._getGasLimit(
         options,
         contract,
         method,
-        args,
-        nonce
+        args
       );
     }
 
     return {
       ...options,
       ...this.get('web3').transactionSettings(),
-      nonce: nonce
+      nonce: await this.get('nonce').getNonce()
     };
   }
 
-  async _getGasLimit(options, contract, method, args, nonce) {
+  async _getGasLimit(options, contract, method, args) {
     let transaction = {};
     let data = contract.interface.functions[method](...args).data;
     let proxyAddress;
@@ -191,7 +188,6 @@ export default class TransactionManager extends PublicService {
 
     transaction = {
       from: this.get('web3').currentAddress(),
-      nonce,
       to: options.dsProxy ? proxyAddress : contract.address,
       data,
       ...transaction
