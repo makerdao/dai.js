@@ -38,3 +38,5 @@ the base rate in a variable called `repo` as a number in the form 0.X _ 10^27.
 In this plugin, the `getAnnualStabilityFee()` and get `getAnnualBaseRate`
 functions convert those values to return a decimal representation of the yearly
 rates (e.g. `0.015` and `0.01`).
+
+Run the tests from the top-level dai.js directory.
