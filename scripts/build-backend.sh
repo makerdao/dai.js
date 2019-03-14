@@ -8,9 +8,9 @@ else
   rm -rf dist
 fi
 
-babel -q contracts --out-dir ./dist/contracts
-babel -q contracts/addresses --out-dir ./dist/contracts/addresses
-babel -q src --out-dir ./dist/src
+babel contracts --out-dir ./dist/contracts
+babel contracts/addresses --out-dir ./dist/contracts/addresses
+babel src --out-dir ./dist/src
 
 copyfiles \
   README.md \
