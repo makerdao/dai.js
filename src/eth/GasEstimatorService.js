@@ -8,7 +8,7 @@ export default class GasEstimatorService extends PublicService {
     this._fallback = 4000000;
   }
 
-  async estimateGasLimit(transaction, options = {}) {
+  async estimateGasLimit(transaction) {
     let web3Data = [];
     try {
       web3Data = await Promise.all([
@@ -16,29 +16,23 @@ export default class GasEstimatorService extends PublicService {
         this.get('web3').estimateGas(transaction)
       ]);
     } catch (err) {
-      options.gasLimit = this._fallback;
-      return options;
+      return this._fallback;
     }
 
     const blockLimit = web3Data[0].gasLimit;
     const estimate = web3Data[1];
 
     if (!this.multiplier && !this.absolute) {
-      options.gasLimit = Math.min(this._absolute, blockLimit);
+      return Math.min(this._absolute, blockLimit);
     } else if (!this._absolute) {
-      options.gasLimit = Math.min(
-        parseInt(estimate * this._multiplier),
-        blockLimit
-      );
+      return Math.min(parseInt(estimate * this._multiplier), blockLimit);
     } else {
-      options.gasLimit = Math.min(
+      return Math.min(
         parseInt(estimate * this._multiplier),
         this._absolute,
         blockLimit
       );
     }
-
-    return options;
   }
 
   get multiplier() {

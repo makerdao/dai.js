@@ -50,21 +50,21 @@ test('clear policies', () => {
 test('use multiplier when absolute null', async () => {
   gasEstimator.multiplier = 1.1;
   const estimate = await gasEstimator.estimateGasLimit(getDummyTransaction());
-  expect(estimate.gasLimit).toBeCloseTo(21000 * 1.1);
+  expect(estimate).toBeCloseTo(21000 * 1.1);
 });
 
 test('use absolute when multiplier null', async () => {
   gasEstimator.absolute = 20000;
   const transaction = await getDummyTransaction();
   const estimate = await gasEstimator.estimateGasLimit(transaction);
-  expect(estimate.gasLimit).toBe(20000);
+  expect(estimate).toBe(20000);
 });
 
 test('choose minimum when both policies set using multiplier', async () => {
   gasEstimator.multiplier = 1.1;
   gasEstimator.absolute = 1000000;
   const estimate = await gasEstimator.estimateGasLimit(getDummyTransaction());
-  expect(estimate.gasLimit).toBeCloseTo(21000 * 1.1);
+  expect(estimate).toBeCloseTo(21000 * 1.1);
 });
 
 test('throws on setting policy less than zero', () => {
