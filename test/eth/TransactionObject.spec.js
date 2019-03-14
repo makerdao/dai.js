@@ -96,10 +96,7 @@ describe('normal web service behavior', () => {
 
     test(
       'generic error',
-      testErrorHandling(
-        () => mkr.transfer(testAddress, '2000000'),
-        /reverted/
-      )
+      testErrorHandling(() => mkr.transfer(testAddress, '2000000'), /reverted/)
     );
 
     test(

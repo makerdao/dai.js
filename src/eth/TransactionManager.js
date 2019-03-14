@@ -57,19 +57,11 @@ export default class TransactionManager extends PublicService {
       (async () => {
         // so we do our async operations inside this immediately-executed
         // async function.
-        let data = contract.interface.functions[method](...args).data;
-        if (options.dsProxy) {
-          const proxyAddress = await this.get('proxy').currentProxy();
-          const proxy = this.get('proxy').getUnwrappedProxyContract(
-            proxyAddress
-          );
-          data = proxy.interface.functions['execute'](contract.address, data)
-            .data;
-        }
         const txOptions = await this._buildTransactionOptions(
           options,
-          data,
-          contract.address
+          contract,
+          method,
+          args
         );
         return this._execute(contract, method, args, txOptions);
       })(),
@@ -162,25 +154,11 @@ export default class TransactionManager extends PublicService {
     return minePromise;
   }
 
-  async _buildTransactionOptions(options, data, address) {
-    let transaction = {};
+  async _buildTransactionOptions(options, contract, method, args) {
     const nonce = await this.get('nonce').getNonce();
-    const proxyAddress = await this.get('proxy').currentProxy();
-    const currentAddress = this.get('web3').currentAddress();
 
-    if (options.value) {
-      transaction.value = options.value;
-    }
-
-    if (data && !options.gasLimit) {
-      transaction = {
-        from: currentAddress,
-        nonce: nonce,
-        to: options.dsProxy ? proxyAddress : address,
-        data: data,
-        ...transaction
-      };
-      await this.get('gasEstimator').estimateGasLimit(transaction, options);
+    if (contract && !options.gasLimit) {
+      await this._getGasLimit(options, contract, method, args, nonce);
     }
 
     return {
@@ -188,6 +166,35 @@ export default class TransactionManager extends PublicService {
       ...this.get('web3').transactionSettings(),
       nonce: nonce
     };
+  }
+
+  async _getGasLimit(options, contract, method, args, nonce) {
+    let transaction = {};
+    let data = contract.interface.functions[method](...args).data;
+    let proxyAddress;
+
+    if (options.dsProxy) {
+      proxyAddress = await this.get('proxy').currentProxy();
+      const proxy = this.get('proxy').getUnwrappedProxyContract(
+        proxyAddress
+      );
+      data = proxy.interface.functions['execute'](contract.address, data)
+        .data;
+    }
+
+    if (options.value) {
+      transaction.value = options.value;
+    }
+
+    transaction = {
+      from: this.get('web3').currentAddress(),
+      nonce: nonce,
+      to: options.dsProxy ? proxyAddress : contract.address,
+      data: data,
+      ...transaction
+    };
+
+    return await this.get('gasEstimator').estimateGasLimit(transaction, options);
   }
 }
 
