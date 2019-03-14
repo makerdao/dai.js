@@ -1,11 +1,17 @@
-import { PublicService } from '@makerdao/services-core';
+import { PrivateService } from '@makerdao/services-core';
 
-export default class GasEstimatorService extends PublicService {
+export default class GasEstimatorService extends PrivateService {
   constructor(name = 'gasEstimator') {
     super(name, ['web3', 'log']);
     this._multiplier = 1.55;
     this._absolute = null;
-    this._fallback = 4000000;
+  }
+
+  authenticate() {
+    const settings = this.get('web3').transactionSettings();
+    this._fallback = settings && settings.gasLimit
+      ? settings.gasLimit
+      : 4000000;
   }
 
   async estimateGasLimit(transaction) {

@@ -5,7 +5,7 @@ let getDummyTransaction, gasEstimator;
 
 beforeEach(async () => {
   gasEstimator = buildTestGasEstimatorService();
-  await gasEstimator.manager().connect();
+  await gasEstimator.manager().authenticate();
 });
 
 function buildTestGasEstimatorService() {
@@ -45,6 +45,19 @@ test('clear policies', () => {
   expect(gasEstimator.absolute).toBe(null);
   gasEstimator.removeFallback();
   expect(gasEstimator.fallback).toBe(null);
+});
+
+test('uses transactionSettings as fallback', async () => {
+  const service = buildTestService('gasEstimator', {
+    gasEstimator: true,
+    web3: {
+      transactionSettings: {
+        gasLimit: 10
+      }
+    }
+  });
+  await service.manager().authenticate();
+  expect(service.fallback).toBe(10);
 });
 
 test('use multiplier when absolute null', async () => {
