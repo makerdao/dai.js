@@ -265,9 +265,8 @@ test('each plugin type can be created with an optional options object for additi
 
   const functionPlugin = jest.fn((maker, config, options) => {
     const gasEstimatorService = maker.service('gasEstimator', true);
-    gasEstimatorService.setPercentage(options.percentage);
-    const percentage = gasEstimatorService.getPercentage();
-    expect(percentage).toBe(options.percentage);
+    gasEstimatorService.percentage = options.percentage;
+    expect(gasEstimatorService.percentage).toBe(options.percentage);
   });
 
   await Maker.create('test', {

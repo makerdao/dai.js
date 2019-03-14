@@ -175,11 +175,8 @@ export default class TransactionManager extends PublicService {
 
     if (options.dsProxy) {
       proxyAddress = await this.get('proxy').currentProxy();
-      const proxy = this.get('proxy').getUnwrappedProxyContract(
-        proxyAddress
-      );
-      data = proxy.interface.functions['execute'](contract.address, data)
-        .data;
+      const proxy = this.get('proxy').getUnwrappedProxyContract(proxyAddress);
+      data = proxy.interface.functions['execute'](contract.address, data).data;
     }
 
     if (options.value) {
@@ -194,7 +191,10 @@ export default class TransactionManager extends PublicService {
       ...transaction
     };
 
-    return await this.get('gasEstimator').estimateGasLimit(transaction, options);
+    return await this.get('gasEstimator').estimateGasLimit(
+      transaction,
+      options
+    );
   }
 }
 
