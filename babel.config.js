@@ -12,7 +12,7 @@ module.exports = function (api) {
     "@babel/plugin-proposal-throw-expressions",
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-transform-runtime"
-  ];
+  ]
 
   const babelrcRoots = [
     ".",

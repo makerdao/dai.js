@@ -4,7 +4,7 @@
       "module-resolver",
       {
         "alias": {
-          "@makerdao/dai": "./src"
+          "@makerdao/dai": "./src/index.js"
         }
       }
     ]
