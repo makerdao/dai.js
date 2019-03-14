@@ -85,3 +85,7 @@ test('throws on setting policy less than zero', () => {
   expect(() => (gasEstimator.absolute = -1)).toThrow();
   expect(() => (gasEstimator.fallback = -1)).toThrow();
 });
+
+test.only('fetches gas price', async () => {
+  await gasEstimator.fetchGasPrice();
+});

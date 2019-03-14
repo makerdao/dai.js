@@ -1,4 +1,5 @@
 import { PrivateService } from '@makerdao/services-core';
+import fetch from 'isomorphic-fetch';
 
 export default class GasEstimatorService extends PrivateService {
   constructor(name = 'gasEstimator') {
@@ -7,11 +8,26 @@ export default class GasEstimatorService extends PrivateService {
     this._absolute = null;
   }
 
+  // get gas values from gas station in authenticate
+  // add that value from buildTransactionOptions in txManager
+  // use wait times returned from gas station to resend tx after some amount of time
+  // with higher gas price
+  // use the same nonce from initial tx (cache somewhere)
+
   authenticate() {
     const settings = this.get('web3').transactionSettings();
-    this._fallback = settings && settings.gasLimit
-      ? settings.gasLimit
-      : 4000000;
+    this._fallback =
+      settings && settings.gasLimit ? settings.gasLimit : 4000000;
+  }
+
+  async fetchGasPrice() {
+    try {
+      const res = await fetch('https://ethgasstation.info/json/ethgasAPI.json');
+      const gasData = await res.json();
+      console.log(gasData);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async estimateGasLimit(transaction) {
