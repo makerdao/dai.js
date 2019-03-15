@@ -18,16 +18,38 @@ export default class GasEstimatorService extends PrivateService {
     const settings = this.get('web3').transactionSettings();
     this._fallback =
       settings && settings.gasLimit ? settings.gasLimit : 4000000;
+    this._gasStationData = this.fetchGasStationData();
   }
 
-  async fetchGasPrice() {
-    try {
-      const res = await fetch('https://ethgasstation.info/json/ethgasAPI.json');
-      const gasData = await res.json();
-      console.log(gasData);
-    } catch (err) {
-      console.error(err);
+  async fetchGasStationData() {
+    const response = await fetch('https://ethgasstation.info/json/ethgasAPI.json');
+    return response.json();
+  }
+
+  getSpeedSetting(txSpeed) {
+    const settings = this.get('web3').transactionSettings();
+
+    if (txSpeed) {
+      return txSpeed;
+    } else if (settings && settings.transactionSpeed) {
+      return settings.transactionSpeed;
+    } else {
+      return 'fast';
     }
+  }
+
+  async getGasPrice(txSpeed) {
+    const speedSetting = this.getSpeedSetting(txSpeed);
+    const gasStationData = await this._gasStationData;
+
+    return gasStationData[speedSetting];
+  }
+
+  async getWaitTime(txSpeed) {
+    const speedSetting = this.getSpeedSetting(txSpeed);
+    const gasStationData = await this._gasStationData;
+
+    return gasStationData[`${speedSetting}Wait`];
   }
 
   async estimateGasLimit(transaction) {
@@ -55,6 +77,10 @@ export default class GasEstimatorService extends PrivateService {
         blockLimit
       );
     }
+  }
+
+  get gasStationData() {
+    return this._gasStationData;
   }
 
   get multiplier() {

@@ -87,5 +87,6 @@ test('throws on setting policy less than zero', () => {
 });
 
 test.only('fetches gas price', async () => {
-  await gasEstimator.fetchGasPrice();
+  console.log(await gasEstimator._gasStationData);
+  console.log(await gasEstimator.getWaitTime('safeLow'));
 });
