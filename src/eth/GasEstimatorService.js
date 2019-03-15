@@ -22,7 +22,9 @@ export default class GasEstimatorService extends PrivateService {
   }
 
   async fetchGasStationData() {
-    const response = await fetch('https://ethgasstation.info/json/ethgasAPI.json');
+    const response = await fetch(
+      'https://ethgasstation.info/json/ethgasAPI.json'
+    );
     return response.json();
   }
 

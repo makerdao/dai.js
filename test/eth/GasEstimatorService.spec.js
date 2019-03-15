@@ -86,7 +86,43 @@ test('throws on setting policy less than zero', () => {
   expect(() => (gasEstimator.fallback = -1)).toThrow();
 });
 
-test.only('fetches gas price', async () => {
-  console.log(await gasEstimator._gasStationData);
-  console.log(await gasEstimator.getWaitTime('safeLow'));
+test('fetches gas station data on authentication', async () => {
+  const keys = [
+    'fast',
+    'fastest',
+    'safeLow',
+    'average',
+    'block_time',
+    'blockNum',
+    'speed',
+    'safeLowWait',
+    'avgWait',
+    'fastWait',
+    'fastestWait'
+  ];
+
+  expect(Object.keys(await gasEstimator.gasStationData)).toEqual(keys);
+});
+
+// FIXME: change the transaction settings to an actual config setting
+// when it's added to ConfigFactory
+test('returns the correct speed setting', () => {
+  expect(gasEstimator.getSpeedSetting()).toBe('fast');
+  expect(gasEstimator.getSpeedSetting('safeLow')).toBe('safeLow');
+  gasEstimator.get('web3')._transactionSettings = { transactionSpeed: 'fastest' };
+  expect(gasEstimator.getSpeedSetting()).toBe('fastest');
+});
+
+test('returns a valid gas price', async () => {
+  const gasStationData = await gasEstimator.gasStationData;
+  const gasPrice = await gasEstimator.getGasPrice();
+  expect(typeof gasPrice).toBe('number');
+  expect(gasPrice).toBe(gasStationData['fast']);
+});
+
+test('returns a valid wait time', async () => {
+  const gasStationData = await gasEstimator.gasStationData;
+  const waitTime = await gasEstimator.getWaitTime();
+  expect(typeof waitTime).toBe('number');
+  expect(waitTime).toBe(gasStationData['fastWait']);
 });
