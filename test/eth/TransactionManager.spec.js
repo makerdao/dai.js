@@ -83,7 +83,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
     dai.wrappedContract,
     'approve',
     [currentAddress, 20000],
-    { gasLimit: 1234567, nonce: expect.any(Number) }
+    { gasLimit: 1234567, nonce: expect.any(Number), gasPrice: expect.any(Number) }
   );
 });
 

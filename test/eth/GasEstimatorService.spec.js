@@ -109,7 +109,9 @@ test('fetches gas station data on authentication', async () => {
 test('returns the correct speed setting', () => {
   expect(gasEstimator.getSpeedSetting()).toBe('fast');
   expect(gasEstimator.getSpeedSetting('safeLow')).toBe('safeLow');
-  gasEstimator.get('web3')._transactionSettings = { transactionSpeed: 'fastest' };
+  gasEstimator.get('web3')._transactionSettings = {
+    transactionSpeed: 'fastest'
+  };
   expect(gasEstimator.getSpeedSetting()).toBe('fastest');
 });
 

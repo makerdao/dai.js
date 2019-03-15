@@ -167,7 +167,8 @@ export default class TransactionManager extends PublicService {
     return {
       ...options,
       ...this.get('web3').transactionSettings(),
-      nonce: await this.get('nonce').getNonce()
+      nonce: await this.get('nonce').getNonce(),
+      gasPrice: await this.get('gasEstimator').getGasPrice()
     };
   }
 
