@@ -9,17 +9,32 @@ export default class GasEstimatorService extends PrivateService {
   }
 
   // account for network in gas station call
-  // set speed preset to state here and delete from transactionSettings
-  // disableGasStation: true
-  // get the price in buildTransactionOptions in txManager
+  // rework config api for top level gasPrice and gasLimit options
+  // override options
   // use wait times returned from gas station to resend tx after some amount of time with higher gas price
-  // use the same nonce from initial tx (cache somewhere)
+  // use the same nonce from initial tx (cache somewhere) in resent tx
 
   authenticate() {
     const settings = this.get('web3').transactionSettings();
-    this._fallback =
-      settings && settings.gasLimit ? settings.gasLimit : 4000000;
     this._gasStationData = this.fetchGasStationData();
+    this.transactionSpeed = this._setProperty('transactionSpeed', 'fast');
+    this.fallback =
+      settings && settings.gasLimit ? settings.gasLimit : this._setProperty('fallback', 4000000);
+    this.multiplier = this._setProperty('multiplier', 1.55);
+    this.absolute = this._setProperty('absolute', null);
+  }
+
+  _setProperty(prop, fallback) {
+    const settings = this.get('web3').transactionSettings();
+    let value = fallback;
+
+    if (settings && settings[prop]) {
+      value = settings[prop];
+      // this won't be necessary when options are moved to top level (out of txSettings)
+      delete settings[prop];
+    }
+
+    return value;
   }
 
   async fetchGasStationData() {
@@ -29,28 +44,16 @@ export default class GasEstimatorService extends PrivateService {
     return response.json();
   }
 
-  getSpeedSetting(txSpeed) {
-    const settings = this.get('web3').transactionSettings();
-
-    if (txSpeed) {
-      return txSpeed;
-    } else if (settings && settings.transactionSpeed) {
-      return settings.transactionSpeed;
-    } else {
-      return 'fast';
-    }
-  }
-
   async getGasPrice(txSpeed) {
-    const speedSetting = this.getSpeedSetting(txSpeed);
-    const gasStationData = await this._gasStationData;
+    const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
+    const gasStationData = await this.gasStationData;
 
     return gasStationData[speedSetting];
   }
 
   async getWaitTime(txSpeed) {
-    const speedSetting = this.getSpeedSetting(txSpeed);
-    const gasStationData = await this._gasStationData;
+    const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
+    const gasStationData = await this.gasStationData;
 
     return gasStationData[`${speedSetting}Wait`];
   }
@@ -63,20 +66,20 @@ export default class GasEstimatorService extends PrivateService {
         this.get('web3').estimateGas(transaction)
       ]);
     } catch (err) {
-      return this._fallback;
+      return this.fallback;
     }
 
     const blockLimit = web3Data[0].gasLimit;
     const estimate = web3Data[1];
 
     if (!this.multiplier && !this.absolute) {
-      return Math.min(this._absolute, blockLimit);
-    } else if (!this._absolute) {
-      return Math.min(parseInt(estimate * this._multiplier), blockLimit);
+      return Math.min(this.absolute, blockLimit);
+    } else if (!this.absolute) {
+      return Math.min(parseInt(estimate * this.multiplier), blockLimit);
     } else {
       return Math.min(
-        parseInt(estimate * this._multiplier),
-        this._absolute,
+        parseInt(estimate * this.multiplier),
+        this.absolute,
         blockLimit
       );
     }
@@ -92,7 +95,7 @@ export default class GasEstimatorService extends PrivateService {
 
   set multiplier(number) {
     if (number <= 0) {
-      throw new Error('gas limit multiplier must be greater than 0');
+      throw new Error('Gas limit multiplier must be greater than 0');
     }
     this._multiplier = number;
   }
@@ -103,7 +106,7 @@ export default class GasEstimatorService extends PrivateService {
 
   set absolute(number) {
     if (number <= 0) {
-      throw new Error('gas limit must be greater than 0');
+      throw new Error('Absolute gas limit must be greater than 0');
     }
 
     this._absolute = number;
@@ -115,10 +118,23 @@ export default class GasEstimatorService extends PrivateService {
 
   set fallback(number) {
     if (number <= 0) {
-      throw new Error('gas limit fallback must be greater than 0');
+      throw new Error('Fallback gas limit must be greater than 0');
     }
 
     this._fallback = number;
+  }
+
+  get transactionSpeed() {
+    return this._transactionSpeed;
+  }
+
+  set transactionSpeed(speed) {
+    const validKeys = ['average', 'fast', 'fastest', 'safeLow'];
+    if (!validKeys.includes(speed)) {
+      throw new Error(`Invalid transaction speed -- options are ${validKeys}`);
+    }
+
+    this._transactionSpeed = speed;
   }
 
   removeMultiplier() {

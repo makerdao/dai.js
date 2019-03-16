@@ -22,10 +22,29 @@ function buildTestGasEstimatorService() {
   return service;
 }
 
-test('initial values', () => {
+test('initial values', async () => {
+  const secondService = buildTestService('gasEstimator', {
+    gasEstimator: true,
+    web3: {
+      transactionSettings: {
+        multiplier: 2,
+        fallback: 2,
+        absolute: 2,
+        transactionSpeed: 'fastest',
+      }
+    }
+  });
+  await secondService.manager().authenticate();
+
   expect(gasEstimator.multiplier).toBe(1.55);
   expect(gasEstimator.absolute).toBe(null);
   expect(gasEstimator.fallback).toBe(4000000);
+  expect(gasEstimator.transactionSpeed).toBe('fast');
+
+  expect(secondService.multiplier).toBe(2);
+  expect(secondService.absolute).toBe(2);
+  expect(secondService.fallback).toBe(2);
+  expect(secondService.transactionSpeed).toBe('fastest');
 });
 
 test('update policies', () => {
@@ -86,6 +105,10 @@ test('throws on setting policy less than zero', () => {
   expect(() => (gasEstimator.fallback = -1)).toThrow();
 });
 
+test('throws on invalid transaction speed', () => {
+  expect(() => (gasEstimator.transactionSpeed = 'sluggish')).toThrow();
+});
+
 test('fetches gas station data on authentication', async () => {
   const keys = [
     'fast',
@@ -102,17 +125,6 @@ test('fetches gas station data on authentication', async () => {
   ];
 
   expect(Object.keys(await gasEstimator.gasStationData)).toEqual(keys);
-});
-
-// FIXME: change the transaction settings to an actual config setting
-// when it's added to ConfigFactory
-test('returns the correct speed setting', () => {
-  expect(gasEstimator.getSpeedSetting()).toBe('fast');
-  expect(gasEstimator.getSpeedSetting('safeLow')).toBe('safeLow');
-  gasEstimator.get('web3')._transactionSettings = {
-    transactionSpeed: 'fastest'
-  };
-  expect(gasEstimator.getSpeedSetting()).toBe('fastest');
 });
 
 test('returns a valid gas price', async () => {
