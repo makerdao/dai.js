@@ -1,12 +1,12 @@
-import { PrivateService } from '@makerdao/services-core';
+import { PublicService } from '@makerdao/services-core';
 import fetch from 'isomorphic-fetch';
 
-export default class GasEstimatorService extends PrivateService {
+export default class GasEstimatorService extends PublicService {
   constructor(name = 'gasEstimator') {
     super(name, ['web3', 'log']);
-    (this._fallback = 4000000),
-      (this._multiplier = 1.55),
-      (this._transactionSpeed = 'fast');
+    this._fallback = 4000000;
+    this._multiplier = 1.55;
+    this._transactionSpeed = 'fast';
   }
 
   initialize(settings) {
@@ -38,12 +38,6 @@ export default class GasEstimatorService extends PrivateService {
       }
     });
   }
-
-  // account for network in gas station call
-  // rework config api for top level gasPrice and gasLimit options
-  // override options
-  // use wait times returned from gas station to resend tx after some amount of time with higher gas price
-  // use the same nonce from initial tx (cache somewhere) in resent tx
 
   async fetchGasStationData() {
     const response = await fetch(

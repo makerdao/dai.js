@@ -164,11 +164,16 @@ export default class TransactionManager extends PublicService {
       );
     }
 
+    // TODO: test this
+    if (!this.get('gasEstimator').disableGasPrice) {
+      let txSpeed = options.transactionSpeed;
+      options.gasPrice = await this.get('gasEstimator').getGasPrice(txSpeed);
+    }
+
     return {
       ...options,
       ...this.get('web3').transactionSettings(),
-      nonce: await this.get('nonce').getNonce(),
-      gasPrice: await this.get('gasEstimator').getGasPrice()
+      nonce: await this.get('nonce').getNonce()
     };
   }
 

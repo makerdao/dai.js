@@ -100,7 +100,7 @@ test('throws on invalid transaction speed', () => {
   expect(() => (gasEstimator.transactionSpeed = 'sluggish')).toThrow();
 });
 
-test('fetches gas station data on authentication', async () => {
+test('fetches gas station data', async () => {
   const keys = [
     'fast',
     'fastest',
@@ -139,7 +139,6 @@ test('setting an explicit gasLimit bypasses estimation', async () => {
     }
   });
   await secondService.manager().authenticate();
-  console.log(secondService);
   expect(await secondService.estimateGasLimit()).toBe(2);
 });
 
