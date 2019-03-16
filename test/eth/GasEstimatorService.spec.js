@@ -30,7 +30,7 @@ test('initial values', async () => {
         multiplier: 2,
         fallback: 2,
         absolute: 2,
-        transactionSpeed: 'fastest',
+        transactionSpeed: 'fastest'
       }
     }
   });
@@ -64,19 +64,6 @@ test('clear policies', () => {
   expect(gasEstimator.absolute).toBe(null);
   gasEstimator.removeFallback();
   expect(gasEstimator.fallback).toBe(null);
-});
-
-test('uses transactionSettings as fallback', async () => {
-  const service = buildTestService('gasEstimator', {
-    gasEstimator: true,
-    web3: {
-      transactionSettings: {
-        gasLimit: 10
-      }
-    }
-  });
-  await service.manager().authenticate();
-  expect(service.fallback).toBe(10);
 });
 
 test('use multiplier when absolute null', async () => {

@@ -15,11 +15,9 @@ export default class GasEstimatorService extends PrivateService {
   // use the same nonce from initial tx (cache somewhere) in resent tx
 
   authenticate() {
-    const settings = this.get('web3').transactionSettings();
     this._gasStationData = this.fetchGasStationData();
     this.transactionSpeed = this._setProperty('transactionSpeed', 'fast');
-    this.fallback =
-      settings && settings.gasLimit ? settings.gasLimit : this._setProperty('fallback', 4000000);
+    this.fallback = this._setProperty('fallback', 4000000);
     this.multiplier = this._setProperty('multiplier', 1.55);
     this.absolute = this._setProperty('absolute', null);
   }
