@@ -4,8 +4,39 @@ import fetch from 'isomorphic-fetch';
 export default class GasEstimatorService extends PrivateService {
   constructor(name = 'gasEstimator') {
     super(name, ['web3', 'log']);
-    this._multiplier = 1.55;
-    this._absolute = null;
+    (this._fallback = 4000000),
+      (this._multiplier = 1.55),
+      (this._transactionSpeed = 'fast');
+  }
+
+  initialize(settings) {
+    this._gasStationData = this.fetchGasStationData();
+
+    if (settings) {
+      this._parseConfig(settings.gasLimit, 'gasLimit');
+      this._parseConfig(settings.gasPrice, 'gasPrice');
+    }
+  }
+
+  _parseConfig(settings = 'default', label) {
+    return settings === 'default' || typeof settings === 'object'
+      ? this._setProperties(settings, label)
+      : (this[label] = settings);
+  }
+
+  _setProperties(settings, label) {
+    if (settings === 'default') return;
+
+    return Object.keys(settings).map(key => {
+      const value = settings[key];
+      if (key === 'disable') {
+        this[
+          'disable' + label.charAt(0).toUpperCase() + label.slice(1)
+        ] = value;
+      } else {
+        this[key] = value;
+      }
+    });
   }
 
   // account for network in gas station call
@@ -13,27 +44,6 @@ export default class GasEstimatorService extends PrivateService {
   // override options
   // use wait times returned from gas station to resend tx after some amount of time with higher gas price
   // use the same nonce from initial tx (cache somewhere) in resent tx
-
-  authenticate() {
-    this._gasStationData = this.fetchGasStationData();
-    this.transactionSpeed = this._setProperty('transactionSpeed', 'fast');
-    this.fallback = this._setProperty('fallback', 4000000);
-    this.multiplier = this._setProperty('multiplier', 1.55);
-    this.absolute = this._setProperty('absolute', null);
-  }
-
-  _setProperty(prop, fallback) {
-    const settings = this.get('web3').transactionSettings();
-    let value = fallback;
-
-    if (settings && settings[prop]) {
-      value = settings[prop];
-      // this won't be necessary when options are moved to top level (out of txSettings)
-      delete settings[prop];
-    }
-
-    return value;
-  }
 
   async fetchGasStationData() {
     const response = await fetch(
@@ -43,6 +53,7 @@ export default class GasEstimatorService extends PrivateService {
   }
 
   async getGasPrice(txSpeed) {
+    if (this.gasPrice) return this.gasPrice;
     const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
     const gasStationData = await this.gasStationData;
 
@@ -57,6 +68,9 @@ export default class GasEstimatorService extends PrivateService {
   }
 
   async estimateGasLimit(transaction) {
+    if (this.gasLimit) return this.gasLimit;
+    if (this.disableGasLimit) return this.fallback;
+
     let web3Data = [];
     try {
       web3Data = await Promise.all([
@@ -95,6 +109,7 @@ export default class GasEstimatorService extends PrivateService {
     if (number <= 0) {
       throw new Error('Gas limit multiplier must be greater than 0');
     }
+
     this._multiplier = number;
   }
 
