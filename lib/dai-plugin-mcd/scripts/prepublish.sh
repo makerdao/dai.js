@@ -5,5 +5,7 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
   exit
 fi
 CWD=`dirname $0`
-rm -r dist/*
-$CWD/../../../node_modules/.bin/babel -d dist src
+rm -rf dist/*
+cd ../..
+./node_modules/.bin/babel -d lib/dai-plugin-mcd/dist lib/dai-plugin-mcd/src
+cd - >/dev/null
