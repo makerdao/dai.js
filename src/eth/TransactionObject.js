@@ -172,6 +172,6 @@ export default class TransactionObject extends TransactionLifeCycle {
       this._nonceService._counts[this._web3Service.currentAddress()] - 1;
 
     this._transaction = newContract[method](...args, options);
-    return this._waitForTransaction();
+    return this._getTransactionData();
   }
 }
