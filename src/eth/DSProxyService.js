@@ -1,3 +1,4 @@
+import tracksTransactions from '../utils/tracksTransactions';
 import { PrivateService } from '@makerdao/services-core';
 import { dappHub } from '../../contracts/abis';
 import { Contract } from 'ethers';
@@ -34,7 +35,8 @@ export default class DSProxyService extends PrivateService {
       : this.getProxyAddress();
   }
 
-  async ensureProxy() {
+  @tracksTransactions
+  async ensureProxy({ promise }) {
     let proxy = await this.currentProxy();
     if (!proxy) {
       this.get('web3')
@@ -42,17 +44,18 @@ export default class DSProxyService extends PrivateService {
         .on('dsproxy/BUILD', obj => {
           proxy = obj.payload.address;
         });
-      await this.build();
+      await this.build({ promise });
     }
     return proxy;
   }
 
-  async build() {
+  @tracksTransactions
+  async build({ promise }) {
     const proxy = await this.currentProxy();
     if (proxy) {
       throw new Error('This account already has a proxy deployed at ' + proxy);
     }
-    const txo = await this._proxyRegistry().build();
+    const txo = await this._proxyRegistry().build({ promise });
     this._currentProxy = await this.getProxyAddress();
     this.get('web3')
       .get('event')
