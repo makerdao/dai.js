@@ -156,7 +156,9 @@ export default class TransactionObject extends TransactionLifeCycle {
 
   async _resendTx() {
     const { contract, method, args } = this.metadata;
-    const contractInfo = this._proxyService._smartContractService._getContractInfo(contract);
+    const contractInfo = this._proxyService._smartContractService._getContractInfo(
+      contract
+    );
     const newContract = new Contract(
       contractInfo.address,
       contractInfo.abi,
@@ -166,7 +168,8 @@ export default class TransactionObject extends TransactionLifeCycle {
     let options = args[args.length - 1];
 
     options.gasPrice = gasStationData.fastest;
-    options.nonce = this._nonceService._counts[this._web3Service.currentAddress()] - 1;
+    options.nonce =
+      this._nonceService._counts[this._web3Service.currentAddress()] - 1;
 
     this._transaction = newContract[method](...args, options);
     return this._waitForTransaction();
