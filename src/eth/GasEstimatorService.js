@@ -40,10 +40,15 @@ export default class GasEstimatorService extends PublicService {
   }
 
   async fetchGasStationData() {
-    const response = await fetch(
-      'https://ethgasstation.info/json/ethgasAPI.json'
-    );
-    return response.json();
+    try {
+      const response = await fetch(
+        'https://ethgasstation.info/json/ethgasAPI.json'
+      );
+      return response.json();
+    } catch (err) {
+      console.error('Error fetching gas data; disabling preset gas price');
+      this.disableGasPrice = true;
+    }
   }
 
   async getGasPrice(txSpeed) {

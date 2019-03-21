@@ -130,14 +130,10 @@ export default class TransactionManager extends PublicService {
   }
 
   _createTransactionObject(tx, { businessObject, metadata, promise } = {}) {
-    const txo = new TransactionObject(
-      tx,
-      this,
-      {
-        businessObject,
-        metadata
-      }
-    );
+    const txo = new TransactionObject(tx, this, {
+      businessObject,
+      metadata
+    });
 
     this._newTxListeners.forEach(cb => cb(txo));
 
