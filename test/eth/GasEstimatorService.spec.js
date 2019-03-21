@@ -152,3 +152,16 @@ test('setting an explicit gasPrice bypasses gasStation data', async () => {
 
   expect(await secondService.getGasPrice()).toBe(2);
 });
+
+test('disabling gasLimit returns fallback', async () => {
+  const secondService = buildTestService('gasEstimator', {
+    gasEstimator: {
+      gasLimit: {
+        disable: true
+      }
+    }
+  });
+  await secondService.manager().authenticate();
+
+  expect(await secondService.estimateGasLimit()).toBe(4000000);
+});
