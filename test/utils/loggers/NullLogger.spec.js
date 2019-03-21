@@ -33,7 +33,4 @@ test('serviceLogger() should throw when given an invalid service object', () => 
   expect(() => new NullLogger().serviceLogger({ manager: null })).toThrow(
     'Invalid service object'
   );
-  expect(() => new NullLogger().serviceLogger({ manager: () => ({}) })).toThrow(
-    'Invalid service object'
-  );
 });
