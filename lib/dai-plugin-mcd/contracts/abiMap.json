@@ -6,6 +6,7 @@
   "COL5": "Token5",
   "CDP_MANAGER": "DssCdpManager",
   "ETH": "WETH9_",
+  "GET_CDPS": "GetCdps",
   "MCD_ADM": "DSRoles",
   "MCD_CAT": "Cat",
   "MCD_DAI": "DSToken",
