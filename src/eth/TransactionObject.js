@@ -2,25 +2,20 @@ import { promiseWait } from '../utils';
 import TransactionLifeCycle from '../eth/TransactionLifeCycle';
 import debug from 'debug';
 import { ETH } from './Currency';
-import { Contract } from 'ethers';
 
 const log = debug('dai:TransactionObject');
 
 export default class TransactionObject extends TransactionLifeCycle {
   constructor(
     transaction,
-    web3Service,
-    nonceService,
-    gasEstimator,
-    proxyService,
+    transactionManager,
     { businessObject, metadata } = {}
   ) {
     super(businessObject);
     this._transaction = transaction;
-    this._web3Service = web3Service;
-    this._nonceService = nonceService;
-    this._gasEstimator = gasEstimator;
-    this._proxyService = proxyService;
+    this._web3Service = transactionManager.get('web3');
+    this._nonceService = transactionManager.get('nonce');
+    this._gasEstimator = transactionManager.get('gasEstimator');
     this._timeStampSubmitted = new Date();
     this.metadata = metadata || {};
     this._confirmedBlockCount = this._web3Service.confirmedBlockCount();
@@ -136,42 +131,24 @@ export default class TransactionObject extends TransactionLifeCycle {
     let tx;
     const startTime = new Date();
     log(`waiting for transaction ${this.hash.substring(8)}... to mine`);
-    for (let i = 0; i < 240; i++) {
-      // 20 minutes max
+    for (let i = 0; i < 24; i++) {
+      // 2 minutes max
       tx = await this._web3Service.getTransaction(this.hash);
       if ((tx || {}).blockHash) break;
       log('not mined yet');
       await promiseWait(5000);
     }
 
-    // reset wait time to estimate from eth gas station
     if (tx && !tx.blockHash) {
-      return this._resendTx();
+      this._gasEstimator.transactionSpeed = 'fastest';
+      throw new Error(
+        'This transaction is taking longer than it should. Check its status on etherscan or try again. Tx hash:',
+        this.hash
+      );
     }
 
     const elapsed = (new Date() - startTime) / 1000;
     log(`mined ${this.hash.substring(8)}... done in ${elapsed}s`);
     return tx;
-  }
-
-  async _resendTx() {
-    const { contract, method, args } = this.metadata;
-    const contractInfo = this._proxyService._smartContractService._getContractInfo(
-      contract
-    );
-    const newContract = new Contract(
-      contractInfo.address,
-      contractInfo.abi,
-      this._web3Service.getEthersSigner()
-    );
-    const gasStationData = await this._gasEstimator.gasStationData;
-    let options = args[args.length - 1];
-
-    options.gasPrice = gasStationData.fastest;
-    options.nonce =
-      this._nonceService._counts[this._web3Service.currentAddress()] - 1;
-
-    this._transaction = newContract[method](...args, options);
-    return this._getTransactionData();
   }
 }

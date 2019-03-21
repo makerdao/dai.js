@@ -132,10 +132,7 @@ export default class TransactionManager extends PublicService {
   _createTransactionObject(tx, { businessObject, metadata, promise } = {}) {
     const txo = new TransactionObject(
       tx,
-      this.get('web3'),
-      this.get('nonce'),
-      this.get('gasEstimator'),
-      this.get('proxy'),
+      this,
       {
         businessObject,
         metadata
