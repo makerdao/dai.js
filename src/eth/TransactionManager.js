@@ -164,7 +164,6 @@ export default class TransactionManager extends PublicService {
       );
     }
 
-    // TODO: test this
     if (!this.get('gasEstimator').disableGasPrice) {
       let txSpeed = options.transactionSpeed;
       options.gasPrice = await this.get('gasEstimator').getGasPrice(txSpeed);

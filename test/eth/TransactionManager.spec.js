@@ -1,6 +1,7 @@
 import {
   buildTestContainer,
-  buildTestEthereumCdpService
+  buildTestEthereumCdpService,
+  buildTestSmartContractService
 } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 import { uniqueId } from '../../src/utils';
@@ -291,5 +292,53 @@ describe('lifecycle hooks', () => {
       expect(drawTx.isError()).toBe(true);
       expect(drawHandlers.error).toHaveBeenCalledWith(drawTx, err);
     }
+  });
+});
+
+describe('transaction options', () => {
+  let txManager, service, contract;
+
+  beforeEach(async () => {
+    service = buildTestSmartContractService();
+    await service.manager().authenticate();
+    txManager = service.get('transactionManager');
+    contract = service.getContractByName('SAI_TUB');
+  });
+
+  test('sets necessary values', async () => {
+    let options;
+    expect.assertions(2);
+
+    options = await txManager._buildTransactionOptions(
+      {},
+      contract,
+      'open',
+      []
+    );
+    expect(Object.keys(options)).toEqual(['gasLimit', 'gasPrice', 'nonce']);
+
+    txManager.get('gasEstimator').disableGasPrice = true;
+    options = await txManager._buildTransactionOptions(
+      {},
+      contract,
+      'open',
+      []
+    );
+    expect(Object.keys(options)).toEqual(['gasLimit', 'nonce']);
+  });
+
+  test('passes through explicit options', async () => {
+    const options = await txManager._buildTransactionOptions(
+      { value: 2 },
+      contract,
+      'open',
+      []
+    );
+    expect(Object.keys(options)).toEqual([
+      'value',
+      'gasLimit',
+      'gasPrice',
+      'nonce'
+    ]);
   });
 });
