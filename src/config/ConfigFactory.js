@@ -21,7 +21,7 @@ const serviceRoles = [
   'cdp',
   'conversion',
   'exchange',
-  'gasEstimator',
+  'gas',
   'log',
   'price',
   'proxy',

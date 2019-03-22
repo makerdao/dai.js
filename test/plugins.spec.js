@@ -264,9 +264,9 @@ test('each plugin type can be created with an optional options object for additi
   };
 
   const functionPlugin = jest.fn((maker, config, options) => {
-    const gasEstimatorService = maker.service('gasEstimator', true);
-    gasEstimatorService.multiplier = options.multiplier;
-    expect(gasEstimatorService.multiplier).toBe(options.multiplier);
+    const gasService = maker.service('gas', true);
+    gasService.multiplier = options.multiplier;
+    expect(gasService.multiplier).toBe(options.multiplier);
   });
 
   await Maker.create('test', {
