@@ -15,7 +15,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     this._transaction = transaction;
     this._web3Service = transactionManager.get('web3');
     this._nonceService = transactionManager.get('nonce');
-    this._gasService = transactionManager.get('gas');
     this._timeStampSubmitted = new Date();
     this.metadata = metadata || {};
     this._confirmedBlockCount = this._web3Service.confirmedBlockCount();
