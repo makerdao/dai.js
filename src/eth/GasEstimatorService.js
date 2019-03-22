@@ -1,4 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
+import { map } from 'lodash';
 import fetch from 'isomorphic-fetch';
 
 export default class GasEstimatorService extends PublicService {
@@ -27,8 +28,7 @@ export default class GasEstimatorService extends PublicService {
   _setProperties(settings, label) {
     if (settings === 'default') return;
 
-    return Object.keys(settings).map(key => {
-      const value = settings[key];
+    return map(settings, (value, key) => {
       if (key === 'disable') {
         this[
           'disable' + label.charAt(0).toUpperCase() + label.slice(1)
