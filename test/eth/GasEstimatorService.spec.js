@@ -115,18 +115,18 @@ test('fetches gas station data', async () => {
     'fastestWait'
   ];
 
-  expect(Object.keys(await gasEstimator.gasStationData)).toEqual(keys);
+  expect(Object.keys(await gasEstimator._gasStationDataPromise)).toEqual(keys);
 });
 
 test('returns a valid gas price', async () => {
-  const gasStationData = await gasEstimator.gasStationData;
+  const gasStationData = await gasEstimator._gasStationDataPromise;
   const gasPrice = await gasEstimator.getGasPrice();
   expect(typeof gasPrice).toBe('number');
   expect(gasPrice).toBe(gasStationData['fast']);
 });
 
 test('returns a valid wait time', async () => {
-  const gasStationData = await gasEstimator.gasStationData;
+  const gasStationData = await gasEstimator._gasStationDataPromise;
   const waitTime = await gasEstimator.getWaitTime();
   expect(typeof waitTime).toBe('number');
   expect(waitTime).toBe(gasStationData['fastWait']);

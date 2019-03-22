@@ -10,7 +10,7 @@ export default class GasEstimatorService extends PublicService {
   }
 
   initialize(settings) {
-    this._gasStationData = this.fetchGasStationData();
+    this._gasStationDataPromise = this.fetchGasStationData();
 
     if (settings) {
       this._parseConfig(settings.gasLimit, 'gasLimit');
@@ -54,14 +54,14 @@ export default class GasEstimatorService extends PublicService {
   async getGasPrice(txSpeed) {
     if (this.gasPrice) return this.gasPrice;
     const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
-    const gasStationData = await this.gasStationData;
+    const gasStationData = await this._gasStationDataPromise;
 
     return gasStationData[speedSetting];
   }
 
   async getWaitTime(txSpeed) {
     const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
-    const gasStationData = await this.gasStationData;
+    const gasStationData = await this._gasStationDataPromise;
 
     return gasStationData[`${speedSetting}Wait`];
   }
@@ -94,10 +94,6 @@ export default class GasEstimatorService extends PublicService {
         blockLimit
       );
     }
-  }
-
-  get gasStationData() {
-    return this._gasStationData;
   }
 
   get multiplier() {
