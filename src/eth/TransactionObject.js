@@ -140,7 +140,6 @@ export default class TransactionObject extends TransactionLifeCycle {
     }
 
     if (tx && !tx.blockHash) {
-      this._gasService.transactionSpeed = 'fastest';
       throw new Error(
         'This transaction is taking longer than it should. Check its status on etherscan or try again. Tx hash:',
         this.hash
