@@ -8,7 +8,7 @@ const log = debug('dai:TransactionManager');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log', 'nonce', 'proxy', 'gasEstimator']);
+    super(name, ['web3', 'log', 'nonce', 'proxy', 'gas']);
     this._newTxListeners = [];
     this._tracker = new Tracker();
   }
@@ -164,9 +164,9 @@ export default class TransactionManager extends PublicService {
       );
     }
 
-    if (!this.get('gasEstimator').disableGasPrice) {
+    if (!this.get('gas').disablePrice) {
       let txSpeed = options.transactionSpeed;
-      options.gasPrice = await this.get('gasEstimator').getGasPrice(txSpeed);
+      options.gasPrice = await this.get('gas').getGasPrice(txSpeed);
     }
 
     return {
@@ -198,7 +198,7 @@ export default class TransactionManager extends PublicService {
       ...transaction
     };
 
-    return this.get('gasEstimator').estimateGasLimit(transaction);
+    return this.get('gas').estimateGasLimit(transaction);
   }
 }
 

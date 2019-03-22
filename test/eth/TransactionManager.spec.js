@@ -317,7 +317,7 @@ describe('transaction options', () => {
     );
     expect(Object.keys(options)).toEqual(['gasLimit', 'gasPrice', 'nonce']);
 
-    txManager.get('gasEstimator').disableGasPrice = true;
+    txManager.get('gas').disablePrice = true;
     options = await txManager._buildTransactionOptions(
       {},
       contract,

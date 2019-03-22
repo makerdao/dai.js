@@ -1,15 +1,15 @@
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 
-let getDummyTransaction, gasEstimator;
+let getDummyTransaction, gasService;
 
 beforeEach(async () => {
-  gasEstimator = buildTestGasEstimatorService();
-  await gasEstimator.manager().authenticate();
+  gasService = buildTestGasService();
+  await gasService.manager().authenticate();
 });
 
-function buildTestGasEstimatorService() {
-  const service = buildTestService('gasEstimator', { gasEstimator: true });
+function buildTestGasService() {
+  const service = buildTestService('gas', { gas: true });
 
   getDummyTransaction = function() {
     return {
@@ -23,15 +23,15 @@ function buildTestGasEstimatorService() {
 }
 
 test('initial values', async () => {
-  const secondService = buildTestService('gasEstimator', {
-    gasEstimator: {
-      gasLimit: {
+  const secondService = buildTestService('gas', {
+    gas: {
+      limit: {
         multiplier: 2,
         fallback: 2,
         absolute: 2,
         disable: true
       },
-      gasPrice: {
+      price: {
         transactionSpeed: 'fastest',
         disable: true
       }
@@ -39,65 +39,65 @@ test('initial values', async () => {
   });
   await secondService.manager().authenticate();
 
-  expect(gasEstimator.multiplier).toBe(1.55);
-  expect(gasEstimator.fallback).toBe(4000000);
-  expect(gasEstimator.transactionSpeed).toBe('fast');
+  expect(gasService.multiplier).toBe(1.55);
+  expect(gasService.fallback).toBe(4000000);
+  expect(gasService.transactionSpeed).toBe('fast');
 
   expect(secondService.multiplier).toBe(2);
   expect(secondService.absolute).toBe(2);
   expect(secondService.fallback).toBe(2);
   expect(secondService.transactionSpeed).toBe('fastest');
-  expect(secondService.disableGasPrice).toBe(true);
-  expect(secondService.disableGasLimit).toBe(true);
+  expect(secondService.disablePrice).toBe(true);
+  expect(secondService.disableLimit).toBe(true);
 });
 
 test('update policies', () => {
-  gasEstimator.multiplier = 1;
-  expect(gasEstimator.multiplier).toBe(1);
-  gasEstimator.absolute = 100000;
-  expect(gasEstimator.absolute).toBe(100000);
-  gasEstimator.fallback = 100000;
-  expect(gasEstimator.fallback).toBe(100000);
+  gasService.multiplier = 1;
+  expect(gasService.multiplier).toBe(1);
+  gasService.absolute = 100000;
+  expect(gasService.absolute).toBe(100000);
+  gasService.fallback = 100000;
+  expect(gasService.fallback).toBe(100000);
 });
 
 test('clear policies', () => {
-  gasEstimator.removeMultiplier();
-  expect(gasEstimator.multiplier).toBe(null);
-  gasEstimator.absolute = 100000;
-  gasEstimator.removeAbsolute();
-  expect(gasEstimator.absolute).toBe(null);
-  gasEstimator.removeFallback();
-  expect(gasEstimator.fallback).toBe(null);
+  gasService.removeMultiplier();
+  expect(gasService.multiplier).toBe(null);
+  gasService.absolute = 100000;
+  gasService.removeAbsolute();
+  expect(gasService.absolute).toBe(null);
+  gasService.removeFallback();
+  expect(gasService.fallback).toBe(null);
 });
 
 test('use multiplier when absolute null', async () => {
-  gasEstimator.multiplier = 1.1;
-  const estimate = await gasEstimator.estimateGasLimit(getDummyTransaction());
+  gasService.multiplier = 1.1;
+  const estimate = await gasService.estimateGasLimit(getDummyTransaction());
   expect(estimate).toBeCloseTo(21000 * 1.1);
 });
 
 test('use absolute when multiplier null', async () => {
-  gasEstimator.absolute = 20000;
+  gasService.absolute = 20000;
   const transaction = await getDummyTransaction();
-  const estimate = await gasEstimator.estimateGasLimit(transaction);
+  const estimate = await gasService.estimateGasLimit(transaction);
   expect(estimate).toBe(20000);
 });
 
 test('choose minimum when both policies set using multiplier', async () => {
-  gasEstimator.multiplier = 1.1;
-  gasEstimator.absolute = 1000000;
-  const estimate = await gasEstimator.estimateGasLimit(getDummyTransaction());
+  gasService.multiplier = 1.1;
+  gasService.absolute = 1000000;
+  const estimate = await gasService.estimateGasLimit(getDummyTransaction());
   expect(estimate).toBeCloseTo(21000 * 1.1);
 });
 
 test('throws on setting policy less than zero', () => {
-  expect(() => (gasEstimator.multiplier = -1)).toThrow();
-  expect(() => (gasEstimator.absolute = -1)).toThrow();
-  expect(() => (gasEstimator.fallback = -1)).toThrow();
+  expect(() => (gasService.multiplier = -1)).toThrow();
+  expect(() => (gasService.absolute = -1)).toThrow();
+  expect(() => (gasService.fallback = -1)).toThrow();
 });
 
 test('throws on invalid transaction speed', () => {
-  expect(() => (gasEstimator.transactionSpeed = 'sluggish')).toThrow();
+  expect(() => (gasService.transactionSpeed = 'sluggish')).toThrow();
 });
 
 test('fetches gas station data', async () => {
@@ -115,27 +115,27 @@ test('fetches gas station data', async () => {
     'fastestWait'
   ];
 
-  expect(Object.keys(await gasEstimator._gasStationDataPromise)).toEqual(keys);
+  expect(Object.keys(await gasService._gasStationDataPromise)).toEqual(keys);
 });
 
 test('returns a valid gas price', async () => {
-  const gasStationData = await gasEstimator._gasStationDataPromise;
-  const gasPrice = await gasEstimator.getGasPrice();
+  const gasStationData = await gasService._gasStationDataPromise;
+  const gasPrice = await gasService.getGasPrice();
   expect(typeof gasPrice).toBe('number');
   expect(gasPrice).toBe(gasStationData['fast']);
 });
 
 test('returns a valid wait time', async () => {
-  const gasStationData = await gasEstimator._gasStationDataPromise;
-  const waitTime = await gasEstimator.getWaitTime();
+  const gasStationData = await gasService._gasStationDataPromise;
+  const waitTime = await gasService.getWaitTime();
   expect(typeof waitTime).toBe('number');
   expect(waitTime).toBe(gasStationData['fastWait']);
 });
 
 test('setting an explicit gasLimit bypasses estimation', async () => {
-  const secondService = buildTestService('gasEstimator', {
-    gasEstimator: {
-      gasLimit: 2
+  const secondService = buildTestService('gas', {
+    gas: {
+      limit: 2
     }
   });
   await secondService.manager().authenticate();
@@ -143,9 +143,9 @@ test('setting an explicit gasLimit bypasses estimation', async () => {
 });
 
 test('setting an explicit gasPrice bypasses gasStation data', async () => {
-  const secondService = buildTestService('gasEstimator', {
-    gasEstimator: {
-      gasPrice: 2
+  const secondService = buildTestService('gas', {
+    gas: {
+      price: 2
     }
   });
   await secondService.manager().authenticate();
@@ -154,9 +154,9 @@ test('setting an explicit gasPrice bypasses gasStation data', async () => {
 });
 
 test('disabling gasLimit returns fallback', async () => {
-  const secondService = buildTestService('gasEstimator', {
-    gasEstimator: {
-      gasLimit: {
+  const secondService = buildTestService('gas', {
+    gas: {
+      limit: {
         disable: true
       }
     }

@@ -12,7 +12,7 @@ export default class OasisExchangeService extends PrivateService {
       'token',
       'web3',
       'log',
-      'gasEstimator',
+      'gas',
       'allowance',
       'transactionManager'
     ]);

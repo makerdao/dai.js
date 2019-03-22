@@ -2,8 +2,8 @@ import { PublicService } from '@makerdao/services-core';
 import { map } from 'lodash';
 import fetch from 'isomorphic-fetch';
 
-export default class GasEstimatorService extends PublicService {
-  constructor(name = 'gasEstimator') {
+export default class GasService extends PublicService {
+  constructor(name = 'gas') {
     super(name, ['web3', 'log']);
     this._fallback = 4000000;
     this._multiplier = 1.55;
@@ -14,8 +14,8 @@ export default class GasEstimatorService extends PublicService {
     this._gasStationDataPromise = this.fetchGasStationData();
 
     if (settings) {
-      this._parseConfig(settings.gasLimit, 'gasLimit');
-      this._parseConfig(settings.gasPrice, 'gasPrice');
+      this._parseConfig(settings.limit, 'limit');
+      this._parseConfig(settings.price, 'price');
     }
   }
 
@@ -47,12 +47,12 @@ export default class GasEstimatorService extends PublicService {
       return response.json();
     } catch (err) {
       console.error('Error fetching gas data; disabling preset gas price');
-      this.disableGasPrice = true;
+      this.disablePrice = true;
     }
   }
 
   async getGasPrice(txSpeed) {
-    if (this.gasPrice) return this.gasPrice;
+    if (this.price) return this.price;
     const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
     const gasStationData = await this._gasStationDataPromise;
 
@@ -67,8 +67,8 @@ export default class GasEstimatorService extends PublicService {
   }
 
   async estimateGasLimit(transaction) {
-    if (this.gasLimit) return this.gasLimit;
-    if (this.disableGasLimit) return this.fallback;
+    if (this.limit) return this.limit;
+    if (this.disableLimit) return this.fallback;
 
     let web3Data = [];
     try {
