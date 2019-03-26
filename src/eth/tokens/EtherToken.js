@@ -2,9 +2,9 @@ import { getCurrency, ETH } from '../Currency';
 import tracksTransactions from '../../utils/tracksTransactions';
 
 export default class EtherToken {
-  constructor(web3Service, gasEstimatorService, transactionManager) {
+  constructor(web3Service, gasService, transactionManager) {
     this._web3 = web3Service;
-    this._gasEstimator = gasEstimatorService;
+    this._gasService = gasService;
     this._transactionManager = transactionManager;
   }
 
