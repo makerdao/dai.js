@@ -16,6 +16,5 @@
     "test"
   ],
   "setupFilesAfterEnv": ["<rootDir>/test/setup-test.js"],
-  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/test/integration/"],
-  "testRunner": "jest-circus/runner"
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/test/integration/"]
 }
