@@ -206,7 +206,8 @@ export default class SmartContractService extends PrivateService {
           const { address, ...otherProps } = definition;
           if (typeof address === 'string') return [definition];
           if (!address || !address[networkName]) {
-            throw new Error(`Missing address for ${name} on ${networkName}`);
+            console.log(`Missing address for ${name} on ${networkName}`);
+            //throw new Error(`Missing address for ${name} on ${networkName}`);
           }
           return [{ address: address[networkName], ...otherProps }];
         })

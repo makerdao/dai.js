@@ -1,5 +1,5 @@
 {
   "rootDir": "../../",
-  "testMatch": ["<rootDir>/test/integration/*.js"],
+  "testMatch": ["<rootDir>/test/integration/*.js", "<rootDir>/lib/dai-plugin-mcd/test/integration/*.js"],
   "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"]
 }
