@@ -20,7 +20,7 @@ const maker = await Maker.create('http', {
       McdPlugin,
       {
         // omit this option to get the default set:
-        // ETH-A, ETH-B, COL1-A, COL1-B, COL2-A, COL3-A, COL4-A, COL5-A
+        // ETH-A, ETH-B, COL1-A
         cdpTypes: [
           { currency: ETH, ilk: 'ETH-A' },
           { currency: COL1, ilk: 'COL1-A' },
