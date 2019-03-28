@@ -2,7 +2,7 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
-import { intersection, isEqual, mergeWith, merge } from 'lodash';
+import { mergeWith } from 'lodash';
 
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
@@ -85,22 +85,7 @@ function delegateToServices(maker, services) {
 
 function mergeOptions(object, source) {
   return mergeWith(object, source, (objValue, srcValue, key) => {
-    if (key === 'addContracts') {
-      const dupes = intersection(
-        Object.keys(objValue || {}),
-        Object.keys(srcValue)
-      ).filter(key => !isEqual(objValue[key], srcValue[key]));
-
-      for (let contractName of dupes) {
-        merge(
-          objValue[contractName],
-          merge(objValue[contractName], srcValue[contractName])
-        );
-      }
-    }
-
-    if (Array.isArray(objValue)) return objValue.concat(srcValue);
-
+    if (Array.isArray(objValue) && key !== 'abi') return objValue.concat(srcValue);
     // when this function returns undefined, mergeWith falls back to the
     // default merging behavior.
     // https://devdocs.io/lodash~4/index#mergeWith
