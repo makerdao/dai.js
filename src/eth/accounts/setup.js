@@ -72,22 +72,28 @@ export async function getBrowserProvider() {
   }
 }
 
-function getInfuraUrl(protocol = 'https', network, infuraApiKey) {
+function getInfuraUrl(protocol = 'https', network, infuraProjectId) {
+  if (!infuraProjectId) {
+    throw new Error(
+      'Cannot use infura without a project ID'
+    );
+  }
   let url = `${protocol}://${network}.infura.io`;
   url += protocol === 'wss' ? '/ws' : '';
-  url += infuraApiKey ? `/${infuraApiKey}` : '';
+  url += '/v3';
+  url += `/${infuraProjectId}`;
   return url;
 }
 
 function getRpcUrl(providerSettings) {
-  const { network, protocol, infuraApiKey, type, url } = providerSettings;
+  const { network, protocol, infuraProjectId, type, url } = providerSettings;
   switch (type) {
     case ProviderType.HTTP:
       return url;
     case ProviderType.WEBSOCKET:
       return url;
     case ProviderType.INFURA:
-      return getInfuraUrl(protocol, network, infuraApiKey);
+      return getInfuraUrl(protocol, network, infuraProjectId);
     default:
       throw new Error('Invalid web3 provider type: ' + type);
   }
