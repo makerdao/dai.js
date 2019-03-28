@@ -56,7 +56,7 @@ export default class DSProxyService extends PrivateService {
       throw new Error('This account already has a proxy deployed at ' + proxy);
     }
     const txo = await this._proxyRegistry().build({ promise });
-    this._currentProxy = await this.getProxyAddress();
+    this._currentProxy = txo.receipt.logs[0].address;
     this.get('web3')
       .get('event')
       .emit('dsproxy/BUILD', {
