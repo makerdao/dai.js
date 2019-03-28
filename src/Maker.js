@@ -2,7 +2,7 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
-import { intersection, isEqual, mergeWith } from 'lodash';
+import { intersection, isEqual, mergeWith, merge } from 'lodash';
 
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
@@ -91,10 +91,11 @@ function mergeOptions(object, source) {
         Object.keys(srcValue)
       ).filter(key => !isEqual(objValue[key], srcValue[key]));
 
-      if (dupes.length > 0) {
-        const label = `Contract${dupes.length > 1 ? 's' : ''}`;
-        const names = dupes.map(d => `"${d}"`).join(', ');
-        throw new Error(`${label} ${names} cannot be defined more than once`);
+      for (let contractName of dupes) {
+        merge(
+          objValue[contractName],
+          merge(objValue[contractName], srcValue[contractName])
+        );
       }
     }
 
