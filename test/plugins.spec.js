@@ -114,39 +114,40 @@ test('add options, merging correctly', async () => {
   });
 });
 
-test('override duplicates in smartContract.addContracts with the new address', async () => {
-  const exampleAbiItem = {
-    constant: true,
-    inputs: [],
-    name: 'test',
-    outputs: [
-      {
-        name: '',
-        type: 'address'
-      }
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function'
-  };
-
-  const newAddress = '0xbeefed1bedded2dabbed3defaced4decade5feed';
-
-  const testPlugin = {
+test('plugins using addContracts property will override the previous one in sequential order; user-supplied config will override all', async () => {
+  const testPlugin1 = {
     addConfig: () => ({
       smartContract: {
         addContracts: {
-          foo: {
-            abi: [],
-            address: newAddress
+          TUB: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tub1'
           },
-          bar: {
-            abi: [exampleAbiItem],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5bade'
+          TAP: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tap1'
           },
-          baz: {
-            abi: [],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5abed'
+          TOP: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5top1'
+          },
+          FOO: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5foo1'
+          }
+        }
+      }
+    })
+  };
+  const testPlugin2 = {
+    addConfig: () => ({
+      provider: { url: 'pluginURL' },
+      smartContract: {
+        addContracts: {
+          TUB: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tub2'
+          },
+          BAR: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5bar2'
+          },
+          TOP: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5top2'
           }
         }
       }
@@ -155,33 +156,43 @@ test('override duplicates in smartContract.addContracts with the new address', a
 
   await Maker.create('test', {
     autoAuthenticate: false,
-    plugins: [testPlugin],
+    provider: { url: 'userURL' },
+    plugins: [testPlugin1, testPlugin2],
     smartContract: {
       addContracts: {
-        // different address
-        foo: {
+        FOO: {
           abi: [],
-          address: '0xbeefed1bedded2dabbed3defaced4decade5bead'
+          address: '0xbeefed1bedded2dabbed3defaced4decade5foo3'
         },
-        // different ABI
-        bar: {
-          abi: [{ ...exampleAbiItem, name: 'zest' }],
-          address: '0xbeefed1bedded2dabbed3defaced4decade5bade'
-        },
-        // same address and ABI -- will not cause error
-        baz: {
-          abi: [],
-          address: '0xbeefed1bedded2dabbed3defaced4decade5abed'
+        TOP: {
+          address: '0xbeefed1bedded2dabbed3defaced4decade5top3'
         }
       }
     }
   });
 
   const last = ConfigFactory.create.mock.calls.length - 1;
-  expect(
-    ConfigFactory.create.mock.calls[last][1].smartContract.addContracts.foo
-      .address
-  ).toBe(newAddress);
+
+  const addContractsResult =
+    ConfigFactory.create.mock.calls[last][1].smartContract.addContracts;
+
+  // User supplied overrides all
+  const fooExpected = '0xbeefed1bedded2dabbed3defaced4decade5foo3';
+  const topExpected = '0xbeefed1bedded2dabbed3defaced4decade5top3';
+  // 2nd plugin overrides the 1st
+  const tubExpected = '0xbeefed1bedded2dabbed3defaced4decade5tub2';
+  const barExpected = '0xbeefed1bedded2dabbed3defaced4decade5bar2';
+  // No overrides for this one from 1st plugin
+  const tapExpected = '0xbeefed1bedded2dabbed3defaced4decade5tap1';
+
+  expect(addContractsResult['FOO'].address).toBe(fooExpected);
+  expect(addContractsResult['TOP'].address).toBe(topExpected);
+  expect(addContractsResult['TUB'].address).toBe(tubExpected);
+  expect(addContractsResult['BAR'].address).toBe(barExpected);
+  expect(addContractsResult['TAP'].address).toBe(tapExpected);
+
+  // All user config options will be preserved
+  expect(ConfigFactory.create.mock.calls[last][1].provider.url).toBe('userURL');
 });
 
 test('add options when smartContract.addContracts is not set on target', async () => {
