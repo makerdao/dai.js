@@ -10,7 +10,7 @@ export const kovanProviderConfig = {
     provider: {
       type: ProviderType.INFURA,
       network: 'kovan',
-      infuraProjectId: infuraProjectId
+      infuraProjectId
     }
   }
 };

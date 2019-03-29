@@ -74,14 +74,11 @@ export async function getBrowserProvider() {
 
 function getInfuraUrl(protocol = 'https', network, infuraProjectId) {
   if (!infuraProjectId) {
-    throw new Error(
-      'Cannot use infura without a project ID'
-    );
+    throw new Error('Cannot use infura without a project ID');
   }
   let url = `${protocol}://${network}.infura.io`;
   url += protocol === 'wss' ? '/ws' : '';
-  url += '/v3';
-  url += `/${infuraProjectId}`;
+  url += `/v3/${infuraProjectId}`;
   return url;
 }
 

@@ -81,7 +81,7 @@ function buildInfuraService(network, privateKey = null) {
       provider: {
         type: ProviderType.INFURA,
         network,
-        infuraProjectId: infuraProjectId
+        infuraProjectId
       },
       transactionSettings: {
         gasLimit: 4000000

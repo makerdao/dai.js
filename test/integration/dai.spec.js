@@ -74,7 +74,7 @@ beforeAll(async () => {
               gasLimit: 4000000
             },
             provider: {
-              infuraProjectId: infuraProjectId
+              infuraProjectId
             }
           }
         };
