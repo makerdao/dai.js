@@ -115,18 +115,33 @@ test('add options, merging correctly', async () => {
 });
 
 test('plugins using addContracts property will override the previous one in sequential order; user-supplied config will override all', async () => {
+  const exampleAbi = {
+    name: 'coldMap',
+    inputs: [{ name: 'inputA', type: 'address' }]
+  };
+
+  const exampleUserConfigAbi = {
+    name: 'coldMap',
+    inputs: [
+      { name: 'inputA', type: 'address' },
+      { name: 'inputB', type: 'uint256' }
+    ]
+  };
+
   const testPlugin1 = {
     addConfig: () => ({
       smartContract: {
         addContracts: {
           TUB: {
-            address: '0xbeefed1bedded2dabbed3defaced4decade5tub1'
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tub1',
+            abi: [exampleAbi]
           },
           TAP: {
             address: '0xbeefed1bedded2dabbed3defaced4decade5tap1'
           },
           TOP: {
-            address: '0xbeefed1bedded2dabbed3defaced4decade5top1'
+            address: '0xbeefed1bedded2dabbed3defaced4decade5top1',
+            abi: [exampleAbi]
           },
           FOO: {
             address: '0xbeefed1bedded2dabbed3defaced4decade5foo1'
@@ -141,7 +156,8 @@ test('plugins using addContracts property will override the previous one in sequ
       smartContract: {
         addContracts: {
           TUB: {
-            address: '0xbeefed1bedded2dabbed3defaced4decade5tub2'
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tub2',
+            abi: [exampleAbi]
           },
           BAR: {
             address: '0xbeefed1bedded2dabbed3defaced4decade5bar2'
@@ -161,11 +177,11 @@ test('plugins using addContracts property will override the previous one in sequ
     smartContract: {
       addContracts: {
         FOO: {
-          abi: [],
           address: '0xbeefed1bedded2dabbed3defaced4decade5foo3'
         },
         TOP: {
-          address: '0xbeefed1bedded2dabbed3defaced4decade5top3'
+          address: '0xbeefed1bedded2dabbed3defaced4decade5top3',
+          abi: [exampleUserConfigAbi]
         }
       }
     }
@@ -190,6 +206,11 @@ test('plugins using addContracts property will override the previous one in sequ
   expect(addContractsResult['TUB'].address).toBe(tubExpected);
   expect(addContractsResult['BAR'].address).toBe(barExpected);
   expect(addContractsResult['TAP'].address).toBe(tapExpected);
+
+  // Duplicate ABIs don't concat array properties
+  expect(addContractsResult['TUB'].abi).toEqual([exampleAbi]);
+  // User supplied ABIs take precedence
+  expect(addContractsResult['TOP'].abi).toEqual([exampleUserConfigAbi]);
 
   // All user config options will be preserved
   expect(ConfigFactory.create.mock.calls[last][1].provider.url).toBe('userURL');

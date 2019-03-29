@@ -87,6 +87,8 @@ function delegateToServices(maker, services) {
 
 function mergeOptions(object, source) {
   return mergeWith(object, source, (objValue, srcValue, key) => {
+    if (Array.isArray(objValue) && key === 'abi') return uniq(objValue);
+
     if (Array.isArray(objValue) && key !== 'abi')
       return uniq(objValue.concat(srcValue));
     // when this function returns undefined, mergeWith falls back to the
