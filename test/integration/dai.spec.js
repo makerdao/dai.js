@@ -4,6 +4,7 @@ import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
 import { uniqueId } from '../../src/utils';
+import { infuraProjectId } from '../helpers/serviceBuilders';
 
 const log = debug('dai:testing:integration');
 let maker, cdp, exchange, address, tokenService, txMgr;
@@ -71,6 +72,9 @@ beforeAll(async () => {
             transactionSettings: {
               gasPrice: 15000000000,
               gasLimit: 4000000
+            },
+            provider: {
+              infuraProjectId
             }
           }
         };

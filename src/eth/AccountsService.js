@@ -84,7 +84,9 @@ export default class AccountsService extends PublicService {
       this.useAccount(name);
     }
     if (this.hasAccount()) {
-      this.get('event').emit('accounts/ADD', { account: sanitizeAccount(account) });
+      this.get('event').emit('accounts/ADD', {
+        account: sanitizeAccount(account)
+      });
     }
 
     return account;
@@ -118,7 +120,9 @@ export default class AccountsService extends PublicService {
     this._engine.addProvider(this.currentWallet(), 0);
     this._engine.start();
     if (this.hasAccount()) {
-      this.get('event').emit('accounts/CHANGE', { account: this.currentAccount() });
+      this.get('event').emit('accounts/CHANGE', {
+        account: this.currentAccount()
+      });
     }
   }
 
