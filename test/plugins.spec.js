@@ -1,5 +1,6 @@
 import Maker from '../src';
 import ConfigFactory from '../src/config/ConfigFactory';
+import { LocalService } from '@makerdao/services-core';
 
 beforeEach(() => {
   jest.spyOn(ConfigFactory, 'create');
@@ -45,7 +46,7 @@ test('object plugin with addConfig and afterCreate', async () => {
 });
 
 const makeMockService = role => {
-  class MockService extends Maker.LocalService {
+  class MockService extends LocalService {
     constructor(name = role) {
       super(name, []);
     }
@@ -113,7 +114,7 @@ test('add options, merging correctly', async () => {
   });
 });
 
-test('do not allow collisions in smartContract.addContracts', async () => {
+test('override duplicates in smartContract.addContracts with the new address', async () => {
   const exampleAbiItem = {
     constant: true,
     inputs: [],
@@ -129,13 +130,15 @@ test('do not allow collisions in smartContract.addContracts', async () => {
     type: 'function'
   };
 
+  const newAddress = '0xbeefed1bedded2dabbed3defaced4decade5feed';
+
   const testPlugin = {
     addConfig: () => ({
       smartContract: {
         addContracts: {
           foo: {
             abi: [],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5feed'
+            address: newAddress
           },
           bar: {
             abi: [exampleAbiItem],
@@ -149,8 +152,6 @@ test('do not allow collisions in smartContract.addContracts', async () => {
       }
     })
   };
-
-  expect.assertions(1);
 
   await Maker.create('test', {
     autoAuthenticate: false,
@@ -174,13 +175,13 @@ test('do not allow collisions in smartContract.addContracts', async () => {
         }
       }
     }
-  }).catch(
-    err =>
-      expect(err).toEqual(
-        new Error('Contracts "foo", "bar" cannot be defined more than once')
-      )
-    // note that "baz" is not in this list
-  );
+  });
+
+  const last = ConfigFactory.create.mock.calls.length - 1;
+  expect(
+    ConfigFactory.create.mock.calls[last][1].smartContract.addContracts.foo
+      .address
+  ).toBe(newAddress);
 });
 
 test('add options when smartContract.addContracts is not set on target', async () => {
@@ -263,17 +264,16 @@ test('each plugin type can be created with an optional options object for additi
   };
 
   const functionPlugin = jest.fn((maker, config, options) => {
-    const gasEstimatorService = maker.service('gasEstimator', true);
-    gasEstimatorService.setPercentage(options.percentage);
-    const percentage = gasEstimatorService.getPercentage();
-    expect(percentage).toBe(options.percentage);
+    const gasService = maker.service('gas', true);
+    gasService.multiplier = options.multiplier;
+    expect(gasService.multiplier).toBe(options.multiplier);
   });
 
   await Maker.create('test', {
     plugins: [
       [addConfigPlugin, { testOption2: 'myOption2' }],
       [beforeCreatePlugin, { testOption1: 'myOption1' }],
-      [functionPlugin, { percentage: 10 }],
+      [functionPlugin, { multiplier: 10 }],
       [afterCreatePlugin, { testOption3: 'myOption3' }]
     ],
     autoAuthenticate: false

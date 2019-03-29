@@ -2,13 +2,15 @@ import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import { has, merge } from 'lodash';
 
+export const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67'; //dai.js project id
+
 export const kovanProviderConfig = {
   web3: {
     privateKey: process.env.KOVAN_PRIVATE_KEY,
     provider: {
       type: ProviderType.INFURA,
       network: 'kovan',
-      infuraApiKey: process.env.INFURA_API_KEY
+      infuraProjectId
     }
   }
 };
@@ -17,9 +19,6 @@ export const websocketProviderConfig = {
     provider: {
       type: ProviderType.WEBSOCKET,
       url: 'ws://localhost:2000'
-    },
-    transactionSettings: {
-      gasLimit: 4000000
     },
     pollingInterval: 50
   },
@@ -31,9 +30,6 @@ export const httpProviderConfig = {
     provider: {
       type: ProviderType.HTTP,
       url: 'http://localhost:2000'
-    },
-    transactionSettings: {
-      gasLimit: 4000000
     },
     pollingInterval: 50
   },

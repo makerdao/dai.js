@@ -16,15 +16,8 @@ test('import vs require', () => {
   expect(Maker2.LocalService).toEqual(LocalService);
 });
 
-test('expose service classes as properties', async () => {
-  expect(typeof Maker.LocalService).toBe('function');
-  expect(typeof Maker.PrivateService).toBe('function');
-  expect(typeof Maker.PublicService).toBe('function');
-});
-
 test('openCdp', async () => {
   const maker = await createMaker();
-  await maker.authenticate();
   const cdp = await maker.openCdp();
   const id = cdp.id;
   expect(typeof id).toBe('number');
@@ -37,7 +30,6 @@ test(
     const testAccount = TestAccountProvider.nextAccount();
 
     const maker = await createMaker(testAccount.key);
-    await maker.authenticate();
     const cdp = await maker.openCdp();
     const id = cdp.id;
     expect(typeof id).toBe('number');
@@ -50,7 +42,6 @@ test(
 
 test('creates a new CDP object for existing CDPs', async () => {
   const maker = await createMaker();
-  await maker.authenticate();
   const cdp = await maker.openCdp();
   const id = cdp.id;
   const newCdp = await maker.getCdp(id);
@@ -61,7 +52,6 @@ test('creates a new CDP object for existing CDPs', async () => {
 
 test('throws an error for an invalid id', async () => {
   const maker = await createMaker();
-  await maker.authenticate();
   expect.assertions(1);
   try {
     await maker.getCdp(99999);

@@ -2,7 +2,7 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
-import { intersection, isEqual, mergeWith } from 'lodash';
+import { mergeWith } from 'lodash';
 
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
@@ -85,21 +85,7 @@ function delegateToServices(maker, services) {
 
 function mergeOptions(object, source) {
   return mergeWith(object, source, (objValue, srcValue, key) => {
-    if (key === 'addContracts') {
-      const dupes = intersection(
-        Object.keys(objValue || {}),
-        Object.keys(srcValue)
-      ).filter(key => !isEqual(objValue[key], srcValue[key]));
-
-      if (dupes.length > 0) {
-        const label = `Contract${dupes.length > 1 ? 's' : ''}`;
-        const names = dupes.map(d => `"${d}"`).join(', ');
-        throw new Error(`${label} ${names} cannot be defined more than once`);
-      }
-    }
-
-    if (Array.isArray(objValue)) return objValue.concat(srcValue);
-
+    if (Array.isArray(objValue) && key !== 'abi') return objValue.concat(srcValue);
     // when this function returns undefined, mergeWith falls back to the
     // default merging behavior.
     // https://devdocs.io/lodash~4/index#mergeWith
@@ -126,5 +112,7 @@ Maker.create = async function(...args) {
     options.plugins = pluginTuples;
   }
 
-  return new Maker(preset, options);
+  const maker = new Maker(preset, options);
+  if (options.autoAuthenticate !== false) await maker.authenticate();
+  return maker;
 };

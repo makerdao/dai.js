@@ -6,7 +6,7 @@ import DSProxyService from '../eth/DSProxyService';
 import EthereumCdpService from '../eth/EthereumCdpService';
 import EthereumTokenService from '../eth/EthereumTokenService';
 import EventService from '../utils/events/EventService';
-import GasEstimatorService from '../eth/GasEstimatorService';
+import GasService from '../eth/GasService';
 import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
@@ -30,7 +30,7 @@ export const resolver = {
     conversion: 'TokenConversionService',
     event: 'EventService',
     // exchange: intentionally omitted
-    gasEstimator: 'GasEstimatorService',
+    gas: 'GasService',
     log: 'ConsoleLogger',
     nonce: 'NonceService',
     price: 'PriceService',
@@ -70,7 +70,7 @@ export default class DefaultServiceProvider extends ServiceProvider {
         EthereumCdpService,
         EthereumTokenService,
         EventService,
-        GasEstimatorService,
+        GasService,
         NonceService,
         NullEventService,
         NullLogger,

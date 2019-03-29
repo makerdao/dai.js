@@ -4,6 +4,7 @@ import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
 import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
 import { uniqueId } from '../../src/utils';
+import { infuraProjectId } from '../helpers/serviceBuilders';
 
 const log = debug('dai:testing:integration');
 let maker, cdp, exchange, address, tokenService, txMgr;
@@ -60,7 +61,6 @@ beforeAll(async () => {
     process.env.NETWORK === 'test'
       ? {
           web3: {
-            transactionSettings: { gasLimit: 4000000 },
             confirmedBlockCount: '0',
             pollingInterval: 50
           }
@@ -72,6 +72,9 @@ beforeAll(async () => {
             transactionSettings: {
               gasPrice: 15000000000,
               gasLimit: 4000000
+            },
+            provider: {
+              infuraProjectId
             }
           }
         };

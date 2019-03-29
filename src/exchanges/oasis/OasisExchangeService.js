@@ -12,7 +12,7 @@ export default class OasisExchangeService extends PrivateService {
       'token',
       'web3',
       'log',
-      'gasEstimator',
+      'gas',
       'allowance',
       'transactionManager'
     ]);
@@ -69,5 +69,5 @@ export default class OasisExchangeService extends PrivateService {
 }
 
 function daiValueForContract(amount) {
-  return getCurrency(amount, DAI).toEthersBigNumber('wei');
+  return getCurrency(amount, DAI).toFixed('wei');
 }

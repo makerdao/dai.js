@@ -1,0 +1,1 @@
+[{"constant":true,"inputs":[{"name":"manager","type":"address"},{"name":"guy","type":"address"}],"name":"getCdps","outputs":[{"name":"ids","type":"uint256[]"},{"name":"ilks","type":"bytes32[]"}],"payable":false,"stateMutability":"view","type":"function"}]

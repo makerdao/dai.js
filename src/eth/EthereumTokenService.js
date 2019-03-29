@@ -10,13 +10,7 @@ import ERC20TokenAbi from '../../contracts/abis/ERC20.json';
 
 export default class EthereumTokenService extends PrivateService {
   constructor(name = 'token') {
-    super(name, [
-      'smartContract',
-      'web3',
-      'log',
-      'gasEstimator',
-      'transactionManager'
-    ]);
+    super(name, ['smartContract', 'web3', 'log', 'gas', 'transactionManager']);
     this._tokens = tokens;
     this._addedTokens = {};
   }
@@ -24,8 +18,9 @@ export default class EthereumTokenService extends PrivateService {
   initialize(settings = {}) {
     if (settings.erc20) {
       for (const token of settings.erc20) {
-        this._tokens[token.symbol] = token.symbol;
-        this._addedTokens[token.symbol] = [token];
+        const symbol = token.symbol || token.currency.symbol;
+        this._tokens[symbol] = symbol;
+        this._addedTokens[symbol] = [token];
       }
     }
   }
@@ -50,7 +45,7 @@ export default class EthereumTokenService extends PrivateService {
     if (symbol === tokens.ETH) {
       return new EtherToken(
         this.get('web3'),
-        this.get('gasEstimator'),
+        this.get('gas'),
         this.get('transactionManager')
       );
     }

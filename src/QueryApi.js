@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch from 'isomorphic-fetch';
 
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
 const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';
