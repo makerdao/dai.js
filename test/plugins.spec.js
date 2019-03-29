@@ -114,7 +114,7 @@ test('add options, merging correctly', async () => {
   });
 });
 
-test('plugins using addContracts property will override the previous one in sequential order; user-supplied config will override all', async () => {
+test('plugin override rules', async () => {
   const exampleAbi = {
     name: 'coldMap',
     inputs: [{ name: 'inputA', type: 'address' }]
@@ -170,7 +170,7 @@ test('plugins using addContracts property will override the previous one in sequ
     })
   };
 
-  await Maker.create('test', {
+  const maker = await Maker.create('test', {
     autoAuthenticate: false,
     provider: { url: 'userURL' },
     plugins: [testPlugin1, testPlugin2],
@@ -200,12 +200,12 @@ test('plugins using addContracts property will override the previous one in sequ
   const barExpected = '0xbeefed1bedded2dabbed3defaced4decade5bar2';
   // No overrides for this one from 1st plugin
   const tapExpected = '0xbeefed1bedded2dabbed3defaced4decade5tap1';
-
+  const scs = maker.service('smartContract');
   expect(addContractsResult['FOO'].address).toBe(fooExpected);
-  expect(addContractsResult['TOP'].address).toBe(topExpected);
-  expect(addContractsResult['TUB'].address).toBe(tubExpected);
+  expect(scs.getContractAddress('TOP')).toBe(topExpected);
+  expect(scs.getContractAddress('TUB').address).toBe(tubExpected);
   expect(addContractsResult['BAR'].address).toBe(barExpected);
-  expect(addContractsResult['TAP'].address).toBe(tapExpected);
+  expect(scs.getContractAddress('TAP').address).toBe(tapExpected);
 
   // Duplicate ABIs don't concat array properties
   expect(addContractsResult['TUB'].abi).toEqual([exampleAbi]);
