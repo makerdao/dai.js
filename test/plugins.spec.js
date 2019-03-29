@@ -171,8 +171,7 @@ test('plugin override rules', async () => {
   };
 
   const maker = await Maker.create('test', {
-    autoAuthenticate: false,
-    provider: { url: 'userURL' },
+    provider: { url: 'http://localhost:2000' },
     plugins: [testPlugin1, testPlugin2],
     smartContract: {
       addContracts: {
@@ -203,9 +202,9 @@ test('plugin override rules', async () => {
   const scs = maker.service('smartContract');
   expect(addContractsResult['FOO'].address).toBe(fooExpected);
   expect(scs.getContractAddress('TOP')).toBe(topExpected);
-  expect(scs.getContractAddress('TUB').address).toBe(tubExpected);
+  expect(scs.getContractAddress('TUB')).toBe(tubExpected);
   expect(addContractsResult['BAR'].address).toBe(barExpected);
-  expect(scs.getContractAddress('TAP').address).toBe(tapExpected);
+  expect(scs.getContractAddress('TAP')).toBe(tapExpected);
 
   // Duplicate ABIs don't concat array properties
   expect(addContractsResult['TUB'].abi).toEqual([exampleAbi]);
@@ -213,7 +212,7 @@ test('plugin override rules', async () => {
   expect(addContractsResult['TOP'].abi).toEqual([exampleUserConfigAbi]);
 
   // All user config options will be preserved
-  expect(ConfigFactory.create.mock.calls[last][1].provider.url).toBe('userURL');
+  expect(ConfigFactory.create.mock.calls[last][1].provider.url).toBe('http://localhost:2000');
 });
 
 test('add options when smartContract.addContracts is not set on target', async () => {
