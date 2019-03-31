@@ -4,7 +4,7 @@ import http from './presets/http.json';
 import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
 import browser from './presets/browser.json';
-import raw from './presets/raw.json';
+import inject from './presets/inject.json';
 import merge from 'lodash.merge';
 import intersection from 'lodash.intersection';
 import { mergeServiceConfig } from './index';
@@ -60,9 +60,8 @@ function loadPreset(name) {
     case 'browser':
       preset = browser;
       break;
-    case 'raw':
-    case 'provider':
-      preset = raw;
+    case 'inject':
+      preset = inject;
       break;
     default:
       throw new ConfigPresetNotFoundError(name);

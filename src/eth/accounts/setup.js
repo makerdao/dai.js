@@ -28,11 +28,9 @@ export async function setupEngine(settings) {
     return new WebsocketSubprovider({ rpcUrl });
   };
 
-  const getRawProvider = () => {
+  const getInjectedProvider = () => {
     if (providerSettings.inject == null) {
-      throw new Error(
-        "Provider 'inject' must be supplied with ProviderType.RAW"
-      );
+      throw new Error("'inject' must be supplied with ProviderType.INJECT");
     }
     return new ProviderSubprovider(providerSettings.inject);
   };
@@ -53,8 +51,8 @@ export async function setupEngine(settings) {
           ? getWebsocketProvider()
           : getHttpProvider();
       break;
-    case ProviderType.RAW:
-      result.provider = getRawProvider();
+    case ProviderType.INJECT:
+      result.provider = getInjectedProvider();
       break;
     default:
       throw new Error('provider type must be defined');

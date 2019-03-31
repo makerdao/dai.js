@@ -1,7 +1,7 @@
 {
   "web3": {
     "provider": {
-      "type": "RAW"
+      "type": "INJECT"
     }
   },
   "exchange": "OasisExchangeService"
