@@ -51,6 +51,13 @@ export default class SmartContractService extends PrivateService {
     return address;
   }
 
+  getContractAddresses() {
+    return mapValues(this._getAllContractInfo(), versions => {
+      const latest = Math.max(...versions.map(info => info.version));
+      return versions.find(info => info.version === latest).address;
+    });
+  }
+
   getContractByName(name, { version, wrap = true } = {}) {
     const info = this._getContractInfo(name, version);
     return this.getContractByAddressAndAbi(info.address, info.abi, {
