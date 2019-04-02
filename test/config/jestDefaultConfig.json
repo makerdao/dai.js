@@ -16,6 +16,6 @@
     "test"
   ],
   "setupFilesAfterEnv": ["<rootDir>/test/setup-test.js"],
-  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/test/integration/"],
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/test/integration/", "<rootDir>/lib/dai-plugin-mcd/test/integration/"],
   "testRunner": "jest-circus/runner"
 }

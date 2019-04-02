@@ -114,74 +114,105 @@ test('add options, merging correctly', async () => {
   });
 });
 
-test('do not allow collisions in smartContract.addContracts', async () => {
-  const exampleAbiItem = {
-    constant: true,
-    inputs: [],
-    name: 'test',
-    outputs: [
-      {
-        name: '',
-        type: 'address'
-      }
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function'
+test('plugin override rules', async () => {
+  const exampleAbi = {
+    name: 'coldMap',
+    inputs: [{ name: 'inputA', type: 'address' }]
   };
 
-  const testPlugin = {
+  const exampleUserConfigAbi = {
+    name: 'coldMap',
+    inputs: [
+      { name: 'inputA', type: 'address' },
+      { name: 'inputB', type: 'uint256' }
+    ]
+  };
+
+  const testPlugin1 = {
     addConfig: () => ({
       smartContract: {
         addContracts: {
-          foo: {
-            abi: [],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5feed'
+          TUB: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tub1',
+            abi: [exampleAbi]
           },
-          bar: {
-            abi: [exampleAbiItem],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5bade'
+          TAP: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tap1'
           },
-          baz: {
-            abi: [],
-            address: '0xbeefed1bedded2dabbed3defaced4decade5abed'
+          TOP: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5top1',
+            abi: [exampleAbi]
+          },
+          FOO: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5foo1'
+          }
+        }
+      }
+    })
+  };
+  const testPlugin2 = {
+    addConfig: () => ({
+      provider: { url: 'pluginURL' },
+      smartContract: {
+        addContracts: {
+          TUB: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5tub2',
+            abi: [exampleAbi]
+          },
+          BAR: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5bar2'
+          },
+          TOP: {
+            address: '0xbeefed1bedded2dabbed3defaced4decade5top2'
           }
         }
       }
     })
   };
 
-  expect.assertions(1);
-
-  await Maker.create('test', {
-    autoAuthenticate: false,
-    plugins: [testPlugin],
+  const maker = await Maker.create('test', {
+    provider: { url: 'http://localhost:2000' },
+    plugins: [testPlugin1, testPlugin2],
     smartContract: {
       addContracts: {
-        // different address
-        foo: {
-          abi: [],
-          address: '0xbeefed1bedded2dabbed3defaced4decade5bead'
+        FOO: {
+          address: '0xbeefed1bedded2dabbed3defaced4decade5foo3'
         },
-        // different ABI
-        bar: {
-          abi: [{ ...exampleAbiItem, name: 'zest' }],
-          address: '0xbeefed1bedded2dabbed3defaced4decade5bade'
-        },
-        // same address and ABI -- will not cause error
-        baz: {
-          abi: [],
-          address: '0xbeefed1bedded2dabbed3defaced4decade5abed'
+        TOP: {
+          address: '0xbeefed1bedded2dabbed3defaced4decade5top3',
+          abi: [exampleUserConfigAbi]
         }
       }
     }
-  }).catch(
-    err =>
-      expect(err).toEqual(
-        new Error('Contracts "foo", "bar" cannot be defined more than once')
-      )
-    // note that "baz" is not in this list
-  );
+  });
+
+  const last = ConfigFactory.create.mock.calls.length - 1;
+
+  const addContractsResult =
+    ConfigFactory.create.mock.calls[last][1].smartContract.addContracts;
+
+  // User supplied overrides all
+  const fooExpected = '0xbeefed1bedded2dabbed3defaced4decade5foo3';
+  const topExpected = '0xbeefed1bedded2dabbed3defaced4decade5top3';
+  // 2nd plugin overrides the 1st
+  const tubExpected = '0xbeefed1bedded2dabbed3defaced4decade5tub2';
+  const barExpected = '0xbeefed1bedded2dabbed3defaced4decade5bar2';
+  // No overrides for this one from 1st plugin
+  const tapExpected = '0xbeefed1bedded2dabbed3defaced4decade5tap1';
+  const scs = maker.service('smartContract');
+  expect(addContractsResult['FOO'].address).toBe(fooExpected);
+  expect(scs.getContractAddress('TOP')).toBe(topExpected);
+  expect(scs.getContractAddress('TUB')).toBe(tubExpected);
+  expect(addContractsResult['BAR'].address).toBe(barExpected);
+  expect(scs.getContractAddress('TAP')).toBe(tapExpected);
+
+  // Duplicate ABIs don't concat array properties
+  expect(addContractsResult['TUB'].abi).toEqual([exampleAbi]);
+  // User supplied ABIs take precedence
+  expect(addContractsResult['TOP'].abi).toEqual([exampleUserConfigAbi]);
+
+  // All user config options will be preserved
+  expect(ConfigFactory.create.mock.calls[last][1].provider.url).toBe('http://localhost:2000');
 });
 
 test('add options when smartContract.addContracts is not set on target', async () => {

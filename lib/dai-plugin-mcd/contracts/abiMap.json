@@ -29,6 +29,7 @@
   "MCD_SPOT": "Spotter",
   "MCD_VAT": "Vat",
   "MCD_VOW": "Vow",
+  "MULTICALL": "MultiCall",
   "PIP_*": "DSValue",
   "PROXY_ACTIONS": "DssProxyActions"
 }

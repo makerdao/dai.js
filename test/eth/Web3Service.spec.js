@@ -2,6 +2,7 @@ import TestAccountProvider from '../helpers/TestAccountProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole } from '../../src/utils';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
+import { infuraProjectId } from '../helpers/serviceBuilders';
 
 function buildDisconnectingService(disconnectAfter = 25) {
   const service = buildTestService(null, disconnectAfter + 25);
@@ -80,7 +81,7 @@ function buildInfuraService(network, privateKey = null) {
       provider: {
         type: ProviderType.INFURA,
         network,
-        infuraApiKey: process.env.INFURA_API_KEY
+        infuraProjectId
       },
       transactionSettings: {
         gasLimit: 4000000
