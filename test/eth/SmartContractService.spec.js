@@ -33,28 +33,6 @@ test('getContractByName should return a functioning contract', async () => {
   );
 });
 
-test("should get a contract's public constant member values in a state object", async () => {
-  const service = buildTestSmartContractService();
-  await service.manager().authenticate();
-
-  const state = await service.getContractState(contracts.SAI_MOM);
-  expect(Object.keys(state)).toEqual([
-    '__self',
-    'tub',
-    'vox',
-    'owner',
-    'authority',
-    'tap'
-  ]);
-});
-
-test('should support recursive smart contract state inspection', async () => {
-  const service = buildTestSmartContractService();
-  await service.manager().authenticate();
-  const state = await service.getContractState(contracts.SAI_TOP, 5, true, []);
-  expect(state.tub.gem.symbol).toEqual('WETH');
-});
-
 test('parameterized smart contract input', async () => {
   const mockContractDefinition = {
     address: '0xbeefed1bedded2dabbed3defaced4decade5dead',
