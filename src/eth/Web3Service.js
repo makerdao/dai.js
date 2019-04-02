@@ -93,6 +93,7 @@ export default class Web3Service extends PrivateService {
         'getBalance',
         'getBlock',
         'getPastLogs',
+        'getStorageAt',
         'getTransaction',
         'getTransactionReceipt',
         'subscribe'
