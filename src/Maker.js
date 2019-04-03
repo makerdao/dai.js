@@ -2,13 +2,13 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
-import { intersection, isEqual, mergeWith } from 'lodash';
+import { mergeWith, cloneDeep, uniq } from 'lodash';
 
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
  */
 export default class Maker {
-  constructor(preset, options = {}) {
+  constructor(preset, options = {}, userOptions = {}) {
     const { plugins = [], ...otherOptions } = options;
 
     for (const [plugin, pluginOptions] of plugins) {
@@ -19,6 +19,8 @@ export default class Maker {
         );
       }
     }
+    // This ensures user supplied config options always take priority
+    if (plugins && userOptions) mergeOptions(otherOptions, userOptions);
 
     const config = ConfigFactory.create(preset, otherOptions, resolver);
     this._container = new DefaultServiceProvider(config).buildContainer();
@@ -85,21 +87,10 @@ function delegateToServices(maker, services) {
 
 function mergeOptions(object, source) {
   return mergeWith(object, source, (objValue, srcValue, key) => {
-    if (key === 'addContracts') {
-      const dupes = intersection(
-        Object.keys(objValue || {}),
-        Object.keys(srcValue)
-      ).filter(key => !isEqual(objValue[key], srcValue[key]));
+    if (Array.isArray(objValue) && key === 'abi') return uniq(objValue);
 
-      if (dupes.length > 0) {
-        const label = `Contract${dupes.length > 1 ? 's' : ''}`;
-        const names = dupes.map(d => `"${d}"`).join(', ');
-        throw new Error(`${label} ${names} cannot be defined more than once`);
-      }
-    }
-
-    if (Array.isArray(objValue)) return objValue.concat(srcValue);
-
+    if (Array.isArray(objValue) && key !== 'abi')
+      return uniq(objValue.concat(srcValue));
     // when this function returns undefined, mergeWith falls back to the
     // default merging behavior.
     // https://devdocs.io/lodash~4/index#mergeWith
@@ -108,7 +99,10 @@ function mergeOptions(object, source) {
 
 Maker.create = async function(...args) {
   const [preset, options = {}] = args;
-  const { plugins } = options;
+  const { plugins, ...otherOptions } = options;
+
+  // Preserve the user supplied options to apply after plugins are executed.
+  const userOptions = cloneDeep(otherOptions);
 
   if (plugins) {
     // If its not already, format the plugin to be a tuple
@@ -126,7 +120,7 @@ Maker.create = async function(...args) {
     options.plugins = pluginTuples;
   }
 
-  const maker = new Maker(preset, options);
+  const maker = new Maker(preset, options, userOptions);
   if (options.autoAuthenticate !== false) await maker.authenticate();
   return maker;
 };
