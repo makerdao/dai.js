@@ -63,3 +63,19 @@ test('throws an error for an invalid id', async () => {
 test('exports currency types', () => {
   expect(Maker.ETH(1).toString()).toEqual('1.00 ETH');
 });
+
+test('injected provider is called', async () => {
+  const mockSend = jest.fn((payload, callback) => callback(payload));
+  const mockProvider = { sendAsync: mockSend, send: mockSend };
+  const maker = await Maker.create('inject', {
+    provider: { inject: mockProvider },
+    autoAuthenticate: false
+  });
+  expect(mockSend.mock.calls.length).toBe(0);
+
+  try {
+    await maker.authenticate();
+  } catch (e) {
+    expect(e.method).toBe('eth_accounts');
+  }
+});

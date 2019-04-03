@@ -29,7 +29,7 @@ export async function setupEngine(settings) {
   };
 
   const getInjectedProvider = () => {
-    if (providerSettings.inject == null) {
+    if (!providerSettings.inject) {
       throw new Error("'inject' must be supplied with ProviderType.INJECT");
     }
     return new ProviderSubprovider(providerSettings.inject);
