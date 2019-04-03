@@ -1,5 +1,5 @@
-// run this with babel-node:
-// > npx @babel/node scripts/fundTestAccount.js
+// usage:
+// > node_modules/.bin/babel-node scripts/fundTestAccount.js <address>
 
 import Maker from '../src';
 import McdPlugin from '../lib/dai-plugin-mcd/src';
