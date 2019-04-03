@@ -141,7 +141,7 @@ test('be authenticated and know default address when private key passed in', don
 });
 
 test('determine correct connection status', async done => {
-  const service = buildTestService();
+  const service = buildTestService(null, 200);
 
   expect(await service._isStillConnected()).toBe(false);
   await service.manager().connect();
