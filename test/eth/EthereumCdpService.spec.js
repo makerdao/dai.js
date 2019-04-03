@@ -35,10 +35,39 @@ test('can read the target price', async () => {
   expect(tp).toEqual(USD_DAI(1));
 });
 
-test('find returns a proxy cdp when owned by proxy', async () => {
-  const cdp = await cdpService.openCdp();
-  const id = cdp.id;
-  console.log(id);
+describe('find cdp', () => {
+  let id;
+
+  beforeEach(async () => {
+    const cdp = await cdpService.openCdp();
+    id = cdp.id;
+  });
+
+  test('can return a normal cdp', async () => {
+    const cdp = await cdpService._findCdp(id);
+    expect(cdp.dsProxyAddress).not.toBeDefined();
+  });
+
+  test('can return a proxy cdp', async () => {
+    const proxy = await cdpService.get('proxy').currentProxy();
+    let cdp;
+
+    cdp = await cdpService._findCdp(id, proxy);
+    expect(cdp.dsProxyAddress).toBeDefined();
+
+    await cdpService.give(id, proxy);
+    cdp = await cdpService._findCdp(id);
+    expect(cdp.dsProxyAddress).toBeDefined();
+  });
+
+  test('throws on invalid id', async () => {
+    expect.assertions(1);
+    try {
+      await cdpService._findCdp('a');
+    } catch (err) {
+      expect(err.message).toBe('ID must be a number.');
+    }
+  });
 });
 
 test('can calculate system collateralization', async () => {

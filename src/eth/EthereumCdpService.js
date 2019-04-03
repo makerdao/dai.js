@@ -29,6 +29,7 @@ export default class EthereumCdpService extends PrivateService {
       'conversion',
       'event',
       'price',
+      'proxy',
       'smartContract',
       'token'
     ]);
@@ -65,9 +66,12 @@ export default class EthereumCdpService extends PrivateService {
     if (typeof id !== 'number') {
       throw new Error('ID must be a number.');
     }
+    const proxy = await this.get('proxy').currentProxy();
     const info = await this.getInfo(id);
     if (info.lad.toString() === '0x0000000000000000000000000000000000000000') {
       throw new Error("That CDP doesn't exist--try opening a new one.");
+    } else if (info.lad === proxy) {
+      dsProxy = proxy;
     }
     return dsProxy === null
       ? new Cdp(this, id)
