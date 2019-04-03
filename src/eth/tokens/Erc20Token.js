@@ -1,4 +1,4 @@
-import { currencies, getCurrency } from '../Currency';
+import { currencies, Currency, getCurrency } from '../Currency';
 
 export default class Erc20Token {
   constructor(contract, web3Service, decimals = 18, symbol, currency) {
@@ -32,7 +32,7 @@ export default class Erc20Token {
   }
 
   _valueForContract(value, unit = this._currency) {
-    return getCurrency(value, unit).toFixed(this._decimals);
+    return this._getCurrency(value, unit).toFixed(this._decimals);
   }
 
   _valueFromContract(value) {
@@ -48,7 +48,7 @@ export default class Erc20Token {
           action: {
             name: 'approve',
             spender,
-            allowance: getCurrency(value, unit),
+            allowance: this._getCurrency(value, unit),
             allowing: value != '0'
           }
         },
@@ -73,14 +73,14 @@ export default class Erc20Token {
     });
   }
 
-  transfer(to, value, { unit = currencies[this.symbol], promise } = {}) {
+  transfer(to, value, { unit = this._currency, promise } = {}) {
     return this._contract.transfer(to, this._valueForContract(value, unit), {
       metadata: {
         action: {
           name: 'transfer',
           from: this._web3.currentAddress(),
           to,
-          amount: getCurrency(value, unit)
+          amount: this._getCurrency(value, unit)
         }
       },
       promise
@@ -91,7 +91,7 @@ export default class Erc20Token {
     from,
     to,
     value,
-    { unit = currencies[this.symbol], promise } = {}
+    { unit = this._currency, promise } = {}
   ) {
     return this._contract.transferFrom(
       from,
@@ -109,5 +109,10 @@ export default class Erc20Token {
         promise
       }
     );
+  }
+
+  _getCurrency(amount, unit) {
+    if (unit == this._currency) return this._currency(amount);
+    return getCurrency(amount, unit);
   }
 }
