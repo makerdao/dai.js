@@ -35,6 +35,12 @@ test('can read the target price', async () => {
   expect(tp).toEqual(USD_DAI(1));
 });
 
+test('find returns a proxy cdp when owned by proxy', async () => {
+  const cdp = await cdpService.openCdp();
+  const id = cdp.id;
+  console.log(id);
+});
+
 test('can calculate system collateralization', async () => {
   const cdp = await cdpService.openCdp();
   let lock = cdp.lockEth(0.1);
