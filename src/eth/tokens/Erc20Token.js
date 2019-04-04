@@ -1,4 +1,4 @@
-import { currencies, Currency, getCurrency } from '../Currency';
+import { currencies, getCurrency } from '../Currency';
 
 export default class Erc20Token {
   constructor(contract, web3Service, decimals = 18, symbol, currency) {
