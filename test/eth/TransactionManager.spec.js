@@ -76,6 +76,7 @@ test('wrapped contract call accepts a businessObject option', async () => {
 test('wrapped contract call adds nonce, web3 settings', async () => {
   const { txMgr, currentAddress, contract } = services;
   const dai = contract.getContractByName(tokens.DAI);
+  const gasPrice = await txMgr.get('gas').getGasPrice();
   jest.spyOn(txMgr, '_execute');
 
   await dai.approve(currentAddress, 20000);
@@ -87,7 +88,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
     {
       gasLimit: 1234567,
       nonce: expect.any(Number),
-      gasPrice: expect.any(Number)
+      gasPrice: gasPrice
     }
   );
 });
