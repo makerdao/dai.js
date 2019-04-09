@@ -28,6 +28,13 @@ export async function setupEngine(settings) {
     return new WebsocketSubprovider({ rpcUrl });
   };
 
+  const getInjectedProvider = () => {
+    if (!providerSettings.inject) {
+      throw new Error("'inject' must be supplied with ProviderType.INJECT");
+    }
+    return new ProviderSubprovider(providerSettings.inject);
+  };
+
   switch (providerSettings.type) {
     case ProviderType.BROWSER:
       result.provider = await getBrowserProvider();
@@ -43,6 +50,9 @@ export async function setupEngine(settings) {
         providerSettings.protocol === 'wss'
           ? getWebsocketProvider()
           : getHttpProvider();
+      break;
+    case ProviderType.INJECT:
+      result.provider = getInjectedProvider();
       break;
     default:
       throw new Error('provider type must be defined');

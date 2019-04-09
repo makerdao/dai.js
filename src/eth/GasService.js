@@ -11,12 +11,14 @@ export default class GasService extends PublicService {
   }
 
   initialize(settings) {
-    this._gasStationDataPromise = this.fetchGasStationData();
-
     if (settings) {
       this._parseConfig(settings.limit, 'limit');
       this._parseConfig(settings.price, 'price');
     }
+
+    this._gasStationDataPromise = this.disablePrice
+      ? Promise.resolve({})
+      : this.fetchGasStationData();
   }
 
   _parseConfig(settings = 'default', label) {
