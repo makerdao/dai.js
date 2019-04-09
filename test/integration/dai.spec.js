@@ -69,10 +69,6 @@ beforeAll(async () => {
           privateKey: process.env.PRIVATE_KEY,
           exchange: 'Eth2DaiDirect',
           web3: {
-            transactionSettings: {
-              gasPrice: 15000000000,
-              gasLimit: 4000000
-            },
             provider: {
               infuraProjectId
             }
@@ -115,142 +111,142 @@ test(
   300000
 );
 
-test(
-  'can lock eth',
-  async () => {
-    const initialCollateral = await cdp.getCollateralValue();
-    const lock = cdp.lockEth(0.01);
-    await txMgr.confirm(lock);
-    const collateral = await cdp.getCollateralValue();
-    expect(collateral.toNumber()).toBeGreaterThan(initialCollateral.toNumber());
-  },
-  600000
-);
+// test(
+//   'can lock eth',
+//   async () => {
+//     const initialCollateral = await cdp.getCollateralValue();
+//     const lock = cdp.lockEth(0.01);
+//     await txMgr.confirm(lock);
+//     const collateral = await cdp.getCollateralValue();
+//     expect(collateral.toNumber()).toBeGreaterThan(initialCollateral.toNumber());
+//   },
+//   600000
+// );
 
-test(
-  'can withdraw Dai',
-  async () => {
-    const initialDebt = await cdp.getDebtValue();
-    const draw = cdp.drawDai(0.1);
-    await txMgr.confirm(draw);
-    const currentDebt = await cdp.getDebtValue();
-    expect(currentDebt.toNumber()).toBeGreaterThan(initialDebt.toNumber());
-  },
-  300000
-);
+// test(
+//   'can withdraw Dai',
+//   async () => {
+//     const initialDebt = await cdp.getDebtValue();
+//     const draw = cdp.drawDai(0.1);
+//     await txMgr.confirm(draw);
+//     const currentDebt = await cdp.getDebtValue();
+//     expect(currentDebt.toNumber()).toBeGreaterThan(initialDebt.toNumber());
+//   },
+//   300000
+// );
 
-xdescribe('OasisExchangeService', () => {
-  test(
-    'can sell Dai',
-    async () => {
-      let tx, error;
+// xdescribe('OasisExchangeService', () => {
+//   test(
+//     'can sell Dai',
+//     async () => {
+//       let tx, error;
 
-      if (process.env.NETWORK === 'test') {
-        await createDaiAndPlaceLimitOrder(exchange);
-      }
+//       if (process.env.NETWORK === 'test') {
+//         await createDaiAndPlaceLimitOrder(exchange);
+//       }
 
-      try {
-        tx = await exchange.sellDai('0.1', WETH);
-      } catch (err) {
-        console.error(err);
-        error = err;
-      }
+//       try {
+//         tx = await exchange.sellDai('0.1', WETH);
+//       } catch (err) {
+//         console.error(err);
+//         error = err;
+//       }
 
-      expect(tx).toBeDefined();
-      expect(error).toBeUndefined();
-    },
-    600000
-  );
+//       expect(tx).toBeDefined();
+//       expect(error).toBeUndefined();
+//     },
+//     600000
+//   );
 
-  test(
-    'can buy Dai',
-    async () => {
-      let tx, error;
-      await checkWethBalance();
+//   test(
+//     'can buy Dai',
+//     async () => {
+//       let tx, error;
+//       await checkWethBalance();
 
-      if (process.env.NETWORK === 'test') {
-        await createDaiAndPlaceLimitOrder(exchange, true);
-      }
+//       if (process.env.NETWORK === 'test') {
+//         await createDaiAndPlaceLimitOrder(exchange, true);
+//       }
 
-      try {
-        tx = await exchange.buyDai('0.1', WETH);
-      } catch (err) {
-        console.error(err);
-        error = err;
-      }
+//       try {
+//         tx = await exchange.buyDai('0.1', WETH);
+//       } catch (err) {
+//         console.error(err);
+//         error = err;
+//       }
 
-      expect(tx).toBeDefined();
-      expect(error).toBeUndefined();
-    },
-    600000
-  );
-});
+//       expect(tx).toBeDefined();
+//       expect(error).toBeUndefined();
+//     },
+//     600000
+//   );
+// });
 
-// Running these consecutively seems to confuse jest
-// and causes unexpected errors. Each will work if
-// run independently from the others
-describe('Eth2DaiDirect', () => {
-  xtest(
-    'sell eth for dai',
-    async () => {
-      const order = await maker.service('exchange').sell('ETH', 'DAI', '0.01');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
+// // Running these consecutively seems to confuse jest
+// // and causes unexpected errors. Each will work if
+// // run independently from the others
+// describe('Eth2DaiDirect', () => {
+//   xtest(
+//     'sell eth for dai',
+//     async () => {
+//       const order = await maker.service('exchange').sell('ETH', 'DAI', '0.01');
+//       console.log(order);
+//       expect(order).toBeDefined();
+//     },
+//     600000
+//   );
 
-  xtest(
-    'sell dai for eth',
-    async () => {
-      const order = await maker.service('exchange').sell('DAI', 'ETH', '0.01');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
+//   xtest(
+//     'sell dai for eth',
+//     async () => {
+//       const order = await maker.service('exchange').sell('DAI', 'ETH', '0.01');
+//       console.log(order);
+//       expect(order).toBeDefined();
+//     },
+//     600000
+//   );
 
-  xtest(
-    'buy dai with eth',
-    async () => {
-      const order = await maker.service('exchange').buy('DAI', 'ETH', '1');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
+//   xtest(
+//     'buy dai with eth',
+//     async () => {
+//       const order = await maker.service('exchange').buy('DAI', 'ETH', '1');
+//       console.log(order);
+//       expect(order).toBeDefined();
+//     },
+//     600000
+//   );
 
-  xtest(
-    'buy eth with dai',
-    async () => {
-      const order = await maker.service('exchange').buy('ETH', 'DAI', '0.01');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
-});
+//   xtest(
+//     'buy eth with dai',
+//     async () => {
+//       const order = await maker.service('exchange').buy('ETH', 'DAI', '0.01');
+//       console.log(order);
+//       expect(order).toBeDefined();
+//     },
+//     600000
+//   );
+// });
 
-test(
-  'can wipe debt',
-  async () => {
-    const initialDebt = await cdp.getDebtValue();
-    const wipe = cdp.wipeDai('0.1');
-    await txMgr.confirm(wipe);
-    const currentDebt = await cdp.getDebtValue();
-    expect(initialDebt.toNumber()).toBeGreaterThan(currentDebt.toNumber());
-  },
-  600000
-);
+// test(
+//   'can wipe debt',
+//   async () => {
+//     const initialDebt = await cdp.getDebtValue();
+//     const wipe = cdp.wipeDai('0.1');
+//     await txMgr.confirm(wipe);
+//     const currentDebt = await cdp.getDebtValue();
+//     expect(initialDebt.toNumber()).toBeGreaterThan(currentDebt.toNumber());
+//   },
+//   600000
+// );
 
-test(
-  'can shut a CDP',
-  async () => {
-    await cdp.shut();
-    await convertPeth();
-    await convertWeth();
-    const info = await cdp.getInfo();
-    expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
-  },
-  1200000
-);
+// test(
+//   'can shut a CDP',
+//   async () => {
+//     await cdp.shut();
+//     await convertPeth();
+//     await convertWeth();
+//     const info = await cdp.getInfo();
+//     expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
+//   },
+//   1200000
+// );
