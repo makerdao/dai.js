@@ -65,17 +65,20 @@ test('exports currency types', () => {
 });
 
 test('injected provider is called', async () => {
+  expect.assertions(3);
   const mockSend = jest.fn((payload, callback) => callback(payload));
   const mockProvider = { sendAsync: mockSend, send: mockSend };
   const maker = await Maker.create('inject', {
     provider: { inject: mockProvider },
     autoAuthenticate: false
   });
-  expect(mockSend.mock.calls.length).toBe(0);
+  expect(mockSend).not.toBeCalled();
 
   try {
     await maker.authenticate();
   } catch (e) {
     expect(e.method).toBe('eth_accounts');
   }
+
+  expect(mockSend).toBeCalled();
 });
