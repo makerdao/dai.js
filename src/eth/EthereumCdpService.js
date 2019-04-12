@@ -77,7 +77,7 @@ export default class EthereumCdpService extends PrivateService {
     if (dsProxy) {
       assert(
         owner === dsProxy.toLowerCase(),
-        'That CDP is not owned by that proxy.'
+        'That CDP is not owned by that address.'
       );
       return new ProxyCdp(this, dsProxy, id);
     }
