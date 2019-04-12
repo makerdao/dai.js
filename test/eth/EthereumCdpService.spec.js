@@ -53,7 +53,7 @@ describe('find cdp', () => {
   test('prevents returning a normal cdp as a proxy cdp', async () => {
     expect.assertions(1);
     return cdpService.getCdp(cdp.id, proxyAddress).catch(err => {
-      expect(err.message).toMatch(/not owned by that proxy/);
+      expect(err.message).toMatch(/not owned by that address/);
     });
   });
 
@@ -71,7 +71,7 @@ describe('find cdp', () => {
     expect.assertions(1);
     const badAddress = '0x0000000000000000000000000000000000000001';
     return cdpService.getCdp(cdp.id, badAddress).catch(err => {
-      expect(err.message).toMatch(/not owned by that proxy/);
+      expect(err.message).toMatch(/not owned by that address/);
     });
   });
 
