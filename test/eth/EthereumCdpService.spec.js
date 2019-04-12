@@ -36,34 +36,49 @@ test('can read the target price', async () => {
 });
 
 describe('find cdp', () => {
-  let id;
+  let cdp, proxyCdp, proxyAddress;
 
-  beforeEach(async () => {
-    const cdp = await cdpService.openCdp();
-    id = cdp.id;
+  beforeAll(async () => {
+    cdp = await cdpService.openCdp();
+    proxyAddress = (await cdpService.get('proxy').currentProxy()).toLowerCase();
+    proxyCdp = await cdpService.openProxyCdp(proxyAddress);
   });
 
-  test('can return a normal cdp', async () => {
-    const cdp = await cdpService._findCdp(id);
-    expect(cdp.dsProxyAddress).not.toBeDefined();
+  test('returns a normal cdp', async () => {
+    const sameCdp = await cdpService.getCdp(cdp.id);
+    expect(sameCdp.id).toEqual(cdp.id);
+    expect(sameCdp.dsProxyAddress).not.toBeDefined();
   });
 
-  test('can return a proxy cdp', async () => {
-    const proxy = await cdpService.get('proxy').currentProxy();
-    let cdp;
+  test('prevents returning a normal cdp as a proxy cdp', async () => {
+    expect.assertions(1);
+    return cdpService.getCdp(cdp.id, proxyAddress).catch(err => {
+      expect(err.message).toMatch(/not owned by that proxy/);
+    });
+  });
 
-    cdp = await cdpService._findCdp(id, proxy);
-    expect(cdp.dsProxyAddress).toBeDefined();
+  test('returns a proxy cdp with proxy address argument', async () => {
+    const sameCdp = await cdpService.getCdp(proxyCdp.id, proxyAddress);
+    expect(sameCdp.dsProxyAddress).toEqual(proxyAddress);
+  });
 
-    await cdpService.give(id, proxy);
-    cdp = await cdpService._findCdp(id);
-    expect(cdp.dsProxyAddress).toBeDefined();
+  test('returns a proxy cdp without proxy address argument', async () => {
+    const sameCdp = await cdpService.getCdp(proxyCdp.id);
+    expect(sameCdp.dsProxyAddress).toEqual(proxyAddress);
+  });
+
+  test('prevents returning a proxy cdp with non-matching owner', async () => {
+    expect.assertions(1);
+    const badAddress = '0x0000000000000000000000000000000000000001';
+    return cdpService.getCdp(cdp.id, badAddress).catch(err => {
+      expect(err.message).toMatch(/not owned by that proxy/);
+    });
   });
 
   test('throws on invalid id', async () => {
     expect.assertions(1);
     try {
-      await cdpService._findCdp('a');
+      await cdpService.getCdp('a');
     } catch (err) {
       expect(err.message).toBe('ID must be a number.');
     }

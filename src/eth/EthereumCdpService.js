@@ -18,6 +18,7 @@ import {
 } from './Currency';
 import { numberToBytes32 } from '../utils/conversion';
 import tracksTransactions from '../utils/tracksTransactions';
+import assert from 'assert';
 
 export default class EthereumCdpService extends PrivateService {
   /**
@@ -62,20 +63,44 @@ export default class EthereumCdpService extends PrivateService {
     return this.get('conversion');
   }
 
-  async _findCdp(id, dsProxy = null) {
-    if (typeof id !== 'number') {
-      throw new Error('ID must be a number.');
-    }
-    const proxy = await this.get('proxy').currentProxy();
+  async getCdp(id, dsProxy) {
+    assert(typeof id === 'number', 'ID must be a number.');
+
     const info = await this.getInfo(id);
-    if (info.lad.toString() === '0x0000000000000000000000000000000000000000') {
-      throw new Error("That CDP doesn't exist--try opening a new one.");
-    } else if (info.lad === proxy) {
-      dsProxy = proxy;
+    const owner = info.lad.toString().toLowerCase();
+
+    assert(
+      owner !== '0x0000000000000000000000000000000000000000',
+      "That CDP doesn't exist--try opening a new one."
+    );
+
+    if (dsProxy) {
+      assert(
+        owner === dsProxy.toLowerCase(),
+        'That CDP is not owned by that proxy.'
+      );
+      return new ProxyCdp(this, dsProxy, id);
     }
-    return dsProxy === null
-      ? new Cdp(this, id)
-      : new ProxyCdp(this, dsProxy, id);
+
+    if (
+      owner ===
+      this._web3Service()
+        .currentAddress()
+        .toLowerCase()
+    ) {
+      return new Cdp(this, id);
+    }
+
+    const proxy = await this.get('proxy').currentProxy();
+    if (owner === proxy.toLowerCase()) {
+      return new ProxyCdp(this, proxy, id);
+    }
+
+    // at this point, the CDP you're getting back could still technically
+    // be owned by a proxy, but in any case it's not owned by you, so it's
+    // fine to give you the normal Cdp interface because you'll only be
+    // allowed to call public methods anyway.
+    return new Cdp(this, id);
   }
 
   async _throwIfNotEnoughMkrToWipe(cdpId, amountToWipe, unit = DAI) {
@@ -114,7 +139,7 @@ export default class EthereumCdpService extends PrivateService {
     return new Cdp(this).transactionObject();
   }
 
-  openProxyCdp(dsProxy = null) {
+  openProxyCdp(dsProxy) {
     return new ProxyCdp(this, dsProxy).transactionObject();
   }
 
@@ -135,10 +160,6 @@ export default class EthereumCdpService extends PrivateService {
 
     const api = new QueryApi(this._web3Service().networkId());
     return api.getCdpIdsForOwner(address);
-  }
-
-  getCdp(id, dsProxy = null) {
-    return this._findCdp(id, dsProxy);
   }
 
   async shut(cdpId) {
