@@ -69,10 +69,6 @@ beforeAll(async () => {
           privateKey: process.env.PRIVATE_KEY,
           exchange: 'Eth2DaiDirect',
           web3: {
-            transactionSettings: {
-              gasPrice: 15000000000,
-              gasLimit: 4000000
-            },
             provider: {
               infuraProjectId
             }
