@@ -35,6 +35,56 @@ test('can read the target price', async () => {
   expect(tp).toEqual(USD_DAI(1));
 });
 
+describe('find cdp', () => {
+  let cdp, proxyCdp, proxyAddress;
+
+  beforeAll(async () => {
+    cdp = await cdpService.openCdp();
+    proxyAddress = (await cdpService.get('proxy').currentProxy()).toLowerCase();
+    proxyCdp = await cdpService.openProxyCdp(proxyAddress);
+  });
+
+  test('returns a normal cdp', async () => {
+    const sameCdp = await cdpService.getCdp(cdp.id);
+    expect(sameCdp.id).toEqual(cdp.id);
+    expect(sameCdp.dsProxyAddress).not.toBeDefined();
+  });
+
+  test('prevents returning a normal cdp as a proxy cdp', async () => {
+    expect.assertions(1);
+    return cdpService.getCdp(cdp.id, proxyAddress).catch(err => {
+      expect(err.message).toMatch(/not owned by that address/);
+    });
+  });
+
+  test('returns a proxy cdp with proxy address argument', async () => {
+    const sameCdp = await cdpService.getCdp(proxyCdp.id, proxyAddress);
+    expect(sameCdp.dsProxyAddress).toEqual(proxyAddress);
+  });
+
+  test('returns a proxy cdp without proxy address argument', async () => {
+    const sameCdp = await cdpService.getCdp(proxyCdp.id);
+    expect(sameCdp.dsProxyAddress).toEqual(proxyAddress);
+  });
+
+  test('prevents returning a proxy cdp with non-matching owner', async () => {
+    expect.assertions(1);
+    const badAddress = '0x0000000000000000000000000000000000000001';
+    return cdpService.getCdp(cdp.id, badAddress).catch(err => {
+      expect(err.message).toMatch(/not owned by that address/);
+    });
+  });
+
+  test('throws on invalid id', async () => {
+    expect.assertions(1);
+    try {
+      await cdpService.getCdp('a');
+    } catch (err) {
+      expect(err.message).toBe('ID must be a number.');
+    }
+  });
+});
+
 test('can calculate system collateralization', async () => {
   const cdp = await cdpService.openCdp();
   let lock = cdp.lockEth(0.1);
