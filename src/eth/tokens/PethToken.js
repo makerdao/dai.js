@@ -1,5 +1,5 @@
 import Erc20Token from './Erc20Token';
-import { WETH } from '../Currency';
+import { WETH, PETH } from '../Currency';
 
 export default class PethToken extends Erc20Token {
   constructor(contract, web3Service, tub) {
@@ -12,7 +12,7 @@ export default class PethToken extends Erc20Token {
     return this._tub.join(value, { promise });
   }
 
-  exit(amount, { unit = WETH, promise } = {}) {
+  exit(amount, { unit = PETH, promise } = {}) {
     const value = this._valueForContract(amount, unit);
     return this._tub.exit(value, { promise });
   }
