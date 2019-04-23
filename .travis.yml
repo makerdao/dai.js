@@ -22,6 +22,7 @@ script:
 - yarn build:backend
 - yarn build:frontend
 - yarn coverage
+- yarn test:build
 - codecov
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
