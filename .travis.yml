@@ -19,10 +19,9 @@ install:
 before_script:
 - npm install -g codecov
 script:
-- yarn build:backend
+- yarn test:build
 - yarn build:frontend
 - yarn coverage
-- yarn test:build
 - codecov
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
