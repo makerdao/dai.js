@@ -3,6 +3,5 @@
     "provider": {
       "type": "BROWSER"
     }
-  },
-  "exchange": "OasisExchangeService"
+  }
 }

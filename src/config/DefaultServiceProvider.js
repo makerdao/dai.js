@@ -10,8 +10,6 @@ import GasService from '../eth/GasService';
 import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
-import Eth2DaiDirect from '../exchanges/oasis/Eth2DaiDirect';
-import OasisExchangeService from '../exchanges/oasis/OasisExchangeService';
 import PriceService from '../eth/PriceService';
 import ServiceProvider from './ServiceProvider';
 import SmartContractService from '../eth/SmartContractService';
@@ -29,7 +27,6 @@ export const resolver = {
     cdp: 'EthereumCdpService',
     conversion: 'TokenConversionService',
     event: 'EventService',
-    // exchange: intentionally omitted
     gas: 'GasService',
     log: 'ConsoleLogger',
     nonce: 'NonceService',
@@ -66,7 +63,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         CacheService,
         ConsoleLogger,
         DSProxyService,
-        Eth2DaiDirect,
         EthereumCdpService,
         EthereumTokenService,
         EventService,
@@ -74,7 +70,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         NonceService,
         NullEventService,
         NullLogger,
-        OasisExchangeService,
         PriceService,
         SmartContractService,
         TimerService,

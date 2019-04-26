@@ -3,6 +3,5 @@
     "provider": {
       "type": "HTTP"
     }
-  },
-  "exchange": "OasisExchangeService"
+  }
 }

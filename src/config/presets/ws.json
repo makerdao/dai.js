@@ -3,6 +3,5 @@
     "provider": {
       "type": "WEBSOCKET"
     }
-  },
-  "exchange": "OasisExchangeService"
+  }
 }

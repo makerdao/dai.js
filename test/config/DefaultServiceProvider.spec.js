@@ -32,7 +32,7 @@ test('add web3 config into accounts config', () => {
   }
 });
 
-test('create a container from a service configuration', async () => {
+xtest('create a container from a service configuration', async () => {
   const container = new DefaultServiceProvider({
     ...config,
     log: false

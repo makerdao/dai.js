@@ -3,6 +3,5 @@
     "provider": {
       "type": "INJECT"
     }
-  },
-  "exchange": "OasisExchangeService"
+  }
 }
