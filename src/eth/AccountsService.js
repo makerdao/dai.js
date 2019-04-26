@@ -89,6 +89,25 @@ export default class AccountsService extends PublicService {
       });
     }
 
+    // Detect account change and automatically switch active account if
+    // autoSwitch flag set (Useful if using a browser wallet like MetaMask)
+    // See: https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md#ear-listening-for-selected-account-changes
+    if (otherSettings.autoSwitch && type === AccountType.BROWSER) {
+      const accountCheckHandle = setInterval(async () => {
+        const activeBrowserAddress = window.web3.eth.defaultAccount.toLowerCase();
+        if (activeBrowserAddress !== accountData.address) {
+          clearInterval(accountCheckHandle);
+          if (!this._getAccountWithAddress(activeBrowserAddress)) {
+            await this.addAccount({
+              type: AccountType.BROWSER,
+              autoSwitch: true
+            });
+          }
+          this.useAccount(window.web3.eth.defaultAccount.toLowerCase());
+        }
+      }, 500);
+    }
+
     return account;
   }
 
