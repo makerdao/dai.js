@@ -67,6 +67,7 @@ xtest('it overwrites a service name', () => {
   expect(config.exchange).toEqual(['OtherService', {}]);
 });
 
+// TODO: test this with a different service
 xtest('it adds service options', () => {
   const config = ConfigFactory.create('http', { exchange: { foo: 'bar' } });
   expect(config.exchange).toEqual(['OasisExchangeService', { foo: 'bar' }]);

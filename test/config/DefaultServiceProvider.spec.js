@@ -32,17 +32,19 @@ test('add web3 config into accounts config', () => {
   }
 });
 
-xtest('create a container from a service configuration', async () => {
+test('create a container from a service configuration', async () => {
   const container = new DefaultServiceProvider({
     ...config,
     log: false
   }).buildContainer();
 
+  console.log(config);
   expect(
     Object.keys(container._services).indexOf('smartContract')
   ).toBeGreaterThan(-1);
 
   await container.authenticate();
+  console.log(container);
   expect(
     container
       .service('web3')
@@ -87,4 +89,29 @@ test('can define new service roles', () => {
 
   const service = container.service('foo');
   expect(service instanceof FooService).toBeTruthy();
+});
+
+test('throws an error when exchange plugin is missing', async () => {
+  class ExchangeService extends LocalService {
+    constructor(name = 'exchange') {
+      super(name);
+    }
+  }
+  const invalidConfigObj = {
+    ...config,
+    exchange: 'Eth2DaiDirect'
+  };
+  const validConfigObj = {
+    ...config,
+    exchange: ExchangeService
+  };
+  const error =
+    'This service has been extracted from dai.js. Please refer to the documentation to add it as a plugin: \n\n https://github.com/makerdao/dai.js/wiki/Basic-Usage-(Plugins)';
+
+  expect(() =>
+    new DefaultServiceProvider(invalidConfigObj).buildContainer()
+  ).toThrow(error);
+  expect(() =>
+    new DefaultServiceProvider(validConfigObj).buildContainer()
+  ).not.toThrow(error);
 });
