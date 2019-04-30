@@ -11,12 +11,14 @@ export default class GasService extends PublicService {
   }
 
   initialize(settings) {
-    this._gasStationDataPromise = this.fetchGasStationData();
-
     if (settings) {
       this._parseConfig(settings.limit, 'limit');
       this._parseConfig(settings.price, 'price');
     }
+
+    this._gasStationDataPromise = this.disablePrice
+      ? Promise.resolve({})
+      : this.fetchGasStationData();
   }
 
   _parseConfig(settings = 'default', label) {
@@ -55,8 +57,12 @@ export default class GasService extends PublicService {
     if (this.price) return this.price;
     const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
     const gasStationData = await this._gasStationDataPromise;
+    const price = this.get('web3')._web3.utils.toWei(
+      (gasStationData[speedSetting] / 10).toString(),
+      'gwei'
+    );
 
-    return gasStationData[speedSetting];
+    return price;
   }
 
   async getWaitTime(txSpeed) {

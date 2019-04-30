@@ -1,5 +1,5 @@
 import Erc20Token from './Erc20Token';
-import { ETH } from '../Currency';
+import { ETH, WETH } from '../Currency';
 
 export default class WethToken extends Erc20Token {
   constructor(contract, web3Service, decimals) {
@@ -17,7 +17,7 @@ export default class WethToken extends Erc20Token {
     });
   }
 
-  withdraw(amount, { unit = ETH, ...options } = {}) {
+  withdraw(amount, { unit = WETH, ...options } = {}) {
     const value = this._valueForContract(amount, unit);
     return this._contract.withdraw(value, options);
   }

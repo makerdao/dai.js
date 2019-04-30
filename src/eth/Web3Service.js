@@ -5,6 +5,7 @@ import promiseProps from 'promise-props';
 import Web3 from 'web3';
 import ProviderType from './web3/ProviderType';
 import makeSigner from './web3/ShimEthersSigner';
+import { last } from 'lodash';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -180,8 +181,12 @@ export default class Web3Service extends PrivateService {
     });
   }
 
-  getNetwork() {
+  get network() {
     return this._info.network;
+  }
+
+  get rpcUrl() {
+    return last(this._web3.currentProvider._providers).rpcUrl;
   }
 
   blockNumber() {

@@ -121,8 +121,11 @@ test('fetches gas station data', async () => {
 test('returns a valid gas price', async () => {
   const gasStationData = await gasService._gasStationDataPromise;
   const gasPrice = await gasService.getGasPrice();
-  expect(typeof gasPrice).toBe('number');
-  expect(gasPrice).toBe(gasStationData['fast']);
+  const expectedValue = gasService
+    .get('web3')
+    ._web3.utils.toWei((gasStationData['fast'] / 10).toString(), 'gwei');
+  expect(typeof gasPrice).toBe('string');
+  expect(gasPrice).toBe(expectedValue);
 });
 
 test('returns a valid wait time', async () => {

@@ -41,7 +41,7 @@ const maker = Maker.create('test');
 await maker.authenticate();
 
 transferDai(address, amount) {
-  const dai = maker.service('token').getToken(tokens.DAI);
+  const dai = maker.service('token').getToken('DAI');
   return dai.transfer(address, amount);
  }
 ```
