@@ -14,7 +14,7 @@ test('can get a service from maker', async () => {
   expect(ethCdp).toBeDefined();
 });
 
-test('can open a CD, lock eth and draw dai', async () => {
+test('can open a CDP, lock eth and draw dai', async () => {
   const maker = await createMaker();
   const cdp = await maker.openCdp();
   await cdp.lockEth(0.01);
