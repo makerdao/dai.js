@@ -45,8 +45,10 @@
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
     "test:net": "./scripts/run-testchain.sh",
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:mcd": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestMcdConfig.json",
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
-    "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./test/config/jestIntegrationConfig.json"
+    "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:build": "yarn build:backend && ./scripts/run-testchain.sh --ci jest --runInBand build.spec.js"
   },
   "lint-staged": {
     "./{src,web,test,contracts,lib}/**/*.js": [
