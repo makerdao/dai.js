@@ -20,6 +20,7 @@ export default class AccountsService extends PublicService {
       provider: providerAccountFactory,
       browser: browserProviderAccountFactory
     };
+    this._autoSwitchCheckHandle = null;
   }
 
   async initialize(settings = {}) {
@@ -73,12 +74,15 @@ export default class AccountsService extends PublicService {
       this.get('log').info(`Not adding account "${name}" (no address found)`);
       return;
     }
+    accountData.address = accountData.address.toLowerCase();
+
     if (this._getAccountWithAddress(accountData.address)) {
       throw new Error('An account with this address already exists.');
     }
 
     if (!name) name = accountData.address;
     const account = { name, type, ...accountData };
+    if (otherSettings.autoSwitch) account.autoSwitch = otherSettings.autoSwitch;
     this._accounts[name] = account;
     if (!this._currentAccount || name === 'default') {
       this.useAccount(name);
@@ -87,25 +91,6 @@ export default class AccountsService extends PublicService {
       this.get('event').emit('accounts/ADD', {
         account: sanitizeAccount(account)
       });
-    }
-
-    // Detect account change and automatically switch active account if
-    // autoSwitch flag set (Useful if using a browser wallet like MetaMask)
-    // See: https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md#ear-listening-for-selected-account-changes
-    if (otherSettings.autoSwitch && type === AccountType.BROWSER) {
-      const accountCheckHandle = setInterval(async () => {
-        const activeBrowserAddress = window.web3.eth.defaultAccount.toLowerCase();
-        if (activeBrowserAddress !== accountData.address) {
-          clearInterval(accountCheckHandle);
-          if (!this._getAccountWithAddress(activeBrowserAddress)) {
-            await this.addAccount({
-              type: AccountType.BROWSER,
-              autoSwitch: true
-            });
-          }
-          this.useAccount(window.web3.eth.defaultAccount.toLowerCase());
-        }
-      }, 500);
     }
 
     return account;
@@ -118,15 +103,25 @@ export default class AccountsService extends PublicService {
   useAccount(name) {
     const account = this._accounts[name];
     invariant(account, `No account found with name "${name}".`);
-    //if using metamask, need to use the currently selected account
-    if (
-      account.type === AccountType.BROWSER &&
-      window.web3.eth.defaultAccount.toLowerCase() !=
-        account.address.toLowerCase()
-    ) {
-      throw new Error(
-        'cannot use a browser account that is not currently selected'
-      );
+
+    if (this._autoSwitchCheckHandle) clearInterval(this._autoSwitchCheckHandle);
+
+    if (account.type === AccountType.BROWSER) {
+      // if using browser/MetaMask, must use the currently selected account
+      if (window.web3.eth.defaultAccount.toLowerCase() !== account.address) {
+        throw new Error(
+          'cannot use a browser account that is not currently selected'
+        );
+      }
+      // detect account change and automatically switch active account if
+      // autoSwitch flag set (useful if using a browser wallet like MetaMask)
+      // see: https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md#ear-listening-for-selected-account-changes
+      if (account.autoSwitch) {
+        this._autoSwitchCheckHandle = setInterval(
+          this._autoSwitchCheckAccountChange(account.address),
+          500
+        );
+      }
     }
 
     if (this._currentAccount) {
@@ -143,6 +138,21 @@ export default class AccountsService extends PublicService {
         account: this.currentAccount()
       });
     }
+  }
+
+  _autoSwitchCheckAccountChange(addr) {
+    return async () => {
+      const activeBrowserAddress = window.web3.eth.defaultAccount.toLowerCase();
+      if (activeBrowserAddress !== addr) {
+        if (!this._getAccountWithAddress(activeBrowserAddress)) {
+          await this.addAccount({
+            type: AccountType.BROWSER,
+            autoSwitch: true
+          });
+        }
+        this.useAccountWithAddress(activeBrowserAddress);
+      }
+    };
   }
 
   _getAccountWithAddress(addr) {
