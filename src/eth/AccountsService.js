@@ -20,7 +20,6 @@ export default class AccountsService extends PublicService {
       provider: providerAccountFactory,
       browser: browserProviderAccountFactory
     };
-    this._autoSwitchCheckHandle = null;
   }
 
   async initialize(settings = {}) {
@@ -59,7 +58,7 @@ export default class AccountsService extends PublicService {
       options = name;
       name = null;
     }
-    const { type, ...otherSettings } = options;
+    const { type, autoSwitch, ...otherSettings } = options;
     invariant(this._engine, 'engine must be set up before adding an account');
     if (name && this._accounts[name]) {
       throw new Error('An account with this name already exists.');
@@ -81,8 +80,8 @@ export default class AccountsService extends PublicService {
     }
 
     if (!name) name = accountData.address;
-    const account = { name, type, ...accountData };
-    if (otherSettings.autoSwitch) account.autoSwitch = otherSettings.autoSwitch;
+    const account = { name, type, autoSwitch: autoSwitch || false, ...accountData };
+
     this._accounts[name] = account;
     if (!this._currentAccount || name === 'default') {
       this.useAccount(name);
