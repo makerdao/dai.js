@@ -4,7 +4,7 @@ import tokens from '../../contracts/tokens';
 import networks, { TESTNET_ID } from '../../contracts/networks';
 import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
-import { mapValues } from 'lodash';
+import mapValues from 'lodash/mapValues';
 import assert from 'assert';
 
 export default class SmartContractService extends PrivateService {
