@@ -1,7 +1,8 @@
 import { PublicService } from '@makerdao/services-core';
 import TransactionObject from './TransactionObject';
 import { uniqueId } from '../utils';
-import { has, each } from 'lodash';
+import each from 'lodash/each';
+import has from 'lodash/has';
 import { inspect } from 'util';
 import debug from 'debug';
 const log = debug('dai:TransactionManager');

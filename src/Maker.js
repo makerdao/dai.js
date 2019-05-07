@@ -2,7 +2,9 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
-import { mergeWith, cloneDeep, uniq } from 'lodash';
+import mergeWith from 'lodash/mergeWith';
+import cloneDeep from 'lodash/cloneDeep';
+import uniq from 'lodash/uniq';
 
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead

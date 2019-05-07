@@ -86,7 +86,7 @@
     "solc": "^0.4.23",
     "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^3.11.0",
-    "webpack-bundle-analyzer": "^2.13.1"
+    "webpack-bundle-analyzer": "^3.3.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
@@ -102,12 +102,6 @@
     "invariant": "^2.2.2",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.11",
-    "lodash.intersection": "^4.4.0",
-    "lodash.isequal": "^4.5.0",
-    "lodash.merge": "^4.6.1",
-    "lodash.times": "^4.3.2",
-    "lodash.uniq": "^4.5.0",
-    "lodash.values": "^4.3.0",
     "promise-props": "^1.0.0",
     "toposort": "^2.0.2",
     "web3": "1.0.0-beta.34",

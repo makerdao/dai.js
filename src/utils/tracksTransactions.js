@@ -1,4 +1,4 @@
-import { times } from 'lodash';
+import times from 'lodash/times';
 
 /*
 

@@ -28,7 +28,10 @@ async function getAccountAddress(subprovider) {
     subprovider.handleRequest(
       { method: 'eth_accounts', params: [], id: 1 },
       null,
-      (err, val) => (err ? reject(err) : resolve(val[0]))
+      (err, val) =>
+        err
+          ? reject(err)
+          : resolve(typeof val[0] === 'string' ? val[0].toLowerCase() : val[0])
     )
   );
 }
