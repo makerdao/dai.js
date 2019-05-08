@@ -1,4 +1,3 @@
-import AccountsService from '../../src/eth/AccountsService';
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '../helpers/TestAccountProvider';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
@@ -8,6 +7,8 @@ import {
 } from '../../src/eth/accounts/factories';
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
+
+jest.useFakeTimers();
 
 function mockEngine(overrides = {}) {
   return {
@@ -216,7 +217,13 @@ describe('mocking window', () => {
     mockProvider = {
       sendAsync: ({ method }, callback) => {
         if (method === 'eth_accounts') {
-          callback(null, { result: ['0xf00'] });
+          callback(null, {
+            result: [
+              window.web3 && window.web3.eth
+                ? window.web3.eth.defaultAccount
+                : '0xf00'
+            ]
+          });
         }
       }
     };
@@ -247,6 +254,38 @@ describe('mocking window', () => {
         'cannot use a browser account that is not currently selected'
       );
     }
+  });
+
+  test('browser autoSwitch', async () => {
+    window.web3 = {
+      currentProvider: mockProvider,
+      eth: {
+        defaultAccount: '0xf00'
+      }
+    };
+
+    const service = buildTestService('accounts', { accounts: true });
+    await service.manager().authenticate();
+    service._engine = mockEngine();
+
+    await service.addAccount('foo', { type: 'browser', autoSwitch: true });
+    service.useAccount('foo');
+    const promise = new Promise(resolve =>
+      service.get('event').on(
+        'accounts/CHANGE',
+        jest.fn(eventObj => {
+          expect(eventObj.payload.account.address).toEqual('0xf01');
+          resolve();
+        })
+      )
+    );
+    window.web3.eth.defaultAccount = '0xf01'; // this changes when a user switches accounts
+
+    jest.advanceTimersByTime(500);
+    jest.clearAllTimers();
+
+    await promise;
+    expect(service.currentAddress()).toEqual('0xf01');
   });
 
   test('browserProviderAccountFactory with window.web3', async () => {

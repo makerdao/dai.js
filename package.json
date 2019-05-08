@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.15.1",
+  "version": "0.15.3",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -45,8 +45,10 @@
     "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
     "test:net": "./scripts/run-testchain.sh",
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:mcd": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestMcdConfig.json",
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
-    "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./test/config/jestIntegrationConfig.json"
+    "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:build": "yarn build:backend && ./scripts/run-testchain.sh --ci jest --runInBand build.spec.js"
   },
   "lint-staged": {
     "./{src,web,test,contracts,lib}/**/*.js": [
@@ -78,12 +80,13 @@
     "husky": "^0.14.3",
     "jest": "^24.5.0",
     "lint-staged": "^7.1.0",
+    "minimist": "^1.2.0",
     "prettier": "^1.12.1",
     "sane": "^4.0.3",
     "solc": "^0.4.23",
     "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^3.11.0",
-    "webpack-bundle-analyzer": "^2.13.1"
+    "webpack-bundle-analyzer": "^3.3.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
@@ -99,12 +102,6 @@
     "invariant": "^2.2.2",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.11",
-    "lodash.intersection": "^4.4.0",
-    "lodash.isequal": "^4.5.0",
-    "lodash.merge": "^4.6.1",
-    "lodash.times": "^4.3.2",
-    "lodash.uniq": "^4.5.0",
-    "lodash.values": "^4.3.0",
     "promise-props": "^1.0.0",
     "toposort": "^2.0.2",
     "web3": "1.0.0-beta.34",

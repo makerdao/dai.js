@@ -5,7 +5,7 @@ import promiseProps from 'promise-props';
 import Web3 from 'web3';
 import ProviderType from './web3/ProviderType';
 import makeSigner from './web3/ShimEthersSigner';
-import { last } from 'lodash';
+import last from 'lodash/last';
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';

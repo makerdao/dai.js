@@ -1,5 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
-import { map } from 'lodash';
+import map from 'lodash/map';
 import fetch from 'isomorphic-fetch';
 
 export default class GasService extends PublicService {

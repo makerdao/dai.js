@@ -5,8 +5,8 @@ import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
 import browser from './presets/browser.json';
 import inject from './presets/inject.json';
-import merge from 'lodash.merge';
-import intersection from 'lodash.intersection';
+import intersection from 'lodash/intersection';
+import merge from 'lodash/merge';
 import { mergeServiceConfig } from './index';
 import { AccountType } from '../utils/constants';
 

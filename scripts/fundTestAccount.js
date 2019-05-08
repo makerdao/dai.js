@@ -4,7 +4,8 @@
 import Maker from '../src';
 import McdPlugin from '../lib/dai-plugin-mcd/src';
 import { isAddress } from 'web3-utils';
-import { map, uniq } from 'lodash';
+import map from 'lodash/map';
+import uniq from 'lodash/uniq';
 
 const amount = 5;
 
