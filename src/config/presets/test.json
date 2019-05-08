@@ -4,5 +4,6 @@
       "type": "HTTP",
       "url": "http://localhost:2000"
     }
-  }
+  },
+  "cdp": true
 }

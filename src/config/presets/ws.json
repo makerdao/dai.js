@@ -3,5 +3,6 @@
     "provider": {
       "type": "WEBSOCKET"
     }
-  }
+  },
+  "cdp": true
 }

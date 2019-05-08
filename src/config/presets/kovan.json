@@ -4,5 +4,6 @@
       "type": "INFURA",
       "network": "kovan"
     }
-  }
+  },
+  "cdp": true
 }

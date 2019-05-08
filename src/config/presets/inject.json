@@ -3,5 +3,6 @@
     "provider": {
       "type": "INJECT"
     }
-  }
+  },
+  "cdp": true
 }

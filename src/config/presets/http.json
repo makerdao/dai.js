@@ -3,5 +3,6 @@
     "provider": {
       "type": "HTTP"
     }
-  }
+  },
+  "cdp": true
 }

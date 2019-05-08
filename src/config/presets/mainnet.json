@@ -4,5 +4,6 @@
       "type": "INFURA",
       "network": "mainnet"
     }
-  }
+  },
+  "cdp": true
 }
