@@ -1,4 +1,4 @@
-import uniq from 'lodash.uniq';
+import uniq from 'lodash/uniq';
 import { Container } from '@makerdao/services-core';
 import { standardizeConfig } from './index';
 

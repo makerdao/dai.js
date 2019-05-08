@@ -1,4 +1,4 @@
-import merge from 'lodash.merge';
+import merge from 'lodash/merge';
 
 function resolveNameForBoolean(role, bool, { defaults, disabled }) {
   let name;
