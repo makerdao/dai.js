@@ -58,24 +58,24 @@ test('it handles url, privateKey, provider, and web3 options', () => {
           url: 'http://foo.net'
         }
       }
-    ]
+    ],
+    cdp: true
   });
 });
 
-xtest('it overwrites a service name', () => {
-  const config = ConfigFactory.create('http', { exchange: 'OtherService' });
-  expect(config.exchange).toEqual(['OtherService', {}]);
+test('it overwrites a service name', () => {
+  const config = ConfigFactory.create('http', { cdp: 'OtherService' });
+  expect(config.cdp).toEqual(['OtherService', {}]);
 });
 
-// TODO: test this with a different service
-xtest('it adds service options', () => {
-  const config = ConfigFactory.create('http', { exchange: { foo: 'bar' } });
-  expect(config.exchange).toEqual(['OasisExchangeService', { foo: 'bar' }]);
+test('it adds service options', () => {
+  const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
+  expect(config.cdp).toEqual([true, { foo: 'bar' }]);
 });
 
 test('it passes service options for an omitted service', () => {
   const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
-  expect(config.cdp).toEqual({ foo: 'bar' });
+  expect(config.cdp).toEqual([true, { foo: 'bar' }]);
 });
 
 test('it preserves the preset service name', () => {

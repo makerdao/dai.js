@@ -38,13 +38,11 @@ test('create a container from a service configuration', async () => {
     log: false
   }).buildContainer();
 
-  console.log(config);
   expect(
     Object.keys(container._services).indexOf('smartContract')
   ).toBeGreaterThan(-1);
 
   await container.authenticate();
-  console.log(container);
   expect(
     container
       .service('web3')

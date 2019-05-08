@@ -110,7 +110,7 @@ describe('querying service for current proxy address', () => {
   });
 });
 
-describe.only('execute', () => {
+describe('execute', () => {
   let maker, tubContract;
 
   beforeAll(async () => {
@@ -119,7 +119,6 @@ describe.only('execute', () => {
       log: false
     });
     await maker.authenticate();
-    console.log(maker.service('proxy'));
     tubContract = maker.service('smartContract').getContractByName('SAI_TUB');
     await maker.service('proxy').ensureProxy();
   });
