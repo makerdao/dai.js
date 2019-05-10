@@ -1,5 +1,6 @@
 import test from './presets/test.json';
 import kovan from './presets/kovan.json';
+import goerli from './presets/goerli.json';
 import http from './presets/http.json';
 import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
@@ -53,6 +54,9 @@ function loadPreset(name) {
       break;
     case 'kovan':
       preset = kovan;
+      break;
+    case 'goerli':
+      preset = goerli;
       break;
     case 'mainnet':
       preset = mainnet;

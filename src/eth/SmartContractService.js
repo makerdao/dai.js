@@ -120,10 +120,11 @@ export default class SmartContractService extends PrivateService {
     if (!mapping) throw new Error(`Network ID ${id} not found in mapping.`);
     const infos = mapping.contracts;
     if (this._addedContracts) {
-      const networkName = {
+      const networkName = { //todo: have this mapping come from contracts/network.js?
         [TESTNET_ID]: 'testnet',
         [42]: 'kovan',
-        [1]: 'mainnet'
+        [1]: 'mainnet',
+        [5]: 'goerli'
       }[id];
 
       const infos2 = {

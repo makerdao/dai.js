@@ -1,0 +1,9 @@
+{
+  "web3": {
+    "provider": {
+      "type": "INFURA",
+      "network": "goerli"
+    }
+  },
+  "exchange": "OasisExchangeService"
+}
