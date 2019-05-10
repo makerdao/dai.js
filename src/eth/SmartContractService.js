@@ -1,7 +1,7 @@
 import { PrivateService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import networks, { TESTNET_ID } from '../../contracts/networks';
+import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
 import mapValues from 'lodash/mapValues';
@@ -116,17 +116,10 @@ export default class SmartContractService extends PrivateService {
   _getAllContractInfo() {
     const id = this.get('web3').networkId(),
       mapping = networks.find(m => m.networkId === id);
-
     if (!mapping) throw new Error(`Network ID ${id} not found in mapping.`);
     const infos = mapping.contracts;
     if (this._addedContracts) {
-      const networkName = { //todo: have this mapping come from contracts/network.js?
-        [TESTNET_ID]: 'testnet',
-        [42]: 'kovan',
-        [1]: 'mainnet',
-        [5]: 'goerli'
-      }[id];
-
+      const networkName = mapping.name === 'test' ? 'testnet' : mapping.name;
       const infos2 = {
         ...infos,
         ...mapValues(this._addedContracts, ([definition], name) => {
