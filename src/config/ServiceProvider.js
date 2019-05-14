@@ -47,6 +47,11 @@ export default class ServiceProvider {
         instance = new service();
       } else {
         // string
+        if (!this.supports(service) && role === 'exchange') {
+          throw new Error(
+            'This service has been extracted from dai.js. Please refer to the documentation to add it as a plugin: \n\n https://github.com/makerdao/dai.js/wiki/Basic-Usage-(Plugins)'
+          );
+        }
         if (!this.supports(service)) {
           throw new Error('Unsupported service in configuration: ' + service);
         }

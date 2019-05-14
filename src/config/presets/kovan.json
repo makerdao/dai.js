@@ -5,5 +5,5 @@
       "network": "kovan"
     }
   },
-  "exchange": "OasisExchangeService"
+  "cdp": true
 }
