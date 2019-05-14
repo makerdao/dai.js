@@ -21,7 +21,6 @@ const serviceRoles = [
   'allowance',
   'cdp',
   'conversion',
-  'exchange',
   'gas',
   'log',
   'price',

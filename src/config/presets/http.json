@@ -4,5 +4,5 @@
       "type": "HTTP"
     }
   },
-  "exchange": "OasisExchangeService"
+  "cdp": true
 }
