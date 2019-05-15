@@ -1,13 +1,11 @@
 import Maker from '../../src/index';
 import tokens from '../../contracts/tokens';
-import { WETH } from '../../src/eth/Currency';
 import debug from 'debug';
-import createDaiAndPlaceLimitOrder from '../helpers/oasisHelpers';
 import { uniqueId } from '../../src/utils';
 import { infuraProjectId } from '../helpers/serviceBuilders';
 
 const log = debug('dai:testing:integration');
-let maker, cdp, exchange, address, tokenService, txMgr;
+let maker, cdp, address, tokenService, txMgr;
 
 async function convertPeth() {
   const peth = tokenService.getToken(tokens.PETH);
@@ -37,21 +35,6 @@ async function convertWeth() {
   }
 }
 
-async function checkWethBalance() {
-  const weth = tokenService.getToken(tokens.WETH);
-  const wethBalance = await weth.balanceOf(address);
-
-  if (wethBalance.toNumber() < 0.01) {
-    console.log(
-      'Current balance is ' + wethBalance.toString() + ', depositing 0.01'
-    );
-    const convert = maker.service('conversion').convertEthToWeth(0.01);
-    await txMgr.confirm(convert);
-  } else {
-    return;
-  }
-}
-
 beforeAll(async () => {
   if (!process.env.PRIVATE_KEY && process.env.NETWORK !== 'test') {
     throw new Error('Please set a private key to run integration tests.');
@@ -67,7 +50,6 @@ beforeAll(async () => {
         }
       : {
           privateKey: process.env.PRIVATE_KEY,
-          exchange: 'Eth2DaiDirect',
           web3: {
             provider: {
               infuraProjectId
@@ -80,7 +62,6 @@ beforeAll(async () => {
   await maker.authenticate();
   tokenService = maker.service('token');
   address = maker.service('web3').currentAddress();
-  exchange = maker.service('exchange');
   txMgr = maker.service('transactionManager');
   txMgr.onNewTransaction(txo => {
     const {
@@ -134,98 +115,6 @@ test(
   },
   300000
 );
-
-xdescribe('OasisExchangeService', () => {
-  test(
-    'can sell Dai',
-    async () => {
-      let tx, error;
-
-      if (process.env.NETWORK === 'test') {
-        await createDaiAndPlaceLimitOrder(exchange);
-      }
-
-      try {
-        tx = await exchange.sellDai('0.1', WETH);
-      } catch (err) {
-        console.error(err);
-        error = err;
-      }
-
-      expect(tx).toBeDefined();
-      expect(error).toBeUndefined();
-    },
-    600000
-  );
-
-  test(
-    'can buy Dai',
-    async () => {
-      let tx, error;
-      await checkWethBalance();
-
-      if (process.env.NETWORK === 'test') {
-        await createDaiAndPlaceLimitOrder(exchange, true);
-      }
-
-      try {
-        tx = await exchange.buyDai('0.1', WETH);
-      } catch (err) {
-        console.error(err);
-        error = err;
-      }
-
-      expect(tx).toBeDefined();
-      expect(error).toBeUndefined();
-    },
-    600000
-  );
-});
-
-// Running these consecutively seems to confuse jest
-// and causes unexpected errors. Each will work if
-// run independently from the others
-describe('Eth2DaiDirect', () => {
-  xtest(
-    'sell eth for dai',
-    async () => {
-      const order = await maker.service('exchange').sell('ETH', 'DAI', '0.01');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
-
-  xtest(
-    'sell dai for eth',
-    async () => {
-      const order = await maker.service('exchange').sell('DAI', 'ETH', '0.01');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
-
-  xtest(
-    'buy dai with eth',
-    async () => {
-      const order = await maker.service('exchange').buy('DAI', 'ETH', '1');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
-
-  xtest(
-    'buy eth with dai',
-    async () => {
-      const order = await maker.service('exchange').buy('ETH', 'DAI', '0.01');
-      console.log(order);
-      expect(order).toBeDefined();
-    },
-    600000
-  );
-});
 
 test(
   'can wipe debt',

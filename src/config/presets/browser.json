@@ -4,5 +4,5 @@
       "type": "BROWSER"
     }
   },
-  "exchange": "OasisExchangeService"
+  "cdp": true
 }

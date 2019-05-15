@@ -4,5 +4,5 @@
       "type": "WEBSOCKET"
     }
   },
-  "exchange": "OasisExchangeService"
+  "cdp": true
 }
