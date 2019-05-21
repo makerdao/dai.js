@@ -896,9 +896,10 @@
     "@types/istanbul-lib-coverage" "^1.1.0"
     "@types/yargs" "^12.0.9"
 
-"@makerdao/currency@^0.9.0":
-  version "0.9.3"
-  resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.3.tgz#27510303771506b4b64998ce3b15c39b2d558fd9"
+"@makerdao/currency@^0.9.5":
+  version "0.9.5"
+  resolved "https://registry.npmjs.org/@makerdao/currency/-/currency-0.9.5.tgz#ec51811bcb669a669a103bde18b5fcc78b197c72"
+  integrity sha512-XCqsBRoum20DdLyFt1S4acWGY79PcbbIJTkHGfjUd4fN1a4rXC4dVAwnzZBw/fsCutcQLRqxbhdd2sxLvDIKhg==
   dependencies:
     babel-runtime "^6.26.0"
     bignumber.js "^8.1.1"
