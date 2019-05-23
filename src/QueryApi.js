@@ -3,6 +3,23 @@ import fetch from 'isomorphic-fetch';
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
 const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';
 
+export async function getQueryResponse(serverUrl, query, variables) {
+  const resp = await fetch(serverUrl, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      query,
+      variables
+    })
+  });
+
+  const { data } = await resp.json();
+  return data;
+}
+
 export default class QueryApi {
   constructor(network) {
     switch (network) {
@@ -28,16 +45,9 @@ export default class QueryApi {
       }
     }`;
 
-    const resp = await fetch(this.serverUrl, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query, variables: { lad: address } })
+    const response = await getQueryResponse(this.serverUrl, query, {
+      lad: address
     });
-
-    const { data } = await resp.json();
-    return data.allCups.nodes.map(n => n.id);
+    return response.allCups.nodes.map(n => n.id);
   }
 }
