@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import assert from 'assert';
 
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
 const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';
@@ -17,6 +18,7 @@ export async function getQueryResponse(serverUrl, query, variables) {
   });
 
   const { data } = await resp.json();
+  assert(data, `error fetching data from ${serverUrl}`);
   return data;
 }
 
