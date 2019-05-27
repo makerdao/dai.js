@@ -122,6 +122,7 @@ export default class SmartContractService extends PrivateService {
     if (this._addedContracts) {
       const networkName = {
         [TESTNET_ID]: 'testnet',
+        [1337]: 'testnet',
         [42]: 'kovan',
         [1]: 'mainnet'
       }[id];
