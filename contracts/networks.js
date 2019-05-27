@@ -149,5 +149,6 @@ export default [
   { name: 'ropsten', networkId: 3, contracts: null },
   { name: 'rinkeby', networkId: 4, contracts: null },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
+  { name: 'test', networkId: 1337, contracts: contractInfo('test') },
   { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('test') }
 ];
