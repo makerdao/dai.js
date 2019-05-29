@@ -4,7 +4,9 @@
       "module-resolver",
       {
         "alias": {
-          "@makerdao/dai": "./src"
+          "@makerdao/dai/contracts": "./contracts",
+          "@makerdao/dai/src": "./src",
+          "@makerdao/dai": "./src",
         }
       }
     ]
