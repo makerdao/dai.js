@@ -3,7 +3,7 @@
   "description": "Plugin to add Multi-Collateral Dai support to dai.js",
   "version": "0.1.13",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist",
   "scripts": {
     "prepublishOnly": "./scripts/prepublish.sh"
   },
