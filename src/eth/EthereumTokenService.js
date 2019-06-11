@@ -53,7 +53,7 @@ export default class EthereumTokenService extends PrivateService {
     const tokenInfo =
       this._addedTokens[symbol] || this._getCurrentNetworkMapping()[symbol];
 
-    const { address, decimals, abi, currency } = !version
+    let { address, decimals, abi, currency } = !version
       ? tokenInfo[tokenInfo.length - 1]
       : tokenInfo[version - 1];
 
@@ -73,6 +73,10 @@ export default class EthereumTokenService extends PrivateService {
       }
       const tub = scs.getContractByName(contracts.SAI_TUB);
       return new PethToken(contract, this.get('web3'), tub);
+    }
+
+    if (symbol === tokens.COL5) {
+      decimals = 9;
     }
 
     return new Erc20Token(
