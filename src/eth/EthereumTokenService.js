@@ -75,10 +75,6 @@ export default class EthereumTokenService extends PrivateService {
       return new PethToken(contract, this.get('web3'), tub);
     }
 
-    if (symbol === tokens.COL5) {
-      decimals = 9;
-    }
-
     return new Erc20Token(
       contract,
       this.get('web3'),
