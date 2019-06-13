@@ -24,7 +24,7 @@
   "MCD_MOVE_*": "GemMove",
   "MCD_MOVE_DAI": "DaiMove",
   "MCD_PAUSE": "DSPause",
-  "MCD_PAUSE_PLAN": "Plan",
+  "MCD_PAUSE_PROXY": "Plan",
   "MCD_POT": "Pot",
   "MCD_SPOT": "Spotter",
   "MCD_VAT": "Vat",
