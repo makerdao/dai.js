@@ -1,0 +1,1 @@
+[{"constant":true,"inputs":[{"name":"x","type":"address"}],"name":"toBytesAddress","outputs":[{"name":"b","type":"bytes"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":true,"inputs":[{"name":"x","type":"uint256"}],"name":"toBytesUint","outputs":[{"name":"b","type":"bytes"}],"payable":false,"stateMutability":"pure","type":"function"}]
