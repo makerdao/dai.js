@@ -1,4 +1,4 @@
 [submodule "testchain"]
 	path = testchain
 	url = https://github.com/makerdao/testchain
-	branch = v0.2.8
+	branch = dai.js
