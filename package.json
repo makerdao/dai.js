@@ -104,7 +104,7 @@
     "lodash": "^4.17.11",
     "promise-props": "^1.0.0",
     "toposort": "^2.0.2",
-    "web3": "1.0.0-beta.34",
+    "web3": "1.0.0-beta.37",
     "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
   },
   "engines": {

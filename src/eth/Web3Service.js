@@ -83,8 +83,7 @@ export default class Web3Service extends PrivateService {
     this.get('log').info('Web3 is initializing...');
     this._defaultEmitter = this.get('event');
 
-    this._web3 = new Web3();
-    this._web3.setProvider(this.get('accounts').getProvider());
+    this._web3 = new Web3(this.get('accounts').getProvider());
 
     Object.assign(
       this,
