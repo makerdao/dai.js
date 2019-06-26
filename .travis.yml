@@ -11,7 +11,10 @@ cache:
   directories:
   - nix
   timeout: 9000
+git:
+  submodules: false
 before_install:
+- git submodule update --init
 - . scripts/install-dapptools.sh
 - npm i -g npm@latest yarn
 install:
