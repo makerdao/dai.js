@@ -11,7 +11,10 @@ cache:
   directories:
   - nix
   timeout: 9000
+git:
+  submodules: false
 before_install:
+- git submodule update --init
 - . scripts/install-dapptools.sh
 - npm i -g npm@latest yarn
 install:
@@ -19,9 +22,9 @@ install:
 before_script:
 - npm install -g codecov
 script:
-- yarn test:build -s default
+- yarn test:build -s default -u
 - yarn build:frontend
-- yarn coverage -s default
+- yarn coverage -s default -u
 - codecov
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
