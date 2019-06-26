@@ -943,10 +943,10 @@
     babel-runtime "^6.26.0"
     bignumber.js "^8.1.1"
 
-"@makerdao/services-core@0.9.5":
-  version "0.9.5"
-  resolved "https://registry.yarnpkg.com/@makerdao/services-core/-/services-core-0.9.5.tgz#2ab2d4cf056ede36b1b4d2d01cca5ea629b4238b"
-  integrity sha512-76OdWkraW1qBp2CP8hezy8MIJT2qjqQYEVuHxmHhUc4lV+VpGogifh5q49do5u6wDKw0TrESccMzNX7E4/VSZA==
+"@makerdao/services-core@^0.9.8":
+  version "0.9.8"
+  resolved "https://registry.yarnpkg.com/@makerdao/services-core/-/services-core-0.9.8.tgz#14481d59267afc5fd1a6576a783d370eb80a47e3"
+  integrity sha512-Qp/kkiKzqhJCuZ2YZT0cYo2oAyCM05PaJK69AkJ0FS21ETC6/n1oSQWwEpnkuKhutnM4ZO9/uuLWke47wC+ojA==
   dependencies:
     babel-runtime "^6.26.0"
     lodash.values "^4.3.0"
