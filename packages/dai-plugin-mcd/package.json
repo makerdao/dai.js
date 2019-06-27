@@ -12,12 +12,6 @@
     "test": "yarn testchain jest --runInBand",
     "test:integration": "yarn test --config ./test/config/jestIntegrationConfig.json"
   },
-  "lint-staged": {
-    "./{src,web,test,contracts}/**/*.js": [
-      "prettier --single-quote --write",
-      "eslint"
-    ]
-  },
   "peerDependencies": {
     "@makerdao/dai": "^0.16.1"
   },
