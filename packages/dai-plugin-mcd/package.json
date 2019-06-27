@@ -13,11 +13,10 @@
     "test:integration": "yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.16.1"
+    "@makerdao/dai": "^0.16.2"
   },
   "dependencies": {
     "@makerdao/currency": "^0.9.5",
-    "@makerdao/dai": "^0.16.2",
     "@makerdao/services-core": "^0.9.5",
     "bignumber.js": "^8.1.1"
   }
