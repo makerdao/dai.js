@@ -23,7 +23,7 @@ before_script:
 - npm install -g codecov
 script:
 - yarn test:build -s default -u
-- yarn build:frontend
+- yarn build
 - yarn coverage -s default -u
 - codecov
 after_install:

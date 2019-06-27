@@ -5,9 +5,15 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test:net": "./scripts/run-testchain.sh",
-    "test": "./scripts/run-testchain.sh --ci yarn lerna run test",
-    "test:integration": "./scripts/run-testchain.sh --ci yarn lerna run test:integration",
+    "build": "yarn lerna run build",
+    "lint": "eslint src test",
+    "precommit": "lint-staged",
+    "prepush": "yarn test",
+    "prettier": "prettier --single-quote --write '{src,test,contracts}/**/*.js'",
+    "coverage": "yarn testchain --ci yarn lerna run coverage",
+    "testchain": "./scripts/run-testchain.sh",
+    "test": "yarn testchain --ci yarn lerna run test",
+    "test:integration": "yarn testchain --ci yarn lerna run test:integration",
     "test:logs": "tail -f ./testchain/var/ganache.out | grep -v 'eth_blockNumber'"
   },
   "workspaces": [

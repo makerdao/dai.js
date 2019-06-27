@@ -31,12 +31,9 @@
   "module": "dist/src/index.js",
   "main": "dist/src/index.js",
   "scripts": {
+    "build": "yarn build:frontend",
     "testchain": "../../scripts/run-testchain.sh --ci",
-    "coverage": "yarn testchain jest --runInBand --coverage",
-    "lint": "eslint src test",
-    "precommit": "lint-staged",
-    "prepush": "yarn test",
-    "prettier": "prettier --single-quote --write '{src,test,contracts}/**/*.js'",
+    "coverage": "yarn test --coverage",
     "test": "yarn testchain jest --runInBand",
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
@@ -47,12 +44,6 @@
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
     "test:build": "yarn build:backend && yarn test --config ./test/config/jestBuildConfig.json"
-  },
-  "lint-staged": {
-    "./{src,web,test,contracts}/**/*.js": [
-      "prettier --single-quote --write",
-      "eslint"
-    ]
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
