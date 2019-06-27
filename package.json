@@ -6,10 +6,10 @@
   "private": true,
   "scripts": {
     "build": "yarn lerna run build",
-    "lint": "eslint src test",
+    "lint": "eslint packages/**/src packages/**/test",
     "precommit": "lint-staged",
     "prepush": "yarn test",
-    "prettier": "prettier --single-quote --write '{src,test,contracts}/**/*.js'",
+    "prettier": "prettier --single-quote --write 'packages/**/{src,test,contracts}/**/*.js'",
     "coverage": "yarn testchain --ci yarn lerna run coverage",
     "testchain": "./scripts/run-testchain.sh",
     "test": "yarn testchain --ci yarn lerna run test",
@@ -18,7 +18,7 @@
     "test:logs": "tail -f ./testchain/var/ganache.out | grep -v 'eth_blockNumber'"
   },
   "lint-staged": {
-    "./{src,web,test,contracts}/**/*.js": [
+    "./packages/**/{src,web,test,contracts}/**/*.js": [
       "prettier --single-quote --write",
       "eslint"
     ]

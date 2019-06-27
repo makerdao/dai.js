@@ -1,12 +1,17 @@
 import { PublicService } from '@makerdao/services-core';
 import { ServiceRoles } from './constants';
 import { MDAI } from './index';
-import BigNumber from 'bignumber.js'
-import { RAY, WAD, SECONDS_PER_YEAR } from './constants'
+import BigNumber from 'bignumber.js';
+import { RAY, WAD, SECONDS_PER_YEAR } from './constants';
 
 export default class SavingsService extends PublicService {
   constructor(name = ServiceRoles.SAVINGS) {
-    super(name, ['smartContract', 'proxy', 'accounts', ServiceRoles.SYSTEM_DATA]);
+    super(name, [
+      'smartContract',
+      'proxy',
+      'accounts',
+      ServiceRoles.SYSTEM_DATA
+    ]);
   }
 
   async join(amountInDai) {
