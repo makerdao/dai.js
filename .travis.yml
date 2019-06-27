@@ -23,8 +23,8 @@ before_script:
 - npm install -g codecov
 script:
 - yarn lerna bootstrap
-- yarn test:build -s default -u
 - yarn build
+- yarn test:build -s default -u
 - yarn coverage -s default -u
 - codecov
 after_install:
