@@ -11,3 +11,4 @@ ganache.out
 yarn.lock
 package-lock.json
 .vscode/
+yarn-error.log

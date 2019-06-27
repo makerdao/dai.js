@@ -1,0 +1,112 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.13.0/libexec/bin/yarn.js
+
+PATH: 
+  /Users/andrealaw/.cargo/bin:/Users/andrealaw/.nix-profile/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Postgres.app/Contents/Versions/latest/bin:/Users/andrealaw/workspace/google-cloud-sdk/bin:/Users/andrealaw/.cargo/bin:/Users/andrealaw/.nix-profile/bin
+
+Yarn version: 
+  1.13.0
+
+Node version: 
+  11.10.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/andrealaw/workspace/makerdao/dai.js/package.json: Unexpected token < in JSON at position 2
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.13.0/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.13.0/libexec/lib/cli.js:304:30)
+      at /usr/local/Cellar/yarn/1.13.0/libexec/lib/cli.js:315:13
+
+npm manifest: 
+  {
+    "name": "@makerdao/dai",
+    "version": "0.16.2",
+    "contributors": [
+      "Wouter Kampmann <wouter@makerdao.com>",
+      "Sean Brennan <sean@makerdao.com>",
+      "Tyler Sorensen <tyler@makerdao.com>",
+      "Ethan Bennett <ethan@makerdao.com>",
+      "Lawrence Wang <lawrence@makerdao.com>",
+      "Joshua Levine <joshua@makerdao.com>",
+      "Michael Elliot <mike@makerdao.com>"
+    ],
+    "description": "Library for interacting with the Dai Stablecoin System.",
+    "license": "MIT",
+    "keywords": [
+      "makerdao",
+      "mkr",
+      "dai",
+      "cdp",
+      "eth",
+      "margin"
+    ],
+    "bugs": {
+      "url": "https://github.com/makerdao/dai.js/issues",
+      "email": "wouter@makerdao.com"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/makerdao/dai.js.git"
+    },
+    "module": "dist/index.js",
+    "main": "dist/index.js",
+    "scripts": {
+      "build:frontend": "./scripts/build-frontend.sh",
+      "build:backend": "./scripts/build-backend.sh",
+      "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
+      "build:backend:src:watch": "./scripts/watch-backend-src.sh",
+      "coverage": "./scripts/run-testchain.sh --ci jest --runInBand --coverage --config ./test/config/jestDefaultConfig.json",
+      "lint": "eslint src test",
+      "precommit": "lint-staged",
+      "prepush": "npm run test",
+      "prettier": "prettier --single-quote --write '{src,test,contracts,lib}/**/*.js'",
+      "xtest": "../../scripts/run-testchain.sh --ci jest --runInBand",
+      "test:watch": "./scripts/run-testchain.sh --ci jest --watch --runInBand",
+      "test:logs": "tail -f ganache.out | grep -v 'eth_blockNumber'",
+      "test:net": "./scripts/run-testchain.sh",
+      "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+      "test:mcd": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestMcdConfig.json",
+      "test:migrations": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestMigrationsConfig.json",
+      "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+      "test:integration": "export NETWORK='test' && ./scripts/run-testchain.sh --ci jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+      "test:build": "yarn build:backend && ./scripts/run-testchain.sh --ci jest --runInBand build.spec.js"
+    },
+    "lint-staged": {
+      "./{src,web,test,contracts,lib}/**/*.js": [
+        "prettier --single-quote --write",
+        "eslint"
+      ]
+    },
+    "dependencies": {
+      "@babel/runtime": "^7.3.4",
+      "@makerdao/currency": "^0.9.5",
+      "@makerdao/services-core": "^0.9.8",
+      "assert": "^1.4.1",
+      "bignumber.js": "^7.2.1",
+      "chalk": "^2.4.1",
+      "debug": "^3.1.0",
+      "ethers": "^3.0.15",
+      "ethers-web3-bridge": "0.0.1",
+      "eventemitter2": "^5.0.1",
+      "invariant": "^2.2.2",
+      "isomorphic-fetch": "^2.2.1",
+      "lodash": "^4.17.11",
+      "promise-props": "^1.0.0",
+      "toposort": "^2.0.2",
+      "web3": "1.0.0-beta.34",
+      "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
+    },
+    "engines": {
+      "node": "11.10"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

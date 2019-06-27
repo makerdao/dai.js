@@ -1,0 +1,79 @@
+{
+  "name": "@makerdao/dai",
+  "version": "0.16.2",
+  "contributors": [
+    "Wouter Kampmann <wouter@makerdao.com>",
+    "Sean Brennan <sean@makerdao.com>",
+    "Tyler Sorensen <tyler@makerdao.com>",
+    "Ethan Bennett <ethan@makerdao.com>",
+    "Lawrence Wang <lawrence@makerdao.com>",
+    "Joshua Levine <joshua@makerdao.com>",
+    "Michael Elliot <mike@makerdao.com>"
+  ],
+  "description": "Library for interacting with the Dai Stablecoin System.",
+  "license": "MIT",
+  "keywords": [
+    "makerdao",
+    "mkr",
+    "dai",
+    "cdp",
+    "eth",
+    "margin"
+  ],
+  "bugs": {
+    "url": "https://github.com/makerdao/dai.js/issues",
+    "email": "wouter@makerdao.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/makerdao/dai.js.git"
+  },
+  "module": "dist/src/index.js",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "testchain": "../../scripts/run-testchain.sh --ci",
+    "coverage": "yarn testchain jest --runInBand --coverage",
+    "lint": "eslint src test",
+    "precommit": "lint-staged",
+    "prepush": "yarn test",
+    "prettier": "prettier --single-quote --write '{src,test,contracts}/**/*.js'",
+    "test": "yarn testchain jest --runInBand",
+    "build:frontend": "./scripts/build-frontend.sh",
+    "build:backend": "./scripts/build-backend.sh",
+    "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
+    "build:backend:src:watch": "./scripts/watch-backend-src.sh",
+    "test:watch": "yarn test --watch",
+    "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
+    "test:build": "yarn build:backend && yarn test --config ./test/config/jestBuildConfig.json"
+  },
+  "lint-staged": {
+    "./{src,web,test,contracts}/**/*.js": [
+      "prettier --single-quote --write",
+      "eslint"
+    ]
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.3.4",
+    "@makerdao/currency": "^0.9.5",
+    "@makerdao/services-core": "^0.9.8",
+    "assert": "^1.4.1",
+    "bignumber.js": "^7.2.1",
+    "chalk": "^2.4.1",
+    "debug": "^3.1.0",
+    "ethers": "^3.0.15",
+    "ethers-web3-bridge": "0.0.1",
+    "eventemitter2": "^5.0.1",
+    "invariant": "^2.2.2",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.17.11",
+    "promise-props": "^1.0.0",
+    "toposort": "^2.0.2",
+    "web3": "1.0.0-beta.34",
+    "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
+  },
+  "engines": {
+    "node": "11.10"
+  }
+}
