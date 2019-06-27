@@ -1,9 +1,6 @@
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import BigNumber from 'bignumber.js'
 import { MDAI, ETH } from '../src/index';
-import { stringToBytes } from '../src/utils';
-import { RAD } from '../src/constants'
 
 let service, maker, dai, proxyAddress;
 
@@ -25,12 +22,12 @@ describe('Savings Service', () => {
 
   afterAll(async () => {
     await maker.service('allowance').removeAllowance('MDAI', proxyAddress);
-  })
+  });
 
   beforeEach(async () => {
     const amountRemaining = await service.balance();
     if (amountRemaining.gt(0)) await service.exit(MDAI(amountRemaining));
-  })
+  });
 
   test('get dai savings rate', async () => {
     const dsr = await service.getYearlyRate();
@@ -39,15 +36,15 @@ describe('Savings Service', () => {
   });
 
   test('get total amount of dai in pot', async () => {
-    await makeSomeDai(3)
+    await makeSomeDai(3);
     const potTotalBeforeJoin = await service.getTotalDai();
     expect(potTotalBeforeJoin.toNumber()).toBe(0);
 
-    await service.join(MDAI(2))
+    await service.join(MDAI(2));
 
     const potTotalAfterJoin = await service.getTotalDai();
     expect(potTotalAfterJoin.toNumber()).toBe(2);
-  })
+  });
 
   test('check amount in balance', async () => {
     const amount = await service.balance();
@@ -71,7 +68,7 @@ describe('Savings Service', () => {
 
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBe(startingBalance);
-  })
+  });
 
   test('join and exit pot', async () => {
     const startingBalance = (await dai.balance()).toNumber();
@@ -91,4 +88,4 @@ describe('Savings Service', () => {
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBe(startingBalance);
   });
-})
+});

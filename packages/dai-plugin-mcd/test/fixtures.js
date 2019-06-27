@@ -1,6 +1,5 @@
 import { MDAI } from '../src';
 
-
 export function dummyEventData(ilkIdentifier) {
   return [
     {

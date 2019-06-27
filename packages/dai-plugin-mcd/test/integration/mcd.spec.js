@@ -85,111 +85,99 @@ const scenarios = [['ETH-A', ETH]];
 describe.each(scenarios)('%s', (ilk, GEM) => {
   let startingGemBalance, startingDaiBalance;
 
-  test(
-    'open',
-    async () => {
-      const cdp = await maker.service(CDP_MANAGER).open(ilk);
-      expect(cdp.id).toBeGreaterThan(0);
-      await expectValues(cdp, { collateral: 0, debt: 0 });
-    },
-    30000
-  );
+  test('open', async () => {
+    const cdp = await maker.service(CDP_MANAGER).open(ilk);
+    expect(cdp.id).toBeGreaterThan(0);
+    await expectValues(cdp, { collateral: 0, debt: 0 });
+  }, 30000);
 
-  test(
-    'openLock, lock, lockAndDraw, free',
-    async () => {
-      startingGemBalance = await maker.getToken(GEM).balance();
-      startingDaiBalance = await dai.balance();
-      await dai.approveUnlimited(proxy);
-      const cdp = await maker
-        .service(CDP_MANAGER)
-        .openLockAndDraw(ilk, GEM(0.01));
-      await expectValues(cdp, {
-        collateral: 0.01,
-        debt: 0,
-        myGem: startingGemBalance.minus(0.01)
-      });
+  test('openLock, lock, lockAndDraw, free', async () => {
+    startingGemBalance = await maker.getToken(GEM).balance();
+    startingDaiBalance = await dai.balance();
+    await dai.approveUnlimited(proxy);
+    const cdp = await maker
+      .service(CDP_MANAGER)
+      .openLockAndDraw(ilk, GEM(0.01));
+    await expectValues(cdp, {
+      collateral: 0.01,
+      debt: 0,
+      myGem: startingGemBalance.minus(0.01)
+    });
 
-      await cdp.lockCollateral(0.01);
-      await expectValues(cdp, {
-        collateral: 0.02,
-        myGem: startingGemBalance.minus(0.02)
-      });
+    await cdp.lockCollateral(0.01);
+    await expectValues(cdp, {
+      collateral: 0.02,
+      myGem: startingGemBalance.minus(0.02)
+    });
 
-      await cdp.lockAndDraw(0.01, 0.5);
-      await expectValues(cdp, {
-        collateral: 0.03,
-        debt: 0.5,
-        myDai: startingDaiBalance.plus(0.5),
-        myGem: startingGemBalance.minus(0.03)
-      });
+    await cdp.lockAndDraw(0.01, 0.5);
+    await expectValues(cdp, {
+      collateral: 0.03,
+      debt: 0.5,
+      myDai: startingDaiBalance.plus(0.5),
+      myGem: startingGemBalance.minus(0.03)
+    });
 
-      await cdp.freeCollateral(0.008);
-      await expectValues(cdp, {
-        collateral: 0.022,
-        myGem: startingGemBalance.minus(0.022)
-      });
-    },
-    180000
-  );
+    await cdp.freeCollateral(0.008);
+    await expectValues(cdp, {
+      collateral: 0.022,
+      myGem: startingGemBalance.minus(0.022)
+    });
+  }, 180000);
 
-  test(
-    'openLockAndDraw, get, draw, wipe, wipeAndFree',
-    async () => {
-      const txStates = ['pending', 'mined', 'confirmed'];
-      const mgr = maker.service(CDP_MANAGER);
-      startingGemBalance = await maker.getToken(GEM).balance();
-      startingDaiBalance = await dai.balance();
-      await dai.approveUnlimited(proxy);
-      const cdp = await mgr.openLockAndDraw(ilk, GEM(0.01), MDAI(0.1));
-      await expectValues(cdp, {
-        collateral: 0.01,
-        debt: 0.1,
-        myDai: startingDaiBalance.plus(0.1),
-        myGem: startingGemBalance.minus(0.01)
-      });
+  test('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
+    const txStates = ['pending', 'mined', 'confirmed'];
+    const mgr = maker.service(CDP_MANAGER);
+    startingGemBalance = await maker.getToken(GEM).balance();
+    startingDaiBalance = await dai.balance();
+    await dai.approveUnlimited(proxy);
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(0.01), MDAI(0.1));
+    await expectValues(cdp, {
+      collateral: 0.01,
+      debt: 0.1,
+      myDai: startingDaiBalance.plus(0.1),
+      myGem: startingGemBalance.minus(0.01)
+    });
 
-      const sameCdp = await mgr.getCdp(cdp.id);
-      await expectValues(sameCdp, { collateral: 0.01, debt: 0.1 });
+    const sameCdp = await mgr.getCdp(cdp.id);
+    await expectValues(sameCdp, { collateral: 0.01, debt: 0.1 });
 
-      const draw = cdp.drawDai(0.1);
-      const drawHandler = jest.fn((tx, state) => {
-        expect(tx.metadata.method).toBe(
-          `lock${GEM == ETH ? 'ETH' : 'Gem'}AndDraw`
-        );
-        expect(state).toBe(txStates[drawHandler.mock.calls.length - 1]);
-      });
-      txMgr.listen(draw, drawHandler);
-      await draw;
-      expect(drawHandler.mock.calls.length).toBe(2);
-      await expectValues(cdp, {
-        debt: 0.2,
-        myDai: startingDaiBalance.plus(0.2)
-      });
+    const draw = cdp.drawDai(0.1);
+    const drawHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe(
+        `lock${GEM == ETH ? 'ETH' : 'Gem'}AndDraw`
+      );
+      expect(state).toBe(txStates[drawHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(draw, drawHandler);
+    await draw;
+    expect(drawHandler.mock.calls.length).toBe(2);
+    await expectValues(cdp, {
+      debt: 0.2,
+      myDai: startingDaiBalance.plus(0.2)
+    });
 
-      const wipe = cdp.wipeDai(0.05);
-      const wipeHandler = jest.fn((tx, state) => {
-        expect(tx.metadata.method).toBe(
-          `wipeAndFree${GEM == ETH ? 'ETH' : 'Gem'}`
-        );
-        expect(state).toBe(txStates[wipeHandler.mock.calls.length - 1]);
-      });
-      txMgr.listen(wipe, wipeHandler);
-      await wipe;
-      expect(wipeHandler.mock.calls.length).toBe(2);
-      await expectValues(cdp, {
-        debt: 0.15,
-        myDai: startingDaiBalance.plus(0.15)
-      });
+    const wipe = cdp.wipeDai(0.05);
+    const wipeHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe(
+        `wipeAndFree${GEM == ETH ? 'ETH' : 'Gem'}`
+      );
+      expect(state).toBe(txStates[wipeHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(wipe, wipeHandler);
+    await wipe;
+    expect(wipeHandler.mock.calls.length).toBe(2);
+    await expectValues(cdp, {
+      debt: 0.15,
+      myDai: startingDaiBalance.plus(0.15)
+    });
 
-      await cdp.wipeAndFree(MDAI(0.1), GEM(0.005));
-      await expectValues(cdp, {
-        collateral: 0.005,
-        debt: 0.05,
-        myDai: startingDaiBalance.plus(0.05),
-        myGem: startingGemBalance.minus(0.005)
-      });
-    },
-    210000
-  );
+    await cdp.wipeAndFree(MDAI(0.1), GEM(0.005));
+    await expectValues(cdp, {
+      collateral: 0.005,
+      debt: 0.05,
+      myDai: startingDaiBalance.plus(0.05),
+      myGem: startingGemBalance.minus(0.005)
+    });
+  }, 210000);
 });

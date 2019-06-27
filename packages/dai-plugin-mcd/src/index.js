@@ -14,7 +14,14 @@ import SystemDataService from './SystemDataService';
 import QueryApiMcdService from './QueryApiMcdService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 export const ServiceRoles = ServiceRoles_;
-const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, AUCTION, QUERY_API, SAVINGS } = ServiceRoles;
+const {
+  CDP_MANAGER,
+  CDP_TYPE,
+  SYSTEM_DATA,
+  AUCTION,
+  QUERY_API,
+  SAVINGS
+} = ServiceRoles;
 
 // look up contract ABIs using abiMap.
 // if an exact match is not found, prefix-match against keys ending in *, e.g.

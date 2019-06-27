@@ -1,7 +1,6 @@
 import { COL1 } from '../src';
 import { mcdMaker } from './helpers';
 import addresses from '../contracts/addresses/testnet.json';
-import { createCurrency } from '@makerdao/currency';
 
 let maker;
 
