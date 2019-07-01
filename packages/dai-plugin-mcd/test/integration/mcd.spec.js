@@ -1,7 +1,7 @@
 import { mcdMaker } from '../helpers';
 import { ServiceRoles } from '../../src/constants';
 import { ETH, MDAI } from '../../src';
-import { uniqueId } from '../../src/utils';
+import { uniqueId } from '../../src/utils/index';
 import debug from 'debug';
 import { infuraProjectId } from './index';
 
