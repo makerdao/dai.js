@@ -14,7 +14,7 @@
     "@makerdao/currency": "^0.9.5",
     "@makerdao/services-core": "^0.9.5",
     "bignumber.js": "^8.1.1",
-    "decimal.js": "3.0.0"
+    "decimal.js": "^10.2.0"
   },
   "devDependencies": {
     "sane": "^4.1.0"
