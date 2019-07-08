@@ -1,5 +1,0 @@
-{
-  "rootDir": "../../",
-  "testMatch": ["<rootDir>/lib/dai-plugin-mcd/test/*.spec.js"],
-  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/", "<rootDir>/test/"]
-}
