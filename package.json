@@ -12,6 +12,7 @@
     "prettier": "prettier --single-quote --write 'packages/**/{src,test,contracts}/**/*.js'",
     "coverage": "yarn testchain --ci yarn lerna run --concurrency 1 coverage",
     "testchain": "./scripts/run-testchain.sh",
+    "testchain:fast": "./scripts/run-testchain.sh -s default -u",
     "test": "yarn testchain --ci yarn lerna run --concurrency 1 test",
     "test:integration": "yarn testchain --ci yarn lerna --concurrency 1 run test:integration",
     "test:build": "yarn testchain --ci yarn lerna run --concurrency 1 test:build",
