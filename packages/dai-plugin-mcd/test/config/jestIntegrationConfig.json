@@ -1,0 +1,5 @@
+{
+  "rootDir": "../../",
+  "testMatch": ["<rootDir>/test/integration/*.spec.js"],
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"]
+}
