@@ -14,7 +14,7 @@ export default class SystemDataService extends PublicService {
   async getAnnualBaseRate() {
     const base = await this.jug.base();
     const baseBigNumber = new BigNumber(base.toString()).dividedBy(RAY).plus(1);
-    
+
     BigNumber.config({ POW_PRECISION: 100 });
     return baseBigNumber
       .pow(SECONDS_PER_YEAR)
