@@ -9,8 +9,7 @@ beforeAll(async () => {
   service = maker.service(ServiceRoles.SYSTEM_DATA);
 });
 
-// This will fail until the next release (>v0.2.9)
-xtest('get annual base rate', async () => {
+test('get annual base rate', async () => {
   const rate = await service.getAnnualBaseRate();
   expect(rate).toBe(0);
 });
