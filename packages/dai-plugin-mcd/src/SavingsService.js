@@ -58,8 +58,6 @@ export default class SavingsService extends PublicService {
 
   async getYearlyRate() {
     const dsr = new BigNumber(await this._pot.dsr()).div(RAY);
-    BigNumber.config({ POW_PRECISION: 100 });
-
     return dsr.pow(SECONDS_PER_YEAR);
   }
 

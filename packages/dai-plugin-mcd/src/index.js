@@ -13,6 +13,8 @@ import AuctionService from './AuctionService';
 import SystemDataService from './SystemDataService';
 import QueryApiMcdService from './QueryApiMcdService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
+import BigNumber from 'bignumber.js';
+
 export const ServiceRoles = ServiceRoles_;
 const {
   CDP_MANAGER,
@@ -129,6 +131,10 @@ export default {
         delete addContracts[c];
       }
     }
+
+    // Set global BigNumber precision to enable
+    // exponential operations
+    BigNumber.config({ POW_PRECISION: 100 });
 
     return {
       smartContract: { addContracts },
