@@ -7,10 +7,6 @@ export default class SystemDataService extends PublicService {
     super(name, ['smartContract', 'token']);
   }
 
-  formatFixedDefault(n) {
-    return Math.format(n, { notation: 'fixed' });
-  }
-
   async getAnnualBaseRate() {
     const base = await this.jug.base();
     const baseBigNumber = new BigNumber(base.toString()).dividedBy(RAY).plus(1);

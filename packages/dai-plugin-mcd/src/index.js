@@ -132,8 +132,7 @@ export default {
       }
     }
 
-    // Set global BigNumber precision to enable
-    // exponential operations
+    // Set global BigNumber precision to enable exponential operations
     BigNumber.config({ POW_PRECISION: 100 });
 
     return {
