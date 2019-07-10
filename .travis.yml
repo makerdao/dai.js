@@ -26,7 +26,6 @@ script:
 - yarn build
 - yarn test:build -s default -u
 - yarn coverage -s default -u
-- yarn test -s default -u
 - codecov
 after_install:
 - cat /home/travis/.npm/_logs/2018-02-*.log
