@@ -92,7 +92,7 @@ export default class EthereumCdpService extends PrivateService {
     }
 
     const proxy = await this.get('proxy').currentProxy();
-    if (owner === proxy.toLowerCase()) {
+    if (proxy && owner === proxy.toLowerCase()) {
       return new ProxyCdp(this, proxy, id);
     }
 
