@@ -114,7 +114,12 @@ export default class AccountsService extends PublicService {
 
     if (account.type === AccountType.BROWSER) {
       // if using browser/MetaMask, must use the currently selected account
-      if (window.web3.eth.defaultAccount.toLowerCase() !== account.address) {
+      // however, defaultAccount can be *unset* the first time the user
+      // connects their browser account. So we bypass the check here.
+      if (
+        window.web3.eth.defaultAccount &&
+        window.web3.eth.defaultAccount.toLowerCase() !== account.address
+      ) {
         throw new Error(
           'cannot use a browser account that is not currently selected'
         );
