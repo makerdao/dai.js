@@ -12,27 +12,17 @@ import { dummyEventData, formattedDummyEventData } from './fixtures';
 // this plugin is moved into its own module...
 import TestAccountProvider from './helpers/TestAccountProvider';
 
-let maker,
-  cdpMgr,
-  txMgr,
-  transactionCount,
-  snapshotId,
-  nonceService,
-  currentAddress;
+let maker, cdpMgr, txMgr, snapshotData;
 
 beforeAll(async () => {
   maker = await mcdMaker();
   cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   txMgr = maker.service('transactionManager');
-  nonceService = maker.service('nonce');
-  currentAddress = maker.service('web3').currentAddress();
-  transactionCount = nonceService._counts[currentAddress];
-  snapshotId = await takeSnapshot();
+  snapshotData = await takeSnapshot(maker);
 });
 
 afterAll(async () => {
-  await restoreSnapshot(snapshotId);
-  nonceService._counts[currentAddress] = transactionCount;
+  await restoreSnapshot(snapshotData, maker);
 });
 
 test('getCdpIds gets empty CDP data from a proxy', async () => {

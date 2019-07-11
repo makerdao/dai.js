@@ -10,7 +10,7 @@ import { MDAI, ETH } from '../src/index';
 let service, maker, dai, proxyAddress;
 
 describe('Savings Service', () => {
-  let snapshotId, transactionCount, nonceService, currentAddress;
+  let snapshotData;
 
   async function makeSomeDai(amount) {
     const cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
@@ -23,10 +23,7 @@ describe('Savings Service', () => {
     service = maker.service(ServiceRoles.SAVINGS);
     dai = maker.getToken(MDAI);
     proxyAddress = await maker.service('proxy').ensureProxy();
-    nonceService = maker.service('nonce');
-    currentAddress = maker.service('web3').currentAddress();
     await dai.approveUnlimited(proxyAddress);
-    transactionCount = nonceService._counts[currentAddress];
   });
 
   afterAll(async () => {
@@ -34,12 +31,11 @@ describe('Savings Service', () => {
   });
 
   beforeEach(async () => {
-    snapshotId = await takeSnapshot();
+    snapshotData = await takeSnapshot(maker);
   });
 
   afterEach(async () => {
-    await restoreSnapshot(snapshotId);
-    nonceService._counts[currentAddress] = transactionCount;
+    await restoreSnapshot(snapshotData, maker);
   });
 
   test('get dai savings rate', async () => {

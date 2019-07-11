@@ -11,14 +11,7 @@ import { createCurrencyRatio } from '@makerdao/currency';
 
 const { CDP_MANAGER, QUERY_API } = ServiceRoles;
 
-let currentAddress,
-  dai,
-  maker,
-  nonceService,
-  proxy,
-  snapshotId,
-  transactionCount,
-  txMgr;
+let dai, maker, proxy, snapshotData, txMgr;
 
 beforeAll(async () => {
   maker = await mcdMaker();
@@ -26,16 +19,12 @@ beforeAll(async () => {
   // the current account has a proxy only because the testchain setup script
   // creates it -- this is probably not a future-proof assumption
   proxy = await maker.currentProxy();
-  currentAddress = maker.service('web3').currentAddress();
   txMgr = maker.service('transactionManager');
-  nonceService = maker.service('nonce');
-  transactionCount = nonceService._counts[currentAddress];
-  snapshotId = await takeSnapshot();
+  snapshotData = await takeSnapshot(maker);
 });
 
 afterAll(async () => {
-  await restoreSnapshot(snapshotId);
-  nonceService._counts[currentAddress] = transactionCount;
+  await restoreSnapshot(snapshotData, maker);
 });
 
 test('prevent locking the wrong collateral type', async () => {
