@@ -7,9 +7,9 @@
   "scripts": {
     "build": "yarn prepublishOnly",
     "prepublishOnly": "./scripts/prepublish.sh",
-    "testchain": "../../scripts/run-testchain.sh --ci",
+    "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
-    "test": "yarn testchain jest --runInBand",
+    "test": "yarn testchain --ci jest --runInBand",
     "test:integration": "yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {

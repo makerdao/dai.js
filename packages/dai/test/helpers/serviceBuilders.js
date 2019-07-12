@@ -56,18 +56,21 @@ export function buildTestService(name, settings = {}) {
   return buildTestContainer(settings).service(name);
 }
 
-export function buildTestEthereumCdpService() {
-  return buildTestService('cdp', { cdp: true });
+export function buildTestEthereumCdpService(settings = {}) {
+  return buildTestService('cdp', { ...settings, cdp: true });
 }
 
-export function buildTestEthereumTokenService() {
-  return buildTestService('token', { token: true });
+export function buildTestEthereumTokenService(settings = {}) {
+  return buildTestService('token', { ...settings, token: true });
 }
 
-export function buildTestSmartContractService() {
-  return buildTestService('smartContract', { smartContract: true });
+export function buildTestSmartContractService(settings = {}) {
+  return buildTestService('smartContract', {
+    ...settings,
+    smartContract: true
+  });
 }
 
-export function buildTestEventService() {
-  return buildTestService('event', { event: true });
+export function buildTestEventService(settings = {}) {
+  return buildTestService('event', { ...settings, event: true });
 }

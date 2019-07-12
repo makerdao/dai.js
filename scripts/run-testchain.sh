@@ -4,4 +4,4 @@ set -e
 CWD="${0%/*}"
 
 $CWD/set-polling-interval.sh
-$CWD/../testchain/scripts/launch $@
+$CWD/../node_modules/@makerdao/testchain/scripts/launch -s default --fast $@
