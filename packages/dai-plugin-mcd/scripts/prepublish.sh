@@ -7,5 +7,5 @@ fi
 CWD=`dirname $0`
 rm -rf dist/*
 cd ../..
-./node_modules/.bin/babel --no-babelrc -d lib/dai-plugin-mcd/dist lib/dai-plugin-mcd/src
+./node_modules/.bin/babel --no-babelrc -d packages/dai-plugin-mcd/dist packages/dai-plugin-mcd/src
 cd - >/dev/null

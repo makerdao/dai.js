@@ -1,7 +1,7 @@
 import { PublicService } from '@makerdao/services-core';
 import { ServiceRoles } from './constants';
-import { TESTNET_ID } from '@makerdao/dai/contracts/networks';
-import { getQueryResponse } from '@makerdao/dai/src/QueryApi';
+import { TESTNET_ID } from '@makerdao/dai/dist/contracts/networks';
+import { getQueryResponse } from '@makerdao/dai/dist/src/QueryApi';
 
 const LOCAL_URL = 'http://localhost:5000/graphql';
 const KOVAN_SERVER_URL = 'http://vdb0-testing.vulcanize.io:5000/graphql';
