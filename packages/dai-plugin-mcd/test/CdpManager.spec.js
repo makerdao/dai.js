@@ -1,4 +1,9 @@
-import { mcdMaker, setupCollateral } from './helpers';
+import {
+  mcdMaker,
+  setupCollateral,
+  takeSnapshot,
+  restoreSnapshot
+} from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { ETH, MDAI } from '../src';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
@@ -7,12 +12,17 @@ import { dummyEventData, formattedDummyEventData } from './fixtures';
 // this plugin is moved into its own module...
 import TestAccountProvider from './helpers/TestAccountProvider';
 
-let maker, cdpMgr, txMgr;
+let maker, cdpMgr, txMgr, snapshotData;
 
 beforeAll(async () => {
   maker = await mcdMaker();
   cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   txMgr = maker.service('transactionManager');
+  snapshotData = await takeSnapshot(maker);
+});
+
+afterAll(async () => {
+  await restoreSnapshot(snapshotData, maker);
 });
 
 test('getCdpIds gets empty CDP data from a proxy', async () => {
@@ -35,7 +45,6 @@ test('getCdpIds gets all CDP data from the proxy', async () => {
 });
 
 test('getCombinedDebtValue', async () => {
-  // await setDebtCeiling(maker, MDAI(100));
   await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
   await cdpMgr.openLockAndDraw('ETH-A', ETH(1), MDAI(3));
   await cdpMgr.openLockAndDraw('ETH-A', ETH(2), MDAI(5));

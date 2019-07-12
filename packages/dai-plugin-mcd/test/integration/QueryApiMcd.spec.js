@@ -63,11 +63,11 @@ const frobParams = {
   kovan: [
     {
       urn: '0xE034c5D04892F95F738AEc00B80C2679B304fC22',
-      ilk: 'COL1-A'
+      ilk: 'REP-A'
     },
     {
       urn: '0x4E95F961BafFe16cF222D329cE5D9dc45aD9086d',
-      ilk: 'COL1-A'
+      ilk: 'REP-A'
     }
   ]
 };

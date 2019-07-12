@@ -3,6 +3,17 @@ import { ServiceRoles } from '../src/constants';
 
 const scenarios = [['ETH-A'], ['MDAI'], ['MKR']];
 
+/*
+  The following arrays are expected values for each tested
+  collateral type. The defined values are:
+  [max bid lifetime, min bid increase]
+*/
+const systemData = {
+  'ETH-A': [1, 0.01],
+  'MDAI': [3, 0.05],
+  'MKR': [3, 0.05]
+};
+
 describe.each(scenarios)('%s', ilk => {
   let auction;
 
@@ -14,7 +25,7 @@ describe.each(scenarios)('%s', ilk => {
 
   test('get max bid lifetime', async () => {
     const time = await auction.getMaxBidLifetime();
-    expect(time).toBe(3);
+    expect(time).toBe(systemData[ilk][0]);
   });
 
   test('get max auction duration', async () => {
@@ -24,6 +35,6 @@ describe.each(scenarios)('%s', ilk => {
 
   test('get min bid increase', async () => {
     const time = await auction.getMinBidIncrease();
-    expect(time).toBe(0.05);
+    expect(time).toBe(systemData[ilk][1]);
   });
 });

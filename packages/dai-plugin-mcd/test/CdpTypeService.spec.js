@@ -1,31 +1,29 @@
 import { createCurrencyRatio } from '@makerdao/currency';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import { ETH, MDAI, MKR, USD, COL1 } from '../src';
+import { ETH, MDAI, MKR, USD, REP } from '../src';
 const { CDP_MANAGER, CDP_TYPE, QUERY_API } = ServiceRoles;
 
 let maker, service;
 
 // these CDP types should be available to the Maker instance because
 // of the configuration passed into it (see test/helpers.js)
-const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['COL1-A', COL1]];
-let systemValues = {};
+const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['REP-A', REP]];
 
-function setSystemValues() {
-  const values = [[1000, 1.5, '2.5'], [500, 1.8, '1.5'], [800, 1.8, '2.0']];
-  let scenario;
-  for (scenario = 0; scenario < scenarios.length; scenario++) {
-    systemValues[scenarios[scenario][0]] = {
-      expectedCeiling: values[scenario][0],
-      expectedRatio: values[scenario][1],
-      expectedFee: values[scenario][2]
-    };
-  }
-}
+/*
+  The following arrays are expected values for each tested
+  collateral type. The defined values are:
+  [total collateral, total debt, debt ceiling, liquidation ratio,
+  liquidation penalty, annual stability fee]
+*/
+const systemValues = {
+  'ETH-A': [2, '4', 100000, 1.5, 0.05, '5.0'],
+  'ETH-B': [2, '4', 100000, 2, 0.05, '4.0'],
+  'REP-A': [2, '4', 5000, 1.8, 0.08, '10.0']
+};
 
 beforeAll(async () => {
   maker = await mcdMaker();
-  setSystemValues();
   jest.setTimeout(8000);
 });
 
@@ -61,12 +59,14 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
 
   test('get total collateral', async () => {
     const total = await cdpType.getTotalCollateral();
-    expect(total).toEqual(GEM(2));
+    expect(total).toEqual(GEM(systemValues[ilk][0]));
   });
 
   test('get total collateral in USD', async () => {
     const collateral = await cdpType.getTotalCollateral(USD);
-    expect(collateral.toNumber()).toEqual(USD(20).toNumber());
+    expect(collateral.toNumber()).toEqual(
+      USD(systemValues[ilk][0] * 10).toNumber()
+    );
   });
 
   test('throw error for invalid collateral type', async () => {
@@ -82,19 +82,17 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
 
   test('get total debt', async () => {
     const debt = await cdpType.getTotalDebt();
-    expect(debt).toEqual(MDAI(4));
+    expect(debt).toEqual(MDAI(systemValues[ilk][1]));
   });
 
   test('get debt ceiling', async () => {
-    const { expectedCeiling } = systemValues[ilk];
     const ceiling = await cdpType.getDebtCeiling();
-    expect(ceiling).toEqual(MDAI(expectedCeiling));
+    expect(ceiling).toEqual(MDAI(systemValues[ilk][2]));
   });
 
   test('get liquidation ratio', async () => {
-    const { expectedRatio } = systemValues[ilk];
     const ratio = await cdpType.getLiquidationRatio();
-    expect(ratio.toNumber()).toBe(expectedRatio);
+    expect(ratio.toNumber()).toBe(systemValues[ilk][3]);
   });
 
   test('get price', async () => {
@@ -104,13 +102,12 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
 
   test('get liquidation penalty', async () => {
     const penalty = await cdpType.getLiquidationPenalty();
-    expect(penalty).toBe(0.05);
+    expect(penalty).toBe(systemValues[ilk][4]);
   });
 
   test('get annual stability fee', async () => {
-    const { expectedFee } = systemValues[ilk];
     const penalty = await cdpType.getAnnualStabilityFee();
-    expect((penalty * 100).toFixed(1)).toBe(expectedFee);
+    expect((penalty * 100).toFixed(1)).toBe(systemValues[ilk][5]);
   });
 
   test('get price history', async () => {

@@ -6,7 +6,7 @@ multi-collateral dai contracts
 ### Example usage
 
 ```js
-import McdPlugin, { ETH, COL1, MDAI } from '@makerdao/dai-plugin-mcd';
+import McdPlugin, { ETH, REP, MDAI } from '@makerdao/dai-plugin-mcd';
 import Maker from '@makerdao/dai';
 import { createCurrency } from '@makerdao/currency';
 import { tokenAddress, tokenAbi } from 'someOtherTokenData';
@@ -20,10 +20,10 @@ const maker = await Maker.create('http', {
       McdPlugin,
       {
         // omit this option to get the default set:
-        // ETH-A, ETH-B, COL1-A
+        // ETH-A, ETH-B, REP-A
         cdpTypes: [
           { currency: ETH, ilk: 'ETH-A' },
-          { currency: COL1, ilk: 'COL1-A' },
+          { currency: REP, ilk: 'REP-A' },
           { currency: TOK, ilk: 'TOK-Z', address: tokenAddress, abi: tokenAbi },
         ]
       }
@@ -33,7 +33,7 @@ const maker = await Maker.create('http', {
 
 await maker.service('proxy').ensureProxy();
 const cdpManager = maker.service('mcd:cdpManager');
-const cdp1 = await cdpManager.openLockAndDraw('COL1-A', COL1(50), MDAI(1000));
+const cdp1 = await cdpManager.openLockAndDraw('REP-A', REP(50), MDAI(1000));
 const cdp2 = await cdpManager.openLockAndDraw('ETH-A', ETH(50), MDAI(1000));
 const cdp3 = await cdpManager.openLockAndDraw('TOK-Z', TOK(50), MDAI(1000));
 ```

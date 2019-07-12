@@ -1,5 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
-import { RAD, RAY, ServiceRoles } from './constants';
+import { RAD, RAY, ServiceRoles, SECONDS_PER_YEAR } from './constants';
 import BigNumber from 'bignumber.js';
 
 export default class SystemDataService extends PublicService {
@@ -10,10 +10,8 @@ export default class SystemDataService extends PublicService {
   async getAnnualBaseRate() {
     const base = await this.jug.base();
     const baseBigNumber = new BigNumber(base.toString()).dividedBy(RAY).plus(1);
-    const secondsPerYear = 60 * 60 * 24 * 365;
-    BigNumber.config({ POW_PRECISION: 100 });
     return baseBigNumber
-      .pow(secondsPerYear)
+      .pow(SECONDS_PER_YEAR)
       .minus(1)
       .toNumber();
   }

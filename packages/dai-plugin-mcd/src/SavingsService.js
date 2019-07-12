@@ -17,7 +17,7 @@ export default class SavingsService extends PublicService {
   async join(amountInDai) {
     await this.get('proxy').ensureProxy();
 
-    return await this._proxyActions.dsrJoin(
+    return this._proxyActions.dsrJoin(
       this._daiAdapterAddress,
       this._potAddress,
       amountInDai.toFixed('wei'),
@@ -28,7 +28,7 @@ export default class SavingsService extends PublicService {
   async exit(amountInDai) {
     await this.get('proxy').ensureProxy();
 
-    return await this._proxyActions.dsrExit(
+    return this._proxyActions.dsrExit(
       this._daiAdapterAddress,
       this._potAddress,
       amountInDai.toFixed('wei'),
@@ -39,18 +39,20 @@ export default class SavingsService extends PublicService {
   async balance() {
     const proxy = await this.get('proxy').ensureProxy();
 
-    return await this.balanceOf(proxy);
+    return this.balanceOf(proxy);
   }
 
   async balanceOf(guy) {
     const amount = new BigNumber(await this._pot.pie(guy)).div(WAD);
     const chi = await this.chi();
+
     return MDAI(amount.times(chi));
   }
 
   async getTotalDai() {
     const totalPie = new BigNumber(await this._pot.Pie()).div(WAD);
     const chi = await this.chi();
+
     return MDAI(totalPie.times(chi));
   }
 

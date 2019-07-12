@@ -1,10 +1,17 @@
-import { mcdMaker, setupCollateral } from './helpers';
+import {
+  mcdMaker,
+  setupCollateral,
+  takeSnapshot,
+  restoreSnapshot
+} from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { MDAI, ETH } from '../src/index';
 
 let service, maker, dai, proxyAddress;
 
 describe('Savings Service', () => {
+  let snapshotData;
+
   async function makeSomeDai(amount) {
     const cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
@@ -15,7 +22,6 @@ describe('Savings Service', () => {
     maker = await mcdMaker();
     service = maker.service(ServiceRoles.SAVINGS);
     dai = maker.getToken(MDAI);
-
     proxyAddress = await maker.service('proxy').ensureProxy();
     await dai.approveUnlimited(proxyAddress);
   });
@@ -25,14 +31,16 @@ describe('Savings Service', () => {
   });
 
   beforeEach(async () => {
-    const amountRemaining = await service.balance();
-    if (amountRemaining.gt(0)) await service.exit(MDAI(amountRemaining));
+    snapshotData = await takeSnapshot(maker);
+  });
+
+  afterEach(async () => {
+    await restoreSnapshot(snapshotData, maker);
   });
 
   test('get dai savings rate', async () => {
     const dsr = await service.getYearlyRate();
-
-    expect(dsr.toNumber()).toBe(1);
+    expect(dsr.toNumber()).toBe(1.0099999999998925);
   });
 
   test('get total amount of dai in pot', async () => {
@@ -48,13 +56,13 @@ describe('Savings Service', () => {
 
   test('check amount in balance', async () => {
     const amount = await service.balance();
-    expect(amount.toNumber()).toBe(0);
+    expect(amount.symbol).toBe('MDAI');
   });
 
   test('check amount using balance of', async () => {
     const proxyAddress = await maker.currentProxy();
     const amount = await service.balanceOf(proxyAddress);
-    expect(amount.toNumber()).toBe(0);
+    expect(amount.symbol).toBe('MDAI');
   });
 
   test('cannot exit pot more than joined', async () => {
@@ -71,10 +79,14 @@ describe('Savings Service', () => {
   });
 
   test('join and exit pot', async () => {
+    await makeSomeDai(3);
+    await service._pot.drip();
+
     const startingBalance = (await dai.balance()).toNumber();
     const amountBeforeJoin = (await service.balance()).toNumber();
 
     await service.join(MDAI(2));
+    await service._pot.drip();
     const amountAfterJoin = await service.balance();
     expect(amountAfterJoin.toNumber()).toBe(amountBeforeJoin + 2);
 
