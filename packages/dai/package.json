@@ -28,6 +28,7 @@
     "type": "git",
     "url": "https://github.com/makerdao/dai.js.git"
   },
+  "files": ["dist/**/*"],
   "module": "dist/src/index.js",
   "main": "dist/src/index.js",
   "scripts": {
