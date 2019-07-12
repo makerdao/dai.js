@@ -80,11 +80,13 @@ describe('Savings Service', () => {
 
   test('join and exit pot', async () => {
     await makeSomeDai(3);
+    await service._pot.drip();
 
     const startingBalance = (await dai.balance()).toNumber();
     const amountBeforeJoin = (await service.balance()).toNumber();
 
     await service.join(MDAI(2));
+    await service._pot.drip();
     const amountAfterJoin = await service.balance();
     expect(amountAfterJoin.toNumber()).toBe(amountBeforeJoin + 2);
 
@@ -93,7 +95,7 @@ describe('Savings Service', () => {
 
     await service.exit(MDAI(2));
     const amountAfterExit = await service.balance();
-    expect(amountAfterExit.toNumber().toFixed(3)).toBe('1.275');
+    expect(amountAfterExit.toNumber()).toBe(amountBeforeJoin);
 
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBe(startingBalance);
