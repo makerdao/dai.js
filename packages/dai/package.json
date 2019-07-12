@@ -32,9 +32,9 @@
   "main": "dist/src/index.js",
   "scripts": {
     "build": "yarn build:frontend",
-    "testchain": "../../scripts/run-testchain.sh --ci",
+    "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
-    "test": "yarn testchain jest --runInBand",
+    "test": "yarn testchain --ci jest --runInBand",
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
     "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
