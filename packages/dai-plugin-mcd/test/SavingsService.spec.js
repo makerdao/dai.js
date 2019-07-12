@@ -88,7 +88,7 @@ describe('Savings Service', () => {
     await service.join(MDAI(2));
     await service._pot.drip();
     const amountAfterJoin = await service.balance();
-    expect(amountAfterJoin.toNumber()).toBe(amountBeforeJoin + 2);
+    expect(amountAfterJoin.toNumber()).toBeCloseTo(amountBeforeJoin + 2);
 
     const duringBalance = (await dai.balance()).toNumber();
     expect(duringBalance).toBe(startingBalance - 2);
