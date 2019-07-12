@@ -111,21 +111,7 @@ describe('lifecycle hooks', () => {
   });
 
   beforeAll(async () => {
-    // This test will fail if unlimited approval for WETH and PETH is already set
-    // for the current account. so we pick an account near the end of all the test
-    // accounts to make it unlikely that some other test in the suite will use it.
-    TestAccountProvider.setIndex(900);
-
-    service = buildTestEthereumCdpService({
-      accounts: {
-        default: {
-          type: 'privateKey',
-          privateKey: TestAccountProvider.nextAccount().key
-        }
-      },
-      log: true
-    });
-
+    service = buildTestEthereumCdpService();
     await service.manager().authenticate();
     txMgr = service.get('smartContract').get('transactionManager');
     priceService = service.get('price');
