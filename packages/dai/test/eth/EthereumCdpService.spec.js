@@ -55,28 +55,13 @@ describe('find cdp', () => {
     const cdps = buildTestEthereumCdpService({
       accounts: {
         default: { type: 'privateKey', ...TestAccountProvider.nextAccount() }
+      },
+      proxy: {
+        currentProxy: async () => { return null; }
       }
     });
     await cdps.manager().authenticate();
-    const saved = { get: cdps.get };
-    // stub out get to return null on currentProxy
-    cdps.get = type => {
-      let ret;
-      switch (type) {
-        case 'proxy':
-          ret = {
-            currentProxy: async () => {
-              return null;
-            }
-          };
-          break;
-        default:
-          ret = saved.get.bind(cdps)(type);
-      }
-      return ret;
-    };
     const sameCdp = await cdps.getCdp(cdp.id);
-    cdps.get = saved.get;
     expect(sameCdp.id).toEqual(cdp.id);
     expect(sameCdp.dsProxyAddress).not.toBeDefined();
   });
