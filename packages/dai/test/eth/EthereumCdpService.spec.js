@@ -55,9 +55,6 @@ describe('find cdp', () => {
     const cdps = buildTestEthereumCdpService({
       accounts: {
         default: { type: 'privateKey', ...TestAccountProvider.nextAccount() }
-      },
-      proxy: {
-        currentProxy: async () => { return null; }
       }
     });
     await cdps.manager().authenticate();
