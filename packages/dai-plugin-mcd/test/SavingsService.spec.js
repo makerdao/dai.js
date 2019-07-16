@@ -6,6 +6,7 @@ import {
 } from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { MDAI, ETH } from '../src/index';
+import BigNumber from 'bignumber.js';
 
 let service, maker, dai, proxyAddress;
 
@@ -80,24 +81,23 @@ describe('Savings Service', () => {
 
   test('join and exit pot', async () => {
     await makeSomeDai(3);
-    await service._pot.drip();
 
     const startingBalance = (await dai.balance()).toNumber();
     const amountBeforeJoin = (await service.balance()).toNumber();
+    const joinAmount = MDAI(2);
 
-    await service.join(MDAI(2));
-    await service._pot.drip();
+    await service.join(joinAmount);
     const amountAfterJoin = await service.balance();
     expect(amountAfterJoin.toNumber()).toBeCloseTo(amountBeforeJoin + 2);
 
     const duringBalance = (await dai.balance()).toNumber();
     expect(duringBalance).toBe(startingBalance - 2);
 
-    await service.exit(MDAI(2));
-
-    // temporarily skipped
-    // const amountAfterExit = await service.balance();
-    // expect(amountAfterExit.toNumber()).toBe(amountBeforeJoin);
+    await service.exit(joinAmount);
+    const amountAfterExit = await service.balance();
+    const chi = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+    const accruedInterest = chi * joinAmount.toNumber() - joinAmount.toNumber();
+    expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest);
 
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBe(startingBalance);
