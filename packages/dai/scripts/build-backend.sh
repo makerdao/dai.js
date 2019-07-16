@@ -13,9 +13,6 @@ babel contracts/addresses --out-dir ./dist/contracts/addresses
 babel src --out-dir ./dist/src
 
 copyfiles \
-  README.md \
-  LICENSE \
-  package.json \
   contracts/abis/* \
   src/config/presets/* \
   contracts/addresses/* \

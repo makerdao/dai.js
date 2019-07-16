@@ -106,6 +106,14 @@ If you have deployed contract code changes to the testchain, run `scripts/instal
 - `yarn test:mainnet` - run integration tests on mainnet
 - `yarn test:integration` - run integration tests on Ganache
 
+## Changelog
+
+### 0.17.0
+
+- **BREAKING CHANGE**: Importing a file directly from the package must now be done by
+prefixing the path with `dist`. E.g. `/contracts/addresses/kovan.json` now becomes
+`/dist/contract/addresses/kovan.json`.
+
 ## License
 
 **Dai.js** is available under the MIT license included with the code.
