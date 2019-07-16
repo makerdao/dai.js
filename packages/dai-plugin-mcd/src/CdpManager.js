@@ -119,6 +119,9 @@ export default class CdpManager extends LocalService {
       }
     ].filter(x => x);
 
+    // doesn't work yet for REP
+    if (!isEth) args.splice(-1, 0, false);
+
     const method = `${id ? 'lock' : 'openLock'}${isEth ? 'ETH' : 'Gem'}AndDraw`;
     return this.proxyActions[method](...args);
   }
