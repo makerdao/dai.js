@@ -166,7 +166,8 @@ export default class ManagedCdp {
   }
 
   lockCollateral(amount, { promise } = {}) {
-    return this.lockAndDraw(amount, undefined, { promise });
+    amount = castAsCurrency(amount, this.currency);
+    return this._cdpManager.lock(this.id, this.ilk, amount, { promise });
   }
 
   drawDai(amount, { promise } = {}) {
@@ -192,7 +193,8 @@ export default class ManagedCdp {
   }
 
   wipeDai(amount, { promise } = {}) {
-    return this.wipeAndFree(amount, undefined, { promise });
+    amount = castAsCurrency(amount, MDAI);
+    return this._cdpManager.wipe(this.id, amount, { promise });
   }
 
   freeCollateral(amount, { promise } = {}) {

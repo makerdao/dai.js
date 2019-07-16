@@ -218,9 +218,7 @@ describe.each([
 
     const draw = cdp.drawDai(1);
     const drawHandler = jest.fn((tx, state) => {
-      expect(tx.metadata.method).toBe(
-        `lock${GEM == ETH ? 'ETH' : 'Gem'}AndDraw`
-      );
+      expect(tx.metadata.method).toBe('wipe');
       expect(state).toBe(txStates[drawHandler.mock.calls.length - 1]);
     });
     txMgr.listen(draw, drawHandler);
