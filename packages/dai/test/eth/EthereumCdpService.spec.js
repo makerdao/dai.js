@@ -2,6 +2,7 @@ import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 import { USD_DAI } from '../../src/eth/Currency';
 import Cdp from '../../src/eth/Cdp';
 import { mineBlocks } from '../helpers/transactionConfirmation';
+import TestAccountProvider from '../helpers/TestAccountProvider';
 
 let cdpService;
 
@@ -46,6 +47,18 @@ describe('find cdp', () => {
 
   test('returns a normal cdp', async () => {
     const sameCdp = await cdpService.getCdp(cdp.id);
+    expect(sameCdp.id).toEqual(cdp.id);
+    expect(sameCdp.dsProxyAddress).not.toBeDefined();
+  });
+
+  test('regression: handle null proxy correctly', async () => {
+    const cdps = buildTestEthereumCdpService({
+      accounts: {
+        default: { type: 'privateKey', ...TestAccountProvider.nextAccount() }
+      }
+    });
+    await cdps.manager().authenticate();
+    const sameCdp = await cdps.getCdp(cdp.id);
     expect(sameCdp.id).toEqual(cdp.id);
     expect(sameCdp.dsProxyAddress).not.toBeDefined();
   });
