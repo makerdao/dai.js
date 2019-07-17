@@ -105,6 +105,7 @@ export default class CdpManager extends LocalService {
     drawAmount = castAsCurrency(drawAmount, MDAI);
     await this.get('proxy').ensureProxy({ promise });
     const isEth = ETH.isInstance(lockAmount);
+    const transferFrom = !ilk.includes('GNT');
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
@@ -119,11 +120,14 @@ export default class CdpManager extends LocalService {
       }
     ].filter(x => x);
 
-    // doesn't work yet for REP
-    if (!isEth) args.splice(-1, 0, false);
-
-    const method = `${id ? 'lock' : 'openLock'}${isEth ? 'ETH' : 'Gem'}AndDraw`;
-    return this.proxyActions[method](...args);
+    // GNT needs `false` as a parameter, because it
+    // doesn't have a transferFrom function. All other
+    // ilks besides ETH need `true`.
+    if (!isEth) args.splice(-1, 0, transferFrom);
+    let method = `${id ? 'lock' : 'openLock'}${isEth ? 'ETH' : 'Gem'}AndDraw`;
+    if (method === 'lockGemAndDraw') method += '(address,address,address,uint256,uint256,uint256,bool)';
+    
+    return await this.proxyActions[method](...args);
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
