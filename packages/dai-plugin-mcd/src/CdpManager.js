@@ -125,8 +125,10 @@ export default class CdpManager extends LocalService {
     // ilks besides ETH need `true`.
     if (!isEth) args.splice(-1, 0, transferFrom);
     let method = `${id ? 'lock' : 'openLock'}${isEth ? 'ETH' : 'Gem'}AndDraw`;
-    if (method === 'lockGemAndDraw') method += '(address,address,address,uint256,uint256,uint256,bool)';
-    
+    if (method === 'lockGemAndDraw') {
+      method += '(address,address,address,uint256,uint256,uint256,bool)';
+    }
+
     return await this.proxyActions[method](...args);
   }
 
