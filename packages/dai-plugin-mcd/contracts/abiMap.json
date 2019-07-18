@@ -20,6 +20,7 @@
   "MCD_JOIN_*": "GemJoin",
   "MCD_JOIN_OMG_A": "GemJoin2",
   "MCD_JOIN_DGD_A": "GemJoin2",
+  "MCD_JOIN_GNT_A": "GemJoin4",
   "MCD_JOIN_DAI": "DaiJoin",
   "MCD_JUG": "Jug",
   "MCD_MOVE_*": "GemMove",
