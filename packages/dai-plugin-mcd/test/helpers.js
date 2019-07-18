@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { createCurrencyRatio } from '@makerdao/currency';
 import Maker from '@makerdao/dai';
-import McdPlugin, { ETH, USD } from '../src';
+import McdPlugin, { ETH, USD, GNT } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { stringToBytes } from '../src/utils';
 import ethAbi from 'web3-eth-abi';
@@ -65,11 +65,14 @@ export async function setupCollateral(maker, ilk, options = {}) {
   const proxy = await maker.currentProxy();
   const cdpType = maker.service(ServiceRoles.CDP_TYPE).getCdpType(null, ilk);
   const { currency } = cdpType;
-  if (currency !== ETH) {
-    // FIXME not safe to assume other tokens support approveUnlimited
+
+  // The following currencies don't support `approveUnlimited`
+  const skipApproval = [ETH, GNT];
+
+  if (!skipApproval.includes(currency)) {
     await maker.getToken(currency).approveUnlimited(proxy);
-    if (options.mint) await mint(maker, currency(options.mint));
   }
+  if (options.mint) await mint(maker, currency(options.mint));
   if (options.price)
     await setPrice(
       maker,
