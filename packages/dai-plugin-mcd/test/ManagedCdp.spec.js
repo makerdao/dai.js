@@ -37,6 +37,10 @@ test('prevent locking the wrong collateral type', async () => {
   }
 });
 
+// test.only('test', async () => {
+//   setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 });
+// });
+
 test('prevent freeing the wrong collateral type', async () => {
   const cdp = await maker.service(CDP_MANAGER).open('REP-A');
   expect.assertions(1);
