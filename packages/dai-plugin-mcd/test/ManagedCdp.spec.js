@@ -4,7 +4,7 @@ import {
   takeSnapshot,
   restoreSnapshot
 } from './helpers';
-import { ETH, REP, MDAI, USD } from '../src';
+import { ETH, REP, MDAI, USD, GNT } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
 import { createCurrencyRatio } from '@makerdao/currency';
@@ -36,10 +36,6 @@ test('prevent locking the wrong collateral type', async () => {
     expect(err.message).toMatch(/Can't cast 1.00 ETH as REP/);
   }
 });
-
-// test.only('test', async () => {
-//   setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 });
-// });
 
 test('prevent freeing the wrong collateral type', async () => {
   const cdp = await maker.service(CDP_MANAGER).open('REP-A');
@@ -137,6 +133,11 @@ describe.each([
     'REP-A',
     REP,
     async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'GNT-A',
+    GNT,
+    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
   ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
