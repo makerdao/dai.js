@@ -1,14 +1,14 @@
 import { PublicService } from '@makerdao/services-core';
 import { ServiceRoles, Migrations } from './constants';
-import ScdCdpToMcdCdp from './migrations/ScdCdpToMcdCdp';
+import ScdToMcdCdp from './migrations/ScdToMcdCdp';
 
 const migrations = {
-  [Migrations.SCD_TO_MCD_CDP]: ScdCdpToMcdCdp
+  [Migrations.SCD_TO_MCD_CDP]: ScdToMcdCdp
 };
 
 export default class MigrationService extends PublicService {
   constructor(name = ServiceRoles.MIGRATION) {
-    super(name, ['smartContract']);
+    super(name, ['smartContract', 'accounts', 'cdp', 'proxy']);
   }
 
   getAllMigrationsIds() {

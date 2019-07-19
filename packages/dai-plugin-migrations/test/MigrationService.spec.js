@@ -1,6 +1,6 @@
 import { migrationMaker } from './helpers';
 import { ServiceRoles, Migrations } from '../src/constants';
-import ScdCdpToMcdCdp from '../src/migrations/ScdCdpToMcdCdp';
+import ScdToMcdCdp from '../src/migrations/ScdToMcdCdp';
 
 let maker, service;
 
@@ -19,7 +19,7 @@ describe('Migration Service', () => {
 
   test('getting each migration returns a valid migration', () => {
     expect(service.getMigration(Migrations.SCD_TO_MCD_CDP)).toBeInstanceOf(
-      ScdCdpToMcdCdp
+      ScdToMcdCdp
     );
   });
 
