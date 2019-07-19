@@ -94,7 +94,7 @@ test('transaction tracking for openLockAndDraw', async () => {
   expect(handlers.mined).toBeCalled();
 });
 
-describe.only('GNT-specific functionality', () => {
+describe('GNT-specific functionality', () => {
   let proxyAddress, joinContract;
 
   beforeAll(async () => {
