@@ -5,7 +5,7 @@ import {
   restoreSnapshot
 } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import { ETH, MDAI } from '../src';
+import { ETH, MDAI, GNT } from '../src';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
 
 // FIXME we won't be able to reach into @makerdao/dai internals like this when
@@ -95,12 +95,11 @@ test('transaction tracking for openLockAndDraw', async () => {
 });
 
 describe.only('GNT-specific functionality', () => {
-  let proxyAddress, joinContract, snapshot;
+  let proxyAddress, joinContract;
 
   beforeAll(async () => {
     proxyAddress = await maker.service('proxy').ensureProxy();
     joinContract = maker.service('smartContract').getContract('MCD_JOIN_GNT_A');
-    snapshot = await takeSnapshot(maker);
   });
 
   test('getBagAddress returns null when no bag exists', async () => {
@@ -124,9 +123,16 @@ describe.only('GNT-specific functionality', () => {
     );
   });
 
-  test('joinBag works with or without a previously deployed bag', async () => {
-    await restoreSnapshot(snapshot, maker);
-    let bagAddress = await cdpMgr._getBagAddress(proxyAddress, joinContract);
+  test('transferToBag transfers...to bag', async () => {
+    const gntToken = maker.service('token').getToken(GNT);
+    const bagAddress = await cdpMgr._ensureBag();
+    
+    const startingBalance = await gntToken.balanceOf(bagAddress);
+    await cdpMgr._transferToBag(GNT(1));
+    const endingBalance = await gntToken.balanceOf(bagAddress);
+
+    expect(startingBalance.toNumber()).toEqual(0);
+    expect(endingBalance.toNumber()).toEqual(1);
   });
 });
 

@@ -8,7 +8,7 @@ import assert from 'assert';
 import ManagedCdp from './ManagedCdp';
 import { castAsCurrency, stringToBytes, bytesToString } from './utils';
 import padStart from 'lodash/padStart';
-import { MDAI, ETH } from './index';
+import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 import { RAY } from './constants';
@@ -21,7 +21,8 @@ export default class CdpManager extends LocalService {
       SYSTEM_DATA,
       QUERY_API,
       'accounts',
-      'proxy'
+      'proxy',
+      'token'
     ]);
     this._getCdpIdsPromises = {};
     this._getUrnPromises = {};
@@ -227,6 +228,13 @@ export default class CdpManager extends LocalService {
   }
 
   // The following functions are required only for GNT
+  async _transferToBag(lockAmount) {
+    const bagAddress = await this._ensureBag();
+    const gntToken = this.get('token').getToken(GNT);
+
+    return gntToken.transfer(bagAddress, lockAmount);
+  }
+
   async _ensureBag() {
     const proxyAddress = await this.get('proxy').ensureProxy();
     const joinContract = this.get('smartContract').getContract(
@@ -235,6 +243,7 @@ export default class CdpManager extends LocalService {
 
     let bagAddress = await this._getBagAddress(proxyAddress, joinContract);
     if (!bagAddress) {
+      // TODO: check if this is gettable from a contract event
       await joinContract.make(proxyAddress);
       bagAddress = await this._getBagAddress(proxyAddress, joinContract);
     }
