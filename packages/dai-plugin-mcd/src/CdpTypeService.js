@@ -11,7 +11,6 @@ export default class CdpTypeService extends PublicService {
 
   initialize(settings = {}) {
     this.settings = settings;
-    console.log(settings);
     this.cdpTypes = (settings.cdpTypes || []).map(
       cdpType => new CdpType(this, cdpType, { prefetch: settings.prefetch })
     );
@@ -21,12 +20,6 @@ export default class CdpTypeService extends PublicService {
     const types = this.cdpTypes.filter(
       t => (!currency || t.currency === currency) && (!ilk || ilk === t.ilk)
     );
-    // let ilks = [];
-    // let i;
-    // for (i = 0; i < this.cdpTypes.length; i++) {
-    //   ilks.push(this.cdpTypes[i].ilk);
-    // }
-    // console.log(ilks);
     if (types.length === 1) return types[0];
 
     const label = [

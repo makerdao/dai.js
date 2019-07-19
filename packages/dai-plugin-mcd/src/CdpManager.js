@@ -225,4 +225,29 @@ export default class CdpManager extends LocalService {
   _adapterAddress(ilk) {
     return this.get(SYSTEM_DATA).adapterAddress(ilk);
   }
+
+  // The following functions are required only for GNT
+  async _ensureBag() {
+    const proxyAddress = await this.get('proxy').ensureProxy();
+    const joinContract = this.get('smartContract').getContract(
+      'MCD_JOIN_GNT_A'
+    );
+
+    let bagAddress = await this._getBagAddress(proxyAddress, joinContract);
+    if (!bagAddress) {
+      await joinContract.make(proxyAddress);
+      bagAddress = await this._getBagAddress(proxyAddress, joinContract);
+    }
+
+    return bagAddress;
+  }
+
+  async _getBagAddress(proxyAddress, joinContract) {
+    let bagAddress = await joinContract.bags(proxyAddress);
+    if (bagAddress === '0x0000000000000000000000000000000000000000') {
+      bagAddress = null;
+    }
+
+    return bagAddress;
+  }
 }

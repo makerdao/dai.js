@@ -94,6 +94,42 @@ test('transaction tracking for openLockAndDraw', async () => {
   expect(handlers.mined).toBeCalled();
 });
 
+describe.only('GNT-specific functionality', () => {
+  let proxyAddress, joinContract, snapshot;
+
+  beforeAll(async () => {
+    proxyAddress = await maker.service('proxy').ensureProxy();
+    joinContract = maker.service('smartContract').getContract('MCD_JOIN_GNT_A');
+    snapshot = await takeSnapshot(maker);
+  });
+
+  test('getBagAddress returns null when no bag exists', async () => {
+    expect(await cdpMgr._getBagAddress(proxyAddress, joinContract)).toBeNull();
+  });
+
+  test('ensureBag creates a bag when none exists', async () => {
+    const bagAddressBeforeEnsure = await cdpMgr._getBagAddress(
+      proxyAddress,
+      joinContract
+    );
+    const bagAddress = await cdpMgr._ensureBag();
+
+    expect(bagAddressBeforeEnsure).toBeNull();
+    expect(bagAddress).toEqual('0x811085985B17DeD64150aBd58E4A7bFE10Ef209f');
+  });
+
+  test('getBagAddress returns real address when one exists', async () => {
+    expect(await cdpMgr._ensureBag()).toEqual(
+      '0x811085985B17DeD64150aBd58E4A7bFE10Ef209f'
+    );
+  });
+
+  test('joinBag works with or without a previously deployed bag', async () => {
+    await restoreSnapshot(snapshot, maker);
+    let bagAddress = await cdpMgr._getBagAddress(proxyAddress, joinContract);
+  });
+});
+
 describe('using a different account', () => {
   let mgr, cdpId;
 

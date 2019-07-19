@@ -253,4 +253,13 @@ describe.each([
       myGem: startingGemBalance.minus(0.5)
     });
   });
+
+  if (ilk === 'GNT-A') {
+    let service;
+
+    test('ensure bag for GNT', async () => {
+      // service = maker.service(CDP_MANAGER);
+      // console.log(cdp);
+    });
+  }
 });
