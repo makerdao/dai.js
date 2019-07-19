@@ -123,6 +123,7 @@ export default class CdpManager extends LocalService {
     // GNT needs `false` as a parameter, because it
     // doesn't have a transferFrom function. All other
     // ilks besides ETH need `true`.
+    if (ilk.includes('GNT')) await this._transferToBag(lockAmount);
     const transferFrom = !ilk.includes('GNT');
     if (!isEth) args.splice(-1, 0, transferFrom);
     let method = `${id ? 'lock' : 'openLock'}${isEth ? 'ETH' : 'Gem'}AndDraw`;

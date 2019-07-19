@@ -126,7 +126,7 @@ describe.only('GNT-specific functionality', () => {
   test('transferToBag transfers...to bag', async () => {
     const gntToken = maker.service('token').getToken(GNT);
     const bagAddress = await cdpMgr._ensureBag();
-    
+
     const startingBalance = await gntToken.balanceOf(bagAddress);
     await cdpMgr._transferToBag(GNT(1));
     const endingBalance = await gntToken.balanceOf(bagAddress);
