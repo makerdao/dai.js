@@ -5,7 +5,7 @@ import {
   restoreSnapshot
 } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import { ETH, MDAI, GNT } from '../src';
+import { ETH, MDAI, GNT, DGD } from '../src';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
 
 // FIXME we won't be able to reach into @makerdao/dai internals like this when
@@ -92,6 +92,12 @@ test('transaction tracking for openLockAndDraw', async () => {
   await open;
   expect(handlers.pending).toBeCalled();
   expect(handlers.mined).toBeCalled();
+});
+
+test('set precision arguments according to decimals', () => {
+  expect(cdpMgr._precision(ETH(1))).toBe('wei');
+  expect(cdpMgr._precision(GNT(1))).toBe(18);
+  expect(cdpMgr._precision(DGD(1))).toBe(9);
 });
 
 describe('GNT-specific functionality', () => {

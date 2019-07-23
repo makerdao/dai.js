@@ -8,7 +8,7 @@ import assert from 'assert';
 import ManagedCdp from './ManagedCdp';
 import { castAsCurrency, stringToBytes, bytesToString } from './utils';
 import padStart from 'lodash/padStart';
-import { MDAI, ETH, GNT, DGD } from './index';
+import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 import { RAY } from './constants';
@@ -107,15 +107,12 @@ export default class CdpManager extends LocalService {
     await this.get('proxy').ensureProxy({ promise });
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
-    const isDgd = DGD.isInstance(lockAmount);
-    const amountArg = isDgd ? 9 : 'wei'
-    console.log('LOCK AMOUNT', lockAmount.toFixed(amountArg));
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       id || stringToBytes(ilk),
-      !isEth && lockAmount.toFixed(amountArg),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
       drawAmount.toFixed('wei'),
       {
         dsProxy: true,
@@ -146,7 +143,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this._adapterAddress(ilk),
       id,
-      !isEth && lockAmount.toFixed('wei'),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
       {
         dsProxy: true,
         value: isEth ? lockAmount.toFixed('wei') : 0,
@@ -168,7 +165,7 @@ export default class CdpManager extends LocalService {
         this._adapterAddress(ilk),
         this._adapterAddress('DAI'),
         this.getIdBytes(id),
-        freeAmount.toFixed('wei'),
+        freeAmount.toFixed(this._precision(freeAmount)),
         wipeAmount.toFixed('wei'),
         { dsProxy: true, promise }
       ].filter(x => x)
@@ -263,6 +260,12 @@ export default class CdpManager extends LocalService {
 
   _adapterAddress(ilk) {
     return this.get(SYSTEM_DATA).adapterAddress(ilk);
+  }
+
+  _precision(amount) {
+    return amount.type.symbol === 'ETH'
+      ? 'wei'
+      : this.get(CDP_TYPE).getCdpType(amount.type).decimals;
   }
 
   // The following functions are only required for GNT

@@ -124,7 +124,7 @@ async function expectUtilValues(cdp, { val, ratio, isSafe, dai }) {
 }
 
 // ZRX and BAT use the same adapter as ETH and REP, so they
-// can safely be omitted.
+// don't need to be tested.
 describe.each([
   [
     'ETH-A',
@@ -208,7 +208,7 @@ describe.each([
     });
   });
 
-  test.only('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
+  test('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
     const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
