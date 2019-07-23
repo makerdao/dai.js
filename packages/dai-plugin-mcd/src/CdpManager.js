@@ -138,6 +138,26 @@ export default class CdpManager extends LocalService {
     return await this.proxyActions[method](...args);
   }
 
+  @tracksTransactions
+  async lock(id, ilk, lockAmount, { promise }) {
+    await this.get('proxy').ensureProxy({ promise });
+    const isEth = ETH.isInstance(lockAmount);
+    const args = [
+      this._managerAddress,
+      this._adapterAddress(ilk),
+      id,
+      !isEth && lockAmount.toFixed('wei'),
+      {
+        dsProxy: true,
+        value: isEth ? lockAmount.toFixed('wei') : 0,
+        promise
+      }
+    ].filter(x => x);
+
+    const method = `lock${isEth ? 'ETH' : 'Gem'}`;
+    return this.proxyActions[method](...args);
+  }
+
   @tracksTransactionsWithOptions({ numArguments: 5 })
   async wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
     const isEth = ETH.isInstance(freeAmount);
@@ -149,6 +169,19 @@ export default class CdpManager extends LocalService {
         this._adapterAddress('DAI'),
         this.getIdBytes(id),
         freeAmount.toFixed('wei'),
+        wipeAmount.toFixed('wei'),
+        { dsProxy: true, promise }
+      ].filter(x => x)
+    );
+  }
+
+  @tracksTransactions
+  async wipe(id, wipeAmount, { promise }) {
+    return this.proxyActions.wipe(
+      ...[
+        this._managerAddress,
+        this._adapterAddress('DAI'),
+        this.getIdBytes(id),
         wipeAmount.toFixed('wei'),
         { dsProxy: true, promise }
       ].filter(x => x)

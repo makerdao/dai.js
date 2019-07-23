@@ -11,12 +11,17 @@ import {
 } from './math';
 
 export default class CdpType {
-  constructor(cdpTypeService, { currency, ilk }, options = { prefetch: true }) {
+  constructor(
+    cdpTypeService,
+    { currency, ilk, decimals },
+    options = { prefetch: true }
+  ) {
     assert(currency && ilk, 'currency and ilk are required');
     this._cdpTypeService = cdpTypeService;
     this._systemData = cdpTypeService.get(ServiceRoles.SYSTEM_DATA);
     this._web3Service = this._systemData.get('smartContract').get('web3');
     this.currency = currency;
+    this.decimals = decimals || 18;
     this.ilk = ilk;
     this._ilkBytes = stringToBytes(this.ilk);
     this.cache = {};

@@ -247,9 +247,7 @@ describe.each([
 
     const wipe = cdp.wipeDai(0.5);
     const wipeHandler = jest.fn((tx, state) => {
-      expect(tx.metadata.method).toBe(
-        `wipeAndFree${GEM == ETH ? 'ETH' : 'Gem'}`
-      );
+      expect(tx.metadata.method).toBe('wipe');
       expect(state).toBe(txStates[wipeHandler.mock.calls.length - 1]);
     });
     txMgr.listen(wipe, wipeHandler);
