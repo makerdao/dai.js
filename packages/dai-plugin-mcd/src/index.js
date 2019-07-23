@@ -71,6 +71,7 @@ export const ZRX = createCurrency('ZRX');
 export const OMG = createCurrency('OMG');
 export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
+export const GNT = createCurrency('GNT');
 
 const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
@@ -81,6 +82,7 @@ const defaultCdpTypes = [
   { currency: OMG, ilk: 'OMG-A' },
   { currency: BAT, ilk: 'BAT-A' },
   { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+  { currency: GNT, ilk: 'GNT-A' },
 
   // the CDP type below is not present in the testchain snapshot -- its purpose
   // is to verify that the code does not throw an error if a CDP type is

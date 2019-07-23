@@ -1700,9 +1700,10 @@
     lodash.values "^4.3.0"
     toposort "^2.0.2"
 
-"@makerdao/testchain@makerdao/testchain#v0.2.9":
-  version "1.0.0"
-  resolved "https://codeload.github.com/makerdao/testchain/tar.gz/048d223913db052de93edc99aed244a01164f2c9"
+"@makerdao/testchain@^0.2.10":
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-0.2.10.tgz#cdd7ad65c21f1aefef58f24912499e825817cf80"
+  integrity sha512-/eLJu/urdafaYg8E7tjKmev26MvTrr2VOGT5xwIyp8Pgan3SyAx9JRSAYi2+g/tAzZCjFHCOi3C3efQAdkGmzQ==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 

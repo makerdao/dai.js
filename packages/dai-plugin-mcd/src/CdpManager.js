@@ -8,7 +8,7 @@ import assert from 'assert';
 import ManagedCdp from './ManagedCdp';
 import { castAsCurrency, stringToBytes, bytesToString } from './utils';
 import padStart from 'lodash/padStart';
-import { MDAI, ETH } from './index';
+import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 import { RAY } from './constants';
@@ -21,7 +21,8 @@ export default class CdpManager extends LocalService {
       SYSTEM_DATA,
       QUERY_API,
       'accounts',
-      'proxy'
+      'proxy',
+      'token'
     ]);
     this._getCdpIdsPromises = {};
     this._getUrnPromises = {};
@@ -103,14 +104,16 @@ export default class CdpManager extends LocalService {
       'lockAmount must be a Currency value'
     );
     drawAmount = castAsCurrency(drawAmount, MDAI);
-    await this.get('proxy').ensureProxy({ promise });
+    const proxyAddress = await this.get('proxy').ensureProxy({ promise });
+    await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
+    const method = setMethod(isEth, id);
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       id || stringToBytes(ilk),
-      !isEth && lockAmount.toFixed('wei'),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
       drawAmount.toFixed('wei'),
       {
         dsProxy: true,
@@ -119,19 +122,23 @@ export default class CdpManager extends LocalService {
       }
     ].filter(x => x);
 
-    const method = `${id ? 'lock' : 'openLock'}${isEth ? 'ETH' : 'Gem'}AndDraw`;
-    return this.proxyActions[method](...args);
+    // Indicates if gem supports transferFrom
+    if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
+
+    return await this.proxyActions[method](...args);
   }
 
   @tracksTransactions
   async lock(id, ilk, lockAmount, { promise }) {
-    await this.get('proxy').ensureProxy({ promise });
+    const proxyAddress = await this.get('proxy').ensureProxy({ promise });
+    await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
+    const method = `lock${isEth ? 'ETH' : 'Gem'}`;
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
       id,
-      !isEth && lockAmount.toFixed('wei'),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
       {
         dsProxy: true,
         value: isEth ? lockAmount.toFixed('wei') : 0,
@@ -139,7 +146,9 @@ export default class CdpManager extends LocalService {
       }
     ].filter(x => x);
 
-    const method = `lock${isEth ? 'ETH' : 'Gem'}`;
+    // Indicates if gem supports transferFrom
+    if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
+
     return this.proxyActions[method](...args);
   }
 
@@ -153,7 +162,7 @@ export default class CdpManager extends LocalService {
         this._adapterAddress(ilk),
         this._adapterAddress('DAI'),
         this.getIdBytes(id),
-        freeAmount.toFixed('wei'),
+        freeAmount.toFixed(this._precision(freeAmount)),
         wipeAmount.toFixed('wei'),
         { dsProxy: true, promise }
       ].filter(x => x)
@@ -249,4 +258,56 @@ export default class CdpManager extends LocalService {
   _adapterAddress(ilk) {
     return this.get(SYSTEM_DATA).adapterAddress(ilk);
   }
+
+  _precision(amount) {
+    return amount.type.symbol === 'ETH'
+      ? 'wei'
+      : this.get(CDP_TYPE).getCdpType(amount.type).decimals;
+  }
+}
+
+export function setMethod(isEth, id) {
+  if (id && isEth) {
+    return 'lockETHAndDraw';
+  } else if (isEth) {
+    return 'openLockETHAndDraw';
+  } else if (id) {
+    return 'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)';
+  }
+  return 'openLockGemAndDraw';
+}
+
+// The following functions are only required for GNT
+export async function setupGnt(lockAmount, proxyAddress, cdpMgr) {
+  if (GNT.isInstance(lockAmount)) {
+    await transferToBag(lockAmount, proxyAddress, cdpMgr);
+  }
+}
+
+export async function transferToBag(lockAmount, proxyAddress, cdpMgr) {
+  const gntToken = cdpMgr.get('token').getToken(GNT);
+  const bagAddress = await ensureBag(proxyAddress, cdpMgr);
+
+  return gntToken.transfer(bagAddress, lockAmount);
+}
+
+export async function ensureBag(proxyAddress, cdpMgr) {
+  const gntAdapter = cdpMgr.get('smartContract').getContract('MCD_JOIN_GNT_A');
+
+  let bagAddress = await getBagAddress(proxyAddress, gntAdapter);
+  if (!bagAddress) {
+    await gntAdapter.make(proxyAddress);
+    bagAddress = await getBagAddress(proxyAddress, gntAdapter);
+  }
+
+  return bagAddress;
+}
+
+export async function getBagAddress(proxyAddress, gntAdapter) {
+  let bagAddress = await gntAdapter.bags(proxyAddress);
+  if (bagAddress === '0x0000000000000000000000000000000000000000') {
+    bagAddress = null;
+  }
+
+  return bagAddress;
 }

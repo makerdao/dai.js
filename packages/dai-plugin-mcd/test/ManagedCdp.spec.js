@@ -4,7 +4,7 @@ import {
   takeSnapshot,
   restoreSnapshot
 } from './helpers';
-import { ETH, REP, MDAI, USD } from '../src';
+import { ETH, REP, MDAI, USD, GNT, OMG, DGD } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
 import { createCurrencyRatio } from '@makerdao/currency';
@@ -123,6 +123,8 @@ async function expectUtilValues(cdp, { val, ratio, isSafe, dai }) {
   }
 }
 
+// ZRX and BAT use the same adapter as ETH and REP, so they
+// don't need to be tested.
 describe.each([
   [
     'ETH-A',
@@ -133,6 +135,21 @@ describe.each([
     'REP-A',
     REP,
     async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'GNT-A',
+    GNT,
+    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'OMG-A',
+    OMG,
+    async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'DGD-A',
+    DGD,
+    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
   ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
