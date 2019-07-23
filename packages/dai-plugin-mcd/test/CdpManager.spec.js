@@ -100,6 +100,15 @@ test('set precision arguments according to decimals', () => {
   expect(cdpMgr._precision(DGD(1))).toBe(9);
 });
 
+test('set method correctly', () => {
+  expect(cdpMgr._setMethod(true, 1)).toBe('lockETHAndDraw');
+  expect(cdpMgr._setMethod(true)).toBe('openLockETHAndDraw');
+  expect(cdpMgr._setMethod(false, 1)).toBe(
+    'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)'
+  );
+  expect(cdpMgr._setMethod()).toBe('openLockGemAndDraw');
+});
+
 describe('GNT-specific functionality', () => {
   let proxyAddress, joinContract;
 
