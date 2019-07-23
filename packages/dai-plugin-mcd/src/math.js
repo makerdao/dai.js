@@ -49,6 +49,8 @@ export function annualStabilityFee(duty) {
 // cdp math
 
 export function collateralAmount(currency, ink) {
+  console.log(parseFloat(ink));
+  console.log(currency.wei(ink, -9));
   return currency.wei(ink);
 }
 

@@ -208,7 +208,7 @@ describe.each([
     });
   });
 
-  test('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
+  test.only('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
     const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));

@@ -8,7 +8,7 @@ import assert from 'assert';
 import ManagedCdp from './ManagedCdp';
 import { castAsCurrency, stringToBytes, bytesToString } from './utils';
 import padStart from 'lodash/padStart';
-import { MDAI, ETH, GNT } from './index';
+import { MDAI, ETH, GNT, DGD } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 import { RAY } from './constants';
@@ -107,12 +107,15 @@ export default class CdpManager extends LocalService {
     await this.get('proxy').ensureProxy({ promise });
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
+    const isDgd = DGD.isInstance(lockAmount);
+    const amountArg = isDgd ? 9 : 'wei'
+    console.log('LOCK AMOUNT', lockAmount.toFixed(amountArg));
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       id || stringToBytes(ilk),
-      !isEth && lockAmount.toFixed('wei'),
+      !isEth && lockAmount.toFixed(amountArg),
       drawAmount.toFixed('wei'),
       {
         dsProxy: true,
@@ -245,11 +248,9 @@ export default class CdpManager extends LocalService {
 
     let bagAddress = await this._getBagAddress(proxyAddress, joinContract);
     if (!bagAddress) {
-      // TODO: check if this is gettable from a contract event
       await joinContract.make(proxyAddress);
       bagAddress = await this._getBagAddress(proxyAddress, joinContract);
     }
-
     return bagAddress;
   }
 
