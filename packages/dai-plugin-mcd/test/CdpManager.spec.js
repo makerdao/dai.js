@@ -4,6 +4,12 @@ import {
   takeSnapshot,
   restoreSnapshot
 } from './helpers';
+import {
+  setMethod,
+  transferToBag,
+  ensureBag,
+  getBagAddress
+} from '../src/CdpManager';
 import { ServiceRoles } from '../src/constants';
 import { ETH, MDAI, GNT, DGD } from '../src';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
@@ -101,49 +107,49 @@ test('set precision arguments according to decimals', () => {
 });
 
 test('set method correctly', () => {
-  expect(cdpMgr._setMethod(true, 1)).toBe('lockETHAndDraw');
-  expect(cdpMgr._setMethod(true)).toBe('openLockETHAndDraw');
-  expect(cdpMgr._setMethod(false, 1)).toBe(
+  expect(setMethod(true, 1)).toBe('lockETHAndDraw');
+  expect(setMethod(true)).toBe('openLockETHAndDraw');
+  expect(setMethod(false, 1)).toBe(
     'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)'
   );
-  expect(cdpMgr._setMethod()).toBe('openLockGemAndDraw');
+  expect(setMethod()).toBe('openLockGemAndDraw');
 });
 
 describe('GNT-specific functionality', () => {
-  let proxyAddress, joinContract;
+  let proxyAddress, gntAdapter;
 
   beforeAll(async () => {
     proxyAddress = await maker.service('proxy').ensureProxy();
-    joinContract = maker.service('smartContract').getContract('MCD_JOIN_GNT_A');
+    gntAdapter = maker.service('smartContract').getContract('MCD_JOIN_GNT_A');
   });
 
   test('getBagAddress returns null when no bag exists', async () => {
-    expect(await cdpMgr._getBagAddress(proxyAddress, joinContract)).toBeNull();
+    expect(await getBagAddress(proxyAddress, gntAdapter)).toBeNull();
   });
 
   test('ensureBag creates a bag when none exists', async () => {
-    const bagAddressBeforeEnsure = await cdpMgr._getBagAddress(
+    const bagAddressBeforeEnsure = await getBagAddress(
       proxyAddress,
-      joinContract
+      gntAdapter
     );
-    const bagAddress = await cdpMgr._ensureBag();
+    const bagAddress = await ensureBag(proxyAddress, cdpMgr);
 
     expect(bagAddressBeforeEnsure).toBeNull();
     expect(bagAddress).toEqual('0x811085985B17DeD64150aBd58E4A7bFE10Ef209f');
   });
 
   test('getBagAddress returns real address when one exists', async () => {
-    expect(await cdpMgr._ensureBag()).toEqual(
+    expect(await ensureBag(proxyAddress, cdpMgr)).toEqual(
       '0x811085985B17DeD64150aBd58E4A7bFE10Ef209f'
     );
   });
 
   test('transferToBag transfers...to bag', async () => {
     const gntToken = maker.service('token').getToken(GNT);
-    const bagAddress = await cdpMgr._ensureBag();
+    const bagAddress = await ensureBag(proxyAddress, cdpMgr);
 
     const startingBalance = await gntToken.balanceOf(bagAddress);
-    await cdpMgr._transferToBag(GNT(1));
+    await transferToBag(GNT(1), proxyAddress, cdpMgr);
     const endingBalance = await gntToken.balanceOf(bagAddress);
 
     expect(startingBalance.toNumber()).toEqual(0);

@@ -104,10 +104,10 @@ export default class CdpManager extends LocalService {
       'lockAmount must be a Currency value'
     );
     drawAmount = castAsCurrency(drawAmount, MDAI);
-    await this.get('proxy').ensureProxy({ promise });
-    await this._setupGnt(lockAmount);
+    const proxyAddress = await this.get('proxy').ensureProxy({ promise });
+    await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
-    const method = this._setMethod(isEth, id);
+    const method = setMethod(isEth, id);
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
@@ -130,8 +130,8 @@ export default class CdpManager extends LocalService {
 
   @tracksTransactions
   async lock(id, ilk, lockAmount, { promise }) {
-    await this.get('proxy').ensureProxy({ promise });
-    await this._setupGnt(lockAmount);
+    const proxyAddress = await this.get('proxy').ensureProxy({ promise });
+    await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
     const method = `lock${isEth ? 'ETH' : 'Gem'}`;
     const args = [
@@ -264,52 +264,50 @@ export default class CdpManager extends LocalService {
       ? 'wei'
       : this.get(CDP_TYPE).getCdpType(amount.type).decimals;
   }
+}
 
-  _setMethod(isEth, id) {
-    if (id && isEth) {
-      return 'lockETHAndDraw';
-    } else if (isEth) {
-      return 'openLockETHAndDraw';
-    } else if (id) {
-      return 'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)';
-    }
-    return 'openLockGemAndDraw';
+export function setMethod(isEth, id) {
+  if (id && isEth) {
+    return 'lockETHAndDraw';
+  } else if (isEth) {
+    return 'openLockETHAndDraw';
+  } else if (id) {
+    return 'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)';
+  }
+  return 'openLockGemAndDraw';
+}
+
+// The following functions are only required for GNT
+export async function setupGnt(lockAmount, proxyAddress, cdpMgr) {
+  if (GNT.isInstance(lockAmount)) {
+    await transferToBag(lockAmount, proxyAddress, cdpMgr);
+  }
+}
+
+export async function transferToBag(lockAmount, proxyAddress, cdpMgr) {
+  const gntToken = cdpMgr.get('token').getToken(GNT);
+  const bagAddress = await ensureBag(proxyAddress, cdpMgr);
+
+  return gntToken.transfer(bagAddress, lockAmount);
+}
+
+export async function ensureBag(proxyAddress, cdpMgr) {
+  const gntAdapter = cdpMgr.get('smartContract').getContract('MCD_JOIN_GNT_A');
+
+  let bagAddress = await getBagAddress(proxyAddress, gntAdapter);
+  if (!bagAddress) {
+    await gntAdapter.make(proxyAddress);
+    bagAddress = await getBagAddress(proxyAddress, gntAdapter);
   }
 
-  // The following functions are only required for GNT
-  async _setupGnt(lockAmount) {
-    if (GNT.isInstance(lockAmount)) {
-      await this._transferToBag(lockAmount);
-    }
+  return bagAddress;
+}
+
+export async function getBagAddress(proxyAddress, gntAdapter) {
+  let bagAddress = await gntAdapter.bags(proxyAddress);
+  if (bagAddress === '0x0000000000000000000000000000000000000000') {
+    bagAddress = null;
   }
 
-  async _transferToBag(lockAmount) {
-    const bagAddress = await this._ensureBag();
-    const gntToken = this.get('token').getToken(GNT);
-
-    return gntToken.transfer(bagAddress, lockAmount);
-  }
-
-  async _ensureBag() {
-    const proxyAddress = await this.get('proxy').ensureProxy();
-    const joinContract = this.get('smartContract').getContract(
-      'MCD_JOIN_GNT_A'
-    );
-
-    let bagAddress = await this._getBagAddress(proxyAddress, joinContract);
-    if (!bagAddress) {
-      await joinContract.make(proxyAddress);
-      bagAddress = await this._getBagAddress(proxyAddress, joinContract);
-    }
-    return bagAddress;
-  }
-
-  async _getBagAddress(proxyAddress, joinContract) {
-    let bagAddress = await joinContract.bags(proxyAddress);
-    if (bagAddress === '0x0000000000000000000000000000000000000000') {
-      bagAddress = null;
-    }
-
-    return bagAddress;
-  }
+  return bagAddress;
 }
