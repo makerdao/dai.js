@@ -127,18 +127,30 @@ export default class CdpManager extends LocalService {
     if (isGnt) await this._transferToBag(lockAmount);
     const transferFrom = !isGnt;
     if (!isEth) args.splice(-1, 0, transferFrom);
-    let method = `${id ? 'lock' : 'openLock'}${isEth ? 'ETH' : 'Gem'}AndDraw`;
-    if (method === 'lockGemAndDraw') {
-      method += '(address,address,address,uint256,uint256,uint256,bool)';
-    }
+
+    const method = this._setMethod(isEth, id);
 
     return await this.proxyActions[method](...args);
+  }
+
+  _setMethod(isEth, id) {
+    if (id && isEth) {
+      return 'lockETHAndDraw';
+    } else if (isEth) {
+      return 'openLockETHAndDraw';
+    } else if (id) {
+      return 'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)'
+    }
+    return 'openLockGemAndDraw';
   }
 
   @tracksTransactions
   async lock(id, ilk, lockAmount, { promise }) {
     await this.get('proxy').ensureProxy({ promise });
     const isEth = ETH.isInstance(lockAmount);
+    const isGnt = GNT.isInstance(lockAmount);
+    const transferFrom = !isGnt;
+    const method = `lock${isEth ? 'ETH' : 'Gem'}`;
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
@@ -150,8 +162,8 @@ export default class CdpManager extends LocalService {
         promise
       }
     ].filter(x => x);
+    if (!isEth) args.splice(-1, 0, transferFrom);
 
-    const method = `lock${isEth ? 'ETH' : 'Gem'}`;
     return this.proxyActions[method](...args);
   }
 
