@@ -105,8 +105,9 @@ export default class CdpManager extends LocalService {
     );
     drawAmount = castAsCurrency(drawAmount, MDAI);
     await this.get('proxy').ensureProxy({ promise });
+    await this._setupGnt(lockAmount);
     const isEth = ETH.isInstance(lockAmount);
-    const isGnt = GNT.isInstance(lockAmount);
+    const method = this._setMethod(isEth, id);
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
@@ -121,35 +122,17 @@ export default class CdpManager extends LocalService {
       }
     ].filter(x => x);
 
-    // GNT needs `false` as a parameter, because it
-    // doesn't have a transferFrom function. All other
-    // ilks besides ETH need `true`.
-    if (isGnt) await this._transferToBag(lockAmount);
-    const transferFrom = !isGnt;
-    if (!isEth) args.splice(-1, 0, transferFrom);
-
-    const method = this._setMethod(isEth, id);
+    // Indicates if gem supports transferFrom
+    if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
 
     return await this.proxyActions[method](...args);
-  }
-
-  _setMethod(isEth, id) {
-    if (id && isEth) {
-      return 'lockETHAndDraw';
-    } else if (isEth) {
-      return 'openLockETHAndDraw';
-    } else if (id) {
-      return 'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)'
-    }
-    return 'openLockGemAndDraw';
   }
 
   @tracksTransactions
   async lock(id, ilk, lockAmount, { promise }) {
     await this.get('proxy').ensureProxy({ promise });
+    await this._setupGnt(lockAmount);
     const isEth = ETH.isInstance(lockAmount);
-    const isGnt = GNT.isInstance(lockAmount);
-    const transferFrom = !isGnt;
     const method = `lock${isEth ? 'ETH' : 'Gem'}`;
     const args = [
       this._managerAddress,
@@ -162,7 +145,9 @@ export default class CdpManager extends LocalService {
         promise
       }
     ].filter(x => x);
-    if (!isEth) args.splice(-1, 0, transferFrom);
+
+    // Indicates if gem supports transferFrom
+    if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
 
     return this.proxyActions[method](...args);
   }
@@ -280,7 +265,24 @@ export default class CdpManager extends LocalService {
       : this.get(CDP_TYPE).getCdpType(amount.type).decimals;
   }
 
+  _setMethod(isEth, id) {
+    if (id && isEth) {
+      return 'lockETHAndDraw';
+    } else if (isEth) {
+      return 'openLockETHAndDraw';
+    } else if (id) {
+      return 'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)';
+    }
+    return 'openLockGemAndDraw';
+  }
+
   // The following functions are only required for GNT
+  async _setupGnt(lockAmount) {
+    if (GNT.isInstance(lockAmount)) {
+      await this._transferToBag(lockAmount);
+    }
+  }
+
   async _transferToBag(lockAmount) {
     const bagAddress = await this._ensureBag();
     const gntToken = this.get('token').getToken(GNT);
