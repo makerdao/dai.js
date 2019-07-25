@@ -1,4 +1,4 @@
-export default class ScdToMcdCdp {
+export default class SingleToMultiCdp {
   constructor(manager) {
     this._manager = manager;
     return this;

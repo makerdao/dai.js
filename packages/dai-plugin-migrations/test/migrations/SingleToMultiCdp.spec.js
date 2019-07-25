@@ -22,7 +22,7 @@ describe('SCD to MCD CDP Migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
     const service = maker.service(ServiceRoles.MIGRATION);
-    migration = service.getMigration(Migrations.SCD_TO_MCD_CDP);
+    migration = service.getMigration(Migrations.SINGLE_TO_MULTI_CDP);
   });
 
   test('if there are no cdps, return false', async () => {

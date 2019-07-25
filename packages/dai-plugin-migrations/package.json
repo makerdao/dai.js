@@ -9,7 +9,7 @@
     "prepublishOnly": "./scripts/prepublish.sh",
     "testchain": "../../scripts/run-testchain.sh --ci",
     "coverage": "yarn test --coverage",
-    "test": "yarn testchain jest --runInBand"
+    "test": "yarn testchain --ci jest --runInBand"
   },
   "peerDependencies": {
     "@makerdao/dai": ">0.16.2"

@@ -1,6 +1,6 @@
 import { migrationMaker } from './helpers';
 import { ServiceRoles, Migrations } from '../src/constants';
-import ScdToMcdCdp from '../src/migrations/ScdToMcdCdp';
+import SingleToMultiCdp from '../src/migrations/SingleToMultiCdp';
 
 let maker, service;
 
@@ -13,13 +13,17 @@ describe('Migration Service', () => {
   test('can fetch a list of all migrations', () => {
     const ids = service.getAllMigrationsIds();
 
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        Migrations.SINGLE_TO_MULTI_CDP
+      ])
+    );
     expect(ids.length).toEqual(1);
-    expect(ids).toEqual(expect.arrayContaining([Migrations.SCD_TO_MCD_CDP]));
   });
 
   test('getting each migration returns a valid migration', () => {
     expect(service.getMigration(Migrations.SCD_TO_MCD_CDP)).toBeInstanceOf(
-      ScdToMcdCdp
+      SingleToMultiCdp
     );
   });
 
