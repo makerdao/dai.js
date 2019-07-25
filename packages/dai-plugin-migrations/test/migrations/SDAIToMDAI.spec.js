@@ -3,13 +3,6 @@ import { ServiceRoles, Migrations } from '../../src/constants';
 
 let maker, migration;
 
-async function getProxy() {
-  return (
-    (await maker.service('proxy').currentProxy()) ||
-    (await maker.service('proxy').build())
-  );
-}
-
 describe('SDai to MDai Migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
@@ -28,7 +21,7 @@ describe('SDai to MDai Migration', () => {
   });
 
   test('if the account has some SDAI, return true', async () => {
-    const proxy = await getProxy();
+    const proxy = await maker.service('proxy').ensureProxy();
     await maker.service('cdp').openProxyCdpLockEthAndDrawDai(0.1, 1, proxy);
 
     const amount = await maker
