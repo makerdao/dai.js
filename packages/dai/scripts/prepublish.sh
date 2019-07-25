@@ -8,6 +8,5 @@ fi
 lerna version --tag-version-prefix="dai-v" --conventional-commits --create-release github
 CWD=`dirname $0`
 rm -rf dist/*
-cd ../..
 ./build-backend.sh
 cd - >/dev/null
