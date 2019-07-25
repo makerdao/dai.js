@@ -22,7 +22,7 @@ describe('Migration Service', () => {
   });
 
   test('getting each migration returns a valid migration', () => {
-    expect(service.getMigration(Migrations.SCD_TO_MCD_CDP)).toBeInstanceOf(
+    expect(service.getMigration(Migrations.SINGLE_TO_MULTI_CDP)).toBeInstanceOf(
       SingleToMultiCdp
     );
   });
