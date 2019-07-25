@@ -5,7 +5,7 @@ if [ $(basename $(pwd)) != "dai-plugin-migrations" ]; then
   exit
 fi
 
-lerna version --conventional-commits --create-release github
+lerna version --tag-version-prefix="dai-plugin-migrations-v" --conventional-commits --create-release github
 CWD=`dirname $0`
 rm -rf dist/*
 cd ../..

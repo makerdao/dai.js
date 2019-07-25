@@ -5,7 +5,7 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
   exit
 fi
 
-lerna version --conventional-commits --create-release github
+lerna version --tag-version-prefix="dai-plugin-mcd-v" --conventional-commits --create-release github
 CWD=`dirname $0`
 rm -rf dist/*
 cd ../..
