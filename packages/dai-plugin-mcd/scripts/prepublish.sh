@@ -5,7 +5,9 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
   exit
 fi
 
-lerna version --tag-version-prefix="dai-plugin-mcd-v" --conventional-commits --create-release github
+yarn config set version-tag-prefix 'dai-plugin-mcd-v'
+yarn version
+
 CWD=`dirname $0`
 rm -rf dist/*
 cd ../..

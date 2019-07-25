@@ -1,12 +1,11 @@
 {
   "name": "@makerdao/dai-plugin-mcd",
   "description": "Plugin to add Multi-Collateral Dai support to dai.js",
-  "version": "0.8.10",
+  "version": "0.2.10-1",
   "license": "MIT",
   "main": "dist",
   "scripts": {
     "build": "yarn prepublishOnly",
-    "preversion": "",
     "prepublishOnly": "./scripts/prepublish.sh",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",

@@ -5,7 +5,9 @@ if [ $(basename $(pwd)) != "dai" ]; then
   exit
 fi
 
-lerna version --tag-version-prefix="dai-v" --conventional-commits --create-release github
+yarn config set version-tag-prefix 'dai-v'
+yarn version
+
 CWD=`dirname $0`
 rm -rf dist/*
 ./build-backend.sh
