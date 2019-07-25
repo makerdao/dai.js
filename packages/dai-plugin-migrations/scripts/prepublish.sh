@@ -4,6 +4,8 @@ if [ $(basename $(pwd)) != "dai-plugin-migrations" ]; then
   echo "This script must be run from the dai-plugin-migrations directory."
   exit
 fi
+
+lerna version --conventional-commits --create-release github
 CWD=`dirname $0`
 rm -rf dist/*
 cd ../..

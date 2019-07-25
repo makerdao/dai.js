@@ -4,6 +4,8 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
   echo "This script must be run from the dai-plugin-mcd directory."
   exit
 fi
+
+lerna version --conventional-commits --create-release github
 CWD=`dirname $0`
 rm -rf dist/*
 cd ../..
