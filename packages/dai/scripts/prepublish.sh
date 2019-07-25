@@ -5,7 +5,7 @@ if [ $(basename $(pwd)) != "dai" ]; then
   exit
 fi
 
-yarn config set version-tag-prefix 'dai-v'
+yarn config set version-tag-prefix "dai-v"
 yarn config set version-git-message "dai-v%s"
 yarn version
 
