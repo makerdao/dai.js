@@ -1,7 +1,7 @@
 import { migrationMaker } from './helpers';
 import { ServiceRoles, Migrations } from '../src/constants';
 import SingleToMultiCdp from '../src/migrations/SingleToMultiCdp';
-import SDAIToMDAI from '../src/migrations/SDAIToMDAI';
+import SDaiToMDai from '../src/migrations/SDaiToMDai';
 
 let maker, service;
 
@@ -28,7 +28,7 @@ describe('Migration Service', () => {
       SingleToMultiCdp
     );
     expect(service.getMigration(Migrations.SDAI_TO_MDAI)).toBeInstanceOf(
-      SDAIToMDAI
+      SDaiToMDai
     );
   });
 

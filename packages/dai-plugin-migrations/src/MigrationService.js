@@ -1,11 +1,11 @@
 import { PublicService } from '@makerdao/services-core';
 import { ServiceRoles, Migrations } from './constants';
 import SingleToMultiCdp from './migrations/SingleToMultiCdp';
-import SDAIToMDAI from './migrations/SDAIToMDAI';
+import SDaiToMDai from './migrations/SDaiToMDai';
 
 const migrations = {
   [Migrations.SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
-  [Migrations.SDAI_TO_MDAI]: SDAIToMDAI
+  [Migrations.SDAI_TO_MDAI]: SDaiToMDai
 };
 
 export default class MigrationService extends PublicService {

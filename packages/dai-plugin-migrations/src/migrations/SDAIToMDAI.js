@@ -1,4 +1,4 @@
-export default class SDAIToMDAI {
+export default class SDaiToMDai {
   constructor(manager) {
     this._manager = manager;
     return this;
