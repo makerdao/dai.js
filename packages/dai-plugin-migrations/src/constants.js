@@ -5,7 +5,8 @@ export const ServiceRoles = {
 };
 
 export const Migrations = {
-  SINGLE_TO_MULTI_CDP: 'single-to-multi-cdp'
+  SINGLE_TO_MULTI_CDP: 'single-to-multi-cdp',
+  SDAI_TO_MDAI: 'sdai-to-mdai'
 };
 
 export const WAD = new BigNumber('1e18');
