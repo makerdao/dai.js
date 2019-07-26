@@ -1,5 +1,6 @@
 import Maker from '@makerdao/dai';
 import MigrationPlugin from '../../src';
+import McdPlugin from '../../../dai-plugin-mcd/src';
 
 export async function migrationMaker({
   preset = 'test',
@@ -8,7 +9,10 @@ export async function migrationMaker({
   ...settings
 } = {}) {
   const maker = await Maker.create(preset, {
-    plugins: [[MigrationPlugin, { addressOverrides, network }]],
+    plugins: [
+      [McdPlugin, { network }],
+      [MigrationPlugin, { addressOverrides, network }]
+    ],
     log: false,
     ...settings
   });
