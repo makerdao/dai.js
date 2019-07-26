@@ -12,6 +12,7 @@ import CdpTypeService from './CdpTypeService';
 import AuctionService from './AuctionService';
 import SystemDataService from './SystemDataService';
 import QueryApiMcdService from './QueryApiMcdService';
+import GlobalSettlementService from './GlobalSettlementService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
 
@@ -22,7 +23,8 @@ const {
   SYSTEM_DATA,
   AUCTION,
   QUERY_API,
-  SAVINGS
+  SAVINGS,
+  GLOBAL_SETTLEMENT
 } = ServiceRoles;
 
 // look up contract ABIs using abiMap.
@@ -152,14 +154,16 @@ export default {
         AUCTION,
         SYSTEM_DATA,
         QUERY_API,
-        SAVINGS
+        SAVINGS,
+        GLOBAL_SETTLEMENT
       ],
       [CDP_TYPE]: [CdpTypeService, { cdpTypes, prefetch }],
       [CDP_MANAGER]: CdpManager,
       [SAVINGS]: SavingsService,
       [AUCTION]: AuctionService,
       [SYSTEM_DATA]: SystemDataService,
-      [QUERY_API]: QueryApiMcdService
+      [QUERY_API]: QueryApiMcdService,
+      [GLOBAL_SETTLEMENT]: GlobalSettlementService
     };
   }
 };
