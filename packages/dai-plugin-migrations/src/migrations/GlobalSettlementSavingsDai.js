@@ -5,8 +5,10 @@ export default class GlobalSettlementSavingsDai {
   }
 
   async check() {
-    const globalSettlement = this._manager.get('mcd:globalSettlement');
-    const isInGlobalSettlement = await globalSettlement.isInProgress();
+    const globalSettlement = this._manager
+      .get('smartContract')
+      .getContract('MCD_END_1');
+    const isInGlobalSettlement = !(await globalSettlement.live());
     if (!isInGlobalSettlement) return false;
 
     const address = this._manager.get('proxy').currentProxy();
