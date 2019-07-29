@@ -1,4 +1,7 @@
 {
   "TUB": "0xe82ce3d6bf40f2f9414c8d01a35e3d9eb16a1761",
-  "MCD_END_1": "0x9a3b6e9cfd39a7fdce11a0c46c3619a3b46ca9cd"
+  "GET_CDPS_1": "0x29213b83da843fd98654df9f880da3df348c0dbe",
+  "CDP_MANAGER_1": "0x23aba2b219bb3685f0e304ca7c9c7e429d44d0b5",
+  "MCD_END_1": "0x9a3b6e9cfd39a7fdce11a0c46c3619a3b46ca9cd",
+  "MCD_VAT_1": "0x546af4b8114522f03dbc10c30f164ba101dc1596"
 }

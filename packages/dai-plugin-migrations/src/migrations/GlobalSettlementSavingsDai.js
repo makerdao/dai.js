@@ -11,7 +11,7 @@ export default class GlobalSettlementSavingsDai {
     const isInGlobalSettlement = !(await globalSettlement.live());
     if (!isInGlobalSettlement) return false;
 
-    const address = this._manager.get('proxy').currentProxy();
+    const address = await this._manager.get('proxy').currentProxy();
     if (!address) return false;
 
     const savings = this._manager.get('mcd:savings');

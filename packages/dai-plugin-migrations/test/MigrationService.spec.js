@@ -3,6 +3,7 @@ import { ServiceRoles, Migrations } from '../src/constants';
 import SingleToMultiCdp from '../src/migrations/SingleToMultiCdp';
 import SDaiToMDai from '../src/migrations/SDaiToMDai';
 import GlobalSettlementSavingsDai from '../src/migrations/GlobalSettlementSavingsDai';
+import GlobalSettlementCollateralClaims from '../src/migrations/GlobalSettlementCollateralClaims';
 
 let maker, service;
 
@@ -19,10 +20,11 @@ describe('Migration Service', () => {
       expect.arrayContaining([
         Migrations.SINGLE_TO_MULTI_CDP,
         Migrations.SDAI_TO_MDAI,
-        Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI
+        Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI,
+        Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS
       ])
     );
-    expect(ids.length).toEqual(2);
+    expect(ids.length).toEqual(3);
   });
 
   test('getting each migration returns a valid migration', () => {
@@ -35,6 +37,9 @@ describe('Migration Service', () => {
     expect(
       service.getMigration(Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI)
     ).toBeInstanceOf(GlobalSettlementSavingsDai);
+    expect(
+      service.getMigration(Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS)
+    ).toBeInstanceOf(GlobalSettlementCollateralClaims);
   });
 
   test('getting a non-existent migration returns undefined', () => {
