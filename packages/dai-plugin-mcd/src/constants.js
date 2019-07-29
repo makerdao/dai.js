@@ -6,8 +6,7 @@ export const ServiceRoles = {
   AUCTION: 'mcd:auction',
   SYSTEM_DATA: 'mcd:systemData',
   QUERY_API: 'mcd:queryApi',
-  SAVINGS: 'mcd:savings',
-  GLOBAL_SETTLEMENT: 'mcd:globalSettlement'
+  SAVINGS: 'mcd:savings'
 };
 
 export const WAD = new BigNumber('1e18');
