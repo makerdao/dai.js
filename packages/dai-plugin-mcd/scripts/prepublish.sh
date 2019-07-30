@@ -4,7 +4,11 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
   echo "This script must be run from the dai-plugin-mcd directory."
   exit
 fi
-CWD=`dirname $0`
+
+yarn config set version-tag-prefix "dai-plugin-mcd-v"
+yarn config set version-git-message "dai-plugin-mcd-v%s"
+yarn version
+
 rm -rf dist/*
 cd ../..
 ./node_modules/.bin/babel --no-babelrc -d packages/dai-plugin-mcd/dist packages/dai-plugin-mcd/src
