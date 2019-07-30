@@ -24,7 +24,7 @@ describe('Migration Service', () => {
         Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS
       ])
     );
-    expect(ids.length).toEqual(3);
+    expect(ids.length).toEqual(4);
   });
 
   test('getting each migration returns a valid migration', () => {

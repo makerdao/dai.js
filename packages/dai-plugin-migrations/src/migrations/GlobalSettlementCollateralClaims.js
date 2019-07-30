@@ -1,3 +1,6 @@
+import BigNumber from 'bignumber.js';
+import { RAY } from '../constants';
+
 export default class GlobalSettlementCollateralClaims {
   constructor(manager) {
     this._manager = manager;
@@ -5,10 +8,8 @@ export default class GlobalSettlementCollateralClaims {
   }
 
   async check() {
-    const globalSettlement = this._manager
-      .get('smartContract')
-      .getContract('MCD_END_1');
-    const isInGlobalSettlement = !(await globalSettlement.live());
+    const end = this._manager.get('smartContract').getContract('MCD_END_1');
+    const isInGlobalSettlement = !(await end.live());
     if (!isInGlobalSettlement) return false;
 
     const address = await this._manager.get('proxy').currentProxy();
@@ -24,17 +25,23 @@ export default class GlobalSettlementCollateralClaims {
       .getContract('GET_CDPS_1')
       .getCdpsDesc(cdpManager.address, address);
 
-    const urns = await Promise.all(
+    const freeCollateral = await Promise.all(
       ids.map(async (id, i) => {
         const urn = await cdpManager.urns(id);
-        return await vat.urns(ilks[i], urn);
+        const vatUrn = await vat.urns(ilks[i], urn);
+        const tag = await end.tags(ilks[i]);
+        const ilk = await vat.ilks(ilks[i]);
+
+        const owed = new BigNumber(vatUrn.art)
+          .times(ilk.rate)
+          .div(RAY)
+          .times(tag)
+          .div(RAY);
+
+        return tag.gt(0) && new BigNumber(vatUrn.ink).minus(owed).gt(0);
       })
     );
 
-    const hasUrnWithInkAndNoArt = urns.some(urn => {
-      return urn.ink.gt(0) && urn.art.eq(0);
-    });
-
-    return hasUrnWithInkAndNoArt;
+    return freeCollateral.some(exists => exists);
   }
 }

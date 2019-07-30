@@ -3,6 +3,7 @@ import { ServiceRoles, Migrations } from './constants';
 import SingleToMultiCdp from './migrations/SingleToMultiCdp';
 import GlobalSettlementSavingsDai from './migrations/GlobalSettlementSavingsDai';
 import GlobalSettlementCollateralClaims from './migrations/GlobalSettlementCollateralClaims';
+import SDaiToMDai from './migrations/SDaiToMDai';
 
 const migrations = {
   [Migrations.SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
@@ -13,7 +14,14 @@ const migrations = {
 
 export default class MigrationService extends PublicService {
   constructor(name = ServiceRoles.MIGRATION) {
-    super(name, ['smartContract', 'accounts', 'cdp', 'proxy', 'token', 'mcd:savings']);
+    super(name, [
+      'smartContract',
+      'accounts',
+      'cdp',
+      'proxy',
+      'token',
+      'mcd:savings'
+    ]);
   }
 
   getAllMigrationsIds() {

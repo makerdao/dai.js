@@ -21,28 +21,28 @@ describe('Global Settlement Savings DAI Migration', () => {
   });
 
   test('if the system is in global settlement and there is no DAI in savings DAI, return false', async () => {
-    mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage });
+    mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage() });
     savingsService.balance = jest.fn(() => MDAI(0));
 
     expect(await migration.check()).toBeFalsy();
   });
 
   test('if the system is in global settlement and there is DAI in savings DAI, return true', async () => {
-    mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage });
+    mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage() });
     savingsService.balance = jest.fn(() => MDAI(10));
 
     expect(await migration.check()).toBeTruthy();
   });
 
   test('if the system is NOT in global settlement and there is no DAI in savings DAI, return false', async () => {
-    mockContracts(smartContract, { MCD_END_1: globalSettlement.beforeCage });
+    mockContracts(smartContract, { MCD_END_1: globalSettlement.beforeCage() });
     savingsService.balance = jest.fn(() => MDAI(0));
 
     expect(await migration.check()).toBeFalsy();
   });
 
   test('if the system is NOT in global settlement and there is DAI in savings DAI, return false', async () => {
-    mockContracts(smartContract, { MCD_END_1: globalSettlement.beforeCage });
+    mockContracts(smartContract, { MCD_END_1: globalSettlement.beforeCage() });
     savingsService.balance = jest.fn(() => MDAI(10));
 
     expect(await migration.check()).toBeFalsy();

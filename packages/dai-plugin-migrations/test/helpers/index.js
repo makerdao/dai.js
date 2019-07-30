@@ -13,6 +13,12 @@ export function stringToBytes(str) {
   return '0x' + Buffer.from(str).toString('hex');
 }
 
+export function bytesToString(hex) {
+  return Buffer.from(hex.replace(/^0x/, ''), 'hex')
+    .toString()
+    .replace(/\x00/g, ''); // eslint-disable-line no-control-regex
+}
+
 export async function setPrice(maker, ratio, ilk) {
   const scs = maker.service('smartContract');
   const { symbol } = ratio.denominator;
