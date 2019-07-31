@@ -82,44 +82,22 @@ async function expectValues(cdp, { collateral, debt, myGem, myDai }) {
 }
 
 async function expectUtilValues(cdp, { val, ratio, isSafe, dai }) {
-  const [
-    debtValue,
-    collateralValue,
-    collateralAmount,
-    collateralizationRatio,
-    safe,
-    minCollateral,
-    availCollateral,
-    daiAvailable,
-    liquidationRatio
-  ] = await Promise.all([
-    cdp.getDebtValue(),
-    cdp.getCollateralValue(),
-    cdp.getCollateralAmount(),
-    cdp.getCollateralizationRatio(),
-    cdp.isSafe(),
-    cdp.getMinSafeCollateralAmount(),
-    cdp.getCollateralAvailable(),
-    cdp.getDaiAvailable(),
-    cdp.type.getLiquidationRatio()
-  ]);
-  const minVal = debtValue.times(liquidationRatio).div(val);
-
   if (val !== undefined) {
-    expect(collateralValue.toNumber()).toBe(val);
-    expect(minCollateral.toNumber()).toBe(minVal.toNumber());
-    expect(availCollateral.toNumber()).toBe(
-      collateralAmount.minus(minVal.toNumber()).toNumber()
+    const minVal = cdp.debtValue.times(cdp.type.liquidationRatio).div(val);
+    expect(cdp.collateralValue.toNumber()).toBe(val);
+    expect(cdp.minSafeCollateralAmount.toNumber()).toBe(minVal.toNumber());
+    expect(cdp.collateralAvailable.toNumber()).toBe(
+      cdp.collateralAmount.minus(minVal.toNumber()).toNumber()
     );
   }
   if (ratio !== undefined) {
-    expect(collateralizationRatio.toNumber()).toBe(ratio);
+    expect(cdp.collateralizationRatio.toNumber()).toBe(ratio);
   }
-  if (safe !== undefined) {
-    expect(safe).toBe(isSafe);
+  if (isSafe !== undefined) {
+    expect(cdp.isSafe).toBe(isSafe);
   }
   if (dai !== undefined) {
-    daiAvailable.eq(MDAI(dai));
+    cdp.daiAvailable.eq(MDAI(dai));
   }
 }
 
