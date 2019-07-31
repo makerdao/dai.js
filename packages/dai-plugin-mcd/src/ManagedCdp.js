@@ -221,8 +221,10 @@ export default class ManagedCdp {
   async prefetch() {
     // TODO allow passing in a multicall instance to use that instead of making
     // separate calls
-    this._getUrnInfo();
-    this.type.prefetch();
+    return Promise.all([
+      this._getUrnInfo(),
+      this.type.prefetch()
+    ]);
   }
 
   async reset() {

@@ -178,11 +178,13 @@ export default class CdpType {
   async prefetch() {
     // TODO allow passing in a multicall instance to use that instead of making
     // separate calls
-    this._getPar();
-    this._getVatInfo();
-    this._getCatInfo();
-    this._getSpotInfo();
-    this._getJugInfo();
+    return Promise.all([
+      this._getPar(),
+      this._getVatInfo(),
+      this._getCatInfo(),
+      this._getSpotInfo(),
+      this._getJugInfo()
+    ]);
   }
 
   async reset() {
