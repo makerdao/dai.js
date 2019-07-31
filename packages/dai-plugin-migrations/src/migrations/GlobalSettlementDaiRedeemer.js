@@ -1,4 +1,4 @@
-import { MDAI } from '@makerdao/dai-plugin-mcd';
+import { MDAI_1 } from '../index';
 
 export default class GlobalSettlementDaiRedeemer {
   constructor(manager) {
@@ -17,7 +17,7 @@ export default class GlobalSettlementDaiRedeemer {
 
     const daiBalance = await this._manager
       .get('token')
-      .getToken(MDAI)
+      .getToken(MDAI_1)
       .balance();
     if (daiBalance.lte(0)) return false;
 

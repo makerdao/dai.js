@@ -5,17 +5,16 @@ export default class GlobalSettlementSavingsDai {
   }
 
   async check() {
-    const globalSettlement = this._manager
-      .get('smartContract')
-      .getContract('MCD_END_1');
-    const isInGlobalSettlement = !(await globalSettlement.live());
+    const smartContract = this._manager.get('smartContract');
+    const end = smartContract.getContract('MCD_END_1');
+    const isInGlobalSettlement = !(await end.live());
     if (!isInGlobalSettlement) return false;
 
-    const address = await this._manager.get('proxy').currentProxy();
-    if (!address) return false;
+    const proxyAddress = await this._manager.get('proxy').currentProxy();
+    if (!proxyAddress) return false;
 
-    const savings = this._manager.get('mcd:savings');
-    const balance = await savings.balance();
+    const pot = smartContract.getContract('MCD_POT_1');
+    const balance = await pot.pie(proxyAddress);
     return balance.gt(0);
   }
 }

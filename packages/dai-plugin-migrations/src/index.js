@@ -1,3 +1,4 @@
+import { createCurrency } from '@makerdao/currency';
 import testnetAddresses from '../contracts/addresses/testnet.json';
 import kovanAddresses from '../contracts/addresses/kovan.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
@@ -43,6 +44,8 @@ function overrideContractAddresses(network, addressOverrides, contracts) {
   return contracts;
 }
 
+export const MDAI_1 = createCurrency('MDAI_1');
+
 export default {
   addConfig: (_, { network = 'testnet', addressOverrides } = {}) => {
     const addContracts = addressOverrides
@@ -61,6 +64,11 @@ export default {
 
     return {
       smartContract: { addContracts },
+      token: {
+        erc20: [
+          { currency: MDAI_1, address: addContracts.MCD_DAI_1.address[network] }
+        ]
+      },
       additionalServices: [MIGRATION],
       [MIGRATION]: MigrationService
     };
