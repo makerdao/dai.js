@@ -59,6 +59,12 @@ test('getCdp looks up ilk', async () => {
   expect(sameCdp.ilk).toEqual(cdp.ilk);
 });
 
+test('getCdp can disable prefetch', async () => {
+  const cdp = await cdpMgr.open('ETH-A');
+  const sameCdp = await cdpMgr.getCdp(cdp.id, { prefetch: false });
+  expect(sameCdp._urnInfoPromise).toBeUndefined();
+});
+
 test('getCombinedEventHistory', async () => {
   const proxy = await maker.currentProxy();
   const mockFn = jest.fn(async () => dummyEventData('ETH-A'));

@@ -2,13 +2,7 @@ import assert from 'assert';
 import { ServiceRoles } from './constants';
 import { stringToBytes } from './utils';
 import { MDAI, USD, ETH, MWETH } from './index';
-import {
-  annualStabilityFee,
-  debtCeiling,
-  liquidationPenalty,
-  liquidationRatio,
-  price
-} from './math';
+import * as math from './math';
 
 export default class CdpType {
   constructor(
@@ -25,13 +19,7 @@ export default class CdpType {
     this.ilk = ilk;
     this._ilkBytes = stringToBytes(this.ilk);
     this.cache = {};
-    if (options.prefetch) {
-      this._getPar();
-      this._getVatInfo();
-      this._getCatInfo();
-      this._getSpotInfo();
-      this._getJugInfo();
-    }
+    if (options.prefetch) this.prefetch();
   }
 
   async getTotalCollateral(unit = this.currency) {
@@ -58,10 +46,10 @@ export default class CdpType {
 
   async getTotalDebt() {
     await this._getVatInfo();
-    return this.getTotalDebtSync();
+    return this.totalDebt;
   }
 
-  getTotalDebtSync() {
+  get totalDebt() {
     const { Art, rate } = this._getCached('vatInfo');
     return MDAI.wei(Art)
       .times(rate)
@@ -70,20 +58,20 @@ export default class CdpType {
 
   async getDebtCeiling() {
     await this._getVatInfo();
-    return this.getDebtCeilingSync();
+    return this.debtCeiling;
   }
 
-  getDebtCeilingSync() {
-    return debtCeiling(this._getCached('vatInfo').line);
+  get debtCeiling() {
+    return math.debtCeiling(this._getCached('vatInfo').line);
   }
 
   async getLiquidationRatio() {
     await this._getSpotInfo();
-    return this.getLiquidationRatioSync();
+    return this.liquidationRatio;
   }
 
-  getLiquidationRatioSync() {
-    return liquidationRatio(this._getCached('spotInfo').mat);
+  get liquidationRatio() {
+    return math.liquidationRatio(this._getCached('spotInfo').mat);
   }
 
   async getPrice() {
@@ -92,34 +80,34 @@ export default class CdpType {
       this._getSpotInfo(),
       this._getPar()
     ]);
-    return this.getPriceSync();
+    return this.price;
   }
 
-  getPriceSync() {
-    return price(
+  get price() {
+    return math.price(
       this.currency,
       this._getCached('par'),
       this._getCached('vatInfo').spot,
-      this.getLiquidationRatioSync()
+      this.liquidationRatio
     );
   }
 
   async getLiquidationPenalty() {
     await this._getCatInfo();
-    return this.getLiquidationPenaltySync();
+    return this.liquidationPenalty;
   }
 
-  getLiquidationPenaltySync() {
-    return liquidationPenalty(this._getCached('catInfo').chop);
+  get liquidationPenalty() {
+    return math.liquidationPenalty(this._getCached('catInfo').chop);
   }
 
   async getAnnualStabilityFee() {
     await this._getJugInfo();
-    return this.getAnnualStabilityFeeSync();
+    return this.annualStabilityFee;
   }
 
-  getAnnualStabilityFeeSync() {
-    return annualStabilityFee(this._getCached('jugInfo').duty);
+  get annualStabilityFee() {
+    return math.annualStabilityFee(this._getCached('jugInfo').duty);
   }
 
   async getPriceHistory(num = 100) {
@@ -185,6 +173,16 @@ export default class CdpType {
       this.cache.jugInfo = value;
       return value;
     });
+  }
+
+  async prefetch() {
+    // TODO allow passing in a multicall instance to use that instead of making
+    // separate calls
+    this._getPar();
+    this._getVatInfo();
+    this._getCatInfo();
+    this._getSpotInfo();
+    this._getJugInfo();
   }
 
   async reset() {
