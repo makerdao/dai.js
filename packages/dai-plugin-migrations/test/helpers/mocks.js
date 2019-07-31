@@ -5,19 +5,31 @@ import { bytesToString } from './';
 export const globalSettlement = {
   beforeCage: () => ({
     live: async () => true,
-    tags: async () => new BigNumber(0)
+    tags: async () => new BigNumber(0),
+    fix: async () => new BigNumber(0)
   }),
   afterCage: () => ({
     live: async () => false,
-    tags: async () => new BigNumber(0)
+    tags: async () => new BigNumber(0),
+    fix: async () => new BigNumber(0)
   }),
   afterCageCollateral: tags => ({
     live: async () => false,
     tags: async ilk => {
       const ilkAsString = bytesToString(ilk);
-      return (
-        RAY.times(new BigNumber(1).div(tags[ilkAsString])) || new BigNumber(0)
-      );
+      return tags[ilkAsString]
+        ? RAY.times(new BigNumber(1).div(tags[ilkAsString]))
+        : new BigNumber(0);
+    },
+    fix: async () => new BigNumber(0)
+  }),
+  afterFlow: fixes => ({
+    live: async () => false,
+    fix: async ilk => {
+      const ilkAsString = bytesToString(ilk);
+      return fixes[ilkAsString]
+        ? RAY.times(fixes[ilkAsString])
+        : new BigNumber(0);
     }
   })
 };
