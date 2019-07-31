@@ -58,13 +58,29 @@ test('getLiquidationPrice and getCollateralizationRatio returns infinity with 0 
   expect(collateralization).toBe(Infinity);
 });
 
-async function expectValues(cdp, { collateral, debt, myGem, myDai }) {
-  cdp.reset();
+async function expectValues(
+  cdp,
+  {
+    reset,
+    collateral,
+    debt,
+    myGem,
+    myDai,
+    collateralValue,
+    ratio,
+    isSafe,
+    daiAvailable
+  }
+) {
+  if (reset) {
+    cdp.reset();
+    await cdp.prefetch();
+  }
   if (collateral !== undefined) {
-    expect(await cdp.getCollateralAmount()).toEqual(cdp.currency(collateral));
+    expect(cdp.collateralAmount).toEqual(cdp.currency(collateral));
   }
   if (debt !== undefined) {
-    expect((await cdp.getDebtValue()).toNumber()).toBeCloseTo(debt, 1);
+    expect(cdp.debtValue).toEqual(MDAI(debt));
   }
   if (myGem !== undefined) {
     const balance = await maker.getToken(cdp.currency).balance();
@@ -79,12 +95,11 @@ async function expectValues(cdp, { collateral, debt, myGem, myDai }) {
   if (myDai !== undefined) {
     expect(await dai.balance()).toEqual(myDai);
   }
-}
-
-async function expectUtilValues(cdp, { val, ratio, isSafe, dai }) {
-  if (val !== undefined) {
-    const minVal = cdp.debtValue.times(cdp.type.liquidationRatio).div(val);
-    expect(cdp.collateralValue.toNumber()).toBe(val);
+  if (collateralValue !== undefined) {
+    const minVal = cdp.debtValue
+      .times(cdp.type.liquidationRatio)
+      .div(collateralValue);
+    expect(cdp.collateralValue.toNumber()).toBe(collateralValue);
     expect(cdp.minSafeCollateralAmount.toNumber()).toBe(minVal.toNumber());
     expect(cdp.collateralAvailable.toNumber()).toBe(
       cdp.collateralAmount.minus(minVal.toNumber()).toNumber()
@@ -96,8 +111,8 @@ async function expectUtilValues(cdp, { val, ratio, isSafe, dai }) {
   if (isSafe !== undefined) {
     expect(cdp.isSafe).toBe(isSafe);
   }
-  if (dai !== undefined) {
-    cdp.daiAvailable.eq(MDAI(dai));
+  if (daiAvailable !== undefined) {
+    cdp.daiAvailable.eq(MDAI(daiAvailable));
   }
 }
 
@@ -167,12 +182,14 @@ describe.each([
 
     await cdp.lockCollateral(1);
     await expectValues(cdp, {
+      reset: true,
       collateral: 2,
       myGem: startingGemBalance.minus(2)
     });
 
     await cdp.lockAndDraw(1, 5);
     await expectValues(cdp, {
+      reset: true,
       collateral: 3,
       debt: 5,
       myDai: startingDaiBalance.plus(5),
@@ -181,6 +198,7 @@ describe.each([
 
     await cdp.freeCollateral(0.8);
     await expectValues(cdp, {
+      reset: true,
       collateral: 2.2,
       myGem: startingGemBalance.minus(2.2)
     });
@@ -198,11 +216,11 @@ describe.each([
     });
     cdp.type.reset();
     const price = await cdp.type.getPrice();
-    await expectUtilValues(cdp, {
+    await expectValues(cdp, {
       val: price.toNumber(),
       ratio: price.toNumber(),
       isSafe: true,
-      dai: '149'
+      daiAvailable: '149'
     });
 
     const sameCdp = await mgr.getCdp(cdp.id);
@@ -221,7 +239,11 @@ describe.each([
     txMgr.listen(draw, drawHandler);
     await draw;
     expect(drawHandler.mock.calls.length).toBe(2);
-    await expectValues(cdp, { debt: 2, myDai: startingDaiBalance.plus(2) });
+    await expectValues(cdp, {
+      reset: true,
+      debt: 2,
+      myDai: startingDaiBalance.plus(2)
+    });
 
     const wipe = cdp.wipeDai(0.5);
     const wipeHandler = jest.fn((tx, state) => {
@@ -231,10 +253,15 @@ describe.each([
     txMgr.listen(wipe, wipeHandler);
     await wipe;
     expect(wipeHandler.mock.calls.length).toBe(2);
-    await expectValues(cdp, { debt: 1.5, myDai: startingDaiBalance.plus(1.5) });
+    await expectValues(cdp, {
+      reset: true,
+      debt: 1.5,
+      myDai: startingDaiBalance.plus(1.5)
+    });
 
     await cdp.wipeAndFree(MDAI(1), GEM(0.5));
     await expectValues(cdp, {
+      reset: true,
       collateral: 0.5,
       debt: 0.5,
       myDai: startingDaiBalance.plus(0.5),
