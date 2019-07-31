@@ -233,10 +233,12 @@ export default class ManagedCdp {
   }
 }
 
-ManagedCdp.create = function(createTxo, ilk, cdpManager) {
+ManagedCdp.create = async function(createTxo, ilk, cdpManager) {
   const sig = ethAbi.encodeEventSignature('NewCdp(address,address,uint256)');
   const log = createTxo.receipt.logs.find(l => l.topics[0] === sig);
   assert(log, 'could not find log for NewCdp event');
   const id = parseInt(log.data, 16);
-  return new ManagedCdp(id, ilk, cdpManager);
+  const cdp = new ManagedCdp(id, ilk, cdpManager);
+  await cdp.prefetch();
+  return cdp;
 };
