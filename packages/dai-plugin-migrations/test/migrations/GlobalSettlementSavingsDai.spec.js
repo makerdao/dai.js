@@ -1,9 +1,10 @@
 import { migrationMaker, setupCollateral } from '../helpers';
 import { mockContracts, globalSettlement } from '../helpers/mocks';
+import { takeSnapshot, restoreSnapshot } from '../helpers/ganache';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { ETH, MDAI } from '@makerdao/dai-plugin-mcd';
 
-let maker, migration, cdpManager, smartContract;
+let maker, migration, cdpManager, smartContract, snapshot;
 
 function joinSavings(amountInDai) {
   return smartContract
@@ -31,8 +32,13 @@ describe('Global Settlement Savings DAI Migration', () => {
     migration = service.getMigration(Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI);
   });
 
-  afterEach(() => {
+  beforeEach(async () => {
+    snapshot = await takeSnapshot(maker);
     jest.restoreAllMocks();
+  });
+
+  afterEach(async () => {
+    await restoreSnapshot(snapshot, maker);
   });
 
   test('if the system is in global settlement and there is no DAI in savings DAI, return false', async () => {
