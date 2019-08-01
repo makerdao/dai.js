@@ -10,11 +10,12 @@ export default class GlobalSettlementSavingsDai {
     const isInGlobalSettlement = !(await end.live());
     if (!isInGlobalSettlement) return false;
 
-    const proxyAddress = await this._manager.get('proxy').currentProxy();
-    if (!proxyAddress) return false;
+    const address =
+      (await this._manager.get('proxy').currentProxy()) ||
+      this._manager.get('accounts').currentAddress();
 
     const pot = smartContract.getContract('MCD_POT_1');
-    const balance = await pot.pie(proxyAddress);
+    const balance = await pot.pie(address);
     return balance.gt(0);
   }
 }

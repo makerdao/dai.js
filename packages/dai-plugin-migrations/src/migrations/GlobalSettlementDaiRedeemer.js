@@ -12,8 +12,9 @@ export default class GlobalSettlementDaiRedeemer {
     const isInGlobalSettlement = !(await end.live());
     if (!isInGlobalSettlement) return false;
 
-    const proxyAddress = await this._manager.get('proxy').currentProxy();
-    if (!proxyAddress) return false;
+    const address =
+      (await this._manager.get('proxy').currentProxy()) ||
+      this._manager.get('accounts').currentAddress();
 
     const daiBalance = await this._manager
       .get('token')
@@ -25,7 +26,7 @@ export default class GlobalSettlementDaiRedeemer {
 
     const [, , ilks] = await smartContract
       .getContract('GET_CDPS_1')
-      .getCdpsDesc(cdpManagerAddress, proxyAddress);
+      .getCdpsDesc(cdpManagerAddress, address);
 
     const uniqueIlks = [...new Set(ilks)];
     const fixes = await Promise.all(

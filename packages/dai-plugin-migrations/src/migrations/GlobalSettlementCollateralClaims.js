@@ -12,8 +12,9 @@ export default class GlobalSettlementCollateralClaims {
     const isInGlobalSettlement = !(await end.live());
     if (!isInGlobalSettlement) return false;
 
-    const address = await this._manager.get('proxy').currentProxy();
-    if (!address) return false;
+    const address =
+      (await this._manager.get('proxy').currentProxy()) ||
+      this._manager.get('accounts').currentAddress();
 
     const cdpManager = this._manager
       .get('smartContract')
