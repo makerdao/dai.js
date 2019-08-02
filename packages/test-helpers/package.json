@@ -1,0 +1,10 @@
+{
+  "name": "test-helpers",
+  "description": "test helpers for the monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
