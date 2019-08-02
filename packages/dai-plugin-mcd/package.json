@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@makerdao/currency": "^0.9.5",
+    "@makerdao/multicall": "^0.7.0",
     "@makerdao/services-core": "^0.9.5",
     "bignumber.js": "^8.1.1"
   }
