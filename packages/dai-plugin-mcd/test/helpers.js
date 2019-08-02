@@ -12,12 +12,14 @@ import { callGanache } from 'test-helpers';
 export async function mcdMaker({
   preset = 'test',
   network = 'testnet',
+  prefetch = true,
+  log = false,
   addressOverrides,
   ...settings
 } = {}) {
   const maker = await Maker.create(preset, {
-    plugins: [[McdPlugin, { addressOverrides, network }]],
-    log: false,
+    plugins: [[McdPlugin, { addressOverrides, network, prefetch }]],
+    log,
     ...settings
   });
   await maker.authenticate();
