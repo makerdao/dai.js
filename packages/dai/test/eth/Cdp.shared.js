@@ -1,5 +1,5 @@
 import { DAI, PETH, USD, USD_ETH, ETH, MKR } from '../../src/eth/Currency';
-import { mineBlocks } from '../helpers/transactionConfirmation';
+import { mineBlocks } from 'test-helpers';
 import { buildTestService } from '../helpers/serviceBuilders';
 import { takeSnapshot, restoreSnapshot } from '../helpers/ganache';
 import TestAccountProvider from '../helpers/TestAccountProvider';
