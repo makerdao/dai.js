@@ -1,5 +1,5 @@
 import { ETH } from '../../src/eth/Currency';
-import TestAccountProvider from './TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 
 export function createOutOfEthTransaction(tokenService) {
   const eth = tokenService.getToken(ETH);

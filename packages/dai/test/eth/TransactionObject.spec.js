@@ -3,7 +3,7 @@ import {
   buildTestService,
   defaultConfig
 } from '../helpers/serviceBuilders';
-import TestAccountProvider from '../helpers/TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 import { mineBlocks } from 'test-helpers';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';

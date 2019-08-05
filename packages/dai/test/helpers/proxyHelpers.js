@@ -1,5 +1,5 @@
 import { MKR } from '../../src/eth/Currency';
-import accounts from './testAccounts';
+import accounts from 'test-helpers/src/testAccounts.json';
 
 export async function setProxyAccount(service, account) {
   const accountService = service

@@ -14,9 +14,7 @@ import { ServiceRoles } from '../src/constants';
 import { ETH, MDAI, GNT, DGD } from '../src';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
 
-// FIXME we won't be able to reach into @makerdao/dai internals like this when
-// this plugin is moved into its own module...
-import TestAccountProvider from './helpers/TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 
 let maker, cdpMgr, txMgr, snapshotData;
 

@@ -1,4 +1,4 @@
-import TestAccountProvider from '../../helpers/TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
 import { MKR, WETH } from '../../../src/eth/Currency';
 import { UINT256_MAX } from '../../../src/utils/constants';

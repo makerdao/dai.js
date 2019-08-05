@@ -1,5 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
-import TestAccountProvider from '../helpers/TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 
 let getDummyTransaction, gasService;
 
