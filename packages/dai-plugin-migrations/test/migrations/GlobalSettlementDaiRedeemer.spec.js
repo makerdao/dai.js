@@ -1,6 +1,6 @@
 import { migrationMaker, setupCollateral } from '../helpers';
 import { mockContracts, globalSettlement } from '../helpers/mocks';
-import TestAccountProvider from '../helpers/TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { MDAI, ETH } from '@makerdao/dai-plugin-mcd';
 
