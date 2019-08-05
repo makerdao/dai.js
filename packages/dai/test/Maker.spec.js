@@ -1,5 +1,5 @@
 import Maker, { ETH, LocalService } from '../src/index';
-import TestAccountProvider from './helpers/TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 const Maker2 = require('../src/index');
 
 async function createMaker(privateKey) {
