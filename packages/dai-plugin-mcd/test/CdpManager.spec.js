@@ -137,7 +137,9 @@ describe('GNT-specific functionality', () => {
   });
 
   test('getBagAddress returns real address when one exists', async () => {
-    expect(await ensureBag(proxyAddress, cdpMgr)).toMatch(/^0x[A-Fa-f0-9]{40}$/);
+    expect(await ensureBag(proxyAddress, cdpMgr)).toMatch(
+      /^0x[A-Fa-f0-9]{40}$/
+    );
   });
 
   test('transferToBag transfers...to bag', async () => {
