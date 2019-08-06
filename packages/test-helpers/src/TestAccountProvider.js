@@ -1,4 +1,4 @@
-import accounts from './testAccounts';
+import accounts from './testAccounts.json';
 
 /**
  *

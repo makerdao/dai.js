@@ -1,8 +1,8 @@
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
 import { USD_DAI } from '../../src/eth/Currency';
 import Cdp from '../../src/eth/Cdp';
-import { mineBlocks } from '../helpers/transactionConfirmation';
-import TestAccountProvider from '../helpers/TestAccountProvider';
+import { mineBlocks } from 'test-helpers';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 
 let cdpService;
 

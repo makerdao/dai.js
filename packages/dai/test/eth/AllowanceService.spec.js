@@ -1,4 +1,4 @@
-import TestAccountProvider from '../helpers/TestAccountProvider';
+import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
 import { buildTestService } from '../helpers/serviceBuilders';
 import { DAI } from '../../src/eth/Currency';
 import { UINT256_MAX } from '../../src/utils/constants';
