@@ -133,13 +133,11 @@ describe('GNT-specific functionality', () => {
     const bagAddress = await ensureBag(proxyAddress, cdpMgr);
 
     expect(bagAddressBeforeEnsure).toBeNull();
-    expect(bagAddress).toEqual('0x811085985B17DeD64150aBd58E4A7bFE10Ef209f');
+    expect(bagAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 
   test('getBagAddress returns real address when one exists', async () => {
-    expect(await ensureBag(proxyAddress, cdpMgr)).toEqual(
-      '0x811085985B17DeD64150aBd58E4A7bFE10Ef209f'
-    );
+    expect(await ensureBag(proxyAddress, cdpMgr)).toMatch(/^0x[A-Fa-f0-9]{40}$/);
   });
 
   test('transferToBag transfers...to bag', async () => {
