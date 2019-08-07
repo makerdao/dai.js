@@ -4,6 +4,7 @@ import mainnetAddresses from '../contracts/addresses/mainnet.json';
 import abiMap from '../contracts/abiMap.json';
 import MigrationService from './MigrationService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
+import { createCurrency } from '@makerdao/currency';
 export const ServiceRoles = ServiceRoles_;
 const { MIGRATION } = ServiceRoles;
 
@@ -28,6 +29,8 @@ const allContracts = Object.entries(testnetAddresses).reduce(
   {}
 );
 
+export const OLD_MKR = createCurrency('OLD_MKR');
+
 function overrideContractAddresses(network, addressOverrides, contracts) {
   Object.entries(addressOverrides).forEach(([name, overrideAddress]) => {
     if (contracts[name]) {
@@ -45,6 +48,13 @@ function overrideContractAddresses(network, addressOverrides, contracts) {
 
 export default {
   addConfig: (_, { network = 'testnet', addressOverrides } = {}) => {
+    const oldMkrData = {
+      currency: OLD_MKR,
+      abi: require('../contracts/abis/ERC20.json'),
+      address: require(`../contracts/addresses/${network}.json`).OLD_MKR,
+      decimals: 18
+    };
+
     const addContracts = addressOverrides
       ? overrideContractAddresses(network, addressOverrides, allContracts)
       : allContracts;
@@ -60,6 +70,9 @@ export default {
     }
 
     return {
+      token: {
+        erc20: [oldMkrData]
+      },
       smartContract: { addContracts },
       additionalServices: [MIGRATION],
       [MIGRATION]: MigrationService

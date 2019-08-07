@@ -134,7 +134,6 @@ export default {
       }
     }
 
-    console.log(tokens[0]);
     // Set global BigNumber precision to enable exponential operations
     BigNumber.config({ POW_PRECISION: 100 });
 
