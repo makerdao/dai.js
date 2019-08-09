@@ -9,7 +9,7 @@ export default class MkrRedeemer {
     return balance.gt(0);
   }
 
-  async oldMkrBalance() {
+  oldMkrBalance() {
     const oldMkr = this._manager.get('token').getToken('OLD_MKR');
     return oldMkr.balance();
   }
