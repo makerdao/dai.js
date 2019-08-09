@@ -7,6 +7,7 @@ import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
 import uniqWith from 'lodash/uniqWith';
 const { CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
+import { createSchema } from './CdpTypeService/multicall';
 
 export default class CdpTypeService extends PublicService {
   constructor(name = CDP_TYPE) {
@@ -38,66 +39,13 @@ export default class CdpTypeService extends PublicService {
   }
 
   useMulticall(watcher) {
-    this.cdpTypes.forEach(type => this.useMulticallForType(watcher, type));
-  }
-
-  useMulticallForType(watcher, cdpType) {
-    const { ilk } = cdpType;
-    const systemData = this.get(SYSTEM_DATA);
-    const scs = systemData.get('smartContract');
-    const schema = [
-      {
-        target: scs.getContractAddress('MCD_JUG'),
-        call: ['ilks(bytes32)(uint256,uint48)', toHex(ilk)],
-        returns: [[`ilk.${ilk}.jug.duty`], [`ilk.${ilk}.jug.rho`]]
-      },
-      {
-        target: scs.getContractAddress('MCD_VAT'),
-        call: [
-          'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
-          toHex(ilk)
-        ],
-        returns: [
-          [`ilk.${ilk}.vat.Art`],
-          [`ilk.${ilk}.vat.rate`],
-          [`ilk.${ilk}.vat.spot`],
-          [`ilk.${ilk}.vat.line`],
-          []
-        ]
-      },
-      {
-        target: scs.getContractAddress('MCD_SPOT'),
-        call: ['ilks(bytes32)(address,uint256)', toHex(ilk)],
-        returns: [[`ilk.${ilk}.spot.pip`], [`ilk.${ilk}.spot.mat`]]
-      },
-      {
-        target: scs.getContractAddress('MCD_CAT'),
-        call: ['ilks(bytes32)(address,uint256,uint256)', toHex(ilk)],
-        returns: [
-          [`ilk.${ilk}.cat.flip`],
-          [`ilk.${ilk}.cat.chop`],
-          [`ilk.${ilk}.cat.lump`]
-        ]
-      },
-      {
-        target: scs.getContractAddress(cdpType.currency.symbol),
-        call: [
-          'balanceOf(address)(uint256)',
-          systemData.adapterAddress(cdpType.ilk)
-        ],
-        returns: [[`ilk.${ilk}.adapterBalance`]]
-      },
-      {
-        target: scs.getContractAddress('MCD_SPOT'),
-        call: ['par()(uint256)'],
-        returns: [['system.par']]
-      }
-    ];
+    const schema = createSchema(this);
 
     watcher.batch().subscribe(updates => {
-      const ilkUpdates = updates.filter(u => u.type.startsWith(`ilk.${ilk}.`));
+      const ilkUpdates = updates.filter(u => u.type.startsWith('ilk.'));
       for (let update of ilkUpdates) {
-        const [, , group, key] = update.type.split('.');
+        const [, ilk, group, key] = update.type.split('.');
+        const cdpType = this.getCdpType(null, ilk);
 
         if (key) {
           set(cdpType.cache, [group + 'Info', key], update.value);
@@ -113,7 +61,11 @@ export default class CdpTypeService extends PublicService {
       }
 
       const parUpdate = updates.find(u => u.type === 'system.par');
-      if (parUpdate) cdpType.cache.par = parUpdate.value;
+      if (parUpdate) {
+        this.cdpTypes.forEach(type => {
+          type.cache.par = parUpdate.value;
+        });
+      }
     });
 
     watcher.tap(model => uniqWith(model.concat(schema), isEqual));
