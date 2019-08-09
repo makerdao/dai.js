@@ -87,6 +87,9 @@ export default class ManagedCdp {
     return this._cdpManager.getUrn(this.id);
   }
 
+  // TODO: after these operations complete, update the cache. once that's done,
+  // update ManagedCdp.spec to use expectValues instead of
+  // expectValuesAfterReset in more places
   lockCollateral(amount, { promise } = {}) {
     amount = castAsCurrency(amount, this.currency);
     return this._cdpManager.lock(this.id, this.ilk, amount, { promise });
