@@ -64,5 +64,39 @@ describe('CdpType integration', () => {
 
     const expectedPrice = USD(150).div(ETH(1));
     expect(ethA.price.eq(expectedPrice)).toBeTruthy();
+
+    const repA = cts.getCdpType(null, 'REP-A');
+    expect(repA.cache).toEqual({
+      adapterBalance: '0',
+      catInfo: {
+        chop: '1080000000000000000000000000',
+        flip: expect.any(String),
+        lump: '1500000000000000000000'
+      },
+      jugInfo: {
+        duty: '1000000003022265980097387650',
+        rho: '1563241298'
+      },
+      par: '1000000000000000000000000000',
+      spotInfo: {
+        mat: '1800000000000000000000000000',
+        pip: expect.any(String)
+      },
+      vatInfo: {
+        Art: '0',
+        line: '5000000000000000000000000000000000000000000000000',
+        rate: '1000000000000000000000000000',
+        spot: '11111111111111111111111111111'
+      }
+    });
+
+    // testing these separately because they're EIP55 checksum addresses
+    expect(repA.cache.spotInfo.pip.toLowerCase()).toEqual(
+      scs.getContractAddress('PIP_REP')
+    );
+    expect(repA.cache.catInfo.flip.toLowerCase()).toEqual(
+      scs.getContractAddress('MCD_FLIP_REP_A')
+    );
+
   });
 });
