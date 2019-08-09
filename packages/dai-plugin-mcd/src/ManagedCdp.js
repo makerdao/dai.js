@@ -20,27 +20,12 @@ export default class ManagedCdp {
     if (options.prefetch) this.prefetch();
   }
 
-  async getCollateralAmount() {
-    await this._getUrnInfo();
-    return this.collateralAmount;
-  }
-
   get collateralAmount() {
     return math.collateralAmount(this.currency, this._getCached('urnInfo').ink);
   }
 
-  async getCollateralValue() {
-    await Promise.all([this._getUrnInfo(), this.type.getPrice()]);
-    return this.collateralValue;
-  }
-
   get collateralValue() {
     return math.collateralValue(this.collateralAmount, this.type.price);
-  }
-
-  async getDebtValue() {
-    await Promise.all([this.type.ilkInfo(), this._getUrnInfo()]);
-    return this.debtValue;
   }
 
   get debtValue() {
@@ -50,22 +35,8 @@ export default class ManagedCdp {
     );
   }
 
-  async getCollateralizationRatio() {
-    await Promise.all([this.getCollateralValue(), this.getDebtValue()]);
-    return this.collateralizationRatio;
-  }
-
   get collateralizationRatio() {
     return math.collateralizationRatio(this.collateralValue, this.debtValue);
-  }
-
-  async getLiquidationPrice() {
-    await Promise.all([
-      this.type.getLiquidationRatio(),
-      this.getDebtValue(),
-      this.getCollateralAmount()
-    ]);
-    return this.liquidationPrice;
   }
 
   get liquidationPrice() {
@@ -76,22 +47,8 @@ export default class ManagedCdp {
     );
   }
 
-  async getIsSafe() {
-    await Promise.all([this.getLiquidationPrice(), this.type.getPrice()]);
-    return this.isSafe;
-  }
-
   get isSafe() {
     return this.type.price.gte(this.liquidationPrice);
-  }
-
-  async getMinSafeCollateralAmount() {
-    await Promise.all([
-      this.getDebtValue(),
-      this.type.getLiquidationRatio(),
-      this.type.getPrice()
-    ]);
-    return this.minSafeCollateralAmount;
   }
 
   get minSafeCollateralAmount() {
@@ -102,25 +59,8 @@ export default class ManagedCdp {
     );
   }
 
-  async getCollateralAvailable() {
-    await Promise.all([
-      this.getCollateralAmount(),
-      this.getMinSafeCollateralAmount()
-    ]);
-    return this.collateralAvailable;
-  }
-
   get collateralAvailable() {
     return this.collateralAmount.minus(this.minSafeCollateralAmount);
-  }
-
-  async getDaiAvailable() {
-    await Promise.all([
-      this.getCollateralValue(),
-      this.type.getLiquidationRatio(),
-      this.getDebtValue()
-    ]);
-    return this.daiAvailable;
   }
 
   get daiAvailable() {

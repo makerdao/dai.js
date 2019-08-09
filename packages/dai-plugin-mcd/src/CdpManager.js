@@ -56,7 +56,7 @@ export default class CdpManager extends LocalService {
     const debts = await Promise.all(
       ids.map(c => {
         const cdp = new ManagedCdp(c.id, c.ilk, this);
-        return cdp.getDebtValue();
+        return cdp.prefetch().then(() => cdp.debtValue);
       })
     );
     return debts.reduce((a, b) => a.plus(b));
