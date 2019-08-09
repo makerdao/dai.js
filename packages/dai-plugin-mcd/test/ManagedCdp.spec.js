@@ -55,10 +55,15 @@ test('liquidationPrice and collateralizationRatio are infinite with 0 collateral
   expect(cdp.collateralizationRatio).toEqual(Infinity);
 });
 
+async function expectValuesAfterReset(cdp, values) {
+  cdp.reset();
+  await cdp.prefetch();
+  return expectValues(cdp, values);
+}
+
 async function expectValues(
   cdp,
   {
-    reset,
     collateral,
     debt,
     myGem,
@@ -69,10 +74,6 @@ async function expectValues(
     daiAvailable
   }
 ) {
-  if (reset) {
-    cdp.reset();
-    await cdp.prefetch();
-  }
   if (collateral !== undefined) {
     expect(cdp.collateralAmount).toEqual(cdp.currency(collateral));
   }
@@ -178,15 +179,13 @@ describe.each([
     });
 
     await cdp.lockCollateral(1);
-    await expectValues(cdp, {
-      reset: true,
+    await expectValuesAfterReset(cdp, {
       collateral: 2,
       myGem: startingGemBalance.minus(2)
     });
 
     await cdp.lockAndDraw(1, 5);
-    await expectValues(cdp, {
-      reset: true,
+    await expectValuesAfterReset(cdp, {
       collateral: 3,
       debt: 5,
       myDai: startingDaiBalance.plus(5),
@@ -194,8 +193,7 @@ describe.each([
     });
 
     await cdp.freeCollateral(0.8);
-    await expectValues(cdp, {
-      reset: true,
+    await expectValuesAfterReset(cdp, {
       collateral: 2.2,
       myGem: startingGemBalance.minus(2.2)
     });
@@ -236,8 +234,7 @@ describe.each([
     txMgr.listen(draw, drawHandler);
     await draw;
     expect(drawHandler.mock.calls.length).toBe(2);
-    await expectValues(cdp, {
-      reset: true,
+    await expectValuesAfterReset(cdp, {
       debt: 2,
       myDai: startingDaiBalance.plus(2)
     });
@@ -250,15 +247,13 @@ describe.each([
     txMgr.listen(wipe, wipeHandler);
     await wipe;
     expect(wipeHandler.mock.calls.length).toBe(2);
-    await expectValues(cdp, {
-      reset: true,
+    await expectValuesAfterReset(cdp, {
       debt: 1.5,
       myDai: startingDaiBalance.plus(1.5)
     });
 
     await cdp.wipeAndFree(MDAI(1), GEM(0.5));
-    await expectValues(cdp, {
-      reset: true,
+    await expectValuesAfterReset(cdp, {
       collateral: 0.5,
       debt: 0.5,
       myDai: startingDaiBalance.plus(0.5),
