@@ -6,6 +6,9 @@ export default class MulticallService extends PublicService {
     super(name, ['web3', 'smartContract']);
   }
 
+  // TODO allow disabling multicall
+  // initialize(settings = {}) { }
+
   connect() {
     const { rpcUrl } = this.get('web3');
     const multicallAddress = this.get('smartContract').getContractAddress(
