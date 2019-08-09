@@ -1,4 +1,3 @@
-import { createWatcher } from '@makerdao/multicall';
 import { mcdMaker } from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { ETH, USD } from '@makerdao/dai';
@@ -13,11 +12,7 @@ describe('CdpType integration', () => {
     });
 
     scs = maker.service('smartContract');
-    watcher = createWatcher([], {
-      rpcUrl: maker.service('web3').rpcUrl,
-      multicallAddress: scs.getContractAddress('MULTICALL'),
-      config: { interval: 50 }
-    });
+    watcher = maker.service('multicall').watcher;
   });
 
   test('populate CdpType cache', async () => {
@@ -25,7 +20,7 @@ describe('CdpType integration', () => {
     const ethA = cts.getCdpType(null, 'ETH-A');
     expect(ethA.cache).toEqual({});
 
-    cts.useMulticall(watcher);
+    cts.useMulticall();
     watcher.start();
     await watcher.awaitInitialFetch();
 
