@@ -210,10 +210,10 @@ describe.each([
       myGem: startingGemBalance.minus(1)
     });
     cdp.type.reset();
-    const price = await cdp.type.getPrice();
+    await cdp.type.prefetch();
     await expectValues(cdp, {
-      val: price.toNumber(),
-      ratio: price.toNumber(),
+      val: cdp.type.price.toNumber(),
+      ratio: cdp.type.price.toNumber(),
       isSafe: true,
       daiAvailable: '149'
     });
