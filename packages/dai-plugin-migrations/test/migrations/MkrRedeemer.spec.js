@@ -1,20 +1,14 @@
 import { migrationMaker } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 
-let address, maker, migration, mkr, oldMkr;
+let maker, migration;
 
 describe('MKR migration check', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
-    address = maker.service('web3').currentAddress();
     migration = maker
       .service(ServiceRoles.MIGRATION)
       .getMigration(Migrations.MKR_REDEEMER);
-    mkr = maker.getToken('MKR');
-    oldMkr = maker.getToken('OLD_MKR');
-
-    await oldMkr.approveUnlimited(address);
-    await mkr.approveUnlimited(address);
   });
 
   test('if the account has no old MKR, return false', async () => {
