@@ -1,7 +1,7 @@
 import { migrationMaker } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 
-let address, maker, migration, mkr, oldMkr, redeemer;
+let address, maker, migration, mkr, oldMkr;
 
 describe('MKR migration check', () => {
   beforeAll(async () => {
@@ -12,9 +12,7 @@ describe('MKR migration check', () => {
       .getMigration(Migrations.MKR_REDEEMER);
     mkr = maker.getToken('MKR');
     oldMkr = maker.getToken('OLD_MKR');
-    redeemer = maker.service('smartContract').getContractByName('REDEEMER');
 
-    await redeemer.start();
     await oldMkr.approveUnlimited(address);
     await mkr.approveUnlimited(address);
   });
