@@ -47,15 +47,12 @@ test('prevent freeing the wrong collateral type', async () => {
   }
 });
 
-test('getLiquidationPrice and getCollateralizationRatio returns infinity with 0 collateral and 0 debt', async () => {
+test('liquidationPrice and collateralizationRatio are infinite with 0 collateral and 0 debt', async () => {
   const cdp = await maker.service(CDP_MANAGER).open('REP-A');
-  const [price, collateralization] = await Promise.all([
-    cdp.getLiquidationPrice(),
-    cdp.getCollateralizationRatio()
-  ]);
+  await cdp.prefetch();
   const ratio = createCurrencyRatio(USD, REP);
-  expect(price).toEqual(ratio(Infinity));
-  expect(collateralization).toBe(Infinity);
+  expect(cdp.liquidationPrice).toEqual(ratio(Infinity));
+  expect(cdp.collateralizationRatio).toEqual(Infinity);
 });
 
 async function expectValues(
