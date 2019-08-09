@@ -19,19 +19,6 @@ describe('MKR migration check', () => {
     await mkr.approveUnlimited(address);
   });
 
-  test('redeemer was deployed correctly', async () => {
-    // this test can be removed when testchain changes
-    // are finalized, but it's useful for now
-
-    const oldAddress = await redeemer.from();
-    const newAddress = await redeemer.to();
-
-    console.log(oldAddress);
-    console.log(newAddress);
-    expect(oldAddress).not.toBe('0x0000000000000000000000000000000000000000');
-    expect(newAddress).not.toBe('0x0000000000000000000000000000000000000000');
-  });
-
   test('if the account has no old MKR, return false', async () => {
     await addFreshAccount();
     maker.service('accounts').useAccount('newAccount');
