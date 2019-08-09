@@ -2,7 +2,6 @@ import { PublicService } from '@makerdao/services-core';
 import CdpType from './CdpType';
 import { ServiceRoles } from './constants';
 import assert from 'assert';
-import { toHex } from './utils/ethereum';
 import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
 import uniqWith from 'lodash/uniqWith';
@@ -11,7 +10,7 @@ import { createSchema } from './CdpTypeService/multicall';
 
 export default class CdpTypeService extends PublicService {
   constructor(name = CDP_TYPE) {
-    super(name, [SYSTEM_DATA, QUERY_API]);
+    super(name, [SYSTEM_DATA, QUERY_API, 'multicall']);
   }
 
   initialize(settings = {}) {
@@ -38,8 +37,9 @@ export default class CdpTypeService extends PublicService {
     assert(types.length > 0, `${label} matches no cdp type`);
   }
 
-  useMulticall(watcher) {
+  useMulticall() {
     const schema = createSchema(this);
+    const { watcher } = this.get('multicall');
 
     watcher.batch().subscribe(updates => {
       const ilkUpdates = updates.filter(u => u.type.startsWith('ilk.'));
