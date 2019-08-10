@@ -1,6 +1,6 @@
 import uniq from 'lodash/uniq';
-import { Container } from '@makerdao/services-core';
-import { standardizeConfig } from './index';
+import Container from './Container';
+import standardizeConfig from './standardizeConfig';
 
 export default class ServiceProvider {
   constructor(config, { services, defaults, disabled }) {
