@@ -43,7 +43,7 @@
     "@babel/plugin-proposal-throw-expressions": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.4.5",
-    "@makerdao/testchain": "^0.2.10-4",
+    "@makerdao/testchain": "^0.2.11",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.5",
