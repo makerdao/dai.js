@@ -1,4 +1,5 @@
-import values from 'lodash.values';
+import values from 'lodash/values';
+import uniq from 'lodash/uniq';
 import ServiceManager, { InvalidServiceError } from './ServiceManager';
 import toposort from 'toposort';
 
@@ -26,12 +27,17 @@ class ExtractedServiceError extends Error {
 // exported just for testing
 export function orderServices(services) {
   const edges = [];
+  const servicesWithoutDeps = [];
   for (let service of services) {
     const name = service.manager().name();
     const depNames = service.manager().dependencies();
-    depNames.forEach(dn => edges.push([dn, name]));
+    if (depNames.length === 0) {
+      servicesWithoutDeps.push(name);
+    } else {
+      depNames.forEach(dn => edges.push([dn, name]));
+    }
   }
-  return toposort(edges);
+  return uniq(toposort(edges).concat(servicesWithoutDeps));
 }
 
 class Container {
