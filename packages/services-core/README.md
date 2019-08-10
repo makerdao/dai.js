@@ -1,10 +1,9 @@
 # @makerdao/services-core
 
-A dependency injection framework extracted from [dai.js](https://github.com/makerdao/dai.js).
+A dependency injection framework used in [dai.js](https://github.com/makerdao/dai.js).
 
 ### TODO
 
-- [ ] bring [ServiceProvider](https://github.com/makerdao/dai.js/blob/dev/src/config/ServiceProvider.js) over
 - [ ] create full usage example
 
 ### Usage (TODO)
