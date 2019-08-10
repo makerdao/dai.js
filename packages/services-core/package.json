@@ -1,21 +1,20 @@
 {
   "name": "@makerdao/services-core",
   "description": "Dependency injection framework",
-  "version": "0.9.6",
+  "version": "0.9.9",
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
     "prepublishOnly": "babel -d dist src",
     "test": "jest"
   },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-jest": "^22.4.3",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-2": "^6.24.1",
-    "jest": "^23.6.0"
-  },
+  "files": [
+    "package.json",
+    "README.md",
+    "LICENSE",
+    "src/**/*.js",
+    "dist/**/*.js"
+  ],
   "dependencies": {
     "babel-runtime": "^6.26.0",
     "lodash.values": "^4.3.0",
