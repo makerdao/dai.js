@@ -1,3 +1,4 @@
+import { ServiceProvider } from '@makerdao/services-core';
 import AccountsService from '../eth/AccountsService';
 import AllowanceService from '../eth/AllowanceService';
 import CacheService from '../utils/CacheService';
@@ -11,7 +12,6 @@ import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
 import PriceService from '../eth/PriceService';
-import ServiceProvider from './ServiceProvider';
 import SmartContractService from '../eth/SmartContractService';
 import TimerService from '../utils/TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
