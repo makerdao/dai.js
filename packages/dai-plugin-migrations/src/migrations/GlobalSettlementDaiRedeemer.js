@@ -1,22 +1,22 @@
 import { MDAI_1 } from '../index';
 
 export default class GlobalSettlementDaiRedeemer {
-  constructor(manager) {
-    this._manager = manager;
+  constructor(container) {
+    this._container = container;
     return this;
   }
 
   async check() {
-    const smartContract = this._manager.get('smartContract');
+    const smartContract = this._container.get('smartContract');
     const end = smartContract.getContract('MCD_END_1');
     const isInGlobalSettlement = !(await end.live());
     if (!isInGlobalSettlement) return false;
 
     const address =
-      (await this._manager.get('proxy').currentProxy()) ||
-      this._manager.get('accounts').currentAddress();
+      (await this._container.get('proxy').currentProxy()) ||
+      this._container.get('accounts').currentAddress();
 
-    const daiBalance = await this._manager
+    const daiBalance = await this._container
       .get('token')
       .getToken(MDAI_1)
       .balance();

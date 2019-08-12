@@ -2,26 +2,26 @@ import BigNumber from 'bignumber.js';
 import { RAY } from '../constants';
 
 export default class GlobalSettlementCollateralClaims {
-  constructor(manager) {
-    this._manager = manager;
+  constructor(container) {
+    this._container = container;
     return this;
   }
 
   async check() {
-    const end = this._manager.get('smartContract').getContract('MCD_END_1');
+    const end = this._container.get('smartContract').getContract('MCD_END_1');
     const isInGlobalSettlement = !(await end.live());
     if (!isInGlobalSettlement) return false;
 
     const address =
-      (await this._manager.get('proxy').currentProxy()) ||
-      this._manager.get('accounts').currentAddress();
+      (await this._container.get('proxy').currentProxy()) ||
+      this._container.get('accounts').currentAddress();
 
-    const cdpManager = this._manager
+    const cdpManager = this._container
       .get('smartContract')
       .getContract('CDP_MANAGER_1');
-    const vat = this._manager.get('smartContract').getContract('MCD_VAT_1');
+    const vat = this._container.get('smartContract').getContract('MCD_VAT_1');
 
-    const [ids, , ilks] = await this._manager
+    const [ids, , ilks] = await this._container
       .get('smartContract')
       .getContract('GET_CDPS_1')
       .getCdpsDesc(cdpManager.address, address);
