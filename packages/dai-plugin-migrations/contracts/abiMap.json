@@ -5,5 +5,6 @@
   "GET_CDPS_1": "GetCdps",
   "CDP_MANAGER_1": "DssCdpManager",
   "MCD_DAI_1": "Dai",
-  "MCD_POT_1": "Pot"
+  "MCD_POT_1": "Pot",
+  "REDEEMER": "Redeemer" 
 }

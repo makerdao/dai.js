@@ -5,8 +5,7 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
   exit
 fi
 
-yarn config set version-tag-prefix "dai-plugin-mcd-v"
-yarn config set version-git-message "dai-plugin-mcd-v%s"
-yarn version
-
-./scripts/build.sh
+rm -rf dist/*
+cd ../..
+./node_modules/.bin/babel --no-babelrc -d packages/dai-plugin-mcd/dist packages/dai-plugin-mcd/src
+cd - >/dev/null

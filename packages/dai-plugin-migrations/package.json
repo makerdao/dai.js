@@ -5,7 +5,7 @@
   "license": "MIT",
   "main": "dist",
   "scripts": {
-    "build": "yarn prepublishOnly",
+    "build": "./scripts/build.sh",
     "prepublishOnly": "./scripts/prepublish.sh",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",

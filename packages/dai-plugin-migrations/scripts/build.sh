@@ -5,8 +5,7 @@ if [ $(basename $(pwd)) != "dai-plugin-migrations" ]; then
   exit
 fi
 
-yarn config set version-tag-prefix "dai-plugin-migrations-v"
-yarn config set version-git-message "dai-plugin-migrations-v%s"
-yarn version
-
-./scripts/build.sh
+rm -rf dist/*
+cd ../..
+./node_modules/.bin/babel --no-babelrc -d packages/dai-plugin-migrations/dist packages/dai-plugin-migrations/src
+cd - >/dev/null

@@ -5,6 +5,7 @@ import SDaiToMDai from '../src/migrations/SDaiToMDai';
 import GlobalSettlementSavingsDai from '../src/migrations/GlobalSettlementSavingsDai';
 import GlobalSettlementCollateralClaims from '../src/migrations/GlobalSettlementCollateralClaims';
 import GlobalSettlementDaiRedeemer from '../src/migrations/GlobalSettlementDaiRedeemer';
+import MkrRedeemer from '../src/migrations/MkrRedeemer';
 
 let maker, service;
 
@@ -23,10 +24,11 @@ describe('Migration Service', () => {
         Migrations.SDAI_TO_MDAI,
         Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI,
         Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS,
-        Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER
+        Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER,
+        Migrations.MKR_REDEEMER
       ])
     );
-    expect(ids.length).toEqual(5);
+    expect(ids.length).toEqual(6);
   });
 
   test('getting each migration returns a valid migration', () => {
@@ -45,6 +47,9 @@ describe('Migration Service', () => {
     expect(
       service.getMigration(Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER)
     ).toBeInstanceOf(GlobalSettlementDaiRedeemer);
+    expect(service.getMigration(Migrations.MKR_REDEEMER)).toBeInstanceOf(
+      MkrRedeemer
+    );
   });
 
   test('getting a non-existent migration returns undefined', () => {

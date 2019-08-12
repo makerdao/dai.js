@@ -5,13 +5,15 @@ import GlobalSettlementSavingsDai from './migrations/GlobalSettlementSavingsDai'
 import GlobalSettlementCollateralClaims from './migrations/GlobalSettlementCollateralClaims';
 import GlobalSettlementDaiRedeemer from './migrations/GlobalSettlementDaiRedeemer';
 import SDaiToMDai from './migrations/SDaiToMDai';
+import MkrRedeemer from './migrations/MkrRedeemer';
 
 const migrations = {
   [Migrations.SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
   [Migrations.SDAI_TO_MDAI]: SDaiToMDai,
   [Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI]: GlobalSettlementSavingsDai,
   [Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS]: GlobalSettlementCollateralClaims,
-  [Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER]: GlobalSettlementDaiRedeemer
+  [Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER]: GlobalSettlementDaiRedeemer,
+  [Migrations.MKR_REDEEMER]: MkrRedeemer
 };
 
 export default class MigrationService extends PublicService {

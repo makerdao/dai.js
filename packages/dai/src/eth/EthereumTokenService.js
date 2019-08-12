@@ -34,6 +34,7 @@ export default class EthereumTokenService extends PrivateService {
     return this._selectTokenVersions(mapping);
   }
 
+  // FIXME should be caching/memoizing here
   getToken(symbol, version) {
     // support passing in Currency constructors
     if (symbol.symbol) symbol = symbol.symbol;

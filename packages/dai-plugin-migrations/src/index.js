@@ -29,6 +29,8 @@ const allContracts = Object.entries(testnetAddresses).reduce(
   {}
 );
 
+export const OLD_MKR = createCurrency('OLD_MKR');
+
 function overrideContractAddresses(network, addressOverrides, contracts) {
   Object.entries(addressOverrides).forEach(([name, overrideAddress]) => {
     if (contracts[name]) {
@@ -48,6 +50,13 @@ export const MDAI_1 = createCurrency('MDAI_1');
 
 export default {
   addConfig: (_, { network = 'testnet', addressOverrides } = {}) => {
+    const oldMkrData = {
+      currency: OLD_MKR,
+      abi: require('../contracts/abis/ERC20.json'),
+      address: require(`../contracts/addresses/${network}.json`).OLD_MKR,
+      decimals: 18
+    };
+
     const addContracts = addressOverrides
       ? overrideContractAddresses(network, addressOverrides, allContracts)
       : allContracts;
@@ -66,6 +75,7 @@ export default {
       smartContract: { addContracts },
       token: {
         erc20: [
+          oldMkrData,
           { currency: MDAI_1, address: addContracts.MCD_DAI_1.address[network] }
         ]
       },
