@@ -142,6 +142,11 @@ class ServiceBase {
    * @param {string[]} dependencies
    */
   constructor(type, name, dependencies = []) {
+    if (!name) name = this.constructor.role;
+    if (this.constructor.dependencies) {
+      dependencies = this.constructor.dependencies;
+    }
+
     if (typeof ServiceType[type] === 'undefined') {
       throw new Error('Invalid ServiceType: ' + type);
     }

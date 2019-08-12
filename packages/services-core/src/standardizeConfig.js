@@ -1,3 +1,5 @@
+import ServiceBase from './ServiceBase';
+
 export default function standardizeConfig(role, config, resolver) {
   if (config instanceof Array) {
     if (typeof config[0] == 'boolean' && resolver) {
@@ -5,30 +7,34 @@ export default function standardizeConfig(role, config, resolver) {
     }
     return config;
   }
-  let className, settings;
+  let className,
+    settings = {};
 
   switch (typeof config) {
     case 'string':
       // handle a string that refers to a class name
       className = config;
-      settings = {};
       break;
     case 'function':
       // handle a service constructor
       className = config;
-      settings = {};
       break;
     case 'object':
-      // handle a settings object -- use the default version
-      className = resolver ? resolveNameForBoolean(role, true, resolver) : true;
-      settings = config;
-      // TODO could also handle a service instance or constructor here
+      if (config instanceof ServiceBase) {
+        // handle a service instance
+        className = config;
+      } else {
+        // handle a settings object -- use the default version
+        className = resolver
+          ? resolveNameForBoolean(role, true, resolver)
+          : true;
+        settings = config;
+      }
       break;
     case 'boolean':
       className = resolver
         ? resolveNameForBoolean(role, config, resolver)
         : config;
-      settings = {};
       break;
     default:
       throw new Error(`could not parse settings for ${role}:`, config);
