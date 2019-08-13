@@ -106,7 +106,6 @@ export default class CdpManager extends LocalService {
     drawAmount = castAsCurrency(drawAmount, MDAI);
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
-    console.log(jugAddress);
     await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
     const method = setMethod(isEth, id);
@@ -152,7 +151,6 @@ export default class CdpManager extends LocalService {
     // Indicates if gem supports transferFrom
     if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
 
-    // console.log(this.proxyActions[method]);
     return this.proxyActions[method](...args);
   }
 

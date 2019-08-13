@@ -108,7 +108,7 @@ test('set method correctly', () => {
   expect(setMethod(true, 1)).toBe('lockETHAndDraw');
   expect(setMethod(true)).toBe('openLockETHAndDraw');
   expect(setMethod(false, 1)).toBe(
-    'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)'
+    'lockGemAndDraw'
   );
   expect(setMethod()).toBe('openLockGemAndDraw');
 });
