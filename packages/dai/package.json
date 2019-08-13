@@ -34,7 +34,7 @@
   "module": "dist/src/index.js",
   "main": "dist/src/index.js",
   "scripts": {
-    "build": "yarn build:frontend",
+    "build": "yarn build:backend",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
     "test": "yarn testchain --ci jest --runInBand",
@@ -47,7 +47,7 @@
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
-    "test:build": "yarn build:backend && yarn test --config ./test/config/jestBuildConfig.json"
+    "test:build": "yarn test --config ./test/config/jestBuildConfig.json"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",

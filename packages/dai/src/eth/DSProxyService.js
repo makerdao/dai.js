@@ -37,16 +37,11 @@ export default class DSProxyService extends PrivateService {
 
   @tracksTransactions
   async ensureProxy({ promise }) {
-    let proxy = await this.currentProxy();
-    if (!proxy) {
-      this.get('web3')
-        .get('event')
-        .on('dsproxy/BUILD', obj => {
-          proxy = obj.payload.address;
-        });
-      await this.build({ promise });
-    }
-    return proxy;
+    const proxy = await this.currentProxy();
+    if (proxy) return proxy;
+
+    await this.build({ promise });
+    return this._currentProxy;
   }
 
   @tracksTransactions
@@ -57,11 +52,6 @@ export default class DSProxyService extends PrivateService {
     }
     const txo = await this._proxyRegistry().build({ promise });
     this._currentProxy = txo.receipt.logs[0].address;
-    this.get('web3')
-      .get('event')
-      .emit('dsproxy/BUILD', {
-        address: this._currentProxy
-      });
     return txo;
   }
 
