@@ -10,7 +10,8 @@
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
     "test": "yarn testchain --ci jest --runInBand",
-    "test:integration": "yarn test --config ./test/config/jestIntegrationConfig.json"
+    "test:kovan": "export NETWORK='kovan' && yarn test --config ./test/config/jestIntegrationConfig.json",
+    "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {
     "@makerdao/dai": ">0.16.5"
