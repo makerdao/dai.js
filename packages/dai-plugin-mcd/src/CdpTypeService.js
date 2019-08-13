@@ -16,6 +16,12 @@ export default class CdpTypeService extends PublicService {
     );
   }
 
+  async connect() {
+    if (this.settings.prefetch) {
+      await Promise.all(this.cdpTypes.map(type => type.prefetch()));
+    }
+  }
+
   getCdpType(currency, ilk) {
     const types = this.cdpTypes.filter(
       t => (!currency || t.currency === currency) && (!ilk || ilk === t.ilk)

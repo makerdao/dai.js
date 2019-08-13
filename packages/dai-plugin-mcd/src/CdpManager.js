@@ -7,6 +7,7 @@ import { ServiceRoles } from './constants';
 import assert from 'assert';
 import ManagedCdp from './ManagedCdp';
 import { castAsCurrency, stringToBytes, bytesToString } from './utils';
+import has from 'lodash/has';
 import padStart from 'lodash/padStart';
 import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
@@ -45,7 +46,9 @@ export default class CdpManager extends LocalService {
 
   async getCdp(id, options) {
     const ilk = bytesToString(await this._manager.ilks(id));
-    return new ManagedCdp(id, ilk, this, options);
+    const cdp = new ManagedCdp(id, ilk, this, options);
+    if (!has(options, 'prefetch') || options.prefetch) await cdp.prefetch();
+    return cdp;
   }
 
   async getCombinedDebtValue(proxyAddress, descending = true) {
@@ -53,7 +56,7 @@ export default class CdpManager extends LocalService {
     const debts = await Promise.all(
       ids.map(c => {
         const cdp = new ManagedCdp(c.id, c.ilk, this);
-        return cdp.getDebtValue();
+        return cdp.prefetch().then(() => cdp.debtValue);
       })
     );
     return debts.reduce((a, b) => a.plus(b));

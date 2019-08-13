@@ -4,15 +4,7 @@ import { ServiceRoles } from './constants';
 import ethAbi from 'web3-eth-abi';
 import assert from 'assert';
 import { MDAI } from './index';
-import {
-  collateralAmount,
-  collateralValue,
-  collateralizationRatio,
-  daiAvailable,
-  debtValue,
-  liquidationPrice,
-  minSafeCollateralAmount
-} from './math';
+import * as math from './math';
 
 export default class ManagedCdp {
   constructor(id, ilk, cdpManager, options = { prefetch: true }) {
@@ -25,127 +17,57 @@ export default class ManagedCdp {
     this.type = cdpManager.get(ServiceRoles.CDP_TYPE).getCdpType(null, ilk);
     this.currency = this.type.currency;
     this.cache = {};
-    if (options.prefetch) {
-      this._getUrnInfo();
-    }
+    if (options.prefetch) this.prefetch();
   }
 
-  async getCollateralAmount() {
-    await this._getUrnInfo();
-    return this.getCollateralAmountSync();
+  get collateralAmount() {
+    return math.collateralAmount(this.currency, this._getCached('urnInfo').ink);
   }
 
-  getCollateralAmountSync() {
-    return collateralAmount(this.currency, this._getCached('urnInfo').ink);
+  get collateralValue() {
+    return math.collateralValue(this.collateralAmount, this.type.price);
   }
 
-  async getCollateralValue() {
-    await Promise.all([this._getUrnInfo(), this.type.getPrice()]);
-    return this.getCollateralValueSync();
-  }
-
-  getCollateralValueSync() {
-    return collateralValue(
-      this.getCollateralAmountSync(),
-      this.type.getPriceSync()
-    );
-  }
-
-  async getDebtValue() {
-    await Promise.all([this.type.ilkInfo(), this._getUrnInfo()]);
-    return this.getDebtValueSync();
-  }
-
-  getDebtValueSync() {
-    return debtValue(
+  get debtValue() {
+    return math.debtValue(
       this._getCached('urnInfo').art,
       this.type._getCached('vatInfo').rate
     );
   }
 
-  async getCollateralizationRatio() {
-    await Promise.all([this.getCollateralValue(), this.getDebtValue()]);
-    return this.getCollateralizationRatioSync();
+  get collateralizationRatio() {
+    return math.collateralizationRatio(this.collateralValue, this.debtValue);
   }
 
-  getCollateralizationRatioSync() {
-    return collateralizationRatio(
-      this.getCollateralValueSync(),
-      this.getDebtValueSync()
+  get liquidationPrice() {
+    return math.liquidationPrice(
+      this.collateralAmount,
+      this.debtValue,
+      this.type.liquidationRatio
     );
   }
 
-  async getLiquidationPrice() {
-    await Promise.all([
-      this.type.getLiquidationRatio(),
-      this.getDebtValue(),
-      this.getCollateralAmount()
-    ]);
-    return this.getLiquidationPriceSync();
+  get isSafe() {
+    return this.type.price.gte(this.liquidationPrice);
   }
 
-  getLiquidationPriceSync() {
-    return liquidationPrice(
-      this.getCollateralAmountSync(),
-      this.getDebtValueSync(),
-      this.type.getLiquidationRatioSync()
+  get minSafeCollateralAmount() {
+    return math.minSafeCollateralAmount(
+      this.debtValue,
+      this.type.liquidationRatio,
+      this.type.price
     );
   }
 
-  async isSafe() {
-    await Promise.all([this.getLiquidationPrice(), this.type.getPrice()]);
-    return this.isSafeSync();
+  get collateralAvailable() {
+    return this.collateralAmount.minus(this.minSafeCollateralAmount);
   }
 
-  isSafeSync() {
-    return this.type.getPriceSync().gte(this.getLiquidationPriceSync());
-  }
-
-  async getMinSafeCollateralAmount() {
-    await Promise.all([
-      this.getDebtValue(),
-      this.type.getLiquidationRatio(),
-      this.type.getPrice()
-    ]);
-    return this.getMinSafeCollateralAmountSync();
-  }
-
-  getMinSafeCollateralAmountSync() {
-    return minSafeCollateralAmount(
-      this.getDebtValueSync(),
-      this.type.getLiquidationRatioSync(),
-      this.type.getPriceSync()
-    );
-  }
-
-  async getCollateralAvailable() {
-    await Promise.all([
-      this.getCollateralAmount(),
-      this.getMinSafeCollateralAmount()
-    ]);
-    return this.getCollateralAvailableSync();
-  }
-
-  getCollateralAvailableSync() {
-    return this.getCollateralAmountSync().minus(
-      this.getMinSafeCollateralAmountSync()
-    );
-  }
-
-  async getDaiAvailable() {
-    await Promise.all([
-      this.getCollateralValue(),
-      this.type.getLiquidationRatio(),
-      this.getDebtValue()
-    ]);
-    return this.getDaiAvailableSync();
-  }
-
-  getDaiAvailableSync() {
-    return daiAvailable(
-      this.getCollateralValueSync(),
-      this.getDebtValueSync(),
-      this.type.getLiquidationRatioSync()
+  get daiAvailable() {
+    return math.daiAvailable(
+      this.collateralValue,
+      this.debtValue,
+      this.type.liquidationRatio
     );
   }
 
@@ -165,6 +87,9 @@ export default class ManagedCdp {
     return this._cdpManager.getUrn(this.id);
   }
 
+  // TODO: after these operations complete, update the cache. once that's done,
+  // update ManagedCdp.spec to use expectValues instead of
+  // expectValuesAfterReset in more places
   lockCollateral(amount, { promise } = {}) {
     amount = castAsCurrency(amount, this.currency);
     return this._cdpManager.lock(this.id, this.ilk, amount, { promise });
@@ -236,16 +161,27 @@ export default class ManagedCdp {
     return this.cache[name];
   }
 
+  async prefetch() {
+    // TODO allow passing in a multicall instance to use that instead of making
+    // separate calls
+    return Promise.all([
+      this._getUrnInfo(),
+      this.type.prefetch()
+    ]);
+  }
+
   async reset() {
     this._urnInfoPromise = null;
     this.cache = {};
   }
 }
 
-ManagedCdp.create = function(createTxo, ilk, cdpManager) {
+ManagedCdp.create = async function(createTxo, ilk, cdpManager) {
   const sig = ethAbi.encodeEventSignature('NewCdp(address,address,uint256)');
   const log = createTxo.receipt.logs.find(l => l.topics[0] === sig);
   assert(log, 'could not find log for NewCdp event');
   const id = parseInt(log.data, 16);
-  return new ManagedCdp(id, ilk, cdpManager);
+  const cdp = new ManagedCdp(id, ilk, cdpManager);
+  await cdp.prefetch();
+  return cdp;
 };

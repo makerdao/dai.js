@@ -5,7 +5,7 @@ import addresses from '../contracts/addresses/testnet.json';
 let maker;
 
 beforeAll(async () => {
-  maker = await mcdMaker();
+  maker = await mcdMaker({ prefetch: false });
 });
 
 test('contract address mapping', async () => {
@@ -20,7 +20,8 @@ test('contract address overrides', async () => {
   const addr2 = '0xa0b85e616f0e7997982d57b2d5984a994f657a8d';
 
   const maker2 = await mcdMaker({
-    addressOverrides: { PIP_ETH: addr1, REP: addr2 }
+    addressOverrides: { PIP_ETH: addr1, REP: addr2 },
+    prefetch: false
   });
 
   const scs = maker2.service('smartContract');
