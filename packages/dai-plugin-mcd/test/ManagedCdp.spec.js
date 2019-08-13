@@ -78,7 +78,9 @@ async function expectValues(
     expect(cdp.collateralAmount).toEqual(cdp.currency(collateral));
   }
   if (debt !== undefined) {
-    expect(cdp.debtValue).toEqual(MDAI(debt));
+    expect(cdp.debtValue)
+      .toNumber()
+      .toBeCloseTo(debt, 1);
   }
   if (myGem !== undefined) {
     const balance = await maker.getToken(cdp.currency).balance();
