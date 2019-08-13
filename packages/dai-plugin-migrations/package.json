@@ -7,12 +7,12 @@
   "scripts": {
     "build": "./scripts/build.sh",
     "prepublishOnly": "./scripts/prepublish.sh",
-    "testchain": "../../scripts/run-testchain.sh --ci",
+    "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
     "test": "yarn testchain --ci jest --runInBand"
   },
   "peerDependencies": {
-    "@makerdao/dai": ">0.16.2"
+    "@makerdao/dai": ">0.17.0"
   },
   "dependencies": {
     "@makerdao/currency": "^0.9.5",
