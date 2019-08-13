@@ -105,11 +105,14 @@ export default class CdpManager extends LocalService {
     );
     drawAmount = castAsCurrency(drawAmount, MDAI);
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
+    const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
+    console.log(jugAddress);
     await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
     const method = setMethod(isEth, id);
     const args = [
       this._managerAddress,
+      jugAddress,
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       id || stringToBytes(ilk),
@@ -149,6 +152,7 @@ export default class CdpManager extends LocalService {
     // Indicates if gem supports transferFrom
     if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
 
+    // console.log(this.proxyActions[method]);
     return this.proxyActions[method](...args);
   }
 
@@ -272,7 +276,7 @@ export function setMethod(isEth, id) {
   } else if (isEth) {
     return 'openLockETHAndDraw';
   } else if (id) {
-    return 'lockGemAndDraw(address,address,address,uint256,uint256,uint256,bool)';
+    return 'lockGemAndDraw';
   }
   return 'openLockGemAndDraw';
 }
