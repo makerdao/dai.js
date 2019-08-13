@@ -55,7 +55,7 @@ test('getCombinedDebtValue', async () => {
   cdpMgr.reset();
   const currentProxy = await maker.currentProxy();
   const totalDebt = await cdpMgr.getCombinedDebtValue(currentProxy);
-  expect(totalDebt).toEqual(MDAI(8));
+  expect(totalDebt.toNumber()).toBeCloseTo(8);
 });
 
 test('getCdp looks up ilk', async () => {
