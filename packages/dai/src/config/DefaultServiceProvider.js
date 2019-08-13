@@ -8,7 +8,6 @@ import EthereumCdpService from '../eth/EthereumCdpService';
 import EthereumTokenService from '../eth/EthereumTokenService';
 import EventService from '../utils/events/EventService';
 import GasService from '../eth/GasService';
-import MulticallService from '../eth/MulticallService';
 import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
@@ -30,7 +29,6 @@ export const resolver = {
     event: 'EventService',
     gas: 'GasService',
     log: 'ConsoleLogger',
-    multicall: 'MulticallService',
     nonce: 'NonceService',
     price: 'PriceService',
     proxy: 'DSProxyService',
@@ -69,7 +67,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         EthereumTokenService,
         EventService,
         GasService,
-        MulticallService,
         NonceService,
         NullEventService,
         NullLogger,
