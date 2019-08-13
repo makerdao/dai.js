@@ -18,12 +18,6 @@ test('should find the proxy registry', () => {
 });
 
 test('should build new proxies', async () => {
-  service
-    .get('web3')
-    .get('event')
-    .on('dsproxy/BUILD', eventObj => {
-      expect(eventObj.payload.address).toEqual(service._currentProxy);
-    });
   await service.build();
   const newAddress = await service.currentProxy();
   expect(newAddress).not.toBeNull();
