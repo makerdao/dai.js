@@ -86,12 +86,13 @@ export default function sharedTests(openCdp, initCdpService) {
       await setPrice(ETH, 400);
     });
 
-    // FIXME this breaks other tests, possibly because it leaves the test chain in
-    // a broken state
+    // FIXME this breaks other tests, possibly because it leaves the test chain
+    // in a broken state
     test.skip('when safe', async () => {
       await expect(cdp.bite()).rejects;
     });
 
+    // FIXME test something meaningful
     test('when unsafe', async () => {
       await setPrice(ETH, 0.01);
       const result = await cdp.bite();

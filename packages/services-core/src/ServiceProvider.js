@@ -1,9 +1,9 @@
 import uniq from 'lodash/uniq';
-import { Container } from '@makerdao/services-core';
-import { standardizeConfig } from './index';
+import Container from './Container';
+import standardizeConfig from './standardizeConfig';
 
 export default class ServiceProvider {
-  constructor(config, { services, defaults, disabled }) {
+  constructor(config, { services = {}, defaults = {}, disabled = {} } = {}) {
     this._config = config;
 
     // all the service classes that this provider should support
@@ -59,6 +59,13 @@ export default class ServiceProvider {
         instance = new this._services[service]();
       }
 
+      const instanceName = instance.manager().name();
+      if (instanceName !== role) {
+        throw new Error(
+          `Role mismatch: "${instanceName}", "${role}"`
+        );
+      }
+
       instance.manager().settings(settings);
       container.register(instance, role);
     }
@@ -85,8 +92,8 @@ export default class ServiceProvider {
 
     // register any remaining ones
     for (let name of newDeps) {
-      const className = this._resolver.defaults[name];
-      const ctor = this._services[className];
+      let ctor = this._resolver.defaults[name];
+      if (typeof ctor === 'string') ctor = this._services[ctor];
       if (!ctor) throw new Error(`No service found for "${name}"`);
       container.register(new ctor(), name);
     }

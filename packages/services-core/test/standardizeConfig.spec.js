@@ -1,4 +1,4 @@
-import { standardizeConfig } from '../../src/config';
+import standardizeConfig from '../src/standardizeConfig';
 
 test('accepts a constructor', () => {
   class FakeService {}
