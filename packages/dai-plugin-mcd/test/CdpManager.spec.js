@@ -50,7 +50,7 @@ test('getCombinedDebtValue', async () => {
   cdpMgr.reset();
   const currentProxy = await maker.currentProxy();
   const totalDebt = await cdpMgr.getCombinedDebtValue(currentProxy);
-  expect(totalDebt.toNumber()).toBeCloseTo(8);
+  expect(totalDebt.toNumber()).toBeCloseTo(8, 1);
 });
 
 test('getCdp looks up ilk', async () => {

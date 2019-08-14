@@ -177,13 +177,12 @@ describe.each([
       debt: 0,
       myGem: startingGemBalance.minus(1)
     });
-
     await cdp.lockCollateral(1);
     await expectValuesAfterReset(cdp, {
       collateral: 2,
       myGem: startingGemBalance.minus(2)
     });
-
+    
     await cdp.lockAndDraw(1, 5);
     await expectValuesAfterReset(cdp, {
       collateral: 3,
@@ -191,7 +190,7 @@ describe.each([
       myDai: startingDaiBalance.plus(5),
       myGem: startingGemBalance.minus(3)
     });
-
+    
     await cdp.freeCollateral(0.8);
     await expectValuesAfterReset(cdp, {
       collateral: 2.2,
