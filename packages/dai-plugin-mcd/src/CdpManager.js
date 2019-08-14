@@ -98,14 +98,14 @@ export default class CdpManager extends LocalService {
     });
     return ManagedCdp.create(await op, type.ilk, this);
   }
-
+  
   @tracksTransactionsWithOptions({ numArguments: 5 })
   async lockAndDraw(id, ilk, lockAmount, drawAmount = MDAI(0), { promise }) {
     assert(lockAmount && drawAmount, 'both amounts must be specified');
     assert(
       lockAmount instanceof Currency,
       'lockAmount must be a Currency value'
-    );
+      );
     drawAmount = castAsCurrency(drawAmount, MDAI);
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
