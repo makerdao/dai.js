@@ -135,7 +135,7 @@ export default class CdpManager extends LocalService {
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
-    const method = `lock${isEth ? 'ETH' : 'Gem'}`;
+    const method = `safeLock${isEth ? 'ETH' : 'Gem'}`;
     const args = [
       this._managerAddress,
       this._adapterAddress(ilk),
