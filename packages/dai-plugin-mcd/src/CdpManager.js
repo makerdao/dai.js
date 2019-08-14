@@ -173,7 +173,7 @@ export default class CdpManager extends LocalService {
 
   @tracksTransactions
   async wipe(id, wipeAmount, { promise }) {
-    return this.proxyActions.wipe(
+    return this.proxyActions.safeWipe(
       ...[
         this._managerAddress,
         this._adapterAddress('DAI'),
