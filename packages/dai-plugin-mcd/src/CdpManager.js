@@ -130,7 +130,9 @@ export default class CdpManager extends LocalService {
     // If opening a new GNT CDP, GNT must first be transferred
     // to the proxy (so it can be transferred to the new bag)
     if (method === 'openLockGNTAndDraw')
-      await this.get('token').getToken('GNT').transfer(proxyAddress, lockAmount);
+      await this.get('token')
+        .getToken('GNT')
+        .transfer(proxyAddress, lockAmount);
     // Transfers to bag if locking GNT in existing CDP
     if (id && isGnt) await transferToBag(lockAmount, proxyAddress, this);
     // Indicates if gem supports transferFrom
