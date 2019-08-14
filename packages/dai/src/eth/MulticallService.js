@@ -6,13 +6,7 @@ export default class MulticallService extends PublicService {
     super(name, ['web3', 'smartContract']);
   }
 
-  connect() {
-    // we shouldn't uncomment this until we're ready to use it, since it will
-    // increase network activity
-    // this.startWatcher();
-  }
-
-  startWatcher() {
+  createWatcher() {
     const { rpcUrl } = this.get('web3');
     const multicallAddress = this.get('smartContract').getContractAddress(
       'MULTICALL'
