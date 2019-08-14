@@ -53,7 +53,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
   });
 
   test('get total debt', () => {
-    expect(cdpType.totalDebt).toEqual(MDAI(systemValues[ilk][1]));
+    expect(cdpType.totalDebt.toNumber()).toBeCloseTo(systemValues[ilk][1]);
   });
 
   test('get debt ceiling', () => {
