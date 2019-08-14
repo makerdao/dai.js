@@ -8,6 +8,10 @@ code on commit.
 ```
 yarn
 yarn lerna bootstrap // Installs dependencies & links all local dependencies together
+cd packages/dai
+yarn build:backend // Builds the dai package for use in the other plugins
+cd ../services-core
+yarn build // Builds the services-core package for use in the other plugins
 ```
 
 ### Running the testchain
