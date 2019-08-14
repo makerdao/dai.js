@@ -179,6 +179,7 @@ describe.each([
     expect(events).toEqual(formattedDummyEventData(GEM, ilk));
   });
 
+  
   test('openLock, lock, lockAndDraw, free', async () => {
     const cdp = await maker.service(CDP_MANAGER).openLockAndDraw(ilk, GEM(1));
     await expectValues(cdp, {
@@ -186,7 +187,7 @@ describe.each([
       debt: 0,
       myGem: startingGemBalance.minus(1)
     });
-
+    
     await cdp.lockCollateral(1);
     await expectValues(cdp, {
       collateral: 2,

@@ -95,20 +95,20 @@ export default class CdpManager extends LocalService {
     });
     return ManagedCdp.create(await op, type.ilk, this);
   }
-
+  
   @tracksTransactionsWithOptions({ numArguments: 5 })
   async lockAndDraw(id, ilk, lockAmount, drawAmount = MDAI(0), { promise }) {
     assert(lockAmount && drawAmount, 'both amounts must be specified');
     assert(
       lockAmount instanceof Currency,
       'lockAmount must be a Currency value'
-    );
+      );
     drawAmount = castAsCurrency(drawAmount, MDAI);
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
-    await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
-    const method = setMethod(isEth, id);
+    const isGnt = GNT.isInstance(lockAmount);
+    const method = setMethod(isEth, isGnt, id);
     const args = [
       this._managerAddress,
       jugAddress,
@@ -123,9 +123,11 @@ export default class CdpManager extends LocalService {
         promise
       }
     ].filter(x => x);
-
+    
+    // Transfers to bag if locking GNT in existing CDP
+    if (id && isGnt) await transferToBag(lockAmount, proxyAddress, this);
     // Indicates if gem supports transferFrom
-    if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
+    if (!isEth && method !== 'openLockGNTAndDraw') args.splice(-1, 0, !GNT.isInstance(lockAmount));
 
     return await this.proxyActions[method](...args);
   }
@@ -133,8 +135,8 @@ export default class CdpManager extends LocalService {
   @tracksTransactions
   async lock(id, ilk, lockAmount, { promise }) {
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
-    await setupGnt(lockAmount, proxyAddress, this);
     const isEth = ETH.isInstance(lockAmount);
+    const isGnt = GNT.isInstance(lockAmount);
     const method = `safeLock${isEth ? 'ETH' : 'Gem'}`;
     const args = [
       this._managerAddress,
@@ -148,6 +150,8 @@ export default class CdpManager extends LocalService {
       }
     ].filter(x => x);
 
+    // Transfers to bag if locking GNT in existing CDP
+    if (id && isGnt) await transferToBag(lockAmount, proxyAddress, this);
     // Indicates if gem supports transferFrom
     if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
 
@@ -268,48 +272,23 @@ export default class CdpManager extends LocalService {
   }
 }
 
-export function setMethod(isEth, id) {
+export function setMethod(isEth, isGnt, id) {
   if (id && isEth) {
     return 'lockETHAndDraw';
   } else if (isEth) {
     return 'openLockETHAndDraw';
+  } else if (!id && isGnt) {
+    return 'openLockGNTAndDraw';
   } else if (id) {
     return 'lockGemAndDraw';
   }
   return 'openLockGemAndDraw';
 }
 
-// The following functions are only required for GNT
-export async function setupGnt(lockAmount, proxyAddress, cdpMgr) {
-  if (GNT.isInstance(lockAmount)) {
-    await transferToBag(lockAmount, proxyAddress, cdpMgr);
-  }
-}
-
 export async function transferToBag(lockAmount, proxyAddress, cdpMgr) {
   const gntToken = cdpMgr.get('token').getToken(GNT);
-  const bagAddress = await ensureBag(proxyAddress, cdpMgr);
+  const gntAdapter = cdpMgr.get('smartContract').getContractByName('MCD_JOIN_GNT_A');
+  const bagAddress = await gntAdapter.bags(proxyAddress);
 
   return gntToken.transfer(bagAddress, lockAmount);
-}
-
-export async function ensureBag(proxyAddress, cdpMgr) {
-  const gntAdapter = cdpMgr.get('smartContract').getContract('MCD_JOIN_GNT_A');
-
-  let bagAddress = await getBagAddress(proxyAddress, gntAdapter);
-  if (!bagAddress) {
-    await gntAdapter.make(proxyAddress);
-    bagAddress = await getBagAddress(proxyAddress, gntAdapter);
-  }
-
-  return bagAddress;
-}
-
-export async function getBagAddress(proxyAddress, gntAdapter) {
-  let bagAddress = await gntAdapter.bags(proxyAddress);
-  if (bagAddress === '0x0000000000000000000000000000000000000000') {
-    bagAddress = null;
-  }
-
-  return bagAddress;
 }
