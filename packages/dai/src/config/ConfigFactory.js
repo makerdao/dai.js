@@ -23,14 +23,15 @@ const serviceRoles = [
   'conversion',
   'gas',
   'log',
+  'multicall',
+  'nonce',
   'price',
   'proxy',
   'smartContract',
   'timer',
   'token',
   'transactionManager',
-  'web3',
-  'nonce'
+  'web3'
 ];
 
 function loadPreset(name) {
