@@ -59,7 +59,7 @@ describe('Global Settlement Dai Redeemer migration', () => {
     expect(await migration.check()).toBeFalsy();
   });
 
-  test.only('if the system IS in global settlement, collateral price has been fixed, the user owns DAI, and the user has locked collateral, return true', async () => {
+  test('if the system IS in global settlement, collateral price has been fixed, the user owns DAI, and the user has locked collateral, return true', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
     await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(10));
 

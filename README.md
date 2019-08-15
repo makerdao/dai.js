@@ -12,6 +12,8 @@ cd packages/dai
 yarn build:backend // Builds the dai package for use in the other plugins
 cd ../services-core
 yarn build // Builds the services-core package for use in the other plugins
+cd ../dai-plugin-mcd
+yarn build // Builds the MCD package for use in other plugins
 ```
 
 ### Running the testchain
