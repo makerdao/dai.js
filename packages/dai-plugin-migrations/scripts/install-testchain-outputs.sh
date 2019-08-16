@@ -23,5 +23,6 @@ do
   ADDRESS=`jq ".$NAME" "$SOURCE/out/addresses-mcd.json"`
   SUFFIX="_1"
   jq ".$NAME$SUFFIX=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
+  jq ".$NAME$SUFFIX=$ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
   cp $SOURCE/out/mcd/$ABI.abi $CONTRACTS/abis/$ABI.json
 done
