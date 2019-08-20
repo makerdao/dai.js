@@ -5,7 +5,7 @@ import {
 } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
 import { uniqueId } from '../../src/utils';
-import { mineBlocks } from 'test-helpers';
+import { mineBlocks } from '@makerdao/test-helpers';
 import size from 'lodash/size';
 import debug from 'debug';
 const log = debug('dai:testing:TxMgr.spec');

@@ -1,6 +1,6 @@
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
 import { ETH } from '../../../src/eth/Currency';
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 
 test('get Ether allowance returns max safe integer', done => {
   const ethereumTokenService = buildTestEthereumTokenService();

@@ -1,9 +1,5 @@
-import {
-  mcdMaker,
-  setupCollateral,
-  takeSnapshot,
-  restoreSnapshot
-} from './helpers';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import { mcdMaker, setupCollateral } from './helpers';
 import { ETH, REP, MDAI, USD, GNT, OMG, DGD } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { dummyEventData, formattedDummyEventData } from './fixtures';

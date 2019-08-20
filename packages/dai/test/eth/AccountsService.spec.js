@@ -1,5 +1,5 @@
 import { buildTestService } from '../helpers/serviceBuilders';
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
 import {
   providerAccountFactory,

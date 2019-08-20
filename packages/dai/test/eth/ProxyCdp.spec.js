@@ -1,6 +1,6 @@
 import sharedTests from './Cdp.shared';
 import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { DAI, ETH } from '../../src/eth/Currency';
 
 let dsProxyAddress, cdpService, currentAddress, ethToken;
