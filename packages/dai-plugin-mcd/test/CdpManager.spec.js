@@ -58,15 +58,19 @@ test('getCombinedDebtValue', async () => {
   expect(totalDebt).toEqual(MDAI(8));
 });
 
-test('getCdp looks up ilk', async () => {
+test('getCdp looks up ilk and has cache', async () => {
   const cdp = await cdpMgr.open('ETH-A');
   const sameCdp = await cdpMgr.getCdp(cdp.id);
   expect(sameCdp.ilk).toEqual(cdp.ilk);
+  expect(cdp).toBe(sameCdp);
+
+  const differentInstance = await cdpMgr.getCdp(cdp.id, { cache: false });
+  expect(differentInstance).not.toBe(cdp);
 });
 
 test('getCdp can disable prefetch', async () => {
   const cdp = await cdpMgr.open('ETH-A');
-  const sameCdp = await cdpMgr.getCdp(cdp.id, { prefetch: false });
+  const sameCdp = await cdpMgr.getCdp(cdp.id, { prefetch: false, cache: false });
   expect(sameCdp._urnInfoPromise).toBeUndefined();
 });
 

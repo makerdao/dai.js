@@ -45,8 +45,14 @@ export default class CdpManager extends LocalService {
   }
 
   async getCdp(id, options) {
+    const cacheEnabled = !has(options, 'cache') || options.cache;
+    let cdp = this._getFromInstanceCache(id, cacheEnabled);
+    if (cdp) return cdp;
+
     const ilk = bytesToString(await this._manager.ilks(id));
-    const cdp = new ManagedCdp(id, ilk, this, options);
+    cdp = new ManagedCdp(id, ilk, this, options);
+
+    this._putInInstanceCache(id, cdp, cacheEnabled);
     if (!has(options, 'prefetch') || options.prefetch) await cdp.prefetch();
     return cdp;
   }
@@ -78,25 +84,34 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async open(ilk, { promise }) {
+  async open(ilk, { promise, cache = true }) {
     await this.get('proxy').ensureProxy({ promise });
     const op = this.proxyActions.open(
       this._managerAddress,
       stringToBytes(ilk),
       { dsProxy: true, promise }
     );
-    return ManagedCdp.create(await op, ilk, this);
+    const cdp = await ManagedCdp.create(await op, ilk, this);
+    this._putInInstanceCache(cdp.id, cdp, cache);
+    return cdp;
   }
 
   // ilk is required if the currency type corresponds to more than one ilk; if
   // it's omitted, it is inferred from lockAmount's currency type
   @tracksTransactions
-  async openLockAndDraw(ilk, lockAmount, drawAmount, { promise }) {
+  async openLockAndDraw(
+    ilk,
+    lockAmount,
+    drawAmount,
+    { promise, cache = true }
+  ) {
     const type = this.get(CDP_TYPE).getCdpType(lockAmount.type, ilk);
     const op = this.lockAndDraw(null, type.ilk, lockAmount, drawAmount, {
       promise
     });
-    return ManagedCdp.create(await op, type.ilk, this);
+    const cdp = await ManagedCdp.create(await op, type.ilk, this);
+    this._putInInstanceCache(cdp.id, cdp, cache);
+    return cdp;
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
@@ -266,6 +281,19 @@ export default class CdpManager extends LocalService {
     return amount.type.symbol === 'ETH'
       ? 'wei'
       : this.get(CDP_TYPE).getCdpType(amount.type).decimals;
+  }
+
+  _getFromInstanceCache(id, enabled) {
+    if (!enabled) return;
+    if (!this._instanceCache) this._instanceCache = {};
+    const instance = this._instanceCache[id];
+    if (instance) return instance;
+  }
+
+  _putInInstanceCache(id, instance, enabled) {
+    if (!enabled) return;
+    if (!this._instanceCache) this._instanceCache = {};
+    this._instanceCache[id] = instance;
   }
 }
 
