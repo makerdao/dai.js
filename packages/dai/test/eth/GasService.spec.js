@@ -112,7 +112,8 @@ test('fetches gas station data', async () => {
     'safeLowWait',
     'avgWait',
     'fastWait',
-    'fastestWait'
+    'fastestWait',
+    'gasPriceRange'
   ];
 
   expect(Object.keys(await gasService._gasStationDataPromise)).toEqual(keys);
