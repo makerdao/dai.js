@@ -7,14 +7,22 @@ CWD=`dirname $0`
 CONTRACTS=$CWD/../contracts
 SOURCE=${1:-$CWD/../../../node_modules/@makerdao/testchain}
 
-TUB_ADDRESS=`jq ".TUB" $SOURCE/out/addresses.json`
-REDEEMER_ADDRESS=`jq ".REDEEMER" $SOURCE/out/addresses.json`
-OLD_MKR_ADDRESS=`jq ".OLD_MKR" $SOURCE/out/addresses.json`
+# Relevant contracts from SCD:
+for CONTRACT in "TUB","SaiTub" "REDEEMER","Redeemer" "OLD_MKR","ERC20"
+do
+  IFS=',' read NAME ABI <<< "${CONTRACT}"
+  ADDRESS=`jq ".$NAME" "$SOURCE/out/addresses.json"`
+  jq ".$NAME=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
+  cp $SOURCE/out/$ABI.abi $CONTRACTS/abis/$ABI.json
+done
 
-jq ".TUB=$TUB_ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-jq ".REDEEMER=$REDEEMER_ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-jq ".OLD_MKR=$OLD_MKR_ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-
-cp $SOURCE/out/SaiTub.abi $CONTRACTS/abis/SaiTub.json
-cp $SOURCE/out/Redeemer.abi $CONTRACTS/abis/Redeemer.json
-cp $SOURCE/out/ERC20.abi $CONTRACTS/abis/ERC20.json
+# Relevant contracts from MCD:
+for CONTRACT in "MCD_END","END" "MCD_VAT","VAT" "GET_CDPS","GetCdps" "CDP_MANAGER","DssCdpManager" "MCD_DAI","Dai" "MCD_POT","Pot"
+do
+  IFS=',' read NAME ABI <<< "${CONTRACT}"
+  ADDRESS=`jq ".$NAME" "$SOURCE/out/addresses-mcd.json"`
+  SUFFIX="_1"
+  jq ".$NAME$SUFFIX=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
+  jq ".$NAME$SUFFIX=$ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
+  cp $SOURCE/out/mcd/$ABI.abi $CONTRACTS/abis/$ABI.json
+done

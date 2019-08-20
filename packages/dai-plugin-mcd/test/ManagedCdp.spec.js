@@ -78,7 +78,7 @@ async function expectValues(
     expect(cdp.collateralAmount).toEqual(cdp.currency(collateral));
   }
   if (debt !== undefined) {
-    expect(cdp.debtValue).toEqual(MDAI(debt));
+    expect(cdp.debtValue.toNumber()).toBeCloseTo(debt, 1);
   }
   if (myGem !== undefined) {
     const balance = await maker.getToken(cdp.currency).balance();
@@ -177,7 +177,6 @@ describe.each([
       debt: 0,
       myGem: startingGemBalance.minus(1)
     });
-
     await cdp.lockCollateral(1);
     await expectValuesAfterReset(cdp, {
       collateral: 2,
@@ -241,7 +240,7 @@ describe.each([
 
     const wipe = cdp.wipeDai(0.5);
     const wipeHandler = jest.fn((tx, state) => {
-      expect(tx.metadata.method).toBe('wipe');
+      expect(tx.metadata.method).toBe('safeWipe');
       expect(state).toBe(txStates[wipeHandler.mock.calls.length - 1]);
     });
     txMgr.listen(wipe, wipeHandler);

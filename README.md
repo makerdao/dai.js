@@ -8,6 +8,7 @@ code on commit.
 ```
 yarn
 yarn lerna bootstrap // Installs dependencies & links all local dependencies together
+yarn build // builds each plugin for local use
 ```
 
 ### Running the testchain

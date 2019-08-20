@@ -23,9 +23,9 @@ const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['REP-A', REP]];
   liquidation penalty, annual stability fee]
 */
 const systemValues = {
-  'ETH-A': [2, '4', 100000, 1.5, 0.05, '5.0'],
-  'ETH-B': [2, '4', 100000, 2, 0.05, '4.0'],
-  'REP-A': [2, '4', 5000, 1.8, 0.08, '10.0']
+  'ETH-A': [2, 4, 100000, 1.5, 0.05, '5.0'],
+  'ETH-B': [2, 4, 100000, 2, 0.05, '4.0'],
+  'REP-A': [2, 4, 5000, 1.8, 0.08, '10.0']
 };
 
 describe.each(scenarios)('%s', (ilk, GEM) => {
@@ -53,7 +53,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
   });
 
   test('get total debt', () => {
-    expect(cdpType.totalDebt).toEqual(MDAI(systemValues[ilk][1]));
+    expect(cdpType.totalDebt.toNumber()).toBeCloseTo(systemValues[ilk][1]);
   });
 
   test('get debt ceiling', () => {
