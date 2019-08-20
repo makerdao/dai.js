@@ -1,4 +1,4 @@
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import { captureConsole } from '../../src/utils';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';

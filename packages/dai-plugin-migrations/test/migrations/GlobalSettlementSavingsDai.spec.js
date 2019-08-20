@@ -1,6 +1,6 @@
 import { migrationMaker, setupCollateral } from '../helpers';
 import { mockContracts, globalSettlement } from '../helpers/mocks';
-import { takeSnapshot, restoreSnapshot } from '../helpers/ganache';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { ETH, MDAI } from '@makerdao/dai-plugin-mcd';
 

@@ -3,8 +3,8 @@ import {
   buildTestService,
   defaultConfig
 } from '../helpers/serviceBuilders';
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
-import { mineBlocks } from 'test-helpers';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
+import { mineBlocks } from '@makerdao/test-helpers';
 import TransactionState from '../../src/eth/TransactionState';
 import Web3Service from '../../src/eth/Web3Service';
 import { promiseWait } from '../../src/utils';

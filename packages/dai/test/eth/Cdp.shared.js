@@ -1,8 +1,11 @@
 import { DAI, PETH, USD, USD_ETH, ETH, MKR } from '../../src/eth/Currency';
-import { mineBlocks } from 'test-helpers';
+import {
+  mineBlocks,
+  takeSnapshot,
+  restoreSnapshot
+} from '@makerdao/test-helpers';
 import { buildTestService } from '../helpers/serviceBuilders';
-import { takeSnapshot, restoreSnapshot } from '../helpers/ganache';
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { promiseWait } from '../../src/utils';
 
 let priceService, currentAddress;
@@ -147,7 +150,7 @@ export default function sharedTests(openCdp, initCdpService) {
       });
 
       describe('with drip', () => {
-        let snapshotId, nonceService, transactionCount;
+        let snapshotData, nonceService, transactionCount;
 
         beforeAll(async () => {
           nonceService = cdpService
@@ -163,13 +166,13 @@ export default function sharedTests(openCdp, initCdpService) {
         beforeEach(async () => {
           // Restoring the snapshot resets the account here. This causes any
           // following tests that call authenticated functions to fail
-          snapshotId = await takeSnapshot();
+          snapshotData = await takeSnapshot();
           await cdpService._drip(); //drip() updates _rhi and thus all cdp fees
           nonceService._counts[currentAddress] = transactionCount;
         });
 
         afterEach(async () => {
-          await restoreSnapshot(snapshotId);
+          await restoreSnapshot(snapshotData);
           cdpService = await initCdpService();
         });
 

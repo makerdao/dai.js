@@ -1,15 +1,14 @@
 import {
   mcdMaker,
-  setupCollateral,
-  takeSnapshot,
-  restoreSnapshot
+  setupCollateral
 } from './helpers';
 import { setMethod, transferToBag } from '../src/CdpManager';
 import { ServiceRoles } from '../src/constants';
 import { ETH, MDAI, GNT, DGD } from '../src';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 
 let maker, cdpMgr, txMgr, snapshotData;
 

@@ -1,4 +1,4 @@
-import { callGanache } from 'test-helpers';
+import callGanache from './callGanache';
 
 export async function takeSnapshot(maker) {
   let snapshotData = {};

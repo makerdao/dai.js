@@ -1,5 +1,5 @@
 import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
-import TestAccountProvider from 'test-helpers/src/TestAccountProvider';
+import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { WETH } from '../../../src/eth/Currency';
 
 let tokenService, weth;

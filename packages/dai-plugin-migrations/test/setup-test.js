@@ -1,15 +1,15 @@
-import { takeSnapshot, restoreSnapshot } from './helpers/ganache';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 
 beforeEach(() => {
   jest.setTimeout(10000);
 });
 
-let snapshotId;
+let snapshotData;
 
 beforeAll(async () => {
-  snapshotId = await takeSnapshot();
+  snapshotData = await takeSnapshot();
 });
 
 afterAll(async () => {
-  await restoreSnapshot(snapshotId);
+  await restoreSnapshot(snapshotData);
 });
