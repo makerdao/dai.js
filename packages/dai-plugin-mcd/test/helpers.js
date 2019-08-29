@@ -18,6 +18,9 @@ export async function mcdMaker({
 } = {}) {
   const maker = await Maker.create(preset, {
     plugins: [[McdPlugin, { addressOverrides, network, prefetch }]],
+    web3: {
+      pollingInterval: 100
+    },
     log,
     ...settings
   });

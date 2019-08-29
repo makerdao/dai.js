@@ -1,4 +1,9 @@
-import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import {
+  takeSnapshot,
+  restoreSnapshot,
+  mineBlocks,
+  TestAccountProvider
+} from '@makerdao/test-helpers';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { MDAI, ETH } from '../src/index';
@@ -56,6 +61,18 @@ describe('Savings Service', () => {
     expect(amount.symbol).toBe('MDAI');
   });
 
+  test('get balance without proxy', async () => {
+    const { address, key } = TestAccountProvider.nextAccount();
+    await maker
+      .service('accounts')
+      .addAccount(address, { type: 'privateKey', key });
+    maker.service('accounts').useAccount(address);
+
+    const balance = await service.balance();
+
+    expect(balance.toNumber()).toBe(0);
+  });
+
   test('check amount using balance of', async () => {
     const proxyAddress = await maker.currentProxy();
     const amount = await service.balanceOf(proxyAddress);
@@ -80,22 +97,55 @@ describe('Savings Service', () => {
 
     const startingBalance = (await dai.balance()).toNumber();
     const amountBeforeJoin = (await service.balance()).toNumber();
-    const joinAmount = MDAI(2);
+    const joinAmount = 2;
 
-    await service.join(joinAmount);
+    await service.join(MDAI(joinAmount));
     const amountAfterJoin = await service.balance();
     expect(amountAfterJoin.toNumber()).toBeCloseTo(amountBeforeJoin + 2);
+
+    const chiAfterJoin = new BigNumber(await service._pot.chi()).shiftedBy(-27);
 
     const duringBalance = (await dai.balance()).toNumber();
     expect(duringBalance).toBe(startingBalance - 2);
 
-    await service.exit(joinAmount);
+    await mineBlocks(maker.service('cdp'), 3);
+
+    await service.exit(MDAI(joinAmount));
     const amountAfterExit = await service.balance();
-    const chi = new BigNumber(await service._pot.chi()).shiftedBy(-27);
-    const accruedInterest = chi * joinAmount.toNumber() - joinAmount.toNumber();
-    expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest);
+
+    const chiAfterExit = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+    const accruedInterest = chiAfterExit
+      .times(joinAmount)
+      .minus(chiAfterJoin.times(joinAmount))
+      .toNumber();
+    expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 10);
 
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBe(startingBalance);
+  });
+
+  test('exit all', async () => {
+    await makeSomeDai(3);
+
+    const startingBalance = (await dai.balance()).toNumber();
+    const joinAmount = 2;
+    await service.join(MDAI(joinAmount));
+
+    const chiAfterJoin = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+    await mineBlocks(maker.service('cdp'), 3);
+
+    await service.exitAll();
+
+    const amountAfterExit = await service.balance();
+    expect(amountAfterExit.toNumber()).toBe(0);
+
+    const chiAfterExit = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+    const accruedInterest = chiAfterExit
+      .times(joinAmount)
+      .minus(chiAfterJoin.times(joinAmount))
+      .toNumber();
+
+    const endingBalance = (await dai.balance()).toNumber();
+    expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 10);
   });
 });

@@ -36,10 +36,20 @@ export default class SavingsService extends PublicService {
     );
   }
 
-  async balance() {
-    const proxy = await this.get('proxy').ensureProxy();
+  async exitAll() {
+    await this.get('proxy').ensureProxy();
 
-    return this.balanceOf(proxy);
+    return this._proxyActions.dsrExitAll(
+      this._daiAdapterAddress,
+      this._potAddress,
+      { dsProxy: true }
+    );
+  }
+
+  async balance() {
+    const proxy = await this.get('proxy').currentProxy();
+
+    return proxy ? this.balanceOf(proxy) : MDAI(0);
   }
 
   async balanceOf(guy) {
