@@ -2,7 +2,7 @@ import { PublicService } from '@makerdao/services-core';
 import { ServiceRoles } from './constants';
 import { MDAI } from './index';
 import BigNumber from 'bignumber.js';
-import { RAY, WAD, SECONDS_PER_YEAR } from './constants';
+import { RAY, RAD, WAD, SECONDS_PER_YEAR } from './constants';
 
 export default class SavingsService extends PublicService {
   constructor(name = ServiceRoles.SAVINGS) {
@@ -19,7 +19,7 @@ export default class SavingsService extends PublicService {
 
     return this._proxyActions.dsrJoin(
       this._daiAdapterAddress,
-      this._potAddress,
+      this._pot.address,
       amountInDai.toFixed('wei'),
       { dsProxy: true }
     );
@@ -30,7 +30,7 @@ export default class SavingsService extends PublicService {
 
     return this._proxyActions.dsrExit(
       this._daiAdapterAddress,
-      this._potAddress,
+      this._pot.address,
       amountInDai.toFixed('wei'),
       { dsProxy: true }
     );
@@ -41,7 +41,7 @@ export default class SavingsService extends PublicService {
 
     return this._proxyActions.dsrExitAll(
       this._daiAdapterAddress,
-      this._potAddress,
+      this._pot.address,
       { dsProxy: true }
     );
   }
@@ -53,10 +53,18 @@ export default class SavingsService extends PublicService {
   }
 
   async balanceOf(guy) {
-    const amount = new BigNumber(await this._pot.pie(guy)).div(WAD);
-    const chi = await this.chi();
+    const slice = new BigNumber(await this._pot.pie(guy)).div(WAD);
+    const totalPie = new BigNumber(await this._pot.Pie()).div(WAD);
 
-    return MDAI(amount.times(chi));
+    const portion = totalPie.eq(0) ? totalPie : slice.div(totalPie);
+
+    const daiInPot = new BigNumber(
+      await this.get('smartContract')
+        .getContract('MCD_VAT')
+        .dai(this._pot.address)
+    ).div(RAD);
+
+    return MDAI(daiInPot.times(portion));
   }
 
   async getTotalDai() {
@@ -82,10 +90,6 @@ export default class SavingsService extends PublicService {
 
   get _pot() {
     return this.get('smartContract').getContractByName('MCD_POT');
-  }
-
-  get _potAddress() {
-    return this.get('smartContract').getContractAddress('MCD_POT');
   }
 
   get _daiAdapterAddress() {
