@@ -59,6 +59,7 @@ describe('Savings Service', () => {
 
   afterEach(async () => {
     await restoreSnapshot(snapshotData, maker);
+    maker.service('accounts').useAccount('default')
   });
 
   test('get dai savings rate', async () => {
