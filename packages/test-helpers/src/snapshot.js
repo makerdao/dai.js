@@ -8,8 +8,18 @@ export async function takeSnapshot(maker) {
 
   if (maker) {
     const nonceService = maker.service('nonce');
-    const currentAddress = maker.service('web3').currentAddress();
-    snapshotData.transactionCount = nonceService._counts[currentAddress];
+    const web3Service = maker.service('web3');
+    const addresses = maker
+      .service('accounts')
+      .listAccounts()
+      .map(account => account.address);
+    snapshotData.transactionCounts = addresses.reduce((acc, address) => {
+      acc[address] = nonceService._counts[address];
+
+      return acc;
+    }, {});
+
+    snapshotData.currentBlock = web3Service.blockNumber();
   }
 
   return snapshotData;
@@ -18,10 +28,15 @@ export async function takeSnapshot(maker) {
 export async function restoreSnapshot(snapshotData, maker) {
   const res = await callGanache('evm_revert', [snapshotData.snapshotId]);
 
-  if (maker && snapshotData.transactionCount) {
-    const currentAddress = maker.service('web3').currentAddress();
-    maker.service('nonce')._counts[currentAddress] =
-      snapshotData.transactionCount;
+  if (maker && snapshotData.transactionCounts) {
+    Object.keys(maker.service('nonce')._counts).forEach(address => {
+      maker.service('nonce')._counts[address] =
+        snapshotData.transactionCounts[address] || undefined;
+    });
+  }
+
+  if (maker && snapshotData.currentBlock) {
+    maker.service('web3')._currentBlock = snapshotData.currentBlock;
   }
 
   return (await res.json()).result;
