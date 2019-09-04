@@ -148,6 +148,15 @@ export default class ManagedCdp {
     );
   }
 
+  @tracksTransactionsWithOptions({ numArguments: 1 })
+  async wipeAllAndFree(freeAmount = this.currency(0), { promise }) {
+    assert(freeAmount, 'free amount must be defined');
+    freeAmount = castAsCurrency(freeAmount, this.currency);
+    return this._cdpManager.wipeAllAndFree(this.id, this.ilk, freeAmount, {
+      promise
+    });
+  }
+
   async _getUrnInfo() {
     if (!this._urnInfoPromise) {
       this._urnInfoPromise = this._cdpManager
@@ -168,10 +177,7 @@ export default class ManagedCdp {
   async prefetch() {
     // TODO allow passing in a multicall instance to use that instead of making
     // separate calls
-    return Promise.all([
-      this._getUrnInfo(),
-      this.type.prefetch()
-    ]);
+    return Promise.all([this._getUrnInfo(), this.type.prefetch()]);
   }
 
   async reset() {

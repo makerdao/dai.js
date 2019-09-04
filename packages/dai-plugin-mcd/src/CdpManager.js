@@ -224,7 +224,20 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async wipeAllAndFree(id, { promise }) {}
+  async wipeAllAndFree(id, ilk, freeAmount, { promise }) {
+    const isEth = ETH.isInstance(freeAmount);
+    const method = isEth ? 'wipeAllAndFreeETH' : 'wipeAllAndFreeGem';
+    return this.proxyActions[method](
+      ...[
+        this._managerAddress,
+        this._adapterAddress(ilk),
+        this._adapterAddress('DAI'),
+        this.getIdBytes(id),
+        freeAmount.toFixed(this._precision(freeAmount)),
+        { dsProxy: true, promise }
+      ].filter(x => x)
+    );
+  }
 
   async getUrn(id) {
     if (!this._getUrnPromises[id]) {
