@@ -70,6 +70,6 @@
     "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
   },
   "engines": {
-    "node": "11.10"
+    "node": ">=10.16 <12"
   }
 }
