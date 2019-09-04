@@ -122,6 +122,10 @@ export default class ManagedCdp {
     return this._cdpManager.wipe(this.id, amount, { promise });
   }
 
+  wipeAll({ promise } = {}) {
+    return this._cdpManager.wipeAll(this.id, { promise });
+  }
+
   freeCollateral(amount, { promise } = {}) {
     return this.wipeAndFree(undefined, amount, { promise });
   }

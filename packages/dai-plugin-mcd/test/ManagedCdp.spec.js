@@ -121,27 +121,27 @@ describe.each([
     'ETH-A',
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
+  ],
+  [
+    'REP-A',
+    REP,
+    async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'GNT-A',
+    GNT,
+    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'OMG-A',
+    OMG,
+    async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'DGD-A',
+    DGD,
+    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
   ]
-  // [
-  //   'REP-A',
-  //   REP,
-  //   async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'GNT-A',
-  //   GNT,
-  //   async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'OMG-A',
-  //   OMG,
-  //   async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'DGD-A',
-  //   DGD,
-  //   async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
-  // ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
 
@@ -260,7 +260,28 @@ describe.each([
     });
   });
 
-  test.only('openLockAndDraw, wipeAll', async () => {});
+  test('openLockAndDraw, wipeAll', async () => {
+    const txStates = ['pending', 'mined', 'confirmed'];
+    const mgr = maker.service(CDP_MANAGER);
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
 
-  test('openLockAndDraw, wipeAllAndFree', async () => {});
+    const wipe = cdp.wipeAll();
+    const wipeHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe('safeWipeAll');
+      expect(state).toBe(txStates[wipeHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(wipe, wipeHandler);
+    await expectValuesAfterReset(cdp, {
+      debt: 1,
+      myDai: startingDaiBalance.plus(1)
+    });
+    await wipe;
+    expect(wipeHandler.mock.calls.length).toBe(2);
+    await expectValuesAfterReset(cdp, {
+      debt: 0,
+      myDai: startingDaiBalance
+    });
+  });
+
+  xtest('openLockAndDraw, wipeAllAndFree', async () => {});
 });
