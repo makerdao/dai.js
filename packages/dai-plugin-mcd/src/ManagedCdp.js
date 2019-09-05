@@ -71,6 +71,10 @@ export default class ManagedCdp {
     );
   }
 
+  async getOwner() {
+    return this._cdpManager.getOwner(this.id);
+  }
+
   async getEventHistory() {
     const urn = await this.getUrn();
     const events = await this._cdpManager
@@ -128,6 +132,10 @@ export default class ManagedCdp {
 
   freeCollateral(amount, { promise } = {}) {
     return this.wipeAndFree(undefined, amount, { promise });
+  }
+
+  give(address, { promise } = {}) {
+    return this._cdpManager.give(this.id, address, { promise });
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })

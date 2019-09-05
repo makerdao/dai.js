@@ -260,7 +260,7 @@ describe.each([
     });
   });
 
-  test('openLockAndDraw, wipeAll', async () => {
+  test.only('openLockAndDraw, wipeAll, give', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
     const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
@@ -282,6 +282,18 @@ describe.each([
       debt: 0,
       myDai: startingDaiBalance
     });
+
+    const newAddress = '0x81431b69b1e0e334d4161a13c2955e0f3599381e';
+    const give = cdp.give(newAddress);
+    const giveHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe('give');
+      expect(state).toBe(txStates[giveHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(give, giveHandler);
+    await give;
+    expect(giveHandler.mock.calls.length).toBe(2);
+    const newOwner = await cdp.getOwner();
+    expect(newOwner.toLowerCase()).toBe(newAddress);
   });
 
   test('openLockAndDraw, wipeAllAndFree', async () => {

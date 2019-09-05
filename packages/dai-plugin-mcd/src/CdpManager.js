@@ -239,11 +239,28 @@ export default class CdpManager extends LocalService {
     );
   }
 
+  @tracksTransactions
+  async give(id, address, { promise }) {
+    return this.proxyActions.give(
+      this._managerAddress,
+      this.getIdBytes(id),
+      address,
+      { dsProxy: true, promise }
+    );
+  }
+
+  @tracksTransactions
+  async giveToProxy() {}
+
   async getUrn(id) {
     if (!this._getUrnPromises[id]) {
       this._getUrnPromises[id] = this._manager.urns(id);
     }
     return this._getUrnPromises[id];
+  }
+
+  async getOwner(id) {
+    return this._manager.owns(this.getIdBytes(id));
   }
 
   parseFrobEvents(events) {
