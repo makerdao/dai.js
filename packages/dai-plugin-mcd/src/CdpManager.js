@@ -259,7 +259,7 @@ export default class CdpManager extends LocalService {
       this.getIdBytes(id),
       address,
       { dsProxy: true, promise }
-    )
+    );
   }
 
   async getUrn(id) {
