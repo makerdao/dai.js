@@ -121,27 +121,27 @@ describe.each([
     'ETH-A',
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
+  ],
+  [
+    'REP-A',
+    REP,
+    async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'GNT-A',
+    GNT,
+    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'OMG-A',
+    OMG,
+    async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'DGD-A',
+    DGD,
+    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
   ]
-  // [
-  //   'REP-A',
-  //   REP,
-  //   async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'GNT-A',
-  //   GNT,
-  //   async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'OMG-A',
-  //   OMG,
-  //   async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'DGD-A',
-  //   DGD,
-  //   async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
-  // ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
 
@@ -298,11 +298,12 @@ describe.each([
     txMgr.listen(give, giveHandler);
     await give;
     expect(giveHandler.mock.calls.length).toBe(2);
+
     const newOwner = await cdp.getOwner();
     expect(newOwner.toLowerCase()).toBe(newAddress);
   });
 
-  test('openLockAndDraw, wipeAllAndFree', async () => {
+  test('openLockAndDraw, wipeAllAndFree, giveToProxy', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
     const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
@@ -330,5 +331,19 @@ describe.each([
       myDai: startingDaiBalance,
       myGem: startingGemBalance
     });
+
+    const newAddress = '0x81431b69b1e0e334d4161a13c2955e0f3599381e';
+    const giveToProxy = cdp.giveToProxy(newAddress);
+    const giveToProxyHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe('giveToProxy');
+      expect(state).toBe(txStates[giveToProxyHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(giveToProxy, giveToProxyHandler);
+    await giveToProxy;
+    expect(giveToProxyHandler.mock.calls.length).toBe(2);
+
+    const newCdpOwner = await cdp.getOwner();
+    const newProxyOwner = await maker.service('proxy').getOwner(newCdpOwner);
+    expect(newProxyOwner.toLowerCase()).toBe(newAddress);
   });
 });

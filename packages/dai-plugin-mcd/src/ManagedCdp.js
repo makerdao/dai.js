@@ -138,6 +138,10 @@ export default class ManagedCdp {
     return this._cdpManager.give(this.id, address, { promise });
   }
 
+  giveToProxy(address, { promise } = {}) {
+    return this._cdpManager.giveToProxy(this.id, address, { promise });
+  }
+
   @tracksTransactionsWithOptions({ numArguments: 3 })
   async wipeAndFree(
     wipeAmount = MDAI(0),

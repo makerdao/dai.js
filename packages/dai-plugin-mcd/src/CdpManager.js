@@ -239,6 +239,7 @@ export default class CdpManager extends LocalService {
     );
   }
 
+  // Gives CDP directly to supplied address
   @tracksTransactions
   async give(id, address, { promise }) {
     return this.proxyActions.give(
@@ -249,8 +250,17 @@ export default class CdpManager extends LocalService {
     );
   }
 
+  // Gives CDP to the proxy of the supplied address
   @tracksTransactions
-  async giveToProxy() {}
+  async giveToProxy(id, address, { promise }) {
+    return this.proxyActions.giveToProxy(
+      this._contractAddress('PROXY_REGISTRY'),
+      this._managerAddress,
+      this.getIdBytes(id),
+      address,
+      { dsProxy: true, promise }
+    )
+  }
 
   async getUrn(id) {
     if (!this._getUrnPromises[id]) {
