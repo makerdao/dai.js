@@ -121,27 +121,27 @@ describe.each([
     'ETH-A',
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
-  ],
-  [
-    'REP-A',
-    REP,
-    async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'GNT-A',
-    GNT,
-    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'OMG-A',
-    OMG,
-    async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'DGD-A',
-    DGD,
-    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
   ]
+  // [
+  //   'REP-A',
+  //   REP,
+  //   async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'GNT-A',
+  //   GNT,
+  //   async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'OMG-A',
+  //   OMG,
+  //   async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'DGD-A',
+  //   DGD,
+  //   async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
+  // ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
 
@@ -168,6 +168,12 @@ describe.each([
     const events = await cdp.getEventHistory();
     expect(mockFn).toBeCalled();
     expect(events).toEqual(formattedDummyEventData(GEM, ilk));
+  });
+
+  test('getOwner', async () => {
+    const cdp = await maker.service(CDP_MANAGER).open(ilk);
+    const proxy = await maker.service('proxy').currentProxy();
+    expect(await cdp.getOwner()).toBe(proxy);
   });
 
   test('openLock, lock, lockAndDraw, free', async () => {
@@ -260,7 +266,7 @@ describe.each([
     });
   });
 
-  test.only('openLockAndDraw, wipeAll, give', async () => {
+  test('openLockAndDraw, wipeAll, give', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
     const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
