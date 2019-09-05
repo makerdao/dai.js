@@ -71,7 +71,7 @@ export default class ManagedCdp {
     );
   }
 
-  async getOwner() {
+  getOwner() {
     return this._cdpManager.getOwner(this.id);
   }
 
@@ -87,7 +87,7 @@ export default class ManagedCdp {
   }
 
   //todo: add caching?
-  async getUrn() {
+  getUrn() {
     return this._cdpManager.getUrn(this.id);
   }
 
@@ -104,7 +104,7 @@ export default class ManagedCdp {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
-  async lockAndDraw(
+  lockAndDraw(
     lockAmount = this.currency(0),
     drawAmount = MDAI(0),
     { promise }
@@ -143,7 +143,7 @@ export default class ManagedCdp {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
-  async wipeAndFree(
+  wipeAndFree(
     wipeAmount = MDAI(0),
     freeAmount = this.currency(0),
     { promise }
@@ -161,7 +161,7 @@ export default class ManagedCdp {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 1 })
-  async wipeAllAndFree(freeAmount = this.currency(0), { promise }) {
+  wipeAllAndFree(freeAmount = this.currency(0), { promise }) {
     assert(freeAmount, 'free amount must be defined');
     freeAmount = castAsCurrency(freeAmount, this.currency);
     return this._cdpManager.wipeAllAndFree(this.id, this.ilk, freeAmount, {
@@ -169,7 +169,7 @@ export default class ManagedCdp {
     });
   }
 
-  async _getUrnInfo() {
+  _getUrnInfo() {
     if (!this._urnInfoPromise) {
       this._urnInfoPromise = this._cdpManager
         .getUrn(this.id)
@@ -186,13 +186,13 @@ export default class ManagedCdp {
     return this.cache[name];
   }
 
-  async prefetch() {
+  prefetch() {
     // TODO allow passing in a multicall instance to use that instead of making
     // separate calls
     return Promise.all([this._getUrnInfo(), this.type.prefetch()]);
   }
 
-  async reset() {
+  reset() {
     this._urnInfoPromise = null;
     this.cache = {};
   }

@@ -184,7 +184,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
-  async wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
+  wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
     const isEth = ETH.isInstance(freeAmount);
     const method = isEth ? 'wipeAndFreeETH' : 'wipeAndFreeGem';
     return this.proxyActions[method](
@@ -201,7 +201,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async wipe(id, wipeAmount, { promise }) {
+  wipe(id, wipeAmount, { promise }) {
     return this.proxyActions.safeWipe(
       ...[
         this._managerAddress,
@@ -214,7 +214,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async wipeAll(id, { promise }) {
+  wipeAll(id, { promise }) {
     return this.proxyActions.safeWipeAll(
       this._managerAddress,
       this._adapterAddress('DAI'),
@@ -224,7 +224,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async wipeAllAndFree(id, ilk, freeAmount, { promise }) {
+  wipeAllAndFree(id, ilk, freeAmount, { promise }) {
     const isEth = ETH.isInstance(freeAmount);
     const method = isEth ? 'wipeAllAndFreeETH' : 'wipeAllAndFreeGem';
     return this.proxyActions[method](
@@ -239,9 +239,9 @@ export default class CdpManager extends LocalService {
     );
   }
 
-  // Gives CDP directly to supplied address
+  // Gives CDP directly to the supplied address
   @tracksTransactions
-  async give(id, address, { promise }) {
+  give(id, address, { promise }) {
     return this.proxyActions.give(
       this._managerAddress,
       this.getIdBytes(id),
@@ -252,7 +252,7 @@ export default class CdpManager extends LocalService {
 
   // Gives CDP to the proxy of the supplied address
   @tracksTransactions
-  async giveToProxy(id, address, { promise }) {
+  giveToProxy(id, address, { promise }) {
     return this.proxyActions.giveToProxy(
       this._contractAddress('PROXY_REGISTRY'),
       this._managerAddress,
@@ -262,14 +262,14 @@ export default class CdpManager extends LocalService {
     );
   }
 
-  async getUrn(id) {
+  getUrn(id) {
     if (!this._getUrnPromises[id]) {
       this._getUrnPromises[id] = this._manager.urns(id);
     }
     return this._getUrnPromises[id];
   }
 
-  async getOwner(id) {
+  getOwner(id) {
     return this._manager.owns(this.getIdBytes(id));
   }
 
