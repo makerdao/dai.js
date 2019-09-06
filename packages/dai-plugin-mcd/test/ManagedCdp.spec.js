@@ -166,6 +166,12 @@ describe.each([
     expect(events).toEqual(formattedDummyEventData(GEM, ilk));
   });
 
+  test('getOwner', async () => {
+    const cdp = await maker.service(CDP_MANAGER).open(ilk);
+    const proxy = await maker.service('proxy').currentProxy();
+    expect(await cdp.getOwner()).toBe(proxy);
+  });
+
   test('openLock, lock, lockAndDraw, free', async () => {
     const cdp = await maker.service(CDP_MANAGER).openLockAndDraw(ilk, GEM(1));
     await expectValues(cdp, {
@@ -254,5 +260,86 @@ describe.each([
       myDai: startingDaiBalance.plus(0.5),
       myGem: startingGemBalance.minus(0.5)
     });
+  });
+
+  test('openLockAndDraw, wipeAll, give', async () => {
+    const txStates = ['pending', 'mined', 'confirmed'];
+    const mgr = maker.service(CDP_MANAGER);
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+    await expectValuesAfterReset(cdp, {
+      debt: 1,
+      myDai: startingDaiBalance.plus(1)
+    });
+
+    const wipeAll = cdp.wipeAll();
+    const wipeAllHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe('safeWipeAll');
+      expect(state).toBe(txStates[wipeAllHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(wipeAll, wipeAllHandler);
+    await wipeAll;
+    expect(wipeAllHandler.mock.calls.length).toBe(2);
+
+    await expectValuesAfterReset(cdp, {
+      debt: 0,
+      myDai: startingDaiBalance
+    });
+
+    const newAddress = '0x81431b69b1e0e334d4161a13c2955e0f3599381e';
+    const give = cdp.give(newAddress);
+    const giveHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe('give');
+      expect(state).toBe(txStates[giveHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(give, giveHandler);
+    await give;
+    expect(giveHandler.mock.calls.length).toBe(2);
+
+    const newOwner = await cdp.getOwner();
+    expect(newOwner.toLowerCase()).toBe(newAddress);
+  });
+
+  test('openLockAndDraw, wipeAllAndFree, giveToProxy', async () => {
+    const txStates = ['pending', 'mined', 'confirmed'];
+    const mgr = maker.service(CDP_MANAGER);
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+    await expectValuesAfterReset(cdp, {
+      collateral: 1,
+      debt: 1,
+      myDai: startingDaiBalance.plus(1),
+      myGem: startingGemBalance.minus(1)
+    });
+
+    const wipeAllAndFree = cdp.wipeAllAndFree(GEM(1));
+    const wipeAllAndFreeHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toEqual(
+        expect.stringContaining('wipeAllAndFree')
+      );
+      expect(state).toBe(txStates[wipeAllAndFreeHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(wipeAllAndFree, wipeAllAndFreeHandler);
+    await wipeAllAndFree;
+    expect(wipeAllAndFreeHandler.mock.calls.length).toBe(2);
+
+    await expectValuesAfterReset(cdp, {
+      collateral: 0,
+      debt: 0,
+      myDai: startingDaiBalance,
+      myGem: startingGemBalance
+    });
+
+    const newAddress = '0x81431b69b1e0e334d4161a13c2955e0f3599381e';
+    const giveToProxy = cdp.giveToProxy(newAddress);
+    const giveToProxyHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe('giveToProxy');
+      expect(state).toBe(txStates[giveToProxyHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(giveToProxy, giveToProxyHandler);
+    await giveToProxy;
+    expect(giveToProxyHandler.mock.calls.length).toBe(2);
+
+    const newCdpOwner = await cdp.getOwner();
+    const newProxyOwner = await maker.service('proxy').getOwner(newCdpOwner);
+    expect(newProxyOwner.toLowerCase()).toBe(newAddress);
   });
 });

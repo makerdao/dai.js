@@ -184,7 +184,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
-  async wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
+  wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
     const isEth = ETH.isInstance(freeAmount);
     const method = isEth ? 'wipeAndFreeETH' : 'wipeAndFreeGem';
     return this.proxyActions[method](
@@ -201,7 +201,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async wipe(id, wipeAmount, { promise }) {
+  wipe(id, wipeAmount, { promise }) {
     return this.proxyActions.safeWipe(
       ...[
         this._managerAddress,
@@ -213,11 +213,64 @@ export default class CdpManager extends LocalService {
     );
   }
 
-  async getUrn(id) {
+  @tracksTransactions
+  wipeAll(id, { promise } = {}) {
+    return this.proxyActions.safeWipeAll(
+      this._managerAddress,
+      this._adapterAddress('DAI'),
+      this.getIdBytes(id),
+      { dsProxy: true, promise }
+    );
+  }
+
+  @tracksTransactions
+  wipeAllAndFree(id, ilk, freeAmount, { promise }) {
+    const isEth = ETH.isInstance(freeAmount);
+    const method = isEth ? 'wipeAllAndFreeETH' : 'wipeAllAndFreeGem';
+    return this.proxyActions[method](
+      ...[
+        this._managerAddress,
+        this._adapterAddress(ilk),
+        this._adapterAddress('DAI'),
+        this.getIdBytes(id),
+        freeAmount.toFixed(this._precision(freeAmount)),
+        { dsProxy: true, promise }
+      ].filter(x => x)
+    );
+  }
+
+  // Gives CDP directly to the supplied address
+  @tracksTransactions
+  give(id, address, { promise }) {
+    return this.proxyActions.give(
+      this._managerAddress,
+      this.getIdBytes(id),
+      address,
+      { dsProxy: true, promise }
+    );
+  }
+
+  // Gives CDP to the proxy of the supplied address
+  @tracksTransactions
+  giveToProxy(id, address, { promise }) {
+    return this.proxyActions.giveToProxy(
+      this._contractAddress('PROXY_REGISTRY'),
+      this._managerAddress,
+      this.getIdBytes(id),
+      address,
+      { dsProxy: true, promise }
+    );
+  }
+
+  getUrn(id) {
     if (!this._getUrnPromises[id]) {
       this._getUrnPromises[id] = this._manager.urns(id);
     }
     return this._getUrnPromises[id];
+  }
+
+  getOwner(id) {
+    return this._manager.owns(this.getIdBytes(id));
   }
 
   parseFrobEvents(events) {

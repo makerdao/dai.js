@@ -71,6 +71,10 @@ export default class ManagedCdp {
     );
   }
 
+  getOwner() {
+    return this._cdpManager.getOwner(this.id);
+  }
+
   async getEventHistory() {
     const urn = await this.getUrn();
     const events = await this._cdpManager
@@ -83,24 +87,24 @@ export default class ManagedCdp {
   }
 
   //todo: add caching?
-  async getUrn() {
+  getUrn() {
     return this._cdpManager.getUrn(this.id);
   }
 
   // TODO: after these operations complete, update the cache. once that's done,
   // update ManagedCdp.spec to use expectValues instead of
   // expectValuesAfterReset in more places
-  lockCollateral(amount, { promise } = {}) {
+  lockCollateral(amount) {
     amount = castAsCurrency(amount, this.currency);
-    return this._cdpManager.lock(this.id, this.ilk, amount, { promise });
+    return this._cdpManager.lock(this.id, this.ilk, amount);
   }
 
-  drawDai(amount, { promise } = {}) {
-    return this.lockAndDraw(undefined, amount, { promise });
+  drawDai(amount) {
+    return this.lockAndDraw(undefined, amount);
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
-  async lockAndDraw(
+  lockAndDraw(
     lockAmount = this.currency(0),
     drawAmount = MDAI(0),
     { promise }
@@ -117,17 +121,29 @@ export default class ManagedCdp {
     );
   }
 
-  wipeDai(amount, { promise } = {}) {
+  wipeDai(amount) {
     amount = castAsCurrency(amount, MDAI);
-    return this._cdpManager.wipe(this.id, amount, { promise });
+    return this._cdpManager.wipe(this.id, amount);
   }
 
-  freeCollateral(amount, { promise } = {}) {
-    return this.wipeAndFree(undefined, amount, { promise });
+  wipeAll() {
+    return this._cdpManager.wipeAll(this.id);
+  }
+
+  freeCollateral(amount) {
+    return this.wipeAndFree(undefined, amount);
+  }
+
+  give(address) {
+    return this._cdpManager.give(this.id, address);
+  }
+
+  giveToProxy(address) {
+    return this._cdpManager.giveToProxy(this.id, address);
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
-  async wipeAndFree(
+  wipeAndFree(
     wipeAmount = MDAI(0),
     freeAmount = this.currency(0),
     { promise }
@@ -144,7 +160,16 @@ export default class ManagedCdp {
     );
   }
 
-  async _getUrnInfo() {
+  @tracksTransactionsWithOptions({ numArguments: 1 })
+  wipeAllAndFree(freeAmount = this.currency(0), { promise }) {
+    assert(freeAmount, 'free amount must be defined');
+    freeAmount = castAsCurrency(freeAmount, this.currency);
+    return this._cdpManager.wipeAllAndFree(this.id, this.ilk, freeAmount, {
+      promise
+    });
+  }
+
+  _getUrnInfo() {
     if (!this._urnInfoPromise) {
       this._urnInfoPromise = this._cdpManager
         .getUrn(this.id)
@@ -161,16 +186,13 @@ export default class ManagedCdp {
     return this.cache[name];
   }
 
-  async prefetch() {
+  prefetch() {
     // TODO allow passing in a multicall instance to use that instead of making
     // separate calls
-    return Promise.all([
-      this._getUrnInfo(),
-      this.type.prefetch()
-    ]);
+    return Promise.all([this._getUrnInfo(), this.type.prefetch()]);
   }
 
-  async reset() {
+  reset() {
     this._urnInfoPromise = null;
     this.cache = {};
   }
