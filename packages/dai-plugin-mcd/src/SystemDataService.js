@@ -1,10 +1,11 @@
 import { PublicService } from '@makerdao/services-core';
 import { RAD, RAY, ServiceRoles, SECONDS_PER_YEAR } from './constants';
+const { CDP_TYPE } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 
 export default class SystemDataService extends PublicService {
   constructor(name = ServiceRoles.SYSTEM_DATA) {
-    super(name, ['smartContract', 'token']);
+    super(name, ['smartContract', 'token', CDP_TYPE]);
   }
 
   async getAnnualBaseRate() {
@@ -19,6 +20,14 @@ export default class SystemDataService extends PublicService {
   async getSystemWideDebtCeiling() {
     const Line = await this.vat.Line();
     return new BigNumber(Line.toString()).dividedBy(RAD).toNumber();
+  }
+
+  //this should equal the total dai supply as long as we account for all cdpTypes/ilks
+  get totalDebtAllCdpTypes() {
+    const debts = this.get(CDP_TYPE).cdpTypes.map(ilk => {
+      return ilk.totalDebt;
+    });
+    return debts.reduce((a, b) => a.plus(b));
   }
 
   adapterAddress(ilk) {

@@ -18,3 +18,8 @@ test('get system-wide debt ceiling', async () => {
   const ceiling = await service.getSystemWideDebtCeiling();
   expect(ceiling).toBe(1000000);
 });
+
+test('get system-wide debt', async () => {
+  const totalDebt = await service.totalDebtAllCdpTypes;
+  console.log('totalDebt', totalDebt);
+});
