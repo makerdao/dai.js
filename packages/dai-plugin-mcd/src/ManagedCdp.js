@@ -94,13 +94,13 @@ export default class ManagedCdp {
   // TODO: after these operations complete, update the cache. once that's done,
   // update ManagedCdp.spec to use expectValues instead of
   // expectValuesAfterReset in more places
-  lockCollateral(amount, { promise } = {}) {
+  lockCollateral(amount) {
     amount = castAsCurrency(amount, this.currency);
-    return this._cdpManager.lock(this.id, this.ilk, amount, { promise });
+    return this._cdpManager.lock(this.id, this.ilk, amount);
   }
 
-  drawDai(amount, { promise } = {}) {
-    return this.lockAndDraw(undefined, amount, { promise });
+  drawDai(amount) {
+    return this.lockAndDraw(undefined, amount);
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
@@ -121,25 +121,25 @@ export default class ManagedCdp {
     );
   }
 
-  wipeDai(amount, { promise } = {}) {
+  wipeDai(amount) {
     amount = castAsCurrency(amount, MDAI);
-    return this._cdpManager.wipe(this.id, amount, { promise });
+    return this._cdpManager.wipe(this.id, amount);
   }
 
-  wipeAll({ promise } = {}) {
-    return this._cdpManager.wipeAll(this.id, { promise });
+  wipeAll() {
+    return this._cdpManager.wipeAll(this.id);
   }
 
-  freeCollateral(amount, { promise } = {}) {
-    return this.wipeAndFree(undefined, amount, { promise });
+  freeCollateral(amount) {
+    return this.wipeAndFree(undefined, amount);
   }
 
-  give(address, { promise } = {}) {
-    return this._cdpManager.give(this.id, address, { promise });
+  give(address) {
+    return this._cdpManager.give(this.id, address);
   }
 
-  giveToProxy(address, { promise } = {}) {
-    return this._cdpManager.giveToProxy(this.id, address, { promise });
+  giveToProxy(address) {
+    return this._cdpManager.giveToProxy(this.id, address);
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
