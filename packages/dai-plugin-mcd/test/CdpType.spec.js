@@ -115,21 +115,15 @@ beforeAll(async () => {
 
 test('get system-wide debt', async () => {
   const totalDebt = await service.totalDebtAllCdpTypes;
-  console.log('totalDebt', totalDebt);
+  expect(totalDebt.toNumber()).toBeCloseTo(12)
 });
 
 test('get system-wide collateral value', async () => {
   const totalCollateralValueAllCdpTypes = await service.totalCollateralValueAllCdpTypes;
-  console.log(
-    'totalCollateralValueAllCdpTypes',
-    totalCollateralValueAllCdpTypes
-  );
+  expect(totalCollateralValueAllCdpTypes.toNumber()).toBeCloseTo(60);
 });
 
 test('get system-wide collateralization ratio', async () => {
   const totalCollateralizationRatioAllCdpTypes = await service.totalCollateralizationRatioAllCdpTypes;
-  console.log(
-    'totalCollateralizationRatioAllCdpTypes',
-    totalCollateralizationRatioAllCdpTypes
-  );
+  expect(totalCollateralizationRatioAllCdpTypes.toNumber()).toBeCloseTo(5);
 });

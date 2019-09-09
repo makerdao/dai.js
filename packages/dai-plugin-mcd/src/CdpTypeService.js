@@ -45,7 +45,6 @@ export default class CdpTypeService extends PublicService {
     const debts = this.cdpTypes.map(ilk => {
       return ilk.totalDebt;
     });
-    console.log('debts', debts);
     return debts.reduce((a, b) => a.plus(b));
   }
 
@@ -55,7 +54,6 @@ export default class CdpTypeService extends PublicService {
     const collateralValues = this.cdpTypes.map(ilk => {
       return ilk.totalCollateral.times(ilk.price);
     });
-    console.log('collateralValues', collateralValues);
     return collateralValues.reduce((a, b) => a.plus(b));
   }
 
