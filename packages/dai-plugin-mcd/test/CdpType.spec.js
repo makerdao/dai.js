@@ -103,4 +103,32 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
   test('get ilk id', () => {
     expect(cdpType.ilk).toBe(ilk);
   });
+
 });
+
+  beforeAll(async () => {
+    await Promise.all(service.cdpTypes.map(async cdpType => {
+      await cdpType.prefetch();
+    }));
+  });
+
+  test('get system-wide debt', async () => {
+    const totalDebt = await service.totalDebtAllCdpTypes;
+    console.log('totalDebt', totalDebt);
+  });
+
+  test('get system-wide collateral value', async () => {
+    const totalCollateralValueAllCdpTypes = await service.totalCollateralValueAllCdpTypes;
+    console.log(
+      'totalCollateralValueAllCdpTypes',
+      totalCollateralValueAllCdpTypes
+    );
+  });
+
+  test('get system-wide collateralization ratio', async () => {
+    const totalCollateralizationRatioAllCdpTypes = await service.totalCollateralizationRatioAllCdpTypes;
+    console.log(
+      'totalCollateralizationRatioAllCdpTypes',
+      totalCollateralizationRatioAllCdpTypes
+    );
+  });
