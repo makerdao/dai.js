@@ -41,11 +41,9 @@ export default class CdpTypeService extends PublicService {
   }
 
   async resetAllCdpTypes() {
-    await Promise.all(
-      this.cdpTypes.map(async cdpType => {
-        await this.getCdpType(null, cdpType.ilk).reset();
-      })
-    );
+    this.cdpTypes.map(cdpType => {
+      this.getCdpType(null, cdpType.ilk).reset();
+    });
   }
 
   async prefetchAllCdpTypes() {
@@ -56,8 +54,8 @@ export default class CdpTypeService extends PublicService {
     );
   }
 
-//--system-wide functions
-//these functions should probably be moved to the system data service, but need to resolve circular dependency between cdpTypeService and SystemDataService first
+  //--system-wide functions
+  //these functions should probably be moved to the system data service, but need to resolve circular dependency between cdpTypeService and SystemDataService first
 
   //this should equal the total dai supply as long as we account for all cdpTypes/ilks
   get totalDebtAllCdpTypes() {
