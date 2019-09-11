@@ -115,7 +115,7 @@ beforeAll(async () => {
 
 test('get system-wide debt', async () => {
   const totalDebt = await service.totalDebtAllCdpTypes;
-  expect(totalDebt.toNumber()).toBeCloseTo(12)
+  expect(totalDebt.toNumber()).toBeCloseTo(12);
 });
 
 test('get system-wide collateral value', async () => {

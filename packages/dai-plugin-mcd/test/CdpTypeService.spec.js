@@ -21,3 +21,11 @@ test('getCdpType with too many matches throws an error', () => {
     service.getCdpType(ETH);
   }).toThrowError(/matches more than one cdp type/);
 });
+
+test('prefetch all cdpTypes', async () => {
+  await service.resetAllCdpTypes();
+  await service.prefetchAllCdpTypes();
+  expect(() => {
+    service.totalDebtAllCdpTypes;
+  }).not.toThrowError();
+});
