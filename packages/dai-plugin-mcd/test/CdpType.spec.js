@@ -106,11 +106,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
 });
 
 beforeAll(async () => {
-  await Promise.all(
-    service.cdpTypes.map(async cdpType => {
-      await cdpType.prefetch();
-    })
-  );
+  await service.prefetchAllCdpTypes();
 });
 
 test('get system-wide debt', async () => {
