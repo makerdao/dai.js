@@ -66,7 +66,6 @@ export default class CdpTypeService extends PublicService {
   }
 
   //todo: this should probably be moved to the system data service, but need to resolve circular dependency between cdpTypeService and SystemDataService first
-  //this should equal the total dai supply as long as we account for all cdpTypes/ilks
   get totalCollateralValueAllCdpTypes() {
     const collateralValues = this.cdpTypes.map(ilk => {
       return ilk.totalCollateral.times(ilk.price);
@@ -75,6 +74,9 @@ export default class CdpTypeService extends PublicService {
   }
 
   get totalCollateralizationRatioAllCdpTypes() {
-    return math.collateralizationRatio(this.totalCollateralValueAllCdpTypes, this.totalDebtAllCdpTypes);
+    return math.collateralizationRatio(
+      this.totalCollateralValueAllCdpTypes,
+      this.totalDebtAllCdpTypes
+    );
   }
 }
