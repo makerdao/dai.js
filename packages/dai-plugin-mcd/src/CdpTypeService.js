@@ -3,6 +3,7 @@ import CdpType from './CdpType';
 import { ServiceRoles } from './constants';
 import assert from 'assert';
 const { CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
+import * as math from './math';
 
 export default class CdpTypeService extends PublicService {
   constructor(name = CDP_TYPE) {
@@ -42,9 +43,7 @@ export default class CdpTypeService extends PublicService {
   async resetAllCdpTypes() {
     await Promise.all(
       this.cdpTypes.map(async cdpType => {
-        await this
-          .getCdpType(null, cdpType.ilk)
-          .reset();
+        await this.getCdpType(null, cdpType.ilk).reset();
       })
     );
   }
@@ -52,9 +51,7 @@ export default class CdpTypeService extends PublicService {
   async prefetchAllCdpTypes() {
     await Promise.all(
       this.cdpTypes.map(async cdpType => {
-        await this
-          .getCdpType(null, cdpType.ilk)
-          .prefetch();
+        await this.getCdpType(null, cdpType.ilk).prefetch();
       })
     );
   }
@@ -78,7 +75,6 @@ export default class CdpTypeService extends PublicService {
   }
 
   get totalCollateralizationRatioAllCdpTypes() {
-    if (this.totalDebtAllCdpTypes.toNumber() === 0) return Infinity;
-    return this.totalCollateralValueAllCdpTypes.div(this.totalDebtAllCdpTypes);
+    return math.collateralizationRatio(this.totalCollateralValueAllCdpTypes, this.totalDebtAllCdpTypes);
   }
 }
