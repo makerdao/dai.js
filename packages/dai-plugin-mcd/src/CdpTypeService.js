@@ -48,8 +48,8 @@ export default class CdpTypeService extends PublicService {
 
   async prefetchAllCdpTypes() {
     await Promise.all(
-      this.cdpTypes.map(cdpType => {
-        this.getCdpType(null, cdpType.ilk).prefetch();
+      this.cdpTypes.map(async cdpType => {
+        await this.getCdpType(null, cdpType.ilk).prefetch();
       })
     );
   }

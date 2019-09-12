@@ -23,6 +23,8 @@ test('getCdpType with too many matches throws an error', () => {
 });
 
 test('prefetch all cdpTypes', async () => {
+  service.resetAllCdpTypes();
+  await service.prefetchAllCdpTypes();
   expect(() => {
     service.totalDebtAllCdpTypes;
   }).not.toThrowError();
