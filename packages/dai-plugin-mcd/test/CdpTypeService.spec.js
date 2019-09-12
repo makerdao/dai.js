@@ -6,8 +6,8 @@ let maker, service;
 
 beforeAll(async () => {
   maker = await mcdMaker();
-  jest.setTimeout(8000);
   service = maker.service(ServiceRoles.CDP_TYPE);
+  await service.prefetchAllCdpTypes();
 });
 
 test('getCdpType with no matches throws an error', () => {
@@ -23,8 +23,6 @@ test('getCdpType with too many matches throws an error', () => {
 });
 
 test('prefetch all cdpTypes', async () => {
-  await service.resetAllCdpTypes();
-  await service.prefetchAllCdpTypes();
   expect(() => {
     service.totalDebtAllCdpTypes;
   }).not.toThrowError();

@@ -7,9 +7,9 @@ const { CDP_MANAGER, CDP_TYPE, QUERY_API } = ServiceRoles;
 let maker, service;
 
 beforeAll(async () => {
-  maker = await mcdMaker({ prefetch: false });
+  maker = await mcdMaker({ prefetch: true });
   service = maker.service(CDP_TYPE);
-  jest.setTimeout(8000);
+  await service.prefetchAllCdpTypes();
 });
 
 // these CDP types should be available to the Maker instance because
@@ -105,9 +105,9 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
   });
 });
 
-beforeAll(async () => {
-  await service.prefetchAllCdpTypes();
-});
+// beforeAll(async () => {
+//   await service.prefetchAllCdpTypes();
+// });
 
 test('get system-wide debt', async () => {
   const totalDebt = await service.totalDebtAllCdpTypes;
