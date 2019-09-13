@@ -7,9 +7,9 @@ const { CDP_MANAGER, CDP_TYPE, QUERY_API } = ServiceRoles;
 let maker, service;
 
 beforeAll(async () => {
-  maker = await mcdMaker({ prefetch: true });
+  maker = await mcdMaker();
   service = maker.service(CDP_TYPE);
-  await service.prefetchAllCdpTypes();
+  jest.setTimeout(8000);
 });
 
 // these CDP types should be available to the Maker instance because

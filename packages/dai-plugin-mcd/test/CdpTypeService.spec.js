@@ -7,7 +7,6 @@ let maker, service;
 beforeAll(async () => {
   maker = await mcdMaker();
   service = maker.service(ServiceRoles.CDP_TYPE);
-  await service.prefetchAllCdpTypes();
 });
 
 test('getCdpType with no matches throws an error', () => {
