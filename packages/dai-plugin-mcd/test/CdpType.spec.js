@@ -105,10 +105,6 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
   });
 });
 
-// beforeAll(async () => {
-//   await service.prefetchAllCdpTypes();
-// });
-
 test('get system-wide debt', async () => {
   const totalDebt = await service.totalDebtAllCdpTypes;
   expect(totalDebt.toNumber()).toBeCloseTo(12);
