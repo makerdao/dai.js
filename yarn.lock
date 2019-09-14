@@ -1700,10 +1700,10 @@
     ethers "^4.0.6"
     js-sha3 "^0.8.0"
 
-"@makerdao/testchain@^0.2.12":
-  version "0.2.12"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-0.2.12.tgz#be3b792086e20aebae61bbb994cc1a8dcebfe41d"
-  integrity sha512-fsEzdR9/a3xeYTq06sfcVhbCdkM+E/xr/bJY2azHcixIw6t/I1tu6f1GxQzrwAOQQCtPFxyugQB8tSWTd2M/9g==
+"@makerdao/testchain@^0.2.13":
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-0.2.13.tgz#01782ed6bbbba8034461232e755fed968bdda633"
+  integrity sha512-fEuhLmfUN8j6MXvNJKcnrI8qNtloq5qLaxVCHuWtKzRgEV8+rtn56bCcPGN6dGnS2McAoswOrTT8DwvXviXQCQ==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 

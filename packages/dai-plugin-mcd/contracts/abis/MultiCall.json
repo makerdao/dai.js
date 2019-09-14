@@ -1,1 +1,1 @@
-[{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"aggregate","outputs":[{"name":"","type":"bytes"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]
+[{"constant":false,"inputs":[{"internalType":"bytes","name":"data","type":"bytes"}],"name":"aggregate","outputs":[{"internalType":"bytes","name":"","type":"bytes"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]
