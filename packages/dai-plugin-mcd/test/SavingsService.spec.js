@@ -93,8 +93,6 @@ describe('Savings Service', () => {
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
 
     const potTotalAfterTime = await service.getTotalDai();
-      console.log('potTotalAfterTime.toNumber()', potTotalAfterTime.toNumber());
-    console.log('joinAmount + accruedInterest', joinAmount + accruedInterest);
     expect(potTotalAfterTime.toNumber()).toBeCloseTo(
       joinAmount + accruedInterest,
       10
@@ -137,8 +135,6 @@ describe('Savings Service', () => {
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
 
     const balanceAfterTime = await service.balanceOf(proxyAddress);
-          console.log('balanceAfterTime.toNumber()', balanceAfterTime.toNumber());
-    console.log('joinAmount + accruedInterest', joinAmount + accruedInterest);
     expect(balanceAfterTime.toNumber()).toBeCloseTo(
       joinAmount + accruedInterest,
       10
@@ -174,9 +170,8 @@ describe('Savings Service', () => {
       chi1,
       chi2
     );
+
     const balanceAfterTime = await service.balanceOf(otherProxyAddress);
-                  console.log('balanceAfterTime.toNumber()', balanceAfterTime.toNumber());
-    console.log('otherAccountJoinAmount + accruedInterest', otherAccountJoinAmount + accruedInterest);
     expect(balanceAfterTime.toNumber()).toBeCloseTo(
       otherAccountJoinAmount + accruedInterest,
       10
@@ -209,8 +204,6 @@ describe('Savings Service', () => {
     await service.join(MDAI(joinAmount));
 
     const amountAfterJoin = await service.balance();
-    console.log('amountAfterJoin.toNumber()', amountAfterJoin.toNumber());
-    console.log('amountBeforeJoin + joinAmount', amountBeforeJoin + joinAmount);
     expect(amountAfterJoin.toNumber()).toBeCloseTo(
       amountBeforeJoin + joinAmount,
       10
@@ -225,9 +218,7 @@ describe('Savings Service', () => {
     await service.exit(MDAI(joinAmount));
 
     const amountAfterExit = await service.balance();
-    console.log('amountAfterExit.toNumber()', amountAfterExit.toNumber());
-    console.log('accruedInterest', accruedInterest);
-    expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 9);
+    expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 10);
 
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBe(startingBalance);
@@ -249,8 +240,6 @@ describe('Savings Service', () => {
     expect(amountAfterExit.toNumber()).toBe(0);
 
     const endingBalance = (await dai.balance()).toNumber();
-    console.log('endingBalance', endingBalance);
-    console.log('startingBalance + accruedInterest', startingBalance + accruedInterest);
     expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 10);
   });
 });
