@@ -126,8 +126,17 @@ export default class ManagedCdp {
     return this._cdpManager.wipe(this.id, amount);
   }
 
+  unsafeWipe(amount) {
+    amount = castAsCurrency(amount, MDAI);
+    return this._cdpManager.unsafeWipe(this.id, amount);
+  }
+
   wipeAll() {
     return this._cdpManager.wipeAll(this.id);
+  }
+
+  unsafeWipeAll() {
+    return this._cdpManager.unsafeWipeAll(this.id);
   }
 
   freeCollateral(amount) {

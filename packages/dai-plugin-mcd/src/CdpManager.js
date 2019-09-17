@@ -214,8 +214,31 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
+  unsafeWipe(id, wipeAmount, { promise }) {
+    return this.proxyActions.wipe(
+      ...[
+        this._managerAddress,
+        this._adapterAddress('DAI'),
+        this.getIdBytes(id),
+        wipeAmount.toFixed('wei'),
+        { dsProxy: true, promise }
+      ].filter(x => x)
+    );
+  }
+
+  @tracksTransactions
   wipeAll(id, { promise } = {}) {
     return this.proxyActions.safeWipeAll(
+      this._managerAddress,
+      this._adapterAddress('DAI'),
+      this.getIdBytes(id),
+      { dsProxy: true, promise }
+    );
+  }
+
+  @tracksTransactions
+  unsafeWipeAll(id, { promise } = {}) {
+    return this.proxyActions.wipeAll(
       this._managerAddress,
       this._adapterAddress('DAI'),
       this.getIdBytes(id),

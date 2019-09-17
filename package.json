@@ -21,7 +21,8 @@
   "lint-staged": {
     "./packages/**/{src,web,test,contracts}/**/*.js": [
       "prettier --single-quote --write",
-      "eslint"
+      "eslint",
+      "git add"
     ]
   },
   "workspaces": [
