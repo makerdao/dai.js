@@ -105,17 +105,16 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
   });
 });
 
-test('get system-wide debt', async () => {
-  const totalDebt = await service.totalDebtAllCdpTypes;
-  expect(totalDebt.toNumber()).toBeCloseTo(12);
+test('get system-wide debt', () => {
+  expect(service.totalDebtAllCdpTypes.toNumber()).toBeCloseTo(12);
 });
 
-test('get system-wide collateral value', async () => {
-  const totalCollateralValueAllCdpTypes = await service.totalCollateralValueAllCdpTypes;
-  expect(totalCollateralValueAllCdpTypes.toNumber()).toBeCloseTo(60);
+test('get system-wide collateral value', () => {
+  expect(service.totalCollateralValueAllCdpTypes.toNumber()).toBeCloseTo(60);
 });
 
 test('get system-wide collateralization ratio', async () => {
-  const totalCollateralizationRatioAllCdpTypes = await service.totalCollateralizationRatioAllCdpTypes;
-  expect(totalCollateralizationRatioAllCdpTypes.toNumber()).toBeCloseTo(5);
+  expect(service.totalCollateralizationRatioAllCdpTypes.toNumber()).toBeCloseTo(
+    5
+  );
 });
