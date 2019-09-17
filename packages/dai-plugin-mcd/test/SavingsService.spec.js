@@ -218,7 +218,7 @@ describe('Savings Service', () => {
     await service.exit(MDAI(joinAmount));
 
     const amountAfterExit = await service.balance();
-    expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 10);
+    expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 8);
 
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBe(startingBalance);
@@ -240,6 +240,6 @@ describe('Savings Service', () => {
     expect(amountAfterExit.toNumber()).toBe(0);
 
     const endingBalance = (await dai.balance()).toNumber();
-    expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 10);
+    expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 8);
   });
 });
