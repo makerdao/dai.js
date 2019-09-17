@@ -90,7 +90,7 @@ test('ether transfer should move transferValue from sender to receiver', done =>
       // sender also pays tx fee, so their balance is lower
       expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
         senderBalance.toNumber(),
-        3
+        2
       );
       done();
     });
@@ -128,7 +128,7 @@ test('ether transferFrom should move transferValue from sender to receiver', don
       // sender also pays tx fee, so their balance is lower
       expect(newSenderBalance.plus(0.1).toNumber()).toBeCloseTo(
         senderBalance.toNumber(),
-        3
+        2
       );
       done();
     });
