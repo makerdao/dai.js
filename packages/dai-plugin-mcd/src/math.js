@@ -62,7 +62,7 @@ export function debtValue(art, rate) {
 }
 
 export function collateralizationRatio(collateralValue, debtValue) {
-  return debtValue.eq(0) ? Infinity : collateralValue.div(debtValue);
+  return debtValue.eq(0) ? Infinity : collateralValue.div(debtValue).toNumber();
 }
 
 export function liquidationPrice(
