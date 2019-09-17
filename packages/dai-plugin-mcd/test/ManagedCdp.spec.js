@@ -87,7 +87,8 @@ async function expectValues(
     }
   }
   if (myDai !== undefined) {
-    expect(await dai.balance()).toEqual(myDai);
+    const balance = await dai.balance();
+    expect(balance.toNumber()).toBeCloseTo(myDai.toNumber());
   }
   if (collateralValue !== undefined) {
     const minVal = cdp.debtValue
@@ -341,5 +342,40 @@ describe.each([
     const newCdpOwner = await cdp.getOwner();
     const newProxyOwner = await maker.service('proxy').getOwner(newCdpOwner);
     expect(newProxyOwner.toLowerCase()).toBe(newAddress);
+  });
+
+  test('openLockAndDraw, unsafeWipe', async () => {
+    const txStates = ['pending', 'mined', 'confirmed'];
+    const mgr = maker.service(CDP_MANAGER);
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+
+    const unsafeWipe = cdp.unsafeWipe(MDAI(1));
+    const unsafeWipeHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toEqual(expect.stringContaining('wipe'));
+      expect(state).toBe(txStates[unsafeWipeHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(unsafeWipe, unsafeWipeHandler);
+    await unsafeWipe;
+    expect(unsafeWipeHandler.mock.calls.length).toBe(2);
+  });
+
+  test('openLockAndDraw, unsafeWipeAll', async () => {
+    const txStates = ['pending', 'mined', 'confirmed'];
+    const mgr = maker.service(CDP_MANAGER);
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+
+    const unsafeWipeAll = cdp.unsafeWipeAll();
+    const unsafeWipeAllHandler = jest.fn((tx, state) => {
+      expect(tx.metadata.method).toBe('wipeAll');
+      expect(state).toBe(txStates[unsafeWipeAllHandler.mock.calls.length - 1]);
+    });
+    txMgr.listen(unsafeWipeAll, unsafeWipeAllHandler);
+    await unsafeWipeAll;
+    expect(unsafeWipeAllHandler.mock.calls.length).toBe(2);
+
+    await expectValuesAfterReset(cdp, {
+      debt: 0,
+      myDai: startingDaiBalance
+    });
   });
 });
