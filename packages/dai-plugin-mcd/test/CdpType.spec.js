@@ -117,5 +117,5 @@ test('get system-wide collateral value', async () => {
 
 test('get system-wide collateralization ratio', async () => {
   const totalCollateralizationRatioAllCdpTypes = await service.totalCollateralizationRatioAllCdpTypes;
-  expect(totalCollateralizationRatioAllCdpTypes).toBeCloseTo(5);
+  expect(totalCollateralizationRatioAllCdpTypes.toNumber()).toBeCloseTo(5);
 });

@@ -101,7 +101,7 @@ async function expectValues(
     );
   }
   if (ratio !== undefined) {
-    expect(cdp.collateralizationRatio).toBe(ratio);
+    expect(cdp.collateralizationRatio.toNumber()).toBe(ratio);
   }
   if (isSafe !== undefined) {
     expect(cdp.isSafe).toBe(isSafe);
