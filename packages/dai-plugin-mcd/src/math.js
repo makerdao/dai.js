@@ -62,7 +62,11 @@ export function debtValue(art, rate) {
 }
 
 export function collateralizationRatio(collateralValue, debtValue) {
-  return debtValue.eq(0) ? Infinity : collateralValue.div(debtValue);
+  if (debtValue.eq(0)) {
+    const ratio = createCurrencyRatio(USD, MDAI);
+    return ratio(Infinity);
+  }
+  return collateralValue.div(debtValue);
 }
 
 export function liquidationPrice(
