@@ -3,6 +3,7 @@ import { ServiceRoles } from './constants';
 import { MDAI } from './index';
 import BigNumber from 'bignumber.js';
 import { RAY, RAD, WAD, SECONDS_PER_YEAR } from './constants';
+import tracksTransactions from './utils/tracksTransactions';
 
 export default class SavingsService extends PublicService {
   constructor(name = ServiceRoles.SAVINGS) {
@@ -14,35 +15,38 @@ export default class SavingsService extends PublicService {
     ]);
   }
 
-  async join(amountInDai) {
+  @tracksTransactions
+  async join(amountInDai, { promise }) {
     await this.get('proxy').ensureProxy();
 
     return this._proxyActions.dsrJoin(
       this._daiAdapterAddress,
       this._pot.address,
       amountInDai.toFixed('wei'),
-      { dsProxy: true }
+      { dsProxy: true, promise }
     );
   }
 
-  async exit(amountInDai) {
+  @tracksTransactions
+  async exit(amountInDai, { promise }) {
     await this.get('proxy').ensureProxy();
 
     return this._proxyActions.dsrExit(
       this._daiAdapterAddress,
       this._pot.address,
       amountInDai.toFixed('wei'),
-      { dsProxy: true }
+      { dsProxy: true, promise }
     );
   }
 
-  async exitAll() {
+  @tracksTransactions
+  async exitAll({ promise }) {
     await this.get('proxy').ensureProxy();
 
     return this._proxyActions.dsrExitAll(
       this._daiAdapterAddress,
       this._pot.address,
-      { dsProxy: true }
+      { dsProxy: true, promise }
     );
   }
 
