@@ -47,8 +47,9 @@ test('liquidationPrice and collateralizationRatio are infinite with 0 collateral
   const cdp = await maker.service(CDP_MANAGER).open('REP-A');
   await cdp.prefetch();
   const ratio = createCurrencyRatio(USD, REP);
+  const ratio2 = createCurrencyRatio(USD, MDAI);
   expect(cdp.liquidationPrice).toEqual(ratio(Infinity));
-  expect(cdp.collateralizationRatio).toEqual(Infinity);
+  expect(cdp.collateralizationRatio).toEqual(ratio2(Infinity));
 });
 
 async function expectValuesAfterReset(cdp, values) {
