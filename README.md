@@ -26,8 +26,8 @@ yarn test:integration
 yarn test:build
 ```
 
-### Test coverage
+Run `yarn coverage` to generate a test coverage report.
 
-```
-yarn coverage
-```
+### Creating a UMD build
+
+See [packages/dai/README.md](https://github.com/makerdao/dai.js/blob/dev/packages/dai/README.md#commands) for instructions.
