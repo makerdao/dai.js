@@ -39,8 +39,6 @@ function expectFrobEvents(events) {
       !!event.tx.transactionHash &&
       !!event.tx.txFrom &&
       !!event.tx.era.iso &&
-      !!event.urn.nodes[0].art &&
-      !!event.urn.nodes[0].ink &&
       !!event.ilkIdentifier
   ).toBe(true);
   expect(new Date(events[0].tx.era.iso) > new Date(events[1].tx.era.iso)).toBe(
@@ -48,7 +46,7 @@ function expectFrobEvents(events) {
   );
 }
 
-//these are ilks  and urns that correspond to frobEvets in the current vdb data generator and remove kovan vdb instance
+//these are ilks  and urns that correspond to frobEvets in the current vdb data generator and remote kovan vdb instance
 const frobParams = {
   test: [
     {
@@ -62,12 +60,12 @@ const frobParams = {
   ],
   kovan: [
     {
-      urn: '0xE034c5D04892F95F738AEc00B80C2679B304fC22',
-      ilk: 'REP-A'
+      urn: '0xAE21412A422279B72aA8641a3D5F1da4BF6cfD30',
+      ilk: 'ETH-A'
     },
     {
-      urn: '0x4E95F961BafFe16cF222D329cE5D9dc45aD9086d',
-      ilk: 'REP-A'
+      urn: '0xB8de18329DAcA5c712a341596a66483366E3E3F6',
+      ilk: 'ETH-A'
     }
   ]
 };
