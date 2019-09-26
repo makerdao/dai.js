@@ -25,17 +25,17 @@ beforeAll(async () => {
 //this test currently uses the kovan server since the price data is not in the local vulcanize db yet
 test('getPriceHistoryForPip for ETH', async () => {
   const prices = await service.getPriceHistoryForPip(
-    '0x8C73Ec0fBCdEC6b8C060BC224D94740FD41f3774'
+    '0x75dd74e8afe8110c8320ed397cccff3b8134d981'
   );
   expect(!!prices[0].val && !!prices[0].blockNumber).toBe(true);
-});
+}, 10000);
 
 function expectFrobEvents(events) {
   const event = events[0];
   expect(
     !!event.dart &&
       !!event.dink &&
-      !!event.ilk.rate &&
+      !!event.ilkRate &&
       !!event.tx.transactionHash &&
       !!event.tx.txFrom &&
       !!event.tx.era.iso &&
@@ -76,11 +76,11 @@ test('getCdpEventsForIlkAndUrn', async () => {
     frobParams[process.env.NETWORK][0].urn
   );
   expectFrobEvents(events);
-});
+}, 10000);
 
 test('getCdpEventsForArrayOfIlksAndUrns', async () => {
   const events = await service.getCdpEventsForArrayOfIlksAndUrns(
     frobParams[process.env.NETWORK]
   );
   expectFrobEvents(events);
-});
+}, 10000);

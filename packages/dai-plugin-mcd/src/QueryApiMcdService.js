@@ -27,7 +27,7 @@ export default class QueryApi extends PublicService {
 
   _buildFrobsQuery(ilk, urn) {
     return `
-      urnFrobs(ilkIdentifier: "${ilk}", urnGuy: "${urn}") {
+      urnFrobs(ilkIdentifier: "${ilk}", urnIdentifier: "${urn}") {
         nodes {
           dart
           dink
