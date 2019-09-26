@@ -5,7 +5,7 @@ export function dummyEventData(ilkIdentifier) {
     {
       dart: '-6000000000000000000',
       dink: '0',
-      ilk: { rate: '2000000000000000000000000000' },
+      ilkRate: '2000000000000000000000000000',
       tx: {
         transactionHash:
           '0xbe023a205453b833e65bf29063de8b8b3bd44d2e68c9c079f681ec46a765a63f',
@@ -26,12 +26,10 @@ export function formattedDummyEventData(GEM, ilk) {
       transactionHash:
         '0xbe023a205453b833e65bf29063de8b8b3bd44d2e68c9c079f681ec46a765a63f',
       changeInCollateral: GEM(0),
-      changeInDebt: MDAI(12),
+      changeInDai: MDAI(12),
       daiAction: 'wipe',
       time: new Date('1970-01-01T00:01:20'),
       senderAddress: '0x1ad35418e7b7c5746ea42295a1100480a810256a',
-      resultingCollateral: GEM(5.33619021597704),
-      resultingDebt: MDAI(6.84919174870238),
       ilk
     }
   ];
