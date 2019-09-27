@@ -168,8 +168,8 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this._adapterAddress(ilk),
       id,
-      owner,
       !isEth && lockAmount.toFixed(this._precision(lockAmount)),
+      owner,
       {
         dsProxy: true,
         value: isEth ? lockAmount.toFixed('wei') : 0,
@@ -180,7 +180,7 @@ export default class CdpManager extends LocalService {
     // Transfers to bag if locking GNT in existing CDP
     if (id && isGnt) await transferToBag(lockAmount, proxyAddress, this);
     // Indicates if gem supports transferFrom
-    if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
+    if (!isEth) args.splice(-2, 0, !GNT.isInstance(lockAmount));
 
     return this.proxyActions[method](...args);
   }

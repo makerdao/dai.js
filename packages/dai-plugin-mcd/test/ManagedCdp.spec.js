@@ -119,12 +119,12 @@ describe.each([
     'ETH-A',
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
+  ],
+  [
+    'REP-A',
+    REP,
+    async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
   ]
-  // [
-  //   'REP-A',
-  //   REP,
-  //   async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
-  // ],
   // [
   //   'GNT-A',
   //   GNT,
@@ -174,7 +174,7 @@ describe.each([
     expect(await cdp.getOwner()).toBe(proxy);
   });
 
-  test('openLock, lock, lockAndDraw, free', async () => {
+  test.only('openLock, lock, lockAndDraw, free', async () => {
     const cdp = await maker.service(CDP_MANAGER).openLockAndDraw(ilk, GEM(1));
     await expectValues(cdp, {
       collateral: 1,
