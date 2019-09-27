@@ -19,7 +19,7 @@ export default class SavingsService extends PublicService {
   async join(amountInDai, { promise }) {
     await this.get('proxy').ensureProxy();
 
-    return this._proxyActions.dsrJoin(
+    return this._proxyActions.join(
       this._daiAdapterAddress,
       this._pot.address,
       amountInDai.toFixed('wei'),
@@ -31,7 +31,7 @@ export default class SavingsService extends PublicService {
   async exit(amountInDai, { promise }) {
     await this.get('proxy').ensureProxy();
 
-    return this._proxyActions.dsrExit(
+    return this._proxyActions.exit(
       this._daiAdapterAddress,
       this._pot.address,
       amountInDai.toFixed('wei'),
@@ -43,7 +43,7 @@ export default class SavingsService extends PublicService {
   async exitAll({ promise }) {
     await this.get('proxy').ensureProxy();
 
-    return this._proxyActions.dsrExitAll(
+    return this._proxyActions.exitAll(
       this._daiAdapterAddress,
       this._pot.address,
       { dsProxy: true, promise }
@@ -89,7 +89,7 @@ export default class SavingsService extends PublicService {
   }
 
   get _proxyActions() {
-    return this.get('smartContract').getContract('PROXY_ACTIONS');
+    return this.get('smartContract').getContract('PROXY_ACTIONS_DSR');
   }
 
   get _pot() {
