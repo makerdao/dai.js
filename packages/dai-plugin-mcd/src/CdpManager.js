@@ -158,9 +158,9 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async lock(id, ilk, lockAmount, { promise }) {
+  async lock(id, ilk, lockAmount, owner, { promise }) {
+    owner = await owner;
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
-    console.log(proxyAddress);
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
     const method = `safeLock${isEth ? 'ETH' : 'Gem'}`;
@@ -168,7 +168,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this._adapterAddress(ilk),
       id,
-      proxyAddress,
+      owner,
       !isEth && lockAmount.toFixed(this._precision(lockAmount)),
       {
         dsProxy: true,
@@ -203,13 +203,15 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  wipe(id, wipeAmount, { promise }) {
+  async wipe(id, wipeAmount, owner, { promise }) {
+    owner = await owner;
     return this.proxyActions.safeWipe(
       ...[
         this._managerAddress,
         this._adapterAddress('DAI'),
         this.getIdBytes(id),
         wipeAmount.toFixed('wei'),
+        owner,
         { dsProxy: true, promise }
       ].filter(x => x)
     );
@@ -229,11 +231,13 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  wipeAll(id, { promise } = {}) {
+  async wipeAll(id, owner, { promise } = {}) {
+    owner = await owner;
     return this.proxyActions.safeWipeAll(
       this._managerAddress,
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
+      owner,
       { dsProxy: true, promise }
     );
   }
