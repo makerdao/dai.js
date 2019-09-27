@@ -8,8 +8,8 @@ let maker, migration, cdpManager, smartContract, snapshot;
 
 function joinSavings(amountInDai) {
   return smartContract
-    .getContract('PROXY_ACTIONS')
-    .dsrJoin(
+    .getContract('PROXY_ACTIONS_DSR')
+    .join(
       smartContract.getContractAddress('MCD_JOIN_DAI'),
       smartContract.getContractAddress('MCD_POT'),
       amountInDai.toFixed('wei'),
