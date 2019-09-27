@@ -119,27 +119,27 @@ describe.each([
     'ETH-A',
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
-  ],
-  [
-    'REP-A',
-    REP,
-    async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'GNT-A',
-    GNT,
-    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'OMG-A',
-    OMG,
-    async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'DGD-A',
-    DGD,
-    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
   ]
+  // [
+  //   'REP-A',
+  //   REP,
+  //   async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'GNT-A',
+  //   GNT,
+  //   async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'OMG-A',
+  //   OMG,
+  //   async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'DGD-A',
+  //   DGD,
+  //   async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
+  // ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
 
