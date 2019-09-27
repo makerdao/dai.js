@@ -7,6 +7,7 @@ code on commit.
 
 ```
 yarn
+curl https://dapp.tools/install | sh // Installs dapptools
 yarn lerna bootstrap // Installs dependencies & links all local dependencies together
 yarn build // builds each plugin for local use
 ```
