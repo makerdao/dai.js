@@ -160,6 +160,7 @@ export default class CdpManager extends LocalService {
   @tracksTransactions
   async lock(id, ilk, lockAmount, { promise }) {
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
+    console.log(proxyAddress);
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
     const method = `safeLock${isEth ? 'ETH' : 'Gem'}`;
@@ -167,6 +168,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this._adapterAddress(ilk),
       id,
+      proxyAddress,
       !isEth && lockAmount.toFixed(this._precision(lockAmount)),
       {
         dsProxy: true,
