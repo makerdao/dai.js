@@ -33,5 +33,6 @@
   "MCD_VOW": "Vow",
   "MULTICALL": "MultiCall",
   "PIP_*": "DSValue",
-  "PROXY_ACTIONS": "DssProxyActions"
+  "PROXY_ACTIONS": "DssProxyActions",
+  "PROXY_ACTIONS_DSR": "DssProxyActionsDsr"
 }
