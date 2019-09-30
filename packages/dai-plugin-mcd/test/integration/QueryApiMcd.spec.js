@@ -22,10 +22,9 @@ beforeAll(async () => {
   service = maker.service(ServiceRoles.QUERY_API);
 });
 
-//this test currently uses the kovan server since the price data is not in the local vulcanize db yet
 test('getPriceHistoryForPip for ETH', async () => {
   const prices = await service.getPriceHistoryForPip(
-    '0x8C73Ec0fBCdEC6b8C060BC224D94740FD41f3774'
+    '0x75dd74e8afe8110c8320ed397cccff3b8134d981'
   );
   expect(!!prices[0].val && !!prices[0].blockNumber).toBe(true);
 });
@@ -35,12 +34,10 @@ function expectFrobEvents(events) {
   expect(
     !!event.dart &&
       !!event.dink &&
-      !!event.ilk.rate &&
+      !!event.ilkRate &&
       !!event.tx.transactionHash &&
       !!event.tx.txFrom &&
       !!event.tx.era.iso &&
-      !!event.urn.nodes[0].art &&
-      !!event.urn.nodes[0].ink &&
       !!event.ilkIdentifier
   ).toBe(true);
   expect(new Date(events[0].tx.era.iso) > new Date(events[1].tx.era.iso)).toBe(
@@ -48,7 +45,7 @@ function expectFrobEvents(events) {
   );
 }
 
-//these are ilks  and urns that correspond to frobEvets in the current vdb data generator and remove kovan vdb instance
+//these are ilks  and urns that correspond to frobEvets in the current vdb data generator and remote kovan vdb instance
 const frobParams = {
   test: [
     {
@@ -62,12 +59,12 @@ const frobParams = {
   ],
   kovan: [
     {
-      urn: '0xE034c5D04892F95F738AEc00B80C2679B304fC22',
-      ilk: 'REP-A'
+      urn: '0xAE21412A422279B72aA8641a3D5F1da4BF6cfD30',
+      ilk: 'ETH-A'
     },
     {
-      urn: '0x4E95F961BafFe16cF222D329cE5D9dc45aD9086d',
-      ilk: 'REP-A'
+      urn: '0xB8de18329DAcA5c712a341596a66483366E3E3F6',
+      ilk: 'ETH-A'
     }
   ]
 };

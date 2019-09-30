@@ -4,7 +4,8 @@ import { TESTNET_ID } from '@makerdao/dai/dist/contracts/networks';
 import { getQueryResponse } from '@makerdao/dai/dist/src/QueryApi';
 
 const LOCAL_URL = 'http://localhost:5000/graphql';
-const KOVAN_SERVER_URL = 'http://vdb0-testing.vulcanize.io:5000/graphql';
+const KOVAN_SERVER_URL =
+  'https://cors-anywhere.herokuapp.com/http://vdb0.20c.com:5000/graphql';
 
 export default class QueryApi extends PublicService {
   constructor(name = ServiceRoles.QUERY_API) {
@@ -27,24 +28,16 @@ export default class QueryApi extends PublicService {
 
   _buildFrobsQuery(ilk, urn) {
     return `
-      urnFrobs(ilkIdentifier: "${ilk}", urnGuy: "${urn}") {
+      urnFrobs(ilkIdentifier: "${ilk}", urnIdentifier: "${urn}") {
         nodes {
           dart
           dink
-          ilk {
-            rate
-          }
+          ilkRate
           tx {
             transactionHash
             txFrom
             era {
               iso
-            }
-          }
-          urn {
-            nodes {
-              art
-              ink
             }
           }
           ilkIdentifier
