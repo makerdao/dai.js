@@ -18,3 +18,8 @@ test('get system-wide debt ceiling', async () => {
   const ceiling = await service.getSystemWideDebtCeiling();
   expect(ceiling).toBe(1000000);
 });
+
+test('get global settlement status', async () => {
+  const cage = await service.isGlobalSettlementInvoked();
+  expect(cage).toBe(false);
+});
