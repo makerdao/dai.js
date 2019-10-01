@@ -1,4 +1,4 @@
-import { RAY } from './constants';
+import { WAD } from './constants';
 import BigNumber from 'bignumber.js';
 import { MDAI } from './index';
 
@@ -34,7 +34,7 @@ export default class Auction {
     // the contract's BigNumber implementation (bn.js) doesn't support decimals,
     // so we use bignumber.js instead
     return new BigNumber(beg)
-      .div(RAY)
+      .div(WAD)
       .minus(1)
       .toNumber();
   }
