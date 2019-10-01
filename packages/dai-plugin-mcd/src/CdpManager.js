@@ -307,33 +307,33 @@ export default class CdpManager extends LocalService {
       const ilk = e.ilkIdentifier;
       const currency = this.get(CDP_TYPE).getCdpType(null, ilk).currency;
       const transactionHash = e.tx.transactionHash;
-      const rate = new BigNumber(e.ilk.rate.toString()).dividedBy(RAY);
+      const rate = new BigNumber(e.ilkRate.toString()).dividedBy(RAY);
       const changeInCollateral = currency.wei(Math.abs(e.dink));
       let collateralAction;
       if (parseInt(e.dink) !== 0) {
         collateralAction = parseInt(e.dink) > 0 ? 'lock' : 'free';
       }
       const dart = MDAI.wei(Math.abs(e.dart));
-      const changeInDebt = dart.times(rate);
+      const changeInDai = dart.times(rate);
       let daiAction;
       if (parseInt(e.dart) !== 0) {
         daiAction = parseInt(e.dart) > 0 ? 'draw' : 'wipe';
       }
       const time = new Date(e.tx.era.iso);
       const senderAddress = e.tx.txFrom;
-      const resultingCollateral = currency.wei(e.urn.nodes[0].ink);
-      const resultingDebt = MDAI.wei(e.urn.nodes[0].art);
+      //const resultingCollateral = currency.wei(e.urn.nodes[0].ink);
+      //const resultingDebt = MDAI.wei(e.urn.nodes[0].art);
       return {
         transactionHash,
         changeInCollateral,
         collateralAction,
-        changeInDebt,
+        changeInDai,
         daiAction,
         ilk,
         time,
-        senderAddress,
-        resultingCollateral,
-        resultingDebt
+        senderAddress
+        //resultingCollateral,
+        //resultingDebt
       };
     });
   }

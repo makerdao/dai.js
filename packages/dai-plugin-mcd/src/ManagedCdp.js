@@ -79,7 +79,7 @@ export default class ManagedCdp {
     const urn = await this.getUrn();
     const events = await this._cdpManager
       .get(ServiceRoles.QUERY_API)
-      .getCdpEventsForIlkAndUrn(stringToBytes(this.ilk), urn);
+      .getCdpEventsForIlkAndUrn(this.ilk, urn);
     return this._cdpManager.parseFrobEvents(
       events,
       this._cdpManager.get(ServiceRoles.CDP_TYPE)

@@ -26,6 +26,13 @@ export default class SystemDataService extends PublicService {
     return this.get('smartContract').getContractAddress(key);
   }
 
+  async isGlobalSettlementInvoked() {
+    const live = await this.get('smartContract')
+      .getContract('MCD_END')
+      .live();
+    return live.eq(0);
+  }
+
   // Helpers ----------------------------------------------
 
   get cat() {
