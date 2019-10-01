@@ -96,8 +96,7 @@ export default class ManagedCdp {
   // expectValuesAfterReset in more places
   lockCollateral(amount) {
     amount = castAsCurrency(amount, this.currency);
-    const owner = this.getOwner();
-    return this._cdpManager.lock(this.id, this.ilk, amount, owner);
+    return this._cdpManager.lock(this.id, this.ilk, amount, this.getOwner());
   }
 
   drawDai(amount) {
@@ -124,8 +123,7 @@ export default class ManagedCdp {
 
   wipeDai(amount) {
     amount = castAsCurrency(amount, MDAI);
-    const owner = this.getOwner();
-    return this._cdpManager.wipe(this.id, amount, owner);
+    return this._cdpManager.wipe(this.id, amount, this.getOwner());
   }
 
   unsafeWipe(amount) {
@@ -134,8 +132,7 @@ export default class ManagedCdp {
   }
 
   wipeAll() {
-    const owner = this.getOwner();
-    return this._cdpManager.wipeAll(this.id, owner);
+    return this._cdpManager.wipeAll(this.id, this.getOwner());
   }
 
   unsafeWipeAll() {
