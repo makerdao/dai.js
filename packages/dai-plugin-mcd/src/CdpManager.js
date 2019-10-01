@@ -158,7 +158,8 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async lock(id, ilk, lockAmount, { promise }) {
+  async lock(id, ilk, lockAmount, owner, { promise }) {
+    owner = await owner;
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
@@ -168,6 +169,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress(ilk),
       id,
       !isEth && lockAmount.toFixed(this._precision(lockAmount)),
+      owner,
       {
         dsProxy: true,
         value: isEth ? lockAmount.toFixed('wei') : 0,
@@ -178,7 +180,7 @@ export default class CdpManager extends LocalService {
     // Transfers to bag if locking GNT in existing CDP
     if (id && isGnt) await transferToBag(lockAmount, proxyAddress, this);
     // Indicates if gem supports transferFrom
-    if (!isEth) args.splice(-1, 0, !GNT.isInstance(lockAmount));
+    if (!isEth) args.splice(-2, 0, !GNT.isInstance(lockAmount));
 
     return this.proxyActions[method](...args);
   }
@@ -201,13 +203,15 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  wipe(id, wipeAmount, { promise }) {
+  async wipe(id, wipeAmount, owner, { promise }) {
+    owner = await owner;
     return this.proxyActions.safeWipe(
       ...[
         this._managerAddress,
         this._adapterAddress('DAI'),
         this.getIdBytes(id),
         wipeAmount.toFixed('wei'),
+        owner,
         { dsProxy: true, promise }
       ].filter(x => x)
     );
@@ -227,11 +231,13 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  wipeAll(id, { promise } = {}) {
+  async wipeAll(id, owner, { promise } = {}) {
+    owner = await owner;
     return this.proxyActions.safeWipeAll(
       this._managerAddress,
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
+      owner,
       { dsProxy: true, promise }
     );
   }

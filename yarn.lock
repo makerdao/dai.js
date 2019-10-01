@@ -1691,19 +1691,20 @@
     babel-runtime "^6.26.0"
     bignumber.js "^8.1.1"
 
-"@makerdao/multicall@^0.7.0":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.7.1.tgz#b15cc00b792608b92b20425cc1c889c94c64cc66"
-  integrity sha512-CSGLCSLkqpqZcyQuAOlCh3+ZE5IYS0vbN+FawlIs9Yod9uHcHn1sCvnEhlhVbRDfZqdx1upKe/ifraM1Dw+riQ==
+"@makerdao/multicall@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.8.0.tgz#c2347b52940b79d303a324b4eef8c04a5f79d0af"
+  integrity sha512-I754RF+1LTsUVpkaYjDBQO4IJqDP2XxriCTYClARVJ7GzbPvXpQcD0EdTLPx5kDAW9OYHPtYsjSr2pOx2Bh51g==
   dependencies:
     cross-fetch "^3.0.1"
-    ethers "^4.0.6"
+    ethers "^4.0.27"
     js-sha3 "^0.8.0"
+    lodash "^4.17.11"
 
-"@makerdao/testchain@^0.2.13":
-  version "0.2.13"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-0.2.13.tgz#01782ed6bbbba8034461232e755fed968bdda633"
-  integrity sha512-fEuhLmfUN8j6MXvNJKcnrI8qNtloq5qLaxVCHuWtKzRgEV8+rtn56bCcPGN6dGnS2McAoswOrTT8DwvXviXQCQ==
+"@makerdao/testchain@^0.2.14":
+  version "0.2.14"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-0.2.14.tgz#c496c80e54ff4e90d6c9fc3c1685bdadf4820661"
+  integrity sha512-9RO5rvWa/1XoXTZ/PH+oYVnu+Pq+DsEi9Pz/GxZE7aQuYOj1oGaYVIkSGw9qYWJLNqfo+DXvTfytbG30vUhfZw==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 
@@ -5028,10 +5029,10 @@ ethers@^3.0.15:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
-ethers@^4.0.6:
-  version "4.0.33"
-  resolved "https://registry.yarnpkg.com/ethers/-/ethers-4.0.33.tgz#f7b88d2419d731a39aefc37843a3f293e396f918"
-  integrity sha512-lAHkSPzBe0Vj+JrhmkEHLtUEKEheVktIjGDyE9gbzF4zf1vibjYgB57LraDHu4/ItqWVkztgsm8GWqcDMN+6vQ==
+ethers@^4.0.27:
+  version "4.0.37"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-4.0.37.tgz#dfa70d59498663878c5e4a977d14356660ca5b90"
+  integrity sha512-B7bDdyQ45A5lPr6k2HOkEKMtYOuqlfy+nNf8glnRvWidkDQnToKw1bv7UyrwlbsIgY2mE03UxTVtouXcT6Vvcw==
   dependencies:
     "@types/node" "^10.3.2"
     aes-js "3.0.0"
