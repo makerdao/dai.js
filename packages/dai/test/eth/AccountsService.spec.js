@@ -32,6 +32,31 @@ test('account with private key string literal in settings', async () => {
   expect(service.currentWallet()).toBeInstanceOf(Wallet);
 });
 
+test('provider account with offset', async () => {
+  const offset = 11;
+  TestAccountProvider.setIndex(offset);
+  const { address } = TestAccountProvider.nextAccount();
+
+  const service = buildTestService('accounts', {
+    accounts: {
+      foo: { type: 'provider', offset }
+    }
+  });
+  await service.manager().connect();
+  expect(service.currentAddress()).toEqual(address);
+});
+
+test('provider account with address', async () => {
+  const { address } = TestAccountProvider.nextAccount();
+  const service = buildTestService('accounts', {
+    accounts: {
+      foo: { type: 'provider', address }
+    }
+  });
+  await service.manager().connect();
+  expect(service.currentAddress()).toEqual(address);
+});
+
 test('invalid private keys', async () => {
   const badKeys = [
     null,
@@ -204,7 +229,7 @@ test('add and use account with no name', async () => {
 
 test('providerAccountFactory', async () => {
   const rpc = new RpcSource({ rpcUrl: 'http://localhost:2000' });
-  const account = await providerAccountFactory(null, rpc);
+  const account = await providerAccountFactory({}, rpc);
   expect(account.address).toEqual('0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6');
 });
 
