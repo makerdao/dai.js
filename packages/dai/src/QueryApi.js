@@ -22,6 +22,27 @@ export async function getQueryResponse(serverUrl, query, variables) {
   return data;
 }
 
+// sample code from EIP-55 "Mixed-case checksum address encoding":
+// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
+function toChecksumAddress(address) {
+  address = address.toLowerCase().replace('0x', '');
+  const createKeccakHash = require('keccak');
+  var hash = createKeccakHash('keccak256')
+    .update(address)
+    .digest('hex');
+  var ret = '0x';
+
+  for (var i = 0; i < address.length; i++) {
+    if (parseInt(hash[i], 16) >= 8) {
+      ret += address[i].toUpperCase();
+    } else {
+      ret += address[i];
+    }
+  }
+
+  return ret;
+}
+
 export default class QueryApi {
   constructor(network) {
     switch (network) {
@@ -38,7 +59,8 @@ export default class QueryApi {
     }
   }
 
-  async getCdpIdsForOwner(address) {
+  async getCdpIdsForOwner(rawAddress) {
+    const address = toChecksumAddress(rawAddress);
     const query = `query ($lad: String) {
       allCups(condition: { lad: $lad }) {
         nodes {
