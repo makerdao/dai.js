@@ -1,8 +1,0 @@
-{
-  "web3": {
-    "provider": {
-      "type": "INJECT"
-    }
-  },
-  "exchange": "OasisExchangeService"
-}

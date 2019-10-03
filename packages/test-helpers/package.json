@@ -1,0 +1,20 @@
+{
+  "name": "@makerdao/test-helpers",
+  "description": "test helpers for the monorepo",
+  "version": "0.2.0",
+  "license": "MIT",
+  "main": "dist",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  },
+  "scripts": {
+    "build": "./scripts/build.sh",
+    "prepublishOnly": "./scripts/build.sh",
+    "test": "jest"
+  },
+  "files": [
+    "package.json",
+    "LICENSE",
+    "dist/**/*"
+  ]
+}

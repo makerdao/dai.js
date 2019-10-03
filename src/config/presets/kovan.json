@@ -1,9 +1,0 @@
-{
-  "web3": {
-    "provider": {
-      "type": "INFURA",
-      "network": "kovan"
-    }
-  },
-  "exchange": "OasisExchangeService"
-}

@@ -1,0 +1,9 @@
+{
+  "web3": {
+    "provider": {
+      "type": "INFURA",
+      "network": "mainnet"
+    }
+  },
+  "cdp": true
+}
