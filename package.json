@@ -8,7 +8,6 @@
     "build": "yarn lerna run build",
     "lint": "eslint packages/**/src packages/**/test",
     "precommit": "lint-staged",
-    "prepush": "yarn test",
     "prettier": "prettier --single-quote --write 'packages/**/{src,test,contracts}/**/*.js'",
     "coverage": "yarn testchain --ci yarn lerna run --concurrency 1 coverage",
     "testchain": "./scripts/run-testchain.sh",
@@ -21,8 +20,7 @@
   "lint-staged": {
     "./packages/**/{src,web,test,contracts}/**/*.js": [
       "prettier --single-quote --write",
-      "eslint",
-      "git add"
+      "eslint"
     ]
   },
   "workspaces": [
