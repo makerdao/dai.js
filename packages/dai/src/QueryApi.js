@@ -1,5 +1,6 @@
-import fetch from 'isomorphic-fetch';
 import assert from 'assert';
+import ethUtil from 'ethereumjs-util';
+import fetch from 'isomorphic-fetch';
 
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
 const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';
@@ -38,7 +39,8 @@ export default class QueryApi {
     }
   }
 
-  async getCdpIdsForOwner(address) {
+  async getCdpIdsForOwner(rawAddress) {
+    const address = ethUtil.toChecksumAddress(rawAddress);
     const query = `query ($lad: String) {
       allCups(condition: { lad: $lad }) {
         nodes {
