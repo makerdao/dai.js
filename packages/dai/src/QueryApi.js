@@ -1,5 +1,6 @@
-import fetch from 'isomorphic-fetch';
 import assert from 'assert';
+import ethUtil from 'ethereumjs-util';
+import fetch from 'isomorphic-fetch';
 
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
 const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';
@@ -22,27 +23,6 @@ export async function getQueryResponse(serverUrl, query, variables) {
   return data;
 }
 
-// sample code from EIP-55 "Mixed-case checksum address encoding":
-// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
-function toChecksumAddress(address) {
-  address = address.toLowerCase().replace('0x', '');
-  const createKeccakHash = require('keccak');
-  var hash = createKeccakHash('keccak256')
-    .update(address)
-    .digest('hex');
-  var ret = '0x';
-
-  for (var i = 0; i < address.length; i++) {
-    if (parseInt(hash[i], 16) >= 8) {
-      ret += address[i].toUpperCase();
-    } else {
-      ret += address[i];
-    }
-  }
-
-  return ret;
-}
-
 export default class QueryApi {
   constructor(network) {
     switch (network) {
@@ -60,7 +40,7 @@ export default class QueryApi {
   }
 
   async getCdpIdsForOwner(rawAddress) {
-    const address = toChecksumAddress(rawAddress);
+    const address = ethUtil.toChecksumAddress(rawAddress);
     const query = `query ($lad: String) {
       allCups(condition: { lad: $lad }) {
         nodes {
