@@ -35,11 +35,15 @@ export function tracksTransactionsWithOptions({ numArguments }) {
     const original = descriptor.value;
     const correctArgsLength = numArguments || original.length;
     descriptor.value = function(...args) {
-      const lastArg = args[args.length - 1];
+      const last = args[args.length - 1];
       let options;
-      if (typeof lastArg === 'object' && lastArg.constructor === Object) {
+      if (
+        typeof last === 'object' &&
+        last !== null &&
+        last.constructor === Object
+      ) {
         args = args.slice(0, args.length - 1);
-        options = lastArg;
+        options = last;
       } else {
         options = {};
       }
