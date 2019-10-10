@@ -159,7 +159,7 @@ export default class CdpManager extends LocalService {
 
   @tracksTransactions
   async lock(id, ilk, lockAmount, owner, { promise }) {
-    owner = await owner;
+    if (!owner) owner = await this.getOwner(id);
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
@@ -204,7 +204,7 @@ export default class CdpManager extends LocalService {
 
   @tracksTransactions
   async wipe(id, wipeAmount, owner, { promise }) {
-    owner = await owner;
+    if (!owner) owner = await this.getOwner(id);
     return this.proxyActions.safeWipe(
       ...[
         this._managerAddress,
@@ -232,7 +232,7 @@ export default class CdpManager extends LocalService {
 
   @tracksTransactions
   async wipeAll(id, owner, { promise } = {}) {
-    owner = await owner;
+    if (!owner) owner = await this.getOwner(id);
     return this.proxyActions.safeWipeAll(
       this._managerAddress,
       this._adapterAddress('DAI'),
