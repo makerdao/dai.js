@@ -1,4 +1,4 @@
-import { REP } from '../src';
+import McdPlugin, { REP } from '../src';
 import { mcdMaker } from './helpers';
 import addresses from '../contracts/addresses/testnet.json';
 
@@ -6,6 +6,27 @@ let maker;
 
 beforeAll(async () => {
   maker = await mcdMaker({ prefetch: false });
+});
+
+test('addConfig outputs contract addresses for all networks', () => {
+  let {
+    smartContract: { addContracts },
+    token: { erc20 }
+  } = McdPlugin.addConfig();
+
+  for (const contract of Object.values(addContracts)) {
+    expect(contract.address).toEqual({
+      testnet: expect.any(String),
+      kovan: expect.any(String)
+    });
+  }
+
+  for (const token of erc20) {
+    expect(token.address).toEqual({
+      testnet: expect.any(String),
+      kovan: expect.any(String)
+    });
+  }
 });
 
 test('contract address mapping', async () => {

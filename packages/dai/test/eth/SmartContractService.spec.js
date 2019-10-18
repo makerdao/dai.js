@@ -33,7 +33,7 @@ test('getContractByName should return a functioning contract', async () => {
   );
 });
 
-test('parameterized smart contract input', async () => {
+test('define contract in config', async () => {
   const mockContractDefinition = {
     address: '0xbeefed1bedded2dabbed3defaced4decade5dead',
     abi: [
@@ -63,7 +63,7 @@ test('parameterized smart contract input', async () => {
   expect(typeof contract.foo).toBe('function');
 });
 
-test('parameterized smart contract input with multiple addresses', async () => {
+test('define contract in config with multiple addresses', async () => {
   const mockContractDefinition = {
     address: {
       testnet: '0xbeefed1bedded2dabbed3defaced4decade5dead',
