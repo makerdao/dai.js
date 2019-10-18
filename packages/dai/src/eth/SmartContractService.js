@@ -1,7 +1,7 @@
 import { PrivateService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import networks, { TESTNET_ID } from '../../contracts/networks';
+import networks from '../../contracts/networks';
 import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
 import mapValues from 'lodash/mapValues';
@@ -114,32 +114,27 @@ export default class SmartContractService extends PrivateService {
   }
 
   _getAllContractInfo() {
-    const id = this.get('web3').networkId(),
-      mapping = networks.find(m => m.networkId === id);
+    let { networkName } = this.get('web3');
+    const mapping = networks.find(m => m.name === networkName);
 
-    if (!mapping) throw new Error(`Network ID ${id} not found in mapping.`);
-    const infos = mapping.contracts;
-    if (this._addedContracts) {
-      const networkName = {
-        [TESTNET_ID]: 'testnet',
-        [1337]: 'testnet',
-        [42]: 'kovan',
-        [1]: 'mainnet'
-      }[id];
+    assert(mapping, `Network "${networkName}" not found in mapping.`);
+    if (!this._addedContracts) return mapping.contracts;
 
-      const infos2 = {
-        ...infos,
-        ...mapValues(this._addedContracts, ([definition], name) => {
-          const { address, ...otherProps } = definition;
-          if (typeof address === 'string') return [definition];
-          if (!address || !address[networkName]) {
-            throw new Error(`Missing address for ${name} on ${networkName}`);
-          }
-          return [{ address: address[networkName], ...otherProps }];
-        })
-      };
-      return infos2;
-    }
-    return infos;
+    return {
+      ...mapping.contracts,
+      ...mapValues(this._addedContracts, ([definition], name) => {
+        const { address, ...otherProps } = definition;
+        if (typeof address === 'string') return [definition];
+        const singleAddress = _findAddress(address, networkName);
+        assert(singleAddress, `Missing address for ${name} on ${networkName}`);
+        return [{ address: singleAddress, ...otherProps }];
+      })
+    };
   }
+}
+
+function _findAddress(address, networkName) {
+  if (typeof address === 'string') return address;
+  if (networkName.startsWith('test')) return address.test || address.testnet;
+  return address[networkName];
 }

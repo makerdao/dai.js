@@ -3,23 +3,16 @@ import contracts from './contracts';
 import * as abis from './abis';
 import kovanAddresses from './addresses/kovan.json';
 import mainnetAddresses from './addresses/mainnet.json';
+import testnetAddresses from './addresses/testnet.json';
+
+const addressMapping = {
+  mainnet: mainnetAddresses,
+  kovan: kovanAddresses,
+  testnet: testnetAddresses
+};
 
 export function contractInfo(network) {
-  let addresses;
-  switch (network) {
-    case 'mainnet':
-      addresses = mainnetAddresses;
-      break;
-    case 'kovan':
-      addresses = kovanAddresses;
-      break;
-    case 'test':
-      // we "require just in time" here because a non-developer user will not
-      // have a testnet addresses file
-      addresses = require('./addresses/testnet.json');
-      break;
-  }
-
+  const addresses = addressMapping[network];
   return {
     // Tokens
     [tokens.DAI]: [
@@ -145,10 +138,10 @@ export const TESTNET_ID = 999;
 
 export default [
   { name: 'mainnet', networkId: 1, contracts: contractInfo('mainnet') },
-  { name: 'morden', networkId: 2, contracts: null },
-  { name: 'ropsten', networkId: 3, contracts: null },
-  { name: 'rinkeby', networkId: 4, contracts: null },
+  { name: 'morden', networkId: 2 },
+  { name: 'ropsten', networkId: 3 },
+  { name: 'rinkeby', networkId: 4 },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
-  { name: 'test', networkId: 1337, contracts: contractInfo('test') },
-  { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('test') }
+  { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },
+  { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('testnet') }
 ];

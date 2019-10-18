@@ -29,11 +29,6 @@ export default class EthereumTokenService extends PrivateService {
     return Object.keys(this._tokens);
   }
 
-  getTokenVersions() {
-    const mapping = this._getCurrentNetworkMapping();
-    return this._selectTokenVersions(mapping);
-  }
-
   // FIXME should be caching/memoizing here
   getToken(symbol, version) {
     // support passing in Currency constructors
@@ -51,12 +46,10 @@ export default class EthereumTokenService extends PrivateService {
       );
     }
 
-    const tokenInfo =
-      this._addedTokens[symbol] || this._getCurrentNetworkMapping()[symbol];
-
-    const { address, decimals, abi, currency } = !version
-      ? tokenInfo[tokenInfo.length - 1]
-      : tokenInfo[version - 1];
+    const { address, decimals, abi, currency } = this._getTokenInfo(
+      symbol,
+      version
+    );
 
     const scs = this.get('smartContract');
     const contract = scs.getContractByAddressAndAbi(
@@ -85,12 +78,28 @@ export default class EthereumTokenService extends PrivateService {
     );
   }
 
-  _getCurrentNetworkMapping() {
-    let networkId = this.get('web3').networkId();
+  _getTokenInfo(symbol, version) {
+    let { network, networkName } = this.get('web3');
+    const tokenInfoList =
+      this._addedTokens[symbol] || this._getNetworkMapping(network)[symbol];
+
+    const tokenInfo = version
+      ? tokenInfoList[version - 1]
+      : tokenInfoList[tokenInfoList.length - 1];
+
+    if (typeof tokenInfo.address === 'string') return tokenInfo;
+
+    return {
+      ...tokenInfo,
+      address:
+        tokenInfo.address[networkName === 'test' ? 'testnet' : networkName]
+    };
+  }
+
+  _getNetworkMapping(networkId) {
     const mapping = networks.filter(m => m.networkId === networkId);
 
     if (mapping.length < 1) {
-      /* istanbul ignore next */
       throw new Error('networkId not found');
     }
 

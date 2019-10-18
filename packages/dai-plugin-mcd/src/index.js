@@ -95,19 +95,12 @@ const defaultCdpTypes = [
 export default {
   addConfig: (
     _,
-    {
-      cdpTypes = defaultCdpTypes,
-      network = 'testnet',
-      addressOverrides,
-      prefetch = true
-    } = {}
+    { cdpTypes = defaultCdpTypes, addressOverrides, prefetch = true } = {}
   ) => {
     if (addressOverrides) {
       addContracts = mapValues(addContracts, (contractDetails, name) => ({
         ...contractDetails,
-        address: {
-          [network]: addressOverrides[name] || contractDetails.address[network]
-        }
+        address: addressOverrides[name] || contractDetails.address
       }));
     }
     const tokens = uniqBy(cdpTypes, 'currency').map(
@@ -118,21 +111,11 @@ export default {
         return {
           currency,
           abi: data.abi,
-          address: data.address[network] || data.address,
+          address: data.address,
           decimals: data.decimals || decimals
         };
       }
     );
-
-    // remove contracts that don't have an address for the given network
-    for (let c of Object.keys(addContracts)) {
-      if (
-        typeof addContracts[c].address === 'object' &&
-        !addContracts[c].address[network]
-      ) {
-        delete addContracts[c];
-      }
-    }
 
     // Set global BigNumber precision to enable exponential operations
     BigNumber.config({ POW_PRECISION: 100 });
@@ -141,8 +124,8 @@ export default {
       smartContract: { addContracts },
       token: {
         erc20: [
-          { currency: MDAI, address: addContracts.MCD_DAI.address[network] },
-          { currency: MWETH, address: addContracts.ETH.address[network] },
+          { currency: MDAI, address: addContracts.MCD_DAI.address },
+          { currency: MWETH, address: addContracts.ETH.address },
           ...tokens
         ]
       },
