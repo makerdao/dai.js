@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/dai-plugin-mcd",
   "description": "Plugin to add Multi-Collateral Dai support to dai.js",
-  "version": "0.2.14-2",
+  "version": "0.2.14-3",
   "license": "MIT",
   "main": "dist",
   "scripts": {
@@ -14,7 +14,7 @@
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {
-    "@makerdao/dai": ">=0.18.8"
+    "@makerdao/dai": ">=0.18.9"
   },
   "dependencies": {
     "@makerdao/currency": "^0.9.5",
