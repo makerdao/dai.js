@@ -185,6 +185,10 @@ export default class Web3Service extends PrivateService {
     return this._info.network;
   }
 
+  get networkName() {
+    return getNetworkName(this.networkId());
+  }
+
   get rpcUrl() {
     return last(this._web3.currentProvider._providers).rpcUrl;
   }

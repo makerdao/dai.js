@@ -15,20 +15,6 @@ test('getTokens returns tokens', () => {
   expect(tokensList.includes(tokens.MKR)).toBe(true);
 });
 
-test('getTokenVersions returns token versions using remote blockchain', () => {
-  const tokenVersions = ethereumTokenService.getTokenVersions();
-
-  expect(tokenVersions[tokens.MKR]).toEqual([1, 2]);
-  expect(tokenVersions[tokens.DAI]).toEqual([1]);
-  expect(tokenVersions[tokens.ETH]).toEqual([1]);
-
-  expect(
-    ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase()
-  ).toBe(
-    ethereumTokenService.getToken(tokens.MKR, 2)._contract.address.toUpperCase()
-  );
-});
-
 test('getToken returns token object of correct version', () => {
   expect(
     ethereumTokenService.getToken(tokens.MKR)._contract.address.toUpperCase()
@@ -50,4 +36,18 @@ test('getToken throws when given unknown token symbol', () => {
 test('getToken works with Currency', () => {
   const token = ethereumTokenService.getToken(MKR);
   expect(token.symbol).toBe('MKR');
+});
+
+test('_getTokenInfo returns token address for current network', () => {
+  ethereumTokenService._addedTokens.FOO = [
+    {
+      address: {
+        testnet: '0xtest',
+        kovan: '0xkovan'
+      }
+    }
+  ];
+
+  const tokenInfo = ethereumTokenService._getTokenInfo('FOO');
+  expect(tokenInfo).toEqual({ address: '0xtest' });
 });
