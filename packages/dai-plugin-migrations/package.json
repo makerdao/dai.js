@@ -17,6 +17,7 @@
   "dependencies": {
     "@makerdao/currency": "^0.9.5",
     "@makerdao/services-core": "^0.9.9",
+    "@makerdao/test-helpers": "^0.2.0",
     "bignumber.js": "^8.1.1"
   }
 }
