@@ -1,0 +1,1 @@
+[{"constant":true,"inputs":[],"name":"peek","outputs":[{"internalType":"bytes32","name":"val","type":"bytes32"},{"internalType":"bool","name":"zzz","type":"bool"}],"payable":false,"stateMutability":"pure","type":"function"}]
