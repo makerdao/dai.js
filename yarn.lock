@@ -1701,10 +1701,10 @@
     js-sha3 "^0.8.0"
     lodash "^4.17.11"
 
-"@makerdao/testchain@^0.2.15":
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-0.2.15.tgz#42c6102a7c493b040479ec71ac89d4e7f69bee92"
-  integrity sha512-2KWz0y0r4QmtoV3aEzoBb1xOWK7bLiNw5VUoDqAYDFCVPPJjZlmDaxlJ1jyuEhqtGdbrmeMg3RYmZwAxr77lkA==
+"@makerdao/testchain@^0.2.15-1":
+  version "0.2.15-1"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-0.2.15-1.tgz#cb5aef18b4e9fddba873175831536eecc885afc0"
+  integrity sha512-8jvUqjNdT5UFzF9v6YmjtuweC7MMA+dZa4VFwZxc3jlsGdq/JWiqnvxxwfIvoBg/w162ZoWgoeK6mswM+t557w==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 
