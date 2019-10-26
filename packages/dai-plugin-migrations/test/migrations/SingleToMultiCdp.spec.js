@@ -51,4 +51,8 @@ describe('SCD to MCD CDP Migration', () => {
 
     expect(await migration.check()).toBeTruthy();
   });
+
+  test('migrate scd cdp to mcd, pay fee with mkr', async () => {
+    console.log(await migration.execute());
+  });
 });
