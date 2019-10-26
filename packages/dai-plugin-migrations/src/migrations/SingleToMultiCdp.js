@@ -19,6 +19,8 @@ export default class SingleToMultiCdp {
   @tracksTransactions
   async execute() {
     const migrateProxy = this._manager.get('smartContract').getContract('MIGRATION_PROXY_ACTIONS');
+    const ids = await this.check();
+    console.log(ids);
     console.log(migrateProxy);
   }
 }
