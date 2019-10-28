@@ -1,7 +1,8 @@
 import { migrationMaker } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 
-let maker, migration;
+let maker, migration, snapshotData;
 
 async function mockCdpIds({ forAccount, forProxy } = {}) {
   const currentAddress = maker.currentAddress();
@@ -25,7 +26,15 @@ describe('SCD to MCD CDP Migration', () => {
     migration = service.getMigration(Migrations.SINGLE_TO_MULTI_CDP);
   });
 
-  test('if there are no cdps, return false', async () => {
+  beforeEach(async () => {
+    snapshotData = await takeSnapshot(maker);
+  });
+
+  afterEach(async () => {
+    await restoreSnapshot(snapshotData, maker);
+  });
+
+  xtest('if there are no cdps, return false', async () => {
     await mockCdpIds();
 
     expect(await migration.check()).toBeFalsy();
@@ -52,7 +61,12 @@ describe('SCD to MCD CDP Migration', () => {
     expect(await migration.check()).toBeTruthy();
   });
 
-  test('migrate scd cdp to mcd, pay fee with mkr', async () => {
-    console.log(await migration.execute());
+  test.only('migrate scd cdp to mcd, pay fee with mkr', async () => {
+    const scdCdp = await maker.openCdp();
+    await scdCdp.lockEth('1');
+    await scdCdp.drawDai('1');
+    const address = maker.service('web3').currentAddress();
+    await maker.service('allowance').requireAllowance('MKR', address);
+    console.log(await migration.execute(scdCdp.id, address));
   });
 });
