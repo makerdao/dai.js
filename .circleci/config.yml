@@ -7,9 +7,7 @@
        - checkout
        - run:
           name: Install dependencies
-          command: |
-            npm i --no-save yarn codecov
-            yarn
+          command: yarn
        - run:
           name: Run tests
           command: |
@@ -19,5 +17,7 @@
             yarn test:build
             yarn coverage
        - run:
-          name: Update codecov
-          command: ./node_modules/.bin/codecov
+          name: codecov
+          command: |
+            npm i --no-save codecov
+            ./node_modules/.bin/codecov
