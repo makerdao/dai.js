@@ -1,7 +1,9 @@
 import { migrationMaker } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import { SAI } from '../../src/index';
 
-let maker, migration;
+let maker, migration, snapshotData;
 
 async function mockCdpIds({ forAccount, forProxy } = {}) {
   const currentAddress = maker.currentAddress();
@@ -18,11 +20,26 @@ async function mockCdpIds({ forAccount, forProxy } = {}) {
   });
 }
 
+async function openLockAndDrawScdCdp(drawAmount) {
+  const cdp = await maker.openCdp();
+  await cdp.lockEth('20');
+  await cdp.drawDai(drawAmount);
+  return cdp;
+}
+
 describe('SCD to MCD CDP Migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
     const service = maker.service(ServiceRoles.MIGRATION);
     migration = service.getMigration(Migrations.SINGLE_TO_MULTI_CDP);
+  });
+
+  beforeEach(async () => {
+    snapshotData = await takeSnapshot(maker);
+  });
+
+  afterEach(async () => {
+    await restoreSnapshot(snapshotData, maker);
   });
 
   test('if there are no cdps, return false', async () => {
@@ -50,5 +67,22 @@ describe('SCD to MCD CDP Migration', () => {
     });
 
     expect(await migration.check()).toBeTruthy();
+  });
+
+  test('if there is sai locked in the mcd migration cdp, return the amount that is there', async () => {
+    const noSaiLiquidity = await migration.migrationSaiAvailable();
+    expect(noSaiLiquidity.toNumber()).toBe(0);
+
+    await openLockAndDrawScdCdp('10');
+    const migrationContract = maker
+      .service('smartContract')
+      .getContract('MIGRATION');
+
+    const sai = maker.getToken(SAI);
+    await sai.approveUnlimited(migrationContract.address);
+    await migrationContract.swapSaiToDai(SAI(10).toFixed('wei'));
+
+    const someSaiLiquidity = await migration.migrationSaiAvailable();
+    expect(someSaiLiquidity.toNumber()).toBe(10);
   });
 });
