@@ -5,6 +5,7 @@ import uniqBy from 'lodash/uniqBy';
 import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
 import testnetAddresses from '../contracts/addresses/testnet.json';
 import kovanAddresses from '../contracts/addresses/kovan.json';
+import mainAddresses from '../contracts/addresses/mainnet.json';
 import abiMap from '../contracts/abiMap.json';
 import CdpManager from './CdpManager';
 import SavingsService from './SavingsService';
@@ -29,9 +30,10 @@ const {
 // if an exact match is not found, prefix-match against keys ending in *, e.g.
 // MCD_JOIN_ETH_B matches MCD_JOIN_*
 // this implementation assumes that all contracts in kovan.json are also in testnet.json
+
 let addContracts = reduce(
-  testnetAddresses,
-  (result, testnetAddress, name) => {
+  mainAddresses,
+  (result, mainAddress, name) => {
     let abiName = abiMap[name];
     if (!abiName) {
       const prefix = Object.keys(abiMap).find(
@@ -45,8 +47,9 @@ let addContracts = reduce(
       result[name] = {
         abi: require(`../contracts/abis/${abiName}.json`),
         address: {
-          testnet: testnetAddress,
-          kovan: kovanAddresses[name]
+          testnet: testnetAddresses[name],
+          kovan: kovanAddresses[name],
+          mainnet: mainAddress
         }
       };
     }
@@ -76,13 +79,13 @@ export const GNT = createCurrency('GNT');
 const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: ETH, ilk: 'ETH-B' },
-  { currency: REP, ilk: 'REP-A' },
-  // { currency: REP, ilk: 'REP-B' },
+  //  { currency: REP, ilk: 'REP-A' },
+  //  { currency: REP, ilk: 'REP-B' },
   { currency: ZRX, ilk: 'ZRX-A' },
-  { currency: OMG, ilk: 'OMG-A' },
+  //  { currency: OMG, ilk: 'OMG-A' },
   { currency: BAT, ilk: 'BAT-A' },
-  { currency: DGD, ilk: 'DGD-A', decimals: 9 },
-  { currency: GNT, ilk: 'GNT-A' },
+  //  { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+  //  { currency: GNT, ilk: 'GNT-A' },
 
   // the CDP type below is not present in the testchain snapshot -- its purpose
   // is to verify that the code does not throw an error if a CDP type is
