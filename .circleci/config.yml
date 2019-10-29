@@ -8,8 +8,7 @@
        - run:
           name: Install dependencies
           command: |
-            npm i --no-save yarn
-            npm i -g codecov
+            npm i --no-save yarn codecov
             yarn
        - run:
           name: Run tests
