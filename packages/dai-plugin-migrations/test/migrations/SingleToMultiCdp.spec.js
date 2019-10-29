@@ -19,6 +19,13 @@ async function mockCdpIds({ forAccount, forProxy } = {}) {
   });
 }
 
+async function openLockAndDrawScdCdp() {
+  const cdp = await maker.openCdp();
+  await cdp.lockEth('1');
+  await cdp.drawDai('1');
+  return cdp;
+}
+
 describe('SCD to MCD CDP Migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
@@ -62,11 +69,7 @@ describe('SCD to MCD CDP Migration', () => {
   });
 
   test.only('migrate scd cdp to mcd, pay fee with mkr', async () => {
-    const scdCdp = await maker.openCdp();
-    await scdCdp.lockEth('1');
-    await scdCdp.drawDai('1');
-    const address = maker.service('web3').currentAddress();
-    await maker.service('allowance').requireAllowance('MKR', address);
-    console.log(await migration.execute(scdCdp.id, address));
+    const cdp = await openLockAndDrawScdCdp();
+    console.log(await migration.execute(cdp.id, 'GEM', 100));
   });
 });
