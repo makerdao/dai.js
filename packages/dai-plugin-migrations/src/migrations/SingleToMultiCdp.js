@@ -1,4 +1,4 @@
-import tracksTransactions from "@makerdao/dai-plugin-mcd/src/utils/tracksTransactions";
+import tracksTransactions from '@makerdao/dai-plugin-mcd/src/utils/tracksTransactions';
 import { stringToBytes } from '../utils';
 
 export default class SingleToMultiCdp {

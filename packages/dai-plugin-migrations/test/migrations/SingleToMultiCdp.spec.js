@@ -70,6 +70,11 @@ describe('SCD to MCD CDP Migration', () => {
 
   test.only('migrate scd cdp to mcd, pay fee with mkr', async () => {
     const cdp = await openLockAndDrawScdCdp();
-    console.log(await migration.execute(cdp.id, 'GEM', 100));
+    const mkr = maker.getToken('MKR');
+    const proxy = await maker.service('proxy').currentProxy();
+    await mkr.approveUnlimited(proxy);
+
+    console.log(await migration.execute(cdp.id));
+    // console.log(await migration.execute(cdp.id, 'GEM', 100));
   });
 });
