@@ -18,4 +18,6 @@
             yarn build
             yarn test:build
             yarn coverage
-            codecov
+       - run:
+          name: Update codecov
+          command: ./node_modules/.bin/codecov
