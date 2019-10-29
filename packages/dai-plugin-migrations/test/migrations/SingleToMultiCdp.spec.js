@@ -1,7 +1,7 @@
 import { migrationMaker } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import { SAI } from '../../src/index';
+import { SAI, MKR } from '../../src/index';
 
 let maker, migration, snapshotData;
 
@@ -70,15 +70,30 @@ describe('SCD to MCD CDP Migration', () => {
   });
 
   test.only('migrate scd cdp to mcd, pay fee with mkr', async () => {
-    const cdp1 = await openLockAndDrawScdCdp(100);
-    const cdp2 = await openLockAndDrawScdCdp(10);
     const migrationContract = maker
       .service('smartContract')
       .getContract('MIGRATION');
-    await migrationContract.swapSaiToDai(SAI(10).toFixed('wei'), {
-      dsProxy: true
-    });
-    console.log(await migration.execute(cdp2.id));
-    // console.log(await migration.execute(cdp.id, 'GEM', 100));
+    const proxyAddress = await maker.service('proxy').currentProxy();
+
+    await openLockAndDrawScdCdp(100);
+    const cdp2 = await openLockAndDrawScdCdp(10);
+
+    const sai = maker.getToken(SAI);
+    const mkr = maker.getToken(MKR);
+    await mkr.approveUnlimited(migrationContract.address);
+    await mkr.approveUnlimited(proxyAddress);
+    await sai.approveUnlimited(migrationContract.address);
+
+    await migrationContract.swapSaiToDai(SAI(10).toFixed('wei'));
+
+    let error;
+    try {
+      console.log(await migration.execute(cdp2.id));
+      // console.log(await migration.execute(cdp.id, 'GEM', 100));
+    } catch (err) {
+      error = err;
+      console.error(err);
+    }
+    expect(error).not.toBeDefined();
   });
 });
