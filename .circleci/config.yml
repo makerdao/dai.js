@@ -9,9 +9,14 @@
           name: Install dependencies
           command: |
             npm i --no-save yarn
+            npm i -g codecov
             yarn
        - run:
           name: Run tests
           command: |
             source /home/circleci/setup-env.sh
-            yarn test
+            yarn lerna bootstrap
+            yarn build
+            yarn test:build
+            yarn coverage
+            codecov
