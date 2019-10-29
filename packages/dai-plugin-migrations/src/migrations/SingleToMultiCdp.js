@@ -19,22 +19,31 @@ export default class SingleToMultiCdp {
 
   @tracksTransactions
   async execute(cupId, payment = 'MKR', maxPayAmount) {
-    const migrationProxy = this._manager.get('smartContract').getContract('MIGRATION_PROXY_ACTIONS');
-    const migration = this._manager.get('smartContract').getContract('MIGRATION');
-    const defaultArgs = [
-      migration.address,
-      stringToBytes(cupId.toString())
-    ];
-    const { method, args } = this._setMethodAndArgs(payment, defaultArgs, maxPayAmount);
+    const migrationProxy = this._manager
+      .get('smartContract')
+      .getContract('MIGRATION_PROXY_ACTIONS');
+    const migration = this._manager
+      .get('smartContract')
+      .getContract('MIGRATION');
+    const defaultArgs = [migration.address, stringToBytes(cupId.toString())];
+    const { method, args } = this._setMethodAndArgs(
+      payment,
+      defaultArgs,
+      maxPayAmount
+    );
 
     return migrationProxy[method](...args, { dsProxy: true });
   }
 
   _setMethodAndArgs(payment, defaultArgs, maxPayAmount) {
-    const otc = this._manager.get('smartContract').getContract('MAKER_OTC').address;
+    const otc = this._manager.get('smartContract').getContract('MAKER_OTC')
+      .address;
 
-    if (payment === 'GEM'){
-      const gem = this._manager.get('token').getToken('WETH').address();
+    if (payment === 'GEM') {
+      const gem = this._manager
+        .get('token')
+        .getToken('WETH')
+        .address();
       return {
         method: 'migratePayFeeWithGem',
         args: [...defaultArgs, otc, gem, maxPayAmount]
@@ -44,12 +53,12 @@ export default class SingleToMultiCdp {
     if (payment === 'DEBT') {
       return {
         method: 'migratePayFeeWithDebt'
-      }
+      };
     }
 
     return {
       method: 'migrate',
       args: defaultArgs
-    }
+    };
   }
 }
