@@ -19,10 +19,10 @@ async function mockCdpIds({ forAccount, forProxy } = {}) {
   });
 }
 
-async function openLockAndDrawScdCdp() {
+async function openLockAndDrawScdCdp(drawAmount) {
   const cdp = await maker.openCdp();
-  await cdp.lockEth('1');
-  await cdp.drawDai('1');
+  await cdp.lockEth('20');
+  await cdp.drawDai(drawAmount);
   return cdp;
 }
 
@@ -69,12 +69,11 @@ describe('SCD to MCD CDP Migration', () => {
   });
 
   test.only('migrate scd cdp to mcd, pay fee with mkr', async () => {
-    const cdp = await openLockAndDrawScdCdp();
-    const mkr = maker.getToken('MKR');
-    const proxy = await maker.service('proxy').currentProxy();
-    await mkr.approveUnlimited(proxy);
-
-    console.log(await migration.execute(cdp.id));
+    const cdp1 = await openLockAndDrawScdCdp(100);
+    const cdp2 = await openLockAndDrawScdCdp(10);
+    const migrationContract = maker.service('smartContract').getContract('MIGRATION');    
+    await migrationContract.swapSaiToDai(10, { dsProxy: true });
+    console.log(await migration.execute(cdp2.id));
     // console.log(await migration.execute(cdp.id, 'GEM', 100));
   });
 });
