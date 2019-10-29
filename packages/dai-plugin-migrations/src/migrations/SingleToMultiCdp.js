@@ -1,6 +1,5 @@
 import tracksTransactions from "@makerdao/dai-plugin-mcd/src/utils/tracksTransactions";
-import assert from 'assert';
-import { createCurrency } from '@makerdao/currency';
+import { stringToBytes } from '../utils';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -24,7 +23,7 @@ export default class SingleToMultiCdp {
     const migration = this._manager.get('smartContract').getContract('MIGRATION');
     const defaultArgs = [
       migration.address,
-      this._stringToBytes(cupId.toString())
+      stringToBytes(cupId.toString())
     ];
     const { method, args } = this._setMethodAndArgs(payment, defaultArgs, maxPayAmount);
 
@@ -52,19 +51,5 @@ export default class SingleToMultiCdp {
       method: 'migrate',
       args: defaultArgs
     }
-  }
-
-  _stringToBytes(str) {
-    assert(!!str, 'argument is falsy');
-    assert(typeof str === 'string', 'argument is not a string');
-    return '0x' + Buffer.from(str).toString('hex');
-  }
-
-  _castAsCurrency(value, currency) {
-    if (currency.isInstance(value)) return value;
-    if (typeof value === 'string' || typeof value === 'number')
-      return currency(value);
-  
-    throw new Error(`Can't cast ${value} as ${currency.symbol}`);
   }
 }
