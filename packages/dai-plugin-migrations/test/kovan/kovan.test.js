@@ -53,11 +53,12 @@ test('kovan', async () => {
   const proxyAddress = await maker.service('proxy').currentProxy();
 
   await sai.approveUnlimited(migrationContract.address);
-  await mkr.approveUnlimited(migrationContract.address, { dsProxy: true });
+  await sai.approveUnlimited(proxyAddress);
+  await mkr.approveUnlimited(migrationContract.address);
   await mkr.approveUnlimited(proxyAddress);
 
   // const cdp = await openLockAndDrawScdCdp('1', maker);
-  // await migrationContract.swapSaiToDai('1000000000000000000');
+  // await migrationContract.swapSaiToDai('5000000000000000000');
 
   let error;
   try {
