@@ -7,5 +7,6 @@
   "MCD_DAI_1": "0x38d4aa5a17d3d15f0a6baa754b11cd3b6e97b8ed",
   "MCD_POT_1": "0x8c4be23de45f82a4fec7a93f69929bd2a13a4777",
   "REDEEMER": "0x2c0f31271673cc29927be725104642aad65a253e",
-  "OLD_MKR": "0x4bb514a7f83fbb13c2b41448208e89fabbcfe2fb"
+  "OLD_MKR": "0x4bb514a7f83fbb13c2b41448208e89fabbcfe2fb",
+  "MIGRATION": "0x97cb5a9abcdbe291d0cd85915fa5b08746fe948a"
 }
