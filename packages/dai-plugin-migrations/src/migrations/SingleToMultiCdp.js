@@ -10,7 +10,7 @@ export default class SingleToMultiCdp {
     const idsFromProxy = await this._manager.get('cdp').getCdpIds(proxyAddress);
     const idsFromAddress = await this._manager.get('cdp').getCdpIds(address);
     return idsFromProxy.length + idsFromAddress.length > 0
-      ? idsFromProxy.concat(idsFromAddress)
-      : [];
+      ? { [proxyAddress]: idsFromProxy, [address]: idsFromAddress }
+      : {};
   }
 }
