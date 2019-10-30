@@ -21,9 +21,11 @@ async function mockCdpIds({ forAccount, forProxy } = {}) {
 }
 
 async function openLockAndDrawScdCdp(drawAmount) {
+  const proxy = await maker.service('proxy').currentProxy();
   const cdp = await maker.openCdp();
   await cdp.lockEth('20');
   await cdp.drawDai(drawAmount);
+  await cdp.give(proxy);
   return cdp;
 }
 
@@ -80,16 +82,14 @@ describe('SCD to MCD CDP Migration', () => {
 
     const sai = maker.getToken(SAI);
     const mkr = maker.getToken(MKR);
-    await mkr.approveUnlimited(migrationContract.address);
     await mkr.approveUnlimited(proxyAddress);
     await sai.approveUnlimited(migrationContract.address);
-    await sai.approveUnlimited(proxyAddress);
 
     await migrationContract.swapSaiToDai(SAI(100).toFixed('wei'));
 
     let error;
     try {
-      console.log(await migration.execute(cdp2.id));
+      await migration.execute(cdp2.id);
       // console.log(await migration.execute(cdp.id, 'GEM', 100));
     } catch (err) {
       error = err;

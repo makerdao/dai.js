@@ -34,9 +34,9 @@ async function mcdMaker({
 }
 
 async function openLockAndDrawScdCdp(drawAmount, maker) {
-  const cdp = await maker.openCdp();
-  await cdp.lockEth('0.1');
-  await cdp.drawDai(drawAmount);
+  const cdp = await maker.openCdp({ dsProxy: true });
+  await cdp.lockEth('0.1', { dsProxy: true });
+  await cdp.drawDai(drawAmount, { dsProxy: true });
   return cdp;
 }
 
@@ -58,6 +58,8 @@ test('kovan', async () => {
   // await mkr.approveUnlimited(proxyAddress);
 
   const cdp = await openLockAndDrawScdCdp('1', maker);
+  const info = await cdp.getInfo();
+  await cdp.give(proxyAddress);
   const id = cdp.id;
   // await migrationContract.swapSaiToDai('5000000000000000000');
 
