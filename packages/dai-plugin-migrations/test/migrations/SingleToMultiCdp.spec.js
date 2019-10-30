@@ -20,11 +20,17 @@ async function mockCdpIds({ forAccount, forProxy } = {}) {
   });
 }
 
-async function openLockAndDrawScdCdp(drawAmount) {
+async function drawSaiAndMigrateToDai(drawAmount) {
   const cdp = await maker.openCdp();
   await cdp.lockEth('20');
   await cdp.drawDai(drawAmount);
-  return cdp;
+  const migrationContract = maker
+    .service('smartContract')
+    .getContract('MIGRATION');
+
+  const sai = maker.getToken(SAI);
+  await sai.approveUnlimited(migrationContract.address);
+  await migrationContract.swapSaiToDai(SAI(10).toFixed('wei'));
 }
 
 describe('SCD to MCD CDP Migration', () => {
@@ -69,20 +75,14 @@ describe('SCD to MCD CDP Migration', () => {
     expect(await migration.check()).toBeTruthy();
   });
 
+  test('if there is no sai locked in the mcd migration cdp, return 0', async () => {
+    const saiLiquidity = await migration.migrationSaiAvailable();
+    expect(saiLiquidity.toFixed('wei')).toBe('0');
+  });
+
   test('if there is sai locked in the mcd migration cdp, return the amount that is there', async () => {
-    const noSaiLiquidity = await migration.migrationSaiAvailable();
-    expect(noSaiLiquidity.toNumber()).toBe(0);
-
-    await openLockAndDrawScdCdp('10');
-    const migrationContract = maker
-      .service('smartContract')
-      .getContract('MIGRATION');
-
-    const sai = maker.getToken(SAI);
-    await sai.approveUnlimited(migrationContract.address);
-    await migrationContract.swapSaiToDai(SAI(10).toFixed('wei'));
-
-    const someSaiLiquidity = await migration.migrationSaiAvailable();
-    expect(someSaiLiquidity.toNumber()).toBe(10);
+    await drawSaiAndMigrateToDai(10); // lock 10 sai into the mcd migration cdp
+    const saiLiquidity = await migration.migrationSaiAvailable();
+    expect(saiLiquidity.toFixed('wei')).toBe('9999999999999999999');
   });
 });

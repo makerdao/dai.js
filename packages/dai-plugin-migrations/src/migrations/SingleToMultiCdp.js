@@ -21,12 +21,17 @@ export default class SingleToMultiCdp {
       .get('smartContract')
       .getContract('MIGRATION').address;
 
-    // should the sai cdp name be passed in via configuration?
     const migrationCdp = await vat.urns(
       stringToBytes('SAI'),
       migrationContractAddress
     );
 
-    return SAI.wei(migrationCdp.ink);
+    // for technical reasons, the liquidation ratio of the mcd migration cdp cannot be 0.
+    // but, it will be close enough that the migration contract will
+    // not be able to free only the last 1 wei of sai
+    const migrationSaiLiquidity = SAI.wei(migrationCdp.ink);
+    return migrationSaiLiquidity.eq(0)
+      ? migrationSaiLiquidity
+      : migrationSaiLiquidity.minus(SAI.wei(1));
   }
 }
