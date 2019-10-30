@@ -1,0 +1,8 @@
+{
+  "version": "v1",
+  "packages": {
+    "@makerdao/dai-plugin-migrations": {
+      "signature": "85f981fce1804c80a15d2ef9ba104810"
+    }
+  }
+}

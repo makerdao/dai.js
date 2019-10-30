@@ -30,6 +30,7 @@ const allContracts = Object.entries(testnetAddresses).reduce(
 );
 
 export const OLD_MKR = createCurrency('OLD_MKR');
+export const SAI = createCurrency('DAI');
 
 function overrideContractAddresses(network, addressOverrides, contracts) {
   Object.entries(addressOverrides).forEach(([name, overrideAddress]) => {
