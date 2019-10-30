@@ -83,8 +83,9 @@ describe('SCD to MCD CDP Migration', () => {
     await mkr.approveUnlimited(migrationContract.address);
     await mkr.approveUnlimited(proxyAddress);
     await sai.approveUnlimited(migrationContract.address);
+    await sai.approveUnlimited(proxyAddress);
 
-    await migrationContract.swapSaiToDai(SAI(10).toFixed('wei'));
+    await migrationContract.swapSaiToDai(SAI(100).toFixed('wei'));
 
     let error;
     try {

@@ -1,5 +1,5 @@
 import tracksTransactions from '@makerdao/dai-plugin-mcd/src/utils/tracksTransactions';
-import { stringToBytes } from '../utils';
+import { stringToBytes, getIdBytes } from '../utils';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -25,7 +25,9 @@ export default class SingleToMultiCdp {
     const migration = this._manager
       .get('smartContract')
       .getContract('MIGRATION');
-    const defaultArgs = [migration.address, stringToBytes(cupId.toString())];
+    const defaultArgs = [migration.address, getIdBytes(cupId)];
+    console.log(cupId);
+    console.log('idToBytes:', getIdBytes(cupId));
     const { method, args } = this._setMethodAndArgs(
       payment,
       defaultArgs,

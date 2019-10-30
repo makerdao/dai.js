@@ -52,17 +52,18 @@ test('kovan', async () => {
     .getMigration(Migrations.SINGLE_TO_MULTI_CDP);
   const proxyAddress = await maker.service('proxy').currentProxy();
 
-  await sai.approveUnlimited(migrationContract.address);
-  await sai.approveUnlimited(proxyAddress);
-  await mkr.approveUnlimited(migrationContract.address);
-  await mkr.approveUnlimited(proxyAddress);
+  // await sai.approveUnlimited(migrationContract.address);
+  // await sai.approveUnlimited(proxyAddress);
+  // await mkr.approveUnlimited(migrationContract.address);
+  // await mkr.approveUnlimited(proxyAddress);
 
-  // const cdp = await openLockAndDrawScdCdp('1', maker);
+  const cdp = await openLockAndDrawScdCdp('1', maker);
+  const id = cdp.id;
   // await migrationContract.swapSaiToDai('5000000000000000000');
 
   let error;
   try {
-    await migration.execute(7111);
+    await migration.execute(id);
   } catch (err) {
     error = err;
     console.error(err);
