@@ -12,7 +12,9 @@ export default class SingleToMultiCdp {
     const proxyAddress = await this._manager.get('proxy').currentProxy();
     const idsFromProxy = await this._manager.get('cdp').getCdpIds(proxyAddress);
     const idsFromAddress = await this._manager.get('cdp').getCdpIds(address);
-    return idsFromProxy.length + idsFromAddress.length > 0;
+    return idsFromProxy.length + idsFromAddress.length > 0
+      ? { [proxyAddress]: idsFromProxy, [address]: idsFromAddress }
+      : {};
   }
 
   async migrationSaiAvailable() {
