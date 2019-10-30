@@ -28,7 +28,7 @@ describe('SCD to MCD CDP Migration', () => {
   test('if there are no cdps, return false', async () => {
     await mockCdpIds();
 
-    expect(await migration.check()).toBeFalsy();
+    expect(await migration.check()).toBe({});
   });
 
   test('if there are cdps owned by a proxy, but no cdps owned by the account, return true', async () => {
