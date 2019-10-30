@@ -34,7 +34,7 @@ describe('SCD to MCD CDP Migration', () => {
   test('if there are cdps owned by a proxy, but no cdps owned by the account, return true', async () => {
     await mockCdpIds({ forProxy: [{ id: '123' }] });
     expect(await migration.check()).toMatchObject({
-      [await maker.currentProxy()]: [ { id: '123' } ],
+      [await maker.currentProxy()]: [{ id: '123' }],
       [maker.currentAddress()]: []
     });
   });
