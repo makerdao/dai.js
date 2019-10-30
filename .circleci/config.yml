@@ -2,7 +2,7 @@
  jobs:
    build:
      docker:
-       - image: levity/dapptools-node
+       - image: levity/dapptools-node-latest
      steps:
        - checkout
        - run:
