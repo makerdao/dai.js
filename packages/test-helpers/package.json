@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/test-helpers",
   "description": "test helpers for the monorepo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "main": "dist",
   "dependencies": {

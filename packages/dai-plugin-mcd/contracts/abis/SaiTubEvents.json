@@ -1,0 +1,1 @@
+[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"lad","type":"address"},{"indexed":false,"internalType":"bytes32","name":"cup","type":"bytes32"}],"name":"LogNewCup","type":"event"}]
