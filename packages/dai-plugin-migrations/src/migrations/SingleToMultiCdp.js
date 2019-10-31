@@ -1,5 +1,6 @@
 import tracksTransactions from '@makerdao/dai-plugin-mcd/src/utils/tracksTransactions';
 import { getIdBytes } from '../utils';
+import { SAI } from '..';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -39,22 +40,24 @@ export default class SingleToMultiCdp {
     const otc = this._manager.get('smartContract').getContract('MAKER_OTC')
       .address;
 
-    if (payment === 'GEM') {
-      const gem = this._manager
-        .get('token')
-        .getToken('WETH')
-        .address();
-      return {
-        method: 'migratePayFeeWithGem',
-        args: [...defaultArgs, otc, gem, maxPayAmount]
-      };
-    }
+    // to do:
+    // if (payment === 'GEM') {
+    //   const gem = this._manager
+    //     .get('token')
+    //     .getToken('DAI')
+    //     .address();
+    //   return {
+    //     method: 'migratePayFeeWithGem',
+    //     args: [...defaultArgs, otc, gem, SAI(maxPayAmount).toFixed('wei')]
+    //   };
+    // }
 
-    if (payment === 'DEBT') {
-      return {
-        method: 'migratePayFeeWithDebt'
-      };
-    }
+    // if (payment === 'DEBT') {
+    //   return {
+    //     method: 'migratePayFeeWithDebt',
+    //     args: [...defaultArgs, otc, SAI(maxPayAmount).toFixed('wei')]
+    //   };
+    // }
 
     return {
       method: 'migrate',

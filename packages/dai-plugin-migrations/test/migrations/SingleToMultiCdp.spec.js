@@ -44,7 +44,7 @@ describe('SCD to MCD CDP Migration', () => {
     await restoreSnapshot(snapshotData, maker);
   });
 
-  xtest('if there are no cdps, return false', async () => {
+  test('if there are no cdps, return false', async () => {
     await mockCdpIds();
 
     expect(await migration.check()).toBeFalsy();
@@ -71,7 +71,8 @@ describe('SCD to MCD CDP Migration', () => {
     expect(await migration.check()).toBeTruthy();
   });
 
-  test.only('migrate scd cdp to mcd, pay fee with mkr', async () => {
+  test('migrate scd cdp to mcd, pay fee with mkr', async () => {
+    expect.assertions(3);
     const migrationContract = maker
       .service('smartContract')
       .getContract('MIGRATION');
@@ -79,22 +80,33 @@ describe('SCD to MCD CDP Migration', () => {
 
     await openLockAndDrawScdCdp(100);
     const cdp2 = await openLockAndDrawScdCdp(10);
+    expect(cdp2.id).toBeDefined();
 
     const sai = maker.getToken(SAI);
     const mkr = maker.getToken(MKR);
     await mkr.approveUnlimited(proxyAddress);
     await sai.approveUnlimited(migrationContract.address);
 
-    await migrationContract.swapSaiToDai(SAI(100).toFixed('wei'));
+    await migrationContract.swapSaiToDai(SAI(50).toFixed('wei'));
 
-    let error;
+    const mcdCdpsBeforeMigration = await maker.service('mcd:cdpManager').getCdpIds(proxyAddress);
+    await migration.execute(cdp2.id);
+    const newMaker = await migrationMaker();
+    const mcdCdpsAfterMigration = await newMaker.service('mcd:cdpManager').getCdpIds(proxyAddress);
+
     try {
-      await migration.execute(cdp2.id);
-      // console.log(await migration.execute(cdp.id, 'GEM', 100));
+      await maker.getCdp(cdp2.id);
     } catch (err) {
-      error = err;
-      console.error(err);
+      expect(err.message).toEqual('That CDP doesn\'t exist--try opening a new one.');
     }
-    expect(error).not.toBeDefined();
+    expect(mcdCdpsAfterMigration.length).toEqual(mcdCdpsBeforeMigration.length + 1);
+  });
+  
+  xtest('migrate scd cdp to mcd, pay fee with sai', async () => {
+    // await migration.execute(cdp2.id, 'GEM', 10);
+  });
+  
+  xtest('migrate scd cdp to mcd, pay fee with debt', async () => {
+    // await migration.execute(cdp2.id, 'DEBT', 10);
   });
 });
