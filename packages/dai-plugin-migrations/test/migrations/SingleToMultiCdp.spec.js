@@ -1,5 +1,5 @@
-import { migrationMaker } from './helpers';
-import { mockCdpIds } from './helpers/mocks';
+import { migrationMaker } from '../helpers';
+import { mockCdpIds } from '../helpers/mocks';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { SAI } from '../../src/index';
