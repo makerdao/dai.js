@@ -40,7 +40,7 @@ async function openLockAndDrawScdCdp(drawAmount, maker) {
   return cdp;
 }
 
-test('kovan', async () => {
+xtest('kovan', async () => {
   const maker = await mcdMaker();
   const sai = maker.getToken(SAI);
   const mkr = maker.getToken(MKR);

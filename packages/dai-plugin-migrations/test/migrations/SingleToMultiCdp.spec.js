@@ -44,69 +44,80 @@ describe('SCD to MCD CDP Migration', () => {
     await restoreSnapshot(snapshotData, maker);
   });
 
-  test('if there are no cdps, return false', async () => {
-    await mockCdpIds();
+  describe('checks', () => {
+    xtest('if there are no cdps, return false', async () => {
+      await mockCdpIds();
 
-    expect(await migration.check()).toBeFalsy();
-  });
-
-  test('if there are cdps owned by a proxy, but no cdps owned by the account, return true', async () => {
-    await mockCdpIds({ forProxy: [{ id: '123' }] });
-
-    expect(await migration.check()).toBeTruthy();
-  });
-
-  test('if there are cdps owned by the account, but no cdps owned by a proxy, return true', async () => {
-    await mockCdpIds({ forAccount: [{ id: '123' }] });
-
-    expect(await migration.check()).toBeTruthy();
-  });
-
-  test('if there are both cdps owned by the account and proxy, return true', async () => {
-    await mockCdpIds({
-      forAccount: [{ id: '123' }],
-      forProxy: [{ id: '234' }]
+      expect(await migration.check()).toBeFalsy();
     });
 
-    expect(await migration.check()).toBeTruthy();
+    test('if there are cdps owned by a proxy, but no cdps owned by the account, return true', async () => {
+      await mockCdpIds({ forProxy: [{ id: '123' }] });
+
+      expect(await migration.check()).toBeTruthy();
+    });
+
+    test('if there are cdps owned by the account, but no cdps owned by a proxy, return true', async () => {
+      await mockCdpIds({ forAccount: [{ id: '123' }] });
+
+      expect(await migration.check()).toBeTruthy();
+    });
+
+    test('if there are both cdps owned by the account and proxy, return true', async () => {
+      await mockCdpIds({
+        forAccount: [{ id: '123' }],
+        forProxy: [{ id: '234' }]
+      });
+
+      expect(await migration.check()).toBeTruthy();
+    });
   });
 
-  test('migrate scd cdp to mcd, pay fee with mkr', async () => {
-    expect.assertions(3);
-    const migrationContract = maker
-      .service('smartContract')
-      .getContract('MIGRATION');
-    const proxyAddress = await maker.service('proxy').currentProxy();
+  describe('migrations', () => {
+    let cdp, proxyAddress, migrationContract;
 
-    await openLockAndDrawScdCdp(100);
-    const cdp2 = await openLockAndDrawScdCdp(10);
-    expect(cdp2.id).toBeDefined();
+    beforeEach(async () => {
+      migrationContract = maker
+        .service('smartContract')
+        .getContract('MIGRATION');
+      proxyAddress = await maker.service('proxy').currentProxy();
+      await openLockAndDrawScdCdp(100);
+      cdp = await openLockAndDrawScdCdp(10);
+      await maker.getToken(MKR).approveUnlimited(proxyAddress);
+      await maker.getToken(SAI).approveUnlimited(migrationContract.address);
+      await migrationContract.swapSaiToDai(SAI(50).toFixed('wei'));
+    });
 
-    const sai = maker.getToken(SAI);
-    const mkr = maker.getToken(MKR);
-    await mkr.approveUnlimited(proxyAddress);
-    await sai.approveUnlimited(migrationContract.address);
+    test('migrate scd cdp to mcd, pay fee with mkr', async () => {
+      expect.assertions(2);
 
-    await migrationContract.swapSaiToDai(SAI(50).toFixed('wei'));
+      const mcdCdpsBeforeMigration = await maker
+        .service('mcd:cdpManager')
+        .getCdpIds(proxyAddress);
+      await migration.execute(cdp.id);
+      const newMaker = await migrationMaker();
+      const mcdCdpsAfterMigration = await newMaker
+        .service('mcd:cdpManager')
+        .getCdpIds(proxyAddress);
 
-    const mcdCdpsBeforeMigration = await maker.service('mcd:cdpManager').getCdpIds(proxyAddress);
-    await migration.execute(cdp2.id);
-    const newMaker = await migrationMaker();
-    const mcdCdpsAfterMigration = await newMaker.service('mcd:cdpManager').getCdpIds(proxyAddress);
+      try {
+        await maker.getCdp(cdp.id);
+      } catch (err) {
+        expect(err.message).toEqual(
+          "That CDP doesn't exist--try opening a new one."
+        );
+      }
+      expect(mcdCdpsAfterMigration.length).toEqual(
+        mcdCdpsBeforeMigration.length + 1
+      );
+    });
 
-    try {
-      await maker.getCdp(cdp2.id);
-    } catch (err) {
-      expect(err.message).toEqual('That CDP doesn\'t exist--try opening a new one.');
-    }
-    expect(mcdCdpsAfterMigration.length).toEqual(mcdCdpsBeforeMigration.length + 1);
-  });
-  
-  xtest('migrate scd cdp to mcd, pay fee with sai', async () => {
-    // await migration.execute(cdp2.id, 'GEM', 10);
-  });
-  
-  xtest('migrate scd cdp to mcd, pay fee with debt', async () => {
-    // await migration.execute(cdp2.id, 'DEBT', 10);
+    xtest('migrate scd cdp to mcd, pay fee with sai', async () => {
+      // await migration.execute(cdp.id, 'GEM', 10);
+    });
+
+    xtest('migrate scd cdp to mcd, pay fee with debt', async () => {
+      // await migration.execute(cdp.id, 'DEBT', 10);
+    });
   });
 });
