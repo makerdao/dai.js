@@ -10,17 +10,17 @@ describe('SDai to MDai Migration', () => {
     migration = service.getMigration(Migrations.SDAI_TO_MDAI);
   });
 
-  test('if the account has no SDAI, return false', async () => {
+  test('if the account has no SDAI, return 0', async () => {
     const amount = await maker
       .service('token')
       .getToken('DAI')
       .balance();
     expect(amount.toNumber()).toBe(0);
 
-    expect(await migration.check()).toBeFalsy();
+    expect((await migration.check()).eq(0)).toBeTruthy();
   });
 
-  test('if the account has some SDAI, return true', async () => {
+  test('if the account has some SDAI, return the balance', async () => {
     const proxy = await maker.service('proxy').ensureProxy();
     await maker.service('cdp').openProxyCdpLockEthAndDrawDai(0.1, 1, proxy);
 
@@ -30,6 +30,6 @@ describe('SDai to MDai Migration', () => {
       .balance();
     expect(amount.toNumber()).toBe(1);
 
-    expect(await migration.check()).toBeTruthy();
+    expect((await migration.check()).eq(1)).toBeTruthy();
   });
 });

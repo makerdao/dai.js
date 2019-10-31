@@ -6,7 +6,6 @@ export default class SDaiToMDai {
 
   async check() {
     const sai = this._manager.get('token').getToken('DAI');
-    const balance = await sai.balance();
-    return balance.gt(0);
+    return sai.balance();
   }
 }

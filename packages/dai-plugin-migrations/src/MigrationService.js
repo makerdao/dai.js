@@ -6,10 +6,11 @@ import GlobalSettlementCollateralClaims from './migrations/GlobalSettlementColla
 import GlobalSettlementDaiRedeemer from './migrations/GlobalSettlementDaiRedeemer';
 import SDaiToMDai from './migrations/SDaiToMDai';
 import MkrRedeemer from './migrations/MkrRedeemer';
+const { SINGLE_TO_MULTI_CDP, SDAI_TO_MDAI } = Migrations;
 
 const migrations = {
-  [Migrations.SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
-  [Migrations.SDAI_TO_MDAI]: SDaiToMDai,
+  [SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
+  [SDAI_TO_MDAI]: SDaiToMDai,
   [Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI]: GlobalSettlementSavingsDai,
   [Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS]: GlobalSettlementCollateralClaims,
   [Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER]: GlobalSettlementDaiRedeemer,
@@ -26,7 +27,25 @@ export default class MigrationService extends PublicService {
   }
 
   getMigration(id) {
-    const migration = migrations[id];
-    return migration && new migration(this);
+    return this._getCachedMigration(id);
+  }
+
+  async runAllChecks() {
+    return {
+      [SINGLE_TO_MULTI_CDP]: await this.getMigration(
+        SINGLE_TO_MULTI_CDP
+      ).check(),
+      [SDAI_TO_MDAI]: await this.getMigration(SDAI_TO_MDAI).check()
+    };
+  }
+
+  _getCachedMigration(id) {
+    if (!this._cache) this._cache = {};
+    if (!this._cache[id]) {
+      const migration = migrations[id];
+      if (!migration) return;
+      this._cache[id] = new migration(this);
+    }
+    return this._cache[id];
   }
 }

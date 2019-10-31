@@ -2,6 +2,8 @@ import tracksTransactions from '@makerdao/dai-plugin-mcd/src/utils/tracksTransac
 import { getIdBytes } from '../utils';
 import { SAI } from '..';
 
+import { stringToBytes } from '../utils';
+
 export default class SingleToMultiCdp {
   constructor(manager) {
     this._manager = manager;
@@ -14,8 +16,8 @@ export default class SingleToMultiCdp {
     const idsFromProxy = await this._manager.get('cdp').getCdpIds(proxyAddress);
     const idsFromAddress = await this._manager.get('cdp').getCdpIds(address);
     return idsFromProxy.length + idsFromAddress.length > 0
-      ? idsFromProxy.concat(idsFromAddress)
-      : [];
+      ? { [proxyAddress]: idsFromProxy, [address]: idsFromAddress }
+      : {};
   }
 
   @tracksTransactions
@@ -63,5 +65,25 @@ export default class SingleToMultiCdp {
       method: 'migrate',
       args: defaultArgs
     };
+  }
+
+  async migrationSaiAvailable() {
+    const vat = this._manager.get('smartContract').getContract('MCD_VAT_1');
+    const migrationContractAddress = this._manager
+      .get('smartContract')
+      .getContract('MIGRATION').address;
+
+    const migrationCdp = await vat.urns(
+      stringToBytes('SAI'),
+      migrationContractAddress
+    );
+
+    // for technical reasons, the liquidation ratio of the mcd migration cdp cannot be 0.
+    // but, it will be close enough that the migration contract will
+    // not be able to free only the last 1 wei of sai
+    const migrationSaiLiquidity = SAI.wei(migrationCdp.ink);
+    return migrationSaiLiquidity.eq(0)
+      ? migrationSaiLiquidity
+      : migrationSaiLiquidity.minus(SAI.wei(1));
   }
 }

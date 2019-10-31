@@ -2,15 +2,12 @@
  jobs:
    build:
      docker:
-       - image: levity/dapptools-node
+       - image: levity/dapptools-node-latest
      steps:
        - checkout
        - run:
           name: Install dependencies
-          command: |
-            npm i --no-save yarn
-            npm i -g codecov
-            yarn
+          command: yarn
        - run:
           name: Run tests
           command: |
@@ -19,4 +16,8 @@
             yarn build
             yarn test:build
             yarn coverage
-            codecov
+       - run:
+          name: codecov
+          command: |
+            npm i --no-save codecov
+            ./node_modules/.bin/codecov
