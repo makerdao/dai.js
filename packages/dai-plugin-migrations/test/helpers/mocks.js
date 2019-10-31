@@ -2,6 +2,21 @@ import BigNumber from 'bignumber.js';
 import { RAY } from '../../src/constants';
 import { bytesToString } from './';
 
+export async function mockCdpIds(maker, { forAccount, forProxy } = {}) {
+  const currentAddress = maker.currentAddress();
+  const currentProxy = await maker.currentProxy();
+
+  maker.service('cdp').getCdpIds = jest.fn().mockImplementation(addr => {
+    if (addr === currentAddress) {
+      return forAccount || [];
+    } else if (addr === currentProxy) {
+      return forProxy || [];
+    } else {
+      return [];
+    }
+  });
+}
+
 export const globalSettlement = {
   beforeCage: () => ({
     live: async () => true,
