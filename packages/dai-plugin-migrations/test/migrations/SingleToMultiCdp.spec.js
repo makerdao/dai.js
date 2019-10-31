@@ -46,10 +46,10 @@ describe('SCD to MCD CDP Migration', () => {
   describe('checks', () => {
     test('if there are no cdps, return false', async () => {
       await mockCdpIds(maker);
-  
+
       expect(await migration.check()).toMatchObject({});
     });
-  
+
     test('if there are cdps owned by a proxy, but no cdps owned by the account, return true', async () => {
       await mockCdpIds(maker, { forProxy: [{ id: '123' }] });
       expect(await migration.check()).toMatchObject({
@@ -57,7 +57,7 @@ describe('SCD to MCD CDP Migration', () => {
         [maker.currentAddress()]: []
       });
     });
-  
+
     test('if there are cdps owned by the account, but no cdps owned by a proxy, return true', async () => {
       await mockCdpIds(maker, { forAccount: [{ id: '123' }] });
       expect(await migration.check()).toMatchObject({
@@ -65,7 +65,7 @@ describe('SCD to MCD CDP Migration', () => {
         [maker.currentAddress()]: [{ id: '123' }]
       });
     });
-  
+
     test('if there are both cdps owned by the account and proxy, return true', async () => {
       await mockCdpIds(maker, {
         forAccount: [{ id: '123' }],
@@ -76,7 +76,7 @@ describe('SCD to MCD CDP Migration', () => {
         [maker.currentAddress()]: [{ id: '123' }]
       });
     });
-  
+
     test('if there is no sai locked in the mcd migration cdp, return 0', async () => {
       const saiLiquidity = await migration.migrationSaiAvailable();
       expect(saiLiquidity.toFixed('wei')).toBe('0');
