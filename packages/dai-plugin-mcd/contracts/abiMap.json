@@ -35,5 +35,7 @@
   "MULTICALL": "MultiCall",
   "PIP_*": "DSValue",
   "PROXY_ACTIONS": "DssProxyActions",
-  "PROXY_ACTIONS_DSR": "DssProxyActionsDsr"
+  "PROXY_ACTIONS_DSR": "DssProxyActionsDsr",
+  "MIGRATION": "ScdMcdMigration",
+  "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions"
 }
