@@ -3,6 +3,7 @@ import { getIdBytes } from '../utils';
 import { SAI } from '..';
 
 import { stringToBytes } from '../utils';
+import { MKR } from '@makerdao/dai-plugin-mcd/dist';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -35,7 +36,22 @@ export default class SingleToMultiCdp {
       maxPayAmount
     );
 
+    await this._requireAllowance(cupId);
     return migrationProxy[method](...args, { dsProxy: true });
+  }
+
+  async _requireAllowance(cupId) {
+    // This will need to be updated to work with sai too
+    const address = this._manager.get('web3').currentAddress();
+    const proxyAddress = await this._manager.get('proxy').currentProxy();
+    const cdp = await this._manager.get('cdp').getCdp(cupId);
+    const fee = await cdp.getGovernanceFee();
+    const mkr = this._getToken(MKR);
+    const allowance = await mkr.allowance(address, proxyAddress);
+
+    if (allowance.toNumber() < fee.toNumber()) {
+      await mkr.approve(proxyAddress, fee.toNumber());
+    }
   }
 
   _setMethodAndArgs(payment, defaultArgs, maxPayAmount) {
@@ -85,5 +101,9 @@ export default class SingleToMultiCdp {
     return migrationSaiLiquidity.eq(0)
       ? migrationSaiLiquidity
       : migrationSaiLiquidity.minus(SAI.wei(1));
+  }
+
+  _getToken(symbol) {
+    return this._manager.get('token').getToken(symbol);
   }
 }

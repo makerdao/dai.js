@@ -96,7 +96,6 @@ describe('SCD to MCD CDP Migration', () => {
       proxyAddress = await maker.service('proxy').currentProxy();
       await openLockAndDrawScdCdp(100);
       cdp = await openLockAndDrawScdCdp(10);
-      await maker.getToken(MKR).approveUnlimited(proxyAddress);
       await migrateSaiToDai(50);
     });
 
