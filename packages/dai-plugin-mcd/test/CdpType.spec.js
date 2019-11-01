@@ -1,7 +1,7 @@
 import { createCurrencyRatio } from '@makerdao/currency';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import { ETH, MDAI, USD, REP } from '../src';
+import { ETH, MDAI, USD, BAT } from '../src';
 const { CDP_MANAGER, CDP_TYPE, QUERY_API } = ServiceRoles;
 
 let maker, service;
@@ -14,7 +14,7 @@ beforeAll(async () => {
 
 // these CDP types should be available to the Maker instance because
 // of the configuration passed into it (see test/helpers.js)
-const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['REP-A', REP]];
+const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['BAT-A', BAT]];
 
 /*
   The following arrays are expected values for each tested
@@ -25,7 +25,7 @@ const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['REP-A', REP]];
 const systemValues = {
   'ETH-A': [2, 4, 100000, 1.5, 0.05, '5.0'],
   'ETH-B': [2, 4, 100000, 2, 0.05, '4.0'],
-  'REP-A': [2, 4, 5000, 1.8, 0.08, '10.0']
+  'BAT-A': [2, 4, 5000, 2, 0.08, '10.5']
 };
 
 describe.each(scenarios)('%s', (ilk, GEM) => {

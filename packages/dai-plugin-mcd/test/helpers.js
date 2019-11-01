@@ -14,10 +14,11 @@ export async function mcdMaker({
   prefetch = true,
   log = false,
   addressOverrides,
+  cdpTypes,
   ...settings
 } = {}) {
   const maker = await Maker.create(preset, {
-    plugins: [[McdPlugin, { addressOverrides, network, prefetch }]],
+    plugins: [[McdPlugin, { cdpTypes, addressOverrides, network, prefetch }]],
     web3: {
       pollingInterval: 100
     },

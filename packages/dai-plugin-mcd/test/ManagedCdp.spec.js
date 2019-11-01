@@ -10,7 +10,15 @@ const { CDP_MANAGER, QUERY_API } = ServiceRoles;
 let dai, maker, proxy, snapshotData, txMgr;
 
 beforeAll(async () => {
-  maker = await mcdMaker();
+  maker = await mcdMaker({
+    cdpTypes: [
+      { currency: ETH, ilk: 'ETH-A' },
+      { currency: REP, ilk: 'REP-A' },
+      { currency: OMG, ilk: 'OMG-A' },
+      { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+      { currency: GNT, ilk: 'GNT-A' }
+    ]
+  });
   dai = maker.getToken(MDAI);
   // the current account has a proxy only because the testchain setup script
   // creates it -- this is probably not a future-proof assumption

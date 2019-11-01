@@ -1,7 +1,4 @@
-import {
-  mcdMaker,
-  setupCollateral
-} from './helpers';
+import { mcdMaker, setupCollateral } from './helpers';
 import { setMethod, transferToBag } from '../src/CdpManager';
 import { ServiceRoles } from '../src/constants';
 import { ETH, MDAI, GNT, DGD } from '../src';
@@ -13,7 +10,14 @@ import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider'
 let maker, cdpMgr, txMgr, snapshotData;
 
 beforeAll(async () => {
-  maker = await mcdMaker();
+  maker = await mcdMaker({
+    cdpTypes: [
+      { currency: ETH, ilk: 'ETH-A' },
+      { currency: ETH, ilk: 'ETH-B' },
+      { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+      { currency: GNT, ilk: 'GNT-A' }
+    ]
+  });
   cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   txMgr = maker.service('transactionManager');
   snapshotData = await takeSnapshot(maker);
@@ -64,7 +68,10 @@ test('getCdp looks up ilk and has cache', async () => {
 
 test('getCdp can disable prefetch', async () => {
   const cdp = await cdpMgr.open('ETH-A');
-  const sameCdp = await cdpMgr.getCdp(cdp.id, { prefetch: false, cache: false });
+  const sameCdp = await cdpMgr.getCdp(cdp.id, {
+    prefetch: false,
+    cache: false
+  });
   expect(sameCdp._urnInfoPromise).toBeUndefined();
 });
 

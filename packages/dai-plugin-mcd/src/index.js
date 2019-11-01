@@ -76,20 +76,8 @@ export const GNT = createCurrency('GNT');
 const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: ETH, ilk: 'ETH-B' },
-  { currency: REP, ilk: 'REP-A' },
-  // { currency: REP, ilk: 'REP-B' },
   { currency: ZRX, ilk: 'ZRX-A' },
-  { currency: OMG, ilk: 'OMG-A' },
-  { currency: BAT, ilk: 'BAT-A' },
-  { currency: DGD, ilk: 'DGD-A', decimals: 9 },
-  { currency: GNT, ilk: 'GNT-A' },
-
-  // the CDP type below is not present in the testchain snapshot -- its purpose
-  // is to verify that the code does not throw an error if a CDP type is
-  // included that we don't have addresses for, so long as we never attempt to
-  // use it. This flexibility allows us to hardcode extra types for local
-  // testing even though they won't be present on Kovan or mainnet.
-  { currency: ETH, ilk: 'ETH-C' }
+  { currency: BAT, ilk: 'BAT-A' }
 ];
 
 export default {
