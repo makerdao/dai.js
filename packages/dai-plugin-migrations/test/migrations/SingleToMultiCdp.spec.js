@@ -10,8 +10,7 @@ async function drawSaiAndMigrateToDai(drawAmount) {
   const cdp = await maker.openCdp();
   await cdp.lockEth('20');
   await cdp.drawDai(drawAmount);
-  const daiMigration = maker.service(ServiceRoles.MIGRATION).getMigration(Migrations.SDAI_TO_MDAI);
-  await daiMigration.execute(10);
+  await migrateSaiToDai(10)
 }
 
 async function openLockAndDrawScdCdp(drawAmount) {
@@ -21,6 +20,11 @@ async function openLockAndDrawScdCdp(drawAmount) {
   await cdp.drawDai(drawAmount);
   await cdp.give(proxy);
   return cdp;
+}
+
+async function migrateSaiToDai(amount) {
+  const daiMigration = maker.service(ServiceRoles.MIGRATION).getMigration(Migrations.SDAI_TO_MDAI);
+  await daiMigration.execute(amount);
 }
 
 describe('SCD to MCD CDP Migration', () => {
@@ -93,8 +97,7 @@ describe('SCD to MCD CDP Migration', () => {
       await openLockAndDrawScdCdp(100);
       cdp = await openLockAndDrawScdCdp(10);
       await maker.getToken(MKR).approveUnlimited(proxyAddress);
-      await maker.getToken(SAI).approveUnlimited(migrationContract.address);
-      await migrationContract.swapSaiToDai(SAI(50).toFixed('wei'));
+      await migrateSaiToDai(50);
     });
 
     test('migrate scd cdp to mcd, pay fee with mkr', async () => {
