@@ -6,7 +6,7 @@ export const ServiceRoles = {
 
 export const Migrations = {
   SINGLE_TO_MULTI_CDP: 'single-to-multi-cdp',
-  SDAI_TO_MDAI: 'sdai-to-mdai',
+  SAI_TO_DAI: 'sdai-to-mdai',
   GLOBAL_SETTLEMENT_SAVINGS_DAI: 'global-settlement-savings-dai',
   GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS: 'global-settlement-collateral-claims',
   GLOBAL_SETTLEMENT_DAI_REDEEMER: 'global-settlement-dai-redeemer',

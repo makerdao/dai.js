@@ -23,7 +23,7 @@ async function openLockAndDrawScdCdp(drawAmount) {
 }
 
 async function migrateSaiToDai(amount) {
-  const daiMigration = maker.service(ServiceRoles.MIGRATION).getMigration(Migrations.SDAI_TO_MDAI);
+  const daiMigration = maker.service(ServiceRoles.MIGRATION).getMigration(Migrations.SAI_TO_DAI);
   await daiMigration.execute(amount);
 }
 

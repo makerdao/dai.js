@@ -7,7 +7,7 @@ describe('SDai to MDai Migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
     const service = maker.service(ServiceRoles.MIGRATION);
-    migration = service.getMigration(Migrations.SDAI_TO_MDAI);
+    migration = service.getMigration(Migrations.SAI_TO_DAI);
   });
 
   test('if the account has no SDAI, return 0', async () => {
