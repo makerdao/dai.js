@@ -85,8 +85,18 @@ export default class TransactionManager extends PublicService {
     );
   }
 
-  onNewTransaction(callback) {
-    this._newTxListeners.push(callback);
+  onNewTransaction(cb) {
+    this._newTxListeners.push(cb);
+  }
+
+  onTransactionUpdate(cb) {
+    this._tracker._globalListeners.push(cb);
+    return {
+      unsub: () => {
+        const idx = this._tracker._globalListeners.indexOf(cb);
+        if (idx !== -1) this._tracker._globalListeners.splice(idx, 1);
+      }
+    };
   }
 
   getTransaction(promise, label) {
@@ -150,7 +160,10 @@ export default class TransactionManager extends PublicService {
     // up when calling a contract function indirectly via two or more nested
     // service method calls, e.g.
     // EthereumCdpService.lockEth -> WethToken.deposit.
-    if (promise) this._tracker.store(uniqueId(promise), txo);
+    if (promise)
+      this._tracker.store(uniqueId(promise), txo, {
+        globalTxStateUpdates: false
+      });
 
     return minePromise;
   }
@@ -208,20 +221,29 @@ class Tracker {
 
   constructor() {
     this._listeners = {};
+    this._globalListeners = [];
     this._transactions = {};
   }
 
-  store(key, tx) {
+  store(key, tx, options = { globalTxStateUpdates: true }) {
     this._init(key);
     this._transactions[key].push(tx);
 
-    for (let event of this.constructor.states) {
-      tx.on(event, () =>
-        this._listeners[key][event].forEach(cb =>
+    for (let state of this.constructor.states) {
+      tx.on(state, () => {
+        if (options.globalTxStateUpdates) {
+          this._globalListeners.forEach(cb =>
+            tx.error ? cb(tx, state, tx.error) : cb(tx, state)
+          );
+        }
+        this._listeners[key][state].forEach(cb =>
           tx.error ? cb(tx, tx.error) : cb(tx)
-        )
-      );
+        );
+      });
     }
+
+    if (options.globalTxStateUpdates)
+      this._globalListeners.forEach(cb => cb(tx, 'initialized'));
 
     this._listeners[key].initialized.forEach(cb =>
       tx.error ? cb(tx, tx.error) : cb(tx)
