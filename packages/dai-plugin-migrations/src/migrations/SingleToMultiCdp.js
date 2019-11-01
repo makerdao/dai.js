@@ -1,5 +1,8 @@
+import tracksTransactions from '@makerdao/dai-plugin-mcd/src/utils/tracksTransactions';
+import { getIdBytes } from '../utils';
+import { SAI } from '..';
+
 import { stringToBytes } from '../utils';
-import { SAI } from '../index';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -15,6 +18,53 @@ export default class SingleToMultiCdp {
     return idsFromProxy.length + idsFromAddress.length > 0
       ? { [proxyAddress]: idsFromProxy, [address]: idsFromAddress }
       : {};
+  }
+
+  @tracksTransactions
+  async execute(cupId, payment = 'MKR', maxPayAmount) {
+    const migrationProxy = this._manager
+      .get('smartContract')
+      .getContract('MIGRATION_PROXY_ACTIONS');
+    const migration = this._manager
+      .get('smartContract')
+      .getContract('MIGRATION');
+    const defaultArgs = [migration.address, getIdBytes(cupId)];
+    const { method, args } = this._setMethodAndArgs(
+      payment,
+      defaultArgs,
+      maxPayAmount
+    );
+
+    return migrationProxy[method](...args, { dsProxy: true });
+  }
+
+  _setMethodAndArgs(payment, defaultArgs, maxPayAmount) {
+    const otc = this._manager.get('smartContract').getContract('MAKER_OTC')
+      .address;
+
+    // to do:
+    // if (payment === 'GEM') {
+    //   const gem = this._manager
+    //     .get('token')
+    //     .getToken('DAI')
+    //     .address();
+    //   return {
+    //     method: 'migratePayFeeWithGem',
+    //     args: [...defaultArgs, otc, gem, SAI(maxPayAmount).toFixed('wei')]
+    //   };
+    // }
+
+    // if (payment === 'DEBT') {
+    //   return {
+    //     method: 'migratePayFeeWithDebt',
+    //     args: [...defaultArgs, otc, SAI(maxPayAmount).toFixed('wei')]
+    //   };
+    // }
+
+    return {
+      method: 'migrate',
+      args: defaultArgs
+    };
   }
 
   async migrationSaiAvailable() {

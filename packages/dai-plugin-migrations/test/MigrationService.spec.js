@@ -15,6 +15,21 @@ beforeAll(async () => {
   service = maker.service(ServiceRoles.MIGRATION);
 });
 
+test('can access migration contracts', async () => {
+  const managerAddress = maker
+    .service('smartContract')
+    .getContract('CDP_MANAGER').address;
+  const migration = maker.service('smartContract').getContract('MIGRATION');
+  const migrationProxyActions = maker
+    .service('smartContract')
+    .getContract('MIGRATION_PROXY_ACTIONS');
+  const migrationManager = await migration.cdpManager();
+
+  expect(migration).toBeDefined();
+  expect(migrationManager.toLowerCase()).toBe(managerAddress);
+  expect(migrationProxyActions).toBeDefined();
+});
+
 test('can fetch a list of all migrations', () => {
   const ids = service.getAllMigrationsIds();
 

@@ -21,8 +21,21 @@ for CONTRACT in "MCD_END","END" "MCD_VAT","VAT" "GET_CDPS","GetCdps" "CDP_MANAGE
 do
   IFS=',' read NAME ABI <<< "${CONTRACT}"
   ADDRESS=`jq ".$NAME" "$SOURCE/out/addresses-mcd.json"`
+  KOVAN_ADDRESS=`jq ".$NAME" "$CONTRACTS/../../dai-plugin-mcd/contracts/addresses/kovan.json"`
   SUFFIX="_1"
   jq ".$NAME$SUFFIX=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-  jq ".$NAME$SUFFIX=$ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
+  jq ".$NAME$SUFFIX=$KOVAN_ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
   cp $SOURCE/out/mcd/$ABI.abi $CONTRACTS/abis/$ABI.json
 done
+
+ADDRESS=`jq ".MIGRATION" "$CONTRACTS/../../dai-plugin-mcd/contracts/addresses/testnet.json"`
+KOVAN_ADDRESS=`jq ".MIGRATION" "$CONTRACTS/../../dai-plugin-mcd/contracts/addresses/kovan.json"`
+jq ".MIGRATION=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
+jq ".MIGRATION=$KOVAN_ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
+cp $CONTRACTS/../../dai-plugin-mcd/contracts/abis/ScdMcdMigration.json $CONTRACTS/abis/ScdMcdMigration.json
+
+ADDRESS=`jq ".MIGRATION_PROXY_ACTIONS" "$CONTRACTS/../../dai-plugin-mcd/contracts/addresses/testnet.json"`
+KOVAN_ADDRESS=`jq ".MIGRATION_PROXY_ACTIONS" "$CONTRACTS/../../dai-plugin-mcd/contracts/addresses/kovan.json"`
+jq ".MIGRATION_PROXY_ACTIONS=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
+jq ".MIGRATION_PROXY_ACTIONS=$KOVAN_ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
+cp $CONTRACTS/../../dai-plugin-mcd/contracts/abis/MigrationProxyActions.json $CONTRACTS/abis/MigrationProxyActions.json
