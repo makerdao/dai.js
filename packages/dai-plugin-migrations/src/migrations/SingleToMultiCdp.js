@@ -49,8 +49,8 @@ export default class SingleToMultiCdp {
     const mkr = this._getToken(MKR);
     const allowance = await mkr.allowance(address, proxyAddress);
 
-    if (allowance.toNumber() < fee.toNumber()) {
-      await mkr.approve(proxyAddress, fee.toNumber());
+    if (allowance.toNumber() < fee.toFixed(28)) {
+      await mkr.approve(proxyAddress, fee.toFixed(28));
     }
   }
 
