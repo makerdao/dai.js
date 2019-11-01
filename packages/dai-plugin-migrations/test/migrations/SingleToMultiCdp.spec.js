@@ -9,7 +9,7 @@ async function drawSaiAndMigrateToDai(drawAmount) {
   const cdp = await maker.openCdp();
   await cdp.lockEth('20');
   await cdp.drawDai(drawAmount);
-  await migrateSaiToDai(10)
+  await migrateSaiToDai(10);
 }
 
 async function openLockAndDrawScdCdp(drawAmount) {
@@ -22,7 +22,9 @@ async function openLockAndDrawScdCdp(drawAmount) {
 }
 
 async function migrateSaiToDai(amount) {
-  const daiMigration = maker.service(ServiceRoles.MIGRATION).getMigration(Migrations.SAI_TO_DAI);
+  const daiMigration = maker
+    .service(ServiceRoles.MIGRATION)
+    .getMigration(Migrations.SAI_TO_DAI);
   await daiMigration.execute(amount);
 }
 
