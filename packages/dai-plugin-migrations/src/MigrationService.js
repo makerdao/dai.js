@@ -19,7 +19,7 @@ const migrations = {
 
 export default class MigrationService extends PublicService {
   constructor(name = ServiceRoles.MIGRATION) {
-    super(name, ['smartContract', 'accounts', 'cdp', 'proxy', 'token']);
+    super(name, ['smartContract', 'accounts', 'cdp', 'proxy', 'token', 'web3']);
   }
 
   getAllMigrationsIds() {

@@ -105,14 +105,11 @@ describe('SCD to MCD CDP Migration', () => {
     test('migrate scd cdp to mcd, pay fee with mkr', async () => {
       expect.assertions(2);
 
-      const mcdCdpsBeforeMigration = await maker
-        .service('mcd:cdpManager')
-        .getCdpIds(proxyAddress);
+      const manager = maker.service('mcd:cdpManager');
+      const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
       await migration.execute(cdp.id);
-      const newMaker = await migrationMaker();
-      const mcdCdpsAfterMigration = await newMaker
-        .service('mcd:cdpManager')
-        .getCdpIds(proxyAddress);
+      await manager.reset();
+      const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
 
       try {
         await maker.getCdp(cdp.id);

@@ -32,4 +32,18 @@ describe('SDai to MDai Migration', () => {
 
     expect((await migration.check()).eq(1)).toBeTruthy();
   });
+
+  test('execute migrates sai to dai', async () => {
+    const address = maker.service('web3').currentAddress();
+    const saiBalanceBeforeMigration = await migration._sai.balanceOf(address);
+    const daiBalanceBeforeMigration = await maker.service('token').getToken('MDAI').balanceOf(address);
+
+    await migration.execute(1);
+
+    const saiBalanceAfterMigration = await migration._sai.balanceOf(address);
+    const daiBalanceAfterMigration = await maker.service('token').getToken('MDAI').balanceOf(address);
+
+    expect(saiBalanceBeforeMigration.toNumber()).toEqual(saiBalanceAfterMigration.toNumber() + 1);
+    expect(daiBalanceBeforeMigration.toNumber()).toEqual(daiBalanceAfterMigration.toNumber() - 1);
+  });
 });
