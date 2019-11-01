@@ -73,42 +73,36 @@ export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
 
+const defaultCdpTypes = [
+  { currency: ETH, ilk: 'ETH-A' },
+  { currency: ETH, ilk: 'ETH-B' },
+  { currency: REP, ilk: 'REP-A' },
+  // { currency: REP, ilk: 'REP-B' },
+  { currency: ZRX, ilk: 'ZRX-A' },
+  { currency: OMG, ilk: 'OMG-A' },
+  { currency: BAT, ilk: 'BAT-A' },
+  { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+  { currency: GNT, ilk: 'GNT-A' },
+
+  // the CDP type below is not present in the testchain snapshot -- its purpose
+  // is to verify that the code does not throw an error if a CDP type is
+  // included that we don't have addresses for, so long as we never attempt to
+  // use it. This flexibility allows us to hardcode extra types for local
+  // testing even though they won't be present on Kovan or mainnet.
+  { currency: ETH, ilk: 'ETH-C' }
+];
+
 export default {
-  addConfig: (_, { cdpTypes, override, prefetch = true } = {}) => {
-    if (override) {
-      const { addresses, network } = override;
-      const overridedContracts = mapValues(
-        addContracts,
-        (contractDetails, name) => {
-          if (contractDetails.address[network]) {
-            return {
-              ...contractDetails,
-              address: addresses[name] || contractDetails.address
-            };
-          } else if (addresses[name]) {
-            const { address: rest } = contractDetails;
-            return {
-              ...contractDetails,
-              address: {
-                [network]: addresses[name],
-                ...rest
-              }
-            };
-          }
-        }
-      );
-
-      addContracts = Object.entries(overridedContracts)
-        .filter(([, v]) => v)
-        .reduce(
-          (acc, [k, v]) => ({
-            [k]: v,
-            ...acc
-          }),
-          {}
-        );
+  addConfig: (
+    _,
+    { cdpTypes = defaultCdpTypes, addressOverrides, prefetch = true } = {}
+  ) => {
+    if (addressOverrides) {
+      addContracts = mapValues(addContracts, (contractDetails, name) => ({
+        ...contractDetails,
+        address: addressOverrides[name] || contractDetails.address
+      }));
     }
-
     const tokens = uniqBy(cdpTypes, 'currency').map(
       ({ currency, address, abi, decimals }) => {
         const data =
