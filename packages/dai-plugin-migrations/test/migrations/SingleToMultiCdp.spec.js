@@ -10,13 +10,8 @@ async function drawSaiAndMigrateToDai(drawAmount) {
   const cdp = await maker.openCdp();
   await cdp.lockEth('20');
   await cdp.drawDai(drawAmount);
-  const migrationContract = maker
-    .service('smartContract')
-    .getContract('MIGRATION');
-
-  const sai = maker.getToken(SAI);
-  await sai.approveUnlimited(migrationContract.address);
-  await migrationContract.swapSaiToDai(SAI(10).toFixed('wei'));
+  const daiMigration = maker.service(ServiceRoles.MIGRATION).getMigration(Migrations.SDAI_TO_MDAI);
+  await daiMigration.execute(10);
 }
 
 async function openLockAndDrawScdCdp(drawAmount) {
