@@ -101,13 +101,23 @@ describe('SCD to MCD CDP Migration', () => {
     });
 
     test('migrate scd cdp to mcd, pay fee with mkr', async () => {
-      expect.assertions(2);
-
+      expect.assertions(4);
       const manager = maker.service('mcd:cdpManager');
+
+      const scdCollateral = await cdp.getCollateralValue();
+      const scdDebt = await cdp.getDebtValue();
       const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
+
       await migration.execute(cdp.id);
       await manager.reset();
+
       const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
+      const mcdCdp = await manager.getCdp(mcdCdpsAfterMigration[0].id);
+      const mcdCollateral = mcdCdp.collateralAmount.toNumber();
+      const mcdDebt = mcdCdp.debtValue.toNumber();
+
+      expect(mcdCollateral).toEqual(scdCollateral.toNumber());
+      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber());
 
       try {
         await maker.getCdp(cdp.id);
@@ -116,6 +126,7 @@ describe('SCD to MCD CDP Migration', () => {
           "That CDP doesn't exist--try opening a new one."
         );
       }
+
       expect(mcdCdpsAfterMigration.length).toEqual(
         mcdCdpsBeforeMigration.length + 1
       );
