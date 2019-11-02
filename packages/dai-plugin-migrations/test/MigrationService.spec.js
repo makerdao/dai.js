@@ -50,9 +50,7 @@ test('getting each migration returns a valid migration', () => {
   expect(service.getMigration(Migrations.SINGLE_TO_MULTI_CDP)).toBeInstanceOf(
     SingleToMultiCdp
   );
-  expect(service.getMigration(Migrations.SAI_TO_DAI)).toBeInstanceOf(
-    SaiToDai
-  );
+  expect(service.getMigration(Migrations.SAI_TO_DAI)).toBeInstanceOf(SaiToDai);
   expect(
     service.getMigration(Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI)
   ).toBeInstanceOf(GlobalSettlementSavingsDai);
@@ -72,7 +70,7 @@ test('getting a non-existent migration returns undefined', () => {
 });
 
 test('runAllChecks', async () => {
-  mockCdpIds(maker);
+  await mockCdpIds(maker);
   const result = await service.runAllChecks();
   expect(result).toEqual({
     [Migrations.SAI_TO_DAI]: expect.anything(),

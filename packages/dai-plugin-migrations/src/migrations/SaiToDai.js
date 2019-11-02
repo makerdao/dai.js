@@ -1,6 +1,6 @@
 import { SAI } from '..';
 
-export default class SDaiToMDai {
+export default class SaiToDai {
   constructor(manager) {
     this._manager = manager;
     this._sai = manager.get('token').getToken(SAI);
