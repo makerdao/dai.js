@@ -113,7 +113,7 @@ describe('execute', () => {
       log: false
     });
     await maker.authenticate();
-    tubContract = maker.service('smartContract').getContractByName('SAI_TUB');
+    tubContract = maker.service('smartContract').getContract('SAI_TUB');
     await maker.service('proxy').ensureProxy();
   });
 

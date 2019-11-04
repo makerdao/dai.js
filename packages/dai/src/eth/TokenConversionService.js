@@ -25,7 +25,7 @@ export default class TokenConversionService extends PrivateService {
 
     await this.get('allowance').requireAllowance(
       WETH,
-      this.get('smartContract').getContractByName(contracts.SAI_TUB).address,
+      this.get('smartContract').getContract(contracts.SAI_TUB).address,
       { promise }
     );
     return pethContract.join(amount, { unit, promise });
@@ -47,7 +47,7 @@ export default class TokenConversionService extends PrivateService {
 
     await this.get('allowance').requireAllowance(
       PETH,
-      this.get('smartContract').getContractByName(contracts.SAI_TUB).address,
+      this.get('smartContract').getContract(contracts.SAI_TUB).address,
       { promise }
     );
     return pethToken.exit(amount, { unit, promise });

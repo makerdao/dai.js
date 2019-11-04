@@ -49,7 +49,7 @@ test('reuse the same web3 and log service in test services', () => {
 
 test('wrapped contract call accepts a businessObject option', async () => {
   expect.assertions(3);
-  const dai = services.contract.getContractByName(tokens.DAI);
+  const dai = services.contract.getContract(tokens.DAI);
 
   const businessObject = {
     a: 1,
@@ -74,7 +74,7 @@ test('wrapped contract call accepts a businessObject option', async () => {
 
 test('wrapped contract call adds nonce, web3 settings', async () => {
   const { txMgr, currentAddress, contract } = services;
-  const dai = contract.getContractByName(tokens.DAI);
+  const dai = contract.getContract(tokens.DAI);
   const gasPrice = await txMgr.get('gas').getGasPrice();
   jest.spyOn(txMgr, '_execute');
 
@@ -288,7 +288,7 @@ describe('transaction options', () => {
     service = buildTestSmartContractService();
     await service.manager().authenticate();
     txManager = service.get('transactionManager');
-    contract = service.getContractByName('SAI_TUB');
+    contract = service.getContract('SAI_TUB');
   });
 
   test('sets necessary values', async () => {

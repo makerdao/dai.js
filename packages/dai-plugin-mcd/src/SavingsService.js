@@ -93,7 +93,7 @@ export default class SavingsService extends PublicService {
   }
 
   get _pot() {
-    return this.get('smartContract').getContractByName('MCD_POT');
+    return this.get('smartContract').getContract('MCD_POT');
   }
 
   get _daiAdapterAddress() {

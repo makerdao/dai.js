@@ -6,30 +6,30 @@ import {
 } from '../helpers/serviceBuilders';
 import addresses from '../../contracts/addresses/testnet';
 
-test('getContractByName should have proper error checking', async () => {
+test('getContract should have proper error checking', async () => {
   const service = buildTestSmartContractService();
 
-  expect(() => service.getContractByName('NOT_A_CONTRACT')).toThrow(
+  expect(() => service.getContract('NOT_A_CONTRACT')).toThrow(
     'No contract found for "NOT_A_CONTRACT"'
   );
-  expect(() => service.getContractByName(contracts.SAI_TOP)).toThrow(
+  expect(() => service.getContract(contracts.SAI_TOP)).toThrow(
     'Cannot resolve network ID. Are you connected?'
   );
 
   await service.manager().authenticate();
   expect(() =>
-    service.getContractByName(contracts.SAI_TOP, { version: 999 })
+    service.getContract(contracts.SAI_TOP, { version: 999 })
   ).toThrow(new Error('Cannot find contract SAI_TOP, version 999'));
 });
 
-test('getContractByName should return a functioning contract', async () => {
+test('getContract should return a functioning contract', async () => {
   const service = buildTestSmartContractService();
   await service.manager().authenticate();
   // Read the PETH address by calling TOP.skr(). Confirm that it's the same as the configured address.
-  const gem = await service.getContractByName(contracts.SAI_TOP).gem();
+  const gem = await service.getContract(contracts.SAI_TOP).gem();
 
   expect(gem.toString().toUpperCase()).toEqual(
-    service.getContractByName(tokens.WETH).address.toUpperCase()
+    service.getContract(tokens.WETH).address.toUpperCase()
   );
 });
 
@@ -58,7 +58,7 @@ test('define contract in config', async () => {
   });
 
   await service.manager().authenticate();
-  const contract = service.getContractByName('mock');
+  const contract = service.getContract('mock');
   expect(contract.address).toEqual(mockContractDefinition.address);
   expect(typeof contract.foo).toBe('function');
 });
@@ -92,16 +92,16 @@ test('define contract in config with multiple addresses', async () => {
   });
 
   await service.manager().authenticate();
-  const contract = service.getContractByName('mock');
+  const contract = service.getContract('mock');
   expect(contract.address).toEqual(mockContractDefinition.address.testnet);
   expect(typeof contract.foo).toBe('function');
 });
 
-test('getContractByName returns contract with a valid signer', async () => {
+test('getContract returns contract with a valid signer', async () => {
   const service = buildTestSmartContractService();
 
   await service.manager().authenticate();
-  const { signer } = service.getContractByName(contracts.SAI_TOP);
+  const { signer } = service.getContract(contracts.SAI_TOP);
   expect(signer).toBeTruthy();
   expect(signer.provider).toBeTruthy();
 });
@@ -111,7 +111,7 @@ test('call constant function without account', async () => {
   service.get('web3').get('accounts').hasAccount = jest.fn(() => false);
 
   await service.manager().authenticate();
-  const contract = service.getContractByName(contracts.SAI_TOP);
+  const contract = service.getContract(contracts.SAI_TOP);
   const gem = await contract.gem();
   expect(contract.signer).toBeNull();
   expect(gem.toLowerCase()).toEqual(addresses.GEM);

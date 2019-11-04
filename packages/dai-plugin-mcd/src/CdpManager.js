@@ -407,9 +407,7 @@ export function setMethod(isEth, isGnt, id) {
 
 export async function transferToBag(lockAmount, proxyAddress, cdpMgr) {
   const gntToken = cdpMgr.get('token').getToken(GNT);
-  const gntAdapter = cdpMgr
-    .get('smartContract')
-    .getContractByName('MCD_JOIN_GNT_A');
+  const gntAdapter = cdpMgr.get('smartContract').getContract('MCD_JOIN_GNT_A');
   const bagAddress = await gntAdapter.bags(proxyAddress);
 
   return gntToken.transfer(bagAddress, lockAmount);

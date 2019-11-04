@@ -29,7 +29,7 @@ export default class PriceService extends PrivateService {
   }
 
   _getContract(contract) {
-    return this.get('smartContract').getContractByName(contract);
+    return this.get('smartContract').getContract(contract);
   }
 
   _valueForContract(value, unit) {

@@ -12,8 +12,8 @@ export default class SmartContractService extends PrivateService {
     super(name, ['web3', 'log', 'transactionManager']);
 
     // aliases
-    this.getContract = this.getContractByName;
-    this.getContractAddress = this.getContractAddressByName;
+    this.getContractByName = this.getContract;
+    this.getContractAddressByName = this.getContractAddress;
   }
 
   initialize(settings = {}) {
@@ -46,7 +46,7 @@ export default class SmartContractService extends PrivateService {
     return wrapContract(contract, name, abi, txManager);
   }
 
-  getContractAddressByName(name, { version } = {}) {
+  getContractAddress(name, { version } = {}) {
     const { address } = this._getContractInfo(name, version);
     return address;
   }
@@ -58,7 +58,7 @@ export default class SmartContractService extends PrivateService {
     });
   }
 
-  getContractByName(name, { version, wrap = true } = {}) {
+  getContract(name, { version, wrap = true } = {}) {
     const info = this._getContractInfo(name, version);
     return this.getContractByAddressAndAbi(info.address, info.abi, {
       name,

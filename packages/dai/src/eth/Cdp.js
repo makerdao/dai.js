@@ -26,7 +26,7 @@ export default class Cdp {
   }
 
   _create() {
-    const tubContract = this._smartContractService.getContractByName(
+    const tubContract = this._smartContractService.getContract(
       contracts.SAI_TUB
     );
 

@@ -128,7 +128,7 @@ test('transferToBag for GNT CDPs', async () => {
   const proxyAddress = await maker.service('proxy').currentProxy();
   const bagAddress = await maker
     .service('smartContract')
-    .getContractByName('MCD_JOIN_GNT_A')
+    .getContract('MCD_JOIN_GNT_A')
     .bags(proxyAddress);
 
   const startingBalance = await gntToken.balanceOf(bagAddress);

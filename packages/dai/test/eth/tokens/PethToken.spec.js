@@ -27,9 +27,7 @@ test('get PETH allowance of address', async () => {
 });
 
 test('should successfully join and exit PETH', async () => {
-  const tub = tokenService
-    .get('smartContract')
-    .getContractByName(contracts.SAI_TUB);
+  const tub = tokenService.get('smartContract').getContract(contracts.SAI_TUB);
   await weth.approveUnlimited(tub.address);
   await peth.approveUnlimited(tub.address);
 

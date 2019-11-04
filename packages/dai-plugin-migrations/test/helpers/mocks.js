@@ -53,7 +53,7 @@ export function mockContracts(
   smartContractService,
   contractToMockImplementation
 ) {
-  const originalGetContract = smartContractService.getContractByName.bind(
+  const originalGetContract = smartContractService.getContract.bind(
     smartContractService
   );
   return jest

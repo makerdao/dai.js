@@ -34,8 +34,8 @@ export default class ProxyCdp {
   }
 
   _create({ lockAndDraw = false, amountEth = null, amountDai = null } = {}) {
-    const tub = this._smartContractService.getContractByName(contracts.SAI_TUB);
-    const saiProxy = this._smartContractService.getContractByName(contracts.SAI_PROXY); // prettier-ignore
+    const tub = this._smartContractService.getContract(contracts.SAI_TUB);
+    const saiProxy = this._smartContractService.getContract(contracts.SAI_PROXY); // prettier-ignore
 
     let method, args;
     if (!this.dsProxyAddress) {
