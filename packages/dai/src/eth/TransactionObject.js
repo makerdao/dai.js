@@ -130,8 +130,8 @@ export default class TransactionObject extends TransactionLifeCycle {
     let tx;
     const startTime = new Date();
     log(`waiting for transaction ${this.hash.substring(8)}... to mine`);
-    for (let i = 0; i < 24; i++) {
-      // 2 minutes max
+    for (let i = 0; i < 120; i++) {
+      // 10 minutes max
       tx = await this._web3Service.getTransaction(this.hash);
       if ((tx || {}).blockHash) break;
       log('not mined yet');
