@@ -1,4 +1,4 @@
-import tracksTransactions from '@makerdao/dai-plugin-mcd/src/utils/tracksTransactions';
+import tracksTransactions from '@makerdao/dai/dist/src/utils/tracksTransactions';
 import { getIdBytes } from '../utils';
 import { SAI } from '..';
 
@@ -54,7 +54,9 @@ export default class SingleToMultiCdp {
     }
   }
 
+  // eslint-disable-next-line
   _setMethodAndArgs(payment, defaultArgs, maxPayAmount) {
+    // eslint-disable-next-line
     const otc = this._manager.get('smartContract').getContract('MAKER_OTC')
       .address;
 
