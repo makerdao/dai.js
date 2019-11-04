@@ -105,11 +105,8 @@ export default class SmartContractService extends PrivateService {
     let versions = contracts[name];
     if (!version) version = Math.max(...versions.map(info => info.version));
     const contractInfo = versions.find(info => info.version === version);
-
-    if (!contractInfo) {
-      throw new Error(`Cannot find contract ${name}, version ${version}`);
-    }
-
+    assert(contractInfo, `Cannot find contract ${name}, version ${version}`);
+    assert(contractInfo.address, `Contract ${name} has no address`);
     return contractInfo;
   }
 
@@ -120,16 +117,21 @@ export default class SmartContractService extends PrivateService {
     assert(mapping, `Network "${networkName}" not found in mapping.`);
     if (!this._addedContracts) return mapping.contracts;
 
-    return {
-      ...mapping.contracts,
-      ...mapValues(this._addedContracts, ([definition], name) => {
-        const { address, ...otherProps } = definition;
-        if (typeof address === 'string') return [definition];
-        const singleAddress = _findAddress(address, networkName);
-        assert(singleAddress, `Missing address for ${name} on ${networkName}`);
-        return [{ address: singleAddress, ...otherProps }];
-      })
-    };
+    if (!this._contractInfoCache) this._contractInfoCache = {};
+    if (!this._contractInfoCache[networkName]) {
+      this._contractInfoCache[networkName] = {
+        ...mapping.contracts,
+        ...mapValues(this._addedContracts, ([definition]) => {
+          const { address, ...otherProps } = definition;
+          if (typeof address === 'string') return [definition];
+          return [
+            { address: _findAddress(address, networkName), ...otherProps }
+          ];
+        })
+      };
+    }
+
+    return this._contractInfoCache[networkName];
   }
 }
 

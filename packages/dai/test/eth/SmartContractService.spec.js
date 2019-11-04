@@ -33,20 +33,20 @@ test('getContract should return a functioning contract', async () => {
   );
 });
 
+const mockAbi = {
+  constant: true,
+  inputs: [],
+  name: 'foo',
+  outputs: [{ name: '', type: 'bytes32' }],
+  payable: false,
+  stateMutability: 'view',
+  type: 'function'
+};
+
 test('define contract in config', async () => {
   const mockContractDefinition = {
     address: '0xbeefed1bedded2dabbed3defaced4decade5dead',
-    abi: [
-      {
-        constant: true,
-        inputs: [],
-        name: 'foo',
-        outputs: [{ name: '', type: 'bytes32' }],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function'
-      }
-    ]
+    abi: [mockAbi]
   };
 
   const service = buildTestService('smartContract', {
@@ -63,30 +63,26 @@ test('define contract in config', async () => {
   expect(typeof contract.foo).toBe('function');
 });
 
-test('define contract in config with multiple addresses', async () => {
+test('define contracts in config with multiple addresses', async () => {
   const mockContractDefinition = {
     address: {
       testnet: '0xbeefed1bedded2dabbed3defaced4decade5dead',
       kovan: '0xbeefed1bedded2dabbed3defaced4decade5caca',
       mainnet: '0xbeefed1bedded2dabbed3defaced4decade5feed'
     },
-    abi: [
-      {
-        constant: true,
-        inputs: [],
-        name: 'foo',
-        outputs: [{ name: '', type: 'bytes32' }],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function'
-      }
-    ]
+    abi: [mockAbi]
   };
 
   const service = buildTestService('smartContract', {
     smartContract: {
       addContracts: {
-        mock: mockContractDefinition
+        mock: mockContractDefinition,
+        mock2: {
+          address: {
+            kovan: '0xbeefed1bedded2dabbed3defaced4decade5caca'
+          },
+          abi: [mockAbi]
+        }
       }
     }
   });
@@ -95,6 +91,10 @@ test('define contract in config with multiple addresses', async () => {
   const contract = service.getContract('mock');
   expect(contract.address).toEqual(mockContractDefinition.address.testnet);
   expect(typeof contract.foo).toBe('function');
+
+  expect(() => {
+    service.getContract('mock2');
+  }).toThrowError('Contract mock2 has no address');
 });
 
 test('getContract returns contract with a valid signer', async () => {
