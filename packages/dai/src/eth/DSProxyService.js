@@ -12,6 +12,8 @@ export default class DSProxyService extends PrivateService {
     this._currentProxy = await this.getProxyAddress();
   }
 
+  // workaround for a circular dependency:
+  // smartContract -> transactionManager -> proxy -> smartContract
   setSmartContractService(service) {
     this._smartContractService = service;
   }
