@@ -86,6 +86,8 @@ export function minSafeCollateralAmount(debtValue, liquidationRatio, price) {
 }
 
 export function daiAvailable(collateralValue, debtValue, liquidationRatio) {
-  const dai = collateralValue.div(liquidationRatio).minus(debtValue);
-  return dai.gt(0) ? dai : MDAI(0);
+  const maxSafeDebtValue = collateralValue.div(liquidationRatio);
+  return debtValue.lt(maxSafeDebtValue)
+    ? MDAI(maxSafeDebtValue.minus(debtValue))
+    : MDAI(0);
 }
