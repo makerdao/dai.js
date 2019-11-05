@@ -27,6 +27,9 @@ export default class SmartContractService extends PrivateService {
         {}
       );
     }
+
+    this._addressOverrides = settings.addressOverrides || {};
+
     this.get('transactionManager')
       .get('proxy')
       .setSmartContractService(this);
@@ -52,10 +55,10 @@ export default class SmartContractService extends PrivateService {
   }
 
   getContractAddresses() {
-    return mapValues(this._getAllContractInfo(), versions => {
-      const latest = Math.max(...versions.map(info => info.version));
-      return versions.find(info => info.version === latest).address;
-    });
+    return mapValues(
+      this._getAllContractInfo(),
+      versions => findLatestContractInfo(versions).address
+    );
   }
 
   getContract(name, { version, wrap = true } = {}) {
@@ -102,9 +105,7 @@ export default class SmartContractService extends PrivateService {
   _getContractInfo(name, version) {
     assert(this.hasContract(name), `No contract found for "${name}"`);
     const contracts = this._getAllContractInfo();
-    let versions = contracts[name];
-    if (!version) version = Math.max(...versions.map(info => info.version));
-    const contractInfo = versions.find(info => info.version === version);
+    const contractInfo = findContractInfoForVersion(contracts[name], version);
     assert(contractInfo, `Cannot find contract ${name}, version ${version}`);
     assert(contractInfo.address, `Contract ${name} has no address`);
     return contractInfo;
@@ -113,30 +114,48 @@ export default class SmartContractService extends PrivateService {
   _getAllContractInfo() {
     let { networkName } = this.get('web3');
     const mapping = networks.find(m => m.name === networkName);
-
     assert(mapping, `Network "${networkName}" not found in mapping.`);
-    if (!this._addedContracts) return mapping.contracts;
 
     if (!this._contractInfoCache) this._contractInfoCache = {};
     if (!this._contractInfoCache[networkName]) {
-      this._contractInfoCache[networkName] = {
-        ...mapping.contracts,
-        ...mapValues(this._addedContracts, ([definition]) => {
-          const { address, ...otherProps } = definition;
-          if (typeof address === 'string') return [definition];
-          return [
-            { address: _findAddress(address, networkName), ...otherProps }
-          ];
-        })
-      };
+      const allContractInfo = this._addedContracts
+        ? { ...mapping.contracts, ...this._addedContracts }
+        : mapping.contracts;
+
+      this._contractInfoCache[networkName] = mapValues(
+        allContractInfo,
+        (versions, name) => {
+          const latest = findLatestContractInfo(versions);
+          const newAddress = resolveAddress(
+            this._addressOverrides[name] || latest.address,
+            networkName,
+            this._addressOverrides[name]
+          );
+          return newAddress !== latest.address
+            ? versions.map(v =>
+                v === latest ? { ...latest, address: newAddress } : v
+              )
+            : versions;
+        }
+      );
     }
 
     return this._contractInfoCache[networkName];
   }
 }
 
-function _findAddress(address, networkName) {
+function resolveAddress(address, networkName) {
+  if (!address) return;
   if (typeof address === 'string') return address;
   if (networkName.startsWith('test')) return address.test || address.testnet;
   return address[networkName];
+}
+
+function findContractInfoForVersion(versions, version) {
+  if (!version) version = Math.max(...versions.map(info => info.version));
+  return versions.find(info => info.version === version);
+}
+
+function findLatestContractInfo(versions) {
+  return findContractInfoForVersion(versions);
 }

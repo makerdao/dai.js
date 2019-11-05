@@ -116,3 +116,19 @@ test('call constant function without account', async () => {
   expect(contract.signer).toBeNull();
   expect(gem.toLowerCase()).toEqual(addresses.GEM);
 });
+
+test('addressOverrides', async () => {
+  const service = buildTestService('smartContract', {
+    smartContract: {
+      addressOverrides: {
+        PROXY_REGISTRY: '0xmock'
+      }
+    }
+  });
+
+  await service.manager().authenticate();
+  const addresses = service.getContractAddresses();
+  expect(addresses.PROXY_REGISTRY).toEqual('0xmock');
+  expect(service.getContractAddress('PROXY_REGISTRY')).toEqual('0xmock');
+  expect(service.lookupContractName('0xmock')).toEqual('PROXY_REGISTRY');
+});
