@@ -1,7 +1,11 @@
 import { migrationMaker } from '../helpers';
 import { mockCdpIds } from '../helpers/mocks';
 import { ServiceRoles, Migrations } from '../../src/constants';
-import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import {
+  mineBlocks,
+  takeSnapshot,
+  restoreSnapshot
+} from '@makerdao/test-helpers';
 
 let maker, migration, snapshotData;
 
@@ -88,12 +92,9 @@ describe('SCD to MCD CDP Migration', () => {
   });
 
   describe('migrations', () => {
-    let cdp, proxyAddress, migrationContract;
+    let cdp, proxyAddress;
 
     beforeEach(async () => {
-      migrationContract = maker
-        .service('smartContract')
-        .getContract('MIGRATION');
       proxyAddress = await maker.service('proxy').currentProxy();
       await openLockAndDrawScdCdp(100);
       cdp = await openLockAndDrawScdCdp(10);
@@ -101,11 +102,16 @@ describe('SCD to MCD CDP Migration', () => {
     });
 
     test('migrate scd cdp to mcd, pay fee with mkr', async () => {
-      expect.assertions(4);
       const manager = maker.service('mcd:cdpManager');
 
       const scdCollateral = await cdp.getCollateralValue();
       const scdDebt = await cdp.getDebtValue();
+      await mineBlocks(maker.service('web3'), 3);
+      await maker
+        .service('smartContract')
+        .getContract('MCD_POT')
+        .drip();
+
       const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
 
       await migration.execute(cdp.id);
@@ -119,13 +125,14 @@ describe('SCD to MCD CDP Migration', () => {
       expect(mcdCollateral).toEqual(scdCollateral.toNumber());
       expect(mcdDebt).toBeCloseTo(scdDebt.toNumber());
 
+      let message;
       try {
         await maker.getCdp(cdp.id);
       } catch (err) {
-        expect(err.message).toEqual(
-          "That CDP doesn't exist--try opening a new one."
-        );
+        message = err.message;
       }
+
+      expect(message).toEqual("That CDP doesn't exist--try opening a new one.");
 
       expect(mcdCdpsAfterMigration.length).toEqual(
         mcdCdpsBeforeMigration.length + 1

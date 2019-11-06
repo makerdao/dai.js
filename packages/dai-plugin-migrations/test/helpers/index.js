@@ -61,6 +61,9 @@ export async function migrationMaker({
       [MigrationPlugin, { addressOverrides, network }]
     ],
     log: false,
+    web3: {
+      pollingInterval: 50
+    },
     ...settings
   });
   await maker.authenticate();
