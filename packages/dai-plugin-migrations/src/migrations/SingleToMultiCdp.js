@@ -49,9 +49,8 @@ export default class SingleToMultiCdp {
     const mkr = this._getToken(MKR);
     const allowance = await mkr.allowance(address, proxyAddress);
 
-    if (allowance.toNumber() < fee.toFixed(28)) {
-      await mkr.approve(proxyAddress, fee.toFixed(28));
-    }
+    // add a buffer amount to allowance in case drip hasn't been called recently
+    if (allowance.lt(fee)) await mkr.approve(proxyAddress, fee.times(1.1));
   }
 
   // eslint-disable-next-line
