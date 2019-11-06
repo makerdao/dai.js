@@ -1,4 +1,4 @@
-import tracksTransactions from '@makerdao/dai/dist/src/utils/tracksTransactions';
+import { tracksTransactionsWithOptions } from '@makerdao/dai/dist/src/utils/tracksTransactions';
 import { getIdBytes } from '../utils';
 import { SAI } from '..';
 
@@ -21,8 +21,8 @@ export default class SingleToMultiCdp {
       : {};
   }
 
-  @tracksTransactions
-  async execute(cupId, payment = 'MKR', maxPayAmount) {
+  @tracksTransactionsWithOptions({ numArguments: 4 })
+  async execute(cupId, payment = 'MKR', maxPayAmount, { promise }) {
     const migrationProxy = this._manager
       .get('smartContract')
       .getContract('MIGRATION_PROXY_ACTIONS');
@@ -37,7 +37,7 @@ export default class SingleToMultiCdp {
     );
 
     await this._requireAllowance(cupId);
-    return migrationProxy[method](...args, { dsProxy: true });
+    return migrationProxy[method](...args, { dsProxy: true, promise });
   }
 
   async _requireAllowance(cupId) {
