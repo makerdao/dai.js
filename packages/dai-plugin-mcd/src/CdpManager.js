@@ -96,6 +96,19 @@ export default class CdpManager extends LocalService {
     return cdp;
   }
 
+  @tracksTransactions
+  async frob(id, dink, dart, { promise }) {
+    //TODO specify precision for dart
+    dink = castAsCurrency(dink, ETH);
+    return this.proxyActions.frob(
+      this._managerAddress,
+      this.getIdBytes(id),
+      dink.toFixed('wei'),
+      dart,
+      { dsProxy: true, promise }
+    );
+  }
+
   // ilk is required if the currency type corresponds to more than one ilk; if
   // it's omitted, it is inferred from lockAmount's currency type
   @tracksTransactions
