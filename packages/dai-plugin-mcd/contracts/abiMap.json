@@ -5,6 +5,7 @@
   "BAT": "BAT",
   "DGD": "DGD",
   "GNT": "GNT",
+  "SAI": "DSToken",
   "CDP_MANAGER": "DssCdpManager",
   "ETH": "WETH9_",
   "GET_CDPS": "GetCdps",
