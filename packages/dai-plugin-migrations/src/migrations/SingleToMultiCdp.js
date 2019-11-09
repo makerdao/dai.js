@@ -4,11 +4,16 @@ import { SAI } from '..';
 
 import { stringToBytes } from '../utils';
 import { MKR } from '@makerdao/dai-plugin-mcd/dist';
+import { utils } from 'ethers';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
     this._manager = manager;
     return this;
+  }
+
+  get newCdpIds() {
+    return this._newCdpIds;
   }
 
   async check() {
@@ -51,6 +56,25 @@ export default class SingleToMultiCdp {
 
     // add a buffer amount to allowance in case drip hasn't been called recently
     if (allowance.lt(fee)) await mkr.approve(proxyAddress, fee.times(1.5));
+  }
+
+  async getNewCdpId(txo) {
+    const logs = txo.receipt.logs;
+    const manager = this._manager
+      .get('smartContract')
+      .getContract('CDP_MANAGER');
+    const transactionManager = this._manager.get('transactionManager');
+    const { NewCdp } = manager.interface.events;
+    const web3 = transactionManager.get('web3')._web3;
+    const topic = utils.keccak256(web3.utils.toHex(NewCdp.signature));
+    const receiptEvent = logs.filter(
+      e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for NewCdp events
+    );
+    const parsedLog = NewCdp.parse(
+      receiptEvent[0].topics,
+      receiptEvent[0].data
+    );
+    return parseInt(parsedLog['cdp']);
   }
 
   // eslint-disable-next-line

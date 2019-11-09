@@ -114,7 +114,11 @@ describe('SCD to MCD CDP Migration', () => {
 
       const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
 
-      await migration.execute(cdp.id);
+      try {
+        await migration.execute(cdp.id);
+      } catch (e) {
+        console.error(e);
+      }
       await manager.reset();
 
       const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
@@ -145,6 +149,12 @@ describe('SCD to MCD CDP Migration', () => {
 
     xtest('migrate scd cdp to mcd, pay fee with debt', async () => {
       // await migration.execute(cdp.id, 'DEBT', 10);
+    });
+
+    test('can get new cdp id from recent migration transaction', async () => {
+      const txo = await migration.execute(cdp.id);
+      const id = await migration.getNewCdpId(txo);
+      expect(id).toBe(1);
     });
   });
 });
