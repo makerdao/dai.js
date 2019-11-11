@@ -97,14 +97,13 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async frob(id, dink, dart, { promise }) {
-    //TODO specify precision for dart
+  async reclaimCollateral(id, dink, { promise }) {
     dink = castAsCurrency(dink, ETH);
     return this.proxyActions.frob(
       this._managerAddress,
       this.getIdBytes(id),
       dink.toFixed('wei'),
-      dart,
+      0,
       { dsProxy: true, promise }
     );
   }
