@@ -56,6 +56,21 @@ const info = await cdp.getInfo();
 console.log(info);
 ```
 
+Addresses overwriting
+
+To be able to override smart contract addresses you will have to pass `smartContract.addressOverrides` option.
+
+```js
+const service = Maker.create('test' {
+    smartContract: {
+      addressOverrides: {
+        PROXY_REGISTRY: '0xYourAddress'
+      }
+    }
+  });
+```
+So using `smartContract.addressOverrides` you can override the address of a contract without having to re-specify its ABI as you would with the addContracts option.
+
 For full documentation, please refer to [https://makerdao.com/documentation/][docs].
 
 For example code that consumes the library, check out [this repository](https://github.com/makerdao/integration-examples).
