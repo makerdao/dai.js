@@ -1,3 +1,4 @@
+import findIndex from 'lodash/findIndex';
 import { mcdMaker, setupCollateral } from './helpers';
 import { setMethod, transferToBag } from '../src/CdpManager';
 import { ServiceRoles } from '../src/constants';
@@ -196,4 +197,36 @@ describe('using a different account', () => {
       expect(err.message).toMatch(/revert/);
     }
   });
+});
+
+test('get event history via web3', async () => {
+  await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
+  const cdp = await cdpMgr.openLockAndDraw('ETH-A', ETH(1), MDAI(3));
+  await cdp.freeCollateral(ETH(0.5));
+  await cdpMgr.give(cdp.id, '0x1000000000000000000000000000000000000000');
+  const events = await cdpMgr.getEventHistory(cdp);
+
+  const openEventIdx = findIndex(events, { type: 'OPEN', id: cdp.id });
+  const depositEventIdx = findIndex(events, { type: 'DEPOSIT', id: cdp.id });
+  const generateEventIdx = findIndex(events, { type: 'GENERATE', id: cdp.id });
+  const withdrawEventIdx = findIndex(events, { type: 'WITHDRAW', id: cdp.id });
+  const giveEventIdx = findIndex(events, { type: 'GIVE', id: cdp.id });
+
+  expect(openEventIdx).toBeGreaterThan(-1);
+  expect(events[openEventIdx].ilk).toEqual('ETH-A');
+
+  expect(depositEventIdx).toBeGreaterThan(-1);
+  expect(events[depositEventIdx].ilk).toEqual('ETH-A');
+  expect(events[depositEventIdx].amount).toEqual('1');
+
+  expect(generateEventIdx).toBeGreaterThan(-1);
+  expect(events[generateEventIdx].ilk).toEqual('ETH-A');
+  expect(events[generateEventIdx].amount).toEqual('3');
+
+  expect(withdrawEventIdx).toBeGreaterThan(-1);
+  expect(events[withdrawEventIdx].ilk).toEqual('ETH-A');
+  expect(events[withdrawEventIdx].amount).toEqual('0.5');
+
+  expect(giveEventIdx).toBeGreaterThan(-1);
+  expect(events[giveEventIdx].newOwner).toEqual('0x1000000000000000000000000000000000000000');
 });
