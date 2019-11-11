@@ -100,6 +100,18 @@ export default class CdpManager extends LocalService {
     return cdp;
   }
 
+  @tracksTransactions
+  async reclaimCollateral(id, dink, { promise }) {
+    dink = castAsCurrency(dink, ETH);
+    return this.proxyActions.frob(
+      this._managerAddress,
+      this.getIdBytes(id),
+      dink.toFixed('wei'),
+      0,
+      { dsProxy: true, promise }
+    );
+  }
+
   // ilk is required if the currency type corresponds to more than one ilk; if
   // it's omitted, it is inferred from lockAmount's currency type
   @tracksTransactions
