@@ -12,10 +12,6 @@ export default class SingleToMultiCdp {
     return this;
   }
 
-  get newCdpIds() {
-    return this._newCdpIds;
-  }
-
   async check() {
     const address = this._manager.get('accounts').currentAddress();
     const proxyAddress = await this._manager.get('proxy').currentProxy();
@@ -42,7 +38,9 @@ export default class SingleToMultiCdp {
     );
 
     await this._requireAllowance(cupId);
-    return migrationProxy[method](...args, { dsProxy: true, promise });
+    return migrationProxy[method](...args, { dsProxy: true, promise }).then(
+      txo => this._getNewCdpId(txo)
+    );
   }
 
   async _requireAllowance(cupId) {
@@ -58,7 +56,7 @@ export default class SingleToMultiCdp {
     if (allowance.lt(fee)) await mkr.approve(proxyAddress, fee.times(1.5));
   }
 
-  async getNewCdpId(txo) {
+  _getNewCdpId(txo) {
     const logs = txo.receipt.logs;
     const manager = this._manager
       .get('smartContract')
