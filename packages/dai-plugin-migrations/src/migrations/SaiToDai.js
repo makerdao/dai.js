@@ -21,8 +21,15 @@ export default class SaiToDai {
       address,
       migrationContract.address
     );
+    console.log(allowance.toNumber());
+    console.log(formattedAmount * 1.5);
+    console.log(migrationContract.address);
     if (allowance.toNumber() < amount) {
-      await this._sai.approve(migrationContract.address, formattedAmount);
+      await this._sai.approve(migrationContract.address, (formattedAmount * 1.5));
+      console.log(await this._sai.allowance(
+        address,
+        migrationContract.address
+      ));
     }
 
     return migrationContract.swapSaiToDai(formattedAmount);

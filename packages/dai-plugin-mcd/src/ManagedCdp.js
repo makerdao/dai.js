@@ -210,17 +210,16 @@ export default class ManagedCdp {
 
 function getNewCdpId(txo, manager) {
   const logs = txo.receipt.logs;
-  const managerContract = manager.get('smartContract').getContract('CDP_MANAGER');
+  const managerContract = manager
+    .get('smartContract')
+    .getContract('CDP_MANAGER');
   const web3 = manager.get('web3')._web3;
   const { NewCdp } = managerContract.interface.events;
   const topic = utils.keccak256(web3.utils.toHex(NewCdp.signature));
   const receiptEvent = logs.filter(
     e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for NewCdp events
   );
-  const parsedLog = NewCdp.parse(
-    receiptEvent[0].topics,
-    receiptEvent[0].data
-  );
+  const parsedLog = NewCdp.parse(receiptEvent[0].topics, receiptEvent[0].data);
   assert(parsedLog['cdp'], 'could not find log for NewCdp event');
   return parseInt(parsedLog['cdp']);
 }

@@ -27,6 +27,7 @@ async function mcdMaker({
       }
     },
     log,
+    addressOverrides: {'MCD_JOIN_ETH_B': '0x0', 'MCD_JOIN_ZRX_A': '0x0' },
     ...settings
   });
   await maker.authenticate();
@@ -40,7 +41,7 @@ async function openLockAndDrawScdCdp(drawAmount, maker) {
   return cdp;
 }
 
-xtest('kovan', async () => {
+test('kovan', async () => {
   const maker = await mcdMaker();
   const sai = maker.getToken(SAI);
   const mkr = maker.getToken(MKR);
@@ -61,7 +62,7 @@ xtest('kovan', async () => {
   const info = await cdp.getInfo();
   await cdp.give(proxyAddress);
   const id = cdp.id;
-  // await migrationContract.swapSaiToDai('5000000000000000000');
+  await migrationContract.swapSaiToDai('5000000000000000000');
 
   let error;
   try {

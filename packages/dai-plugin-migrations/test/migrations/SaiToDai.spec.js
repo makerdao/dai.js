@@ -39,13 +39,16 @@ describe('SDai to MDai Migration', () => {
     expect((await migration.check()).eq(1)).toBeTruthy();
   });
 
-  test('execute migrates sai to dai', async () => {
+  test.only('execute migrates sai to dai', async () => {
     const address = maker.service('web3').currentAddress();
+    const proxy = await maker.service('proxy').ensureProxy();
+    await maker.service('cdp').openProxyCdpLockEthAndDrawDai(0.1, 1, proxy);
     const saiBalanceBeforeMigration = await migration._sai.balanceOf(address);
     const daiBalanceBeforeMigration = await maker
       .service('token')
       .getToken('MDAI')
       .balanceOf(address);
+    console.log(saiBalanceBeforeMigration);
 
     await migration.execute(1);
 
