@@ -23,7 +23,8 @@ export default class CdpManager extends LocalService {
       QUERY_API,
       'accounts',
       'proxy',
-      'token'
+      'token',
+      'web3'
     ]);
     this._getCdpIdsPromises = {};
     this._getUrnPromises = {};
@@ -85,10 +86,11 @@ export default class CdpManager extends LocalService {
 
   @tracksTransactions
   async open(ilk, { promise, cache = true }) {
-    await this.get('proxy').ensureProxy({ promise });
+    const proxy = await this.get('proxy').ensureProxy({ promise });
     const op = this.proxyActions.open(
       this._managerAddress,
       stringToBytes(ilk),
+      proxy,
       { dsProxy: true, promise }
     );
     const cdp = await ManagedCdp.create(await op, ilk, this);
