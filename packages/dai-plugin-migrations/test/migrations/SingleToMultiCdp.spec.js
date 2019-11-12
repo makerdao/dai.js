@@ -56,10 +56,10 @@ describe('SCD to MCD CDP Migration', () => {
 
     test('if there are no cdps, return false', async () => {
       await mockCdpIds(maker);
-  
+
       expect(await migration.check()).toMatchObject({});
     });
-  
+
     test('if there are cdps owned by a proxy, but no cdps owned by the account, return true', async () => {
       await mockCdpIds(maker, { forProxy: [{ id: '123' }] });
       expect(await migration.check()).toMatchObject({
@@ -67,7 +67,7 @@ describe('SCD to MCD CDP Migration', () => {
         [maker.currentAddress()]: []
       });
     });
-  
+
     test('if there are cdps owned by the account, but no cdps owned by a proxy, return true', async () => {
       await mockCdpIds(maker, { forAccount: [{ id: '123' }] });
       expect(await migration.check()).toMatchObject({
@@ -75,7 +75,7 @@ describe('SCD to MCD CDP Migration', () => {
         [maker.currentAddress()]: [{ id: '123' }]
       });
     });
-  
+
     test('if there are both cdps owned by the account and proxy, return true', async () => {
       await mockCdpIds(maker, {
         forAccount: [{ id: '123' }],
@@ -86,19 +86,18 @@ describe('SCD to MCD CDP Migration', () => {
         [maker.currentAddress()]: [{ id: '123' }]
       });
     });
-  
+
     test('if there is no sai locked in the mcd migration cdp, return 0', async () => {
       const saiLiquidity = await migration.migrationSaiAvailable();
       expect(saiLiquidity.toFixed('wei')).toBe('0');
     });
-  
+
     test('if there is sai locked in the mcd migration cdp, return the amount that is there', async () => {
       await drawSaiAndMigrateToDai(10); // lock 10 sai into the mcd migration cdp
       const saiLiquidity = await migration.migrationSaiAvailable();
       expect(saiLiquidity.toFixed('wei')).toBe('9999999999999999999');
     });
   });
-
 
   describe('migrations', () => {
     let cdp, proxyAddress;
@@ -128,15 +127,14 @@ describe('SCD to MCD CDP Migration', () => {
 
       const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
 
-      try {
-        await migration.execute(cdp.id);
-      } catch (e) {
-        console.error(e);
-      }
+      const newId = await migration.execute(cdp.id);
       await manager.reset();
 
       const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
-      const mcdCdp = await manager.getCdp(mcdCdpsAfterMigration[0].id);
+      const mcdCdpId = mcdCdpsAfterMigration[0].id;
+      expect(newId).toEqual(mcdCdpId);
+
+      const mcdCdp = await manager.getCdp(mcdCdpId);
       const mcdCollateral = mcdCdp.collateralAmount.toNumber();
       const mcdDebt = mcdCdp.debtValue.toNumber();
 
@@ -155,7 +153,7 @@ describe('SCD to MCD CDP Migration', () => {
       expect(mcdCdpsAfterMigration.length).toEqual(
         mcdCdpsBeforeMigration.length + 1
       );
-    });
+    }, 15000);
 
     xtest('migrate scd cdp to mcd, pay fee with sai', async () => {
       // await migration.execute(cdp.id, 'GEM', 10);
@@ -163,12 +161,6 @@ describe('SCD to MCD CDP Migration', () => {
 
     xtest('migrate scd cdp to mcd, pay fee with debt', async () => {
       // await migration.execute(cdp.id, 'DEBT', 10);
-    });
-
-    test('can get new cdp id from recent migration transaction', async () => {
-      const txo = await migration.execute(cdp.id);
-      const id = await migration.getNewCdpId(txo);
-      expect(id).toBe(1);
     });
   });
 });

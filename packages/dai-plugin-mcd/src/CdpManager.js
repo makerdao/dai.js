@@ -1,5 +1,6 @@
 import { Currency } from '@makerdao/currency';
 import { LocalService } from '@makerdao/services-core';
+import ethAbi from 'web3-eth-abi';
 import tracksTransactions, {
   tracksTransactionsWithOptions
 } from './utils/tracksTransactions';
@@ -9,6 +10,9 @@ import ManagedCdp from './ManagedCdp';
 import { castAsCurrency, stringToBytes, bytesToString } from './utils';
 import has from 'lodash/has';
 import padStart from 'lodash/padStart';
+import padEnd from 'lodash/padEnd';
+import orderBy from 'lodash/orderBy';
+import flatten from 'lodash/flatten';
 import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
@@ -96,6 +100,18 @@ export default class CdpManager extends LocalService {
     const cdp = await ManagedCdp.create(await op, ilk, this);
     this._putInInstanceCache(cdp.id, cdp, cache);
     return cdp;
+  }
+
+  @tracksTransactions
+  async reclaimCollateral(id, dink, { promise }) {
+    dink = castAsCurrency(dink, ETH);
+    return this.proxyActions.frob(
+      this._managerAddress,
+      this.getIdBytes(id),
+      dink.toFixed('wei'),
+      0,
+      { dsProxy: true, promise }
+    );
   }
 
   // ilk is required if the currency type corresponds to more than one ilk; if
@@ -391,6 +407,230 @@ export default class CdpManager extends LocalService {
     if (!enabled) return;
     if (!this._instanceCache) this._instanceCache = {};
     this._instanceCache[id] = instance;
+  }
+
+  async getEventHistory(managedCdp) {
+    const MCD_JOIN_DAI = this.get('smartContract').getContractAddress('MCD_JOIN_DAI');
+    const CDP_MANAGER = this.get('smartContract').getContractAddress('CDP_MANAGER');
+    const MCD_VAT = this.get('smartContract').getContractAddress('MCD_VAT');
+
+    const id = managedCdp.id;
+    const fromBlock = 1;
+    const web3 = this.get('smartContract').get('web3');
+
+    const formatAddress = v => '0x' + v.slice(26);
+    const funcSigTopic = v => padEnd(ethAbi.encodeFunctionSignature(v), 66, '0');
+    const fromWei = v => web3._web3.utils.fromWei(v.toString());
+    const fromHexWei = v => web3._web3.utils.fromWei(web3._web3.utils.toBN(v.toString()).toString()).toString();
+    const numberFromHex = v => web3._web3.utils.toBN(v.toString()).toNumber();
+
+    const EVENT_GIVE = funcSigTopic('give(uint256,address)');
+    const EVENT_DAI_ADAPTER_EXIT = funcSigTopic('exit(address,uint256)');
+    const EVENT_DAI_ADAPTER_JOIN = funcSigTopic('join(address,uint256)');
+    const EVENT_VAT_FROB = funcSigTopic('frob(bytes32,address,address,address,int256,int256)');
+    const EVENT_MANAGER_FROB = funcSigTopic('frob(uint256,int256,int256)');
+
+    const promisesBlockTimestamp = {};
+    const getBlockTimestamp = block => {
+      if (promisesBlockTimestamp.hasOwnProperty(block)) return promisesBlockTimestamp[block];
+      promisesBlockTimestamp[block] = web3.getBlock(block, false);
+      return promisesBlockTimestamp[block];
+    };
+
+    const decodeManagerFrob = data => {
+      const sig = ethAbi.encodeFunctionSignature('frob(uint256,int256,int256)').slice(2);
+      const decoded = ethAbi.decodeParameters([
+        'uint256', // id
+        'int256',  // dink
+        'int256'   // dart
+      ], '0x' + data.replace(new RegExp('^.+?' + sig), ''));
+      return {
+        id: decoded[0].toString(),
+        dink: decoded[1],
+        dart: decoded[2] // can't be used directly because would need to be scaled up using vat.ilks[ilk].rate
+      };
+    };
+
+    const decodeVatFrob = data => {
+      const sig = ethAbi.encodeFunctionSignature('frob(bytes32,address,address,address,int256,int256)').slice(2);
+      const decoded = ethAbi.decodeParameters([
+        'bytes32', // ilk
+        'address', // u (urnHandler)
+        'address', // v (urnHandler)
+        'address', // w (urnHandler)
+        'int256',  // dink
+        'int256'   // dart
+      ], '0x' + data.replace(new RegExp('^.+?' + sig), ''));
+      return {
+        ilk: bytesToString(decoded[0].toString()),
+        urnHandler: decoded[1].toString(),
+        dink: decoded[4].toString(),
+        dart: decoded[5].toString()
+      };
+    };
+
+    const urnHandler = (await this.getUrn(id)).toLowerCase();
+    const ilk = managedCdp.ilk;
+
+    const lookups = [
+      {
+        request: web3.getPastLogs({
+          address: CDP_MANAGER,
+          topics: [
+            EVENT_MANAGER_FROB,
+            null,
+            '0x' + padStart(id.toString(16), 64, '0')
+          ],
+          fromBlock
+        }),
+        result: async r => {
+          // For now, use an approach where we find the oldest frob
+          // (until we can get an indexed cdp param added to event NewCdp)
+          const events1 = r.reduce(
+            (acc, { blockNumber: block }) => {
+              // Consider the earliest block to be the block the vault was opened
+              if (acc === null || acc.block > block) {
+                return {
+                  type: 'OPEN',
+                  order: 0,
+                  block,
+                  id,
+                  ilk
+                };
+              }
+              return acc;
+            },
+            null
+          );
+          const events2 = r.reduce(
+            async (acc, { address, blockNumber: block, data, topics }) => {
+              let { dart } = decodeManagerFrob(data);
+              acc = await acc;
+              dart = new BigNumber(dart);
+
+              // Imprecise debt amount frobbed (not scaled by vat.ilks[ilk].rate)
+              if (dart.lt(0) || dart.gt(0)) {
+                // Lookup the dai join events on this block for this proxy address
+                const proxy = topics[1];
+                const joinDaiEvents = await web3.getPastLogs({
+                  address: MCD_JOIN_DAI,
+                  topics: [
+                    dart.lt(0)
+                      ? EVENT_DAI_ADAPTER_JOIN
+                      : EVENT_DAI_ADAPTER_EXIT,
+                    proxy
+                  ],
+                  fromBlock: block,
+                  toBlock: block
+                });
+                acc.push(
+                  ...joinDaiEvents.map(
+                    ({ address, blockNumber: block, topics }) => ({
+                      type: dart.lt(0) ? 'PAY_BACK' : 'GENERATE',
+                      order: 2,
+                      address,
+                      block,
+                      id,
+                      ilk,
+                      proxy: formatAddress(topics[1]),
+                      recipient: formatAddress(topics[2]),
+                      amount: fromHexWei(topics[3])
+                    })
+                  )
+                );
+              }
+              return acc;
+            },
+            []
+          );
+          return flatten([events1, await events2]);
+        }
+      },
+      {
+        request: web3.getPastLogs({
+          address: MCD_VAT,
+          topics: [
+            EVENT_VAT_FROB,
+            null,
+            '0x' + padStart(urnHandler.slice(2), 64, '0')
+          ],
+          fromBlock
+        }),
+        result: r => {
+          return r.reduce(
+            (acc, { address, blockNumber: block, data, topics }) => {
+              let { ilk, dink } = decodeVatFrob(data);
+              dink = new BigNumber(dink);
+              // Gem withdrawal
+              if (dink.lt(0)) {
+                acc.push({
+                  type: 'WITHDRAW',
+                  order: 3,
+                  block,
+                  id,
+                  ilk,
+                  adapter: address.toLowerCase(),
+                  amount: Math.abs(fromWei(dink.toString())).toString(),
+                  proxy: formatAddress(topics[1])
+                });
+              }
+              // Gem deposit
+              if (dink.gt(0)) {
+                acc.push({
+                  type: 'DEPOSIT',
+                  order: 1,
+                  block,
+                  id,
+                  ilk,
+                  adapter: address.toLowerCase(),
+                  amount: fromWei(dink.toString()),
+                  proxy: formatAddress(topics[1])
+                });
+              }
+              return acc;
+            },
+            []
+          );
+        }
+      },
+      {
+        request: web3.getPastLogs({
+          address: CDP_MANAGER,
+          topics: [EVENT_GIVE, null, '0x' + padStart(id.toString(16), 64, '0')],
+          fromBlock
+        }),
+        result: r => r.map(({ address, blockNumber: block, data, topics }) => ({
+          type: 'GIVE',
+          block,
+          prevOwner: formatAddress(topics[1]),
+          id: numberFromHex(topics[2]),
+          newOwner: formatAddress(topics[3])
+        }))
+      }
+    ];
+
+    const results = await Promise.all(lookups.map(l => l.request));
+    const events = orderBy(
+      await Promise.all(
+        flatten(
+          await Promise.all(
+            results.map(async (r, i) => await lookups[i].result(r))
+          )
+        )
+          .filter(r => r !== null)
+          .map(async e => {
+            e.address && e.address.toLowerCase();
+            e.timestamp = (await getBlockTimestamp(e.block)).timestamp;
+            return e;
+          })
+      ),
+      ['block', 'order'],
+      ['desc', 'desc']
+    ).map(e => {
+      delete e.order;
+      return e;
+    });
+    return events;
   }
 }
 

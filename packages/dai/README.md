@@ -56,7 +56,7 @@ const info = await cdp.getInfo();
 console.log(info);
 ```
 
-For full documentation, please refer to [https://makerdao.com/documentation/][docs].
+For full documentation, please refer to [the wiki][wiki].
 
 For example code that consumes the library, check out [this repository](https://github.com/makerdao/integration-examples).
 
@@ -134,4 +134,4 @@ prefixing the path with `dist`. E.g. `/contracts/addresses/kovan.json` now becom
 [cover-url]: https://codecov.io/github/makerdao/dai.js?branch=dev
 
 [makerdao]: https://makerdao.com
-[docs]: https://makerdao.com/documentation
+[wiki]: https://github.com/makerdao/dai.js/wiki

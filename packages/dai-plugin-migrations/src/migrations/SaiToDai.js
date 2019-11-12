@@ -1,3 +1,4 @@
+import tracksTransactions from '@makerdao/dai/dist/src/utils/tracksTransactions';
 import { SAI } from '..';
 
 export default class SaiToDai {
@@ -11,7 +12,8 @@ export default class SaiToDai {
     return this._sai.balance();
   }
 
-  async execute(amount) {
+  @tracksTransactions
+  async execute(amount, { promise }) {
     const formattedAmount = SAI(amount).toFixed('wei');
     const address = this._manager.get('web3').currentAddress();
     const migrationContract = this._manager
@@ -25,13 +27,11 @@ export default class SaiToDai {
     console.log(formattedAmount * 1.5);
     console.log(migrationContract.address);
     if (allowance.toNumber() < amount) {
-      await this._sai.approve(migrationContract.address, (formattedAmount * 1.5));
-      console.log(await this._sai.allowance(
-        address,
-        migrationContract.address
-      ));
+      await this._sai.approve(migrationContract.address, formattedAmount, {
+        promise
+      });
     }
 
-    return migrationContract.swapSaiToDai(formattedAmount);
+    return migrationContract.swapSaiToDai(formattedAmount, { promise });
   }
 }
