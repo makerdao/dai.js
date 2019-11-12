@@ -15,7 +15,7 @@ test('getCdpType with no matches throws an error', () => {
   }).toThrowError(/matches no cdp type/);
 });
 
-test('getCdpType with too many matches throws an error', () => {
+xtest('getCdpType with too many matches throws an error', () => {
   expect(() => {
     service.getCdpType(ETH);
   }).toThrowError(/matches more than one cdp type/);

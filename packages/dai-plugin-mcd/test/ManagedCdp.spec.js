@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { mcdMaker, setupCollateral } from './helpers';
-import { ETH, REP, MDAI, USD, GNT, OMG, DGD } from '../src';
+import { ETH, REP, MDAI, USD, GNT, OMG, DGD, BAT } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
 import { createCurrencyRatio } from '@makerdao/currency';
@@ -13,10 +13,11 @@ beforeAll(async () => {
   maker = await mcdMaker({
     cdpTypes: [
       { currency: ETH, ilk: 'ETH-A' },
-      { currency: REP, ilk: 'REP-A' },
-      { currency: OMG, ilk: 'OMG-A' },
-      { currency: DGD, ilk: 'DGD-A', decimals: 9 },
-      { currency: GNT, ilk: 'GNT-A' }
+      { currency: BAT, ilk: 'BAT-A' }
+      // { currency: REP, ilk: 'REP-A' },
+      // { currency: OMG, ilk: 'OMG-A' },
+      // { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+      // { currency: GNT, ilk: 'GNT-A' }
     ]
   });
   dai = maker.getToken(MDAI);
@@ -32,29 +33,29 @@ afterAll(async () => {
 });
 
 test('prevent locking the wrong collateral type', async () => {
-  const cdp = await maker.service(CDP_MANAGER).open('REP-A');
+  const cdp = await maker.service(CDP_MANAGER).open('BAT-A');
   expect.assertions(1);
   try {
     await cdp.lockCollateral(ETH(1));
   } catch (err) {
-    expect(err.message).toMatch(/Can't cast 1.00 ETH as REP/);
+    expect(err.message).toMatch(/Can't cast 1.00 ETH as BAT/);
   }
 });
 
 test('prevent freeing the wrong collateral type', async () => {
-  const cdp = await maker.service(CDP_MANAGER).open('REP-A');
+  const cdp = await maker.service(CDP_MANAGER).open('BAT-A');
   expect.assertions(1);
   try {
     await cdp.freeCollateral(ETH(1));
   } catch (err) {
-    expect(err.message).toMatch(/Can't cast 1.00 ETH as REP/);
+    expect(err.message).toMatch(/Can't cast 1.00 ETH as BAT/);
   }
 });
 
 test('liquidationPrice and collateralizationRatio are infinite with 0 collateral and 0 debt', async () => {
-  const cdp = await maker.service(CDP_MANAGER).open('REP-A');
+  const cdp = await maker.service(CDP_MANAGER).open('BAT-A');
   await cdp.prefetch();
-  const ratio = createCurrencyRatio(USD, REP);
+  const ratio = createCurrencyRatio(USD, BAT);
   const ratio2 = createCurrencyRatio(USD, MDAI);
   expect(cdp.liquidationPrice).toEqual(ratio(Infinity));
   expect(cdp.collateralizationRatio).toEqual(ratio2(Infinity));
@@ -127,27 +128,27 @@ describe.each([
     'ETH-A',
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
-  ],
-  [
-    'REP-A',
-    REP,
-    async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'GNT-A',
-    GNT,
-    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'OMG-A',
-    OMG,
-    async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'DGD-A',
-    DGD,
-    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
   ]
+  // [
+  //   'REP-A',
+  //   REP,
+  //   async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'GNT-A',
+  //   GNT,
+  //   async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'OMG-A',
+  //   OMG,
+  //   async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'DGD-A',
+  //   DGD,
+  //   async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
+  // ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
 
