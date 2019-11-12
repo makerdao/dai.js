@@ -48,7 +48,6 @@ describe('SDai to MDai Migration', () => {
       .service('token')
       .getToken('MDAI')
       .balanceOf(address);
-    console.log(saiBalanceBeforeMigration);
 
     await migration.execute(1);
 
