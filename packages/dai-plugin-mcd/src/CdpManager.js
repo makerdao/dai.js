@@ -32,6 +32,7 @@ export default class CdpManager extends LocalService {
     ]);
     this._getCdpIdsPromises = {};
     this._getUrnPromises = {};
+    this._getEventHistoryPromises = {};
   }
 
   async getCdpIds(proxyAddress, descending = true) {
@@ -374,6 +375,11 @@ export default class CdpManager extends LocalService {
     this._getUrnPromises = {};
   }
 
+  resetEventHistoryCache(id = null) {
+    if (id !== null) delete this._getEventHistoryPromises[id];
+    else this._getEventHistoryPromises = {};
+  }
+
   get _manager() {
     return this.get('smartContract').getContract('CDP_MANAGER');
   }
@@ -415,6 +421,7 @@ export default class CdpManager extends LocalService {
     const MCD_VAT = this.get('smartContract').getContractAddress('MCD_VAT');
 
     const id = managedCdp.id;
+    if (this._getEventHistoryPromises.hasOwnProperty(id)) return await this._getEventHistoryPromises[id];
     const fromBlock = 1;
     const web3 = this.get('smartContract').get('web3');
 
@@ -487,13 +494,14 @@ export default class CdpManager extends LocalService {
           // For now, use an approach where we find the oldest frob
           // (until we can get an indexed cdp param added to event NewCdp)
           const events1 = r.reduce(
-            (acc, { blockNumber: block }) => {
+            (acc, { blockNumber: block, transactionHash: txHash }) => {
               // Consider the earliest block to be the block the vault was opened
               if (acc === null || acc.block > block) {
                 return {
                   type: 'OPEN',
                   order: 0,
                   block,
+                  txHash,
                   id,
                   ilk
                 };
@@ -503,7 +511,7 @@ export default class CdpManager extends LocalService {
             null
           );
           const events2 = r.reduce(
-            async (acc, { address, blockNumber: block, data, topics }) => {
+            async (acc, { blockNumber: block, data, topics }) => {
               let { dart } = decodeManagerFrob(data);
               acc = await acc;
               dart = new BigNumber(dart);
@@ -525,16 +533,17 @@ export default class CdpManager extends LocalService {
                 });
                 acc.push(
                   ...joinDaiEvents.map(
-                    ({ address, blockNumber: block, topics }) => ({
+                    ({ blockNumber: block, transactionHash: txHash, topics }) => ({
                       type: dart.lt(0) ? 'PAY_BACK' : 'GENERATE',
                       order: 2,
-                      address,
                       block,
+                      txHash,
                       id,
                       ilk,
+                      adapter: MCD_JOIN_DAI.toLowerCase(),
                       proxy: formatAddress(topics[1]),
                       recipient: formatAddress(topics[2]),
-                      amount: fromHexWei(topics[3])
+                      amount: fromHexWei(topics[3]),
                     })
                   )
                 );
@@ -556,42 +565,23 @@ export default class CdpManager extends LocalService {
           ],
           fromBlock
         }),
-        result: r => {
-          return r.reduce(
-            (acc, { address, blockNumber: block, data, topics }) => {
-              let { ilk, dink } = decodeVatFrob(data);
-              dink = new BigNumber(dink);
-              // Gem withdrawal
-              if (dink.lt(0)) {
-                acc.push({
-                  type: 'WITHDRAW',
-                  order: 3,
-                  block,
-                  id,
-                  ilk,
-                  adapter: address.toLowerCase(),
-                  amount: Math.abs(fromWei(dink.toString())).toString(),
-                  proxy: formatAddress(topics[1])
-                });
-              }
-              // Gem deposit
-              if (dink.gt(0)) {
-                acc.push({
-                  type: 'DEPOSIT',
-                  order: 1,
-                  block,
-                  id,
-                  ilk,
-                  adapter: address.toLowerCase(),
-                  amount: fromWei(dink.toString()),
-                  proxy: formatAddress(topics[1])
-                });
-              }
-              return acc;
-            },
-            []
-          );
-        }
+        result: r => r.map(({ address, blockNumber: block, transactionHash: txHash, data }) => {
+          let { ilk, dink, proxy } = decodeVatFrob(data);
+          dink = new BigNumber(dink);
+          if (dink.lt(0) || dink.gt(0)) return {
+            type: dink.lt(0) ? 'WITHDRAW' : 'DEPOSIT',
+            order: dink.lt(0) ? 3 : 1,
+            block,
+            txHash,
+            id,
+            ilk,
+            gem: managedCdp.currency.symbol,
+            adapter: address.toLowerCase(),
+            amount: Math.abs(fromWei(dink.toString())).toString(),
+            proxy
+          };
+          return null;
+        })
       },
       {
         request: web3.getPastLogs({
@@ -599,38 +589,40 @@ export default class CdpManager extends LocalService {
           topics: [EVENT_GIVE, null, '0x' + padStart(id.toString(16), 64, '0')],
           fromBlock
         }),
-        result: r => r.map(({ address, blockNumber: block, data, topics }) => ({
+        result: r => r.map(({ blockNumber: block, transactionHash: txHash, topics }) => ({
           type: 'GIVE',
           block,
+          txHash,
           prevOwner: formatAddress(topics[1]),
           id: numberFromHex(topics[2]),
           newOwner: formatAddress(topics[3])
         }))
       }
     ];
-
-    const results = await Promise.all(lookups.map(l => l.request));
-    const events = orderBy(
-      await Promise.all(
-        flatten(
-          await Promise.all(
-            results.map(async (r, i) => await lookups[i].result(r))
+    this._getEventHistoryPromises[id] = (async () => {
+      const results = await Promise.all(lookups.map(l => l.request));
+      const events = orderBy(
+        await Promise.all(
+          flatten(
+            await Promise.all(
+              results.map(async (r, i) => await lookups[i].result(r))
+            )
           )
-        )
           .filter(r => r !== null)
           .map(async e => {
-            e.address && e.address.toLowerCase();
             e.timestamp = (await getBlockTimestamp(e.block)).timestamp;
             return e;
           })
-      ),
-      ['block', 'order'],
-      ['desc', 'desc']
-    ).map(e => {
-      delete e.order;
-      return e;
-    });
-    return events;
+        ),
+        ['block', 'order'],
+        ['desc', 'desc']
+      ).map(e => {
+        delete e.order;
+        return e;
+      });
+      return events;
+    })();
+    return this._getEventHistoryPromises[id];
   }
 }
 
