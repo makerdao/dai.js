@@ -217,6 +217,7 @@ test('get event history via web3', async () => {
 
   expect(depositEventIdx).toBeGreaterThan(-1);
   expect(events[depositEventIdx].ilk).toEqual('ETH-A');
+  expect(events[depositEventIdx].gem).toEqual('ETH');
   expect(events[depositEventIdx].amount).toEqual('1');
 
   expect(generateEventIdx).toBeGreaterThan(-1);
@@ -225,8 +226,13 @@ test('get event history via web3', async () => {
 
   expect(withdrawEventIdx).toBeGreaterThan(-1);
   expect(events[withdrawEventIdx].ilk).toEqual('ETH-A');
+  expect(events[withdrawEventIdx].gem).toEqual('ETH');
   expect(events[withdrawEventIdx].amount).toEqual('0.5');
 
   expect(giveEventIdx).toBeGreaterThan(-1);
   expect(events[giveEventIdx].newOwner).toEqual('0x1000000000000000000000000000000000000000');
+
+  const cachedEvents = await cdpMgr.getEventHistory(cdp);
+  const openCachedEventIdx = findIndex(cachedEvents, { type: 'OPEN', id: cdp.id });
+  expect(openCachedEventIdx).toBeGreaterThan(-1);
 });
