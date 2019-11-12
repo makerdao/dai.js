@@ -14,7 +14,7 @@ beforeAll(async () => {
 
 // these CDP types should be available to the Maker instance because
 // of the configuration passed into it (see test/helpers.js)
-const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['BAT-A', BAT]];
+const scenarios = [['ETH-A', ETH], ['BAT-A', BAT]];
 
 /*
   The following arrays are expected values for each tested
@@ -24,7 +24,7 @@ const scenarios = [['ETH-A', ETH], ['ETH-B', ETH], ['BAT-A', BAT]];
 */
 const systemValues = {
   'ETH-A': [2, 4, 100000, 1.5, 0.05, '5.0'],
-  'ETH-B': [2, 4, 100000, 2, 0.05, '4.0'],
+  // 'ETH-B': [2, 4, 100000, 2, 0.05, '4.0'],
   'BAT-A': [2, 4, 5000, 2, 0.08, '10.5']
 };
 
@@ -106,11 +106,11 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
 });
 
 test('get system-wide debt', () => {
-  expect(service.totalDebtAllCdpTypes.toNumber()).toBeCloseTo(12);
+  expect(service.totalDebtAllCdpTypes.toNumber()).toBeCloseTo(8);
 });
 
 test('get system-wide collateral value', () => {
-  expect(service.totalCollateralValueAllCdpTypes.toNumber()).toBeCloseTo(60);
+  expect(service.totalCollateralValueAllCdpTypes.toNumber()).toBeCloseTo(40);
 });
 
 test('get system-wide collateralization ratio', async () => {
