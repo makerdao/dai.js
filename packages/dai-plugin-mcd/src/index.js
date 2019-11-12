@@ -75,8 +75,6 @@ export const GNT = createCurrency('GNT');
 
 const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
-  { currency: ETH, ilk: 'ETH-B' },
-  { currency: ZRX, ilk: 'ZRX-A' },
   { currency: BAT, ilk: 'BAT-A' }
 ];
 
