@@ -13,7 +13,6 @@ import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 import { RAY } from './constants';
-import { utils } from 'ethers';
 import getEventHistoryImpl from './getEventHistory';
 
 export default class CdpManager extends LocalService {
@@ -414,9 +413,9 @@ export default class CdpManager extends LocalService {
     );
     const web3 = this.get('web3')._web3;
     const { NewCdp } = managerContract.interface.events;
-    const topic = utils.keccak256(web3.utils.toHex(NewCdp.signature));
+    const topic = web3.utils.keccak256(web3.utils.toHex(NewCdp.signature));
     const receiptEvent = logs.filter(
-      e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for NewCdp events
+      e => e.topics[0].toLowerCase() === topic.toLowerCase()
     );
     const parsedLog = NewCdp.parse(
       receiptEvent[0].topics,
