@@ -47,7 +47,7 @@
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.4.5",
     "@makerdao/testchain": "^0.2.16-1",
-    "babel-eslint": "^10.0.1",
+    "babel-eslint": "^10.0.3",
     "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.5",
     "babel-plugin-module-resolver": "^3.2.0",

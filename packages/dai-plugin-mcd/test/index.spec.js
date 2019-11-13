@@ -14,11 +14,13 @@ test('addConfig outputs contract addresses for all networks', () => {
     token: { erc20 }
   } = McdPlugin.addConfig();
 
+  // there are more addresses for testnet than other networks
   for (const contract of Object.values(addContracts)) {
-    expect(contract.address).toEqual({
-      testnet: expect.any(String),
-      kovan: expect.any(String)
-    });
+    expect(contract.address).toEqual(
+      expect.objectContaining({
+        testnet: expect.any(String)
+      })
+    );
   }
 
   for (const token of erc20) {

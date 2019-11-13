@@ -14,10 +14,9 @@ beforeAll(async () => {
   maker = await mcdMaker({
     cdpTypes: [
       { currency: ETH, ilk: 'ETH-A' },
+      { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+      { currency: GNT, ilk: 'GNT-A' },
       { currency: BAT, ilk: 'BAT-A' }
-      // { currency: ETH, ilk: 'ETH-B' },
-      // { currency: DGD, ilk: 'DGD-A', decimals: 9 },
-      // { currency: GNT, ilk: 'GNT-A' }
     ]
   });
   cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
@@ -111,7 +110,7 @@ test('transaction tracking for openLockAndDraw', async () => {
   expect(handlers.mined).toBeCalled();
 });
 
-xtest('set precision arguments according to decimals', () => {
+test('set precision arguments according to decimals', () => {
   expect(cdpMgr._precision(ETH(1))).toBe('wei');
   expect(cdpMgr._precision(GNT(1))).toBe(18);
   expect(cdpMgr._precision(DGD(1))).toBe(9);
@@ -125,7 +124,7 @@ test('set method correctly', () => {
   expect(setMethod(false, true)).toBe('openLockGNTAndDraw');
 });
 
-xtest('transferToBag for GNT CDPs', async () => {
+test('transferToBag for GNT CDPs', async () => {
   const gntToken = maker.service('token').getToken(GNT);
   const proxyAddress = await maker.service('proxy').currentProxy();
   const bagAddress = await maker
@@ -231,9 +230,14 @@ test('get event history via web3', async () => {
   expect(events[withdrawEventIdx].amount).toEqual('0.5');
 
   expect(giveEventIdx).toBeGreaterThan(-1);
-  expect(events[giveEventIdx].newOwner).toEqual('0x1000000000000000000000000000000000000000');
+  expect(events[giveEventIdx].newOwner).toEqual(
+    '0x1000000000000000000000000000000000000000'
+  );
 
   const cachedEvents = await cdpMgr.getEventHistory(cdp);
-  const openCachedEventIdx = findIndex(cachedEvents, { type: 'OPEN', id: cdp.id });
+  const openCachedEventIdx = findIndex(cachedEvents, {
+    type: 'OPEN',
+    id: cdp.id
+  });
   expect(openCachedEventIdx).toBeGreaterThan(-1);
 });
