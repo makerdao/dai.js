@@ -154,6 +154,11 @@ describe('SCD to MCD CDP Migration', () => {
     });
 
     test.only('migrate scd cdp to mcd, pay fee with debt', async () => {
+      try {
+        await placeLimitOrder(migration._manager);
+      } catch (err) {
+        console.error(err);
+      }
       await migration.execute(cdp.id, 'DEBT', 10);
     });
   });

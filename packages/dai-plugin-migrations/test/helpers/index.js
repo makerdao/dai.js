@@ -8,6 +8,7 @@ import McdPlugin, {
   USD
 } from '@makerdao/dai-plugin-mcd';
 import ethAbi from 'web3-eth-abi';
+import { utils } from 'ethers'
 
 export function stringToBytes(str) {
   return '0x' + Buffer.from(str).toString('hex');
@@ -70,44 +71,38 @@ export async function migrationMaker({
   return maker;
 }
 
-export async function placeLimitOrder(otcService) {
-  // We need to update this function to sell MKR
-  const wethToken = otcService.get('token').getToken(WETH);
-  const wethAddress = wethToken.address();
-  const daiToken = otcService.get('token').getToken(DAI);
+export async function placeLimitOrder(migrationService) {
+  const daiToken = migrationService.get('token').getToken('DAI');
   const daiAddress = daiToken.address();
-  const oasisAddress = otcService
+  const oasisAddress = migrationService
     .get('smartContract')
     .getContractByName('MAKER_OTC').address;
-  const mkrAddress = otcService.get('token').getToken('MKR');
-  const sellToken = sellDai ? daiAddress : wethAddress;
-  const buyToken = sellDai ? wethAddress : daiAddress;
-  const value = sellDai ? utils.parseEther('2.0') : utils.parseEther('10.0');
-  const position = sellDai ? 0 : 1;
+  const mkrToken = migrationService.get('token').getToken('MKR');
+  const mkrAddress = mkrToken.address();
+  const value = utils.parseEther('10.0');
 
-  await wethToken.approveUnlimited(oasisAddress);
-  await wethToken.deposit('1');
+  await mkrToken.approveUnlimited(oasisAddress);
   await daiToken.approveUnlimited(oasisAddress);
   
   return await offer(
-    otcService,
+    migrationService,
     utils.parseEther('0.5'),
-    sellToken,
+    mkrAddress,
     value,
-    buyToken,
-    position
+    daiAddress,
+    1
   );
 }
 
 async function offer(
-  otcService,
+  migrationService,
   payAmount,
   payTokenAddress,
   buyAmount,
   buyTokenAddress,
   position
 ) {
-  const oasisContract = otcService
+  const oasisContract = migrationService
     .get('smartContract')
     .getContractByName('MAKER_OTC');
 
