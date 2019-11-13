@@ -422,14 +422,17 @@ export default class CdpManager extends LocalService {
 
     const id = managedCdp.id;
     if (this._getEventHistoryPromises.hasOwnProperty(id)) return await this._getEventHistoryPromises[id];
+
+    // TODO: Set to block num that contracts were deployed (break out into config for kovan/mainnet)
     const fromBlock = 1;
-    const web3 = this.get('smartContract').get('web3');
+    const web3 = this.get('web3');
+    const utils = web3._web3.utils;
 
     const formatAddress = v => '0x' + v.slice(26);
     const funcSigTopic = v => padEnd(ethAbi.encodeFunctionSignature(v), 66, '0');
-    const fromWei = v => web3._web3.utils.fromWei(v.toString());
-    const fromHexWei = v => web3._web3.utils.fromWei(web3._web3.utils.toBN(v.toString()).toString()).toString();
-    const numberFromHex = v => web3._web3.utils.toBN(v.toString()).toNumber();
+    const fromWei = v => utils.fromWei(v.toString());
+    const fromHexWei = v => utils.fromWei(utils.toBN(v.toString()).toString()).toString();
+    const numberFromHex = v => utils.toBN(v.toString()).toNumber();
 
     const EVENT_GIVE = funcSigTopic('give(uint256,address)');
     const EVENT_DAI_ADAPTER_EXIT = funcSigTopic('exit(address,uint256)');
@@ -479,7 +482,33 @@ export default class CdpManager extends LocalService {
     const urnHandler = (await this.getUrn(id)).toLowerCase();
     const ilk = managedCdp.ilk;
 
+    const { NewCdp } = this
+    .get('smartContract')
+    .getContract('CDP_MANAGER').interface.events;
+
     const lookups = [
+      {
+        request: web3.getPastLogs({
+          address: CDP_MANAGER,
+          topics: [
+            utils.keccak256(utils.toHex(NewCdp.signature)),
+            null,
+            null,
+            '0x' + padStart(id.toString(16), 64, '0')
+          ],
+          fromBlock
+        }),
+        result: r => r.map(({ blockNumber: block, transactionHash: txHash }) => {
+          return {
+            type: 'OPEN',
+            order: 0,
+            block,
+            txHash,
+            id,
+            ilk
+          };
+        })
+      },
       {
         request: web3.getPastLogs({
           address: CDP_MANAGER,
@@ -490,70 +519,47 @@ export default class CdpManager extends LocalService {
           ],
           fromBlock
         }),
-        result: async r => {
-          // For now, use an approach where we find the oldest frob
-          // (until we can get an indexed cdp param added to event NewCdp)
-          const events1 = r.reduce(
-            (acc, { blockNumber: block, transactionHash: txHash }) => {
-              // Consider the earliest block to be the block the vault was opened
-              if (acc === null || acc.block > block) {
-                return {
-                  type: 'OPEN',
-                  order: 0,
-                  block,
-                  txHash,
-                  id,
-                  ilk
-                };
-              }
-              return acc;
-            },
-            null
-          );
-          const events2 = r.reduce(
-            async (acc, { blockNumber: block, data, topics }) => {
-              let { dart } = decodeManagerFrob(data);
-              acc = await acc;
-              dart = new BigNumber(dart);
-
-              // Imprecise debt amount frobbed (not scaled by vat.ilks[ilk].rate)
-              if (dart.lt(0) || dart.gt(0)) {
-                // Lookup the dai join events on this block for this proxy address
-                const proxy = topics[1];
-                const joinDaiEvents = await web3.getPastLogs({
-                  address: MCD_JOIN_DAI,
-                  topics: [
-                    dart.lt(0)
-                      ? EVENT_DAI_ADAPTER_JOIN
-                      : EVENT_DAI_ADAPTER_EXIT,
-                    proxy
-                  ],
-                  fromBlock: block,
-                  toBlock: block
-                });
-                acc.push(
-                  ...joinDaiEvents.map(
-                    ({ blockNumber: block, transactionHash: txHash, topics }) => ({
-                      type: dart.lt(0) ? 'PAY_BACK' : 'GENERATE',
-                      order: 2,
-                      block,
-                      txHash,
-                      id,
-                      ilk,
-                      adapter: MCD_JOIN_DAI.toLowerCase(),
-                      proxy: formatAddress(topics[1]),
-                      recipient: formatAddress(topics[2]),
-                      amount: fromHexWei(topics[3]),
-                    })
-                  )
-                );
-              }
-              return acc;
-            },
-            []
-          );
-          return flatten([events1, await events2]);
-        }
+        result: async r => r.reduce(
+          async (acc, { blockNumber: block, data, topics }) => {
+            let { dart } = decodeManagerFrob(data);
+            acc = await acc;
+            dart = new BigNumber(dart);
+            // Imprecise debt amount frobbed (not scaled by vat.ilks[ilk].rate)
+            if (dart.lt(0) || dart.gt(0)) {
+              // Lookup the dai join events on this block for this proxy address
+              const proxy = topics[1];
+              const joinDaiEvents = await web3.getPastLogs({
+                address: MCD_JOIN_DAI,
+                topics: [
+                  dart.lt(0)
+                    ? EVENT_DAI_ADAPTER_JOIN
+                    : EVENT_DAI_ADAPTER_EXIT,
+                  proxy
+                ],
+                fromBlock: block,
+                toBlock: block
+              });
+              acc.push(
+                ...joinDaiEvents.map(
+                  ({ blockNumber: block, transactionHash: txHash, topics }) => ({
+                    type: dart.lt(0) ? 'PAY_BACK' : 'GENERATE',
+                    order: 2,
+                    block,
+                    txHash,
+                    id,
+                    ilk,
+                    adapter: MCD_JOIN_DAI.toLowerCase(),
+                    proxy: formatAddress(topics[1]),
+                    recipient: formatAddress(topics[2]),
+                    amount: fromHexWei(topics[3])
+                  })
+                )
+              );
+            }
+            return acc;
+          },
+          []
+        )
       },
       {
         request: web3.getPastLogs({
@@ -566,9 +572,9 @@ export default class CdpManager extends LocalService {
           fromBlock
         }),
         result: r => r.map(({ address, blockNumber: block, transactionHash: txHash, data }) => {
-          let { ilk, dink, proxy } = decodeVatFrob(data);
+          let { ilk, dink } = decodeVatFrob(data);
           dink = new BigNumber(dink);
-          if (dink.lt(0) || dink.gt(0)) return {
+          return (dink.lt(0) || dink.gt(0)) ? {
             type: dink.lt(0) ? 'WITHDRAW' : 'DEPOSIT',
             order: dink.lt(0) ? 3 : 1,
             block,
@@ -577,10 +583,8 @@ export default class CdpManager extends LocalService {
             ilk,
             gem: managedCdp.currency.symbol,
             adapter: address.toLowerCase(),
-            amount: Math.abs(fromWei(dink.toString())).toString(),
-            proxy
-          };
-          return null;
+            amount: Math.abs(fromWei(dink.toString())).toString()
+          } : null;
         })
       },
       {

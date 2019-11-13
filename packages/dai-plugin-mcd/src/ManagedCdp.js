@@ -5,7 +5,6 @@ import ethAbi from 'web3-eth-abi';
 import assert from 'assert';
 import { MDAI } from './index';
 import * as math from './math';
-import { utils } from 'ethers';
 
 export default class ManagedCdp {
   constructor(id, ilk, cdpManager, options = { prefetch: true }) {
@@ -215,9 +214,9 @@ function getNewCdpId(txo, manager) {
     .getContract('CDP_MANAGER');
   const web3 = manager.get('web3')._web3;
   const { NewCdp } = managerContract.interface.events;
-  const topic = utils.keccak256(web3.utils.toHex(NewCdp.signature));
+  const topic = web3.utils.keccak256(web3.utils.toHex(NewCdp.signature));
   const receiptEvent = logs.filter(
-    e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for NewCdp events
+    e => e.topics[0].toLowerCase() === topic.toLowerCase() // filter for NewCdp events
   );
   const parsedLog = NewCdp.parse(receiptEvent[0].topics, receiptEvent[0].data);
   assert(parsedLog['cdp'], 'could not find log for NewCdp event');
