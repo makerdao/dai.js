@@ -27,7 +27,7 @@ async function mcdMaker({
       }
     },
     log,
-    addressOverrides: {'MCD_JOIN_ETH_B': '0x0', 'MCD_JOIN_ZRX_A': '0x0' },
+    addressOverrides: { MCD_JOIN_ETH_B: '0x0', MCD_JOIN_ZRX_A: '0x0' },
     ...settings
   });
   await maker.authenticate();

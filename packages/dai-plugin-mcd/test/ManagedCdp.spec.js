@@ -131,7 +131,7 @@ describe.each([
     'BAT-A',
     BAT,
     async () => setupCollateral(maker, 'BAT-A', { price: 100, debtCeiling: 50 })
-  ],
+  ]
   // [
   //   'GNT-A',
   //   GNT,
