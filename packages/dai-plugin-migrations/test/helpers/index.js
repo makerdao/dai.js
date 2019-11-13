@@ -8,7 +8,7 @@ import McdPlugin, {
   USD
 } from '@makerdao/dai-plugin-mcd';
 import ethAbi from 'web3-eth-abi';
-import { utils } from 'ethers'
+import { utils } from 'ethers';
 
 export function stringToBytes(str) {
   return '0x' + Buffer.from(str).toString('hex');
@@ -83,7 +83,7 @@ export async function placeLimitOrder(migrationService) {
 
   await mkrToken.approveUnlimited(oasisAddress);
   await daiToken.approveUnlimited(oasisAddress);
-  
+
   return await offer(
     migrationService,
     utils.parseEther('0.5'),

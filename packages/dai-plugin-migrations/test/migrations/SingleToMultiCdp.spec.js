@@ -96,7 +96,8 @@ describe('SCD to MCD CDP Migration', () => {
   describe.each([
     'MKR',
     'DEBT'
-  ])('pay with %s', (payment) => {
+    // 'GEM'
+  ])('pay with %s', payment => {
     let cdp, proxyAddress;
 
     beforeEach(async () => {
@@ -118,9 +119,7 @@ describe('SCD to MCD CDP Migration', () => {
         await placeLimitOrder(migration._manager);
         maxPayAmount = 10;
       }
-
       if (payment === 'DEBT') minRatio = 150;
-
 
       const manager = maker.service('mcd:cdpManager');
       const scdCollateral = await cdp.getCollateralValue();
@@ -130,32 +129,37 @@ describe('SCD to MCD CDP Migration', () => {
         .service('smartContract')
         .getContract('MCD_POT')
         .drip();
-  
+
       const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
-  
-      const newId = await migration.execute(cdp.id, payment, maxPayAmount);
+
+      const newId = await migration.execute(
+        cdp.id,
+        payment,
+        maxPayAmount,
+        minRatio
+      );
       await manager.reset();
-  
+
       const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
       const mcdCdpId = mcdCdpsAfterMigration[0].id;
       expect(newId).toEqual(mcdCdpId);
-  
+
       const mcdCdp = await manager.getCdp(mcdCdpId);
       const mcdCollateral = mcdCdp.collateralAmount.toNumber();
       const mcdDebt = mcdCdp.debtValue.toNumber();
-  
+
       expect(mcdCollateral).toEqual(scdCollateral.toNumber());
       expect(mcdDebt).toBeCloseTo(scdDebt.toNumber());
-  
+
       let message;
       try {
         await maker.getCdp(cdp.id);
       } catch (err) {
         message = err.message;
       }
-  
+
       expect(message).toEqual("That CDP doesn't exist--try opening a new one.");
-  
+
       expect(mcdCdpsAfterMigration.length).toEqual(
         mcdCdpsBeforeMigration.length + 1
       );
