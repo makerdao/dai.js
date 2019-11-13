@@ -93,12 +93,13 @@ export default class SingleToMultiCdp {
     //   };
     // }
 
-    // if (payment === 'DEBT') {
-    //   return {
-    //     method: 'migratePayFeeWithDebt',
-    //     args: [...defaultArgs, otc, SAI(maxPayAmount).toFixed('wei')]
-    //   };
-    // }
+    if (payment === 'DEBT') {
+      // add min ratio
+      return {
+        method: 'migratePayFeeWithDebt',
+        args: [...defaultArgs, otc, SAI(maxPayAmount).toFixed('wei')]
+      };
+    }
 
     return {
       method: 'migrate',

@@ -1,4 +1,4 @@
-import { migrationMaker } from '../helpers';
+import { migrationMaker, placeLimitOrder } from '../helpers';
 import { mockCdpIds } from '../helpers/mocks';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import {
@@ -159,8 +159,8 @@ describe('SCD to MCD CDP Migration', () => {
       // await migration.execute(cdp.id, 'GEM', 10);
     });
 
-    xtest('migrate scd cdp to mcd, pay fee with debt', async () => {
-      // await migration.execute(cdp.id, 'DEBT', 10);
+    test.only('migrate scd cdp to mcd, pay fee with debt', async () => {
+      await migration.execute(cdp.id, 'DEBT', 10);
     });
   });
 });
