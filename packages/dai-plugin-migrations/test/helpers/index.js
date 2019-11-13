@@ -8,6 +8,7 @@ import McdPlugin, {
   USD
 } from '@makerdao/dai-plugin-mcd';
 import ethAbi from 'web3-eth-abi';
+import { utils } from 'ethers';
 
 export function stringToBytes(str) {
   return '0x' + Buffer.from(str).toString('hex');
@@ -68,4 +69,49 @@ export async function migrationMaker({
   });
   await maker.authenticate();
   return maker;
+}
+
+export async function placeLimitOrder(migrationService) {
+  const daiToken = migrationService.get('token').getToken('DAI');
+  const daiAddress = daiToken.address();
+  const oasisAddress = migrationService
+    .get('smartContract')
+    .getContractByName('MAKER_OTC').address;
+  const mkrToken = migrationService.get('token').getToken('MKR');
+  const mkrAddress = mkrToken.address();
+  const value = utils.parseEther('10.0');
+
+  await mkrToken.approveUnlimited(oasisAddress);
+  await daiToken.approveUnlimited(oasisAddress);
+
+  return await offer(
+    migrationService,
+    utils.parseEther('0.5'),
+    mkrAddress,
+    value,
+    daiAddress,
+    1
+  );
+}
+
+async function offer(
+  migrationService,
+  payAmount,
+  payTokenAddress,
+  buyAmount,
+  buyTokenAddress,
+  position
+) {
+  const oasisContract = migrationService
+    .get('smartContract')
+    .getContractByName('MAKER_OTC');
+
+  const tx = await oasisContract.offer(
+    payAmount,
+    payTokenAddress,
+    buyAmount,
+    buyTokenAddress,
+    position
+  );
+  return await tx.mine();
 }

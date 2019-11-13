@@ -21,7 +21,7 @@ export default class SingleToMultiCdp {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 4 })
-  async execute(cupId, payment = 'MKR', maxPayAmount, { promise }) {
+  async execute(cupId, payment = 'MKR', maxPayAmount, minRatio, { promise }) {
     const migrationProxy = this._manager
       .get('smartContract')
       .getContract('MIGRATION_PROXY_ACTIONS');
@@ -32,7 +32,8 @@ export default class SingleToMultiCdp {
     const { method, args } = this._setMethodAndArgs(
       payment,
       defaultArgs,
-      maxPayAmount
+      maxPayAmount,
+      minRatio
     );
 
     await this._requireAllowance(cupId);
@@ -54,13 +55,11 @@ export default class SingleToMultiCdp {
     if (allowance.lt(fee)) await mkr.approve(proxyAddress, fee.times(1.5));
   }
 
-  // eslint-disable-next-line
-  _setMethodAndArgs(payment, defaultArgs, maxPayAmount) {
-    // eslint-disable-next-line
+  _setMethodAndArgs(payment, defaultArgs, maxPayAmount, minRatio) {
     const otc = this._manager.get('smartContract').getContract('MAKER_OTC')
       .address;
 
-    // to do:
+    // to-do:
     // if (payment === 'GEM') {
     //   const gem = this._manager
     //     .get('token')
@@ -72,12 +71,17 @@ export default class SingleToMultiCdp {
     //   };
     // }
 
-    // if (payment === 'DEBT') {
-    //   return {
-    //     method: 'migratePayFeeWithDebt',
-    //     args: [...defaultArgs, otc, SAI(maxPayAmount).toFixed('wei')]
-    //   };
-    // }
+    if (payment === 'DEBT') {
+      return {
+        method: 'migratePayFeeWithDebt',
+        args: [
+          ...defaultArgs,
+          otc,
+          SAI(maxPayAmount).toFixed('wei'),
+          SAI(minRatio).toFixed('wei')
+        ]
+      };
+    }
 
     return {
       method: 'migrate',

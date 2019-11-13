@@ -1,4 +1,4 @@
-import { migrationMaker } from '../helpers';
+import { migrationMaker, placeLimitOrder } from '../helpers';
 import { mockCdpIds } from '../helpers/mocks';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import {
@@ -93,7 +93,11 @@ describe('SCD to MCD CDP Migration', () => {
     });
   });
 
-  describe('migrations', () => {
+  describe.each([
+    'MKR',
+    'DEBT'
+    // 'GEM'
+  ])('pay with %s', payment => {
     let cdp, proxyAddress;
 
     beforeEach(async () => {
@@ -108,9 +112,16 @@ describe('SCD to MCD CDP Migration', () => {
       await restoreSnapshot(snapshotData, maker);
     });
 
-    test('migrate scd cdp to mcd, pay fee with mkr', async () => {
-      const manager = maker.service('mcd:cdpManager');
+    test('execute', async () => {
+      let maxPayAmount, minRatio;
 
+      if (payment !== 'MKR') {
+        await placeLimitOrder(migration._manager);
+        maxPayAmount = 10;
+      }
+      if (payment === 'DEBT') minRatio = 150;
+
+      const manager = maker.service('mcd:cdpManager');
       const scdCollateral = await cdp.getCollateralValue();
       const scdDebt = await cdp.getDebtValue();
       await mineBlocks(maker.service('web3'), 3);
@@ -121,7 +132,12 @@ describe('SCD to MCD CDP Migration', () => {
 
       const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
 
-      const newId = await migration.execute(cdp.id);
+      const newId = await migration.execute(
+        cdp.id,
+        payment,
+        maxPayAmount,
+        minRatio
+      );
       await manager.reset();
 
       const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
@@ -147,14 +163,6 @@ describe('SCD to MCD CDP Migration', () => {
       expect(mcdCdpsAfterMigration.length).toEqual(
         mcdCdpsBeforeMigration.length + 1
       );
-    }, 15000);
-
-    xtest('migrate scd cdp to mcd, pay fee with sai', async () => {
-      // await migration.execute(cdp.id, 'GEM', 10);
-    });
-
-    xtest('migrate scd cdp to mcd, pay fee with debt', async () => {
-      // await migration.execute(cdp.id, 'DEBT', 10);
     });
   });
 });
