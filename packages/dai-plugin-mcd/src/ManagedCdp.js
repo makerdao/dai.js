@@ -1,7 +1,6 @@
 import { castAsCurrency, stringToBytes } from './utils';
 import { tracksTransactionsWithOptions } from './utils/tracksTransactions';
 import { ServiceRoles } from './constants';
-import ethAbi from 'web3-eth-abi';
 import assert from 'assert';
 import { MDAI } from './index';
 import * as math from './math';
