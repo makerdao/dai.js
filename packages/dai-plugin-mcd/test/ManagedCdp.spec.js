@@ -121,19 +121,17 @@ async function expectValues(
   }
 }
 
-// ZRX and BAT use the same adapter as ETH and REP, so they
-// don't need to be tested.
 describe.each([
   [
     'ETH-A',
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
-  ]
-  // [
-  //   'REP-A',
-  //   REP,
-  //   async () => setupCollateral(maker, 'REP-A', { price: 100, debtCeiling: 50 })
-  // ],
+  ],
+  [
+    'BAT-A',
+    BAT,
+    async () => setupCollateral(maker, 'BAT-A', { price: 100, debtCeiling: 50 })
+  ],
   // [
   //   'GNT-A',
   //   GNT,
