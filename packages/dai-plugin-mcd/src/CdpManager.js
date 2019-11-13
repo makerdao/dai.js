@@ -17,6 +17,7 @@ import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 import { RAY } from './constants';
+import { utils } from 'ethers';
 
 export default class CdpManager extends LocalService {
   constructor(name = CDP_MANAGER) {
@@ -415,9 +416,32 @@ export default class CdpManager extends LocalService {
     this._instanceCache[id] = instance;
   }
 
+  getNewCdpId(txo) {
+    const logs = txo.receipt.logs;
+    const managerContract = this.get('smartContract').getContract(
+      'CDP_MANAGER'
+    );
+    const web3 = this.get('web3')._web3;
+    const { NewCdp } = managerContract.interface.events;
+    const topic = utils.keccak256(web3.utils.toHex(NewCdp.signature));
+    const receiptEvent = logs.filter(
+      e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for NewCdp events
+    );
+    const parsedLog = NewCdp.parse(
+      receiptEvent[0].topics,
+      receiptEvent[0].data
+    );
+    assert(parsedLog['cdp'], 'could not find log for NewCdp event');
+    return parseInt(parsedLog['cdp']);
+  }
+
   async getEventHistory(managedCdp) {
-    const MCD_JOIN_DAI = this.get('smartContract').getContractAddress('MCD_JOIN_DAI');
-    const CDP_MANAGER = this.get('smartContract').getContractAddress('CDP_MANAGER');
+    const MCD_JOIN_DAI = this.get('smartContract').getContractAddress(
+      'MCD_JOIN_DAI'
+    );
+    const CDP_MANAGER = this.get('smartContract').getContractAddress(
+      'CDP_MANAGER'
+    );
     const MCD_VAT = this.get('smartContract').getContractAddress('MCD_VAT');
 
     const id = managedCdp.id;
@@ -437,23 +461,31 @@ export default class CdpManager extends LocalService {
     const EVENT_GIVE = funcSigTopic('give(uint256,address)');
     const EVENT_DAI_ADAPTER_EXIT = funcSigTopic('exit(address,uint256)');
     const EVENT_DAI_ADAPTER_JOIN = funcSigTopic('join(address,uint256)');
-    const EVENT_VAT_FROB = funcSigTopic('frob(bytes32,address,address,address,int256,int256)');
+    const EVENT_VAT_FROB = funcSigTopic(
+      'frob(bytes32,address,address,address,int256,int256)'
+    );
     const EVENT_MANAGER_FROB = funcSigTopic('frob(uint256,int256,int256)');
 
     const promisesBlockTimestamp = {};
     const getBlockTimestamp = block => {
-      if (promisesBlockTimestamp.hasOwnProperty(block)) return promisesBlockTimestamp[block];
+      if (promisesBlockTimestamp.hasOwnProperty(block))
+        return promisesBlockTimestamp[block];
       promisesBlockTimestamp[block] = web3.getBlock(block, false);
       return promisesBlockTimestamp[block];
     };
 
     const decodeManagerFrob = data => {
-      const sig = ethAbi.encodeFunctionSignature('frob(uint256,int256,int256)').slice(2);
-      const decoded = ethAbi.decodeParameters([
-        'uint256', // id
-        'int256',  // dink
-        'int256'   // dart
-      ], '0x' + data.replace(new RegExp('^.+?' + sig), ''));
+      const sig = ethAbi
+        .encodeFunctionSignature('frob(uint256,int256,int256)')
+        .slice(2);
+      const decoded = ethAbi.decodeParameters(
+        [
+          'uint256', // id
+          'int256', // dink
+          'int256' // dart
+        ],
+        '0x' + data.replace(new RegExp('^.+?' + sig), '')
+      );
       return {
         id: decoded[0].toString(),
         dink: decoded[1],
@@ -462,15 +494,22 @@ export default class CdpManager extends LocalService {
     };
 
     const decodeVatFrob = data => {
-      const sig = ethAbi.encodeFunctionSignature('frob(bytes32,address,address,address,int256,int256)').slice(2);
-      const decoded = ethAbi.decodeParameters([
-        'bytes32', // ilk
-        'address', // u (urnHandler)
-        'address', // v (urnHandler)
-        'address', // w (urnHandler)
-        'int256',  // dink
-        'int256'   // dart
-      ], '0x' + data.replace(new RegExp('^.+?' + sig), ''));
+      const sig = ethAbi
+        .encodeFunctionSignature(
+          'frob(bytes32,address,address,address,int256,int256)'
+        )
+        .slice(2);
+      const decoded = ethAbi.decodeParameters(
+        [
+          'bytes32', // ilk
+          'address', // u (urnHandler)
+          'address', // v (urnHandler)
+          'address', // w (urnHandler)
+          'int256', // dink
+          'int256' // dart
+        ],
+        '0x' + data.replace(new RegExp('^.+?' + sig), '')
+      );
       return {
         ilk: bytesToString(decoded[0].toString()),
         urnHandler: decoded[1].toString(),
@@ -593,14 +632,15 @@ export default class CdpManager extends LocalService {
           topics: [EVENT_GIVE, null, '0x' + padStart(id.toString(16), 64, '0')],
           fromBlock
         }),
-        result: r => r.map(({ blockNumber: block, transactionHash: txHash, topics }) => ({
-          type: 'GIVE',
-          block,
-          txHash,
-          prevOwner: formatAddress(topics[1]),
-          id: numberFromHex(topics[2]),
-          newOwner: formatAddress(topics[3])
-        }))
+        result: r =>
+          r.map(({ blockNumber: block, transactionHash: txHash, topics }) => ({
+            type: 'GIVE',
+            block,
+            txHash,
+            prevOwner: formatAddress(topics[1]),
+            id: numberFromHex(topics[2]),
+            newOwner: formatAddress(topics[3])
+          }))
       }
     ];
     this._getEventHistoryPromises[id] = (async () => {
@@ -612,11 +652,11 @@ export default class CdpManager extends LocalService {
               results.map(async (r, i) => await lookups[i].result(r))
             )
           )
-          .filter(r => r !== null)
-          .map(async e => {
-            e.timestamp = (await getBlockTimestamp(e.block)).timestamp;
-            return e;
-          })
+            .filter(r => r !== null)
+            .map(async e => {
+              e.timestamp = (await getBlockTimestamp(e.block)).timestamp;
+              return e;
+            })
         ),
         ['block', 'order'],
         ['desc', 'desc']
