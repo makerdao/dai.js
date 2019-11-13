@@ -33,12 +33,6 @@ async function migrateSaiToDai(amount) {
 }
 
 describe('SCD to MCD CDP Migration', () => {
-  // beforeAll(async () => {
-  //   maker = await migrationMaker();
-  //   const service = maker.service(ServiceRoles.MIGRATION);
-  //   migration = service.getMigration(Migrations.SINGLE_TO_MULTI_CDP);
-  // });
-
   beforeEach(async () => {
     maker = await migrationMaker();
     const service = maker.service(ServiceRoles.MIGRATION);
