@@ -73,7 +73,6 @@ export default class SingleToMultiCdp {
     // }
 
     if (payment === 'DEBT') {
-      // add min ratio
       return {
         method: 'migratePayFeeWithDebt',
         args: [...defaultArgs, otc, SAI(maxPayAmount).toFixed('wei'), SAI(150).toFixed('wei')]

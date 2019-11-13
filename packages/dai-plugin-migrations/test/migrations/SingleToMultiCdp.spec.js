@@ -93,7 +93,10 @@ describe('SCD to MCD CDP Migration', () => {
     });
   });
 
-  describe('migrations', () => {
+  describe.each([
+    'MKR',
+    'DEBT'
+  ])('pay with %s', (payment) => {
     let cdp, proxyAddress;
 
     beforeEach(async () => {
@@ -108,9 +111,18 @@ describe('SCD to MCD CDP Migration', () => {
       await restoreSnapshot(snapshotData, maker);
     });
 
-    test('migrate scd cdp to mcd, pay fee with mkr', async () => {
-      const manager = maker.service('mcd:cdpManager');
+    test('execute', async () => {
+      let maxPayAmount, minRatio;
 
+      if (payment !== 'MKR') {
+        await placeLimitOrder(migration._manager);
+        maxPayAmount = 10;
+      }
+
+      if (payment === 'DEBT') minRatio = 150;
+
+
+      const manager = maker.service('mcd:cdpManager');
       const scdCollateral = await cdp.getCollateralValue();
       const scdDebt = await cdp.getDebtValue();
       await mineBlocks(maker.service('web3'), 3);
@@ -118,69 +130,35 @@ describe('SCD to MCD CDP Migration', () => {
         .service('smartContract')
         .getContract('MCD_POT')
         .drip();
-
+  
       const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
-
-      const newId = await migration.execute(cdp.id);
+  
+      const newId = await migration.execute(cdp.id, payment, maxPayAmount);
       await manager.reset();
-
+  
       const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
       const mcdCdpId = mcdCdpsAfterMigration[0].id;
       expect(newId).toEqual(mcdCdpId);
-
+  
       const mcdCdp = await manager.getCdp(mcdCdpId);
       const mcdCollateral = mcdCdp.collateralAmount.toNumber();
       const mcdDebt = mcdCdp.debtValue.toNumber();
-
+  
       expect(mcdCollateral).toEqual(scdCollateral.toNumber());
       expect(mcdDebt).toBeCloseTo(scdDebt.toNumber());
-
+  
       let message;
       try {
         await maker.getCdp(cdp.id);
       } catch (err) {
         message = err.message;
       }
-
+  
       expect(message).toEqual("That CDP doesn't exist--try opening a new one.");
-
+  
       expect(mcdCdpsAfterMigration.length).toEqual(
         mcdCdpsBeforeMigration.length + 1
       );
-    }, 15000);
-
-    xtest('migrate scd cdp to mcd, pay fee with sai', async () => {
-      // await migration.execute(cdp.id, 'GEM', 10);
-    });
-
-    test('migrate scd cdp to mcd, pay fee with debt', async () => {
-      const manager = maker.service('mcd:cdpManager');
-      await placeLimitOrder(migration._manager);
-      const scdCollateral = await cdp.getCollateralValue();
-      const scdDebt = await cdp.getDebtValue();
-      await mineBlocks(maker.service('web3'), 3);
-      await maker
-        .service('smartContract')
-        .getContract('MCD_POT')
-        .drip();
-
-      const mcdCdpsBeforeMigration = await manager.getCdpIds(proxyAddress);
-      const newId = await migration.execute(cdp.id, 'DEBT', 10);
-      await manager.reset();
-
-      const mcdCdpsAfterMigration = await manager.getCdpIds(proxyAddress);
-      const mcdCdpId = mcdCdpsAfterMigration[0].id;
-      expect(newId).toEqual(mcdCdpId);
-      expect(mcdCdpsAfterMigration.length).toEqual(
-        mcdCdpsBeforeMigration.length + 1
-      );
-
-      const mcdCdp = await manager.getCdp(mcdCdpId);
-      const mcdCollateral = mcdCdp.collateralAmount.toNumber();
-      const mcdDebt = mcdCdp.debtValue.toNumber();
-
-      expect(mcdCollateral).toEqual(scdCollateral.toNumber());
-      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber());
     });
   });
 });
