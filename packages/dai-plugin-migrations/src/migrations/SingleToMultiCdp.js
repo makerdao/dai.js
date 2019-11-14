@@ -1,8 +1,6 @@
 import { tracksTransactionsWithOptions } from '@makerdao/dai/dist/src/utils/tracksTransactions';
-import { getIdBytes } from '../utils';
+import { getIdBytes, stringToBytes } from '../utils';
 import { SAI, MKR } from '..';
-
-import { stringToBytes } from '../utils';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -89,24 +87,30 @@ export default class SingleToMultiCdp {
     };
   }
 
+  // the Sai available is the smaller of two values:
+  //  - the Sai locked in the migration contract's special CDP
+  //  - the debt ceiling for the ETH-A ilk in MCD
   async migrationSaiAvailable() {
     const vat = this._manager.get('smartContract').getContract('MCD_VAT_1');
     const migrationContractAddress = this._manager
       .get('smartContract')
       .getContract('MIGRATION').address;
 
-    const migrationCdp = await vat.urns(
-      stringToBytes('SAI'),
-      migrationContractAddress
-    );
+    const ethA = this._manager.get('mcd:cdpType').getCdpType(null, 'ETH-A');
+    ethA.reset();
 
-    // for technical reasons, the liquidation ratio of the mcd migration cdp cannot be 0.
-    // but, it will be close enough that the migration contract will
+    const [migrationCdp, debtHeadroom] = await Promise.all([
+      vat.urns(stringToBytes('SAI'), migrationContractAddress),
+      ethA.prefetch().then(() => SAI(ethA.debtCeiling.minus(ethA.totalDebt)))
+    ]);
+
+    // for technical reasons, the liquidation ratio of the mcd migration cdp
+    // cannot be 0. but it will be close enough that the migration contract will
     // not be able to free only the last 1 wei of sai
-    const migrationSaiLiquidity = SAI.wei(migrationCdp.ink);
-    return migrationSaiLiquidity.eq(0)
-      ? migrationSaiLiquidity
-      : migrationSaiLiquidity.minus(SAI.wei(1));
+    let lockedSai = SAI.wei(migrationCdp.ink);
+    if (lockedSai.gt(0)) lockedSai = lockedSai.minus(SAI.wei(1));
+
+    return debtHeadroom.lt(lockedSai) ? debtHeadroom : lockedSai;
   }
 
   _getToken(symbol) {

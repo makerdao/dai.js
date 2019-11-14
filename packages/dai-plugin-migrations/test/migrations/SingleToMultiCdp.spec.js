@@ -1,4 +1,4 @@
-import { migrationMaker, placeLimitOrder } from '../helpers';
+import { migrationMaker, placeLimitOrder, setPrice } from '../helpers';
 import { mockCdpIds } from '../helpers/mocks';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import {
@@ -6,6 +6,8 @@ import {
   takeSnapshot,
   restoreSnapshot
 } from '@makerdao/test-helpers';
+import { USD, MDAI as DAI, ETH } from '@makerdao/dai-plugin-mcd';
+import { createCurrencyRatio } from '@makerdao/currency';
 
 let maker, migration, snapshotData;
 
@@ -87,9 +89,22 @@ describe('SCD to MCD CDP Migration', () => {
     });
 
     test('if there is sai locked in the mcd migration cdp, return the amount that is there', async () => {
-      await drawSaiAndMigrateToDai(10); // lock 10 sai into the mcd migration cdp
-      const saiLiquidity = await migration.migrationSaiAvailable();
-      expect(saiLiquidity.toFixed('wei')).toBe('9999999999999999999');
+      await drawSaiAndMigrateToDai(10); // lock 10 sai into the migration cdp
+      const available = await migration.migrationSaiAvailable();
+      expect(available.toFixed('wei')).toBe('9999999999999999999');
+    });
+
+    test('if the headroom under the debt ceiling is smaller than the sai locked, return that amount', async () => {
+      await drawSaiAndMigrateToDai(1000);
+      await setPrice(maker, createCurrencyRatio(USD, ETH)(100000), 'ETH-A');
+
+      // this expects the debt ceiling to be 100000
+      await maker
+        .service('mcd:cdpManager')
+        .openLockAndDraw('ETH-A', ETH(2), DAI(99998));
+
+      const available = await migration.migrationSaiAvailable();
+      expect(available.toFixed('wei')).toBe('1999999999999999999');
     });
   });
 
