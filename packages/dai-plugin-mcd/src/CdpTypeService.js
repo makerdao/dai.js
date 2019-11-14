@@ -25,7 +25,9 @@ export default class CdpTypeService extends PublicService {
 
   getCdpType(currency, ilk) {
     const types = this.cdpTypes.filter(
-      t => (!currency || t.currency === currency) && (!ilk || ilk === t.ilk)
+      t =>
+        (!currency || t.currency.symbol === currency.symbol) &&
+        (!ilk || ilk === t.ilk)
     );
     if (types.length === 1) return types[0];
 
