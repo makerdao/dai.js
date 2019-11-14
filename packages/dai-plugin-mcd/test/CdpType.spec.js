@@ -34,7 +34,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
 
   beforeAll(async () => {
     ratio = createCurrencyRatio(USD, GEM);
-    await setupCollateral(maker, ilk, { price, debtCeiling: 111 });
+    await setupCollateral(maker, ilk, { price });
 
     for (let i = 0; i < 2; i++) {
       await maker.service(CDP_MANAGER).openLockAndDraw(ilk, GEM(1), 2);
