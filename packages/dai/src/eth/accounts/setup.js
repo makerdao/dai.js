@@ -5,11 +5,13 @@ import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
 import SubscriptionSubprovider from 'web3-provider-engine/dist/es5/subproviders/subscriptions';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
+const DEFAULT_POLLING_INTERVAL = 4000;
+
 export async function setupEngine(settings) {
   const { provider: providerSettings, pollingInterval } = settings.web3;
 
   const engine = new Web3ProviderEngine({
-    pollingInterval: pollingInterval ? pollingInterval : 2000
+    pollingInterval: pollingInterval || DEFAULT_POLLING_INTERVAL
   });
   const result = { engine };
 
