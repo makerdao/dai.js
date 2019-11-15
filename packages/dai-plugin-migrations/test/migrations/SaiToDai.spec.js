@@ -4,7 +4,7 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 
 let maker, migration, snapshot;
 
-describe('SDai to MDai Migration', () => {
+describe('SAI to DAI Migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
     const service = maker.service(ServiceRoles.MIGRATION);
@@ -16,7 +16,7 @@ describe('SDai to MDai Migration', () => {
     restoreSnapshot(snapshot, maker);
   });
 
-  test('if the account has no SDAI, return 0', async () => {
+  test('if the account has no SAI, return 0', async () => {
     const amount = await maker
       .service('token')
       .getToken('DAI')
@@ -26,7 +26,7 @@ describe('SDai to MDai Migration', () => {
     expect((await migration.check()).eq(0)).toBeTruthy();
   });
 
-  test('if the account has some SDAI, return the balance', async () => {
+  test('if the account has some SAI, return the balance', async () => {
     const proxy = await maker.service('proxy').ensureProxy();
     await maker.service('cdp').openProxyCdpLockEthAndDrawDai(0.1, 1, proxy);
 
@@ -39,7 +39,7 @@ describe('SDai to MDai Migration', () => {
     expect((await migration.check()).eq(1)).toBeTruthy();
   });
 
-  test.only('execute migrates sai to dai', async () => {
+  test('execute migrates SAI to DAI', async () => {
     const address = maker.service('web3').currentAddress();
     const proxy = await maker.service('proxy').ensureProxy();
     await maker.service('cdp').openProxyCdpLockEthAndDrawDai(0.1, 1, proxy);
