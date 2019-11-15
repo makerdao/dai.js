@@ -43,7 +43,7 @@ test('can fetch a list of all migrations', () => {
       Migrations.MKR_REDEEMER
     ])
   );
-  expect(ids.length).toEqual(6);
+  expect(ids.length).toEqual(7);
 });
 
 test('getting each migration returns a valid migration', () => {
@@ -74,6 +74,7 @@ test('runAllChecks', async () => {
   const result = await service.runAllChecks();
   expect(result).toEqual({
     [Migrations.SAI_TO_DAI]: expect.anything(),
+    [Migrations.DAI_TO_SAI]: expect.anything(),
     [Migrations.SINGLE_TO_MULTI_CDP]: {}
   });
   expect(result[Migrations.SAI_TO_DAI].eq(0)).toBeTruthy();

@@ -1,5 +1,6 @@
 import Maker from '@makerdao/dai';
 import MigrationPlugin from '../../src';
+import { Migrations } from '../../src/constants';
 import { createCurrencyRatio } from '@makerdao/currency';
 import McdPlugin, {
   ServiceRoles,
@@ -114,4 +115,18 @@ async function offer(
     position
   );
   return await tx.mine();
+}
+
+export async function drawSaiAndMigrateToDai(drawAmount, maker) {
+  const cdp = await maker.openCdp();
+  await cdp.lockEth('20');
+  await cdp.drawDai(drawAmount);
+  await migrateSaiToDai(10, maker);
+}
+
+export async function migrateSaiToDai(amount, maker) {
+  const daiMigration = maker
+    .service('migration')
+    .getMigration(Migrations.SAI_TO_DAI);
+  await daiMigration.execute(amount);
 }

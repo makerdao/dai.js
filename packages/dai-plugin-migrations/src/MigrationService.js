@@ -6,11 +6,13 @@ import GlobalSettlementCollateralClaims from './migrations/GlobalSettlementColla
 import GlobalSettlementDaiRedeemer from './migrations/GlobalSettlementDaiRedeemer';
 import SaiToDai from './migrations/SaiToDai';
 import MkrRedeemer from './migrations/MkrRedeemer';
-const { SINGLE_TO_MULTI_CDP, SAI_TO_DAI } = Migrations;
+import DaiToSai from './migrations/DaiToSai';
+const { SINGLE_TO_MULTI_CDP, SAI_TO_DAI, DAI_TO_SAI } = Migrations;
 
 const migrations = {
   [SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
   [SAI_TO_DAI]: SaiToDai,
+  [DAI_TO_SAI]: DaiToSai,
   [Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI]: GlobalSettlementSavingsDai,
   [Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS]: GlobalSettlementCollateralClaims,
   [Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER]: GlobalSettlementDaiRedeemer,
@@ -44,7 +46,8 @@ export default class MigrationService extends PublicService {
       [SINGLE_TO_MULTI_CDP]: await this.getMigration(
         SINGLE_TO_MULTI_CDP
       ).check(),
-      [SAI_TO_DAI]: await this.getMigration(SAI_TO_DAI).check()
+      [SAI_TO_DAI]: await this.getMigration(SAI_TO_DAI).check(),
+      [DAI_TO_SAI]: await this.getMigration(DAI_TO_SAI).check()
     };
   }
 

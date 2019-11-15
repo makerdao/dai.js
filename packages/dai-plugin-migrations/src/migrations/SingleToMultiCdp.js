@@ -34,23 +34,25 @@ export default class SingleToMultiCdp {
       minRatio
     );
 
-    await this._requireAllowance(cupId);
+    if (payment !== 'DEBT') await this._requireAllowance(cupId, payment);
     return migrationProxy[method](...args, { dsProxy: true, promise }).then(
       txo => this._manager.get('mcd:cdpManager').getNewCdpId(txo)
     );
   }
 
-  async _requireAllowance(cupId) {
-    // This will need to be updated to work with sai too
+  async _requireAllowance(cupId, payment) {
     const address = this._manager.get('web3').currentAddress();
     const proxyAddress = await this._manager.get('proxy').currentProxy();
     const cdp = await this._manager.get('cdp').getCdp(cupId);
+    // fee value needs to be converted to dai if payment === 'GEM'
     const fee = await cdp.getGovernanceFee();
-    const mkr = this._getToken(MKR);
-    const allowance = await mkr.allowance(address, proxyAddress);
+    const token = payment === 'MKR' 
+      ? this._getToken(MKR)
+      : this._getToken(SAI);
+    const allowance = await token.allowance(address, proxyAddress);
 
     // add a buffer amount to allowance in case drip hasn't been called recently
-    if (allowance.lt(fee)) await mkr.approve(proxyAddress, fee.times(1.5));
+    if (allowance.lt(fee.toNumber())) await token.approve(proxyAddress, fee.times(1.5));
   }
 
   _setMethodAndArgs(payment, defaultArgs, maxPayAmount, minRatio) {
