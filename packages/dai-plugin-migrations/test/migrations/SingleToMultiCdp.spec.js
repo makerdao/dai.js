@@ -1,4 +1,10 @@
-import { migrationMaker, placeLimitOrder, setPrice } from '../helpers';
+import {
+  migrationMaker,
+  placeLimitOrder,
+  setPrice,
+  drawSaiAndMigrateToDai,
+  migrateSaiToDai
+} from '../helpers';
 import { mockCdpIds } from '../helpers/mocks';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import {
@@ -11,13 +17,6 @@ import { createCurrencyRatio } from '@makerdao/currency';
 
 let maker, migration, snapshotData;
 
-async function drawSaiAndMigrateToDai(drawAmount) {
-  const cdp = await maker.openCdp();
-  await cdp.lockEth('20');
-  await cdp.drawDai(drawAmount);
-  await migrateSaiToDai(10);
-}
-
 async function openLockAndDrawScdCdp(drawAmount) {
   const proxy = await maker.service('proxy').currentProxy();
   const cdp = await maker.openCdp();
@@ -25,13 +24,6 @@ async function openLockAndDrawScdCdp(drawAmount) {
   await cdp.drawDai(drawAmount);
   await cdp.give(proxy);
   return cdp;
-}
-
-async function migrateSaiToDai(amount) {
-  const daiMigration = maker
-    .service(ServiceRoles.MIGRATION)
-    .getMigration(Migrations.SAI_TO_DAI);
-  await daiMigration.execute(amount);
 }
 
 describe('SCD to MCD CDP Migration', () => {
@@ -89,13 +81,13 @@ describe('SCD to MCD CDP Migration', () => {
     });
 
     test('if there is sai locked in the mcd migration cdp, return the amount that is there', async () => {
-      await drawSaiAndMigrateToDai(10); // lock 10 sai into the migration cdp
+      await drawSaiAndMigrateToDai(10, maker); // lock 10 sai into the migration cdp
       const available = await migration.migrationSaiAvailable();
       expect(available.toFixed('wei')).toBe('9999999999999999999');
     });
 
     test('if the headroom under the debt ceiling is smaller than the sai locked, return that amount', async () => {
-      await drawSaiAndMigrateToDai(1000);
+      await drawSaiAndMigrateToDai(1000, maker);
       await setPrice(maker, createCurrencyRatio(USD, ETH)(100000), 'ETH-A');
 
       // this expects the debt ceiling to be 100000
@@ -120,7 +112,7 @@ describe('SCD to MCD CDP Migration', () => {
       proxyAddress = await maker.service('proxy').currentProxy();
       await openLockAndDrawScdCdp(100);
       cdp = await openLockAndDrawScdCdp(10);
-      await migrateSaiToDai(50);
+      await migrateSaiToDai(50, maker);
     });
 
     afterEach(async () => {

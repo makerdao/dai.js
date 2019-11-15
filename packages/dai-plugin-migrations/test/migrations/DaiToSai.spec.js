@@ -1,23 +1,12 @@
-import { migrationMaker } from '../helpers';
+import {
+  migrationMaker,
+  drawSaiAndMigrateToDai
+} from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ETH } from '@makerdao/dai-plugin-mcd/dist';
 
 let maker, migration, snapshot;
-
-async function drawSaiAndMigrateToDai(drawAmount) {
-  const cdp = await maker.openCdp();
-  await cdp.lockEth('20');
-  await cdp.drawDai(drawAmount);
-  await migrateSaiToDai(10);
-}
-
-async function migrateSaiToDai(amount) {
-  const daiMigration = maker
-    .service(ServiceRoles.MIGRATION)
-    .getMigration(Migrations.SAI_TO_DAI);
-  await daiMigration.execute(amount);
-}
 
 describe('DAI to SAI Migration', () => {
   beforeAll(async () => {
@@ -54,7 +43,7 @@ describe('DAI to SAI Migration', () => {
   });
 
   test('execute migrates DAI to SAI', async () => {
-    await drawSaiAndMigrateToDai(10);
+    await drawSaiAndMigrateToDai(10, maker);
     const address = maker.service('web3').currentAddress();
     await maker.service('mcd:cdpManager').openLockAndDraw('ETH-A', ETH(1), 1);
     const daiBalanceBeforeMigration = await migration._dai.balanceOf(address);
