@@ -1,6 +1,6 @@
 import { tracksTransactionsWithOptions } from '@makerdao/dai/dist/src/utils/tracksTransactions';
 import { getIdBytes, stringToBytes } from '../utils';
-import { SAI, MKR } from '..';
+import { SAI, MKR, DAI } from '..';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -103,7 +103,10 @@ export default class SingleToMultiCdp {
 
     const [migrationCdp, debtHeadroom] = await Promise.all([
       vat.urns(stringToBytes('SAI'), migrationContractAddress),
-      ethA.prefetch().then(() => SAI(ethA.debtCeiling.minus(ethA.totalDebt)))
+      ethA.prefetch().then(() => {
+        if (ethA.debtCeiling.toNumber() === 0) return SAI(0);
+        return SAI(ethA.debtCeiling.minus(ethA.totalDebt))
+      })
     ]);
 
     // for technical reasons, the liquidation ratio of the mcd migration cdp
