@@ -102,8 +102,8 @@ describe('SCD to MCD CDP Migration', () => {
 
   describe.each([
     'MKR',
-    'DEBT'
-    // 'GEM'
+    'DEBT',
+    'GEM'
   ])('pay with %s', payment => {
     let cdp, proxyAddress;
 
@@ -127,6 +127,7 @@ describe('SCD to MCD CDP Migration', () => {
         maxPayAmount = 10;
       }
       if (payment === 'DEBT') minRatio = 150;
+      await maker.service('price').setMkrPrice(100);
 
       const manager = maker.service('mcd:cdpManager');
       const scdCollateral = await cdp.getCollateralValue();

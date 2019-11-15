@@ -1,6 +1,6 @@
 import { tracksTransactionsWithOptions } from '@makerdao/dai/dist/src/utils/tracksTransactions';
 import { getIdBytes, stringToBytes } from '../utils';
-import { SAI, MKR, DAI } from '..';
+import { SAI, MKR } from '..';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -44,11 +44,15 @@ export default class SingleToMultiCdp {
     const address = this._manager.get('web3').currentAddress();
     const proxyAddress = await this._manager.get('proxy').currentProxy();
     const cdp = await this._manager.get('cdp').getCdp(cupId);
-    // fee value needs to be converted to dai if payment === 'GEM'
-    const fee = await cdp.getGovernanceFee();
     const token = payment === 'MKR' 
       ? this._getToken(MKR)
       : this._getToken(SAI);
+
+    let fee = await cdp.getGovernanceFee();
+    if (payment === 'GEM') {
+      const mkrPrice = await this._manager.get('price').getMkrPrice();
+      fee = SAI(fee.toNumber() * mkrPrice.toNumber());
+    }
     const allowance = await token.allowance(address, proxyAddress);
 
     // add a buffer amount to allowance in case drip hasn't been called recently
@@ -59,17 +63,16 @@ export default class SingleToMultiCdp {
     const otc = this._manager.get('smartContract').getContract('MAKER_OTC')
       .address;
 
-    // to-do:
-    // if (payment === 'GEM') {
-    //   const gem = this._manager
-    //     .get('token')
-    //     .getToken('DAI')
-    //     .address();
-    //   return {
-    //     method: 'migratePayFeeWithGem',
-    //     args: [...defaultArgs, otc, gem, SAI(maxPayAmount).toFixed('wei')]
-    //   };
-    // }
+    if (payment === 'GEM') {
+      const gem = this._manager
+        .get('token')
+        .getToken('DAI')
+        .address();
+      return {
+        method: 'migratePayFeeWithGem',
+        args: [...defaultArgs, otc, gem, SAI(maxPayAmount).toFixed('wei')]
+      };
+    }
 
     if (payment === 'DEBT') {
       return {

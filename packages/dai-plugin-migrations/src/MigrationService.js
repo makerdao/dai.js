@@ -29,7 +29,8 @@ export default class MigrationService extends PublicService {
       'token',
       'web3',
       'mcd:cdpManager',
-      'mcd:cdpType'
+      'mcd:cdpType',
+      'price'
     ]);
   }
 
