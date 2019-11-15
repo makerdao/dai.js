@@ -18,7 +18,7 @@ export default class SingleToMultiCdp {
       : {};
   }
 
-  @tracksTransactionsWithOptions({ numArguments: 4 })
+  @tracksTransactionsWithOptions({ numArguments: 5 })
   async execute(cupId, payment = 'MKR', maxPayAmount, minRatio, { promise }) {
     const migrationProxy = this._manager
       .get('smartContract')
