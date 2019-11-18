@@ -141,7 +141,7 @@ export default class CdpManager extends LocalService {
     const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
-    const method = setMethod(isEth, isGnt, id, lockAmount);
+    const method = setMethod(isEth, isGnt, id);
     const args = [
       this._managerAddress,
       jugAddress,
