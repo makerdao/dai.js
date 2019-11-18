@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { mcdMaker, setupCollateral } from './helpers';
-import { ETH, REP, MDAI, USD, GNT, OMG, DGD, BAT } from '../src';
+import { ETH, MDAI, USD, BAT, GNT, DGD } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { dummyEventData, formattedDummyEventData } from './fixtures';
 import { createCurrencyRatio } from '@makerdao/currency';
@@ -13,11 +13,9 @@ beforeAll(async () => {
   maker = await mcdMaker({
     cdpTypes: [
       { currency: ETH, ilk: 'ETH-A' },
-      { currency: BAT, ilk: 'BAT-A' }
-      // { currency: REP, ilk: 'REP-A' },
-      // { currency: OMG, ilk: 'OMG-A' },
-      // { currency: DGD, ilk: 'DGD-A', decimals: 9 },
-      // { currency: GNT, ilk: 'GNT-A' }
+      { currency: BAT, ilk: 'BAT-A' },
+      { currency: DGD, ilk: 'DGD-A', decimals: 9 },
+      { currency: GNT, ilk: 'GNT-A' }
     ]
   });
   dai = maker.getToken(MDAI);
@@ -131,22 +129,17 @@ describe.each([
     'BAT-A',
     BAT,
     async () => setupCollateral(maker, 'BAT-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'GNT-A',
+    GNT,
+    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'DGD-A',
+    DGD,
+    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
   ]
-  // [
-  //   'GNT-A',
-  //   GNT,
-  //   async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'OMG-A',
-  //   OMG,
-  //   async () => setupCollateral(maker, 'OMG-A', { price: 100, debtCeiling: 50 })
-  // ],
-  // [
-  //   'DGD-A',
-  //   DGD,
-  //   async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
-  // ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
 
@@ -236,9 +229,7 @@ describe.each([
 
     const draw = cdp.drawDai(1);
     const drawHandler = jest.fn((tx, state) => {
-      expect(tx.metadata.method).toBe(
-        `lock${GEM == ETH ? 'ETH' : 'Gem'}AndDraw`
-      );
+      expect(tx.metadata.method).toBe('draw');
       expect(state).toBe(txStates[drawHandler.mock.calls.length - 1]);
     });
     txMgr.listen(draw, drawHandler);

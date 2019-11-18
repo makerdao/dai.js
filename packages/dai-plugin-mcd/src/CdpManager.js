@@ -141,7 +141,7 @@ export default class CdpManager extends LocalService {
     const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
     const isEth = ETH.isInstance(lockAmount);
     const isGnt = GNT.isInstance(lockAmount);
-    const method = setMethod(isEth, isGnt, id);
+    const method = setMethod(isEth, isGnt, id, lockAmount);
     const args = [
       this._managerAddress,
       jugAddress,
@@ -200,20 +200,30 @@ export default class CdpManager extends LocalService {
     return this.proxyActions[method](...args);
   }
 
+  @tracksTransactions
+  async draw(id, ilk, drawAmount, { promise }) {
+    return this.proxyActions.draw(
+      this._managerAddress,
+      this.get('smartContract').getContractAddress('MCD_JUG'),
+      this._adapterAddress('DAI'),
+      this.getIdBytes(id),
+      castAsCurrency(drawAmount, MDAI).toFixed('wei'),
+      { dsProxy: true, promise }
+    );
+  }
+
   @tracksTransactionsWithOptions({ numArguments: 5 })
   wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
     const isEth = ETH.isInstance(freeAmount);
     const method = isEth ? 'wipeAndFreeETH' : 'wipeAndFreeGem';
     return this.proxyActions[method](
-      ...[
-        this._managerAddress,
-        this._adapterAddress(ilk),
-        this._adapterAddress('DAI'),
-        this.getIdBytes(id),
-        freeAmount.toFixed(this._precision(freeAmount)),
-        wipeAmount.toFixed('wei'),
-        { dsProxy: true, promise }
-      ].filter(x => x)
+      this._managerAddress,
+      this._adapterAddress(ilk),
+      this._adapterAddress('DAI'),
+      this.getIdBytes(id),
+      freeAmount.toFixed(this._precision(freeAmount)),
+      wipeAmount.toFixed('wei'),
+      { dsProxy: true, promise }
     );
   }
 
@@ -221,27 +231,23 @@ export default class CdpManager extends LocalService {
   async wipe(id, wipeAmount, owner, { promise }) {
     if (!owner) owner = await this.getOwner(id);
     return this.proxyActions.safeWipe(
-      ...[
-        this._managerAddress,
-        this._adapterAddress('DAI'),
-        this.getIdBytes(id),
-        wipeAmount.toFixed('wei'),
-        owner,
-        { dsProxy: true, promise }
-      ].filter(x => x)
+      this._managerAddress,
+      this._adapterAddress('DAI'),
+      this.getIdBytes(id),
+      wipeAmount.toFixed('wei'),
+      owner,
+      { dsProxy: true, promise }
     );
   }
 
   @tracksTransactions
   unsafeWipe(id, wipeAmount, { promise }) {
     return this.proxyActions.wipe(
-      ...[
-        this._managerAddress,
-        this._adapterAddress('DAI'),
-        this.getIdBytes(id),
-        wipeAmount.toFixed('wei'),
-        { dsProxy: true, promise }
-      ].filter(x => x)
+      this._managerAddress,
+      this._adapterAddress('DAI'),
+      this.getIdBytes(id),
+      wipeAmount.toFixed('wei'),
+      { dsProxy: true, promise }
     );
   }
 
@@ -272,14 +278,12 @@ export default class CdpManager extends LocalService {
     const isEth = ETH.isInstance(freeAmount);
     const method = isEth ? 'wipeAllAndFreeETH' : 'wipeAllAndFreeGem';
     return this.proxyActions[method](
-      ...[
-        this._managerAddress,
-        this._adapterAddress(ilk),
-        this._adapterAddress('DAI'),
-        this.getIdBytes(id),
-        freeAmount.toFixed(this._precision(freeAmount)),
-        { dsProxy: true, promise }
-      ].filter(x => x)
+      this._managerAddress,
+      this._adapterAddress(ilk),
+      this._adapterAddress('DAI'),
+      this.getIdBytes(id),
+      freeAmount.toFixed(this._precision(freeAmount)),
+      { dsProxy: true, promise }
     );
   }
 

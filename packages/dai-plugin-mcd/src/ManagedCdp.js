@@ -1,5 +1,7 @@
 import { castAsCurrency, stringToBytes } from './utils';
-import { tracksTransactionsWithOptions } from './utils/tracksTransactions';
+import tracksTransactions, {
+  tracksTransactionsWithOptions
+} from './utils/tracksTransactions';
 import { ServiceRoles } from './constants';
 import assert from 'assert';
 import { MDAI } from './index';
@@ -98,8 +100,9 @@ export default class ManagedCdp {
     return this._cdpManager.lock(this.id, this.ilk, amount, null);
   }
 
-  drawDai(amount) {
-    return this.lockAndDraw(undefined, amount);
+  @tracksTransactions
+  drawDai(amount, { promise }) {
+    return this._cdpManager.draw(this.id, this.ilk, amount, { promise });
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
