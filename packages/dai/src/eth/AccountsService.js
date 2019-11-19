@@ -10,6 +10,7 @@ import {
 } from './accounts/factories';
 import { setupEngine } from './accounts/setup';
 import { AccountType } from '../utils/constants';
+import assert from 'assert';
 
 const sanitizeAccount = pick(['name', 'type', 'address']);
 
@@ -113,17 +114,10 @@ export default class AccountsService extends PublicService {
     if (this._autoSwitchCheckHandle) clearInterval(this._autoSwitchCheckHandle);
 
     if (account.type === AccountType.BROWSER) {
-      // if using browser/MetaMask, must use the currently selected account
-      // however, defaultAccount can be *unset* the first time the user
-      // connects their browser account. So we bypass the check here.
-      if (
-        window.web3.eth.defaultAccount &&
-        window.web3.eth.defaultAccount.toLowerCase() !== account.address
-      ) {
-        throw new Error(
-          'cannot use a browser account that is not currently selected'
-        );
-      }
+      assert(
+        isAddressSelected(account.address),
+        'cannot use a browser account that is not currently selected'
+      );
       // detect account change and automatically switch active account if
       // autoSwitch flag set (useful if using a browser wallet like MetaMask)
       // see: https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md#ear-listening-for-selected-account-changes
@@ -153,7 +147,7 @@ export default class AccountsService extends PublicService {
 
   _autoSwitchCheckAccountChange(addr) {
     return async () => {
-      const activeBrowserAddress = window.web3.eth.defaultAccount.toLowerCase();
+      const activeBrowserAddress = getSelectedAddress().toLowerCase();
       if (activeBrowserAddress !== addr) {
         if (!this._getAccountWithAddress(activeBrowserAddress)) {
           await this.addAccount({
@@ -204,4 +198,17 @@ export default class AccountsService extends PublicService {
   currentWallet() {
     return this._accounts[this._currentAccount].subprovider;
   }
+}
+
+function getSelectedAddress() {
+  return typeof window.ethereum !== 'undefined'
+    ? window.ethereum.selectedAddress
+    : window.web3.eth.defaultAccount;
+}
+
+function isAddressSelected(address) {
+  // if using browser/MetaMask, we must use the currently selected account;
+  // however, it can be blank the first time the user connects their account.
+  const selectedAddress = getSelectedAddress();
+  return !selectedAddress || selectedAddress.toLowerCase() === address;
 }
