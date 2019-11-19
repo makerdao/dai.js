@@ -121,6 +121,15 @@ export default class SingleToMultiCdp {
     return debtHeadroom.lt(lockedSai) ? debtHeadroom : lockedSai;
   }
 
+  async saiAmountNeededToBuyMkr(mkrAmount) {
+    const otcContract = this._manager.get('smartContract').getContract('MAKER_OTC');
+    return otcContract.getPayAmount(
+      this._getToken(SAI).address(),
+      this._getToken(MKR).address(),
+      MKR(mkrAmount).toFixed('wei')
+    ).then(a => SAI.wei(a));
+  }
+
   _getToken(symbol) {
     return this._manager.get('token').getToken(symbol);
   }

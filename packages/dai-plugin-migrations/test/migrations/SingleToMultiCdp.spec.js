@@ -13,6 +13,7 @@ import {
   restoreSnapshot
 } from '@makerdao/test-helpers';
 import { USD, MDAI as DAI, ETH } from '@makerdao/dai-plugin-mcd';
+import { SAI, MKR } from '../../src';
 import { createCurrencyRatio } from '@makerdao/currency';
 
 let maker, migration, snapshotData;
@@ -97,6 +98,12 @@ describe('SCD to MCD CDP Migration', () => {
 
       const available = await migration.migrationSaiAvailable();
       expect(available.toFixed('wei')).toBe('1999999999999999999');
+    });
+
+    test('saiAmountNeededToBuyMkr', async () => {
+        await placeLimitOrder(migration._manager);
+        const saiAmount = await migration.saiAmountNeededToBuyMkr(MKR(.5));
+        expect(saiAmount).toEqual(SAI(10));
     });
   });
 
