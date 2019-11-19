@@ -92,7 +92,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       stringToBytes(ilk),
       proxy,
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { ilk } }
     );
     const cdp = await ManagedCdp.create(await op, ilk, this);
     this._putInInstanceCache(cdp.id, cdp, cache);
@@ -107,7 +107,7 @@ export default class CdpManager extends LocalService {
       this.getIdBytes(id),
       dink.toFixed('wei'),
       0,
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id, dink } }
     );
   }
 
@@ -153,7 +153,8 @@ export default class CdpManager extends LocalService {
       {
         dsProxy: true,
         value: isEth ? lockAmount.toFixed('wei') : 0,
-        promise
+        promise,
+        metadata: { id, ilk, lockAmount, drawAmount }
       }
     ].filter(x => x);
 
@@ -188,7 +189,8 @@ export default class CdpManager extends LocalService {
       {
         dsProxy: true,
         value: isEth ? lockAmount.toFixed('wei') : 0,
-        promise
+        promise,
+        metadata: { id, ilk, lockAmount }
       }
     ].filter(x => x);
 
@@ -208,7 +210,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
       castAsCurrency(drawAmount, MDAI).toFixed('wei'),
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id, ilk, drawAmount } }
     );
   }
 
@@ -223,7 +225,7 @@ export default class CdpManager extends LocalService {
       this.getIdBytes(id),
       freeAmount.toFixed(this._precision(freeAmount)),
       wipeAmount.toFixed('wei'),
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id, ilk, wipeAmount, freeAmount } }
     );
   }
 
@@ -236,7 +238,7 @@ export default class CdpManager extends LocalService {
       this.getIdBytes(id),
       wipeAmount.toFixed('wei'),
       owner,
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id, wipeAmount } }
     );
   }
 
@@ -247,7 +249,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
       wipeAmount.toFixed('wei'),
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id, wipeAmount } }
     );
   }
 
@@ -259,7 +261,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
       owner,
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id } }
     );
   }
 
@@ -269,7 +271,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id } }
     );
   }
 
@@ -283,7 +285,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
       freeAmount.toFixed(this._precision(freeAmount)),
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id, ilk, freeAmount } }
     );
   }
 
@@ -294,7 +296,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this.getIdBytes(id),
       address,
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id } }
     );
   }
 
@@ -306,7 +308,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this.getIdBytes(id),
       address,
-      { dsProxy: true, promise }
+      { dsProxy: true, promise, metadata: { id, address } }
     );
   }
 
