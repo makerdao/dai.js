@@ -101,17 +101,13 @@ describe('SCD to MCD CDP Migration', () => {
     });
 
     test('saiAmountNeededToBuyMkr', async () => {
-        await placeLimitOrder(migration._manager);
-        const saiAmount = await migration.saiAmountNeededToBuyMkr(MKR(.5));
-        expect(saiAmount).toEqual(SAI(10));
+      await placeLimitOrder(migration._manager);
+      const saiAmount = await migration.saiAmountNeededToBuyMkr(MKR(0.5));
+      expect(saiAmount).toEqual(SAI(10));
     });
   });
 
-  describe.each([
-    'MKR',
-    'DEBT',
-    'GEM'
-  ])('pay with %s', payment => {
+  describe.each(['MKR', 'DEBT', 'GEM'])('pay with %s', payment => {
     let cdp, proxyAddress;
 
     beforeEach(async () => {

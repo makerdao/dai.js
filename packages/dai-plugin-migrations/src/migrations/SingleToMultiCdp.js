@@ -44,9 +44,7 @@ export default class SingleToMultiCdp {
     const address = this._manager.get('web3').currentAddress();
     const proxyAddress = await this._manager.get('proxy').currentProxy();
     const cdp = await this._manager.get('cdp').getCdp(cupId);
-    const token = payment === 'MKR' 
-      ? this._getToken(MKR)
-      : this._getToken(SAI);
+    const token = payment === 'MKR' ? this._getToken(MKR) : this._getToken(SAI);
 
     let fee = await cdp.getGovernanceFee();
     if (payment === 'GEM') {
@@ -56,7 +54,8 @@ export default class SingleToMultiCdp {
     const allowance = await token.allowance(address, proxyAddress);
 
     // add a buffer amount to allowance in case drip hasn't been called recently
-    if (allowance.lt(fee.toNumber())) await token.approve(proxyAddress, fee.times(1.5));
+    if (allowance.lt(fee.toNumber()))
+      await token.approve(proxyAddress, fee.times(1.5));
   }
 
   _setMethodAndArgs(payment, defaultArgs, maxPayAmount, minRatio) {
@@ -108,7 +107,7 @@ export default class SingleToMultiCdp {
       vat.urns(stringToBytes('SAI'), migrationContractAddress),
       ethA.prefetch().then(() => {
         if (ethA.debtCeiling.toNumber() === 0) return SAI(0);
-        return SAI(ethA.debtCeiling.minus(ethA.totalDebt))
+        return SAI(ethA.debtCeiling.minus(ethA.totalDebt));
       })
     ]);
 
@@ -122,12 +121,16 @@ export default class SingleToMultiCdp {
   }
 
   async saiAmountNeededToBuyMkr(mkrAmount) {
-    const otcContract = this._manager.get('smartContract').getContract('MAKER_OTC');
-    return otcContract.getPayAmount(
-      this._getToken(SAI).address(),
-      this._getToken(MKR).address(),
-      MKR(mkrAmount).toFixed('wei')
-    ).then(a => SAI.wei(a));
+    const otcContract = this._manager
+      .get('smartContract')
+      .getContract('MAKER_OTC');
+    return otcContract
+      .getPayAmount(
+        this._getToken(SAI).address(),
+        this._getToken(MKR).address(),
+        MKR(mkrAmount).toFixed('wei')
+      )
+      .then(a => SAI.wei(a));
   }
 
   _getToken(symbol) {
