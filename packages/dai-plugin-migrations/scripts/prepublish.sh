@@ -5,8 +5,10 @@ if [ $(basename $(pwd)) != "dai-plugin-migrations" ]; then
   exit
 fi
 
-yarn config set version-tag-prefix "dai-plugin-migrations-v"
-yarn config set version-git-message "dai-plugin-migrations-v%s"
-yarn version
+if [ ! SKIP_VERSION_UPDATE ]; then
+  yarn config set version-tag-prefix "dai-plugin-migrations-v"
+  yarn config set version-git-message "dai-plugin-migrations-v%s"
+  yarn version
+fi
 
 ./scripts/build.sh
