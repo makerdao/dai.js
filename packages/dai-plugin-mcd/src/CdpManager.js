@@ -13,7 +13,7 @@ import { MDAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
 import BigNumber from 'bignumber.js';
 import { RAY } from './constants';
-import getEventHistoryImpl from './getEventHistory';
+import getEventHistoryImpl from './EventHistory';
 
 export default class CdpManager extends LocalService {
   constructor(name = CDP_MANAGER) {
