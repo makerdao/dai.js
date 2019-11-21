@@ -47,6 +47,11 @@ export default class TransactionManager extends PublicService {
         businessObject = options.businessObject;
         delete options.businessObject;
       }
+
+      // some subproviders require a value key included with the Tx
+      if (!has(options, 'value')) {
+        options.value = 0;
+      }
     } else {
       options = {};
     }
