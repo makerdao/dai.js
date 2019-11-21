@@ -49,7 +49,7 @@ export default class TransactionManager extends PublicService {
       }
 
       // some subproviders require a value key included with the Tx
-      if (!options.value) {
+      if (!has(options, 'value')) {
         options.value = 0;
       }
     } else {
