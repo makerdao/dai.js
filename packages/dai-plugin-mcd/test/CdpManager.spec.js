@@ -67,9 +67,9 @@ test('getCdp looks up ilk and has cache', async () => {
   expect(differentInstance).not.toBe(cdp);
 });
 
-test('getIlkByCdpId returns the ilk of a specific CDP', async () => {
+test('getIlkForCdp returns the ilk of a specific CDP', async () => {
   const cdp = await cdpMgr.open('ETH-A');
-  const ilk = await cdpMgr.getIlkByCdpId(cdp.id);
+  const ilk = await cdpMgr.getIlkForCdp(cdp.id);
   expect(ilk).toBe('ETH-A');
 });
 
