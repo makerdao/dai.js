@@ -50,13 +50,16 @@ export default class CdpManager extends LocalService {
     const cacheEnabled = !has(options, 'cache') || options.cache;
     let cdp = this._getFromInstanceCache(id, cacheEnabled);
     if (cdp) return cdp;
-
-    const ilk = bytesToString(await this._manager.ilks(id));
+    const ilk = await this.getIlkForCdp(id);
     cdp = new ManagedCdp(id, ilk, this, options);
 
     this._putInInstanceCache(id, cdp, cacheEnabled);
     if (!has(options, 'prefetch') || options.prefetch) await cdp.prefetch();
     return cdp;
+  }
+
+  async getIlkForCdp(id) {
+    return bytesToString(await this._manager.ilks(id));
   }
 
   async getCombinedDebtValue(proxyAddress, descending = true) {
