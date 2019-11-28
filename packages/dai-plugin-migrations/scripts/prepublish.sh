@@ -6,8 +6,6 @@ if [ $(basename $(pwd)) != "dai-plugin-migrations" ]; then
 fi
 
 if [ ! SKIP_VERSION_UPDATE ]; then
-  yarn config set version-tag-prefix "dai-plugin-migrations-v"
-  yarn config set version-git-message "dai-plugin-migrations-v%s"
   yarn version
 fi
 

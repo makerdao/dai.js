@@ -6,8 +6,6 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
 fi
 
 if [ ! SKIP_VERSION_UPDATE ]; then
-  yarn config set version-tag-prefix "dai-plugin-mcd-v"
-  yarn config set version-git-message "dai-plugin-mcd-v%s"
   yarn version
 fi
 
