@@ -75,9 +75,10 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   const fromBlock = [1, 42].includes(web3.networkId()) ? 8600000 : 1;
 
   const utils = web3._web3.utils;
-  const fromWei = v => utils.fromWei(v.toString());
-  const fromHexWei = v => utils.fromWei(utils.toBN(v.toString()).toString()).toString();
-  const numberFromHex = v => utils.toBN(v.toString()).toNumber();
+  const toHex = v => BigNumber(v).toString(16);
+  const fromWei = v => utils.fromWei(toHex(v));
+  const fromHexWei = v => utils.fromWei(utils.toBN(toHex(v)).toString()).toString();
+  const numberFromHex = v => utils.toBN(toHex(v)).toNumber();
 
   const promisesBlockTimestamp = {};
   const getBlockTimestamp = block => {
