@@ -5,6 +5,12 @@ import ConfigFactory from './config/ConfigFactory';
 import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 import uniq from 'lodash/uniq';
+import has from 'lodash/has';
+import assert from 'assert';
+
+// a plugin must be either an object with at least one of these keys defined, or
+// a single function, which will be treated as the value for `afterCreate`.
+const PLUGIN_KEYS = ['beforeCreate', 'afterCreate', 'addConfig'];
 
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
@@ -27,13 +33,8 @@ export default class Maker {
     const config = ConfigFactory.create(preset, otherOptions, resolver);
     this._container = new DefaultServiceProvider(config).buildContainer();
 
-    for (let pluginTuple of plugins) {
-      const [plugin, pluginOptions] = pluginTuple;
-      if (typeof plugin === 'function') {
-        plugin(this, config, pluginOptions);
-      } else if (plugin.afterCreate) {
-        plugin.afterCreate(this, config, pluginOptions);
-      }
+    for (const [plugin, pluginOptions] of plugins) {
+      if (plugin.afterCreate) plugin.afterCreate(this, config, pluginOptions);
     }
 
     if (otherOptions.autoAuthenticate !== false) this.authenticate();
@@ -107,22 +108,28 @@ Maker.create = async function(...args) {
   const userOptions = cloneDeep(otherOptions);
 
   if (plugins) {
-    // If its not already, format the plugin to be a tuple
-    // of type [plugin, options object].
-    const pluginTuples = plugins.map(plugin =>
-      !Array.isArray(plugin) ? [plugin, {}] : plugin
-    );
-    for (const [plugin, pluginOptions] of pluginTuples) {
-      if (plugin.beforeCreate) {
-        const resultOptions = await plugin.beforeCreate(pluginOptions);
-        Object.assign(options, resultOptions);
-      }
+    options.plugins = standardizePluginConfig(plugins);
+    for (const [p, popts] of options.plugins) {
+      // the beforeCreate function can return new options to be sent to the
+      // Maker constructor
+      if (p.beforeCreate) Object.assign(options, await p.beforeCreate(popts));
     }
-    // reassign the plugins array in the options
-    options.plugins = pluginTuples;
   }
 
   const maker = new Maker(preset, options, userOptions);
   if (options.autoAuthenticate !== false) await maker.authenticate();
   return maker;
 };
+
+const standardizePluginConfig = plugins =>
+  plugins.map((x, i) => {
+    let [plugin, pluginOptions] = Array.isArray(x) ? x : [x, {}];
+    if (typeof plugin === 'function') plugin = { afterCreate: plugin };
+
+    assert(
+      PLUGIN_KEYS.some(x => has(plugin, x)),
+      `plugins[${i}] does not seem to be a plugin`
+    );
+
+    return [plugin, pluginOptions];
+  });
