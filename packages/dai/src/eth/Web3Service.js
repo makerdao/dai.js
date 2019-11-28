@@ -37,21 +37,6 @@ export default class Web3Service extends PrivateService {
     return this.get('accounts').currentAddress();
   }
 
-  ethersProvider() {
-    try {
-      throw new Error('hi');
-    } catch (err) {
-      console.warn(
-        'using ethers provider is deprecated...\n' +
-          err.stack
-            .split('\n')
-            .slice(1, 7)
-            .join('\n')
-      );
-    }
-    return this._ethersProvider;
-  }
-
   getEthersSigner() {
     if (!this._ethersSigner) this._ethersSigner = makeSigner(this);
     return this._ethersSigner;
@@ -135,9 +120,6 @@ export default class Web3Service extends PrivateService {
     if (!this._info.node.includes('MetaMask')) {
       this._info.whisper = this._web3.shh;
     }
-
-    // FIXME set up block listening with web3 instead
-    this._setUpEthers(this.networkId());
 
     this._currentBlock = await this._web3.eth.getBlockNumber();
     this._listenForNewBlocks();
@@ -282,20 +264,6 @@ export default class Web3Service extends PrivateService {
     this.manager().onDeauthenticated(() => {
       this.get('timer').disposeTimer(TIMER_AUTHENTICATION);
     });
-  }
-
-  _setUpEthers(chainId) {
-    const ethers = require('ethers');
-    this._ethersProvider = this._buildEthersProvider(ethers, chainId);
-  }
-
-  _buildEthersProvider(ethers, chainId) {
-    const provider = new ethers.providers.Web3Provider(
-      this._web3.currentProvider,
-      { name: getNetworkName(chainId), chainId: chainId }
-    );
-
-    return provider;
   }
 
   _setStatusTimerDelay(delay) {

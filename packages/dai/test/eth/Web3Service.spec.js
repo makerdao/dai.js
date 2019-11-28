@@ -212,20 +212,6 @@ test('handle automatic change of account as a deauthenticate', async done => {
   await service.manager().authenticate();
 });
 
-test('create a ethersjs object running parallel to web3', done => {
-  const service = buildTestService();
-  service
-    .manager()
-    .connect()
-    .then(() => {
-      expect(service._ethersProvider).toBeDefined();
-      expect(service._web3.currentProvider).toBe(
-        service._ethersProvider._web3Provider
-      );
-      done();
-    });
-});
-
 test('connect to ganache testnet with account 0x16fb9...', done => {
   const service = buildTestService(),
     expectedAccounts = [
