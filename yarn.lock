@@ -1691,10 +1691,10 @@
     babel-runtime "^6.26.0"
     bignumber.js "^8.1.1"
 
-"@makerdao/multicall@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.8.0.tgz#c2347b52940b79d303a324b4eef8c04a5f79d0af"
-  integrity sha512-I754RF+1LTsUVpkaYjDBQO4IJqDP2XxriCTYClARVJ7GzbPvXpQcD0EdTLPx5kDAW9OYHPtYsjSr2pOx2Bh51g==
+"@makerdao/multicall@^0.9.0-rc.1":
+  version "0.9.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.9.0-rc.1.tgz#0f07d86fde46148d537a825f4f97268176571d66"
+  integrity sha512-X0kdC117WXnsEwSFepDWG1Fhh65+Zov1wKZJpZyXyJE5wiIN9GW9AhXuw6W0oaiwUkpPxVx2UWaclwroQjCsQg==
   dependencies:
     cross-fetch "^3.0.1"
     ethers "^4.0.27"

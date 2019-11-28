@@ -6,6 +6,8 @@ import Web3 from 'web3';
 import ProviderType from './web3/ProviderType';
 import makeSigner from './web3/ShimEthersSigner';
 import last from 'lodash/last';
+import debug from 'debug';
+const log = debug('dai:Web3Service');
 
 const TIMER_CONNECTION = 'web3CheckConnectionStatus';
 const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
@@ -122,6 +124,7 @@ export default class Web3Service extends PrivateService {
     }
 
     this._currentBlock = await this._web3.eth.getBlockNumber();
+    this._updateBlockNumber(this._currentBlock);
     this._listenForNewBlocks();
 
     this._installDisconnectCheck();
@@ -180,12 +183,19 @@ export default class Web3Service extends PrivateService {
   }
 
   _listenForNewBlocks() {
-    if (this.usingWebsockets()) {
+    if (this.networkName !== 'test') {
+      log('Using newBlockHeaders subscription for block detection');
       this._newBlocksSubscription = this.subscribe('newBlockHeaders').on(
         'data',
-        data => this._updateBlockNumber(data.number)
+        ({ number: blockNumber }) => {
+          if (!this._currentBlock) this._currentBlock = blockNumber - 1;
+          for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
+            this._updateBlockNumber(i);
+          }
+        }
       );
     } else {
+      log('Using manual getBlockNumber polling for block detection');
       const updateBlocks = async () => {
         const blockNumber = await this._web3.eth.getBlockNumber();
         if (!this._currentBlock) this._currentBlock = blockNumber - 1;
@@ -228,7 +238,7 @@ export default class Web3Service extends PrivateService {
   }
 
   _updateBlockNumber(blockNumber) {
-    this.get('log').info('New block:', blockNumber);
+    log(`Latest block: ${blockNumber}`);
 
     this._currentBlock = blockNumber;
     if (this._blockListeners[blockNumber]) {

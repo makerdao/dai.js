@@ -15,17 +15,22 @@ export async function setupEngine(settings) {
   });
   const result = { engine };
 
-  const getHttpProvider = (settings = {}) => {
-    const rpcUrl = getRpcUrl({ ...providerSettings, ...settings });
+  const getHttpProvider = () => {
+    const rpcUrl = getRpcUrl(providerSettings);
+    const subscriptionProvider = new SubscriptionSubprovider();
+    subscriptionProvider.on('data', (err, data) =>
+      engine.emit('data', err, data)
+    );
+    engine.addProvider(subscriptionProvider);
     return new RpcSource({ rpcUrl });
   };
 
   const getWebsocketProvider = () => {
     const rpcUrl = getRpcUrl(providerSettings);
     const subscriptionProvider = new SubscriptionSubprovider();
-    subscriptionProvider.on('data', (err, notification) => {
-      engine.emit('data', err, notification);
-    });
+    subscriptionProvider.on('data', (err, data) =>
+      engine.emit('data', err, data)
+    );
     engine.addProvider(subscriptionProvider);
     return new WebsocketSubprovider({ rpcUrl });
   };

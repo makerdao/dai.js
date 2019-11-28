@@ -52,7 +52,7 @@
   "dependencies": {
     "@babel/runtime": "^7.3.4",
     "@makerdao/currency": "^0.9.5",
-    "@makerdao/multicall": "^0.8.0",
+    "@makerdao/multicall": "^0.9.0-rc.1",
     "@makerdao/services-core": "^0.9.9",
     "assert": "^1.4.1",
     "bignumber.js": "^7.2.1",
