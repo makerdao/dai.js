@@ -4,6 +4,7 @@ import { MDAI } from './index';
 import BigNumber from 'bignumber.js';
 import { RAY, RAD, WAD, SECONDS_PER_YEAR } from './constants';
 import tracksTransactions from './utils/tracksTransactions';
+import { getDsrEventHistory } from './EventHistory';
 
 export default class SavingsService extends PublicService {
   constructor(name = ServiceRoles.SAVINGS) {
@@ -11,6 +12,7 @@ export default class SavingsService extends PublicService {
       'smartContract',
       'proxy',
       'accounts',
+      'web3',
       ServiceRoles.SYSTEM_DATA
     ]);
   }
@@ -98,5 +100,10 @@ export default class SavingsService extends PublicService {
 
   get _daiAdapterAddress() {
     return this.get(ServiceRoles.SYSTEM_DATA).adapterAddress('DAI');
+  }
+
+  getEventHistory(address) {
+    if (!this._eventHistoryCache) this._eventHistoryCache = {};
+    return getDsrEventHistory(this, address, this._eventHistoryCache);
   }
 }

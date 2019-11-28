@@ -242,4 +242,23 @@ describe('Savings Service', () => {
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 8);
   });
+
+  xtest('get event history via web3', async () => {
+    console.log('proxyAddress', proxyAddress);
+    console.log('block number', maker.service('web3').blockNumber());
+    await makeSomeDai(10);
+
+    const amountBeforeJoin = (await service.balance()).toNumber();
+    console.log('before', amountBeforeJoin);
+    await service.join(MDAI(3));
+
+    await mineBlocks(maker.service('web3'), 5);
+
+    const amountAfterJoin = (await service.balance()).toNumber();
+    console.log('after', amountAfterJoin);
+    
+    const events = await service.getEventHistory(proxyAddress);
+    console.log('EVENTS in test', events);
+    console.log('block number', maker.service('web3').blockNumber());
+  });
 });

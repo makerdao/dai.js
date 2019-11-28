@@ -242,3 +242,93 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
 
   return cache[id];
 }
+
+export async function getDsrEventHistory(service, address, cache) {
+  const MCD_JOIN_DAI = service.get('smartContract').getContractAddress('MCD_JOIN_DAI');
+
+  const id = address;
+  if (cache[id]) return cache[id];
+
+  const web3 = service.get('web3');
+
+  // 8600000 is 2019-09-22 on mainnet and 2018-09-04 on kovan
+  const fromBlock = [1, 42].includes(web3.networkId()) ? 8600000 : 1;
+
+  const utils = web3._web3.utils;
+  const fromHexWei = v => utils.fromWei(utils.toBN(v.toString()).toString()).toString();
+
+  const promisesBlockTimestamp = {};
+
+  const getBlockTimestamp = block => {
+    if (!promisesBlockTimestamp[block]) {
+      promisesBlockTimestamp[block] = web3.getBlock(block, false);
+    }
+    return promisesBlockTimestamp[block];
+  };
+
+  const lookups = [
+    {
+      request: web3.getPastLogs({
+        address: MCD_JOIN_DAI,
+        topics: [
+          EVENT_DAI_ADAPTER_JOIN,
+          '0x' + padStart(address.slice(2), 64, '0')
+        ],
+        fromBlock
+      }),
+      result: r =>
+        r.map(({ blockNumber: block, transactionHash: txHash, topics }) => {
+          return {
+            type: 'DEPOSIT',
+            order: 0,
+            block,
+            txHash,
+            amount: fromHexWei(topics[3])
+          };
+        })
+    },
+    {
+      request: web3.getPastLogs({
+        address: MCD_JOIN_DAI,
+        topics: [
+          EVENT_DAI_ADAPTER_EXIT,
+          '0x' + padStart(address.slice(2), 64, '0')
+        ],
+        fromBlock
+      }),
+      result: r =>
+        r.map(({ blockNumber: block, transactionHash: txHash, topics }) => {
+          return {
+            type: 'WITHDRAW',
+            order: 0,
+            block,
+            txHash,
+            amount: fromHexWei(topics[3])
+          };
+        })
+    },
+  ];
+
+  // eslint-disable-next-line require-atomic-updates
+  cache[address] = (async () => {
+    const results = await Promise.all(lookups.map(l => l.request));
+    return orderBy(
+      await Promise.all(
+        flatten(await Promise.all(results.map((r, i) => lookups[i].result(r))))
+          .filter(r => r !== null)
+          .map(async e => {
+            // eslint-disable-next-line require-atomic-updates
+            e.timestamp = (await getBlockTimestamp(e.block)).timestamp;
+            return e;
+          })
+      ),
+      ['block', 'order'],
+      ['desc', 'desc']
+    ).map(e => {
+      delete e.order;
+      return e;
+    });
+  })();
+
+  return cache[address];
+}
