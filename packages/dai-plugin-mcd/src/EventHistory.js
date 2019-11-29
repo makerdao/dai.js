@@ -284,7 +284,8 @@ export async function getDsrEventHistory(service, address, cache) {
             order: 0,
             block,
             txHash,
-            amount: fromHexWei(topics[3])
+            amount: fromHexWei(topics[3]),
+            gem: 'DAI'
           };
         })
     },
@@ -304,7 +305,8 @@ export async function getDsrEventHistory(service, address, cache) {
             order: 0,
             block,
             txHash,
-            amount: fromHexWei(topics[3])
+            amount: fromHexWei(topics[3]),
+            gem: 'DAI'
           };
         })
     },
