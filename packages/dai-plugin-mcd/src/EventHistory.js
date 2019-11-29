@@ -4,7 +4,7 @@ import padEnd from 'lodash/padEnd';
 import orderBy from 'lodash/orderBy';
 import flatten from 'lodash/flatten';
 import BigNumber from 'bignumber.js';
-import { bytesToString } from './utils';
+import { bytesToString, parseWeiNumeric, numberFromNumeric } from './utils';
 
 const formatAddress = v => '0x' + v.slice(26).toLowerCase();
 const funcSigTopic = v => padEnd(ethAbi.encodeFunctionSignature(v), 66, '0');
@@ -12,7 +12,9 @@ const funcSigTopic = v => padEnd(ethAbi.encodeFunctionSignature(v), 66, '0');
 const EVENT_GIVE = funcSigTopic('give(uint256,address)');
 const EVENT_DAI_ADAPTER_EXIT = funcSigTopic('exit(address,uint256)');
 const EVENT_DAI_ADAPTER_JOIN = funcSigTopic('join(address,uint256)');
-const EVENT_VAT_FROB = funcSigTopic('frob(bytes32,address,address,address,int256,int256)');
+const EVENT_VAT_FROB = funcSigTopic(
+  'frob(bytes32,address,address,address,int256,int256)'
+);
 const EVENT_MANAGER_FROB = funcSigTopic('frob(uint256,int256,int256)');
 
 const decodeManagerFrob = data => {
@@ -60,25 +62,28 @@ const decodeVatFrob = data => {
 };
 
 export default async function getEventHistory(cdpManager, managedCdp, cache) {
-  const MCD_JOIN_DAI = cdpManager.get('smartContract').getContractAddress('MCD_JOIN_DAI');
-  const MCD_JOIN_SAI = cdpManager.get('smartContract').getContractAddress('MCD_JOIN_SAI');
-  const CDP_MANAGER = cdpManager.get('smartContract').getContractAddress('CDP_MANAGER');
-  const MIGRATION = cdpManager.get('smartContract').getContractAddress('MIGRATION');
+  const MCD_JOIN_DAI = cdpManager
+    .get('smartContract')
+    .getContractAddress('MCD_JOIN_DAI');
+  const MCD_JOIN_SAI = cdpManager
+    .get('smartContract')
+    .getContractAddress('MCD_JOIN_SAI');
+  const CDP_MANAGER = cdpManager
+    .get('smartContract')
+    .getContractAddress('CDP_MANAGER');
+  const MIGRATION = cdpManager
+    .get('smartContract')
+    .getContractAddress('MIGRATION');
   const MCD_VAT = cdpManager.get('smartContract').getContractAddress('MCD_VAT');
 
   const id = managedCdp.id;
   if (cache[id]) return cache[id];
 
   const web3 = cdpManager.get('web3');
+  const utils = web3._web3.utils;
 
   // 8600000 is 2019-09-22 on mainnet and 2018-09-04 on kovan
   const fromBlock = [1, 42].includes(web3.networkId()) ? 8600000 : 1;
-
-  const utils = web3._web3.utils;
-  const toHex = v => BigNumber(v).toString(16);
-  const fromWei = v => utils.fromWei(toHex(v));
-  const fromHexWei = v => utils.fromWei(utils.toBN(toHex(v)).toString()).toString();
-  const numberFromHex = v => utils.toBN(toHex(v)).toNumber();
 
   const promisesBlockTimestamp = {};
   const getBlockTimestamp = block => {
@@ -149,7 +154,12 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
             });
             acc.push(
               ...joinDaiEvents.map(
-                ({ address, blockNumber: block, transactionHash: txHash, topics }) => ({
+                ({
+                  address,
+                  blockNumber: block,
+                  transactionHash: txHash,
+                  topics
+                }) => ({
                   type: dart.lt(0) ? 'PAY_BACK' : 'GENERATE',
                   order: 2,
                   block,
@@ -159,7 +169,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
                   adapter: address.toLowerCase(),
                   proxy: formatAddress(topics[1]),
                   recipient: formatAddress(topics[2]),
-                  amount: fromHexWei(topics[3])
+                  amount: parseWeiNumeric(topics[3])
                 })
               )
             );
@@ -192,7 +202,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
                   ilk,
                   gem: managedCdp.currency.symbol,
                   adapter: address.toLowerCase(),
-                  amount: Math.abs(fromWei(dink.toString())).toString()
+                  amount: Math.abs(parseWeiNumeric(dink)).toString()
                 }
               : null;
           }
@@ -213,7 +223,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
             block,
             txHash,
             prevOwner,
-            id: numberFromHex(topics[2]),
+            id: numberFromNumeric(topics[2]),
             newOwner: formatAddress(topics[3])
           };
         })
