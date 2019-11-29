@@ -106,4 +106,9 @@ export default class SavingsService extends PublicService {
     if (!this._eventHistoryCache) this._eventHistoryCache = {};
     return getDsrEventHistory(this, address, this._eventHistoryCache);
   }
+
+  resetEventHistoryCache(address = null) {
+    if (address !== null) delete this._eventHistoryCache[address];
+    else this._eventHistoryCache = {};
+  }
 }

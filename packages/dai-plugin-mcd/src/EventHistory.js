@@ -255,7 +255,9 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
 }
 
 export async function getDsrEventHistory(service, address, cache) {
-  const MCD_JOIN_DAI = service.get('smartContract').getContractAddress('MCD_JOIN_DAI');
+  const MCD_JOIN_DAI = service
+    .get('smartContract')
+    .getContractAddress('MCD_JOIN_DAI');
 
   const id = address;
   if (cache[id]) return cache[id];
@@ -264,9 +266,6 @@ export async function getDsrEventHistory(service, address, cache) {
 
   // 8600000 is 2019-09-22 on mainnet and 2018-09-04 on kovan
   const fromBlock = [1, 42].includes(web3.networkId()) ? 8600000 : 1;
-
-  const utils = web3._web3.utils;
-  const fromHexWei = v => utils.fromWei(utils.toBN(v.toString()).toString()).toString();
 
   const promisesBlockTimestamp = {};
 
@@ -294,7 +293,7 @@ export async function getDsrEventHistory(service, address, cache) {
             order: 0,
             block,
             txHash,
-            amount: fromHexWei(topics[3]),
+            amount: parseWeiNumeric(topics[3]),
             gem: 'DAI'
           };
         })
@@ -315,11 +314,11 @@ export async function getDsrEventHistory(service, address, cache) {
             order: 0,
             block,
             txHash,
-            amount: fromHexWei(topics[3]),
+            amount: parseWeiNumeric(topics[3]),
             gem: 'DAI'
           };
         })
-    },
+    }
   ];
 
   // eslint-disable-next-line require-atomic-updates
