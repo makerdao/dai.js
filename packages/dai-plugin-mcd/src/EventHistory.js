@@ -286,16 +286,19 @@ export async function getDsrEventHistory(service, address, cache) {
         ],
         fromBlock
       }),
-      result: r => r.filter(({topics}) => parseWeiNumeric(topics[3]) !== '0').map(({ blockNumber: block, transactionHash: txHash, topics }) => {
-          return {
-            type: 'DEPOSIT',
-            order: 0,
-            block,
-            txHash,
-            amount: parseWeiNumeric(topics[3]),
-            gem: 'DAI'
-          };
-        })
+      result: r =>
+        r
+          .filter(({ topics }) => parseWeiNumeric(topics[3]) !== '0')
+          .map(({ blockNumber: block, transactionHash: txHash, topics }) => {
+            return {
+              type: 'DEPOSIT',
+              order: 0,
+              block,
+              txHash,
+              amount: parseWeiNumeric(topics[3]),
+              gem: 'DAI'
+            };
+          })
     },
     {
       request: web3.getPastLogs({
@@ -306,16 +309,19 @@ export async function getDsrEventHistory(service, address, cache) {
         ],
         fromBlock
       }),
-      result: r => r.filter(({topics}) => parseWeiNumeric(topics[3]) !== '0').map(({ blockNumber: block, transactionHash: txHash, topics }) => {
-          return {
-            type: 'WITHDRAW',
-            order: 0,
-            block,
-            txHash,
-            amount: parseWeiNumeric(topics[3]),
-            gem: 'DAI'
-          };
-        })
+      result: r =>
+        r
+          .filter(({ topics }) => parseWeiNumeric(topics[3]) !== '0')
+          .map(({ blockNumber: block, transactionHash: txHash, topics }) => {
+            return {
+              type: 'WITHDRAW',
+              order: 0,
+              block,
+              txHash,
+              amount: parseWeiNumeric(topics[3]),
+              gem: 'DAI'
+            };
+          })
     }
   ];
 
