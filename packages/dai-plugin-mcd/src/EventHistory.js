@@ -271,13 +271,30 @@ export async function getDsrEventHistory(service, address, cache) {
   const fromBlock = [1, 42].includes(web3.networkId()) ? 8600000 : 1;
 
   const promisesBlockTimestamp = {};
-
   const getBlockTimestamp = block => {
     if (!promisesBlockTimestamp[block]) {
       promisesBlockTimestamp[block] = web3.getBlock(block, false);
     }
     return promisesBlockTimestamp[block];
   };
+
+  const adapterJoinEvents = await web3.getPastLogs({
+    address: MCD_JOIN_DAI,
+    topics: [
+      EVENT_DAI_ADAPTER_JOIN,
+      '0x' + padStart(address.slice(2), 64, '0')
+    ],
+    fromBlock
+  });
+
+  const adapterExitEvents = await web3.getPastLogs({
+    address: MCD_JOIN_DAI,
+    topics: [
+      EVENT_DAI_ADAPTER_EXIT,
+      '0x' + padStart(address.slice(2), 64, '0')
+    ],
+    fromBlock
+  });
 
   const lookups = [
     {
@@ -286,21 +303,11 @@ export async function getDsrEventHistory(service, address, cache) {
         topics: [EVENT_POT_JOIN, '0x' + padStart(address.slice(2), 64, '0')],
         fromBlock
       }),
-      result: async r =>
-        r.map(async ({ blockNumber: block, transactionHash: txHash }) => {
-          const potJoinEvents = await web3.getPastLogs({
-            address: MCD_JOIN_DAI,
-            topics: [
-              EVENT_DAI_ADAPTER_JOIN,
-              '0x' + padStart(address.slice(2), 64, '0')
-            ],
-            fromBlock
-          });
-
-          const [{ topics: adapterTopics }] = potJoinEvents.filter(
+      result: r =>
+        r.map(({ blockNumber: block, transactionHash: txHash }) => {
+          const [{ topics: adapterTopics }] = adapterJoinEvents.filter(
             x => x.transactionHash === txHash
           );
-
           return {
             type: 'DSR_DEPOSIT',
             order: 0,
@@ -317,17 +324,9 @@ export async function getDsrEventHistory(service, address, cache) {
         topics: [EVENT_POT_EXIT, '0x' + padStart(address.slice(2), 64, '0')],
         fromBlock
       }),
-      result: async r =>
-        r.map(async ({ blockNumber: block, transactionHash: txHash }) => {
-          const potExitEvents = await web3.getPastLogs({
-            address: MCD_JOIN_DAI,
-            topics: [
-              EVENT_DAI_ADAPTER_EXIT,
-              '0x' + padStart(address.slice(2), 64, '0')
-            ],
-            fromBlock
-          });
-          const [{ topics: adapterTopics }] = potExitEvents.filter(
+      result: r =>
+        r.map(({ blockNumber: block, transactionHash: txHash }) => {
+          const [{ topics: adapterTopics }] = adapterExitEvents.filter(
             x => x.transactionHash === txHash
           );
           return {
