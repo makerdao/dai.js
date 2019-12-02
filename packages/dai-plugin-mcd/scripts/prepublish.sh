@@ -5,8 +5,4 @@ if [ $(basename $(pwd)) != "dai-plugin-mcd" ]; then
   exit
 fi
 
-if [[ -z "$SKIP_VERSION_UPDATE" ]]; then
-  yarn version
-fi
-
 ./scripts/build.sh
