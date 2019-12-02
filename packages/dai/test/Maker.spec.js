@@ -78,3 +78,27 @@ test('injected provider is called', async () => {
 
   expect(mockSend).toBeCalled();
 });
+
+test('smartContract.addressOverrides can override plugins', async () => {
+  const maker = await Maker.create('test', {
+    plugins: [
+      {
+        addConfig: () => ({
+          smartContract: {
+            addContracts: {
+              FOO: { address: '0xfoo', abi: [] }
+            }
+          }
+        })
+      }
+    ],
+    smartContract: {
+      addressOverrides: { FOO: '0xfoo2' }
+    },
+    log: false
+  });
+
+  // addressOverrides should be able to modify contracts added by plugins
+  const addresses = maker.service('smartContract').getContractAddresses();
+  expect(addresses.FOO).toEqual('0xfoo2');
+});
