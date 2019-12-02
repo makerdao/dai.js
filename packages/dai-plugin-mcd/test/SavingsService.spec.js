@@ -266,4 +266,13 @@ describe('Savings Service', () => {
     const cachedEvents = await service.getEventHistory(proxyAddress);
     expect(cachedEvents.length).toEqual(2);
   });
+
+  test.only('get dsr event history via web3', async () => {
+    await makeSomeDai(10);
+    await service.join(MDAI(3));
+    await service.exit(MDAI(2));
+    const [chi1, chi2] = await mineBlocksAndReturnChi(10);
+    console.log('chi1, chi2', chi1, chi2);
+    await service.getEarningsToDate(proxyAddress);
+  });
 });

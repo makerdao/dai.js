@@ -114,13 +114,14 @@ export default class SavingsService extends PublicService {
       address,
       this._eventHistoryCache
     );
-    console.log('eventHistory', eventHistory);
-    let bal = new BigNumber(0);
+    let sum = new BigNumber(0);
     eventHistory.forEach(({ type, amount }) => {
-      if (type === 'DEPOSIT') bal = bal.plus(new BigNumber(amount));
-      if (type === 'WITHDRAW') bal = bal.minus(new BigNumber(amount));
-      console.log('bal', bal);
+      if (type === 'DSR_DEPOSIT') sum = sum.plus(amount);
+      if (type === 'DSR_WITHDRAW') sum = sum.minus(amount);
     });
+    const balance = await this.balance();
+    const earns = balance.minus(sum);
+    return earns;
   }
 
   resetEventHistoryCache(address = null) {
