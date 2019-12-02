@@ -259,8 +259,8 @@ export async function getDsrEventHistory(service, address, cache) {
     .get('smartContract')
     .getContractAddress('MCD_JOIN_DAI');
 
-  const id = address;
-  if (cache[id]) return cache[id];
+  address = address.toLowerCase();
+  if (cache[address]) return cache[address];
 
   const web3 = service.get('web3');
 

@@ -8,6 +8,7 @@ import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { MDAI, ETH } from '../src/index';
 import BigNumber from 'bignumber.js';
+import findIndex from 'lodash/findIndex';
 
 let service, maker, dai, proxyAddress;
 
@@ -243,22 +244,25 @@ describe('Savings Service', () => {
     expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 8);
   });
 
-  xtest('get event history via web3', async () => {
-    console.log('proxyAddress', proxyAddress);
-    console.log('block number', maker.service('web3').blockNumber());
+  test('get dsr event history via web3', async () => {
     await makeSomeDai(10);
-
-    const amountBeforeJoin = (await service.balance()).toNumber();
-    console.log('before', amountBeforeJoin);
     await service.join(MDAI(3));
-
-    await mineBlocks(maker.service('web3'), 5);
-
-    const amountAfterJoin = (await service.balance()).toNumber();
-    console.log('after', amountAfterJoin);
-    
     const events = await service.getEventHistory(proxyAddress);
-    console.log('EVENTS in test', events);
-    console.log('block number', maker.service('web3').blockNumber());
+
+    const depositEventIdx = findIndex(events, { type: 'DEPOSIT' });
+    const withdrawEventIdx = findIndex(events, { type: 'WITHDRAW' });
+
+    expect(depositEventIdx).toBeGreaterThan(-1);
+    expect(events[depositEventIdx].gem).toEqual('DAI');
+    expect(events[depositEventIdx].amount).toEqual('3');
+
+    expect(withdrawEventIdx).toBeGreaterThan(-1);
+    expect(events[withdrawEventIdx].gem).toEqual('DAI');
+    expect(events[withdrawEventIdx].amount).toEqual('10');
+
+    await service.join(MDAI(1));
+
+    const cachedEvents = await service.getEventHistory(proxyAddress);
+    expect(cachedEvents.length).toEqual(2);
   });
 });
