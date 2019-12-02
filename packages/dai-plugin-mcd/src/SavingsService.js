@@ -107,6 +107,22 @@ export default class SavingsService extends PublicService {
     return getDsrEventHistory(this, address, this._eventHistoryCache);
   }
 
+  async getEarningsToDate(address) {
+    if (!this._eventHistoryCache) this._eventHistoryCache = {};
+    const eventHistory = await getDsrEventHistory(
+      this,
+      address,
+      this._eventHistoryCache
+    );
+    console.log('eventHistory', eventHistory);
+    let bal = new BigNumber(0);
+    eventHistory.forEach(({ type, amount }) => {
+      if (type === 'DEPOSIT') bal = bal.plus(new BigNumber(amount));
+      if (type === 'WITHDRAW') bal = bal.minus(new BigNumber(amount));
+      console.log('bal', bal);
+    });
+  }
+
   resetEventHistoryCache(address = null) {
     if (address !== null) delete this._eventHistoryCache[address];
     else this._eventHistoryCache = {};
