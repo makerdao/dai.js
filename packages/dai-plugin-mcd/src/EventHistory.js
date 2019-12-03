@@ -291,7 +291,7 @@ export async function getDsrEventHistory(service, address, cache) {
           .filter(({ topics }) => parseWeiNumeric(topics[3]) !== '0')
           .map(({ blockNumber: block, transactionHash: txHash, topics }) => {
             return {
-              type: 'DEPOSIT',
+              type: 'DSR_DEPOSIT',
               order: 0,
               block,
               txHash,
@@ -314,8 +314,8 @@ export async function getDsrEventHistory(service, address, cache) {
           .filter(({ topics }) => parseWeiNumeric(topics[3]) !== '0')
           .map(({ blockNumber: block, transactionHash: txHash, topics }) => {
             return {
-              type: 'WITHDRAW',
-              order: 0,
+              type: 'DSR_WITHDRAW',
+              order: 1,
               block,
               txHash,
               amount: parseWeiNumeric(topics[3]),

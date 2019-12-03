@@ -249,8 +249,8 @@ describe('Savings Service', () => {
     await service.join(MDAI(3));
     const events = await service.getEventHistory(proxyAddress);
 
-    const depositEventIdx = findIndex(events, { type: 'DEPOSIT' });
-    const withdrawEventIdx = findIndex(events, { type: 'WITHDRAW' });
+    const depositEventIdx = findIndex(events, { type: 'DSR_DEPOSIT' });
+    const withdrawEventIdx = findIndex(events, { type: 'DSR_WITHDRAW' });
 
     expect(depositEventIdx).toBeGreaterThan(-1);
     expect(events[depositEventIdx].gem).toEqual('DAI');
