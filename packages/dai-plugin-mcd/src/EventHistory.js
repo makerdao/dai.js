@@ -12,6 +12,8 @@ const funcSigTopic = v => padEnd(ethAbi.encodeFunctionSignature(v), 66, '0');
 const EVENT_GIVE = funcSigTopic('give(uint256,address)');
 const EVENT_DAI_ADAPTER_EXIT = funcSigTopic('exit(address,uint256)');
 const EVENT_DAI_ADAPTER_JOIN = funcSigTopic('join(address,uint256)');
+const EVENT_POT_JOIN = funcSigTopic('join(uint256)');
+const EVENT_POT_EXIT = funcSigTopic('exit(uint256)');
 const EVENT_VAT_FROB = funcSigTopic(
   'frob(bytes32,address,address,address,int256,int256)'
 );
@@ -258,6 +260,7 @@ export async function getDsrEventHistory(service, address, cache) {
   const MCD_JOIN_DAI = service
     .get('smartContract')
     .getContractAddress('MCD_JOIN_DAI');
+  const MCD_POT = service.get('smartContract').getContractAddress('MCD_POT');
 
   address = address.toLowerCase();
   if (cache[address]) return cache[address];
@@ -268,7 +271,6 @@ export async function getDsrEventHistory(service, address, cache) {
   const fromBlock = [1, 42].includes(web3.networkId()) ? 8600000 : 1;
 
   const promisesBlockTimestamp = {};
-
   const getBlockTimestamp = block => {
     if (!promisesBlockTimestamp[block]) {
       promisesBlockTimestamp[block] = web3.getBlock(block, false);
@@ -279,49 +281,71 @@ export async function getDsrEventHistory(service, address, cache) {
   const lookups = [
     {
       request: web3.getPastLogs({
-        address: MCD_JOIN_DAI,
-        topics: [
-          EVENT_DAI_ADAPTER_JOIN,
-          '0x' + padStart(address.slice(2), 64, '0')
-        ],
+        address: MCD_POT,
+        topics: [EVENT_POT_JOIN, '0x' + padStart(address.slice(2), 64, '0')],
         fromBlock
       }),
-      result: r =>
-        r
-          .filter(({ topics }) => parseWeiNumeric(topics[3]) !== '0')
-          .map(({ blockNumber: block, transactionHash: txHash, topics }) => {
-            return {
+      result: async r =>
+        r.reduce(
+          async (acc, { blockNumber: block, transactionHash: txHash }) => {
+            acc = await acc;
+            const adapterJoinEvents = await web3.getPastLogs({
+              address: MCD_JOIN_DAI,
+              topics: [
+                EVENT_DAI_ADAPTER_JOIN,
+                '0x' + padStart(address.slice(2), 64, '0')
+              ],
+              fromBlock
+            });
+            const [{ topics: adapterTopics }] = adapterJoinEvents.filter(
+              x => x.transactionHash === txHash
+            );
+            acc.push({
               type: 'DSR_DEPOSIT',
               order: 0,
               block,
               txHash,
-              amount: parseWeiNumeric(topics[3]),
+              amount: parseWeiNumeric(adapterTopics[3]),
               gem: 'DAI'
-            };
-          })
+            });
+            return acc;
+          },
+          []
+        )
     },
     {
       request: web3.getPastLogs({
-        address: MCD_JOIN_DAI,
-        topics: [
-          EVENT_DAI_ADAPTER_EXIT,
-          '0x' + padStart(address.slice(2), 64, '0')
-        ],
+        address: MCD_POT,
+        topics: [EVENT_POT_EXIT, '0x' + padStart(address.slice(2), 64, '0')],
         fromBlock
       }),
-      result: r =>
-        r
-          .filter(({ topics }) => parseWeiNumeric(topics[3]) !== '0')
-          .map(({ blockNumber: block, transactionHash: txHash, topics }) => {
-            return {
+      result: async r =>
+        r.reduce(
+          async (acc, { blockNumber: block, transactionHash: txHash }) => {
+            acc = await acc;
+            const adapterExitEvents = await web3.getPastLogs({
+              address: MCD_JOIN_DAI,
+              topics: [
+                EVENT_DAI_ADAPTER_EXIT,
+                '0x' + padStart(address.slice(2), 64, '0')
+              ],
+              fromBlock
+            });
+            const [{ topics: adapterTopics }] = adapterExitEvents.filter(
+              x => x.transactionHash === txHash
+            );
+            acc.push({
               type: 'DSR_WITHDRAW',
-              order: 1,
+              order: 0,
               block,
               txHash,
-              amount: parseWeiNumeric(topics[3]),
+              amount: parseWeiNumeric(adapterTopics[3]),
               gem: 'DAI'
-            };
-          })
+            });
+            return acc;
+          },
+          []
+        )
     }
   ];
 

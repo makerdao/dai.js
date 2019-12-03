@@ -247,6 +247,7 @@ describe('Savings Service', () => {
   test('get dsr event history via web3', async () => {
     await makeSomeDai(10);
     await service.join(MDAI(3));
+    await service.exit(MDAI(2));
     const events = await service.getEventHistory(proxyAddress);
 
     const depositEventIdx = findIndex(events, { type: 'DSR_DEPOSIT' });
@@ -258,7 +259,7 @@ describe('Savings Service', () => {
 
     expect(withdrawEventIdx).toBeGreaterThan(-1);
     expect(events[withdrawEventIdx].gem).toEqual('DAI');
-    expect(events[withdrawEventIdx].amount).toEqual('10');
+    expect(events[withdrawEventIdx].amount).toEqual('2');
 
     await service.join(MDAI(1));
 
