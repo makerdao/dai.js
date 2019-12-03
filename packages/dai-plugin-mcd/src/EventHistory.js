@@ -278,24 +278,6 @@ export async function getDsrEventHistory(service, address, cache) {
     return promisesBlockTimestamp[block];
   };
 
-  const adapterJoinEvents = await web3.getPastLogs({
-    address: MCD_JOIN_DAI,
-    topics: [
-      EVENT_DAI_ADAPTER_JOIN,
-      '0x' + padStart(address.slice(2), 64, '0')
-    ],
-    fromBlock
-  });
-
-  const adapterExitEvents = await web3.getPastLogs({
-    address: MCD_JOIN_DAI,
-    topics: [
-      EVENT_DAI_ADAPTER_EXIT,
-      '0x' + padStart(address.slice(2), 64, '0')
-    ],
-    fromBlock
-  });
-
   const lookups = [
     {
       request: web3.getPastLogs({
@@ -303,20 +285,33 @@ export async function getDsrEventHistory(service, address, cache) {
         topics: [EVENT_POT_JOIN, '0x' + padStart(address.slice(2), 64, '0')],
         fromBlock
       }),
-      result: r =>
-        r.map(({ blockNumber: block, transactionHash: txHash }) => {
-          const [{ topics: adapterTopics }] = adapterJoinEvents.filter(
-            x => x.transactionHash === txHash
-          );
-          return {
-            type: 'DSR_DEPOSIT',
-            order: 0,
-            block,
-            txHash,
-            amount: parseWeiNumeric(adapterTopics[3]),
-            gem: 'DAI'
-          };
-        })
+      result: async r =>
+        r.reduce(
+          async (acc, { blockNumber: block, transactionHash: txHash }) => {
+            acc = await acc;
+            const adapterJoinEvents = await web3.getPastLogs({
+              address: MCD_JOIN_DAI,
+              topics: [
+                EVENT_DAI_ADAPTER_JOIN,
+                '0x' + padStart(address.slice(2), 64, '0')
+              ],
+              fromBlock
+            });
+            const [{ topics: adapterTopics }] = adapterJoinEvents.filter(
+              x => x.transactionHash === txHash
+            );
+            acc.push({
+              type: 'DSR_DEPOSIT',
+              order: 0,
+              block,
+              txHash,
+              amount: parseWeiNumeric(adapterTopics[3]),
+              gem: 'DAI'
+            });
+            return acc;
+          },
+          []
+        )
     },
     {
       request: web3.getPastLogs({
@@ -324,20 +319,33 @@ export async function getDsrEventHistory(service, address, cache) {
         topics: [EVENT_POT_EXIT, '0x' + padStart(address.slice(2), 64, '0')],
         fromBlock
       }),
-      result: r =>
-        r.map(({ blockNumber: block, transactionHash: txHash }) => {
-          const [{ topics: adapterTopics }] = adapterExitEvents.filter(
-            x => x.transactionHash === txHash
-          );
-          return {
-            type: 'DSR_WITHDRAW',
-            order: 0,
-            block,
-            txHash,
-            amount: parseWeiNumeric(adapterTopics[3]),
-            gem: 'DAI'
-          };
-        })
+      result: async r =>
+        r.reduce(
+          async (acc, { blockNumber: block, transactionHash: txHash }) => {
+            acc = await acc;
+            const adapterExitEvents = await web3.getPastLogs({
+              address: MCD_JOIN_DAI,
+              topics: [
+                EVENT_DAI_ADAPTER_EXIT,
+                '0x' + padStart(address.slice(2), 64, '0')
+              ],
+              fromBlock
+            });
+            const [{ topics: adapterTopics }] = adapterExitEvents.filter(
+              x => x.transactionHash === txHash
+            );
+            acc.push({
+              type: 'DSR_WITHDRAW',
+              order: 0,
+              block,
+              txHash,
+              amount: parseWeiNumeric(adapterTopics[3]),
+              gem: 'DAI'
+            });
+            return acc;
+          },
+          []
+        )
     }
   ];
 
