@@ -11,7 +11,9 @@ export default class SingleToMultiCdp {
   async check() {
     const address = this._manager.get('accounts').currentAddress();
     const proxyAddress = await this._manager.get('proxy').currentProxy();
-    const idsFromProxy = proxyAddress ? await this._manager.get('cdp').getCdpIds(proxyAddress) : [];
+    const idsFromProxy = proxyAddress
+      ? await this._manager.get('cdp').getCdpIds(proxyAddress)
+      : [];
     const idsFromAddress = await this._manager.get('cdp').getCdpIds(address);
     return idsFromProxy.length + idsFromAddress.length > 0
       ? { [proxyAddress]: idsFromProxy, [address]: idsFromAddress }
