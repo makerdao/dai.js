@@ -255,11 +255,11 @@ describe('Savings Service', () => {
 
     expect(depositEventIdx).toBeGreaterThan(-1);
     expect(events[depositEventIdx].gem).toEqual('DAI');
-    expect(events[depositEventIdx].amount).toEqual('3');
+    expect(MDAI(events[depositEventIdx].amount).toNumber()).toBeCloseTo(3, 18);
 
     expect(withdrawEventIdx).toBeGreaterThan(-1);
     expect(events[withdrawEventIdx].gem).toEqual('DAI');
-    expect(events[withdrawEventIdx].amount).toEqual('2');
+    expect(MDAI(events[withdrawEventIdx].amount).toNumber()).toBeCloseTo(2, 18);
 
     await service.join(MDAI(1));
 
