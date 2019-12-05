@@ -7,6 +7,7 @@ import EtherToken from './tokens/EtherToken';
 import WethToken from './tokens/WethToken';
 import PethToken from './tokens/PethToken';
 import ERC20TokenAbi from '../../contracts/abis/ERC20.json';
+import assert from 'assert';
 
 export default class EthereumTokenService extends PrivateService {
   constructor(name = 'token') {
@@ -34,9 +35,11 @@ export default class EthereumTokenService extends PrivateService {
     // support passing in Currency constructors
     if (symbol.symbol) symbol = symbol.symbol;
 
-    if (this.getTokens().indexOf(symbol) < 0) {
-      throw new Error('provided token is not a symbol');
-    }
+    assert(symbol, 'Symbol is blank');
+    assert(
+      this.getTokens().indexOf(symbol) >= 0,
+      `Symbol "${symbol}" is not recognized`
+    );
 
     if (symbol === tokens.ETH) {
       return new EtherToken(
