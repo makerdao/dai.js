@@ -114,14 +114,17 @@ export default class SavingsService extends PublicService {
       address,
       this._eventHistoryCache
     );
-    let sum = new BigNumber(0);
+    let dep = MDAI(0);
+    let wd = MDAI(0);
     eventHistory.forEach(({ type, amount }) => {
-      if (type === 'DSR_DEPOSIT') sum = sum.plus(amount);
-      if (type === 'DSR_WITHDRAW') sum = sum.minus(amount);
+      if (type === 'DSR_DEPOSIT') dep = dep.plus(amount);
+      if (type === 'DSR_WITHDRAW') wd = wd.plus(amount);
     });
+    const sum = dep.minus(wd);
     const balance = await this.balance();
-    const earns = balance.minus(sum);
-    return earns;
+
+    // this will throw if creating a negative currency amount
+    return balance.lt(sum) ? MDAI(0) : balance.minus(sum);
   }
 
   resetEventHistoryCache(address = null) {

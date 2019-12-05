@@ -20,7 +20,7 @@ function calculateAccruedInterest(amount, chi1, chi2) {
 }
 
 async function mineBlocksAndReturnChi(blocksToMine) {
-  const chiBeforeTime = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+  const chiBeforeTime = new BigNumber(await service.chi());
 
   await mineBlocks(maker.service('web3'), blocksToMine);
   await maker
@@ -28,7 +28,7 @@ async function mineBlocksAndReturnChi(blocksToMine) {
     .getContract('MCD_POT')
     .drip();
 
-  const chiAfterTime = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+  const chiAfterTime = new BigNumber(await service.chi());
 
   return [chiBeforeTime, chiAfterTime];
 }
@@ -244,7 +244,7 @@ describe('Savings Service', () => {
     expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 8);
   });
 
-  test('get dsr event history via web3', async () => {
+  xtest('get dsr event history via web3', async () => {
     await makeSomeDai(10);
     await service.join(MDAI(3));
     await service.exit(MDAI(2));
@@ -267,12 +267,21 @@ describe('Savings Service', () => {
     expect(cachedEvents.length).toEqual(2);
   });
 
-  test.only('get dsr event history via web3', async () => {
+  test('earnings to date', async () => {
     await makeSomeDai(10);
-    await service.join(MDAI(3));
-    await service.exit(MDAI(2));
+    const joinAmount = 10;
+    await service.join(MDAI(joinAmount));
+
+    const etdA = await service.getEarningsToDate(proxyAddress);
     const [chi1, chi2] = await mineBlocksAndReturnChi(10);
-    console.log('chi1, chi2', chi1, chi2);
-    await service.getEarningsToDate(proxyAddress);
+    const etdB = await service.getEarningsToDate(proxyAddress);
+
+    expect(etdB.gt(etdA)).toBe(true);
+    // in the test we know the chi, so we can verify that calculation is close
+    const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
+    expect(etdB.minus(etdA).toNumber()).toBeCloseTo(
+      etdA.plus(accruedInterest).toNumber(),
+      10
+    );
   });
 });
