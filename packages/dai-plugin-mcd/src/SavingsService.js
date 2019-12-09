@@ -119,10 +119,8 @@ export default class SavingsService extends PublicService {
       if (type === 'DSR_DEPOSIT') sum = sum.plus(amount);
       if (type === 'DSR_WITHDRAW') sum = sum.minus(amount);
     });
-    // must cast to BN or this will throw if creating a negative currency amount
-    const balance = (await this.balance()).toBigNumber();
-
-    return balance.minus(sum);
+    const balance = await this.balance();
+    return balance.gt(sum) ? balance.minus(sum) : MDAI(0);
   }
 
   resetEventHistoryCache(address = null) {
