@@ -1,5 +1,6 @@
 import { migrationMaker } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
+import { OLD_MKR } from '../../src';
 
 let maker, migration;
 
@@ -11,22 +12,16 @@ describe('MKR migration check', () => {
       .getMigration(Migrations.MKR_REDEEMER);
   });
 
-  test('if the account has no old MKR, return false', async () => {
+  test('if the account has no old MKR, return zero', async () => {
     await addFreshAccount();
     maker.service('accounts').useAccount('newAccount');
-    const amount = await migration.oldMkrBalance();
-
-    expect(amount.toNumber()).toBe(0);
-    expect(await migration.check()).toBeFalsy();
-
+    expect(await migration.check()).toEqual(OLD_MKR(0));
     maker.service('accounts').useAccount('default');
   });
 
-  test('if the account has old MKR, return true', async () => {
-    const amount = await migration.oldMkrBalance();
-
-    expect(amount.toNumber()).toBe(400);
-    expect(await migration.check()).toBeTruthy();
+  test('if the account has old MKR, return balance', async () => {
+    const amount = await migration.check();
+    expect(amount).toEqual(OLD_MKR(400));
   });
 });
 
