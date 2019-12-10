@@ -1,5 +1,5 @@
 // usage:
-// > node_modules/.bin/babel-node scripts/fundTestAccount.js <address> <daiAmount>
+// > node_modules/.bin/babel-node packages/test-helpers/scripts/generateDai.js <address> <daiAmount>
 
 import { isAddress } from 'web3-utils';
 import { MDAI, ETH } from '@makerdao/dai-plugin-mcd/src/index';
