@@ -102,13 +102,13 @@ describe('Savings Service', () => {
 
   test('check amount in balance', async () => {
     const amount = await service.balance();
-    expect(amount.symbol).toBe('MDAI');
+    expect(MDAI.isInstance(amount)).toBeTruthy();
   });
 
   test('check amount using balance of', async () => {
     const proxyAddress = await maker.currentProxy();
     const amount = await service.balanceOf(proxyAddress);
-    expect(amount.symbol).toBe('MDAI');
+    expect(MDAI.isInstance(amount)).toBeTruthy();
   });
 
   test('get balance without proxy', async () => {
@@ -186,32 +186,32 @@ describe('Savings Service', () => {
 
     await service.join(MDAI(1));
 
-    const startingBalance = (await dai.balance()).toNumber();
+    const startingBalance = await dai.balance();
 
     const exit = service.exit(MDAI(2));
     expect(exit).rejects.toThrow();
 
-    const endingBalance = (await dai.balance()).toNumber();
-    expect(endingBalance).toBe(startingBalance);
+    const endingBalance = await dai.balance();
+    expect(endingBalance).toEqual(startingBalance);
   });
 
   test('join and exit pot', async () => {
     await makeSomeDai(3);
 
-    const startingBalance = (await dai.balance()).toNumber();
-    const amountBeforeJoin = (await service.balance()).toNumber();
+    const startingBalance = await dai.balance();
+    const amountBeforeJoin = await service.balance();
     const joinAmount = 2;
 
     await service.join(MDAI(joinAmount));
 
     const amountAfterJoin = await service.balance();
     expect(amountAfterJoin.toNumber()).toBeCloseTo(
-      amountBeforeJoin + joinAmount,
+      amountBeforeJoin.plus(joinAmount).toNumber(),
       10
     );
 
-    const duringBalance = (await dai.balance()).toNumber();
-    expect(duringBalance).toBe(startingBalance - joinAmount);
+    const duringBalance = await dai.balance();
+    expect(duringBalance).toEqual(startingBalance.minus(joinAmount));
 
     const [chi1, chi2] = await mineBlocksAndReturnChi(3);
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
@@ -221,8 +221,8 @@ describe('Savings Service', () => {
     const amountAfterExit = await service.balance();
     expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 8);
 
-    const endingBalance = (await dai.balance()).toNumber();
-    expect(endingBalance).toBe(startingBalance);
+    const endingBalance = await dai.balance();
+    expect(endingBalance).toEqual(startingBalance);
   });
 
   test('exit all', async () => {
