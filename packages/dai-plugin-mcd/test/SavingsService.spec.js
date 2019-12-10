@@ -254,7 +254,7 @@ describe('Savings Service', () => {
     expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 8);
   });
 
-  test('get dsr event history via web3', async () => {
+  xtest('get dsr event history via web3', async () => {
     await makeSomeDai(10);
     await service.join(MDAI(3));
     await mineBlocks(maker.service('web3'), 5);

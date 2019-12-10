@@ -11,7 +11,9 @@ export default class SingleToMultiCdp {
   async check() {
     const address = this._manager.get('accounts').currentAddress();
     const proxyAddress = await this._manager.get('proxy').currentProxy();
-    const idsFromProxy = await this._manager.get('cdp').getCdpIds(proxyAddress);
+    const idsFromProxy = proxyAddress
+      ? await this._manager.get('cdp').getCdpIds(proxyAddress)
+      : [];
     const idsFromAddress = await this._manager.get('cdp').getCdpIds(address);
     return idsFromProxy.length + idsFromAddress.length > 0
       ? { [proxyAddress]: idsFromProxy, [address]: idsFromAddress }
@@ -20,13 +22,17 @@ export default class SingleToMultiCdp {
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
   async execute(cupId, payment = 'MKR', maxPayAmount, minRatio, { promise }) {
+    const jug = this._manager
+      .get('smartContract')
+      .getContract('MCD_JUG')
+      .address;
     const migrationProxy = this._manager
       .get('smartContract')
       .getContract('MIGRATION_PROXY_ACTIONS');
     const migration = this._manager
       .get('smartContract')
       .getContract('MIGRATION');
-    const defaultArgs = [migration.address, getIdBytes(cupId)];
+    const defaultArgs = [migration.address, jug, getIdBytes(cupId)];
     const { method, args } = this._setMethodAndArgs(
       payment,
       defaultArgs,
