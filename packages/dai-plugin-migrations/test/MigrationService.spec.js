@@ -75,6 +75,7 @@ test('runAllChecks', async () => {
   expect(result).toEqual({
     [Migrations.SAI_TO_DAI]: expect.anything(),
     [Migrations.DAI_TO_SAI]: expect.anything(),
+    [Migrations.MKR_REDEEMER]: expect.anything(),
     [Migrations.SINGLE_TO_MULTI_CDP]: {}
   });
   expect(result[Migrations.SAI_TO_DAI].eq(0)).toBeTruthy();
