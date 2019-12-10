@@ -222,7 +222,17 @@ describe('Savings Service', () => {
     expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 8);
 
     const endingBalance = await dai.balance();
-    expect(endingBalance).toEqual(startingBalance);
+
+    // Due to how 'exit' handles rounding sub-wei amounts, the ending balance can be one wei less than expected
+    const amountLessWei = MDAI(startingBalance)
+      .minus(MDAI.wei(1))
+      .toBigNumber()
+      .toString();
+    expect(
+      [startingBalance.toBigNumber().toString(), amountLessWei].includes(
+        endingBalance.toBigNumber().toString()
+      )
+    ).toBe(true);
   });
 
   test('exit all', async () => {
@@ -244,10 +254,13 @@ describe('Savings Service', () => {
     expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 8);
   });
 
-  xtest('get dsr event history via web3', async () => {
+  test('get dsr event history via web3', async () => {
     await makeSomeDai(10);
     await service.join(MDAI(3));
-    await service.exit(MDAI(2));
+    await mineBlocks(maker.service('web3'), 5);
+
+    const exitAmount = '2';
+    await service.exit(MDAI(exitAmount));
     const events = await service.getEventHistory(proxyAddress);
 
     const depositEventIdx = findIndex(events, { type: 'DSR_DEPOSIT' });
@@ -259,7 +272,15 @@ describe('Savings Service', () => {
 
     expect(withdrawEventIdx).toBeGreaterThan(-1);
     expect(events[withdrawEventIdx].gem).toEqual('DAI');
-    expect(events[withdrawEventIdx].amount).toEqual('2');
+
+    // Due to how 'exit' handles rounding sub-wei amounts, the exit amount returned can be one wei less than intended
+    const amountLessWei = MDAI(exitAmount)
+      .minus(MDAI.wei(1))
+      .toBigNumber()
+      .toString();
+    expect(
+      [exitAmount, amountLessWei].includes(events[withdrawEventIdx].amount)
+    ).toBe(true);
 
     await service.join(MDAI(1));
 
@@ -279,9 +300,6 @@ describe('Savings Service', () => {
     expect(etdB.gt(etdA)).toBe(true);
     // in the test we know the chi, so we can verify that calculation is close
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
-    expect(etdB.minus(etdA).toNumber()).toBeCloseTo(
-      etdA.plus(accruedInterest).toNumber(),
-      10
-    );
+    expect(etdB.minus(etdA).toNumber()).toBeCloseTo(accruedInterest, 10);
   });
 });
