@@ -111,6 +111,7 @@ describe('SCD to MCD CDP Migration', () => {
     let cdp, proxyAddress;
 
     beforeEach(async () => {
+      jest.setTimeout(20000);
       snapshotData = await takeSnapshot(maker);
       proxyAddress = await maker.service('proxy').currentProxy();
       await openLockAndDrawScdCdp(100);
@@ -160,7 +161,7 @@ describe('SCD to MCD CDP Migration', () => {
       const mcdDebt = mcdCdp.debtValue.toNumber();
 
       expect(mcdCollateral).toEqual(scdCollateral.toNumber());
-      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber());
+      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber(), 1);
 
       let message;
       try {
