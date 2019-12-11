@@ -48,8 +48,9 @@ export default class MigrationService extends PublicService {
         SINGLE_TO_MULTI_CDP
       ).check(),
       [SAI_TO_DAI]: await this.getMigration(SAI_TO_DAI).check(),
-      [DAI_TO_SAI]: await this.getMigration(DAI_TO_SAI).check(),
-      [MKR_REDEEMER]: await this.getMigration(MKR_REDEEMER).check()
+      [DAI_TO_SAI]: await this.getMigration(DAI_TO_SAI).check()
+      // removed until fixed on mainnet:
+      // [MKR_REDEEMER]: await this.getMigration(MKR_REDEEMER).check()
     };
   }
 
