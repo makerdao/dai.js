@@ -4,11 +4,6 @@ export default class MkrRedeemer {
     return this;
   }
 
-  // async check() {
-  //   const balance = await this.oldMkrBalance();
-  //   return balance.gt(0);
-  // }
-
   async check() {
     const oldMkr = this._manager.get('token').getToken('OLD_MKR');
     return oldMkr.balance();

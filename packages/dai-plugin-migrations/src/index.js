@@ -52,7 +52,7 @@ function overrideContractAddresses(network, addressOverrides, contracts) {
 export const MDAI_1 = createCurrency('MDAI_1');
 
 export default {
-  addConfig: (_, { network = 'testnet', addressOverrides } = {}) => {
+  addConfig: (_, { network, addressOverrides } = {}) => {
     const oldMkrData = {
       currency: OLD_MKR,
       abi: require('../contracts/abis/ERC20.json'),
