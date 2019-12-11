@@ -7,12 +7,14 @@ import GlobalSettlementDaiRedeemer from './migrations/GlobalSettlementDaiRedeeme
 import SaiToDai from './migrations/SaiToDai';
 import MkrRedeemer from './migrations/MkrRedeemer';
 import DaiToSai from './migrations/DaiToSai';
-const { SINGLE_TO_MULTI_CDP, SAI_TO_DAI, DAI_TO_SAI, MKR_REDEEMER } = Migrations;
+import ChiefMigrate from './migrations/ChiefMigrate';
+const { SINGLE_TO_MULTI_CDP, SAI_TO_DAI, DAI_TO_SAI, MKR_REDEEMER, CHIEF_MIGRATE } = Migrations;
 
 const migrations = {
   [SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
   [SAI_TO_DAI]: SaiToDai,
   [DAI_TO_SAI]: DaiToSai,
+  [CHIEF_MIGRATE]: ChiefMigrate,
   [Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI]: GlobalSettlementSavingsDai,
   [Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS]: GlobalSettlementCollateralClaims,
   [Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER]: GlobalSettlementDaiRedeemer,
@@ -48,7 +50,8 @@ export default class MigrationService extends PublicService {
         SINGLE_TO_MULTI_CDP
       ).check(),
       [SAI_TO_DAI]: await this.getMigration(SAI_TO_DAI).check(),
-      [DAI_TO_SAI]: await this.getMigration(DAI_TO_SAI).check()
+      [DAI_TO_SAI]: await this.getMigration(DAI_TO_SAI).check(),
+      [CHIEF_MIGRATE]: await this.getMigration(CHIEF_MIGRATE).check()
       // removed until fixed on mainnet:
       // [MKR_REDEEMER]: await this.getMigration(MKR_REDEEMER).check()
     };
