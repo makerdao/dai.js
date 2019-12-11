@@ -20,7 +20,7 @@ function calculateAccruedInterest(amount, chi1, chi2) {
 }
 
 async function mineBlocksAndReturnChi(blocksToMine) {
-  const chiBeforeTime = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+  const chiBeforeTime = new BigNumber(await service.chi());
 
   await mineBlocks(maker.service('web3'), blocksToMine);
   await maker
@@ -28,7 +28,7 @@ async function mineBlocksAndReturnChi(blocksToMine) {
     .getContract('MCD_POT')
     .drip();
 
-  const chiAfterTime = new BigNumber(await service._pot.chi()).shiftedBy(-27);
+  const chiAfterTime = new BigNumber(await service.chi());
 
   return [chiBeforeTime, chiAfterTime];
 }
@@ -102,13 +102,13 @@ describe('Savings Service', () => {
 
   test('check amount in balance', async () => {
     const amount = await service.balance();
-    expect(amount.symbol).toBe('MDAI');
+    expect(MDAI.isInstance(amount)).toBeTruthy();
   });
 
   test('check amount using balance of', async () => {
     const proxyAddress = await maker.currentProxy();
     const amount = await service.balanceOf(proxyAddress);
-    expect(amount.symbol).toBe('MDAI');
+    expect(MDAI.isInstance(amount)).toBeTruthy();
   });
 
   test('get balance without proxy', async () => {
@@ -186,32 +186,32 @@ describe('Savings Service', () => {
 
     await service.join(MDAI(1));
 
-    const startingBalance = (await dai.balance()).toNumber();
+    const startingBalance = await dai.balance();
 
     const exit = service.exit(MDAI(2));
     expect(exit).rejects.toThrow();
 
-    const endingBalance = (await dai.balance()).toNumber();
-    expect(endingBalance).toBe(startingBalance);
+    const endingBalance = await dai.balance();
+    expect(endingBalance).toEqual(startingBalance);
   });
 
   test('join and exit pot', async () => {
     await makeSomeDai(3);
 
-    const startingBalance = (await dai.balance()).toNumber();
-    const amountBeforeJoin = (await service.balance()).toNumber();
+    const startingBalance = await dai.balance();
+    const amountBeforeJoin = await service.balance();
     const joinAmount = 2;
 
     await service.join(MDAI(joinAmount));
 
     const amountAfterJoin = await service.balance();
     expect(amountAfterJoin.toNumber()).toBeCloseTo(
-      amountBeforeJoin + joinAmount,
+      amountBeforeJoin.plus(joinAmount).toNumber(),
       10
     );
 
-    const duringBalance = (await dai.balance()).toNumber();
-    expect(duringBalance).toBe(startingBalance - joinAmount);
+    const duringBalance = await dai.balance();
+    expect(duringBalance).toEqual(startingBalance.minus(joinAmount));
 
     const [chi1, chi2] = await mineBlocksAndReturnChi(3);
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
@@ -221,8 +221,18 @@ describe('Savings Service', () => {
     const amountAfterExit = await service.balance();
     expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 8);
 
-    const endingBalance = (await dai.balance()).toNumber();
-    expect(endingBalance).toBe(startingBalance);
+    const endingBalance = await dai.balance();
+
+    // Due to how 'exit' handles rounding sub-wei amounts, the ending balance can be one wei less than expected
+    const amountLessWei = MDAI(startingBalance)
+      .minus(MDAI.wei(1))
+      .toBigNumber()
+      .toString();
+    expect(
+      [startingBalance.toBigNumber().toString(), amountLessWei].includes(
+        endingBalance.toBigNumber().toString()
+      )
+    ).toBe(true);
   });
 
   test('exit all', async () => {
@@ -247,7 +257,10 @@ describe('Savings Service', () => {
   xtest('get dsr event history via web3', async () => {
     await makeSomeDai(10);
     await service.join(MDAI(3));
-    await service.exit(MDAI(2));
+    await mineBlocks(maker.service('web3'), 5);
+
+    const exitAmount = '2';
+    await service.exit(MDAI(exitAmount));
     const events = await service.getEventHistory(proxyAddress);
 
     const depositEventIdx = findIndex(events, { type: 'DSR_DEPOSIT' });
@@ -259,11 +272,34 @@ describe('Savings Service', () => {
 
     expect(withdrawEventIdx).toBeGreaterThan(-1);
     expect(events[withdrawEventIdx].gem).toEqual('DAI');
-    expect(events[withdrawEventIdx].amount).toEqual('2');
+
+    // Due to how 'exit' handles rounding sub-wei amounts, the exit amount returned can be one wei less than intended
+    const amountLessWei = MDAI(exitAmount)
+      .minus(MDAI.wei(1))
+      .toBigNumber()
+      .toString();
+    expect(
+      [exitAmount, amountLessWei].includes(events[withdrawEventIdx].amount)
+    ).toBe(true);
 
     await service.join(MDAI(1));
 
     const cachedEvents = await service.getEventHistory(proxyAddress);
     expect(cachedEvents.length).toEqual(2);
+  });
+
+  test('earnings to date', async () => {
+    await makeSomeDai(10);
+    const joinAmount = 10;
+    await service.join(MDAI(joinAmount));
+
+    const etdA = await service.getEarningsToDate(proxyAddress);
+    const [chi1, chi2] = await mineBlocksAndReturnChi(10);
+    const etdB = await service.getEarningsToDate(proxyAddress);
+
+    expect(etdB.gt(etdA)).toBe(true);
+    // in the test we know the chi, so we can verify that calculation is close
+    const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
+    expect(etdB.minus(etdA).toNumber()).toBeCloseTo(accruedInterest, 10);
   });
 });
