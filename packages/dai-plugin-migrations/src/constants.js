@@ -12,7 +12,8 @@ export const Migrations = {
   GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS: 'global-settlement-collateral-claims',
   GLOBAL_SETTLEMENT_DAI_REDEEMER: 'global-settlement-dai-redeemer',
   MKR_REDEEMER: 'mkr-redeemer',
-  CHIEF_MIGRATE: 'chief-migrate'
+  CHIEF_MIGRATE: 'chief-migrate',
+  VOTE_PROXY: 'vote-proxy'
 };
 
 export const WAD = new BigNumber('1e18');

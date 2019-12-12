@@ -8,7 +8,13 @@ import SaiToDai from './migrations/SaiToDai';
 import MkrRedeemer from './migrations/MkrRedeemer';
 import DaiToSai from './migrations/DaiToSai';
 import ChiefMigrate from './migrations/ChiefMigrate';
-const { SINGLE_TO_MULTI_CDP, SAI_TO_DAI, DAI_TO_SAI, MKR_REDEEMER, CHIEF_MIGRATE } = Migrations;
+const {
+  SINGLE_TO_MULTI_CDP,
+  SAI_TO_DAI,
+  DAI_TO_SAI,
+  MKR_REDEEMER,
+  CHIEF_MIGRATE
+} = Migrations;
 
 const migrations = {
   [SINGLE_TO_MULTI_CDP]: SingleToMultiCdp,
