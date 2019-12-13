@@ -8,7 +8,7 @@ CONTRACTS=$CWD/../contracts
 SOURCE=${1:-$CWD/../../../node_modules/@makerdao/testchain}
 
 # Relevant contracts from SCD:
-for CONTRACT in "TUB","SaiTub" "REDEEMER","Redeemer" "OLD_MKR","ERC20"
+for CONTRACT in "TUB","SaiTub" "REDEEMER","Redeemer" "OLD_MKR","DSToken" "OLD_CHIEF","DSChief"
 do
   IFS=',' read NAME ABI <<< "${CONTRACT}"
   ADDRESS=`jq ".$NAME" "$SOURCE/out/addresses.json"`
