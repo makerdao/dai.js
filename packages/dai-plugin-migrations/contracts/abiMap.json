@@ -8,5 +8,6 @@
   "MCD_POT_1": "Pot",
   "REDEEMER": "Redeemer",
   "MIGRATION": "ScdMcdMigration",
-  "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions" 
+  "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions",
+  "OLD_CHIEF": "DSChief"
 }
