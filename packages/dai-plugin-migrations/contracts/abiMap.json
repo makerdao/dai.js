@@ -9,5 +9,6 @@
   "REDEEMER": "Redeemer",
   "MIGRATION": "ScdMcdMigration",
   "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions",
-  "OLD_CHIEF": "DSChief"
+  "OLD_CHIEF": "DSChief",
+  "VOTE_PROXY_FACTORY": "VoteProxyFactory" 
 }
