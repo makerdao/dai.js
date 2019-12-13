@@ -55,7 +55,7 @@ export default {
   addConfig: (_, { network = 'mainnet', addressOverrides } = {}) => {
     const oldMkrData = {
       currency: OLD_MKR,
-      abi: require('../contracts/abis/ERC20.json'),
+      abi: require('../contracts/abis/DSToken.json'),
       address: require(`../contracts/addresses/${network}.json`).OLD_MKR,
       decimals: 18
     };
