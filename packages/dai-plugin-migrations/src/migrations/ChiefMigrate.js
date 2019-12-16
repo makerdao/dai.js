@@ -1,7 +1,6 @@
-import BigNumber from 'bignumber.js';
+import { MKR } from '..';
 
-/* Addresses */
-export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export default class ChiefMigrate {
   constructor(manager) {
@@ -15,17 +14,27 @@ export default class ChiefMigrate {
 
   async check() {
     const address = this._manager.get('accounts').currentAddress();
-    const balance = this._oldChief.deposits(address);
+
+    const voteProxyAddress = await this._getVoteProxyAddress(address);
+
+    const mkrLockedDirectly = MKR.wei(await this._oldChief.deposits(address));
+    const mkrLockedViaProxy = MKR.wei(
+      voteProxyAddress ? await this._oldChief.deposits(voteProxyAddress) : 0
+    );
+
+    return { mkrLockedDirectly, mkrLockedViaProxy };
+  }
+
+  async execute() {}
+
+  async _getVoteProxyAddress(walletAddress) {
     const [proxyAddressCold, proxyAddressHot] = await Promise.all([
-      this._proxyFactoryContract.coldMap(address),
-      this._proxyFactoryContract.hotMap(address)
+      this._proxyFactoryContract.coldMap(walletAddress),
+      this._proxyFactoryContract.hotMap(walletAddress)
     ]);
-    const proxyBalance =
-      proxyAddressCold !== ZERO_ADDRESS
-        ? this._oldChief.deposits(proxyAddressCold)
-        : proxyAddressHot !== ZERO_ADDRESS
-        ? this._oldChief.deposits(proxyAddressHot)
-        : BigNumber(0);
-    return [balance, proxyBalance];
+
+    if (proxyAddressCold !== ZERO_ADDRESS) return proxyAddressCold;
+    if (proxyAddressHot !== ZERO_ADDRESS) return proxyAddressHot;
+    return null;
   }
 }
