@@ -2,6 +2,7 @@ import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
 import has from 'lodash/has';
 import merge from 'lodash/merge';
+import testnetAddresses from '../../contracts/addresses/testnet.json';
 
 export const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67'; //dai.js project id
 
@@ -73,4 +74,18 @@ export function buildTestSmartContractService(settings = {}) {
 
 export function buildTestEventService(settings = {}) {
   return buildTestService('event', { ...settings, event: true });
+}
+
+export function buildTestMulticallService(settings = {}) {
+  return buildTestService('multicall', {
+    ...settings,
+    smartContract: {
+      addContracts: {
+        MULTICALL: {
+          address: testnetAddresses.MULTICALL
+        }
+      }
+    },
+    multicall: true
+  });
 }
