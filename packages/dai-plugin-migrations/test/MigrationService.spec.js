@@ -40,10 +40,11 @@ test('can fetch a list of all migrations', () => {
       Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI,
       Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS,
       Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER,
-      Migrations.MKR_REDEEMER
+      Migrations.MKR_REDEEMER,
+      Migrations.CHIEF_MIGRATE
     ])
   );
-  expect(ids.length).toEqual(7);
+  expect(ids.length).toEqual(8);
 });
 
 test('getting each migration returns a valid migration', () => {
@@ -75,8 +76,9 @@ test('runAllChecks', async () => {
   expect(result).toEqual({
     [Migrations.SAI_TO_DAI]: expect.anything(),
     [Migrations.DAI_TO_SAI]: expect.anything(),
-    [Migrations.MKR_REDEEMER]: expect.anything(),
-    [Migrations.SINGLE_TO_MULTI_CDP]: {}
+    [Migrations.SINGLE_TO_MULTI_CDP]: {},
+    [Migrations.CHIEF_MIGRATE]: expect.anything(),
+    [Migrations.MKR_REDEEMER]: expect.anything()
   });
   expect(result[Migrations.SAI_TO_DAI].eq(0)).toBeTruthy();
 });
