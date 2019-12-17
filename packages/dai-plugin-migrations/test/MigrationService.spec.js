@@ -76,10 +76,9 @@ test('runAllChecks', async () => {
   expect(result).toEqual({
     [Migrations.SAI_TO_DAI]: expect.anything(),
     [Migrations.DAI_TO_SAI]: expect.anything(),
-    // removed until fixed on mainnet:
-    // [Migrations.MKR_REDEEMER]: expect.anything(),
     [Migrations.SINGLE_TO_MULTI_CDP]: {},
-    [Migrations.CHIEF_MIGRATE]: expect.anything()
+    [Migrations.CHIEF_MIGRATE]: expect.anything(),
+    [Migrations.MKR_REDEEMER]: expect.anything()
   });
   expect(result[Migrations.SAI_TO_DAI].eq(0)).toBeTruthy();
 });

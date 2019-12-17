@@ -8,59 +8,74 @@ export default class MulticallService extends PublicService {
     super(name, ['web3', 'smartContract']);
   }
 
-  createWatcher(config = {}) {
+  createWatcher({
+    useWeb3Provider = false,
+    interval = 'block',
+    ...config
+  } = {}) {
     const web3 = this.get('web3');
     config = {
-      multicallAddress: this.get('smartContract').getContractAddress('MULTICALL'),
+      multicallAddress: this.get('smartContract').getContractAddress(
+        'MULTICALL'
+      ),
       ...config
     };
 
-    let onNewBlockPolling = false;
-    if (config.interval === 'block') {
+    let onNewBlockPolling;
+    if (interval === 'block') {
       onNewBlockPolling = true;
       config.interval = 60000; // 1 min polling fallback safeguard
     }
-
-    if (config.useFetch) {
-      delete config.useFetch;
-      if (web3.usingWebsockets())
-        throw new Error('Unable to use fetch with multicall when using websockets');
+    if (useWeb3Provider) config.web3 = web3._web3;
+    else {
       if (!web3.rpcUrl) throw new Error('Unable to get rpcUrl for multicall');
       config.rpcUrl = web3.rpcUrl;
-    } else config.web3 = web3._web3;
+    }
 
     this._watcher = createWatcher([], config);
 
     if (onNewBlockPolling) {
-      log('Watcher created with poll on new block mode');
+      log(
+        `Watcher created with poll on new block mode using ${
+          config.rpcUrl ? `rpcUrl: ${config.rpcUrl}` : 'web3 provider'
+        }`
+      );
       web3.onNewBlock(blockNumber => {
-        log(`Polling after new block detected: #${blockNumber}`);
-        this.watcher.poll();
+        log(`Polling after new block detected (${blockNumber})`);
+        this._watcher.poll();
       });
     } else {
       log(
         `Watcher created with ${
           config.interval ? config.interval + 'ms' : 'default'
-        } polling interval`
+        } polling interval using ${
+          config.rpcUrl ? `rpcUrl: ${config.rpcUrl}` : 'web3 provider'
+        }`
       );
     }
 
-    this.watcher.onPoll(({ id, latestBlockNumber }) =>
+    this._watcher.onPoll(({ id, latestBlockNumber }) =>
       log(
-        `Sending eth_call network request #${id} latestBlockNumber: ${latestBlockNumber}`
+        `Sending eth_call network request #${id}${
+          latestBlockNumber ? ` (latestBlockNumber: ${latestBlockNumber})` : ''
+        }`
       )
     );
-    this.watcher.onNewBlock(blockHeight => log(`Latest block: ${blockHeight}`));
+    this._watcher.onNewBlock(blockHeight =>
+      log(`Latest block: ${blockHeight}`)
+    );
+
+    return this._watcher;
   }
 
   tap(cb) {
     log('Watcher tapped');
-    return this.watcher.tap(cb);
+    return this._watcher.tap(cb);
   }
 
   start() {
     log('Watcher started');
-    return this.watcher.start();
+    return this._watcher.start();
   }
 
   disconnect() {

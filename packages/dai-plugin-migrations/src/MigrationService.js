@@ -57,9 +57,8 @@ export default class MigrationService extends PublicService {
       ).check(),
       [SAI_TO_DAI]: await this.getMigration(SAI_TO_DAI).check(),
       [DAI_TO_SAI]: await this.getMigration(DAI_TO_SAI).check(),
-      [CHIEF_MIGRATE]: await this.getMigration(CHIEF_MIGRATE).check()
-      // removed until fixed on mainnet:
-      // [MKR_REDEEMER]: await this.getMigration(MKR_REDEEMER).check()
+      [CHIEF_MIGRATE]: await this.getMigration(CHIEF_MIGRATE).check(),
+      [MKR_REDEEMER]: await this.getMigration(MKR_REDEEMER).check()
     };
   }
 

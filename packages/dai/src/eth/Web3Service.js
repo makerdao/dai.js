@@ -175,7 +175,8 @@ export default class Web3Service extends PrivateService {
   }
 
   get rpcUrl() {
-    return last(this._web3.currentProvider._providers).rpcUrl;
+    const provider = last(this._web3.currentProvider._providers);
+    return provider.rpcUrl || provider._url || null;
   }
 
   blockNumber() {

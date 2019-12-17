@@ -1691,20 +1691,23 @@
     babel-runtime "^6.26.0"
     bignumber.js "^8.1.1"
 
-"@makerdao/multicall@^0.9.0-rc.1":
-  version "0.9.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.9.0-rc.1.tgz#0f07d86fde46148d537a825f4f97268176571d66"
-  integrity sha512-X0kdC117WXnsEwSFepDWG1Fhh65+Zov1wKZJpZyXyJE5wiIN9GW9AhXuw6W0oaiwUkpPxVx2UWaclwroQjCsQg==
+"@makerdao/multicall@^0.9.0-rc.2":
+  version "0.9.0-rc.2"
+  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.9.0-rc.2.tgz#2a005df4f41f5097784781be077f09d9c82776e2"
+  integrity sha512-WRiMqugAIDvPFAadNg3+dgV16G94K5EGIJUUs2Ee9tzprX8+lPOhytVxQpnkAiLTP3ac108QtjTiKpKYLdOhpw==
   dependencies:
-    cross-fetch "^3.0.1"
+    cross-fetch "^3.0.4"
+    debug "^4.1.1"
     ethers "^4.0.27"
+    isomorphic-ws "^4.0.1"
     js-sha3 "^0.8.0"
     lodash "^4.17.11"
+    ws "^7.2.0"
 
-"@makerdao/testchain@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.0.2.tgz#818cf7851369000f21b8047770f80e3a11e35301"
-  integrity sha512-QMmfHsJNtg5T8d//U2Jv97Gz1ikIOMhRf5U4e4H8OmfTN/RsEdRT7rumofqQJsv7YESJvJk7quUw3RqfWwRLEw==
+"@makerdao/testchain@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.0.3.tgz#c7df934a4863b9bf58ec1fdce9a4352e9d418378"
+  integrity sha512-hvkQbVhfueSY06WqjptYFZy4wwYIxO1SpzZJ3I9kQxlaO8SqBeiqthHlSqvPHsUJBpRU7yDs5yRRzWY61NcRcA==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 
@@ -3912,7 +3915,7 @@ cross-fetch@^2.1.0, cross-fetch@^2.1.1:
     node-fetch "2.1.2"
     whatwg-fetch "2.0.4"
 
-cross-fetch@^3.0.1:
+cross-fetch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.0.4.tgz#7bef7020207e684a7638ef5f2f698e24d9eb283c"
   integrity sha512-MSHgpjQqgbT/94D4CyADeNoYh52zMkCX4pcJvPP5WqPsLFMKjr2TCMg381ox5qI0ii2dPwaLx/00477knXqXVw==
@@ -5656,7 +5659,7 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-"ganache-cli@github:makerdao/ganache-cli#fix/gas-est-crash":
+ganache-cli@makerdao/ganache-cli#fix/gas-est-crash:
   version "6.4.3-beta.0"
   resolved "https://codeload.github.com/makerdao/ganache-cli/tar.gz/3e512b61da2479042627e6155231dcb038110650"
   dependencies:
@@ -6763,6 +6766,11 @@ isomorphic-fetch@^2.2.1:
   dependencies:
     node-fetch "^1.0.1"
     whatwg-fetch ">=0.10.0"
+
+isomorphic-ws@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/isomorphic-ws/-/isomorphic-ws-4.0.1.tgz#55fd4cd6c5e6491e76dc125938dd863f5cd4f2dc"
+  integrity sha512-BhBvN2MBpWTaSHdWRb/bwdZJ1WaehQ2L1KngkCkfLUGF0mAWAT1sQUQacEmQ0jXkFw/czDXPNQSL5u2/Krsz1w==
 
 isstream@~0.1.2:
   version "0.1.2"
@@ -12193,6 +12201,11 @@ ws@^6.0.0:
   integrity sha512-GIyAXC2cB7LjvpgMt9EKS2ldqr0MTrORaleiOno6TweZ6r3TKtoFQWay/2PceJ3RuBasOHzXNn5Lrw1X0bEjqA==
   dependencies:
     async-limiter "~1.0.0"
+
+ws@^7.2.0:
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.2.1.tgz#03ed52423cd744084b2cf42ed197c8b65a936b8e"
+  integrity sha512-sucePNSafamSKoOqoNfBd8V0StlkzJKL2ZAhGQinCfNQ+oacw+Pk7lcdAElecBF2VkLNZRiIb5Oi1Q5lVUVt2A==
 
 xhr-request-promise@^0.1.2:
   version "0.1.2"
