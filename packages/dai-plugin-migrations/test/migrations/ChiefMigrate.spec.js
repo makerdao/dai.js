@@ -1,8 +1,12 @@
 import { migrationMaker } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
-import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import {
+  takeSnapshot,
+  restoreSnapshot,
+  TestAccountProvider
+} from '@makerdao/test-helpers';
 import { MKR } from '../../src';
-// import voteProxyAbi from '../../contracts/abis/VoteProxy.json';
+import voteProxyAbi from '../../contracts/abis/VoteProxy.json';
 
 let maker, migration, snapshot;
 
@@ -11,14 +15,17 @@ describe('Chief Migration', () => {
     maker = await migrationMaker();
     const service = maker.service(ServiceRoles.MIGRATION);
     migration = service.getMigration(Migrations.CHIEF_MIGRATE);
+  });
+
+  beforeEach(async () => {
     snapshot = await takeSnapshot(maker);
   });
 
-  afterAll(async () => {
+  afterEach(() => {
     restoreSnapshot(snapshot, maker);
   });
 
-  test('if the account has no MKR in old chief, return 0', async () => {
+  test('if the account has no MKR locked in old chief, return 0', async () => {
     const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
     expect(mkrLockedDirectly.toNumber()).toBe(0);
     expect(mkrLockedViaProxy.toNumber()).toBe(0);
@@ -42,32 +49,43 @@ describe('Chief Migration', () => {
     expect(mkrLockedViaProxy.toNumber()).toBe(0);
   });
 
-  // TODO
-  test.skip('if the account has some MKR locked via proxy in old chief, return the amount', async () => {
-    // const oldChief = maker
-    //   .service('smartContract')
-    //   .getContractByName('OLD_CHIEF');
-    // const voteProxyFactory = maker
-    //   .service('smartContract')
-    //   .getContractByName('VOTE_PROXY_FACTORY');
-    // cold
-    // voteProxyFactory.initiateLink(hot);
-    // hot
-    // voteProxyFactory.approveLink(cold);
-    // back to cold
-    // const voteProxyAddress = migration._getVoteProxyAddress(cold);
-    // console.log('voteProxyAbi', voteProxyAbi);
-    // const voteProxy = maker
-    //   .service('smartContract')
-    //   .getContractByAddressAndAbi(voteProxyAddress, voteProxyAbi);
-    // await maker
-    //   .service('token')
-    //   .getToken(MKR)
-    //   .approveUnlimited(voteProxyAddress);
-    // const LOCK_AMOUNT = MKR('5.123456789123456789');
-    // await voteProxy.lock(LOCK_AMOUNT.toFixed('wei'));
-    // const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
-    // expect(mkrLockedDirectly.toNumber()).toBe(0);
-    // expect(mkrLockedViaProxy.isEqual(LOCK_AMOUNT)).toBeTruthy();
+  test('if the account has some MKR locked via proxy in old chief, return the amount', async () => {
+    const oldVoteProxyFactory = maker
+      .service('smartContract')
+      .getContractByName('OLD_VOTE_PROXY_FACTORY');
+
+    const coldAccount = maker.currentAccount();
+    const hotAccount = TestAccountProvider.nextAccount();
+    await maker.addAccount({ ...hotAccount, type: 'privateKey' });
+
+    // initiate from cold
+    maker.useAccount('default');
+    await oldVoteProxyFactory.initiateLink(hotAccount.address);
+
+    // switch to hot
+    maker.useAccount(hotAccount.address);
+    await oldVoteProxyFactory.approveLink(coldAccount.address);
+
+    // and back to cold
+    maker.useAccount('default');
+    const voteProxyAddress = await migration._getVoteProxyAddress(
+      coldAccount.address
+    );
+
+    const voteProxy = maker
+      .service('smartContract')
+      .getContractByAddressAndAbi(voteProxyAddress, voteProxyAbi);
+
+    await maker
+      .service('token')
+      .getToken(MKR)
+      .approveUnlimited(voteProxyAddress);
+
+    const LOCK_AMOUNT = MKR('5.123456789123456789');
+    await voteProxy.lock(LOCK_AMOUNT.toFixed('wei'));
+
+    const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
+    expect(mkrLockedDirectly.toNumber()).toBe(0);
+    expect(mkrLockedViaProxy.isEqual(LOCK_AMOUNT)).toBeTruthy();
   });
 });

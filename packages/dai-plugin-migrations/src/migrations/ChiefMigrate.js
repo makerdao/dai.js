@@ -6,7 +6,7 @@ export default class ChiefMigrate {
   constructor(manager) {
     this._manager = manager;
     this._oldChief = manager.get('smartContract').getContract('OLD_CHIEF');
-    this._proxyFactoryContract = manager
+    this._oldProxyFactoryContract = manager
       .get('smartContract')
       .getContractByName('OLD_VOTE_PROXY_FACTORY');
     return this;
@@ -14,7 +14,6 @@ export default class ChiefMigrate {
 
   async check() {
     const address = this._manager.get('accounts').currentAddress();
-
     const voteProxyAddress = await this._getVoteProxyAddress(address);
 
     const mkrLockedDirectly = MKR.wei(await this._oldChief.deposits(address));
@@ -25,12 +24,10 @@ export default class ChiefMigrate {
     return { mkrLockedDirectly, mkrLockedViaProxy };
   }
 
-  async execute() {}
-
   async _getVoteProxyAddress(walletAddress) {
     const [proxyAddressCold, proxyAddressHot] = await Promise.all([
-      this._proxyFactoryContract.coldMap(walletAddress),
-      this._proxyFactoryContract.hotMap(walletAddress)
+      this._oldProxyFactoryContract.coldMap(walletAddress),
+      this._oldProxyFactoryContract.hotMap(walletAddress)
     ]);
 
     if (proxyAddressCold !== ZERO_ADDRESS) return proxyAddressCold;
