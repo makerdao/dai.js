@@ -8,7 +8,7 @@ export default class ChiefMigrate {
     this._oldChief = manager.get('smartContract').getContract('OLD_CHIEF');
     this._proxyFactoryContract = manager
       .get('smartContract')
-      .getContractByName('VOTE_PROXY_FACTORY');
+      .getContractByName('OLD_VOTE_PROXY_FACTORY');
     return this;
   }
 
