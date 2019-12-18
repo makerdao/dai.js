@@ -10,5 +10,6 @@
   "MIGRATION": "ScdMcdMigration",
   "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions",
   "OLD_CHIEF": "DSChief",
-  "OLD_VOTE_PROXY_FACTORY": "VoteProxyFactory"
+  "OLD_VOTE_PROXY_FACTORY": "VoteProxyFactory",
+  "OLD_MKR": "DSToken"
 }
