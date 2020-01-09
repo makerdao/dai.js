@@ -1,11 +1,37 @@
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
+import { zip, map } from 'rxjs';
+
 const log = debug('dai:MulticallService');
+
+const LOGICAL = 'logical';
+const DERIVED = 'derived';
 
 export default class MulticallService extends PublicService {
   constructor(name = 'multicall') {
     super(name, ['web3', 'smartContract']);
+
+    observableStore = {};
+
+    observableSchema = {
+      generatedUserDebt: {
+        type: LOGICAL,
+        call: urnId => `vat.urn.${urnId}.art`
+      },
+      debtScalingFactor: {
+        type: LOGICAL,
+        call: ilkName => `vat.ilk.${ilkName}.rate`
+      },
+      daiGenerated: {
+        type: DERIVED,
+        dependents: ['generatedUserDebt', 'debtScalingFactor'],
+        fn: ({ generatedUserDebt$, debtScalingFactor$ }) =>
+          zip(generatedUserDebt$, debtScalingFactor$).pipe(
+            map(([a, b]) => a * b)
+          )
+      }
+    };
   }
 
   createWatcher({
