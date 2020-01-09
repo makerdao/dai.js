@@ -78,6 +78,8 @@ export default class MulticallService extends PublicService {
     return this._watcher.start();
   }
 
+  registerSchema() {}
+
   disconnect() {
     // TODO
   }
