@@ -17,6 +17,10 @@ beforeEach(() => {
   testAddress = TestAccountProvider.nextAddress();
 });
 
+test('MKR total supply', async () => {
+  console.log(await mkr.totalSupply());
+});
+
 test('get ERC20 (MKR) balance of address', async () => {
   const balance = await mkr.balanceOf(TestAccountProvider.nextAddress());
   expect(balance).toEqual(MKR(0));
