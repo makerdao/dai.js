@@ -1,37 +1,19 @@
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
-import { zip, map } from 'rxjs';
+import { Observable, ReplaySubject, zip, map } from 'rxjs';
 
 const log = debug('dai:MulticallService');
-
-const LOGICAL = 'logical';
-const DERIVED = 'derived';
 
 export default class MulticallService extends PublicService {
   constructor(name = 'multicall') {
     super(name, ['web3', 'smartContract']);
 
-    observableStore = {};
+    this._rootObservable = new ReplaySubject();
+    this._rootSubscription = null;
 
-    observableSchema = {
-      generatedUserDebt: {
-        type: LOGICAL,
-        call: urnId => `vat.urn.${urnId}.art`
-      },
-      debtScalingFactor: {
-        type: LOGICAL,
-        call: ilkName => `vat.ilk.${ilkName}.rate`
-      },
-      daiGenerated: {
-        type: DERIVED,
-        dependents: ['generatedUserDebt', 'debtScalingFactor'],
-        fn: ({ generatedUserDebt$, debtScalingFactor$ }) =>
-          zip(generatedUserDebt$, debtScalingFactor$).pipe(
-            map(([a, b]) => a * b)
-          )
-      }
-    };
+    this.observableStore = {};
+    this.observableSchema = {};
   }
 
   createWatcher({
@@ -104,7 +86,96 @@ export default class MulticallService extends PublicService {
     return this._watcher.start();
   }
 
-  registerSchema() {}
+  startObservable() {
+    if (this._watcher === undefined) throw new Error('watcher is not defined');
+
+    if (this._rootSubscription === null) {
+      this._rootSubcription = this._watcher.subscribe(updates =>
+        this._rootObservable.next(updates)
+      );
+    }
+    return this._rootObservable;
+  }
+
+  destructureContractCall(call) {
+    const [callFnName, callTypes, returnTypes] = call
+      .split('(')
+      .map(s => {
+        if (s[s.length - 1] === ')') return s.substring(0, s.length - 1);
+        else return s;
+      })
+      .map(s => s.split(','))
+      .map(s => {
+        if (Array.isArray(s)) return s.filter(x => x !== '');
+        else return s;
+      });
+
+    if (returnTypes.length < 1)
+      throw new Error(
+        'Invalid contract call specified, call must return at least one argument'
+      );
+
+    return { callFnName, callTypes, returnTypes };
+  }
+
+  registerLogicalSchema(schemas) {
+    let addresses = this.get('smartContract').getContractAddresses();
+    addresses.MDAI = addresses.MCD_DAI;
+    addresses.MWETH = addresses.ETH;
+
+    const res = schemas.reduce(
+      (
+        acc,
+        { contractName, contractCall, callArgs, callArgsOverrides, returnKeys }
+      ) => {
+        const {
+          callFnName,
+          callTypes,
+          returnTypes
+        } = this.destructureContractCall(contractCall);
+
+        if (callTypes.length !== callArgs.length)
+          throw new Error(
+            `Invalid contract call specified, number of call types, ${callTypes} does not match number of call arguments, ${callArgs}`
+          );
+
+        if (returnTypes.length !== returnKeys.length)
+          throw new Error(
+            `Invalid contract call specified, number of return types, ${returnTypes} does not match number of return arguments, ${returnKeys}`
+          );
+
+        const callArgsIdentifiers = callArgsOverrides
+          ? callArgsOverrides.join('.')
+          : callArgs.map(a => a[0]).join('.');
+
+        const callKeyStructure = `${contractName}.${callFnName}.${callArgsIdentifiers}`;
+
+        const processedCallArgs = callArgs.map(([arg, cb]) => {
+          if (cb === undefined) return arg;
+          return cb(arg);
+        });
+
+        const processedReturnKeys = returnKeys.map(([k, cb]) =>
+          [`${callKeyStructure}.${k}`, cb].filter(x => x)
+        );
+
+        return {
+          ...acc,
+          [contractCall]: {
+            watcherCall: {
+              target: addresses[contractName],
+              call: [contractCall, ...processedCallArgs],
+              returns: [...processedReturnKeys]
+            },
+            observables: []
+          }
+        };
+      },
+      {}
+    );
+
+    return res;
+  }
 
   disconnect() {
     // TODO
