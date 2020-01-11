@@ -8,7 +8,7 @@
     "node-fetch": "^2.6.0"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
+    "build": "../../scripts/build.sh && cp src/testAccounts.json dist",
     "prepublishOnly": "yarn build",
     "test": "jest"
   },
