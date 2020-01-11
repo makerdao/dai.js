@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "./scripts/build.sh",
-    "prepublishOnly": "./scripts/build.sh",
+    "prepublishOnly": "yarn build",
     "test": "jest"
   },
   "files": [
