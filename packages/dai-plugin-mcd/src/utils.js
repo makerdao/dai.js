@@ -46,3 +46,15 @@ export function toHex(str, { with0x = true, rightPadding = 64 } = {}) {
   if (rightPadding > 0) result = padRight(result, rightPadding);
   return with0x ? '0x' + result : result;
 }
+
+export function fromWei(value) {
+  return BigNumber(value).shiftedBy(-18);
+}
+
+export function fromRay(value) {
+  return BigNumber(value).shiftedBy(-27);
+}
+
+export function fromRad(value) {
+  return BigNumber(value).shiftedBy(-45);
+}
