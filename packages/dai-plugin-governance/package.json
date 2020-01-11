@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/dai-plugin-governance",
   "description": "A dai.js plugin for adding MKR governance support to dapps.",
-  "version": "0.7.4-rc.2",
+  "version": "0.8.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,40 +15,11 @@
     "ramda": "^0.25.0",
     "web3-utils": "^1.0.0-beta.36"
   },
-  "devDependencies": {
-    "@babel/cli": "^7.4.3",
-    "@babel/core": "^7.4.3",
-    "@babel/node": "^7.2.2",
-    "@babel/plugin-proposal-class-properties": "^7.4.0",
-    "@babel/plugin-transform-runtime": "^7.3.4",
-    "@babel/preset-env": "^7.4.3",
-    "@makerdao/dai": "^0.16.1",
-    "@makerdao/dai-plugin-config": "^0.2.7-rc.3",
-    "@makerdao/dai-plugin-governance": "^0.5.4",
-    "@makerdao/testchain": "^1.0.3",
-    "@makerdao/testchain-client": "^0.2.6-rc.1",
-    "babel-eslint": "^10.0.1",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-2": "^6.24.1",
-    "copyfiles": "^2.1.0",
-    "eslint": "^5.9.0",
-    "ganache-cli": "^6.7.0",
-    "husky": "^1.1.4",
-    "jest": "^24.5.0",
-    "lint-staged": "^8.0.4",
-    "prettier": "^1.14.2",
-    "sane": "^4.0.1"
-  },
   "scripts": {
-    "deploy": "yarn build && yarn publish dist",
-    "test": "yarn testchain --ci jest --runInBand --config ./test/config/jestTestchainConfigOriginal.json",
-    "test:integration": "jest --runInBand --config ./test/config/jestIntegrationConfig.json",
-    "testchain": "./scripts/run-testchain.sh -s default -u",
-    "ci": "./gov-testchain/deploy-gov --ci jest --coverage",
     "build": "./scripts/build.sh",
-    "precommit": "lint-staged",
-    "build:watch": "sane ./scripts/build.sh src --wait=10",
-    "prepublishOnly": "if [ \"`basename $(pwd)`\" != 'dist' ]; then echo You must be in the dist folder to publish. && exit 1; fi"
+    "testchain": "../../scripts/run-testchain.sh",
+    "test": "yarn testchain --ci jest --runInBand --config ./test/config/jestTestchainConfigOriginal.json",
+    "test:integration": "jest --runInBand --config ./test/config/jestIntegrationConfig.json"
   },
   "lint-staged": {
     "*.{js,json}": [
@@ -57,5 +28,8 @@
     ]
   },
   "module": "src/index.js",
-  "main": "src/index.js"
+  "main": "src/index.js",
+  "devDependencies": {
+    "@makerdao/dai-plugin-config": "^0.2.14-rc.1"
+  }
 }
