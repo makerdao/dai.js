@@ -100,7 +100,7 @@ describe('SCD to MCD CDP Migration', () => {
       expect(available.toFixed('wei')).toBe('1999999999999999999');
     });
 
-    test.only('saiAmountNeededToBuyMkr', async () => {
+    test('saiAmountNeededToBuyMkr', async () => {
       await placeLimitOrder(migration._manager);
       const saiAmount = await migration.saiAmountNeededToBuyMkr(MKR(0.5));
       expect(saiAmount).toEqual(SAI(10));
