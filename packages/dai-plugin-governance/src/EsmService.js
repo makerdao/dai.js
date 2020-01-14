@@ -4,7 +4,7 @@ import { getCurrency } from './utils/helpers';
 
 export default class EsmService extends PrivateService {
   constructor(name = 'esm') {
-    super(name, ['smartContract', 'web3', 'token', 'allowance']);
+    super(name, ['smartContract', 'web3', 'token', 'allowance', 'govQueryApi']);
   }
 
   async thresholdAmount() {
@@ -79,6 +79,27 @@ export default class EsmService extends PrivateService {
       }
     }
     return this._esmContract().fire();
+  }
+
+  async getStakingHistory() {
+    const stakes = await this.get('govQueryApi').getEsmJoins();
+    const parsedStakes = stakes.map(e => {
+      const transactionHash = e.txHash;
+      const senderAddress = e.txFrom;
+      const amount = MKR(e.joinAmount);
+      const time = new Date(e.blockTimestamp);
+      return {
+        transactionHash,
+        senderAddress,
+        amount,
+        time
+      };
+    });
+    const sortedParsedStakes = parsedStakes.sort((a, b) => {
+      //sort by date descending
+      return b.time - a.time;
+    });
+    return sortedParsedStakes;
   }
 
   _esmContract() {

@@ -5,6 +5,7 @@ let service;
 beforeAll(async () => {
   const maker = await setupTestMakerInstance();
   service = maker.service('govQueryApi');
+  jest.setTimeout(10000);
 });
 
 test('get all active polls', async () => {
@@ -35,4 +36,9 @@ test('get mkr weight by option', async () => {
 test('get block number', async () => {
   const num = await service.getBlockNumber(1511634513);
   console.log('num', num);
+});
+
+test('get esm joins', async () => {
+  const joins = await service.getEsmJoins();
+  console.log('joins', joins);
 });

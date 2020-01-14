@@ -1,7 +1,6 @@
 import { createGetCurrency } from '@makerdao/currency';
 import {
   MKR,
-  LOCAL_URL,
   STAGING_MAINNET_URL,
   KOVAN_URL,
   MAINNET_URL
@@ -32,7 +31,7 @@ export const netIdtoSpockUrl = id => {
     case 42:
       return KOVAN_URL;
     default:
-      return LOCAL_URL;
+      return STAGING_MAINNET_URL;
   }
 };
 
@@ -43,7 +42,7 @@ export const netIdtoSpockUrlStaging = id => {
     case 42:
       return KOVAN_URL;
     default:
-      return LOCAL_URL;
+      return STAGING_MAINNET_URL;
   }
 };
 
