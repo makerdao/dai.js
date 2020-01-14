@@ -33,19 +33,16 @@ export default {
 
     const addressKey = network == 'ganache' ? 'testnet' : network;
 
-    const esmContracts =
-      network === 'ganache'
-        ? {
-            [ESM]: {
-              address: map(prop('MCD_ESM'), contractAddresses),
-              abi: require('../contracts/abis/ESM.json')
-            },
-            [END]: {
-              address: map(prop('MCD_END'), contractAddresses),
-              abi: require('../contracts/abis/End.json')
-            }
-          }
-        : {};
+    const esmContracts = {
+      [ESM]: {
+        address: map(prop('MCD_ESM'), contractAddresses),
+        abi: require('../contracts/abis/ESM.json')
+      },
+      [END]: {
+        address: map(prop('MCD_END'), contractAddresses),
+        abi: require('../contracts/abis/End.json')
+      }
+    };
 
     const addContracts = {
       [CHIEF]: {
