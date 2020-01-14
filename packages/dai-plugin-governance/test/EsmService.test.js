@@ -7,6 +7,8 @@ import {
 } from './helpers';
 import EsmService from '../src/EsmService';
 
+import { dummyEsmData, parsedDummyEsmData } from './fixtures';
+
 let maker, esmService;
 beforeAll(async () => {
   maker = await setupTestMakerInstance();
@@ -103,4 +105,12 @@ xtest('can trigger emergency shutdown', async () => {
   console.log(fireable);
   const active = await esmService.emergencyShutdownActive();
   expect(active).toBe(true);
+});
+
+test('get staking history', async () => {
+  const mockFn = jest.fn(async () => dummyEsmData);
+  maker.service('govQueryApi').getEsmJoins = mockFn;
+  const stakes = await esmService.getStakingHistory();
+  expect(mockFn).toBeCalled();
+  expect(stakes).toEqual(parsedDummyEsmData);
 });
