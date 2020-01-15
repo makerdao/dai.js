@@ -1704,10 +1704,10 @@
     lodash "^4.17.11"
     ws "^7.2.0"
 
-"@makerdao/testchain@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.0.4.tgz#83551d3c761dc46846a74dfe41d0ba58843c6849"
-  integrity sha512-1n++P1AOMbvZ8X2t6lkqUu09/wFfG05Ml09DIlbpdM7+R4AMZzbKb0rZQxW5fZoCDBrWCi3cJygBE+Hr1V0OiA==
+"@makerdao/testchain@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.0.5.tgz#013162ce9717cbebb0fa67eba28e1d0fd4a8771b"
+  integrity sha512-UsB4KuDZdyK99dZhIim1JASxT5tXqEIq16gx7ZqOuwydqOjMh+iykz5F1bekYjembZ+DWYm0eMH6WpQ56uA1rg==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 
