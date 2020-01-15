@@ -58,3 +58,10 @@ export function fromRay(value) {
 export function fromRad(value) {
   return BigNumber(value).shiftedBy(-45);
 }
+
+export function isBigNumber(value) {
+  return BigNumber.isBigNumber(value);
+}
+
+export const isValidAddressString = addressString =>
+  /^0x([A-Fa-f0-9]{40})$/.test(addressString);
