@@ -31,7 +31,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "jq": "^1.7.2",
     "lerna": "^3.15.0"
   },
   "devDependencies": {
