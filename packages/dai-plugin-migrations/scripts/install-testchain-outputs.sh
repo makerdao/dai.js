@@ -39,3 +39,9 @@ KOVAN_ADDRESS=`jq ".MIGRATION_PROXY_ACTIONS" "$CONTRACTS/../../dai-plugin-mcd/co
 jq ".MIGRATION_PROXY_ACTIONS=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
 jq ".MIGRATION_PROXY_ACTIONS=$KOVAN_ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
 cp $CONTRACTS/../../dai-plugin-mcd/contracts/abis/MigrationProxyActions.json $CONTRACTS/abis/MigrationProxyActions.json
+
+ADDRESS=`jq ".OLD_VOTE_PROXY_FACTORY" "$CONTRACTS/../../dai/contracts/addresses/testnet.json"`
+KOVAN_ADDRESS=`jq ".OLD_VOTE_PROXY_FACTORY" "$CONTRACTS/../../dai/contracts/addresses/kovan.json"`
+jq ".OLD_VOTE_PROXY_FACTORY=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
+jq ".OLD_VOTE_PROXY_FACTORY=$KOVAN_ADDRESS" $CONTRACTS/addresses/kovan.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/kovan.json
+cp $CONTRACTS/../../dai/contracts/abis/VoteProxyFactory.json $CONTRACTS/abis/VoteProxyFactory.json
