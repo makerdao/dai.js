@@ -1,4 +1,10 @@
+/* eslint-disable */
 import BigNumber from 'bignumber.js';
+
+function debtValue(art, rate) {
+  art = fromWei(art);
+  return art.times(rate).shiftedBy(-27);
+}
 
 export function padRight(string, chars, sign) {
   return string + new Array(chars - string.length + 1).join(sign ? sign : '0');
@@ -25,14 +31,11 @@ export function fromRad(value) {
   return BigNumber(value).shiftedBy(-45);
 }
 
-const TOTAL_ENCUMBERED_DEBT = 'totalEncumberedDebt';
-const DEBT_SCALING_FACTOR = 'debtScalingFactor';
-const PRICE_WITH_SAFETY_MARGIN = 'priceWithSafetyMargin';
-const DEBT_CEILING = 'debtCeiling';
-const URN_DEBT_FLOOR = 'urnDebtFloor';
-
-const TEST_COMPUTED_1 = 'testComputed1';
-const TEST_COMPUTED_2 = 'testComputed2';
+const totalEncumberedDebt = 'totalEncumberedDebt';
+const debtScalingFactor = 'debtScalingFactor';
+const priceWithSafetyMargin = 'priceWithSafetyMargin';
+const debtCeiling = 'debtCeiling';
+const urnDebtFloor = 'urnDebtFloor';
 
 export const ilk = {
   generate: ilkName => ({
@@ -41,42 +44,72 @@ export const ilk = {
     call: [
       'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
       toHex(ilkName)
-    ],
-    returns: [
-      [`${TOTAL_ENCUMBERED_DEBT}.${ilkName}`], // Art
-      [`${DEBT_SCALING_FACTOR}.${ilkName}`, fromRay], // rate
-      [`${PRICE_WITH_SAFETY_MARGIN}.${ilkName}`], // spot
-      [`${DEBT_CEILING}.${ilkName}`, fromRad], // line
-      [`${URN_DEBT_FLOOR}.${ilkName}`] // dust
     ]
   }),
-  keys: [
-    TOTAL_ENCUMBERED_DEBT,
-    DEBT_SCALING_FACTOR,
-    PRICE_WITH_SAFETY_MARGIN,
-    DEBT_CEILING,
-    URN_DEBT_FLOOR
+  returns: [
+    totalEncumberedDebt,
+    [debtScalingFactor, fromRay],
+    priceWithSafetyMargin,
+    [debtCeiling, fromRad],
+    urnDebtFloor
   ]
+};
+
+export const ilkDebt = {
+  generate: ilkName => ({
+    dependencies: [
+      ['totalEncumberedDebt', ilkName],
+      ['debtScalingFactor', ilkName]
+    ],
+    computed: (art, rate) => {
+      console.log('ilkDebt computed:', art, rate)
+      return debtValue(art, rate);
+    }
+  })
 };
 
 export const testComputed1 = {
   generate: ilkName => ({
-    dependencies: [[DEBT_SCALING_FACTOR, ilkName], [DEBT_CEILING, ilkName]],
-    computed: (val1, val2) => Number(val1) + Number(val2)
+    dependencies: [
+      ['debtScalingFactor', ilkName],
+      ['debtCeiling', ilkName]
+    ],
+    computed: (debtScalingFactor, debtCeiling) => Number(debtScalingFactor) + Number(debtCeiling)
   }),
-  key: TEST_COMPUTED_1
 };
 
 export const testComputed2 = {
   generate: multiplyBy => ({
-    dependencies: [[TEST_COMPUTED_1, 'ETH-A']],
-    computed: val1 => Number(val1) * multiplyBy
+    dependencies: [
+      ['testComputed1', 'ETH-A']
+    ],
+    computed: testComputed1 => testComputed1 * multiplyBy
   }),
-  key: TEST_COMPUTED_2
+};
+
+export const testComputed3 = {
+  generate: multiplyBy => ({
+    dependencies: [
+      ['testComputed2', 10],
+      [() => new Promise(resolve => resolve(multiplyBy))]
+    ],
+    computed: (testComputed2, promiseResult) => testComputed2 * promiseResult
+  })
+};
+
+export const ilkDebtCeilings = {
+  generate: ilks => ({
+    // Dynamically generate dependencies
+    dependencies: () => ilks.map(ilkName => ['debtCeiling', ilkName]),
+    computed: (...results) => results.map(r => Number(r))
+  })
 };
 
 export default {
   ilk,
+  ilkDebt,
   testComputed1,
-  testComputed2
+  testComputed2,
+  testComputed3,
+  ilkDebtCeilings
 };

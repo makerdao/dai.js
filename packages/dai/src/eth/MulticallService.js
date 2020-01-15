@@ -1,7 +1,7 @@
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
-import { Observable, ReplaySubject, combineLatest } from 'rxjs';
+import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
@@ -13,21 +13,16 @@ export default class MulticallService extends PublicService {
   constructor(name = 'multicall') {
     super(name, ['web3', 'smartContract']);
 
-    this._schemas = {};
+    this._schemas = [];
     this._schemaByObservableKey = {};
     this._subjects = {};
     this._observables = {};
     this._watcherUpdates = null;
     this._watchingSchemasTotal = 0;
-
-    this.addresses = {};
+    this._addresses = {};
   }
 
-  createWatcher({
-    useWeb3Provider = false,
-    interval = 'block',
-    ...config
-  } = {}) {
+  createWatcher({ useWeb3Provider = false, interval = 'block', ...config } = {}) {
     const web3 = this.get('web3');
     config = {
       multicallAddress: this.get('smartContract').getContractAddress(
@@ -98,108 +93,162 @@ export default class MulticallService extends PublicService {
   }
 
   registerSchemas(schemas) {
-    // this.addresses = this.get('smartContract').getContractAddresses();
-    this._schemas = [...schemas];
-    this._schemas.forEach(schema => {
+    this._addresses = this.get('smartContract').getContractAddresses();
+
+    if (typeof schemas !== 'object') throw new Error('Schemas must be object or array');
+
+    // If schemas is key/val object use key as schema key in array object
+    if (!Array.isArray(schemas))
+      schemas = Object.keys(schemas).map(key => ({ key, ...schemas[key] }));
+    // Clone if array
+    else schemas = schemas.map(item => ({ ...item }));
+
+    schemas.forEach(schema => {
       schema.watching = {};
-      if (schema.keys)
-        schema.keys.forEach(key => (this._schemaByObservableKey[key] = schema));
-      if (schema.key) this._schemaByObservableKey[schema.key] = schema;
+      // Automatically use schema key as return key if no return keys specified
+      if (!schema.return && !schema.returns) schema.returns = [schema.key];
+
+      if (schema.return && schema.returns)
+        throw new Error('Ambiguous return key definitions on schema: found both return and returns');
+      if (schema.return) schema.returns = [schema.return];
+      if (!Array.isArray(schema.returns))
+        throw new Error('Schema must contain return/returns key');
+      schema.returns.forEach(ret => {
+        if (Array.isArray(ret)) this._schemaByObservableKey[ret[0]] = schema;
+        else if (typeof ret === 'string')
+          this._schemaByObservableKey[ret] = schema;
+      });
     });
+    this._schemas = [...this._schemas, ...schemas];
+    log2(`Registered ${schemas.length} schemas`);
   }
 
   watchObservable(key, ...args) {
     const path = args.join('.');
-    const fullPath = `${key}.${path}`;
+    const fullPath = `${key}${path ? '.' : ''}${path}`;
 
     const schema = this.schemaByObservableKey(key);
+    if (!schema) throw new Error(`No registered schema found for observable key: ${key}`);
     const generatedSchema = schema.generate(...args);
+    log2(`watchObservable() called for ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`);
 
-    // Subscribe to updates from watcher and emit to subjects
-    if (!this._watcherUpdates) {
-      this._watcherUpdates = this._watcher.subscribe(update => {
-        const subject = get(this._subjects, update.type);
-        if (subject) subject.next(update.value);
-      });
+    const existingObservable = get(this._observables, fullPath);
+    if (existingObservable) {
+      log2(`Returning existing ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`);
+      return existingObservable;
     }
 
-    // This is a computed observable
+    // Handle computed observable
     if (generatedSchema.computed) {
-      const subs = generatedSchema.dependencies.map(dep => {
+      // Handle dynamically generated dependencies
+      const dependencies = typeof generatedSchema.dependencies === 'function'
+        ? generatedSchema.dependencies()
+        : generatedSchema.dependencies;
+
+      const dependencySubs = dependencies.map(dep => {
+        // TODO: This should allow a single string/func as well as a string array
         const key = dep.shift();
+        // This is a promise dependency
+        if (typeof key === 'function') {
+          return from(key());
+        }
         return this.watchObservable(key, ...dep);
       });
-      return Observable.create(observer => {
-        const observerLatest = combineLatest(subs).pipe(
-          map(result => generatedSchema.computed(...result))
-        );
+      const observerLatest = combineLatest(dependencySubs).pipe(
+        map(result => generatedSchema.computed(...result))
+      );
+
+      // Create computed observable
+      const observable =  Observable.create(observer => {
         const sub = observerLatest.subscribe(observer);
         return () => {
           sub.unsubscribe();
         };
       });
-    }
-
-    // This is a base observable
-    if (!get(this._subjects, fullPath)) {
-      const subject = new ReplaySubject(1);
-      set(this._subjects, fullPath, subject);
-
-      // Create base observable
-      const observable = Observable.create(observer => {
-        this._watchingSchemasTotal++;
-        // If this is the first subscriber to this schema
-        if (!schema.watching[path]) {
-          schema.watching[path] = 1;
-          // Tap multicall to add schema (first subscriber to this schema)
-          const { id, contractName, call, returns } = generatedSchema;
-          log2(`Schema added to multicall: ${id}`);
-          this._watcher.tap(calls => [
-            ...calls,
-            {
-              id,
-              target: this.addresses[contractName],
-              call,
-              returns
-            }
-          ]);
-          this._watcher.tap(s => {
-            log2('Current schemas:', s.map(({ id }) => id));
-            return s;
-          });
-        } else schema.watching[path]++;
-        log2('Schema subscribers:', schema.watching[path]);
-
-        const sub = subject.subscribe(observer);
-        return () => {
-          // If no schemas are being watched, unsubscribe from watcher updates
-          this._watchingSchemasTotal--;
-          if (this._watchingSchemasTotal === 0) this._watcherUpdates.unsub();
-
-          sub.unsubscribe();
-          schema.watching[path]--;
-          log2('Schema subscribers:', schema.watching[path]);
-          if (schema.watching[path] === 0) {
-            // Tap multicall to remove schema (last unsubscriber to this schema)
-            log2(`Schema removed from multicall: ${generatedSchema.id}`);
-            this._watcher.tap(schemas =>
-              // TODO: make backwards compatible by checking undefined
-              schemas.filter(({ id }) => id !== generatedSchema.id)
-            );
-            this._watcher.tap(s => {
-              log2('Remaining schemas count:', s.length);
-              return s;
-            });
-          }
-        };
-      });
-
-      log2(`Created new observable: ${fullPath}`);
+      log2(`Created new computed observable: ${fullPath}`);
       set(this._observables, fullPath, observable);
       return observable;
     }
-    log2(`Returning existing observable: ${fullPath}`);
-    return get(this._observables, fullPath);
+
+    // This is a base observable
+    const subject = new ReplaySubject(1);
+    set(this._subjects, fullPath, subject);
+
+    // Create base observable
+    const observable = Observable.create(observer => {
+      // Subscribe to watcher updates and emit them to subjects
+      if (!this._watcherUpdates) {
+        log2('Subscribed to watcher updates');
+        this._watcherUpdates = this._watcher.subscribe(update => {
+          // console.log('(MulticallService) Got update:', update)
+          const subject = get(this._subjects, update.type);
+          if (subject) subject.next(update.value);
+        });
+      }
+      this._watchingSchemasTotal++;
+
+      // If this is the first subscriber to this schema
+      if (!schema.watching[path]) {
+        schema.watching[path] = 1;
+        // Tap multicall to add schema (first subscriber to this schema)
+        let { id, contractName, call, returns } = generatedSchema;
+        // Automatically generate schema return keys
+        if (!returns)
+          returns = schema.returns.map(ret => {
+            let key = Array.isArray(ret) ? ret[0] : ret;
+            key = `${key}${path ? '.' : ''}${path}`;
+            return Array.isArray(ret) && ret.length == 2 ? [key, ret[1]] : [key];
+          });
+
+        if (!this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`);
+        this._watcher.tap(calls => [
+          ...calls,
+          {
+            id,
+            target: this._addresses[contractName],
+            call,
+            returns
+          }
+        ]);
+        log2(`Schema added to multicall: ${id}`);
+        this._watcher.tap(s => {
+          log2('Current schemas:', s.filter(({ id }) => id).map(({ id }) => id));
+          return s;
+        });
+      } else schema.watching[path]++;
+      log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`);
+
+      const sub = subject.subscribe(observer);
+      return () => {
+        // If no schemas are being watched, unsubscribe from watcher updates
+        if (--this._watchingSchemasTotal === 0) {
+          log2('Unsubscribed from watcher updates');
+          this._watcherUpdates.unsub();
+          this._watcherUpdates = null;
+        }
+        sub.unsubscribe();
+        schema.watching[path]--;
+        log2('Schema subscribers:', schema.watching[path]);
+        if (schema.watching[path] === 0) {
+          // Tap multicall to remove schema (last unsubscriber to this schema)
+          log2(`Schema removed from multicall: ${generatedSchema.id}`);
+          this._watcher.tap(schemas =>
+            // TODO: make backwards compatible by checking undefined
+            schemas.filter(({ id }) => id !== generatedSchema.id)
+          );
+          this._watcher.tap(s => {
+            log2(`Remaining schemas: ${s.filter(({ id }) => id).length}`);
+            return s;
+          });
+        }
+      };
+    });
+
+    log2(`Created new base observable: ${fullPath}`);
+    set(this._observables, fullPath, observable);
+    return observable;
+
+
   }
 
   disconnect() {
