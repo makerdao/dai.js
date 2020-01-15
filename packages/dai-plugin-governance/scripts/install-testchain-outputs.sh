@@ -3,7 +3,7 @@ set -e
 
 CWD=`dirname $0`
 CONTRACTS=$CWD/../contracts
-SOURCE=${1:-$CWD/../node_modules/@makerdao/testchain}
+SOURCE=${1:-$CWD/../../../node_modules/@makerdao/testchain}
 
 CHIEF=`jq ".MCD_ADM" "$SOURCE/out/addresses-mcd.json"`
 jq ".CHIEF=$CHIEF" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
