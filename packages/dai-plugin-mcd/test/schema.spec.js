@@ -3,6 +3,7 @@ import { ETH, BAT, MDAI } from '../src';
 import {
   toHex,
   fromRad,
+  fromWei,
   fromRay,
   isBigNumber,
   isValidAddressString
@@ -14,7 +15,10 @@ import schemas, {
   debtCeiling,
   urnDebtFloor,
   proxyAddress,
-  totalDaiSupply
+  totalDaiSupply,
+  unlockedCollateral,
+  urnInk,
+  urnArt
 } from '../src/schema';
 import { ServiceRoles } from '../src/constants';
 import BigNumber from 'bignumber.js';
@@ -25,6 +29,7 @@ let mcall,
   snapshotData,
   cdpMgr,
   cdpTypeService,
+  proxyService,
   ethAInfo,
   batAInfo,
   vault;
@@ -73,6 +78,7 @@ beforeAll(async () => {
   address = maker.service('web3').currentAddress();
   cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   cdpTypeService = maker.service(ServiceRoles.CDP_TYPE);
+  proxyService = maker.service('proxy');
 
   vault = await setupFn();
 
@@ -202,4 +208,28 @@ test.skip('ilkPrices', async () => {
   expect(ethAPrice.symbol).toEqual('USD/ETH');
   expect(ethBPrice.symbol).toEqual('USD/ETH');
   expect(batAPrice.symbol).toEqual('USD/BAT');
+});
+
+test('unlockedCollateral', async () => {
+  const cdpId = 1;
+  const expected = 0;
+  const col = await maker.latest(unlockedCollateral, 'ETH-A', await cdpMgr.getUrn(cdpId));
+
+  expect(col).toEqual(fromWei(expected));
+});
+
+test('urnInk', async () => {
+  const cdpId = 1;
+  const expected = fromWei(1000000000000000000);
+  const col = await maker.latest(urnInk, 'ETH-A', await cdpMgr.getUrn(cdpId));
+
+  expect(col).toEqual(expected);
+});
+
+test('urnArt', async () => {
+  const cdpId = 1;
+  const expected = fromWei(995000000000000000);
+  const col = await maker.latest(urnArt, 'ETH-A', await cdpMgr.getUrn(cdpId));
+
+  expect(col.toNumber()).toBeCloseTo(expected.toNumber());
 });

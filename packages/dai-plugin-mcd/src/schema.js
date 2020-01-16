@@ -41,7 +41,7 @@ export const ilks = {
 export const totalDaiSupply = 'totalDaiSupply';
 export const debt = {
   generate: () => ({
-    id: `VAT.debt()`,
+    id: 'VAT.debt()',
     contractName: 'MCD_VAT',
     call: ['debt()(uint256)']
   }),
@@ -106,11 +106,34 @@ export const spotPar = {
   returns: [[refPerDai, fromRay]]
 };
 
+export const unlockedCollateral = 'unlockedCollateral';//TODO is it best naming?
+export const vatGem = {
+  generate: (ilkName, urn) => ({
+    id: `MCD_Vat.gem(${ilkName},${urn})`,
+    contractName: 'MCD_VAT',
+    call: ['gem(bytes32,address)(uint)', toHex(ilkName), urn]
+  }),
+  return: [unlockedCollateral, fromWei]
+};
+
+export const urnInk = 'urnInk';
+export const urnArt = 'urnArt';
+export const urnState = {
+  generate: (ilkName, urn) => ({
+    id: `MCD_Vat.urns(${ilkName},${urn})`,
+    contractName: 'MCD_VAT',
+    call: ['urns(bytes32,address)(uint256,uint256)', toHex(ilkName), urn]
+  }),
+  returns: [[urnInk, fromWei], [urnArt, fromWei]]
+};
+
 export default {
   ilks,
   proxies,
   debt,
   spotIlks,
   spotPar,
-  ilkPrices
+  ilkPrices,
+  vatGem,
+  urnState
 };
