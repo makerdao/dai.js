@@ -16,7 +16,6 @@ import schemas, {
   proxyAddress,
   totalDaiSupply
 } from '../src/schema';
-import { first } from 'rxjs/operators';
 import { ServiceRoles } from '../src/constants';
 import BigNumber from 'bignumber.js';
 let mcall,
@@ -57,8 +56,6 @@ const setupFn = async () => {
   );
 };
 
-const giveLatest = obs$ => obs$.pipe(first()).toPromise();
-
 beforeAll(async () => {
   maker = await mcdMaker({
     cdpTypes: [
@@ -92,68 +89,83 @@ test(totalEncumberedDebt, async () => {
   const ethADebtAmount = ETH_A_DEBT_AMOUNT._amount;
   const batADebtAmount = BAT_A_DEBT_AMOUNT._amount;
 
-  const ethAEncumberedDebt = await giveLatest(
-    maker.watch(totalEncumberedDebt, 'ETH-A')
-  );
-  const batAEncumberedDebt = await giveLatest(
-    maker.watch(totalEncumberedDebt, 'BAT-A')
-  );
+  const ethAEncumberedDebt = await maker.latest(totalEncumberedDebt, 'ETH-A');
+  const batAEncumberedDebt = await maker.latest(totalEncumberedDebt, 'BAT-A');
 
   expect(isBigNumber(ethAEncumberedDebt)).toEqual(true);
   expect(isBigNumber(batAEncumberedDebt)).toEqual(true);
 
-  expect(ethAEncumberedDebt.toString()).toEqual(
+  expect(ethAEncumberedDebt).toEqual(
     ethADebtAmount
       .shiftedBy(18)
       .div(fromRay(ethARate))
-      .toFixed(0, 0)
+      .integerValue(0)
   );
 
-  expect(batAEncumberedDebt.toString()).toEqual(
+  expect(batAEncumberedDebt).toEqual(
     batADebtAmount
       .shiftedBy(18)
       .div(fromRay(batARate))
-      .toFixed(0, 0)
+      .integerValue(0)
   );
 });
 
 test(debtScalingFactor, async () => {
-  const { rate } = ethAInfo;
-  const debtScalingFactor$ = mcall.watchObservable(debtScalingFactor, 'ETH-A');
-  const res = await debtScalingFactor$.pipe(first()).toPromise();
-  expect(isBigNumber(res)).toEqual(true);
-  expect(res.toString()).toEqual(fromRay(rate).toString());
+  const { rate: ethARate } = ethAInfo;
+  const { rate: batARate } = batAInfo;
+
+  const ethADebtScalingFactor = await maker.latest(debtScalingFactor, 'ETH-A');
+  const batADebtScalingFactor = await maker.latest(debtScalingFactor, 'BAT-A');
+
+  expect(isBigNumber(ethADebtScalingFactor)).toEqual(true);
+  expect(isBigNumber(batADebtScalingFactor)).toEqual(true);
+
+  expect(ethADebtScalingFactor).toEqual(fromRay(ethARate));
+  expect(batADebtScalingFactor).toEqual(fromRay(batARate));
 });
 
 test(priceWithSafetyMargin, async () => {
-  const priceWithSafetyMargin$ = mcall.watchObservable(
+  const ethAPriceWithSafetyMargin = await maker.latest(
     priceWithSafetyMargin,
     'ETH-A'
   );
-  const res = await priceWithSafetyMargin$.pipe(first()).toPromise();
-  expect(isBigNumber(res)).toEqual(true);
-  expect(res.toString()).toEqual('120');
+  const batAPriceWithSafetyMargin = await maker.latest(
+    priceWithSafetyMargin,
+    'BAT-A'
+  );
+
+  const ethACalculatedMargin = BigNumber(ETH_A_PRICE)
+    .times(2)
+    .div(3);
+  const batACalculatedMargin = BigNumber(BAT_A_PRICE).div(2);
+
+  expect(isBigNumber(ethAPriceWithSafetyMargin)).toEqual(true);
+  expect(isBigNumber(batAPriceWithSafetyMargin)).toEqual(true);
+
+  expect(ethAPriceWithSafetyMargin).toEqual(ethACalculatedMargin);
+  expect(batAPriceWithSafetyMargin).toEqual(batACalculatedMargin);
 });
 
 test(debtCeiling, async () => {
-  const debtCeiling$ = mcall.watchObservable(debtCeiling, 'ETH-A');
-  const res = await debtCeiling$.pipe(first()).toPromise();
-  expect(isBigNumber(res)).toEqual(true);
-  expect(res.toString()).toEqual('100000');
+  const ethADebtCeiling = await maker.latest(debtCeiling, 'ETH-A');
+  const batADebtCeiling = await maker.latest(debtCeiling, 'BAT-A');
+
+  expect(isBigNumber(ethADebtCeiling)).toEqual(true);
+  expect(isBigNumber(batADebtCeiling)).toEqual(true);
+
+  expect(ethADebtCeiling).toEqual(BigNumber('100000'));
+  expect(batADebtCeiling).toEqual(BigNumber('5000'));
 });
 
 test(urnDebtFloor, async () => {
-  const urnDebtFloor$ = mcall.watchObservable(urnDebtFloor, 'ETH-A');
-  const res = await urnDebtFloor$.pipe(first()).toPromise();
-  expect(isBigNumber(res)).toEqual(true);
-  expect(res.toString()).toEqual('0');
-});
+  const ethAUrnDebtFloor = await maker.latest(urnDebtFloor, 'ETH-A');
+  const batAUrnDebtFloor = await maker.latest(urnDebtFloor, 'BAT-A');
 
-test(proxyAddress, async () => {
-  const proxyAddress$ = mcall.watchObservable(proxyAddress, address);
-  const res = await proxyAddress$.pipe(first()).toPromise();
-  expect(isValidAddressString(res)).toEqual(true);
-  expect(res.toString()).toEqual('0xC21eDD3d1Ba1bCCD67008B680b362ce6F344DaB3');
+  expect(isBigNumber(ethAUrnDebtFloor)).toEqual(true);
+  expect(isBigNumber(batAUrnDebtFloor)).toEqual(true);
+
+  expect(ethAUrnDebtFloor).toEqual(BigNumber('0'));
+  expect(batAUrnDebtFloor).toEqual(BigNumber('0'));
 });
 
 test(totalDaiSupply, async () => {
@@ -162,18 +174,32 @@ test(totalDaiSupply, async () => {
 
   const ethADaiGenerated = MDAI.rad(BigNumber(ethAArt).times(ethARate));
   const batADaiGenerated = MDAI.rad(BigNumber(batAArt).times(batARate));
+  const sumOfDaiGeneratedFromIlks = ethADaiGenerated.plus(batADaiGenerated);
 
-  const res = await giveLatest(maker.watch(totalDaiSupply));
+  const totalDaiAmount = await maker.latest(totalDaiSupply);
 
-  expect(res.symbol).toEqual('MDAI');
-  expect(res.isEqual(ethADaiGenerated.plus(batADaiGenerated))).toEqual(true);
+  expect(totalDaiAmount.symbol).toEqual('MDAI');
+  expect(totalDaiAmount.isEqual(sumOfDaiGeneratedFromIlks)).toEqual(true);
 });
 
-test('ilkPrices', async () => {
-  const obs = mcall.watchObservable('ilkPrices', ['ETH-A', 'ETH-B']);
-  const res = await obs.pipe(first()).toPromise();
-  expect(res[0].toNumber()).toEqual(180);
-  expect(res[0].symbol).toEqual('USD/ETH');
-  expect(res[1].toNumber()).toEqual(150);
-  expect(res[1].symbol).toEqual('USD/ETH');
+test(proxyAddress, async () => {
+  const proxy = await maker.latest(proxyAddress, address);
+  expect(isValidAddressString(proxy)).toEqual(true);
+  expect(proxy).toEqual('0xC21eDD3d1Ba1bCCD67008B680b362ce6F344DaB3');
+});
+
+test.skip('ilkPrices', async () => {
+  const [ethAPrice, ethBPrice, batAPrice] = await maker.latest('ilkPrices', [
+    'ETH-A',
+    'ETH-B',
+    'BAT-A'
+  ]);
+
+  expect(ethAPrice.toNumber()).toEqual(180);
+  expect(ethBPrice.toNumber()).toEqual(150);
+  expect(batAPrice.toNumber()).toEqual(40);
+
+  expect(ethAPrice.symbol).toEqual('USD/ETH');
+  expect(ethBPrice.symbol).toEqual('USD/ETH');
+  expect(batAPrice.symbol).toEqual('USD/BAT');
 });

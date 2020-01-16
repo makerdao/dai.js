@@ -2,7 +2,7 @@ import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
 import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, first } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -247,6 +247,12 @@ export default class MulticallService extends PublicService {
     log2(`Created new base observable: ${fullPath}`);
     set(this._observables, fullPath, observable);
     return observable;
+  }
+
+  latest(key, ...args) {
+    return this.watchObservable(key, ...args)
+      .pipe(first())
+      .toPromise();
   }
 
   _tapMulticallWithSchema(schema, generatedSchema, path) {

@@ -52,7 +52,7 @@ export default class Maker {
       event: ['on'],
       proxy: ['currentProxy'],
       token: ['getToken'],
-      multicall: ['watch']
+      multicall: ['watch', 'latest']
     });
   }
 
