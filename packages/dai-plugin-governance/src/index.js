@@ -17,11 +17,9 @@ import GovQueryApiService from './GovQueryApiService';
 import EsmService from './EsmService';
 
 export default {
-  addConfig: function(config, { network = 'mainnet', mcd, staging = false }) {
+  addConfig: function(config, { network = 'mainnet', staging = false }) {
     const contractAddresses = {
-      kovan: mcd
-        ? require('../contracts/addresses/kovan-mcd.json')
-        : require('../contracts/addresses/kovan.json'),
+      kovan: require('../contracts/addresses/kovan.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
     };
 
