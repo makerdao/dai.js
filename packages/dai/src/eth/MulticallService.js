@@ -97,7 +97,7 @@ export default class MulticallService extends PublicService {
 
     if (typeof schemas !== 'object') throw new Error('Schemas must be object or array');
 
-    // If schemas is key/val object use key as schema key in array object
+    // If schemas is key/val object use key as schema key and convert to array object
     if (!Array.isArray(schemas))
       schemas = Object.keys(schemas).map(key => ({ key, ...schemas[key] }));
     // Clone if array
@@ -107,16 +107,15 @@ export default class MulticallService extends PublicService {
       schema.watching = {};
       // Automatically use schema key as return key if no return keys specified
       if (!schema.return && !schema.returns) schema.returns = [schema.key];
-
       if (schema.return && schema.returns)
-        throw new Error('Ambiguous return key definitions on schema: found both return and returns');
+        throw new Error('Ambiguous return definitions in schema: found both return and returns property');
       if (schema.return) schema.returns = [schema.return];
       if (!Array.isArray(schema.returns))
-        throw new Error('Schema must contain return/returns key');
+        throw new Error('Schema must contain return/returns property');
+      // Use return keys to create observable keys => schema mapping
       schema.returns.forEach(ret => {
         if (Array.isArray(ret)) this._schemaByObservableKey[ret[0]] = schema;
-        else if (typeof ret === 'string')
-          this._schemaByObservableKey[ret] = schema;
+        else if (typeof ret === 'string') this._schemaByObservableKey[ret] = schema;
       });
     });
     this._schemas = [...this._schemas, ...schemas];
@@ -187,34 +186,11 @@ export default class MulticallService extends PublicService {
       }
       this._watchingSchemasTotal++;
 
-      // If this is the first subscriber to this schema
+      // First subscriber to this schema
       if (!schema.watching[path]) {
         schema.watching[path] = 1;
         // Tap multicall to add schema (first subscriber to this schema)
-        let { id, contractName, call, returns } = generatedSchema;
-        // Automatically generate schema return keys
-        if (!returns)
-          returns = schema.returns.map(ret => {
-            let key = Array.isArray(ret) ? ret[0] : ret;
-            key = `${key}${path ? '.' : ''}${path}`;
-            return Array.isArray(ret) && ret.length == 2 ? [key, ret[1]] : [key];
-          });
-
-        if (!this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`);
-        this._watcher.tap(calls => [
-          ...calls,
-          {
-            id,
-            target: this._addresses[contractName],
-            call,
-            returns
-          }
-        ]);
-        log2(`Schema added to multicall: ${id}`);
-        this._watcher.tap(s => {
-          log2('Current schemas:', s.filter(({ id }) => id).map(({ id }) => id));
-          return s;
-        });
+        this._tapMulticallWithSchema(schema, generatedSchema, path);
       } else schema.watching[path]++;
       log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`);
 
@@ -247,8 +223,32 @@ export default class MulticallService extends PublicService {
     log2(`Created new base observable: ${fullPath}`);
     set(this._observables, fullPath, observable);
     return observable;
+  }
 
-
+  _tapMulticallWithSchema(schema, generatedSchema, path) {
+    let { id, contractName, call, returns } = generatedSchema;
+    // Automatically generate return keys if not specified in schema
+    if (!returns)
+      returns = schema.returns.map(ret => {
+        let key = Array.isArray(ret) ? ret[0] : ret;
+        key = `${key}${path ? '.' : ''}${path}`;
+        return Array.isArray(ret) && ret.length == 2 ? [key, ret[1]] : [key];
+      });
+    if (!this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`);
+    this._watcher.tap(calls => [
+      ...calls,
+      {
+        id,
+        target: this._addresses[contractName],
+        call,
+        returns
+      }
+    ]);
+    log2(`Schema added to multicall: ${id}`);
+    this._watcher.tap(s => {
+      log2('Current schemas:', s.filter(({ id }) => id).map(({ id }) => id));
+      return s;
+    });
   }
 
   disconnect() {
