@@ -36,12 +36,13 @@ const ETH_A_PRICE = 180;
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
 const BAT_A_DEBT_AMOUNT = MDAI(1);
+const BAT_A_PRICE = 40;
 
 const setupFn = async () => {
   await setupCollateral(maker, 'ETH-A', {
     price: ETH_A_PRICE
   });
-  //  await setupCollateral(maker, 'BAT-A', { price: 5, debtCeiling: 50 });
+  await setupCollateral(maker, 'BAT-A', { price: BAT_A_PRICE });
 
   const mgr = await maker.service(ServiceRoles.CDP_MANAGER);
   await mgr.openLockAndDraw(
@@ -49,18 +50,20 @@ const setupFn = async () => {
     ETH_A_COLLATERAL_AMOUNT,
     ETH_A_DEBT_AMOUNT
   );
-  // await mgr.openLockAndDraw(
-  //   'BAT-A',
-  //   BAT_A_COLLATERAL_AMOUNT,
-  //   BAT_A_DEBT_AMOUNT
-  // );
+  await mgr.openLockAndDraw(
+    'BAT-A',
+    BAT_A_COLLATERAL_AMOUNT,
+    BAT_A_DEBT_AMOUNT
+  );
 };
+
+const giveLatest = obs$ => obs$.pipe(first()).toPromise();
 
 beforeAll(async () => {
   maker = await mcdMaker({
     cdpTypes: [
-      { currency: ETH, ilk: 'ETH-A' }
-      //{ currency: BAT, ilk: 'BAT-A' }
+      { currency: ETH, ilk: 'ETH-A' },
+      { currency: BAT, ilk: 'BAT-A' }
     ],
     multicall: true
   });
@@ -69,29 +72,47 @@ beforeAll(async () => {
   watcher = mcall.createWatcher({ interval: 'block' });
   mcall.registerSchemas(schemas);
   mcall.start();
+
   address = maker.service('web3').currentAddress();
   cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   cdpTypeService = maker.service(ServiceRoles.CDP_TYPE);
+
   vault = await setupFn();
 
   ethAInfo = await cdpTypeService.getCdpType(ETH, 'ETH-A').ilkInfo();
-  //  batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
+  batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
 });
 
 test(totalEncumberedDebt, async () => {
-  const { rate } = ethAInfo;
-  const debtAmount = ETH_A_DEBT_AMOUNT._amount;
-  const totalEncumberedDebt$ = mcall.watchObservable(
-    totalEncumberedDebt,
-    'ETH-A'
-  );
-  const res = await totalEncumberedDebt$.pipe(first()).toPromise();
+  // TODO Define hardcoded rates for given ilks outside of the system and test
+  // against those rather than data extracted from the chain
+  const { rate: ethARate } = ethAInfo;
+  const { rate: batARate } = batAInfo;
 
-  expect(isBigNumber(res)).toEqual(true);
-  expect(res.toString()).toEqual(
-    debtAmount
+  const ethADebtAmount = ETH_A_DEBT_AMOUNT._amount;
+  const batADebtAmount = BAT_A_DEBT_AMOUNT._amount;
+
+  const ethAEncumberedDebt = await giveLatest(
+    maker.watch(totalEncumberedDebt, 'ETH-A')
+  );
+  const batAEncumberedDebt = await giveLatest(
+    maker.watch(totalEncumberedDebt, 'BAT-A')
+  );
+
+  expect(isBigNumber(ethAEncumberedDebt)).toEqual(true);
+  expect(isBigNumber(batAEncumberedDebt)).toEqual(true);
+
+  expect(ethAEncumberedDebt.toString()).toEqual(
+    ethADebtAmount
       .shiftedBy(18)
-      .div(fromRay(rate))
+      .div(fromRay(ethARate))
+      .toFixed(0, 0)
+  );
+
+  expect(batAEncumberedDebt.toString()).toEqual(
+    batADebtAmount
+      .shiftedBy(18)
+      .div(fromRay(batARate))
       .toFixed(0, 0)
   );
 });
@@ -136,12 +157,16 @@ test(proxyAddress, async () => {
 });
 
 test(totalDaiSupply, async () => {
-  const { Art, rate } = ethAInfo;
-  const daiGeneratedFromETHA = MDAI.rad(BigNumber(Art).times(rate));
-  const totalDaiSupply$ = mcall.watchObservable(totalDaiSupply);
-  const res = await totalDaiSupply$.pipe(first()).toPromise();
+  const { Art: ethAArt, rate: ethARate } = ethAInfo;
+  const { Art: batAArt, rate: batARate } = batAInfo;
+
+  const ethADaiGenerated = MDAI.rad(BigNumber(ethAArt).times(ethARate));
+  const batADaiGenerated = MDAI.rad(BigNumber(batAArt).times(batARate));
+
+  const res = await giveLatest(maker.watch(totalDaiSupply));
+
   expect(res.symbol).toEqual('MDAI');
-  expect(res.isEqual(daiGeneratedFromETHA)).toEqual(true);
+  expect(res.isEqual(ethADaiGenerated.plus(batADaiGenerated))).toEqual(true);
 });
 
 test('ilkPrices', async () => {

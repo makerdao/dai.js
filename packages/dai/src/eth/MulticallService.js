@@ -22,7 +22,15 @@ export default class MulticallService extends PublicService {
     this._addresses = {};
   }
 
-  createWatcher({ useWeb3Provider = false, interval = 'block', ...config } = {}) {
+  initialize() {
+    this.watch = this.watchObservable;
+  }
+
+  createWatcher({
+    useWeb3Provider = false,
+    interval = 'block',
+    ...config
+  } = {}) {
     const web3 = this.get('web3');
     config = {
       multicallAddress: this.get('smartContract').getContractAddress(
@@ -95,7 +103,8 @@ export default class MulticallService extends PublicService {
   registerSchemas(schemas) {
     this._addresses = this.get('smartContract').getContractAddresses();
 
-    if (typeof schemas !== 'object') throw new Error('Schemas must be object or array');
+    if (typeof schemas !== 'object')
+      throw new Error('Schemas must be object or array');
 
     // If schemas is key/val object use key as schema key and convert to array object
     if (!Array.isArray(schemas))
@@ -108,14 +117,17 @@ export default class MulticallService extends PublicService {
       // Automatically use schema key as return key if no return keys specified
       if (!schema.return && !schema.returns) schema.returns = [schema.key];
       if (schema.return && schema.returns)
-        throw new Error('Ambiguous return definitions in schema: found both return and returns property');
+        throw new Error(
+          'Ambiguous return definitions in schema: found both return and returns property'
+        );
       if (schema.return) schema.returns = [schema.return];
       if (!Array.isArray(schema.returns))
         throw new Error('Schema must contain return/returns property');
       // Use return keys to create observable keys => schema mapping
       schema.returns.forEach(ret => {
         if (Array.isArray(ret)) this._schemaByObservableKey[ret[0]] = schema;
-        else if (typeof ret === 'string') this._schemaByObservableKey[ret] = schema;
+        else if (typeof ret === 'string')
+          this._schemaByObservableKey[ret] = schema;
       });
     });
     this._schemas = [...this._schemas, ...schemas];
@@ -127,22 +139,32 @@ export default class MulticallService extends PublicService {
     const fullPath = `${key}${path ? '.' : ''}${path}`;
 
     const schema = this.schemaByObservableKey(key);
-    if (!schema) throw new Error(`No registered schema found for observable key: ${key}`);
+    if (!schema)
+      throw new Error(`No registered schema found for observable key: ${key}`);
     const generatedSchema = schema.generate(...args);
-    log2(`watchObservable() called for ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`);
+    log2(
+      `watchObservable() called for ${
+        generatedSchema.computed ? 'computed ' : 'base '
+      }observable: ${fullPath}`
+    );
 
     const existingObservable = get(this._observables, fullPath);
     if (existingObservable) {
-      log2(`Returning existing ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`);
+      log2(
+        `Returning existing ${
+          generatedSchema.computed ? 'computed ' : 'base '
+        }observable: ${fullPath}`
+      );
       return existingObservable;
     }
 
     // Handle computed observable
     if (generatedSchema.computed) {
       // Handle dynamically generated dependencies
-      const dependencies = typeof generatedSchema.dependencies === 'function'
-        ? generatedSchema.dependencies()
-        : generatedSchema.dependencies;
+      const dependencies =
+        typeof generatedSchema.dependencies === 'function'
+          ? generatedSchema.dependencies()
+          : generatedSchema.dependencies;
 
       const dependencySubs = dependencies.map(dep => {
         // TODO: This should allow a single string/func as well as a string array
@@ -158,7 +180,7 @@ export default class MulticallService extends PublicService {
       );
 
       // Create computed observable
-      const observable =  Observable.create(observer => {
+      const observable = Observable.create(observer => {
         const sub = observerLatest.subscribe(observer);
         return () => {
           sub.unsubscribe();
@@ -192,7 +214,9 @@ export default class MulticallService extends PublicService {
         // Tap multicall to add schema (first subscriber to this schema)
         this._tapMulticallWithSchema(schema, generatedSchema, path);
       } else schema.watching[path]++;
-      log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`);
+      log2(
+        `Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`
+      );
 
       const sub = subject.subscribe(observer);
       return () => {
@@ -234,7 +258,8 @@ export default class MulticallService extends PublicService {
         key = `${key}${path ? '.' : ''}${path}`;
         return Array.isArray(ret) && ret.length == 2 ? [key, ret[1]] : [key];
       });
-    if (!this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`);
+    if (!this._addresses[contractName])
+      throw new Error(`Can't find contract address for ${contractName}`);
     this._watcher.tap(calls => [
       ...calls,
       {

@@ -53,23 +53,29 @@ export const ilkPrices = {
     // Dynamically generated dependencies
     dependencies: () => [
       ['refPerDai'],
-      ...ilkNames.reduce((acc, ilk) => [...acc,
-        ['priceWithSafetyMargin', ilk],
-        ['liquidationRatio', ilk]
-      ], [])
+      ...ilkNames.reduce(
+        (acc, ilk) => [
+          ...acc,
+          ['priceWithSafetyMargin', ilk],
+          ['liquidationRatio', ilk]
+        ],
+        []
+      )
     ],
     computed: (refPerDai, ...results) =>
-    results.reduce((acc, r, i) => {
-      if (i % 2 === 0) {
-        const currency = ETH;
-        const priceWithSafetyMargin = results[i];
-        const liquidationRatio = results[i + 1];
-        const ratio = createCurrencyRatio(USD, currency);
-        const price = priceWithSafetyMargin.times(refPerDai).times(liquidationRatio.toNumber());
-        return [...acc, ratio(price)];
-      }
-      return acc;
-    }, [])
+      results.reduce((acc, r, i) => {
+        if (i % 2 === 0) {
+          const currency = ETH;
+          const priceWithSafetyMargin = results[i];
+          const liquidationRatio = results[i + 1];
+          const ratio = createCurrencyRatio(USD, currency);
+          const price = priceWithSafetyMargin
+            .times(refPerDai)
+            .times(liquidationRatio.toNumber());
+          return [...acc, ratio(price)];
+        }
+        return acc;
+      }, [])
   })
 };
 
@@ -79,14 +85,14 @@ export const spotIlks = {
   generate: ilkName => ({
     id: `MCD_SPOT.ilks(${ilkName})`,
     contractName: 'MCD_SPOT',
-    call: [
-      'ilks(bytes32)(address,uint256)',
-      toHex(ilkName)
-    ],
+    call: ['ilks(bytes32)(address,uint256)', toHex(ilkName)]
   }),
   returns: [
     priceFeedAddress,
-    [liquidationRatio, v => createCurrencyRatio(USD, MDAI)(BigNumber(fromRay(v)))]
+    [
+      liquidationRatio,
+      v => createCurrencyRatio(USD, MDAI)(BigNumber(fromRay(v)))
+    ]
   ]
 };
 
@@ -95,11 +101,9 @@ export const spotPar = {
   generate: () => ({
     id: 'MCD_SPOT.par()',
     contractName: 'MCD_SPOT',
-    call: ['par()(uint256)'],
+    call: ['par()(uint256)']
   }),
-  returns: [
-    [refPerDai, fromRay]
-  ]
+  returns: [[refPerDai, fromRay]]
 };
 
 export default {
@@ -108,5 +112,5 @@ export default {
   debt,
   spotIlks,
   spotPar,
-  ilkPrices,
+  ilkPrices
 };

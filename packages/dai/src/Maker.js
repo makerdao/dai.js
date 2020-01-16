@@ -51,7 +51,8 @@ export default class Maker {
       cdp: ['getCdp', 'openCdp', 'getCdpIds'],
       event: ['on'],
       proxy: ['currentProxy'],
-      token: ['getToken']
+      token: ['getToken'],
+      multicall: ['watch']
     });
   }
 

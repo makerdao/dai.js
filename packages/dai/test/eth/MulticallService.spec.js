@@ -100,15 +100,24 @@ test('watch computed observable with promise dependency', async () => {
 });
 
 test('watch computed observable with dynamically generated dependencies', async () => {
-  const observable = service.watchObservable('ilkDebtCeilings', ['ETH-A', 'BAT-A']);
+  const observable = service.watchObservable('ilkDebtCeilings', [
+    'ETH-A',
+    'BAT-A'
+  ]);
   const ilkDebtCeilings = await observable.pipe(first()).toPromise();
 
   expect(ilkDebtCeilings).toEqual([100000, 5000]);
 });
 
 test('watch same computed observable with dynamically generated dependencies more than once', async () => {
-  const observable1 = service.watchObservable('ilkDebtCeilings', ['ETH-A', 'BAT-A']);
-  const observable2 = service.watchObservable('ilkDebtCeilings', ['ETH-A', 'BAT-A']);
+  const observable1 = service.watchObservable('ilkDebtCeilings', [
+    'ETH-A',
+    'BAT-A'
+  ]);
+  const observable2 = service.watchObservable('ilkDebtCeilings', [
+    'ETH-A',
+    'BAT-A'
+  ]);
   const ilkDebtCeilings1 = await observable1.pipe(first()).toPromise();
   const ilkDebtCeilings2 = await observable2.pipe(first()).toPromise();
 
