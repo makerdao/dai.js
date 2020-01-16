@@ -1,3 +1,5 @@
 packages/dai/src/eth/MulticallService.js
 packages/dai/test/eth/MulticallService.spec.js
 packages/dai/test/helpers/schemas.js
+packages/dai-plugin-mcd/src/schema.js
+packages/dai-plugin-mcd/test/schema.spec.js

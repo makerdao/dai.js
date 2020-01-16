@@ -143,3 +143,12 @@ test(totalDaiSupply, async () => {
   expect(res.symbol).toEqual('MDAI');
   expect(res.isEqual(daiGeneratedFromETHA)).toEqual(true);
 });
+
+test('ilkPrices', async () => {
+  const obs = mcall.watchObservable('ilkPrices', ['ETH-A', 'ETH-B']);
+  const res = await obs.pipe(first()).toPromise();
+  expect(res[0].toNumber()).toEqual(180);
+  expect(res[0].symbol).toEqual('USD/ETH');
+  expect(res[1].toNumber()).toEqual(150);
+  expect(res[1].symbol).toEqual('USD/ETH');
+});

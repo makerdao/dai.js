@@ -1,7 +1,7 @@
+import { createCurrencyRatio } from '@makerdao/currency';
 import { toHex, fromWei, fromRay, fromRad } from './utils';
-import { combineLatest } from 'rxjs';
 import BigNumber from 'bignumber.js';
-import { MDAI } from '..';
+import { USD, ETH, BAT, MDAI } from '..';
 
 export const proxyAddress = 'proxyAddress';
 
@@ -48,8 +48,65 @@ export const debt = {
   returns: [[totalDaiSupply, MDAI.rad]]
 };
 
+export const ilkPrices = {
+  generate: ilkNames => ({
+    // Dynamically generated dependencies
+    dependencies: () => [
+      ['refPerDai'],
+      ...ilkNames.reduce((acc, ilk) => [...acc,
+        ['priceWithSafetyMargin', ilk],
+        ['liquidationRatio', ilk]
+      ], [])
+    ],
+    computed: (refPerDai, ...results) =>
+    results.reduce((acc, r, i) => {
+      if (i % 2 === 0) {
+        const currency = ETH;
+        const priceWithSafetyMargin = results[i];
+        const liquidationRatio = results[i + 1];
+        const ratio = createCurrencyRatio(USD, currency);
+        const price = priceWithSafetyMargin.times(refPerDai).times(liquidationRatio.toNumber());
+        return [...acc, ratio(price)];
+      }
+      return acc;
+    }, [])
+  })
+};
+
+export const priceFeedAddress = 'priceFeedAddress';
+export const liquidationRatio = 'liquidationRatio';
+export const spotIlks = {
+  generate: ilkName => ({
+    id: `MCD_SPOT.ilks(${ilkName})`,
+    contractName: 'MCD_SPOT',
+    call: [
+      'ilks(bytes32)(address,uint256)',
+      toHex(ilkName)
+    ],
+  }),
+  returns: [
+    priceFeedAddress,
+    [liquidationRatio, v => createCurrencyRatio(USD, MDAI)(BigNumber(fromRay(v)))]
+  ]
+};
+
+export const refPerDai = 'refPerDai';
+export const spotPar = {
+  generate: () => ({
+    id: 'MCD_SPOT.par()',
+    contractName: 'MCD_SPOT',
+    call: ['par()(uint256)'],
+  }),
+  returns: [
+    [refPerDai, fromRay]
+  ]
+};
+
 export default {
   ilks,
   proxies,
-  debt
+  debt,
+  spotIlks,
+  spotPar,
+  ilkPrices,
 };
