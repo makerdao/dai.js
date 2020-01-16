@@ -41,7 +41,7 @@ export const vatIlks = {
 export const TOTAL_DAI_SUPPLY = 'totalDaiSupply';
 export const debt = {
   generate: () => ({
-    id: `VAT.debt()`,
+    id: 'VAT.debt()',
     contractName: 'MCD_VAT',
     call: ['debt()(uint256)']
   }),
@@ -121,6 +121,27 @@ export const ilkPrices = {
   })
 };
 
+export const UNLOCKED_COLLATERAL = 'unlockedCollateral';
+export const vatGem = {
+  generate: (ilkName, urn) => ({
+    id: `MCD_Vat.gem(${ilkName},${urn})`,
+    contractName: 'MCD_VAT',
+    call: ['gem(bytes32,address)(uint)', toHex(ilkName), urn]
+  }),
+  return: [UNLOCKED_COLLATERAL, fromWei]
+};
+
+export const URN_INK = 'urnInk';
+export const URN_ART = 'urnArt';
+export const urnState = {
+  generate: (ilkName, urn) => ({
+    id: `MCD_Vat.urns(${ilkName},${urn})`,
+    contractName: 'MCD_VAT',
+    call: ['urns(bytes32,address)(uint256,uint256)', toHex(ilkName), urn]
+  }),
+  returns: [[URN_INK, fromWei], [URN_ART, fromWei]]
+};
+
 export default {
   vatIlks,
   proxies,
@@ -128,5 +149,7 @@ export default {
   spotIlks,
   spotPar,
   ilkPrices,
-  liquidationRatio
+  liquidationRatio,
+  vatGem,
+  urnState
 };
