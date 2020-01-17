@@ -139,6 +139,18 @@ export const urnState = {
   returns: [[URN_INK, fromWei], [URN_ART, fromWei]]
 };
 
+export const VAULT_URN = 'vaultUrn';
+export const vaultUrn = {
+  generate: id => ({
+    id: `CDP_MANAGER.urns(${id})`,
+    contractName: 'CDP_MANAGER',
+    call: ['urns(uint256)(address)', parseInt(id)]
+  }),
+  returns: [
+    VAULT_URN
+  ]
+};
+
 export default {
   vatIlks,
   proxies,
@@ -149,5 +161,6 @@ export default {
   ilkPrices,
   liquidationRatio,
   vatGem,
-  urnState
+  urnState,
+  vaultUrn
 };
