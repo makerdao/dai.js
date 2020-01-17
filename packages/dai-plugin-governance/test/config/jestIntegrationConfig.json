@@ -1,0 +1,6 @@
+{
+  "rootDir": "../../",
+  "testMatch": ["<rootDir>/test/integration/*.js"],
+  "setupFilesAfterEnv": ["<rootDir>/test/config/original-setup.js"],
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"]
+}

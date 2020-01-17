@@ -44,6 +44,7 @@ import schemas, {
   VAULT_URN,
   VAULT_ILK,
   VAULT_ILK_AND_URN,
+  VAULT_BY_ID,
   DUTY,
   RHO
 } from '../src/schema';
@@ -215,6 +216,13 @@ test(TOTAL_DAI_SUPPLY, async () => {
   expect(totalDaiAmount.isEqual(sumOfDaiGeneratedFromIlks)).toEqual(true);
 });
 
+test(PROXY_ADDRESS, async () => {
+  const proxyAddress = await maker.latest(PROXY_ADDRESS, address);
+
+  expect(isValidAddressString(proxyAddress)).toEqual(true);
+  expect(proxyAddress).toEqual('0x570074CCb147ea3dE2E23fB038D4d78324278886');
+});
+
 test(PRICE_FEED_ADDRESS, async () => {
   const ethAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'ETH-A');
   const batAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'BAT-A');
@@ -222,8 +230,12 @@ test(PRICE_FEED_ADDRESS, async () => {
   expect(isValidAddressString(ethAPriceFeedAddress)).toEqual(true);
   expect(isValidAddressString(batAPriceFeedAddress)).toEqual(true);
 
-  expect(ethAPriceFeedAddress).toEqual('0xaF14E6E871f81BB92f151AfF1bB80936Aa06C6D6');
-  expect(batAPriceFeedAddress).toEqual('0x7eD0d0255153050e9623FfECEeE49a1020503CA3');
+  expect(ethAPriceFeedAddress).toEqual(
+    '0xb0ae8c0856259C6fe000F8e2C14507E5FC167D48'
+  );
+  expect(batAPriceFeedAddress).toEqual(
+    '0x80f178c7b47cb635Ceb12aBB891338744e98365C'
+  );
 });
 
 test(RAW_LIQUIDATION_RATIO, async () => {
@@ -307,7 +319,7 @@ test(URN_ART, async () => {
 
 test(VAULT_URN, async () => {
   const cdpId = 1;
-  const expected = '0xe8c8C8A68b9dE5cC65aCBF20f4eCc802d71a4EBE';
+  const expected = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const urn = await maker.latest(VAULT_URN, cdpId);
   expect(urn).toEqual(expected);
 });
@@ -322,10 +334,24 @@ test(VAULT_ILK, async () => {
 test(VAULT_ILK_AND_URN, async () => {
   const cdpId = 1;
   const expectedIlk = 'ETH-A';
-  const expectedUrn = '0xe8c8C8A68b9dE5cC65aCBF20f4eCc802d71a4EBE';
+  const expectedUrn = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const [ilk, urn] = await maker.latest(VAULT_ILK_AND_URN, cdpId);
   expect(ilk).toEqual(expectedIlk);
   expect(urn).toEqual(expectedUrn);
+});
+
+test(VAULT_BY_ID, async () => {
+  const cdpId = 1;
+  const expectedIlk = 'ETH-A';
+  const expectedUrn = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
+  const expectedInk = fromWei(1000000000000000000);
+  const expectedArt = fromWei(995000000000000000);
+  const { ilk, urn, ink, art } = await maker.latest(VAULT_BY_ID, cdpId);
+
+  expect(ilk).toEqual(expectedIlk);
+  expect(urn).toEqual(expectedUrn);
+  expect(ink).toEqual(expectedInk);
+  expect(art.toNumber()).toBeCloseTo(expectedArt.toNumber());
 });
 
 test(DUTY, async () => {
