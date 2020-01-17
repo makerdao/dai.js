@@ -34,7 +34,7 @@ export const vatIlks = {
     [TOTAL_ENCUMBERED_DEBT, BigNumber],
     [DEBT_SCALING_FACTOR, fromRay],
     [PRICE_WITH_SAFETY_MARGIN, fromRay],
-    [DEBT_CEILING, fromRad],
+    [DEBT_CEILING, MDAI.rad],
     [URN_DEBT_FLOOR, fromRad]
   ]
 };

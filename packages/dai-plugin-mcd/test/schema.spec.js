@@ -7,6 +7,7 @@ import {
   fromWei,
   fromRay,
   isBigNumber,
+  isCurrency,
   isValidAddressString
 } from '../src/utils';
 import { ServiceRoles } from '../src/constants';
@@ -171,11 +172,11 @@ test(DEBT_CEILING, async () => {
   const ethADebtCeiling = await maker.latest(DEBT_CEILING, 'ETH-A');
   const batADebtCeiling = await maker.latest(DEBT_CEILING, 'BAT-A');
 
-  expect(isBigNumber(ethADebtCeiling)).toEqual(true);
-  expect(isBigNumber(batADebtCeiling)).toEqual(true);
+  expect(isCurrency(ethADebtCeiling)).toEqual(true);
+  expect(isCurrency(batADebtCeiling)).toEqual(true);
 
-  expect(ethADebtCeiling).toEqual(BigNumber('100000'));
-  expect(batADebtCeiling).toEqual(BigNumber('5000'));
+  expect(ethADebtCeiling.isEqual(MDAI(100000))).toEqual(true);
+  expect(batADebtCeiling.isEqual(MDAI(5000))).toEqual(true);
 });
 
 test(URN_DEBT_FLOOR, async () => {

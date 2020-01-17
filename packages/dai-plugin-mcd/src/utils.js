@@ -1,6 +1,7 @@
 import assert from 'assert';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
+import { Currency } from '@makerdao/currency';
 const web3Utils = new Web3().utils;
 
 export function stringToBytes(str) {
@@ -61,6 +62,10 @@ export function fromRad(value) {
 
 export function isBigNumber(value) {
   return BigNumber.isBigNumber(value);
+}
+
+export function isCurrency(value) {
+  return value instanceof Currency;
 }
 
 export const isValidAddressString = addressString =>
