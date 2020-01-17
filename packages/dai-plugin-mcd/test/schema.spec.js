@@ -23,7 +23,6 @@ let mcall,
   ethAInfo,
   batAInfo,
   vault;
-import { createCurrencyRatio } from '@makerdao/currency';
 
 import schemas, {
   TOTAL_ENCUMBERED_DEBT,
@@ -44,7 +43,9 @@ import schemas, {
   URN_ART,
   VAULT_URN,
   VAULT_ILK,
-  VAULT_ILK_AND_URN
+  VAULT_ILK_AND_URN,
+  DUTY,
+  RHO
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
@@ -97,6 +98,13 @@ beforeAll(async () => {
 
   ethAInfo = await cdpTypeService.getCdpType(ETH, 'ETH-A').ilkInfo();
   batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
+});
+
+test(PROXY_ADDRESS, async () => {
+  const proxyAddress = await maker.latest(PROXY_ADDRESS, address);
+
+  expect(isValidAddressString(proxyAddress)).toEqual(true);
+  expect(proxyAddress).toEqual('0xC21eDD3d1Ba1bCCD67008B680b362ce6F344DaB3');
 });
 
 test(TOTAL_ENCUMBERED_DEBT, async () => {
@@ -207,13 +215,6 @@ test(TOTAL_DAI_SUPPLY, async () => {
   expect(totalDaiAmount.isEqual(sumOfDaiGeneratedFromIlks)).toEqual(true);
 });
 
-test(PROXY_ADDRESS, async () => {
-  const proxyAddress = await maker.latest(PROXY_ADDRESS, address);
-
-  expect(isValidAddressString(proxyAddress)).toEqual(true);
-  expect(proxyAddress).toEqual('0xC21eDD3d1Ba1bCCD67008B680b362ce6F344DaB3');
-});
-
 test(PRICE_FEED_ADDRESS, async () => {
   const ethAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'ETH-A');
   const batAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'BAT-A');
@@ -280,7 +281,7 @@ test(ILK_PRICES, async () => {
 
 test(UNLOCKED_COLLATERAL, async () => {
   const cdpId = 1;
-  const expected = 0;
+  const expected = 0;  
   const col = await maker.latest(
     UNLOCKED_COLLATERAL,
     'ETH-A',
@@ -293,17 +294,15 @@ test(UNLOCKED_COLLATERAL, async () => {
 test(URN_INK, async () => {
   const cdpId = 1;
   const expected = fromWei(1000000000000000000);
-  const col = await maker.latest(URN_INK, 'ETH-A', await cdpMgr.getUrn(cdpId));
-
-  expect(col).toEqual(expected);
+  const ink = await maker.latest(URN_INK, 'ETH-A', await cdpMgr.getUrn(cdpId));
+  expect(ink).toEqual(expected);
 });
 
 test(URN_ART, async () => {
   const cdpId = 1;
-  const expected = fromWei(995000000000000000);
-  const col = await maker.latest(URN_ART, 'ETH-A', await cdpMgr.getUrn(cdpId));
-
-  expect(col.toNumber()).toBeCloseTo(expected.toNumber());
+  const expected = fromWei(995000000000000000); 
+  const art = await maker.latest(URN_ART, 'ETH-A', await cdpMgr.getUrn(cdpId));
+  expect(art.toNumber()).toBeCloseTo(expected.toNumber());
 });
 
 test(VAULT_URN, async () => {
@@ -327,4 +326,17 @@ test(VAULT_ILK_AND_URN, async () => {
   const [ilk, urn] = await maker.latest(VAULT_ILK_AND_URN, cdpId);
   expect(ilk).toEqual(expectedIlk);
   expect(urn).toEqual(expectedUrn);
+});
+
+test(DUTY, async () => {
+  const expected = 0.04999999999989363;
+  const duty = await maker.latest(DUTY, 'ETH-A');
+  expect((duty)).toEqual(expected);
+});
+
+test(RHO, async () => {
+  var timestamp = Math.round((new Date()).getTime() / 1000);
+  const rho = await maker.latest(RHO, 'ETH-A');
+// RHO is called in the beforeAll block
+  expect((timestamp-rho)).toBeLessThanOrEqual(10);
 });

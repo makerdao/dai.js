@@ -3,6 +3,7 @@ import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
 import { toHex, bytesToString, fromWei, fromWad, fromRay, fromRad } from './utils';
 import BigNumber from 'bignumber.js';
 import { USD, ETH, BAT, MDAI } from '..';
+import { annualStabilityFee } from './math';
 
 export const PROXY_ADDRESS = 'proxyAddress';
 
@@ -171,6 +172,18 @@ export const vaultIlkAndUrn = {
   })
 };
 
+export const DUTY = 'duty';
+export const RHO = 'rho';
+export const jugInfo = {
+  generate: (name) => ({
+    id: `MCD_JUG.ilks(${name})`,
+    contractName: 'MCD_JUG',
+    call: ['ilks(bytes32)(uint256,uint48)', toHex(name)],
+  }),
+  returns: [[DUTY, annualStabilityFee], [RHO]]
+};
+
+
 export default {
   vatIlks,
   proxies,
@@ -184,5 +197,6 @@ export default {
   urnState,
   vaultUrn,
   vaultIlk,
-  vaultIlkAndUrn
+  vaultIlkAndUrn,
+  jugInfo
 };
