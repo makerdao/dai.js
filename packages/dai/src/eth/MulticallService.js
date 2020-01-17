@@ -163,7 +163,7 @@ export default class MulticallService extends PublicService {
       // Handle dynamically generated dependencies
       const dependencies =
         typeof generatedSchema.dependencies === 'function'
-          ? generatedSchema.dependencies()
+          ? generatedSchema.dependencies(this.watchObservable.bind(this))
           : generatedSchema.dependencies;
 
       const dependencySubs = dependencies.map(dep => {
