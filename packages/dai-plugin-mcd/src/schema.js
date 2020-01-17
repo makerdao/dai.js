@@ -1,6 +1,13 @@
 /* eslint-disable */
 import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
-import { toHex, bytesToString, fromWei, fromWad, fromRay, fromRad } from './utils';
+import {
+  toHex,
+  bytesToString,
+  fromWei,
+  fromWad,
+  fromRay,
+  fromRad
+} from './utils';
 import BigNumber from 'bignumber.js';
 import { USD, ETH, BAT, MDAI } from '..';
 import { first } from 'rxjs/operators';
@@ -35,7 +42,7 @@ export const vatIlks = {
     [TOTAL_ENCUMBERED_DEBT, BigNumber],
     [DEBT_SCALING_FACTOR, fromRay],
     [PRICE_WITH_SAFETY_MARGIN, fromRay],
-    [DEBT_CEILING, MDAI.rad],
+    [DEBT_CEILING, v => MDAI(v, 'rad')],
     [URN_DEBT_FLOOR, fromRad]
   ]
 };
@@ -47,7 +54,7 @@ export const debt = {
     contractName: 'MCD_VAT',
     call: ['debt()(uint256)']
   }),
-  returns: [[TOTAL_DAI_SUPPLY, MDAI.rad]]
+  returns: [[TOTAL_DAI_SUPPLY, v => MDAI(v, 'rad')]]
 };
 
 export const PRICE_FEED_ADDRESS = 'priceFeedAddress';
@@ -98,7 +105,9 @@ export const ilkPrice = {
       [LIQUIDATION_RATIO, ilkName]
     ],
     computed: (ratioDaiUsd, priceWithSafetyMargin, liquidationRatio) => {
-      const currency = createCurrency(liquidationRatio.numerator.symbol.substring(1, 4));
+      const currency = createCurrency(
+        liquidationRatio.numerator.symbol.substring(1, 4)
+      );
       const ratio = createCurrencyRatio(USD, currency);
       const price = priceWithSafetyMargin
         .times(ratioDaiUsd.toNumber())
@@ -111,9 +120,7 @@ export const ilkPrice = {
 export const ILK_PRICES = 'ilkPrices';
 export const ilkPrices = {
   generate: ilkNames => ({
-    dependencies: () => [
-      ...ilkNames.map(ilkName => [ILK_PRICE, ilkName])
-    ],
+    dependencies: () => [...ilkNames.map(ilkName => [ILK_PRICE, ilkName])],
     computed: (...prices) => prices
   })
 };
@@ -146,9 +153,7 @@ export const vaultUrn = {
     contractName: 'CDP_MANAGER',
     call: ['urns(uint256)(address)', parseInt(id)]
   }),
-  returns: [
-    VAULT_URN
-  ]
+  returns: [VAULT_URN]
 };
 
 export const VAULT_ILK = 'vaultIlk';
@@ -164,10 +169,7 @@ export const vaultIlk = {
 export const VAULT_ILK_AND_URN = 'vaultIlkAndUrn';
 export const vaultIlkAndUrn = {
   generate: id => ({
-    dependencies: [
-      [VAULT_ILK, id],
-      [VAULT_URN, id]
-    ],
+    dependencies: [[VAULT_ILK, id], [VAULT_URN, id]],
     computed: (ilk, urn) => [ilk, urn]
   })
 };
@@ -175,10 +177,7 @@ export const vaultIlkAndUrn = {
 export const URN_INK_AND_ART = 'urnInkAndArt';
 export const urnInkAndArt = {
   generate: (ilk, urn) => ({
-    dependencies: [
-      [URN_INK, ilk, urn],
-      [URN_ART, ilk, urn]
-    ],
+    dependencies: [[URN_INK, ilk, urn], [URN_ART, ilk, urn]],
     computed: (ink, art) => [ink, art]
   })
 };
@@ -186,15 +185,24 @@ export const urnInkAndArt = {
 export const VAULT_BY_ID = 'vaultById';
 export const vaultById = {
   generate: id => ({
-    dependencies: (watch) => ([
-      [() => new Promise(resolve => {
-        watch(VAULT_ILK_AND_URN, id).pipe(first()).toPromise().then(([ilk, urn]) => {
-          watch(URN_INK_AND_ART, ilk, urn).pipe(first()).toPromise().then(([ink, art]) => {
-            resolve([ilk, urn, ink, art])
+    dependencies: watch => [
+      [
+        () =>
+          new Promise(resolve => {
+            watch(VAULT_ILK_AND_URN, id)
+              .pipe(first())
+              .toPromise()
+              .then(([ilk, urn]) => {
+                watch(URN_INK_AND_ART, ilk, urn)
+                  .pipe(first())
+                  .toPromise()
+                  .then(([ink, art]) => {
+                    resolve([ilk, urn, ink, art]);
+                  });
+              });
           })
-        });
-      })]
-    ]),
+      ]
+    ],
     computed: ([ilk, urn, ink, art]) => ({ ilk, urn, ink, art })
   })
 };
