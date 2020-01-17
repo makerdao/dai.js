@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { mcdMaker, setupCollateral } from './helpers';
 import { ETH, BAT, MDAI, USD } from '../src';
 import {
@@ -35,6 +36,7 @@ import schemas, {
   RAW_LIQUIDATION_RATIO,
   RATIO_DAI_USD,
   LIQUIDATION_RATIO,
+  ILK_PRICE,
   ILK_PRICES,
   UNLOCKED_COLLATERAL,
   URN_INK,
@@ -215,12 +217,8 @@ test(PRICE_FEED_ADDRESS, async () => {
   expect(isValidAddressString(ethAPriceFeedAddress)).toEqual(true);
   expect(isValidAddressString(batAPriceFeedAddress)).toEqual(true);
 
-  expect(ethAPriceFeedAddress).toEqual(
-    '0xaF14E6E871f81BB92f151AfF1bB80936Aa06C6D6'
-  );
-  expect(batAPriceFeedAddress).toEqual(
-    '0x7eD0d0255153050e9623FfECEeE49a1020503CA3'
-  );
+  expect(ethAPriceFeedAddress).toEqual('0xaF14E6E871f81BB92f151AfF1bB80936Aa06C6D6');
+  expect(batAPriceFeedAddress).toEqual('0x7eD0d0255153050e9623FfECEeE49a1020503CA3');
 });
 
 test(RAW_LIQUIDATION_RATIO, async () => {
@@ -252,6 +250,12 @@ test(RATIO_DAI_USD, async () => {
   const ratio = await maker.latest(RATIO_DAI_USD);
   expect(ratio.symbol).toEqual('MDAI/USD');
   expect(ratio.toNumber()).toEqual(1);
+});
+
+test(ILK_PRICE, async () => {
+  const ethAPrice = await maker.latest(ILK_PRICE, 'ETH-A');
+  expect(ethAPrice.toNumber()).toEqual(180);
+  expect(ethAPrice.symbol).toEqual('USD/ETH');
 });
 
 test(ILK_PRICES, async () => {

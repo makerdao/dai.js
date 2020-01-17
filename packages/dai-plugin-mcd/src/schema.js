@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
 import { toHex, fromWei, fromRay, fromRad } from './utils';
 import BigNumber from 'bignumber.js';
@@ -87,37 +88,33 @@ export const spotPar = {
   returns: [[RATIO_DAI_USD, v => createCurrencyRatio(MDAI, USD)(fromRay(v))]]
 };
 
+export const ILK_PRICE = 'ilkPrice';
+export const ilkPrice = {
+  generate: ilkName => ({
+    dependencies: [
+      [RATIO_DAI_USD],
+      [PRICE_WITH_SAFETY_MARGIN, ilkName],
+      [LIQUIDATION_RATIO, ilkName]
+    ],
+    computed: (ratioDaiUsd, priceWithSafetyMargin, liquidationRatio) => {
+      const currency = createCurrency(liquidationRatio.numerator.symbol.substring(1, 4));
+      const ratio = createCurrencyRatio(USD, currency);
+      const price = priceWithSafetyMargin
+        .times(ratioDaiUsd.toNumber())
+        .times(liquidationRatio.toNumber());
+      return ratio(price);
+    }
+  })
+};
+
 export const ILK_PRICES = 'ilkPrices';
 export const ilkPrices = {
   generate: ilkNames => ({
-    // Dynamically generated dependencies
     dependencies: () => [
       [RATIO_DAI_USD],
-      ...ilkNames.reduce(
-        (acc, ilk) => [
-          ...acc,
-          [PRICE_WITH_SAFETY_MARGIN, ilk],
-          [LIQUIDATION_RATIO, ilk]
-        ],
-        []
-      )
+      ...ilkNames.map(ilkName => [ILK_PRICE, ilkName])
     ],
-    computed: (ratioDaiUsd, ...results) =>
-      results.reduce((acc, r, i) => {
-        if (i % 2 === 0) {
-          const priceWithSafetyMargin = results[i];
-          const liquidationRatio = results[i + 1];
-          const currency = createCurrency(
-            liquidationRatio.numerator.symbol.substring(1, 4)
-          );
-          const ratio = createCurrencyRatio(USD, currency);
-          const price = priceWithSafetyMargin
-            .times(ratioDaiUsd.toNumber())
-            .times(liquidationRatio.toNumber());
-          return [...acc, ratio(price)];
-        }
-        return acc;
-      }, [])
+    computed: (_, ...prices) => prices
   })
 };
 
@@ -148,6 +145,7 @@ export default {
   debt,
   spotIlks,
   spotPar,
+  ilkPrice,
   ilkPrices,
   liquidationRatio,
   vatGem,
