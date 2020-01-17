@@ -105,7 +105,7 @@ test(PROXY_ADDRESS, async () => {
   const proxyAddress = await maker.latest(PROXY_ADDRESS, address);
 
   expect(isValidAddressString(proxyAddress)).toEqual(true);
-  expect(proxyAddress).toEqual('0xC21eDD3d1Ba1bCCD67008B680b362ce6F344DaB3');
+  expect(proxyAddress).toEqual('0x570074CCb147ea3dE2E23fB038D4d78324278886');
 });
 
 test(TOTAL_ENCUMBERED_DEBT, async () => {
@@ -293,7 +293,7 @@ test(ILK_PRICES, async () => {
 
 test(UNLOCKED_COLLATERAL, async () => {
   const cdpId = 1;
-  const expected = 0;  
+  const expected = 0;
   const col = await maker.latest(
     UNLOCKED_COLLATERAL,
     'ETH-A',
@@ -312,7 +312,7 @@ test(URN_INK, async () => {
 
 test(URN_ART, async () => {
   const cdpId = 1;
-  const expected = fromWei(995000000000000000); 
+  const expected = fromWei(995000000000000000);
   const art = await maker.latest(URN_ART, 'ETH-A', await cdpMgr.getUrn(cdpId));
   expect(art.toNumber()).toBeCloseTo(expected.toNumber());
 });
@@ -357,12 +357,12 @@ test(VAULT_BY_ID, async () => {
 test(DUTY, async () => {
   const expected = 0.04999999999989363;
   const duty = await maker.latest(DUTY, 'ETH-A');
-  expect((duty)).toEqual(expected);
+  expect(duty).toEqual(expected);
 });
 
 test(RHO, async () => {
-  var timestamp = Math.round((new Date()).getTime() / 1000);
+  var timestamp = Math.round(new Date().getTime() / 1000);
   const rho = await maker.latest(RHO, 'ETH-A');
-// RHO is called in the beforeAll block
-  expect((timestamp-rho)).toBeLessThanOrEqual(10);
+  // RHO is called in the beforeAll block
+  expect(timestamp - rho).toBeLessThanOrEqual(10);
 });
