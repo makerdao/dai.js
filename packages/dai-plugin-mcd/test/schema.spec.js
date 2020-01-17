@@ -48,7 +48,10 @@ import schemas, {
   VAULT_BY_ID,
   ANNUAL_STABILITY_FEE,
   FEE_UPDATE_TIMESTAMP,
-  TOTAL_SAVINGS_DAI
+  TOTAL_SAVINGS_DAI,
+  LIQUIDATOR_ADDRESS,
+  LIQUIDATION_PENALTY,
+  MAX_AUCTION_LOT_SIZE
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
@@ -399,4 +402,22 @@ test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
   expect(totalSavingsDai.symbol).toEqual('CHAI');
   expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
+});
+
+test(LIQUIDATOR_ADDRESS, async () => {
+  const expected = '0x55320248dC50Ef6dABc88ECbc294Fd5e2e1f4eC6';
+  const address = await maker.latest(LIQUIDATOR_ADDRESS, 'ETH-A');
+  expect(address).toEqual(expected);
+});
+
+test(LIQUIDATION_PENALTY, async () => {
+  const expected = 0.05;
+  const liquidationPenalty = await maker.latest(LIQUIDATION_PENALTY, 'ETH-A');
+  expect(liquidationPenalty).toEqual(expected);
+});
+
+test(MAX_AUCTION_LOT_SIZE, async () => {
+  const expected = BigNumber('1.5');
+  const maxLotSize = await maker.latest(MAX_AUCTION_LOT_SIZE, 'ETH-A');
+  expect(maxLotSize).toEqual(expected);
 });

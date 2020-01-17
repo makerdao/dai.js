@@ -10,7 +10,7 @@ import {
 } from './utils';
 import BigNumber from 'bignumber.js';
 import { USD, ETH, BAT, MDAI, CHAI } from '..';
-import { annualStabilityFee } from './math';
+import { annualStabilityFee, liquidationPenalty } from './math';
 import { first } from 'rxjs/operators';
 
 export const PROXY_ADDRESS = 'proxyAddress';
@@ -241,6 +241,21 @@ export const piePot = {
   returns: [[TOTAL_SAVINGS_DAI, v => CHAI(v, 'wei')]]
 };
 
+export const LIQUIDATOR_ADDRESS = 'liquidatorAddress';
+export const LIQUIDATION_PENALTY = 'liquidationPenalty';
+export const MAX_AUCTION_LOT_SIZE = 'maxAuctionLotSize';
+export const liquidatorState = {
+  generate: ilkName => ({
+    id: `MCD_CAT.ilks(${ilkName})`,
+    contractName: 'MCD_CAT',
+    call: ['ilks(bytes32)(address,uint256,uint256)', toHex(ilkName)]
+  }),
+  returns: [
+    [LIQUIDATOR_ADDRESS],
+    [LIQUIDATION_PENALTY, liquidationPenalty],
+    [MAX_AUCTION_LOT_SIZE, v => BigNumber(v).shiftedBy(-18)]]
+};
+
 export default {
   vatIlks,
   proxies,
@@ -258,5 +273,6 @@ export default {
   urnCollateralAndDebt,
   vaultById,
   jugInfo,
-  piePot
+  piePot,
+  liquidatorState
 };

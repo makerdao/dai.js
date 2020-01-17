@@ -93,6 +93,27 @@ interface WatchInterface {
     ilkName: string
     ): number;
 
+   /**
+   * @param ilkName String uniquely identifying an ilk
+   */
+  liquidatorAddress(
+    ilkName: string
+    ): string;
+
+  /**
+   * @param ilkName String uniquely identifying an ilk
+   */
+  liquidationPenalty(
+    ilkName: string
+    ): number;
+
+  /**
+   * @param ilkName String uniquely identifying an ilk
+   */
+  maxAuctionLotSize(
+    ilkName: string
+    ): BigNumber;
+
 
 }
 
