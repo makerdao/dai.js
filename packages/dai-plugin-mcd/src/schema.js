@@ -160,6 +160,17 @@ export const vaultIlk = {
   returns: [[VAULT_ILK, bytesToString]]
 };
 
+export const VAULT_ILK_AND_URN = 'vaultIlkAndUrn';
+export const vaultIlkAndUrn = {
+  generate: id => ({
+    dependencies: [
+      [VAULT_ILK, id],
+      [VAULT_URN, id]
+    ],
+    computed: (ilk, urn) => [ilk, urn]
+  })
+};
+
 export default {
   vatIlks,
   proxies,
@@ -172,5 +183,6 @@ export default {
   vatGem,
   urnState,
   vaultUrn,
-  vaultIlk
+  vaultIlk,
+  vaultIlkAndUrn
 };
