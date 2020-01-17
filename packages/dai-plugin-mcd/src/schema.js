@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
-import { toHex, fromWei, fromRay, fromRad } from './utils';
+import { toHex, bytesToString, fromWei, fromWad, fromRay, fromRad } from './utils';
 import BigNumber from 'bignumber.js';
 import { USD, ETH, BAT, MDAI } from '..';
 
@@ -151,6 +151,16 @@ export const vaultUrn = {
   ]
 };
 
+export const VAULT_ILK = 'vaultIlk';
+export const vaultIlk = {
+  generate: id => ({
+    id: `CDP_MANAGER.ilks(${id})`,
+    contractName: 'CDP_MANAGER',
+    call: ['ilks(uint256)(bytes32)', parseInt(id)]
+  }),
+  returns: [[VAULT_ILK, bytesToString]]
+};
+
 export default {
   vatIlks,
   proxies,
@@ -162,5 +172,6 @@ export default {
   liquidationRatio,
   vatGem,
   urnState,
-  vaultUrn
+  vaultUrn,
+  vaultIlk
 };

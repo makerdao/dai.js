@@ -42,7 +42,8 @@ import schemas, {
   UNLOCKED_COLLATERAL,
   URN_INK,
   URN_ART,
-  VAULT_URN
+  VAULT_URN,
+  VAULT_ILK
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
@@ -309,4 +310,11 @@ test(VAULT_URN, async () => {
   const expected = '0xe8c8C8A68b9dE5cC65aCBF20f4eCc802d71a4EBE';
   const urn = await maker.latest(VAULT_URN, cdpId);
   expect(urn).toEqual(expected);
+});
+
+test(VAULT_ILK, async () => {
+  const cdpId = 1;
+  const expected = 'ETH-A';
+  const ilk = await maker.latest(VAULT_ILK, cdpId);
+  expect(ilk).toEqual(expected);
 });
