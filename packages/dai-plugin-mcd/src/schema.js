@@ -3,6 +3,7 @@ import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
 import { toHex, bytesToString, fromWei, fromWad, fromRay, fromRad } from './utils';
 import BigNumber from 'bignumber.js';
 import { USD, ETH, BAT, MDAI } from '..';
+import { first } from 'rxjs/operators';
 
 export const PROXY_ADDRESS = 'proxyAddress';
 
@@ -171,6 +172,33 @@ export const vaultIlkAndUrn = {
   })
 };
 
+export const URN_INK_AND_ART = 'urnInkAndArt';
+export const urnInkAndArt = {
+  generate: (ilk, urn) => ({
+    dependencies: [
+      [URN_INK, ilk, urn],
+      [URN_ART, ilk, urn]
+    ],
+    computed: (ink, art) => [ink, art]
+  })
+};
+
+export const VAULT_BY_ID = 'vaultById';
+export const vaultById = {
+  generate: id => ({
+    dependencies: (watch) => ([
+      [() => new Promise(resolve => {
+        watch(VAULT_ILK_AND_URN, id).pipe(first()).toPromise().then(([ilk, urn]) => {
+          watch(URN_INK_AND_ART, ilk, urn).pipe(first()).toPromise().then(([ink, art]) => {
+            resolve([ilk, urn, ink, art])
+          })
+        });
+      })]
+    ]),
+    computed: ([ilk, urn, ink, art]) => ({ ilk, urn, ink, art })
+  })
+};
+
 export default {
   vatIlks,
   proxies,
@@ -184,5 +212,7 @@ export default {
   urnState,
   vaultUrn,
   vaultIlk,
-  vaultIlkAndUrn
+  vaultIlkAndUrn,
+  urnInkAndArt,
+  vaultById
 };

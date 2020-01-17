@@ -44,7 +44,8 @@ import schemas, {
   URN_ART,
   VAULT_URN,
   VAULT_ILK,
-  VAULT_ILK_AND_URN
+  VAULT_ILK_AND_URN,
+  VAULT_BY_ID
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
@@ -327,4 +328,18 @@ test(VAULT_ILK_AND_URN, async () => {
   const [ilk, urn] = await maker.latest(VAULT_ILK_AND_URN, cdpId);
   expect(ilk).toEqual(expectedIlk);
   expect(urn).toEqual(expectedUrn);
+});
+
+test(VAULT_BY_ID, async () => {
+  const cdpId = 1;
+  const expectedIlk = 'ETH-A';
+  const expectedUrn = '0xe8c8C8A68b9dE5cC65aCBF20f4eCc802d71a4EBE';
+  const expectedInk = fromWei(1000000000000000000);
+  const expectedArt = fromWei(995000000000000000);
+  const { ilk, urn, ink, art } = await maker.latest(VAULT_BY_ID, cdpId);
+
+  expect(ilk).toEqual(expectedIlk);
+  expect(urn).toEqual(expectedUrn);
+  expect(ink).toEqual(expectedInk);
+  expect(art.toNumber()).toBeCloseTo(expectedArt.toNumber());
 });
