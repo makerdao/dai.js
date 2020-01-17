@@ -48,7 +48,9 @@ import schemas, {
   VAULT_BY_ID,
   ANNUAL_STABILITY_FEE,
   FEE_UPDATE_TIMESTAMP,
-  TOTAL_SAVINGS_DAI
+  TOTAL_SAVINGS_DAI,
+  SAVINGS_DAI_BY_PROXY,
+  SAVINGS_DAI
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
@@ -86,6 +88,7 @@ const setupFn = async () => {
 };
 
 beforeAll(async () => {
+  snapshotData = await takeSnapshot(maker);
   maker = await mcdMaker({
     cdpTypes: [
       { currency: ETH, ilk: 'ETH-A' },
@@ -103,18 +106,13 @@ beforeAll(async () => {
   cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   cdpTypeService = maker.service(ServiceRoles.CDP_TYPE);
   proxyService = maker.service('proxy');
-
   vault = await setupFn();
 
   ethAInfo = await cdpTypeService.getCdpType(ETH, 'ETH-A').ilkInfo();
   batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
 });
 
-beforeEach(async () => {
-  snapshotData = await takeSnapshot(maker);
-});
-
-afterEach(async () => {
+afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
 });
 
@@ -399,4 +397,19 @@ test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
   expect(totalSavingsDai.symbol).toEqual('CHAI');
   expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
+});
+
+test(SAVINGS_DAI_BY_PROXY, async () => {
+  const savingsDaiByProxy = await maker.latest(
+    SAVINGS_DAI_BY_PROXY,
+    await proxyService.getProxyAddress()
+  );
+  expect(savingsDaiByProxy.symbol).toEqual('CHAI');
+  expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
+});
+
+test(SAVINGS_DAI, async () => {
+  const savingsDai = await maker.latest(SAVINGS_DAI, address);
+  expect(savingsDai.symbol).toEqual('CHAI');
+  expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
 });
