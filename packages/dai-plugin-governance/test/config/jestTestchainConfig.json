@@ -1,0 +1,9 @@
+{
+  "rootDir": "../../",
+  "roots": ["lib", "src", "test"],
+  "setupFilesAfterEnv": ["<rootDir>/test/config/setup-test.js"],
+  "testPathIgnorePatterns": [
+    "<rootDir>/node_modules/",
+    "<rootDir>/test/integration/"
+  ]
+}

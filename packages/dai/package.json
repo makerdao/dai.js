@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.23.0-rc.4",
+  "version": "0.23.1",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -42,7 +42,7 @@
     "build:backend": "./scripts/build-backend.sh",
     "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
     "build:backend:src:watch": "./scripts/watch-backend-src.sh",
-    "prepublishOnly": "./scripts/prepublish.sh",
+    "prepublishOnly": "yarn build",
     "test:watch": "yarn test --watch",
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",

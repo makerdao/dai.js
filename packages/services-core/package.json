@@ -5,8 +5,8 @@
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel -d dist src",
-    "prepublishOnly": "babel -d dist src",
+    "build": "../../scripts/build.sh",
+    "prepublishOnly": "yarn build",
     "test": "jest",
     "coverage": "jest --coverage"
   },
