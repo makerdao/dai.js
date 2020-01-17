@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { mcdMaker, setupCollateral } from './helpers';
 import { ETH, BAT, MDAI, USD } from '../src';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import {
   toHex,
   fromRad,
@@ -51,7 +52,7 @@ import schemas, {
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(2);
+const ETH_A_DEBT_AMOUNT = MDAI(1);
 const ETH_A_PRICE = 180;
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
@@ -107,6 +108,14 @@ beforeAll(async () => {
 
   ethAInfo = await cdpTypeService.getCdpType(ETH, 'ETH-A').ilkInfo();
   batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
+});
+
+beforeEach(async () => {
+  snapshotData = await takeSnapshot(maker);
+});
+
+afterEach(async () => {
+  await restoreSnapshot(snapshotData, maker);
 });
 
 test(PROXY_ADDRESS, async () => {
