@@ -6,6 +6,10 @@ export default class PauseService extends PublicService {
     super(name, ['smartContract', 'web3']);
   }
 
+  getDelayInSeconds() {
+      return this._pauseContract().delay();
+  }
+
   _pauseContract() {
     return this.get('smartContract').getContractByName(PAUSE);
   }

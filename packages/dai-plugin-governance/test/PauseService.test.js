@@ -29,3 +29,8 @@ afterAll(async done => {
 test('can create Pause Service', async () => {
   expect(pauseService).toBeInstanceOf(PauseService);
 });
+
+test('get delay', async () => {
+  const delay = await pauseService.getDelayInSeconds();
+  expect(delay.toNumber()).toBe(0);
+});
