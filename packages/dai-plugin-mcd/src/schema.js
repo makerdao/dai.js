@@ -111,10 +111,9 @@ export const ILK_PRICES = 'ilkPrices';
 export const ilkPrices = {
   generate: ilkNames => ({
     dependencies: () => [
-      [RATIO_DAI_USD],
       ...ilkNames.map(ilkName => [ILK_PRICE, ilkName])
     ],
-    computed: (_, ...prices) => prices
+    computed: (...prices) => prices
   })
 };
 
