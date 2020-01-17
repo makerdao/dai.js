@@ -46,11 +46,12 @@ import schemas, {
   VAULT_ILK_AND_URN,
   VAULT_BY_ID,
   ANNUAL_STABILITY_FEE,
-  FEE_UPDATE_TIMESTAMP
+  FEE_UPDATE_TIMESTAMP,
+  TOTAL_SAVINGS_DAI
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = MDAI(2);
 const ETH_A_PRICE = 180;
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
@@ -64,6 +65,11 @@ const setupFn = async () => {
   await setupCollateral(maker, 'BAT-A', { price: BAT_A_PRICE });
 
   const mgr = await maker.service(ServiceRoles.CDP_MANAGER);
+  const sav = await maker.service(ServiceRoles.SAVINGS);
+  const dai = maker.getToken(MDAI);
+  const _proxyAddress = await maker.service('proxy').ensureProxy();
+  await dai.approveUnlimited(_proxyAddress);
+
   await mgr.openLockAndDraw(
     'ETH-A',
     ETH_A_COLLATERAL_AMOUNT,
@@ -74,6 +80,8 @@ const setupFn = async () => {
     BAT_A_COLLATERAL_AMOUNT,
     BAT_A_DEBT_AMOUNT
   );
+
+  await sav.join(MDAI(1));
 };
 
 beforeAll(async () => {
@@ -367,13 +375,19 @@ test(VAULT_BY_ID, async () => {
 
 test(ANNUAL_STABILITY_FEE, async () => {
   const expected = 0.04999999999989363;
-  const duty = await maker.latest(ANNUAL_STABILITY_FEE, 'ETH-A');
-  expect(duty).toEqual(expected);
+  const annualStabilityFee = await maker.latest(ANNUAL_STABILITY_FEE, 'ETH-A');
+  expect(annualStabilityFee).toEqual(expected);
 });
 
 test(FEE_UPDATE_TIMESTAMP, async () => {
   var timestamp = Math.round(new Date().getTime() / 1000);
-  const rho = await maker.latest(FEE_UPDATE_TIMESTAMP, 'ETH-A');
+  const feeUpdateTimestamp = await maker.latest(FEE_UPDATE_TIMESTAMP, 'ETH-A');
   // RHO is called in the beforeAll block
-  expect(timestamp - rho).toBeLessThanOrEqual(10);
+  expect(timestamp - feeUpdateTimestamp).toBeLessThanOrEqual(10);
+});
+
+test(TOTAL_SAVINGS_DAI, async () => {
+  const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
+  expect(totalSavingsDai.symbol).toEqual('CHAI');
+  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
 });

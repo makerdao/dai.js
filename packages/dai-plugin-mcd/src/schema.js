@@ -9,7 +9,7 @@ import {
   fromRad
 } from './utils';
 import BigNumber from 'bignumber.js';
-import { USD, ETH, BAT, MDAI } from '..';
+import { USD, ETH, BAT, MDAI, CHAI } from '..';
 import { annualStabilityFee } from './math';
 import { first } from 'rxjs/operators';
 
@@ -72,8 +72,9 @@ export const spotIlks = {
 
 export const LIQUIDATION_RATIO = 'liquidationRatio';
 export const liquidationRatio = {
-  // The liquidation ratio value is the minimum dollar amount of collateral in
-  // terms of a single dollar unit amount of debt
+  // The liquidation ratio value is the ratio between the minimum dollar amount of a unit of
+  // collateral in terms of a single dollar unit amount of debt in which the system does not
+  // deem a vault of that collateral type (ilk) underwater
   //
   // In plain english, it is the ratio of the dollar amount of ETH in terms of
   // the dollar amount of dai
@@ -230,6 +231,16 @@ export const jugInfo = {
   returns: [[ANNUAL_STABILITY_FEE, annualStabilityFee], [FEE_UPDATE_TIMESTAMP]]
 };
 
+export const TOTAL_SAVINGS_DAI = 'totalSavingsDai';
+export const piePot = {
+  generate: () => ({
+    id: `MCD_POT.Pie`,
+    contractName: 'MCD_POT',
+    call: ['Pie()(uint256)']
+  }),
+  returns: [[TOTAL_SAVINGS_DAI, v => CHAI(v, 'wei')]]
+};
+
 export default {
   vatIlks,
   proxies,
@@ -246,5 +257,6 @@ export default {
   vaultIlkAndUrn,
   urnCollateralAndDebt,
   vaultById,
-  jugInfo
+  jugInfo,
+  piePot
 };

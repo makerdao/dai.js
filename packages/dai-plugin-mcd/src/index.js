@@ -69,6 +69,9 @@ export const USD_ETH = createCurrencyRatio(USD, ETH);
 export const MWETH = createCurrency('MWETH');
 export const MDAI = createCurrency('MDAI');
 
+// Casting for savings dai
+export const CHAI = createCurrency('CHAI');
+
 export const REP = createCurrency('REP');
 export const ZRX = createCurrency('ZRX');
 export const OMG = createCurrency('OMG');
