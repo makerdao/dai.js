@@ -51,6 +51,49 @@ interface WatchInterface {
   ilkPrices(
       [ilkNames]: string
   ): Currency;
+
+  /**
+   * @param ilkName String uniquely identifying an ilk
+   * @param urn String hexidecimal address of the vault handler
+   */
+  unlockedCollateral(
+    ilkName: string,
+    urn: string
+  ): BigNumber;
+
+  /**
+   * @param ilkName String uniquely identifying an ilk
+   * @param urn String hexidecimal address of the vault handler
+   */
+  encumberedCollateral(
+    ilkName: string,
+    urn: string
+    ): BigNumber;
+
+  /**
+   * @param ilkName String uniquely identifying an ilk
+   * @param urn String hexidecimal address of the vault handler
+   */
+  encumberedDebt(
+    ilkName: string,
+    urn: string
+    ): BigNumber;
+
+  /**
+   * @param ilkName String uniquely identifying an ilk
+   */
+  annualStabilityFee(
+    ilkName: string
+    ): number;
+
+  /**
+   * @param ilkName String uniquely identifying an ilk
+   */
+  feeUpdateTimestamp(
+    ilkName: string
+    ): number;
+
+
 }
 
 declare var watch: WatchInterface;

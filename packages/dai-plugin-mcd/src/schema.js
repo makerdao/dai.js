@@ -222,10 +222,10 @@ export const vaultById = {
 export const ANNUAL_STABILITY_FEE = 'annualStabilityFee';
 export const FEE_UPDATE_TIMESTAMP = 'feeUpdateTimestamp';
 export const jugInfo = {
-  generate: name => ({
-    id: `MCD_JUG.ilks(${name})`,
+  generate: ilkName => ({
+    id: `MCD_JUG.ilks(${ilkName})`,
     contractName: 'MCD_JUG',
-    call: ['ilks(bytes32)(uint256,uint48)', toHex(name)]
+    call: ['ilks(bytes32)(uint256,uint48)', toHex(ilkName)]
   }),
   returns: [[ANNUAL_STABILITY_FEE, annualStabilityFee], [FEE_UPDATE_TIMESTAMP]]
 };
