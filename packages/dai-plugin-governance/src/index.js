@@ -44,7 +44,6 @@ export default {
       }
     };
 
-
     const addContracts = {
       [CHIEF]: {
         address: map(prop('CHIEF'), contractAddresses),
