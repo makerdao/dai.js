@@ -232,13 +232,46 @@ export const jugInfo = {
 };
 
 export const TOTAL_SAVINGS_DAI = 'totalSavingsDai';
-export const piePot = {
+export const potPie = {
   generate: () => ({
     id: `MCD_POT.Pie`,
     contractName: 'MCD_POT',
     call: ['Pie()(uint256)']
   }),
   returns: [[TOTAL_SAVINGS_DAI, v => CHAI(v, 'wei')]]
+};
+
+export const SAVINGS_DAI_BY_PROXY = 'savingsDaiByProxy';
+export const potpie = {
+  generate: proxyAddress => ({
+    id: `MCD_POT.pie(${proxyAddress})`,
+    contractName: 'MCD_POT',
+    call: ['pie(address)(uint256)', proxyAddress]
+  }),
+  returns: [[SAVINGS_DAI_BY_PROXY, v => CHAI(v, 'wei')]]
+};
+
+export const SAVINGS_DAI = 'savingsDai';
+export const savingsDai = {
+  generate: address => ({
+    dependencies: watch => [
+      [
+        () =>
+          new Promise(resolve => {
+            watch(PROXY_ADDRESS, address)
+              .pipe(first())
+              .toPromise()
+              .then(proxyAddress => {
+                watch(SAVINGS_DAI_BY_PROXY, proxyAddress)
+                  .pipe(first())
+                  .toPromise()
+                  .then(resolve);
+              });
+          })
+      ]
+    ],
+    computed: savingsDai => savingsDai
+  })
 };
 
 export const LIQUIDATOR_ADDRESS = 'liquidatorAddress';
@@ -274,5 +307,8 @@ export default {
   vaultById,
   jugInfo,
   piePot,
+  potPie,
+  potpie,
+  savingsDai,
   liquidatorState
 };
