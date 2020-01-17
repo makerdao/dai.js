@@ -136,15 +136,15 @@ export const vatGem = {
   return: [UNLOCKED_COLLATERAL, fromWei]
 };
 
-export const URN_INK = 'urnInk';
-export const URN_ART = 'urnArt';
+export const ENCUMBERED_COLLATERAL = 'encumberedCollateral';
+export const ENCUMBERED_DEBT = 'encumberedDebt';
 export const urnState = {
   generate: (ilkName, urn) => ({
     id: `MCD_Vat.urns(${ilkName},${urn})`,
     contractName: 'MCD_VAT',
     call: ['urns(bytes32,address)(uint256,uint256)', toHex(ilkName), urn]
   }),
-  returns: [[URN_INK, fromWei], [URN_ART, fromWei]]
+  returns: [[ENCUMBERED_COLLATERAL, fromWei], [ENCUMBERED_DEBT, fromWei]]
 };
 
 export const VAULT_URN = 'vaultUrn';
@@ -175,11 +175,17 @@ export const vaultIlkAndUrn = {
   })
 };
 
-export const URN_INK_AND_ART = 'urnInkAndArt';
-export const urnInkAndArt = {
+export const URN_COLLATERAL_AND_DEBT = 'urnCollateralAndDebt';
+export const urnCollateralAndDebt = {
   generate: (ilk, urn) => ({
-    dependencies: [[URN_INK, ilk, urn], [URN_ART, ilk, urn]],
-    computed: (ink, art) => [ink, art]
+    dependencies: [
+      [ENCUMBERED_COLLATERAL, ilk, urn],
+      [ENCUMBERED_DEBT, ilk, urn]
+    ],
+    computed: (encumberedCollateral, encumberedDebt) => [
+      encumberedCollateral,
+      encumberedDebt
+    ]
   })
 };
 
@@ -194,29 +200,34 @@ export const vaultById = {
               .pipe(first())
               .toPromise()
               .then(([ilk, urn]) => {
-                watch(URN_INK_AND_ART, ilk, urn)
+                watch(URN_COLLATERAL_AND_DEBT, ilk, urn)
                   .pipe(first())
                   .toPromise()
-                  .then(([ink, art]) => {
-                    resolve([ilk, urn, ink, art]);
+                  .then(([encumberedCollateral, encumberedDebt]) => {
+                    resolve([ilk, urn, encumberedCollateral, encumberedDebt]);
                   });
               });
           })
       ]
     ],
-    computed: ([ilk, urn, ink, art]) => ({ ilk, urn, ink, art })
+    computed: ([ilk, urn, encumberedCollateral, encumberedDebt]) => ({
+      ilk,
+      urn,
+      encumberedCollateral,
+      encumberedDebt
+    })
   })
 };
 
-export const DUTY = 'duty';
-export const RHO = 'rho';
+export const ANNUAL_STABILITY_FEE = 'annualStabilityFee';
+export const FEE_UPDATE_TIMESTAMP = 'feeUpdateTimestamp';
 export const jugInfo = {
-  generate: (name) => ({
+  generate: name => ({
     id: `MCD_JUG.ilks(${name})`,
     contractName: 'MCD_JUG',
-    call: ['ilks(bytes32)(uint256,uint48)', toHex(name)],
+    call: ['ilks(bytes32)(uint256,uint48)', toHex(name)]
   }),
-  returns: [[DUTY, annualStabilityFee], [RHO]]
+  returns: [[ANNUAL_STABILITY_FEE, annualStabilityFee], [FEE_UPDATE_TIMESTAMP]]
 };
 
 export default {
@@ -233,7 +244,7 @@ export default {
   vaultUrn,
   vaultIlk,
   vaultIlkAndUrn,
-  urnInkAndArt,
+  urnCollateralAndDebt,
   vaultById,
   jugInfo
 };

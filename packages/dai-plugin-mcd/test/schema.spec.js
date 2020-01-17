@@ -39,14 +39,14 @@ import schemas, {
   ILK_PRICE,
   ILK_PRICES,
   UNLOCKED_COLLATERAL,
-  URN_INK,
-  URN_ART,
+  ENCUMBERED_COLLATERAL,
+  ENCUMBERED_DEBT,
   VAULT_URN,
   VAULT_ILK,
   VAULT_ILK_AND_URN,
   VAULT_BY_ID,
-  DUTY,
-  RHO
+  ANNUAL_STABILITY_FEE,
+  FEE_UPDATE_TIMESTAMP
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
@@ -303,18 +303,26 @@ test(UNLOCKED_COLLATERAL, async () => {
   expect(col).toEqual(fromWei(expected));
 });
 
-test(URN_INK, async () => {
+test(ENCUMBERED_COLLATERAL, async () => {
   const cdpId = 1;
   const expected = fromWei(1000000000000000000);
-  const ink = await maker.latest(URN_INK, 'ETH-A', await cdpMgr.getUrn(cdpId));
-  expect(ink).toEqual(expected);
+  const encumberedCollateral = await maker.latest(
+    ENCUMBERED_COLLATERAL,
+    'ETH-A',
+    await cdpMgr.getUrn(cdpId)
+  );
+  expect(encumberedCollateral).toEqual(expected);
 });
 
-test(URN_ART, async () => {
+test(ENCUMBERED_DEBT, async () => {
   const cdpId = 1;
   const expected = fromWei(995000000000000000);
-  const art = await maker.latest(URN_ART, 'ETH-A', await cdpMgr.getUrn(cdpId));
-  expect(art.toNumber()).toBeCloseTo(expected.toNumber());
+  const encumberedDebt = await maker.latest(
+    ENCUMBERED_DEBT,
+    'ETH-A',
+    await cdpMgr.getUrn(cdpId)
+  );
+  expect(encumberedDebt.toNumber()).toBeCloseTo(expected.toNumber());
 });
 
 test(VAULT_URN, async () => {
@@ -346,23 +354,26 @@ test(VAULT_BY_ID, async () => {
   const expectedUrn = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const expectedInk = fromWei(1000000000000000000);
   const expectedArt = fromWei(995000000000000000);
-  const { ilk, urn, ink, art } = await maker.latest(VAULT_BY_ID, cdpId);
+  const { ilk, urn, encumberedCollateral, encumberedDebt } = await maker.latest(
+    VAULT_BY_ID,
+    cdpId
+  );
 
   expect(ilk).toEqual(expectedIlk);
   expect(urn).toEqual(expectedUrn);
-  expect(ink).toEqual(expectedInk);
-  expect(art.toNumber()).toBeCloseTo(expectedArt.toNumber());
+  expect(encumberedCollateral).toEqual(expectedInk);
+  expect(encumberedDebt.toNumber()).toBeCloseTo(expectedArt.toNumber());
 });
 
-test(DUTY, async () => {
+test(ANNUAL_STABILITY_FEE, async () => {
   const expected = 0.04999999999989363;
-  const duty = await maker.latest(DUTY, 'ETH-A');
+  const duty = await maker.latest(ANNUAL_STABILITY_FEE, 'ETH-A');
   expect(duty).toEqual(expected);
 });
 
-test(RHO, async () => {
+test(FEE_UPDATE_TIMESTAMP, async () => {
   var timestamp = Math.round(new Date().getTime() / 1000);
-  const rho = await maker.latest(RHO, 'ETH-A');
+  const rho = await maker.latest(FEE_UPDATE_TIMESTAMP, 'ETH-A');
   // RHO is called in the beforeAll block
   expect(timestamp - rho).toBeLessThanOrEqual(10);
 });
