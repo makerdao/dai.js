@@ -47,10 +47,13 @@ import schemas, {
   VAULT_ILK_AND_URN,
   VAULT_BY_ID,
   ANNUAL_STABILITY_FEE,
-  FEE_UPDATE_TIMESTAMP,
+  DATE_STABILITY_FEES_LAST_LEVIED,
   TOTAL_SAVINGS_DAI,
   SAVINGS_DAI_BY_PROXY,
-  SAVINGS_DAI
+  SAVINGS_DAI,
+  DAI_SAVINGS_RATE,
+  ANNUAL_DAI_SAVINGS_RATE,
+  DATE_EARNINGS_LAST_ACCRUED
 } from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
@@ -386,11 +389,15 @@ test(ANNUAL_STABILITY_FEE, async () => {
   expect(annualStabilityFee).toEqual(expected);
 });
 
-test(FEE_UPDATE_TIMESTAMP, async () => {
+test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
   var timestamp = Math.round(new Date().getTime() / 1000);
-  const feeUpdateTimestamp = await maker.latest(FEE_UPDATE_TIMESTAMP, 'ETH-A');
-  // RHO is called in the beforeAll block
-  expect(timestamp - feeUpdateTimestamp).toBeLessThanOrEqual(10);
+  const dateStabilityFeesLastLevied = await maker.latest(
+    DATE_STABILITY_FEES_LAST_LEVIED,
+    'ETH-A'
+  );
+
+  expect(dateStabilityFeesLastLevied instanceof Date).toEqual(true);
+  expect(timestamp - dateStabilityFeesLastLevied).toBeLessThanOrEqual(10);
 });
 
 test(TOTAL_SAVINGS_DAI, async () => {
@@ -412,4 +419,28 @@ test(SAVINGS_DAI, async () => {
   const savingsDai = await maker.latest(SAVINGS_DAI, address);
   expect(savingsDai.symbol).toEqual('CHAI');
   expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
+});
+
+test(DAI_SAVINGS_RATE, async () => {
+  const daiSavingsRate = await maker.latest(DAI_SAVINGS_RATE);
+  expect(daiSavingsRate).toEqual(BigNumber('1.000000000315522921573372069'));
+});
+
+test(ANNUAL_DAI_SAVINGS_RATE, async () => {
+  const annualDaiSavingsRate = await maker.latest(ANNUAL_DAI_SAVINGS_RATE);
+  expect(annualDaiSavingsRate).toEqual(
+    BigNumber(
+      '0.999999999999999998903600959584714938425430352632298919434159277685511322388082342817131189583694'
+    )
+  );
+});
+
+test(DATE_EARNINGS_LAST_ACCRUED, async () => {
+  const timestamp = Math.round(new Date().getTime() / 1000);
+  const dateEarningsLastAccrued = await maker.latest(
+    DATE_EARNINGS_LAST_ACCRUED
+  );
+
+  expect(dateEarningsLastAccrued instanceof Date).toEqual(true);
+  expect(timestamp - dateEarningsLastAccrued).toBeLessThanOrEqual(10);
 });

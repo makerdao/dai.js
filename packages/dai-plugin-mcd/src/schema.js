@@ -221,14 +221,17 @@ export const vaultById = {
 };
 
 export const ANNUAL_STABILITY_FEE = 'annualStabilityFee';
-export const FEE_UPDATE_TIMESTAMP = 'feeUpdateTimestamp';
+export const DATE_STABILITY_FEES_LAST_LEVIED = 'dateStabilityFeesLastLevied';
 export const jugInfo = {
   generate: ilkName => ({
     id: `MCD_JUG.ilks(${ilkName})`,
     contractName: 'MCD_JUG',
     call: ['ilks(bytes32)(uint256,uint48)', toHex(ilkName)]
   }),
-  returns: [[ANNUAL_STABILITY_FEE, annualStabilityFee], [FEE_UPDATE_TIMESTAMP]]
+  returns: [
+    [ANNUAL_STABILITY_FEE, annualStabilityFee],
+    [DATE_STABILITY_FEES_LAST_LEVIED, val => new Date(val * 1000)]
+  ]
 };
 
 export const TOTAL_SAVINGS_DAI = 'totalSavingsDai';
@@ -274,6 +277,40 @@ export const savingsDai = {
   })
 };
 
+export const DAI_SAVINGS_RATE = 'daiSavingsRate';
+export const potDsr = {
+  generate: () => ({
+    id: `MCD_POT.dsr`,
+    contractName: 'MCD_POT',
+    call: ['dsr()(uint256)']
+  }),
+  returns: [[DAI_SAVINGS_RATE, fromRay]]
+};
+
+export const ANNUAL_DAI_SAVINGS_RATE = 'annualDaiSavingsRate';
+export const annualDaiSavingsRate = {
+  generate: () => ({
+    dependencies: () => [[DAI_SAVINGS_RATE]],
+    computed: daiSavingsRate =>
+      daiSavingsRate
+        .pow(365 * 24 * 60 * 60)
+        .minus(1)
+        .times(100)
+  })
+};
+
+export const DATE_EARNINGS_LAST_ACCRUED = 'dateEarningsLastAccrued';
+export const potRho = {
+  generate: () => ({
+    id: `MCD_POT.rho`,
+    contractName: 'MCD_POT',
+    call: ['rho()(uint256)']
+  }),
+  returns: [
+    [DATE_EARNINGS_LAST_ACCRUED, val => new Date(val.toNumber() * 1000)]
+  ]
+};
+
 export default {
   vatIlks,
   proxies,
@@ -293,5 +330,8 @@ export default {
   jugInfo,
   potPie,
   potpie,
-  savingsDai
+  savingsDai,
+  potDsr,
+  annualDaiSavingsRate,
+  potRho
 };
