@@ -109,7 +109,7 @@ export default class QueryApi extends PublicService {
       nodes
     }
     }`;
-    const response = await this.getQueryResponse(this.serverUrl, query);
+    const response = await this.getQueryResponseMemoized(this.serverUrl, query);
     return response.timeToBlockNumber.nodes[0];
   }
 
