@@ -403,22 +403,22 @@ test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
   expect(timestamp - dateStabilityFeesLastLevied).toBeLessThanOrEqual(10);
 });
 
-xtest(TOTAL_SAVINGS_DAI, async () => {
+test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
   expect(totalSavingsDai.symbol).toEqual('CHAI');
   expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
 });
 
-xtest(SAVINGS_DAI_BY_PROXY, async () => {
+test(SAVINGS_DAI_BY_PROXY, async () => {
   const savingsDaiByProxy = await maker.latest(
     SAVINGS_DAI_BY_PROXY,
     await proxyService.getProxyAddress()
-    );
-    expect(savingsDaiByProxy.symbol).toEqual('CHAI');
-    expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
-  });
-  
-xtest(SAVINGS_DAI, async () => {
+  );
+  expect(savingsDaiByProxy.symbol).toEqual('CHAI');
+  expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
+});
+
+test(SAVINGS_DAI, async () => {
   const savingsDai = await maker.latest(SAVINGS_DAI, address);
   expect(savingsDai.symbol).toEqual('CHAI');
   expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
