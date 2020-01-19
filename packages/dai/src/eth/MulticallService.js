@@ -2,7 +2,7 @@ import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
 import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
-import { map, first } from 'rxjs/operators';
+import { map, first, flatMap } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -166,15 +166,46 @@ export default class MulticallService extends PublicService {
           ? generatedSchema.dependencies(this.watchObservable.bind(this))
           : generatedSchema.dependencies;
 
-      const dependencySubs = dependencies.map(dep => {
-        // TODO: This should allow a single string/func as well as a string array
-        const key = dep.shift();
+      const recurseDependencyTree = trie => {
+        let key = trie.shift();
         // This is a promise dependency
         if (typeof key === 'function') {
           return from(key());
         }
-        return this.watchObservable(key, ...dep);
-      });
+
+        let atLeafNode = false;
+        const [checker] = trie;
+        if (!Array.isArray(checker)) {
+          atLeafNode = true;
+        }
+
+        if (Array.isArray(trie) && !atLeafNode) {
+          if (trie.length > 1) {
+            return combineLatest(trie.map(recurseDependencyTree)).pipe(
+              flatMap(result => {
+                return this.watchObservable(key, ...result);
+              })
+            );
+          } else {
+            const next = trie.shift();
+            console.log(next);
+            return recurseDependencyTree(next).pipe(
+              flatMap(result => {
+                return Array.isArray(result)
+                  ? this.watchObservable(key, ...result)
+                  : this.watchObservable(key, result);
+              })
+            );
+          }
+        } else {
+          if (Array.isArray(trie) && trie.length === 0)
+            return this.watchObservable(key);
+          return this.watchObservable(key, ...trie);
+        }
+      };
+
+      const dependencySubs = dependencies.map(recurseDependencyTree);
+
       const observerLatest = combineLatest(dependencySubs).pipe(
         map(result => generatedSchema.computed(...result))
       );

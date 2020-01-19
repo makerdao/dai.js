@@ -193,25 +193,13 @@ export const urnCollateralAndDebt = {
 export const VAULT_BY_ID = 'vaultById';
 export const vaultById = {
   generate: id => ({
-    dependencies: watch => [
-      [
-        () =>
-          new Promise(resolve => {
-            watch(VAULT_ILK_AND_URN, id)
-              .pipe(first())
-              .toPromise()
-              .then(([ilk, urn]) => {
-                watch(URN_COLLATERAL_AND_DEBT, ilk, urn)
-                  .pipe(first())
-                  .toPromise()
-                  .then(([encumberedCollateral, encumberedDebt]) => {
-                    resolve([ilk, urn, encumberedCollateral, encumberedDebt]);
-                  });
-              });
-          })
-      ]
+    dependencies: [
+      [VAULT_ILK, id],
+      [VAULT_URN, id],
+      [ENCUMBERED_COLLATERAL, [VAULT_ILK, id], [VAULT_URN, id]],
+      [ENCUMBERED_DEBT, [VAULT_ILK, id], [VAULT_URN, id]]
     ],
-    computed: ([ilk, urn, encumberedCollateral, encumberedDebt]) => ({
+    computed: (ilk, urn, encumberedCollateral, encumberedDebt) => ({
       ilk,
       urn,
       encumberedCollateral,
@@ -257,22 +245,7 @@ export const potpie = {
 export const SAVINGS_DAI = 'savingsDai';
 export const savingsDai = {
   generate: address => ({
-    dependencies: watch => [
-      [
-        () =>
-          new Promise(resolve => {
-            watch(PROXY_ADDRESS, address)
-              .pipe(first())
-              .toPromise()
-              .then(proxyAddress => {
-                watch(SAVINGS_DAI_BY_PROXY, proxyAddress)
-                  .pipe(first())
-                  .toPromise()
-                  .then(resolve);
-              });
-          })
-      ]
-    ],
+    dependencies: [[SAVINGS_DAI_BY_PROXY, [PROXY_ADDRESS, address]]],
     computed: savingsDai => savingsDai
   })
 };
@@ -323,7 +296,8 @@ export const liquidatorState = {
   returns: [
     [LIQUIDATOR_ADDRESS],
     [LIQUIDATION_PENALTY, liquidationPenalty],
-    [MAX_AUCTION_LOT_SIZE, v => BigNumber(v).shiftedBy(-18)]]
+    [MAX_AUCTION_LOT_SIZE, v => BigNumber(v).shiftedBy(-18)]
+  ]
 };
 
 export default {

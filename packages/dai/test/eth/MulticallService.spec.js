@@ -8,10 +8,12 @@ import { first } from 'rxjs/operators';
 let service;
 let watcher;
 let address;
+let addressWithProxy;
 
 beforeEach(async () => {
   service = buildTestMulticallService();
   await service.manager().authenticate();
+  addressWithProxy = service.get('web3').currentAddress();
   address = TestAccountProvider.nextAddress();
   watcher = service.createWatcher({ interval: 'block' });
   service.registerSchemas(schemas);
@@ -123,4 +125,10 @@ test('watch same computed observable with dynamically generated dependencies mor
 
   expect(ilkDebtCeilings1).toEqual([100000, 5000]);
   expect(ilkDebtCeilings2).toEqual([100000, 5000]);
+});
+
+test('watch computed observable which chains calls to base observables', async () => {
+  const observable = service.watchObservable('testComputed4', address);
+  const res = await observable.pipe(first()).toPromise();
+  expect(res).toEqual(0);
 });

@@ -62,7 +62,7 @@ export const ilkDebt = {
       ['debtScalingFactor', ilkName]
     ],
     computed: (art, rate) => {
-      console.log('ilkDebt computed:', art, rate)
+      console.log('ilkDebt computed:', art, rate);
       return debtValue(art, rate);
     }
   })
@@ -70,21 +70,17 @@ export const ilkDebt = {
 
 export const testComputed1 = {
   generate: ilkName => ({
-    dependencies: [
-      ['debtScalingFactor', ilkName],
-      ['debtCeiling', ilkName]
-    ],
-    computed: (debtScalingFactor, debtCeiling) => Number(debtScalingFactor) + Number(debtCeiling)
-  }),
+    dependencies: [['debtScalingFactor', ilkName], ['debtCeiling', ilkName]],
+    computed: (debtScalingFactor, debtCeiling) =>
+      Number(debtScalingFactor) + Number(debtCeiling)
+  })
 };
 
 export const testComputed2 = {
   generate: multiplyBy => ({
-    dependencies: [
-      ['testComputed1', 'ETH-A']
-    ],
+    dependencies: [['testComputed1', 'ETH-A']],
     computed: testComputed1 => testComputed1 * multiplyBy
-  }),
+  })
 };
 
 export const testComputed3 = {
@@ -94,6 +90,31 @@ export const testComputed3 = {
       [() => new Promise(resolve => resolve(multiplyBy))]
     ],
     computed: (testComputed2, promiseResult) => testComputed2 * promiseResult
+  })
+};
+
+export const proxies = {
+  generate: address => ({
+    id: `PROXY_REGISTRY.proxies(${address})`,
+    contractName: 'PROXY_REGISTRY',
+    call: ['proxies(address)(address)', address]
+  }),
+  returns: [['proxyAddress']]
+};
+
+export const potpie = {
+  generate: proxyAddress => ({
+    id: `MCD_POT.pie(${proxyAddress})`,
+    contractName: 'MCD_POT',
+    call: ['pie(address)(uint256)', proxyAddress]
+  }),
+  returns: [['savingsDaiByProxy']]
+};
+
+export const testComputed4 = {
+  generate: address => ({
+    dependencies: [['savingsDaiByProxy', ['proxyAddress', address]]],
+    computed: res => Number(res)
   })
 };
 
@@ -111,5 +132,8 @@ export default {
   testComputed1,
   testComputed2,
   testComputed3,
+  proxies,
+  potpie,
+  testComputed4,
   ilkDebtCeilings
 };

@@ -418,11 +418,15 @@ test(SAVINGS_DAI_BY_PROXY, async () => {
   expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
 });
 
-test(SAVINGS_DAI, async () => {
-  const savingsDai = await maker.latest(SAVINGS_DAI, address);
-  expect(savingsDai.symbol).toEqual('CHAI');
-  expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
-});
+test(
+  SAVINGS_DAI,
+  async () => {
+    const savingsDai = await maker.latest(SAVINGS_DAI, address);
+    expect(savingsDai.symbol).toEqual('CHAI');
+    expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
+  },
+  10000
+);
 
 test(DAI_SAVINGS_RATE, async () => {
   const daiSavingsRate = await maker.latest(DAI_SAVINGS_RATE);
