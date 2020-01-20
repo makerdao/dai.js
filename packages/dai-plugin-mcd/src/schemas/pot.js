@@ -10,7 +10,7 @@ import {
 
 export const potPie = {
   generate: () => ({
-    id: `MCD_POT.Pie`,
+    id: 'MCD_POT.Pie',
     contractName: 'MCD_POT',
     call: ['Pie()(uint256)']
   }),
@@ -28,7 +28,7 @@ export const potpie = {
 
 export const potDsr = {
   generate: () => ({
-    id: `MCD_POT.dsr`,
+    id: 'MCD_POT.dsr',
     contractName: 'MCD_POT',
     call: ['dsr()(uint256)']
   }),
@@ -37,7 +37,7 @@ export const potDsr = {
 
 export const potRho = {
   generate: () => ({
-    id: `MCD_POT.rho`,
+    id: 'MCD_POT.rho',
     contractName: 'MCD_POT',
     call: ['rho()(uint256)']
   }),

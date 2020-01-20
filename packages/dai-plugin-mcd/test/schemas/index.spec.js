@@ -191,40 +191,6 @@ test(ILK_PRICES, async () => {
   expect(batAPrice.symbol).toEqual('USD/BAT');
 });
 
-test(UNLOCKED_COLLATERAL, async () => {
-  const cdpId = 1;
-  const expected = 0;
-  const col = await maker.latest(
-    UNLOCKED_COLLATERAL,
-    'ETH-A',
-    await cdpMgr.getUrn(cdpId)
-  );
-
-  expect(col).toEqual(fromWei(expected));
-});
-
-test(ENCUMBERED_COLLATERAL, async () => {
-  const cdpId = 1;
-  const expected = fromWei(1000000000000000000);
-  const encumberedCollateral = await maker.latest(
-    ENCUMBERED_COLLATERAL,
-    'ETH-A',
-    await cdpMgr.getUrn(cdpId)
-  );
-  expect(encumberedCollateral).toEqual(expected);
-});
-
-test(ENCUMBERED_DEBT, async () => {
-  const cdpId = 1;
-  const expected = fromWei(995000000000000000);
-  const encumberedDebt = await maker.latest(
-    ENCUMBERED_DEBT,
-    'ETH-A',
-    await cdpMgr.getUrn(cdpId)
-  );
-  expect(encumberedDebt.toNumber()).toBeCloseTo(expected.toNumber());
-});
-
 test(VAULT_URN, async () => {
   const cdpId = 1;
   const expected = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
@@ -265,6 +231,16 @@ test(VAULT_BY_ID, async () => {
   expect(encumberedDebt.toNumber()).toBeCloseTo(expectedArt.toNumber());
 });
 
+test(
+  SAVINGS_DAI,
+  async () => {
+    const savingsDai = await maker.latest(SAVINGS_DAI, address);
+    expect(savingsDai.symbol).toEqual('CHAI');
+    expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
+  },
+  10000
+);
+
 test(ANNUAL_STABILITY_FEE, async () => {
   const expected = 0.04999999999989363;
   const annualStabilityFee = await maker.latest(ANNUAL_STABILITY_FEE, 'ETH-A');
@@ -280,55 +256,6 @@ test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
 
   expect(dateStabilityFeesLastLevied instanceof Date).toEqual(true);
   expect(timestamp - dateStabilityFeesLastLevied).toBeLessThanOrEqual(10);
-});
-
-test(TOTAL_SAVINGS_DAI, async () => {
-  const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
-  expect(totalSavingsDai.symbol).toEqual('CHAI');
-  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
-});
-
-test(SAVINGS_DAI_BY_PROXY, async () => {
-  const savingsDaiByProxy = await maker.latest(
-    SAVINGS_DAI_BY_PROXY,
-    await proxyService.getProxyAddress()
-  );
-  expect(savingsDaiByProxy.symbol).toEqual('CHAI');
-  expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
-});
-
-test(
-  SAVINGS_DAI,
-  async () => {
-    const savingsDai = await maker.latest(SAVINGS_DAI, address);
-    expect(savingsDai.symbol).toEqual('CHAI');
-    expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
-  },
-  10000
-);
-
-test(DAI_SAVINGS_RATE, async () => {
-  const daiSavingsRate = await maker.latest(DAI_SAVINGS_RATE);
-  expect(daiSavingsRate).toEqual(BigNumber('1.000000000315522921573372069'));
-});
-
-test(ANNUAL_DAI_SAVINGS_RATE, async () => {
-  const annualDaiSavingsRate = await maker.latest(ANNUAL_DAI_SAVINGS_RATE);
-  expect(annualDaiSavingsRate).toEqual(
-    BigNumber(
-      '0.999999999999999998903600959584714938425430352632298919434159277685511322388082342817131189583694'
-    )
-  );
-});
-
-test(DATE_EARNINGS_LAST_ACCRUED, async () => {
-  const timestamp = Math.round(new Date().getTime() / 1000);
-  const dateEarningsLastAccrued = await maker.latest(
-    DATE_EARNINGS_LAST_ACCRUED
-  );
-
-  expect(dateEarningsLastAccrued instanceof Date).toEqual(true);
-  expect(timestamp - dateEarningsLastAccrued).toBeLessThanOrEqual(10);
 });
 
 test(LIQUIDATOR_ADDRESS, async () => {
