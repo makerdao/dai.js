@@ -8,12 +8,10 @@ import { first } from 'rxjs/operators';
 let service;
 let watcher;
 let address;
-let addressWithProxy;
 
 beforeEach(async () => {
   service = buildTestMulticallService();
   await service.manager().authenticate();
-  addressWithProxy = service.get('web3').currentAddress();
   address = TestAccountProvider.nextAddress();
   watcher = service.createWatcher({ interval: 'block' });
   service.registerSchemas(schemas);
