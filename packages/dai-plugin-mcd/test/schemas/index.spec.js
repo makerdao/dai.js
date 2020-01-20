@@ -197,21 +197,3 @@ test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
   expect(dateStabilityFeesLastLevied instanceof Date).toEqual(true);
   expect(timestamp - dateStabilityFeesLastLevied).toBeLessThanOrEqual(10);
 });
-
-test(LIQUIDATOR_ADDRESS, async () => {
-  const expected = '0x55320248dC50Ef6dABc88ECbc294Fd5e2e1f4eC6';
-  const address = await maker.latest(LIQUIDATOR_ADDRESS, 'ETH-A');
-  expect(address).toEqual(expected);
-});
-
-test(LIQUIDATION_PENALTY, async () => {
-  const expected = 0.05;
-  const liquidationPenalty = await maker.latest(LIQUIDATION_PENALTY, 'ETH-A');
-  expect(liquidationPenalty).toEqual(expected);
-});
-
-test(MAX_AUCTION_LOT_SIZE, async () => {
-  const expected = BigNumber('1.5');
-  const maxLotSize = await maker.latest(MAX_AUCTION_LOT_SIZE, 'ETH-A');
-  expect(maxLotSize).toEqual(expected);
-});
