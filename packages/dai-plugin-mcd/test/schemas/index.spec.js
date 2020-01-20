@@ -15,24 +15,8 @@ import { ServiceRoles } from '../../src/constants';
 import BigNumber from 'bignumber.js';
 
 import schemas, {
-  TOTAL_ENCUMBERED_DEBT,
-  DEBT_SCALING_FACTOR,
-  PRICE_WITH_SAFETY_MARGIN,
-  DEBT_CEILING,
-  URN_DEBT_FLOOR,
-  TOTAL_DAI_SUPPLY,
-  PRICE_FEED_ADDRESS,
-  RAW_LIQUIDATION_RATIO,
-  RATIO_DAI_USD,
-  LIQUIDATION_RATIO,
   ILK_PRICE,
   ILK_PRICES,
-  UNLOCKED_COLLATERAL,
-  ENCUMBERED_COLLATERAL,
-  ENCUMBERED_DEBT,
-  PROXY_ADDRESS,
-  VAULT_URN,
-  VAULT_ILK,
   VAULT_ILK_AND_URN,
   VAULT_BY_ID,
   DATE_STABILITY_FEES_LAST_LEVIED,
@@ -114,9 +98,6 @@ beforeAll(async () => {
   cdpTypeService = maker.service(ServiceRoles.CDP_TYPE);
   proxyService = maker.service('proxy');
   vault = await setupFn();
-
-  ethAInfo = await cdpTypeService.getCdpType(ETH, 'ETH-A').ilkInfo();
-  batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
 });
 
 afterAll(async () => {
@@ -180,20 +161,3 @@ test(
   },
   10000
 );
-
-test(ANNUAL_STABILITY_FEE, async () => {
-  const expected = 0.04999999999989363;
-  const annualStabilityFee = await maker.latest(ANNUAL_STABILITY_FEE, 'ETH-A');
-  expect(annualStabilityFee).toEqual(expected);
-});
-
-test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
-  var timestamp = Math.round(new Date().getTime() / 1000);
-  const dateStabilityFeesLastLevied = await maker.latest(
-    DATE_STABILITY_FEES_LAST_LEVIED,
-    'ETH-A'
-  );
-
-  expect(dateStabilityFeesLastLevied instanceof Date).toEqual(true);
-  expect(timestamp - dateStabilityFeesLastLevied).toBeLessThanOrEqual(10);
-});
