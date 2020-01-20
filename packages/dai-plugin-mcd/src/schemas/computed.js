@@ -10,7 +10,8 @@ import {
   VAULT_URN,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
-  SAVINGS_DAI_BY_PROXY
+  SAVINGS_DAI_BY_PROXY,
+  PROXY_ADDRESS
 } from './constants';
 
 export const ilkPrice = {
