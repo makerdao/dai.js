@@ -1,6 +1,6 @@
 /* eslint-disable */
-import { mcdMaker, setupCollateral } from './helpers';
-import { ETH, BAT, MDAI, USD } from '../src';
+import { mcdMaker, setupCollateral } from '../helpers';
+import { ETH, BAT, MDAI, USD } from '../../src';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import {
   toHex,
@@ -10,9 +10,44 @@ import {
   isBigNumber,
   isCurrency,
   isValidAddressString
-} from '../src/utils';
-import { ServiceRoles } from '../src/constants';
+} from '../../src/utils';
+import { ServiceRoles } from '../../src/constants';
 import BigNumber from 'bignumber.js';
+
+import schemas, {
+  TOTAL_ENCUMBERED_DEBT,
+  DEBT_SCALING_FACTOR,
+  PRICE_WITH_SAFETY_MARGIN,
+  DEBT_CEILING,
+  URN_DEBT_FLOOR,
+  TOTAL_DAI_SUPPLY,
+  PRICE_FEED_ADDRESS,
+  RAW_LIQUIDATION_RATIO,
+  RATIO_DAI_USD,
+  LIQUIDATION_RATIO,
+  ILK_PRICE,
+  ILK_PRICES,
+  UNLOCKED_COLLATERAL,
+  ENCUMBERED_COLLATERAL,
+  ENCUMBERED_DEBT,
+  PROXY_ADDRESS,
+  VAULT_URN,
+  VAULT_ILK,
+  VAULT_ILK_AND_URN,
+  VAULT_BY_ID,
+  DATE_STABILITY_FEES_LAST_LEVIED,
+  ANNUAL_STABILITY_FEE,
+  TOTAL_SAVINGS_DAI,
+  SAVINGS_DAI_BY_PROXY,
+  SAVINGS_DAI,
+  DAI_SAVINGS_RATE,
+  ANNUAL_DAI_SAVINGS_RATE,
+  DATE_EARNINGS_LAST_ACCRUED,
+  LIQUIDATOR_ADDRESS,
+  LIQUIDATION_PENALTY,
+  MAX_AUCTION_LOT_SIZE
+} from '../../src/schemas';
+
 let mcall,
   maker,
   address,
@@ -24,40 +59,6 @@ let mcall,
   ethAInfo,
   batAInfo,
   vault;
-
-import schemas, {
-  TOTAL_ENCUMBERED_DEBT,
-  DEBT_SCALING_FACTOR,
-  PRICE_WITH_SAFETY_MARGIN,
-  DEBT_CEILING,
-  URN_DEBT_FLOOR,
-  PROXY_ADDRESS,
-  TOTAL_DAI_SUPPLY,
-  PRICE_FEED_ADDRESS,
-  RAW_LIQUIDATION_RATIO,
-  RATIO_DAI_USD,
-  LIQUIDATION_RATIO,
-  ILK_PRICE,
-  ILK_PRICES,
-  UNLOCKED_COLLATERAL,
-  ENCUMBERED_COLLATERAL,
-  ENCUMBERED_DEBT,
-  VAULT_URN,
-  VAULT_ILK,
-  VAULT_ILK_AND_URN,
-  VAULT_BY_ID,
-  ANNUAL_STABILITY_FEE,
-  DATE_STABILITY_FEES_LAST_LEVIED,
-  TOTAL_SAVINGS_DAI,
-  SAVINGS_DAI_BY_PROXY,
-  SAVINGS_DAI,
-  DAI_SAVINGS_RATE,
-  ANNUAL_DAI_SAVINGS_RATE,
-  DATE_EARNINGS_LAST_ACCRUED,
-  LIQUIDATOR_ADDRESS,
-  LIQUIDATION_PENALTY,
-  MAX_AUCTION_LOT_SIZE
-} from '../src/schema';
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);

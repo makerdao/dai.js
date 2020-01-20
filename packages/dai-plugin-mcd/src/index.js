@@ -15,7 +15,6 @@ import SystemDataService from './SystemDataService';
 import QueryApiMcdService from './QueryApiMcdService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
-import schema from './schema';
 
 export const ServiceRoles = ServiceRoles_;
 const {
@@ -78,8 +77,6 @@ export const OMG = createCurrency('OMG');
 export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
-
-export const mcdSchema = schema;
 
 const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },

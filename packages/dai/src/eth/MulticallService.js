@@ -191,7 +191,6 @@ export default class MulticallService extends PublicService {
             );
           } else {
             const next = trie.shift();
-            console.log(next);
             return recurseDependencyTree(next).pipe(
               flatMap(result => {
                 return Array.isArray(result)
@@ -235,7 +234,6 @@ export default class MulticallService extends PublicService {
       if (!this._watcherUpdates) {
         log2('Subscribed to watcher updates');
         this._watcherUpdates = this._watcher.subscribe(update => {
-          // console.log('(MulticallService) Got update:', update)
           const subject = get(this._subjects, update.type);
           if (subject) subject.next(update.value);
         });
