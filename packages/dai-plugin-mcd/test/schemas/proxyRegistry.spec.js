@@ -2,8 +2,7 @@ import { mcdMaker } from '../helpers';
 import {
   takeSnapshot,
   restoreSnapshot,
-  TestAccountProvider,
-  mineBlocks
+  TestAccountProvider
 } from '@makerdao/test-helpers';
 import { isValidAddressString } from '../../src/utils';
 
