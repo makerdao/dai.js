@@ -90,5 +90,6 @@ export default {
   ilkPrices,
   vaultIlkAndUrn,
   urnCollateralAndDebt,
-  vaultById
+  vaultById,
+  savingsDai
 };
