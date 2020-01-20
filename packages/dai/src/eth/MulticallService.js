@@ -101,6 +101,10 @@ export default class MulticallService extends PublicService {
     return this._schemaByObservableKey[key];
   }
 
+  get observableKeys() {
+    return Object.keys(this._schemaByObservableKey);
+  }
+
   registerSchemas(schemas) {
     if (typeof schemas !== 'object')
       throw new Error('Schemas must be object or array');
