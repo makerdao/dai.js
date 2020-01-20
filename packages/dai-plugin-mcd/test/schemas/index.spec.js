@@ -123,52 +123,6 @@ afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
 });
 
-test(PRICE_FEED_ADDRESS, async () => {
-  const ethAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'ETH-A');
-  const batAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'BAT-A');
-
-  expect(isValidAddressString(ethAPriceFeedAddress)).toEqual(true);
-  expect(isValidAddressString(batAPriceFeedAddress)).toEqual(true);
-
-  expect(ethAPriceFeedAddress).toEqual(
-    '0xb0ae8c0856259C6fe000F8e2C14507E5FC167D48'
-  );
-  expect(batAPriceFeedAddress).toEqual(
-    '0x80f178c7b47cb635Ceb12aBB891338744e98365C'
-  );
-});
-
-test(RAW_LIQUIDATION_RATIO, async () => {
-  const ethARawLiquidationRatio = await maker.latest(
-    RAW_LIQUIDATION_RATIO,
-    'ETH-A'
-  );
-  const batARawLiquidationRatio = await maker.latest(
-    RAW_LIQUIDATION_RATIO,
-    'BAT-A'
-  );
-
-  expect(ethARawLiquidationRatio).toEqual(BigNumber('1.5'));
-  expect(batARawLiquidationRatio).toEqual(BigNumber('2.0'));
-});
-
-test(LIQUIDATION_RATIO, async () => {
-  const ethALiquidationRatio = await maker.latest(LIQUIDATION_RATIO, 'ETH-A');
-  const batALiquidationRatio = await maker.latest(LIQUIDATION_RATIO, 'BAT-A');
-
-  expect(ethALiquidationRatio.symbol).toEqual('(ETH/USD)/(MDAI/USD)');
-  expect(batALiquidationRatio.symbol).toEqual('(BAT/USD)/(MDAI/USD)');
-
-  expect(ethALiquidationRatio.toNumber()).toEqual(1.5);
-  expect(batALiquidationRatio.toNumber()).toEqual(2.0);
-});
-
-test(RATIO_DAI_USD, async () => {
-  const ratio = await maker.latest(RATIO_DAI_USD);
-  expect(ratio.symbol).toEqual('MDAI/USD');
-  expect(ratio.toNumber()).toEqual(1);
-});
-
 test(ILK_PRICE, async () => {
   const ethAPrice = await maker.latest(ILK_PRICE, 'ETH-A');
   expect(ethAPrice.toNumber()).toEqual(180);
@@ -189,20 +143,6 @@ test(ILK_PRICES, async () => {
   expect(ethAPrice.symbol).toEqual('USD/ETH');
   expect(ethBPrice.symbol).toEqual('USD/ETH');
   expect(batAPrice.symbol).toEqual('USD/BAT');
-});
-
-test(VAULT_URN, async () => {
-  const cdpId = 1;
-  const expected = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
-  const urn = await maker.latest(VAULT_URN, cdpId);
-  expect(urn).toEqual(expected);
-});
-
-test(VAULT_ILK, async () => {
-  const cdpId = 1;
-  const expected = 'ETH-A';
-  const ilk = await maker.latest(VAULT_ILK, cdpId);
-  expect(ilk).toEqual(expected);
 });
 
 test(VAULT_ILK_AND_URN, async () => {
