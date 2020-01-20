@@ -24,6 +24,7 @@ export default class MulticallService extends PublicService {
 
   initialize() {
     this.watch = this.watchObservable;
+    this._addresses = this.get('smartContract').getContractAddresses();
   }
 
   createWatcher({
@@ -101,8 +102,6 @@ export default class MulticallService extends PublicService {
   }
 
   registerSchemas(schemas) {
-    this._addresses = this.get('smartContract').getContractAddresses();
-
     if (typeof schemas !== 'object')
       throw new Error('Schemas must be object or array');
 
