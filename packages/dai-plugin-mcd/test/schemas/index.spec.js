@@ -123,13 +123,6 @@ afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
 });
 
-test(PROXY_ADDRESS, async () => {
-  const proxyAddress = await maker.latest(PROXY_ADDRESS, address);
-
-  expect(isValidAddressString(proxyAddress)).toEqual(true);
-  expect(proxyAddress).toEqual('0x570074CCb147ea3dE2E23fB038D4d78324278886');
-});
-
 test(TOTAL_ENCUMBERED_DEBT, async () => {
   // TODO Define hardcoded rates for given ilks outside of the system and test
   // against those rather than data extracted from the chain
