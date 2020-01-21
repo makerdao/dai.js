@@ -1,5 +1,5 @@
 import { fromRay } from '../utils';
-import { CHAI } from '../..';
+import { CHAI } from '..';
 
 import {
   TOTAL_SAVINGS_DAI,
