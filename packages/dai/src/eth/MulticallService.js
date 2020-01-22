@@ -145,6 +145,13 @@ export default class MulticallService extends PublicService {
     const schema = this.schemaByObservableKey(key);
     if (!schema)
       throw new Error(`No registered schema found for observable key: ${key}`);
+    if (args.length < schema.generate.length)
+      throw new Error(
+        `Observable ${key} expects at least ${schema.generate.length} argument${
+          schema.generate.length > 1 ? 's' : ''
+        }`
+      );
+
     const generatedSchema = schema.generate(...args);
     log2(
       `watchObservable() called for ${
@@ -267,10 +274,9 @@ export default class MulticallService extends PublicService {
         schema.watching[path]--;
         log2('Schema subscribers:', schema.watching[path]);
         if (schema.watching[path] === 0) {
-          // Tap multicall to remove schema (last unsubscriber to this schema)
+          // Tap multicall to remove schema (last unsubscriber from this schema)
           log2(`Schema removed from multicall: ${generatedSchema.id}`);
           this._watcher.tap(schemas =>
-            // TODO: make backwards compatible by checking undefined
             schemas.filter(({ id }) => id !== generatedSchema.id)
           );
           this._watcher.tap(s => {
