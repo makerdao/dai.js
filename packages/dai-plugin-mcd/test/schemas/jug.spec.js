@@ -1,10 +1,12 @@
 import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 
-import schemas, {
+import {
   ANNUAL_STABILITY_FEE,
   DATE_STABILITY_FEES_LAST_LEVIED
 } from '../../src/schemas';
+
+import jugSchemas from '../../src/schemas/jug';
 
 let maker, snapshotData;
 
@@ -15,7 +17,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(jugSchemas);
   maker.service('multicall').start();
 });
 
@@ -30,7 +32,7 @@ test(ANNUAL_STABILITY_FEE, async () => {
 });
 
 test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
-  var timestamp = Math.round(new Date().getTime() / 1000);
+  const timestamp = Math.round(new Date().getTime() / 1000);
   const dateStabilityFeesLastLevied = await maker.latest(
     DATE_STABILITY_FEES_LAST_LEVIED,
     'ETH-A'

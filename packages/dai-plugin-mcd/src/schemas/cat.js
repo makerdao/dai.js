@@ -9,10 +9,10 @@ import {
 } from './constants';
 
 export const catIlks = {
-  generate: ilkName => ({
-    id: `MCD_CAT.ilks(${ilkName})`,
+  generate: collateralTypeName => ({
+    id: `MCD_CAT.ilks(${collateralTypeName})`,
     contractName: 'MCD_CAT',
-    call: ['ilks(bytes32)(address,uint256,uint256)', toHex(ilkName)]
+    call: ['ilks(bytes32)(address,uint256,uint256)', toHex(collateralTypeName)]
   }),
   returns: [
     [LIQUIDATOR_ADDRESS],

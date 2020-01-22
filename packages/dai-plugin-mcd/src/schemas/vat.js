@@ -7,7 +7,7 @@ import {
   DEBT_SCALING_FACTOR,
   PRICE_WITH_SAFETY_MARGIN,
   DEBT_CEILING,
-  URN_DEBT_FLOOR,
+  DEBT_FLOOR,
   TOTAL_DAI_SUPPLY,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
@@ -28,7 +28,7 @@ export const vatIlks = {
     [DEBT_SCALING_FACTOR, fromRay],
     [PRICE_WITH_SAFETY_MARGIN, fromRay],
     [DEBT_CEILING, v => MDAI(v, 'rad')],
-    [URN_DEBT_FLOOR, fromRad]
+    [DEBT_FLOOR, fromRad]
   ]
 };
 

@@ -3,7 +3,7 @@ export const TOTAL_ENCUMBERED_DEBT = 'totalEncumberedDebt';
 export const DEBT_SCALING_FACTOR = 'debtScalingFactor';
 export const PRICE_WITH_SAFETY_MARGIN = 'priceWithSafetyMargin';
 export const DEBT_CEILING = 'debtCeiling';
-export const URN_DEBT_FLOOR = 'urnDebtFloor';
+export const DEBT_FLOOR = 'debtFloor';
 export const TOTAL_DAI_SUPPLY = 'totalDaiSupply';
 export const ENCUMBERED_COLLATERAL = 'encumberedCollateral';
 export const ENCUMBERED_DEBT = 'encumberedDebt';
@@ -13,6 +13,7 @@ export const UNLOCKED_COLLATERAL = 'unlockedCollateral';
 export const PRICE_FEED_ADDRESS = 'priceFeedAddress';
 export const RAW_LIQUIDATION_RATIO = 'rawLiquidationRatio';
 export const RATIO_DAI_USD = 'ratioDaiUsd';
+export const LIQUIDATION_RATIO = 'liquidationRatio';
 
 // jug
 export const ANNUAL_STABILITY_FEE = 'annualStabilityFee';
@@ -22,8 +23,8 @@ export const DATE_STABILITY_FEES_LAST_LEVIED = 'dateStabilityFeesLastLevied';
 export const PROXY_ADDRESS = 'proxyAddress';
 
 // cdpManager
-export const VAULT_URN = 'vaultUrn';
-export const VAULT_ILK = 'vaultIlk';
+export const VAULT_ADDRESS = 'vaultAddress';
+export const VAULT_TYPE = 'vaultType';
 
 // pot
 export const TOTAL_SAVINGS_DAI = 'totalSavingsDai';
@@ -38,11 +39,10 @@ export const LIQUIDATION_PENALTY = 'liquidationPenalty';
 export const MAX_AUCTION_LOT_SIZE = 'maxAuctionLotSize';
 
 // computed
-export const LIQUIDATION_RATIO = 'liquidationRatio';
-export const ILK_PRICE = 'ilkPrice';
-export const ILK_PRICES = 'ilkPrices';
-export const VAULT_ILK_AND_URN = 'vaultIlkAndUrn';
-export const URN_COLLATERAL_AND_DEBT = 'urnCollateralAndDebt';
+export const COLLATERAL_TYPE_PRICE = 'collateralTypePrice';
+export const COLLATERAL_TYPES_PRICES = 'collateralTypesPrices';
+export const VAULT_TYPE_AND_ADDRESS = 'vaultTypeAndAddress';
+export const VAULT_COLLATERAL_AND_DEBT = 'vaultCollateralAndDebt';
 export const VAULT = 'vault';
 export const SAVINGS_DAI = 'savingsDai';
 export const DEBT_VALUE = 'debtValue';

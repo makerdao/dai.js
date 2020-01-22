@@ -5,17 +5,19 @@ import { ServiceRoles } from '../../src/constants';
 import { fromRay, fromWei, isBigNumber, isCurrency } from '../../src/utils';
 import BigNumber from 'bignumber.js';
 
-import schemas, {
+import {
   TOTAL_ENCUMBERED_DEBT,
   DEBT_SCALING_FACTOR,
   PRICE_WITH_SAFETY_MARGIN,
   DEBT_CEILING,
-  URN_DEBT_FLOOR,
+  DEBT_FLOOR,
   TOTAL_DAI_SUPPLY,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
   UNLOCKED_COLLATERAL
 } from '../../src/schemas';
+
+import vatSchemas from '../../src/schemas/vat';
 
 let maker, snapshotData, ethAInfo, batAInfo, cdpMgr, cdpTypeService;
 
@@ -38,7 +40,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(vatSchemas);
   maker.service('multicall').start();
   await setupCollateral(maker, 'ETH-A', {
     price: ETH_A_PRICE
@@ -76,8 +78,8 @@ test(TOTAL_ENCUMBERED_DEBT, async () => {
   const { rate: ethARate } = ethAInfo;
   const { rate: batARate } = batAInfo;
 
-  const ethADebtAmount = ETH_A_DEBT_AMOUNT._amount;
-  const batADebtAmount = BAT_A_DEBT_AMOUNT._amount;
+  const ethADebtAmount = ETH_A_DEBT_AMOUNT.toBigNumber();
+  const batADebtAmount = BAT_A_DEBT_AMOUNT.toBigNumber();
 
   const ethAEncumberedDebt = await maker.latest(TOTAL_ENCUMBERED_DEBT, 'ETH-A');
   const batAEncumberedDebt = await maker.latest(TOTAL_ENCUMBERED_DEBT, 'BAT-A');
@@ -153,15 +155,15 @@ test(DEBT_CEILING, async () => {
   expect(batADebtCeiling.isEqual(MDAI(5000))).toEqual(true);
 });
 
-test(URN_DEBT_FLOOR, async () => {
-  const ethAUrnDebtFloor = await maker.latest(URN_DEBT_FLOOR, 'ETH-A');
-  const batAUrnDebtFloor = await maker.latest(URN_DEBT_FLOOR, 'BAT-A');
+test(DEBT_FLOOR, async () => {
+  const ethADebtFloor = await maker.latest(DEBT_FLOOR, 'ETH-A');
+  const batADebtFloor = await maker.latest(DEBT_FLOOR, 'BAT-A');
 
-  expect(isBigNumber(ethAUrnDebtFloor)).toEqual(true);
-  expect(isBigNumber(batAUrnDebtFloor)).toEqual(true);
+  expect(isBigNumber(ethADebtFloor)).toEqual(true);
+  expect(isBigNumber(batADebtFloor)).toEqual(true);
 
-  expect(ethAUrnDebtFloor).toEqual(BigNumber('0'));
-  expect(batAUrnDebtFloor).toEqual(BigNumber('0'));
+  expect(ethADebtFloor).toEqual(BigNumber('0'));
+  expect(batADebtFloor).toEqual(BigNumber('0'));
 });
 
 test(TOTAL_DAI_SUPPLY, async () => {

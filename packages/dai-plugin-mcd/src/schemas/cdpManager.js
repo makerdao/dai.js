@@ -1,4 +1,4 @@
-import { VAULT_URN, VAULT_ILK } from './constants';
+import { VAULT_ADDRESS, VAULT_TYPE } from './constants';
 import { bytesToString } from '../utils';
 
 export const cdpManagerUrns = {
@@ -7,7 +7,7 @@ export const cdpManagerUrns = {
     contractName: 'CDP_MANAGER',
     call: ['urns(uint256)(address)', parseInt(id)]
   }),
-  returns: [VAULT_URN]
+  returns: [VAULT_ADDRESS]
 };
 
 export const cdpManagerIlks = {
@@ -16,7 +16,7 @@ export const cdpManagerIlks = {
     contractName: 'CDP_MANAGER',
     call: ['ilks(uint256)(bytes32)', parseInt(id)]
   }),
-  returns: [[VAULT_ILK, bytesToString]]
+  returns: [[VAULT_TYPE, bytesToString]]
 };
 
 export default {

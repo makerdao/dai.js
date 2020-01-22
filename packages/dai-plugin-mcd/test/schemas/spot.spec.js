@@ -2,13 +2,16 @@ import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import BigNumber from 'bignumber.js';
 import { isValidAddressString } from '../../src/utils';
+import testnetAddresses from '../../contracts/addresses/testnet';
 
-import schemas, {
+import {
   PRICE_FEED_ADDRESS,
   RAW_LIQUIDATION_RATIO,
   LIQUIDATION_RATIO,
   RATIO_DAI_USD
 } from '../../src/schemas';
+
+import spotSchemas from '../../src/schemas/spot';
 
 let maker, snapshotData;
 
@@ -19,7 +22,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(spotSchemas);
   maker.service('multicall').start();
 });
 
@@ -31,15 +34,13 @@ test(PRICE_FEED_ADDRESS, async () => {
   const ethAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'ETH-A');
   const batAPriceFeedAddress = await maker.latest(PRICE_FEED_ADDRESS, 'BAT-A');
 
+  const { PIP_ETH, PIP_BAT } = testnetAddresses;
+
   expect(isValidAddressString(ethAPriceFeedAddress)).toEqual(true);
   expect(isValidAddressString(batAPriceFeedAddress)).toEqual(true);
 
-  expect(ethAPriceFeedAddress).toEqual(
-    '0xb0ae8c0856259C6fe000F8e2C14507E5FC167D48'
-  );
-  expect(batAPriceFeedAddress).toEqual(
-    '0x80f178c7b47cb635Ceb12aBB891338744e98365C'
-  );
+  expect(ethAPriceFeedAddress.toLowerCase()).toEqual(PIP_ETH);
+  expect(batAPriceFeedAddress.toLowerCase()).toEqual(PIP_BAT);
 });
 
 test(RAW_LIQUIDATION_RATIO, async () => {

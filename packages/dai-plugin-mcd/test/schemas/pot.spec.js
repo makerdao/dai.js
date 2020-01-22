@@ -4,13 +4,15 @@ import { ETH, MDAI } from '../../src';
 import { ServiceRoles } from '../../src/constants';
 import BigNumber from 'bignumber.js';
 
-import schemas, {
+import {
   TOTAL_SAVINGS_DAI,
   SAVINGS_DAI_BY_PROXY,
   DAI_SAVINGS_RATE,
   ANNUAL_DAI_SAVINGS_RATE,
   DATE_EARNINGS_LAST_ACCRUED
 } from '../../src/schemas';
+
+import potSchemas from '../../src/schemas/pot';
 
 let maker, snapshotData, cdpMgr, saveService;
 
@@ -26,7 +28,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(potSchemas);
   maker.service('multicall').start();
   await setupCollateral(maker, 'ETH-A', {
     price: ETH_A_PRICE
@@ -54,8 +56,8 @@ afterAll(async () => {
 
 test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
-  expect(totalSavingsDai.symbol).toEqual('CHAI');
-  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
+  expect(totalSavingsDai.symbol).toEqual('DSR-DAI');
+  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.999795, 5);
 });
 
 test(SAVINGS_DAI_BY_PROXY, async () => {
@@ -63,7 +65,7 @@ test(SAVINGS_DAI_BY_PROXY, async () => {
     SAVINGS_DAI_BY_PROXY,
     await maker.service('proxy').getProxyAddress()
   );
-  expect(savingsDaiByProxy.symbol).toEqual('CHAI');
+  expect(savingsDaiByProxy.symbol).toEqual('DSR-DAI');
   expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
 });
 

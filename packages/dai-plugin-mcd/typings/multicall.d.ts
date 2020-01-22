@@ -3,7 +3,7 @@ declare global {
   interface CurrencyRatio {}
   interface VaultResult {
     /**
-     * The urn address of this vault.
+     * The address of this vault.
      *
      * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
      * tempor incididunt ut labore et dolore magna aliqua.
@@ -12,16 +12,16 @@ declare global {
      * console.log('test code');
      * ```
      */
-    urn: string;
+    vaultAddress: string;
 
     /**
-     * The price of this vault's ilk.
+     * The price of this vault's collateral type.
      *
      * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
      * tempor incididunt ut labore et dolore magna aliqua.
      *
      */
-    ilkPrice: CurrencyRatio;
+    collateralTypePrice: CurrencyRatio;
 
     /**
      * Lorem ipsum.
@@ -43,117 +43,93 @@ declare global {
   }
 
   interface WatchInterfaceMcd {
-
     /** Watch the total encumbered debt of a collateral type
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static totalEncumberedDebt(
-      ilkName: string
-    ): Currency;
+    static totalEncumberedDebt(collateralTypeName: string): Currency;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static debtScalingFactor(
-      ilkName: string
-    ): BigNumber;
+    static debtScalingFactor(collateralTypeName: string): BigNumber;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static priceWithSafetyMargin(
-        ilkName: string
-    ): BigNumber;
+    static priceWithSafetyMargin(collateralTypeName: string): BigNumber;
 
     /** Get the Dai debt ceiling for a particular collateral type
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static debtCeiling(
-        ilkName: string
-    ): Currency;
+    static debtCeiling(collateralTypeName: string): Currency;
+
+    /** Minimum amount of debt that can be generated when opening a vault of that type
+     * @param collateralTypeName String uniquely identifying a collateral type
+     */
+    static debtFloor(collateralTypeName: string): BigNumber;
+
+    /** Watch the price of a collateral type
+     * @param collateralTypeName String uniquely identifying a collateral type
+     */
+    static collateralTypePrice(collateralTypeName: string): Currency;
+
+    /** Watch the prices of ilks defined in the system
+     *
+     * Default ilks defined in the dai.js mcd-plugin
+     */
+    static collateralTypesPrices(): Currency;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
-     */
-    static urnDebtFloor(
-        ilkName: string
-    ): BigNumber;
-
-    /** Watch the price of an ilk
-     * @param ilkName String uniquely identifying an ilk
-     */
-    static ilkPrice(
-        ilkName: string
-    ): Currency;
-
-    /** Watch the prices of a list of ilks
-     * @param ilkName Array of strings uniquely identifying ilks
-     */
-    static ilkPrices(
-        [ilkNames]: string
-    ): Currency;
-
-    /**
-     * @param ilkName String uniquely identifying an ilk
-     * @param urn String hexidecimal address of the vault handler
+     * @param collateralTypeName String uniquely identifying a collateral type
+     * @param vaultAddress String hexidecimal address of the vault handler
      */
     static unlockedCollateral(
-      ilkName: string,
-      urn: string
+      collateralTypeName: string,
+      vaultAddress: string
     ): BigNumber;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
-     * @param urn String hexidecimal address of the vault handler
+     * @param collateralTypeName String uniquely identifying a collateral type
+     * @param vaultAddress String hexidecimal address of the vault handler
      */
     static encumberedCollateral(
-      ilkName: string,
-      urn: string
-      ): BigNumber;
+      collateralTypeName: string,
+      vaultAddress: string
+    ): BigNumber;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
-     * @param urn String hexidecimal address of the vault handler
+     * @param collateralTypeName String uniquely identifying a collateral type
+     * @param vaultAddress String hexidecimal address of the vault handler
      */
     static encumberedDebt(
-      ilkName: string,
-      urn: string
-      ): BigNumber;
+      collateralTypeName: string,
+      vaultAddress: string
+    ): BigNumber;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static annualStabilityFee(
-      ilkName: string
-      ): number;
+    static annualStabilityFee(collateralTypeName: string): number;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static feeUpdateTimestamp(
-      ilkName: string
-      ): number;
+    static feeUpdateTimestamp(collateralTypeName: string): number;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static liquidatorAddress(
-      ilkName: string
-      ): string;
+    static liquidatorAddress(collateralTypeName: string): string;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static liquidationPenalty(
-      ilkName: string
-      ): number;
+    static liquidationPenalty(collateralTypeName: string): number;
 
     /**
-     * @param ilkName String uniquely identifying an ilk
+     * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static maxAuctionLotSize(
-      ilkName: string
-      ): BigNumber;
+    static maxAuctionLotSize(collateralTypeName: string): BigNumber;
 
     /**
      * Get a vault by id.
@@ -167,9 +143,7 @@ declare global {
      *
      * @param id Numerical id of the vault
      */
-    static vaultById(
-      id: number
-      ): VaultResult;
+    static vaultById(id: number): VaultResult;
   }
 }
 

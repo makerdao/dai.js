@@ -1,17 +1,18 @@
 import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
-import { USD, MDAI } from '../..';
 import {
   collateralValue as calcCollateralValue,
   daiAvailable as calcDaiAvailable
 } from '../math';
+import { defaultCdpTypes } from '../';
+import { USD, MDAI } from '../';
 
 import {
   RATIO_DAI_USD,
   LIQUIDATION_RATIO,
   PRICE_WITH_SAFETY_MARGIN,
-  ILK_PRICE,
-  VAULT_ILK,
-  VAULT_URN,
+  COLLATERAL_TYPE_PRICE,
+  VAULT_TYPE,
+  VAULT_ADDRESS,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
   SAVINGS_DAI_BY_PROXY,
@@ -23,12 +24,12 @@ import {
   RAW_LIQUIDATION_RATIO
 } from './constants';
 
-export const ilkPrice = {
-  generate: ilkName => ({
+export const collateralTypePrice = {
+  generate: collateralTypeName => ({
     dependencies: [
       [RATIO_DAI_USD],
-      [PRICE_WITH_SAFETY_MARGIN, ilkName],
-      [LIQUIDATION_RATIO, ilkName]
+      [PRICE_WITH_SAFETY_MARGIN, collateralTypeName],
+      [LIQUIDATION_RATIO, collateralTypeName]
     ],
     computed: (ratioDaiUsd, priceWithSafetyMargin, liquidationRatio) => {
       const currency = createCurrency(
@@ -43,25 +44,30 @@ export const ilkPrice = {
   })
 };
 
-export const ilkPrices = {
-  generate: ilkNames => ({
-    dependencies: () => [...ilkNames.map(ilkName => [ILK_PRICE, ilkName])],
+export const collateralTypesPrices = {
+  generate: () => ({
+    dependencies: () => [
+      ...defaultCdpTypes.map(({ ilk: collateralTypeName }) => [
+        COLLATERAL_TYPE_PRICE,
+        collateralTypeName
+      ])
+    ],
     computed: (...prices) => prices
   })
 };
 
-export const vaultIlkAndUrn = {
+export const vaultTypeAndAddress = {
   generate: id => ({
-    dependencies: [[VAULT_ILK, id], [VAULT_URN, id]],
-    computed: (ilk, urn) => [ilk, urn]
+    dependencies: [[VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+    computed: (vaultType, vaultAddress) => [vaultType, vaultAddress]
   })
 };
 
-export const urnCollateralAndDebt = {
-  generate: (ilk, urn) => ({
+export const vaultCollateralAndDebt = {
+  generate: (vaultType, vaultAddress) => ({
     dependencies: [
-      [ENCUMBERED_COLLATERAL, ilk, urn],
-      [ENCUMBERED_DEBT, ilk, urn]
+      [ENCUMBERED_COLLATERAL, vaultType, vaultAddress],
+      [ENCUMBERED_DEBT, vaultType, vaultAddress]
     ],
     computed: (encumberedCollateral, encumberedDebt) => [
       encumberedCollateral,
@@ -73,8 +79,8 @@ export const urnCollateralAndDebt = {
 export const debtValue = {
   generate: id => ({
     dependencies: [
-      [ENCUMBERED_DEBT, [VAULT_ILK, id], [VAULT_URN, id]],
-      [DEBT_SCALING_FACTOR, [VAULT_ILK, id]]
+      [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+      [DEBT_SCALING_FACTOR, [VAULT_TYPE, id]]
     ],
     computed: (encumberedDebt, debtScalingFactor) => {
       return MDAI(encumberedDebt).times(debtScalingFactor);
@@ -85,15 +91,18 @@ export const debtValue = {
 export const collateralValue = {
   generate: id => ({
     dependencies: [
-      [VAULT_ILK, id],
-      [ENCUMBERED_COLLATERAL, [VAULT_ILK, id], [VAULT_URN, id]],
-      [ILK_PRICE, [VAULT_ILK, id]]
+      [VAULT_TYPE, id],
+      [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+      [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]]
     ],
-    computed: (ilkName, encumberedCollateral, ilkPrice) => {
+    computed: (ilkName, encumberedCollateral, collateralTypePrice) => {
       // Todo: better way to get collateral name
       const currency = createCurrency(ilkName.substring(0, 3));
       // Note: the first arg is collateralAmount calculation
-      return calcCollateralValue(currency(encumberedCollateral), ilkPrice);
+      return calcCollateralValue(
+        currency(encumberedCollateral),
+        collateralTypePrice
+      );
     }
   })
 };
@@ -103,7 +112,7 @@ export const daiAvailable = {
     dependencies: [
       [COLLATERAL_VALUE, id],
       [DEBT_VALUE, id],
-      [RAW_LIQUIDATION_RATIO, [VAULT_ILK, id]]
+      [RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]]
     ],
     computed: (collateralValue, debtValue, rawLiquidationRatio) => {
       const ratio = createCurrencyRatio(USD, MDAI);
@@ -116,30 +125,34 @@ export const daiAvailable = {
 export const vault = {
   generate: id => ({
     dependencies: [
-      [VAULT_ILK, id],
-      [VAULT_URN, id],
-      [ENCUMBERED_COLLATERAL, [VAULT_ILK, id], [VAULT_URN, id]],
-      [ENCUMBERED_DEBT, [VAULT_ILK, id], [VAULT_URN, id]],
-      [ILK_PRICE, [VAULT_ILK, id]],
+      [VAULT_TYPE, id],
+      [VAULT_ADDRESS, id],
+      [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+      [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+      [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]],
       [DEBT_VALUE, id],
       [COLLATERAL_VALUE, id],
-      [DAI_AVAILABLE, id]
+      [DAI_AVAILABLE, id],
+      [VAULT_TYPE, id],
+      [VAULT_ADDRESS, id],
+      [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+      [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]]
     ],
     computed: (
-      ilk,
-      urn,
+      vaultType,
+      vaultAddress,
       encumberedCollateral,
       encumberedDebt,
-      ilkPrice,
+      collateralTypePrice,
       debtValue,
       collateralValue,
       daiAvailable
     ) => ({
-      ilk,
-      urn,
+      vaultType,
+      vaultAddress,
       encumberedCollateral,
       encumberedDebt,
-      ilkPrice,
+      collateralTypePrice,
       debtValue,
       collateralValue,
       daiAvailable
@@ -155,10 +168,10 @@ export const savingsDai = {
 };
 
 export default {
-  ilkPrice,
-  ilkPrices,
-  vaultIlkAndUrn,
-  urnCollateralAndDebt,
+  collateralTypePrice,
+  collateralTypesPrices,
+  vaultTypeAndAddress,
+  vaultCollateralAndDebt,
   vault,
   collateralValue,
   debtValue,
