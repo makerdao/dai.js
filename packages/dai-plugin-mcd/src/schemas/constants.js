@@ -48,3 +48,7 @@ export const SAVINGS_DAI = 'savingsDai';
 export const DEBT_VALUE = 'debtValue';
 export const COLLATERAL_VALUE = 'collateralValue';
 export const DAI_AVAILABLE = 'daiAvailable';
+
+// token
+export const TOKEN_BALANCE = 'tokenBalance';
+export const BALANCE = 'balance';
