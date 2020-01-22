@@ -21,6 +21,7 @@ import { spotIlks, liquidationRatio, spotPar } from '../../src/schemas/spot';
 import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
 import { potpie } from '../../src/schemas/pot';
 import computedSchemas from '../../src/schemas/computed';
+import { createCurrencyRatio } from '@makerdao/currency';
 
 let maker, address, snapshotData;
 
@@ -148,6 +149,7 @@ test(VAULT, async () => {
   const expectedDebtValue = MDAI(1);
   const expectedCollateralValue = USD(180);
   const expectedDaiAvailable = MDAI(119);
+  const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
 
   const vault = await maker.latest(VAULT, cdpId);
 
@@ -159,7 +161,9 @@ test(VAULT, async () => {
   expect(vault.encumberedDebt.toNumber()).toBeCloseTo(
     expectedEncumberedDebt.toNumber()
   );
-  // expect(vault.ilkPrice).toEqual(expectedInk);
+  expect(vault.collateralTypePrice.toString()).toEqual(
+    expectedColTypePrice.toString()
+  );
   expect(vault.debtValue.toString()).toEqual(expectedDebtValue.toString());
   expect(vault.collateralValue.toString()).toEqual(
     expectedCollateralValue.toString()

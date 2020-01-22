@@ -2,6 +2,15 @@ declare global {
   interface Currency {}
   interface CurrencyRatio {}
   interface VaultResult {
+     /**
+     * The collateral type of this vault.
+     *
+     * ```ts
+     * console.log('test code');
+     * ```
+     */
+    vaultType: string;
+
     /**
      * The address of this vault.
      *
@@ -13,15 +22,6 @@ declare global {
      * ```
      */
     vaultAddress: string;
-
-    /**
-     * The price of this vault's collateral type.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
-     */
-    collateralTypePrice: CurrencyRatio;
 
     /**
      * Lorem ipsum.
@@ -40,6 +40,44 @@ declare global {
      *
      */
     encumberedDebt: Currency;
+
+    /**
+     * The price of this vault's collateral type.
+     *
+     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+     * tempor incididunt ut labore et dolore magna aliqua.
+     *
+     */
+    collateralTypePrice: CurrencyRatio;
+
+    /**
+     * The value in DAI of this vault's debt.
+     *
+     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+     * tempor incididunt ut labore et dolore magna aliqua.
+     *
+     */
+    debtValue: Currency;
+
+    /**
+     * The value in USD of this vault's locked collateral.
+     *
+     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+     * tempor incididunt ut labore et dolore magna aliqua.
+     *
+     */
+    collateralValue: Currency;
+
+    /**
+     * The maximum amount DAI available to generate for this vault.
+     *
+     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+     * tempor incididunt ut labore et dolore magna aliqua.
+     *
+     */
+    daiAvailable: Currency;
+
+
   }
 
   interface WatchInterfaceMcd {
@@ -132,6 +170,21 @@ declare global {
     static maxAuctionLotSize(collateralTypeName: string): BigNumber;
 
     /**
+     * @param id Numerical id of the vault
+     */
+    static debtValue(id: number): Currency;
+
+    /**
+     * @param id Numerical id of the vault
+     */
+    static collateralValue(id: number): Currency;
+
+    /**
+     * @param id Numerical id of the vault
+     */
+    static daiAvailable(id: number): Currency;
+
+    /**
      * Get a vault by id.
      *
      * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
@@ -143,7 +196,7 @@ declare global {
      *
      * @param id Numerical id of the vault
      */
-    static vaultById(id: number): VaultResult;
+    static vault(id: number): VaultResult;
   }
 }
 
