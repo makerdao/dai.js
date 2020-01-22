@@ -57,7 +57,7 @@ afterAll(async () => {
 test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
   expect(totalSavingsDai.symbol).toEqual('DSR-DAI');
-  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
+  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.9997958, 7);
 });
 
 test(SAVINGS_DAI_BY_PROXY, async () => {

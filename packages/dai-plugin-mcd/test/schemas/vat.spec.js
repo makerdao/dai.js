@@ -78,8 +78,8 @@ test(TOTAL_ENCUMBERED_DEBT, async () => {
   const { rate: ethARate } = ethAInfo;
   const { rate: batARate } = batAInfo;
 
-  const ethADebtAmount = ETH_A_DEBT_AMOUNT._amount;
-  const batADebtAmount = BAT_A_DEBT_AMOUNT._amount;
+  const ethADebtAmount = ETH_A_DEBT_AMOUNT.toBigNumber();
+  const batADebtAmount = BAT_A_DEBT_AMOUNT.toBigNumber();
 
   const ethAEncumberedDebt = await maker.latest(TOTAL_ENCUMBERED_DEBT, 'ETH-A');
   const batAEncumberedDebt = await maker.latest(TOTAL_ENCUMBERED_DEBT, 'BAT-A');

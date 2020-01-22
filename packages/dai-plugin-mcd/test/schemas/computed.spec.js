@@ -136,5 +136,5 @@ test(VAULT_BY_ID, async () => {
 test(SAVINGS_DAI, async () => {
   const savingsDai = await maker.latest(SAVINGS_DAI, address);
   expect(savingsDai.symbol).toEqual('DSR-DAI');
-  expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
+  expect(savingsDai.toNumber()).toBeCloseTo(0.9997958, 7);
 });

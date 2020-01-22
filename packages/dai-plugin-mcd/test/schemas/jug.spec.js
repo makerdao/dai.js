@@ -32,7 +32,7 @@ test(ANNUAL_STABILITY_FEE, async () => {
 });
 
 test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
-  var timestamp = Math.round(new Date().getTime() / 1000);
+  const timestamp = Math.round(new Date().getTime() / 1000);
   const dateStabilityFeesLastLevied = await maker.latest(
     DATE_STABILITY_FEES_LAST_LEVIED,
     'ETH-A'

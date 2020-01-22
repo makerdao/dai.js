@@ -1,6 +1,7 @@
 import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import BigNumber from 'bignumber.js';
+import testnetAddresses from '../../contracts/addresses/testnet';
 
 import {
   LIQUIDATOR_ADDRESS,
@@ -28,9 +29,9 @@ afterAll(async () => {
 });
 
 test(LIQUIDATOR_ADDRESS, async () => {
-  const expected = '0x55320248dC50Ef6dABc88ECbc294Fd5e2e1f4eC6';
+  const { MCD_FLIP_ETH_A: expected } = testnetAddresses;
   const address = await maker.latest(LIQUIDATOR_ADDRESS, 'ETH-A');
-  expect(address).toEqual(expected);
+  expect(address.toLowerCase()).toEqual(expected);
 });
 
 test(LIQUIDATION_PENALTY, async () => {
