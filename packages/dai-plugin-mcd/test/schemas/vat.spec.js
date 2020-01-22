@@ -5,7 +5,7 @@ import { ServiceRoles } from '../../src/constants';
 import { fromRay, fromWei, isBigNumber, isCurrency } from '../../src/utils';
 import BigNumber from 'bignumber.js';
 
-import schemas, {
+import {
   TOTAL_ENCUMBERED_DEBT,
   DEBT_SCALING_FACTOR,
   PRICE_WITH_SAFETY_MARGIN,
@@ -16,6 +16,8 @@ import schemas, {
   ENCUMBERED_DEBT,
   UNLOCKED_COLLATERAL
 } from '../../src/schemas';
+
+import vatSchemas from '../../src/schemas/vat';
 
 let maker, snapshotData, ethAInfo, batAInfo, cdpMgr, cdpTypeService;
 
@@ -38,7 +40,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(vatSchemas);
   maker.service('multicall').start();
   await setupCollateral(maker, 'ETH-A', {
     price: ETH_A_PRICE

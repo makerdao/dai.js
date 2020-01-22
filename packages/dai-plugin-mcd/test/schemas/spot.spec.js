@@ -3,12 +3,14 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import BigNumber from 'bignumber.js';
 import { isValidAddressString } from '../../src/utils';
 
-import schemas, {
+import {
   PRICE_FEED_ADDRESS,
   RAW_LIQUIDATION_RATIO,
   LIQUIDATION_RATIO,
   RATIO_DAI_USD
 } from '../../src/schemas';
+
+import spotSchemas from '../../src/schemas/spot';
 
 let maker, snapshotData;
 
@@ -19,7 +21,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(spotSchemas);
   maker.service('multicall').start();
 });
 

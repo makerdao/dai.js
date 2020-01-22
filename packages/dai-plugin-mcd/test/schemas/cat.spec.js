@@ -2,11 +2,13 @@ import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import BigNumber from 'bignumber.js';
 
-import schemas, {
+import {
   LIQUIDATOR_ADDRESS,
   LIQUIDATION_PENALTY,
   MAX_AUCTION_LOT_SIZE
 } from '../../src/schemas';
+
+import catSchemas from '../../src/schemas/cat';
 
 let maker, snapshotData;
 
@@ -17,7 +19,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(catSchemas);
   maker.service('multicall').start();
 });
 

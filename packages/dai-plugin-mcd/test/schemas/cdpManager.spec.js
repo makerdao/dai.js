@@ -3,7 +3,9 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ETH, BAT, MDAI } from '../../src';
 import { ServiceRoles } from '../../src/constants';
 
-import schemas, { VAULT_ADDRESS, VAULT_TYPE } from '../../src/schemas';
+import { VAULT_ADDRESS, VAULT_TYPE } from '../../src/schemas';
+
+import cdpManagerSchemas from '../../src/schemas/cdpManager';
 
 let maker, snapshotData, cdpMgr;
 
@@ -22,7 +24,7 @@ beforeAll(async () => {
 
   snapshotData = await takeSnapshot(maker);
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas(cdpManagerSchemas);
   maker.service('multicall').start();
   await setupCollateral(maker, 'ETH-A', {
     price: ETH_A_PRICE

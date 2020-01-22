@@ -73,7 +73,9 @@ declare global {
      */
     static collateralTypePrice(collateralTypeName: string): Currency;
 
-    /** Watch the prices of a list of ilks
+    /** Watch the prices of ilks defined in the system
+     *
+     * Default ilks defined in the dai.js mcd-plugin
      */
     static collateralTypesPrices(): Currency;
 

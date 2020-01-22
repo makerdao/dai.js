@@ -4,13 +4,20 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { fromWei } from '../../src/utils';
 import { ServiceRoles } from '../../src/constants';
 
-import schemas, {
+import {
   COLLATERAL_TYPE_PRICE,
   COLLATERAL_TYPES_PRICES,
   VAULT_TYPE_AND_ADDRESS,
   VAULT_BY_ID,
   SAVINGS_DAI
 } from '../../src/schemas';
+
+import { vatIlks, vatUrns } from '../../src/schemas/vat';
+import { cdpManagerUrns, cdpManagerIlks } from '../../src/schemas/cdpManager';
+import { spotIlks, liquidationRatio, spotPar } from '../../src/schemas/spot';
+import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
+import { potpie } from '../../src/schemas/pot';
+import computedSchemas from '../../src/schemas/computed';
 
 let maker, address, snapshotData;
 
@@ -33,7 +40,18 @@ beforeAll(async () => {
   });
 
   maker.service('multicall').createWatcher({ interval: 'block' });
-  maker.service('multicall').registerSchemas(schemas);
+  maker.service('multicall').registerSchemas({
+    vatIlks,
+    vatUrns,
+    cdpManagerUrns,
+    cdpManagerIlks,
+    spotPar,
+    spotIlks,
+    proxyRegistryProxies,
+    potpie,
+    liquidationRatio,
+    ...computedSchemas
+  });
   maker.service('multicall').start();
 
   address = maker.service('web3').currentAddress();
