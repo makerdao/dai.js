@@ -1,5 +1,5 @@
 import { fromRay } from '../utils';
-import { CHAI } from '..';
+import { DSR_DAI } from '..';
 
 import {
   TOTAL_SAVINGS_DAI,
@@ -14,7 +14,7 @@ export const potPie = {
     contractName: 'MCD_POT',
     call: ['Pie()(uint256)']
   }),
-  returns: [[TOTAL_SAVINGS_DAI, v => CHAI(v, 'wei')]]
+  returns: [[TOTAL_SAVINGS_DAI, v => DSR_DAI(v, 'wei')]]
 };
 
 export const potpie = {
@@ -23,7 +23,7 @@ export const potpie = {
     contractName: 'MCD_POT',
     call: ['pie(address)(uint256)', proxyAddress]
   }),
-  returns: [[SAVINGS_DAI_BY_PROXY, v => CHAI(v, 'wei')]]
+  returns: [[SAVINGS_DAI_BY_PROXY, v => DSR_DAI(v, 'wei')]]
 };
 
 export const potDsr = {

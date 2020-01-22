@@ -69,7 +69,7 @@ export const MWETH = createCurrency('MWETH');
 export const MDAI = createCurrency('MDAI');
 
 // Casting for savings dai
-export const CHAI = createCurrency('CHAI');
+export const DSR_DAI = createCurrency('DSR-DAI');
 
 export const REP = createCurrency('REP');
 export const ZRX = createCurrency('ZRX');

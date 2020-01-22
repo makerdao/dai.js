@@ -54,7 +54,7 @@ afterAll(async () => {
 
 test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
-  expect(totalSavingsDai.symbol).toEqual('CHAI');
+  expect(totalSavingsDai.symbol).toEqual('DSR-DAI');
   expect(totalSavingsDai.toNumber()).toBeCloseTo(0.99995);
 });
 
@@ -63,7 +63,7 @@ test(SAVINGS_DAI_BY_PROXY, async () => {
     SAVINGS_DAI_BY_PROXY,
     await maker.service('proxy').getProxyAddress()
   );
-  expect(savingsDaiByProxy.symbol).toEqual('CHAI');
+  expect(savingsDaiByProxy.symbol).toEqual('DSR-DAI');
   expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
 });
 

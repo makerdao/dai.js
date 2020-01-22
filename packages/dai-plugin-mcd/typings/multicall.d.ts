@@ -74,9 +74,8 @@ declare global {
     static collateralTypePrice(collateralTypeName: string): Currency;
 
     /** Watch the prices of a list of ilks
-     * @param collateralTypeNames Array of strings uniquely identifying collateral types
      */
-    static collateralTypesPrices([collateralTypeNames]: string): Currency;
+    static collateralTypesPrices(): Currency;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
