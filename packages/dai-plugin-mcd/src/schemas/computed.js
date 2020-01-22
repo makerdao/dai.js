@@ -1,5 +1,6 @@
 import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
-import { USD } from '../..';
+import { defaultCdpTypes } from '../';
+import { USD } from '../';
 
 import {
   RATIO_DAI_USD,
@@ -35,9 +36,9 @@ export const collateralTypePrice = {
 };
 
 export const collateralTypesPrices = {
-  generate: collateralTypesNames => ({
+  generate: () => ({
     dependencies: () => [
-      ...collateralTypesNames.map(collateralTypeName => [
+      ...defaultCdpTypes.map(({ ilk: collateralTypeName }) => [
         COLLATERAL_TYPE_PRICE,
         collateralTypeName
       ])

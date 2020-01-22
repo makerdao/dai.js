@@ -73,17 +73,12 @@ test(COLLATERAL_TYPE_PRICE, async () => {
 });
 
 test(COLLATERAL_TYPES_PRICES, async () => {
-  const [ethAPrice, ethBPrice, batAPrice] = await maker.latest(
-    COLLATERAL_TYPES_PRICES,
-    ['ETH-A', 'ETH-B', 'BAT-A']
-  );
+  const [ethAPrice, batAPrice] = await maker.latest(COLLATERAL_TYPES_PRICES);
 
   expect(ethAPrice.toNumber()).toEqual(180);
-  expect(ethBPrice.toNumber()).toEqual(150);
   expect(batAPrice.toNumber()).toEqual(40);
 
   expect(ethAPrice.symbol).toEqual('USD/ETH');
-  expect(ethBPrice.symbol).toEqual('USD/ETH');
   expect(batAPrice.symbol).toEqual('USD/BAT');
 });
 
