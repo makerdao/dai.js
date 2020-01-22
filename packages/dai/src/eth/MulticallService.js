@@ -19,6 +19,7 @@ export default class MulticallService extends PublicService {
     this._observables = {};
     this._watcherUpdates = null;
     this._watchingSchemasTotal = 0;
+    this._multicallResultCache = {};
     this._addresses = {};
   }
 
@@ -227,6 +228,8 @@ export default class MulticallService extends PublicService {
     // This is a base observable
     const subject = new ReplaySubject(1);
     set(this._subjects, fullPath, subject);
+    if (this._multicallResultCache[fullPath])
+      subject.next(this._multicallResultCache[fullPath]);
 
     // Create base observable
     const observable = Observable.create(observer => {
@@ -236,6 +239,7 @@ export default class MulticallService extends PublicService {
         this._watcherUpdates = this._watcher.subscribe(update => {
           const subject = get(this._subjects, update.type);
           if (subject) subject.next(update.value);
+          else this._multicallResultCache[update.type] = update.value;
         });
       }
       this._watchingSchemasTotal++;
@@ -246,6 +250,7 @@ export default class MulticallService extends PublicService {
         // Tap multicall to add schema (first subscriber to this schema)
         this._tapMulticallWithSchema(schema, generatedSchema, path);
       } else schema.watching[path]++;
+
       log2(
         `Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`
       );
