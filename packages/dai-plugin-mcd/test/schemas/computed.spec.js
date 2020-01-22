@@ -1,5 +1,5 @@
 import { mcdMaker, setupCollateral } from '../helpers';
-import { ETH, BAT, MDAI } from '../../src';
+import { ETH, BAT, MDAI, USD } from '../../src';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { fromWei } from '../../src/utils';
 import { ServiceRoles } from '../../src/constants';
@@ -8,8 +8,11 @@ import schemas, {
   ILK_PRICE,
   ILK_PRICES,
   VAULT_ILK_AND_URN,
-  VAULT_BY_ID,
-  SAVINGS_DAI
+  VAULT,
+  SAVINGS_DAI,
+  DEBT_VALUE,
+  COLLATERAL_VALUE,
+  DAI_AVAILABLE
 } from '../../src/schemas';
 
 let maker, address, snapshotData;
@@ -97,21 +100,55 @@ test(VAULT_ILK_AND_URN, async () => {
   expect(urn).toEqual(expectedUrn);
 });
 
-test(VAULT_BY_ID, async () => {
+test(DEBT_VALUE, async () => {
+  const cdpId = 1;
+  const debtValue = await maker.latest(DEBT_VALUE, cdpId);
+  const expected = MDAI(1);
+
+  expect(debtValue.toNumber()).toEqual(expected.toNumber());
+});
+
+test(COLLATERAL_VALUE, async () => {
+  const cdpId = 1;
+  const collateralValue = await maker.latest(COLLATERAL_VALUE, cdpId);
+  const expected = USD(180);
+
+  expect(collateralValue.toString()).toEqual(expected.toString());
+});
+
+test(DAI_AVAILABLE, async () => {
+  const cdpId = 1;
+  const daiAvailable = await maker.latest(DAI_AVAILABLE, cdpId);
+  const expected = MDAI(119);
+
+  expect(daiAvailable.toString()).toEqual(expected.toString());
+});
+
+test(VAULT, async () => {
   const cdpId = 1;
   const expectedIlk = 'ETH-A';
   const expectedUrn = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const expectedInk = fromWei(1000000000000000000);
   const expectedArt = fromWei(995000000000000000);
-  const { ilk, urn, encumberedCollateral, encumberedDebt } = await maker.latest(
-    VAULT_BY_ID,
-    cdpId
-  );
+  const expectedDebtValue = MDAI(1);
+  const expectedCollateralValue = USD(180);
+  const expectedDaiAvailable = MDAI(119);
 
-  expect(ilk).toEqual(expectedIlk);
-  expect(urn).toEqual(expectedUrn);
-  expect(encumberedCollateral).toEqual(expectedInk);
-  expect(encumberedDebt.toNumber()).toBeCloseTo(expectedArt.toNumber());
+  const vault = await maker.latest(VAULT, cdpId);
+
+  expect(Object.keys(vault).length).toBe(8);
+  expect(vault.ilk).toEqual(expectedIlk);
+  expect(vault.urn).toEqual(expectedUrn);
+  expect(vault.encumberedCollateral).toEqual(expectedInk);
+  expect(vault.encumberedDebt.toNumber()).toBeCloseTo(expectedArt.toNumber());
+  // expect(vault.ilkPrice).toEqual(expectedInk);
+  expect(vault.debtValue.toString()).toEqual(expectedDebtValue.toString());
+  expect(vault.collateralValue.toString()).toEqual(
+    expectedCollateralValue.toString()
+  );
+  expect(vault.daiAvailable.toString()).toEqual(
+    expectedDaiAvailable.toString()
+  );
 });
 
 test(SAVINGS_DAI, async () => {
