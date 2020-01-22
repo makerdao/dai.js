@@ -3,7 +3,7 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ETH, BAT, MDAI } from '../../src';
 import { ServiceRoles } from '../../src/constants';
 
-import schemas, { VAULT_URN, VAULT_ILK } from '../../src/schemas';
+import schemas, { VAULT_ADDRESS, VAULT_TYPE } from '../../src/schemas';
 
 let maker, snapshotData, cdpMgr;
 
@@ -44,16 +44,16 @@ afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
 });
 
-test(VAULT_URN, async () => {
+test(VAULT_ADDRESS, async () => {
   const cdpId = 1;
   const expected = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
-  const urn = await maker.latest(VAULT_URN, cdpId);
-  expect(urn).toEqual(expected);
+  const vaultAddress = await maker.latest(VAULT_ADDRESS, cdpId);
+  expect(vaultAddress).toEqual(expected);
 });
 
-test(VAULT_ILK, async () => {
+test(VAULT_TYPE, async () => {
   const cdpId = 1;
   const expected = 'ETH-A';
-  const ilk = await maker.latest(VAULT_ILK, cdpId);
-  expect(ilk).toEqual(expected);
+  const vaultType = await maker.latest(VAULT_TYPE, cdpId);
+  expect(vaultType).toEqual(expected);
 });

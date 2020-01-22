@@ -5,21 +5,21 @@ import {
   RATIO_DAI_USD,
   LIQUIDATION_RATIO,
   PRICE_WITH_SAFETY_MARGIN,
-  ILK_PRICE,
-  VAULT_ILK,
-  VAULT_URN,
+  COLLATERAL_TYPE_PRICE,
+  VAULT_TYPE,
+  VAULT_ADDRESS,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
   SAVINGS_DAI_BY_PROXY,
   PROXY_ADDRESS
 } from './constants';
 
-export const ilkPrice = {
-  generate: ilkName => ({
+export const collateralTypePrice = {
+  generate: collateralTypeName => ({
     dependencies: [
       [RATIO_DAI_USD],
-      [PRICE_WITH_SAFETY_MARGIN, ilkName],
-      [LIQUIDATION_RATIO, ilkName]
+      [PRICE_WITH_SAFETY_MARGIN, collateralTypeName],
+      [LIQUIDATION_RATIO, collateralTypeName]
     ],
     computed: (ratioDaiUsd, priceWithSafetyMargin, liquidationRatio) => {
       const currency = createCurrency(
@@ -34,25 +34,30 @@ export const ilkPrice = {
   })
 };
 
-export const ilkPrices = {
-  generate: ilkNames => ({
-    dependencies: () => [...ilkNames.map(ilkName => [ILK_PRICE, ilkName])],
+export const collateralTypesPrices = {
+  generate: collateralTypesNames => ({
+    dependencies: () => [
+      ...collateralTypesNames.map(collateralTypeName => [
+        COLLATERAL_TYPE_PRICE,
+        collateralTypeName
+      ])
+    ],
     computed: (...prices) => prices
   })
 };
 
-export const vaultIlkAndUrn = {
+export const vaultTypeAndAddress = {
   generate: id => ({
-    dependencies: [[VAULT_ILK, id], [VAULT_URN, id]],
-    computed: (ilk, urn) => [ilk, urn]
+    dependencies: [[VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+    computed: (vaultType, vaultAddress) => [vaultType, vaultAddress]
   })
 };
 
-export const urnCollateralAndDebt = {
-  generate: (ilk, urn) => ({
+export const vaultCollateralAndDebt = {
+  generate: (vaultType, vaultAddress) => ({
     dependencies: [
-      [ENCUMBERED_COLLATERAL, ilk, urn],
-      [ENCUMBERED_DEBT, ilk, urn]
+      [ENCUMBERED_COLLATERAL, vaultType, vaultAddress],
+      [ENCUMBERED_DEBT, vaultType, vaultAddress]
     ],
     computed: (encumberedCollateral, encumberedDebt) => [
       encumberedCollateral,
@@ -64,14 +69,19 @@ export const urnCollateralAndDebt = {
 export const vaultById = {
   generate: id => ({
     dependencies: [
-      [VAULT_ILK, id],
-      [VAULT_URN, id],
-      [ENCUMBERED_COLLATERAL, [VAULT_ILK, id], [VAULT_URN, id]],
-      [ENCUMBERED_DEBT, [VAULT_ILK, id], [VAULT_URN, id]]
+      [VAULT_TYPE, id],
+      [VAULT_ADDRESS, id],
+      [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+      [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]]
     ],
-    computed: (ilk, urn, encumberedCollateral, encumberedDebt) => ({
-      ilk,
-      urn,
+    computed: (
+      vaultType,
+      vaultAddress,
+      encumberedCollateral,
+      encumberedDebt
+    ) => ({
+      vaultType,
+      vaultAddress,
       encumberedCollateral,
       encumberedDebt
     })
@@ -86,10 +96,10 @@ export const savingsDai = {
 };
 
 export default {
-  ilkPrice,
-  ilkPrices,
-  vaultIlkAndUrn,
-  urnCollateralAndDebt,
+  collateralTypePrice,
+  collateralTypesPrices,
+  vaultTypeAndAddress,
+  vaultCollateralAndDebt,
   vaultById,
   savingsDai
 };

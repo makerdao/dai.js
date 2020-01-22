@@ -10,7 +10,7 @@ import schemas, {
   DEBT_SCALING_FACTOR,
   PRICE_WITH_SAFETY_MARGIN,
   DEBT_CEILING,
-  URN_DEBT_FLOOR,
+  DEBT_FLOOR,
   TOTAL_DAI_SUPPLY,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
@@ -153,15 +153,15 @@ test(DEBT_CEILING, async () => {
   expect(batADebtCeiling.isEqual(MDAI(5000))).toEqual(true);
 });
 
-test(URN_DEBT_FLOOR, async () => {
-  const ethAUrnDebtFloor = await maker.latest(URN_DEBT_FLOOR, 'ETH-A');
-  const batAUrnDebtFloor = await maker.latest(URN_DEBT_FLOOR, 'BAT-A');
+test(DEBT_FLOOR, async () => {
+  const ethADebtFloor = await maker.latest(DEBT_FLOOR, 'ETH-A');
+  const batADebtFloor = await maker.latest(DEBT_FLOOR, 'BAT-A');
 
-  expect(isBigNumber(ethAUrnDebtFloor)).toEqual(true);
-  expect(isBigNumber(batAUrnDebtFloor)).toEqual(true);
+  expect(isBigNumber(ethADebtFloor)).toEqual(true);
+  expect(isBigNumber(batADebtFloor)).toEqual(true);
 
-  expect(ethAUrnDebtFloor).toEqual(BigNumber('0'));
-  expect(batAUrnDebtFloor).toEqual(BigNumber('0'));
+  expect(ethADebtFloor).toEqual(BigNumber('0'));
+  expect(batADebtFloor).toEqual(BigNumber('0'));
 });
 
 test(TOTAL_DAI_SUPPLY, async () => {

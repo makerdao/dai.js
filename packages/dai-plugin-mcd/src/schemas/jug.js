@@ -7,10 +7,10 @@ import {
 } from './constants';
 
 export const jugIlks = {
-  generate: ilkName => ({
-    id: `MCD_JUG.ilks(${ilkName})`,
+  generate: collateralTypeName => ({
+    id: `MCD_JUG.ilks(${collateralTypeName})`,
     contractName: 'MCD_JUG',
-    call: ['ilks(bytes32)(uint256,uint48)', toHex(ilkName)]
+    call: ['ilks(bytes32)(uint256,uint48)', toHex(collateralTypeName)]
   }),
   returns: [
     [ANNUAL_STABILITY_FEE, annualStabilityFee],

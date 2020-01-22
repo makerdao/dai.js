@@ -5,9 +5,9 @@ import { fromWei } from '../../src/utils';
 import { ServiceRoles } from '../../src/constants';
 
 import schemas, {
-  ILK_PRICE,
-  ILK_PRICES,
-  VAULT_ILK_AND_URN,
+  COLLATERAL_TYPE_PRICE,
+  COLLATERAL_TYPES_PRICES,
+  VAULT_TYPE_AND_ADDRESS,
   VAULT_BY_ID,
   SAVINGS_DAI
 } from '../../src/schemas';
@@ -66,18 +66,17 @@ afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
 });
 
-test(ILK_PRICE, async () => {
-  const ethAPrice = await maker.latest(ILK_PRICE, 'ETH-A');
+test(COLLATERAL_TYPE_PRICE, async () => {
+  const ethAPrice = await maker.latest(COLLATERAL_TYPE_PRICE, 'ETH-A');
   expect(ethAPrice.toNumber()).toEqual(180);
   expect(ethAPrice.symbol).toEqual('USD/ETH');
 });
 
-test(ILK_PRICES, async () => {
-  const [ethAPrice, ethBPrice, batAPrice] = await maker.latest(ILK_PRICES, [
-    'ETH-A',
-    'ETH-B',
-    'BAT-A'
-  ]);
+test(COLLATERAL_TYPES_PRICES, async () => {
+  const [ethAPrice, ethBPrice, batAPrice] = await maker.latest(
+    COLLATERAL_TYPES_PRICES,
+    ['ETH-A', 'ETH-B', 'BAT-A']
+  );
 
   expect(ethAPrice.toNumber()).toEqual(180);
   expect(ethBPrice.toNumber()).toEqual(150);
@@ -88,30 +87,37 @@ test(ILK_PRICES, async () => {
   expect(batAPrice.symbol).toEqual('USD/BAT');
 });
 
-test(VAULT_ILK_AND_URN, async () => {
+test(VAULT_TYPE_AND_ADDRESS, async () => {
   const cdpId = 1;
-  const expectedIlk = 'ETH-A';
-  const expectedUrn = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
-  const [ilk, urn] = await maker.latest(VAULT_ILK_AND_URN, cdpId);
-  expect(ilk).toEqual(expectedIlk);
-  expect(urn).toEqual(expectedUrn);
+  const expectedVaultType = 'ETH-A';
+  const expectedVaultAddress = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
+  const [collateralType, vaultAddress] = await maker.latest(
+    VAULT_TYPE_AND_ADDRESS,
+    cdpId
+  );
+  expect(collateralType).toEqual(expectedVaultType);
+  expect(vaultAddress).toEqual(expectedVaultAddress);
 });
 
 test(VAULT_BY_ID, async () => {
   const cdpId = 1;
-  const expectedIlk = 'ETH-A';
-  const expectedUrn = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
-  const expectedInk = fromWei(1000000000000000000);
-  const expectedArt = fromWei(995000000000000000);
-  const { ilk, urn, encumberedCollateral, encumberedDebt } = await maker.latest(
-    VAULT_BY_ID,
-    cdpId
-  );
+  const expectedVaultType = 'ETH-A';
+  const expectedVaultAddress = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
+  const expectedEncumberedCollateral = fromWei(1000000000000000000);
+  const expectedEncumberedDebt = fromWei(995000000000000000);
+  const {
+    vaultType,
+    vaultAddress,
+    encumberedCollateral,
+    encumberedDebt
+  } = await maker.latest(VAULT_BY_ID, cdpId);
 
-  expect(ilk).toEqual(expectedIlk);
-  expect(urn).toEqual(expectedUrn);
-  expect(encumberedCollateral).toEqual(expectedInk);
-  expect(encumberedDebt.toNumber()).toBeCloseTo(expectedArt.toNumber());
+  expect(vaultType).toEqual(expectedVaultType);
+  expect(vaultAddress).toEqual(expectedVaultAddress);
+  expect(encumberedCollateral).toEqual(expectedEncumberedCollateral);
+  expect(encumberedDebt.toNumber()).toBeCloseTo(
+    expectedEncumberedDebt.toNumber()
+  );
 });
 
 test(SAVINGS_DAI, async () => {
