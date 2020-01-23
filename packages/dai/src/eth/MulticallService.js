@@ -1,8 +1,8 @@
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
-import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
-import { map, first, flatMap } from 'rxjs/operators';
+import { Observable, ReplaySubject, combineLatest, from, interval } from 'rxjs';
+import { map, first, flatMap, throttle } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -196,6 +196,7 @@ export default class MulticallService extends PublicService {
         if (Array.isArray(trie) && !atLeafNode) {
           if (trie.length > 1) {
             return combineLatest(trie.map(recurseDependencyTree)).pipe(
+              throttle(() => interval(1)),
               flatMap(result => {
                 return this.watchObservable(key, ...result);
               })
@@ -220,6 +221,7 @@ export default class MulticallService extends PublicService {
       const dependencySubs = dependencies.map(recurseDependencyTree);
 
       const observerLatest = combineLatest(dependencySubs).pipe(
+        throttle(() => interval(1)),
         map(result => generatedSchema.computed(...result))
       );
 
