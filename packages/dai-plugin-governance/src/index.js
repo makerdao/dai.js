@@ -5,6 +5,7 @@ import {
   POLLING,
   ESM,
   END,
+  PAUSE,
   MKR,
   IOU
 } from './utils/constants';
@@ -15,6 +16,7 @@ import VoteProxyFactoryService from './VoteProxyFactoryService';
 import GovPollingService from './GovPollingService';
 import GovQueryApiService from './GovQueryApiService';
 import EsmService from './EsmService';
+import PauseService from './PauseService';
 
 export default {
   addConfig: function(config, { network = 'mainnet', staging = false }) {
@@ -56,6 +58,10 @@ export default {
         address: map(prop('POLLING'), contractAddresses),
         abi: require('../contracts/abis/Polling.json')
       },
+      [PAUSE]: {
+        address: map(prop('PAUSE'), contractAddresses),
+        abi: require('../contracts/abis/DSPause.json')
+      },
       ...esmContracts
     };
 
@@ -67,7 +73,8 @@ export default {
         'voteProxyFactory',
         'govPolling',
         'govQueryApi',
-        'esm'
+        'esm',
+        'pause'
       ],
       chief: [ChiefService],
       voteProxy: [VoteProxyService],
@@ -75,6 +82,7 @@ export default {
       govPolling: [GovPollingService],
       govQueryApi: [GovQueryApiService, { staging }],
       esm: [EsmService],
+      pause: [PauseService],
       smartContract: { addContracts },
       token: {
         erc20: [

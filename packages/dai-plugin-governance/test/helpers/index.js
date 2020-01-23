@@ -4,6 +4,8 @@ import govPlugin from '../../src/index';
 import configPlugin from '@makerdao/dai-plugin-config';
 import { createCurrency } from '@makerdao/currency';
 
+const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67';
+
 const MKR = createCurrency('MKR');
 
 // Until we have better event listeners from the server, we'll have to fake it with sleep
@@ -59,7 +61,7 @@ export async function restoreSnapshotOriginal(snapId) {
   }
 }
 
-export const setupMakerOld = async () => {
+export const setupMakerOld = async (network) => {
   const accounts = {
     owner: {
       type: 'privateKey',
@@ -79,11 +81,19 @@ export const setupMakerOld = async () => {
     }
   };
 
-  const maker = await Maker.create('http', {
-    plugins: [[govPlugin, { network: 'ganache' }]],
-    url: 'http://localhost:2000',
+  let url;
+  if(network==='ganache') url = 'http://localhost:2000';
+  const preset = network === 'ganache' ? 'http' : network;
+  const maker = await Maker.create(preset, {
+    plugins: [[govPlugin, { network }]],
+    url,
     accounts,
-    log: false
+    log: false,
+    web3: {
+      provider: {
+        infuraProjectId
+      }
+    }
   });
   await maker.authenticate();
   return maker;
@@ -139,14 +149,14 @@ export const deleteSnapshot = async (client, snapshotId) => {
   return true;
 };
 
-export const setupTestMakerInstance = async () => {
+export const setupTestMakerInstance = async (network = 'ganache') => {
   // Remove this line when the old testchain system is fully replace
-  if (global.useOldChain) return setupMakerOld();
+  if (global.useOldChain) return setupMakerOld(network);
 
   const accounts = await fetchAccounts();
   const maker = await Maker.create('http', {
     plugins: [
-      [govPlugin, { network: 'ganache' }],
+      [govPlugin, { network }],
       [
         configPlugin,
         { testchainId: global.testchainId, backendEnv: global.backendEnv }
