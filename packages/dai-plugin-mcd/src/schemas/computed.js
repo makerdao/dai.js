@@ -1,7 +1,10 @@
 import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
 import {
   collateralValue as calcCollateralValue,
-  daiAvailable as calcDaiAvailable
+  daiAvailable as calcDaiAvailable,
+  collateralizationRatio as calcCollateralizationRatio,
+  liquidationPrice as calcLiquidationPrice,
+  minSafeCollateralAmount as calcMinSafeCollateralAmount
 } from '../math';
 import { defaultCdpTypes } from '../';
 import { USD, MDAI } from '../';
@@ -19,9 +22,16 @@ import {
   PROXY_ADDRESS,
   DEBT_SCALING_FACTOR,
   DEBT_VALUE,
+  COLLATERALIZATION_RATIO,
+  COLLATERAL_AMOUNT,
   COLLATERAL_VALUE,
+  LIQUIDATION_PRICE,
   DAI_AVAILABLE,
-  RAW_LIQUIDATION_RATIO
+  MIN_SAFE_COLLATERAL_AMOUNT,
+  COLLATERAL_AVAILABLE_AMOUNT,
+  COLLATERAL_AVAILABLE_VALUE,
+  RAW_LIQUIDATION_RATIO,
+  UNLOCKED_COLLATERAL
 } from './constants';
 
 export const collateralTypePrice = {
@@ -76,6 +86,31 @@ export const vaultCollateralAndDebt = {
   })
 };
 
+export const collateralAmount = {
+  generate: id => ({
+    dependencies: [
+      [VAULT_TYPE, id],
+      [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]]
+    ],
+    computed: (vaultType, encumberedCollateral) => {
+      // Todo: better way to get collateral name
+      const currency = createCurrency(vaultType.substring(0, 3));
+      return currency(encumberedCollateral);
+    }
+  })
+};
+
+export const collateralValue = {
+  generate: id => ({
+    dependencies: [
+      [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]],
+      [COLLATERAL_AMOUNT, id]
+    ],
+    computed: (collateralTypePrice, collateralAmount) =>
+      calcCollateralValue(collateralAmount, collateralTypePrice)
+  })
+};
+
 export const debtValue = {
   generate: id => ({
     dependencies: [
@@ -88,20 +123,28 @@ export const debtValue = {
   })
 };
 
-export const collateralValue = {
+export const collateralizationRatio = {
+  generate: id => ({
+    dependencies: [[COLLATERAL_VALUE, id], [DEBT_VALUE, id]],
+    computed: (collateralValue, debtValue) =>
+      calcCollateralizationRatio(collateralValue, debtValue)
+  })
+};
+
+export const liquidationPrice = {
   generate: id => ({
     dependencies: [
-      [VAULT_TYPE, id],
-      [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
-      [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]]
+      [COLLATERAL_AMOUNT, id],
+      [DEBT_VALUE, id],
+      [RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]]
     ],
-    computed: (ilkName, encumberedCollateral, collateralTypePrice) => {
-      // Todo: better way to get collateral name
-      const currency = createCurrency(ilkName.substring(0, 3));
-      // Note: the first arg is collateralAmount calculation
-      return calcCollateralValue(
-        currency(encumberedCollateral),
-        collateralTypePrice
+    computed: (collateralAmount, debtValue, rawLiquidationRatio) => {
+      const ratio = createCurrencyRatio(USD, MDAI);
+      const liquidationRatio = ratio(rawLiquidationRatio.toNumber());
+      return calcLiquidationPrice(
+        collateralAmount,
+        debtValue,
+        liquidationRatio
       );
     }
   })
@@ -122,6 +165,39 @@ export const daiAvailable = {
   })
 };
 
+export const minSafeCollateralAmount = {
+  generate: id => ({
+    dependencies: [
+      [DEBT_VALUE, id],
+      [RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]],
+      [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]]
+    ],
+    computed: (debtValue, rawLiquidationRatio, price) => {
+      const ratio = createCurrencyRatio(USD, MDAI);
+      const liquidationRatio = ratio(rawLiquidationRatio.toNumber());
+      return calcMinSafeCollateralAmount(debtValue, liquidationRatio, price);
+    }
+  })
+};
+export const collateralAvailableAmount = {
+  generate: id => ({
+    dependencies: [[COLLATERAL_AMOUNT, id], [MIN_SAFE_COLLATERAL_AMOUNT, id]],
+    computed: (collateralAmount, minSafeCollateralAmount) =>
+      collateralAmount.minus(minSafeCollateralAmount)
+  })
+};
+
+export const collateralAvailableValue = {
+  generate: id => ({
+    dependencies: [
+      [COLLATERAL_AVAILABLE_AMOUNT, id],
+      [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]]
+    ],
+    computed: (collateralAvailableAmount, collateralTypePrice) =>
+      calcCollateralValue(collateralAvailableAmount, collateralTypePrice)
+  })
+};
+
 export const vault = {
   generate: id => ({
     dependencies: [
@@ -131,12 +207,14 @@ export const vault = {
       [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
       [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]],
       [DEBT_VALUE, id],
+      [COLLATERALIZATION_RATIO, id],
+      [COLLATERAL_AMOUNT, id],
       [COLLATERAL_VALUE, id],
+      [LIQUIDATION_PRICE, id],
       [DAI_AVAILABLE, id],
-      [VAULT_TYPE, id],
-      [VAULT_ADDRESS, id],
-      [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
-      [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]]
+      [COLLATERAL_AVAILABLE_AMOUNT, id],
+      [COLLATERAL_AVAILABLE_VALUE, id],
+      [UNLOCKED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]]
     ],
     computed: (
       vaultType,
@@ -145,8 +223,14 @@ export const vault = {
       encumberedDebt,
       collateralTypePrice,
       debtValue,
+      collateralizationRatio,
+      collateralAmount,
       collateralValue,
-      daiAvailable
+      liquidationPrice,
+      daiAvailable,
+      collateralAvailableAmount,
+      collateralAvailableValue,
+      unlockedCollateral
     ) => ({
       vaultType,
       vaultAddress,
@@ -154,8 +238,14 @@ export const vault = {
       encumberedDebt,
       collateralTypePrice,
       debtValue,
+      collateralizationRatio,
+      collateralAmount,
       collateralValue,
-      daiAvailable
+      liquidationPrice,
+      daiAvailable,
+      collateralAvailableAmount,
+      collateralAvailableValue,
+      unlockedCollateral
     })
   })
 };
@@ -173,8 +263,14 @@ export default {
   vaultTypeAndAddress,
   vaultCollateralAndDebt,
   vault,
+  collateralAmount,
   collateralValue,
   debtValue,
+  collateralizationRatio,
+  liquidationPrice,
   daiAvailable,
+  minSafeCollateralAmount,
+  collateralAvailableAmount,
+  collateralAvailableValue,
   savingsDai
 };

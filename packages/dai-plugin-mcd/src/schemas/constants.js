@@ -46,8 +46,14 @@ export const VAULT_COLLATERAL_AND_DEBT = 'vaultCollateralAndDebt';
 export const VAULT = 'vault';
 export const SAVINGS_DAI = 'savingsDai';
 export const DEBT_VALUE = 'debtValue';
+export const COLLATERALIZATION_RATIO = 'collateralizationRatio';
+export const COLLATERAL_AMOUNT = 'collateralAmount';
 export const COLLATERAL_VALUE = 'collateralValue';
+export const LIQUIDATION_PRICE = 'liquidationPrice';
 export const DAI_AVAILABLE = 'daiAvailable';
+export const MIN_SAFE_COLLATERAL_AMOUNT = 'minSafeCollateralAmount';
+export const COLLATERAL_AVAILABLE_AMOUNT = 'collateralAvailableAmount';
+export const COLLATERAL_AVAILABLE_VALUE = 'collateralAvailableValue';
 
 // token
 export const TOKEN_BALANCE = 'tokenBalance';
