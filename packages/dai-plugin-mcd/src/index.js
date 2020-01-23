@@ -83,6 +83,18 @@ export const defaultCdpTypes = [
   { currency: BAT, ilk: 'BAT-A' }
 ];
 
+export const SAI = createCurrency('SAI');
+
+export const defaultTokens = [
+  ...new Set([
+    ...defaultCdpTypes.map(type => type.currency),
+    MDAI,
+    MWETH,
+    SAI,
+    DSR_DAI
+  ])
+];
+
 export default {
   addConfig: (
     _,
