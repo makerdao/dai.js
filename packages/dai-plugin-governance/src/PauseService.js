@@ -7,7 +7,13 @@ export default class PauseService extends PublicService {
   }
 
   getDelayInSeconds() {
-      return this._pauseContract().delay();
+    if (this.delay) return this.delay;
+    this.delay = this._pauseContract().delay();
+    return this.delay;
+  }
+
+  refresh() {
+    this.delay = null;
   }
 
   _pauseContract() {
