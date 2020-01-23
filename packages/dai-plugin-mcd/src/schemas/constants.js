@@ -28,10 +28,11 @@ export const VAULT_TYPE = 'vaultType';
 
 // pot
 export const TOTAL_SAVINGS_DAI = 'totalSavingsDai';
-export const SAVINGS_DAI_BY_PROXY = 'savingsDaiByProxy';
+export const SAVINGS_DAI = 'savingsDai';
 export const DAI_SAVINGS_RATE = 'daiSavingsRate';
 export const ANNUAL_DAI_SAVINGS_RATE = 'annualDaiSavingsRate';
 export const DATE_EARNINGS_LAST_ACCRUED = 'dateEarningsLastAccrued';
+export const SAVINGS_RATE_ACCUMUALTOR = 'savingsRateAccumulator';
 
 // cat
 export const LIQUIDATOR_ADDRESS = 'liquidatorAddress';
@@ -44,7 +45,8 @@ export const COLLATERAL_TYPES_PRICES = 'collateralTypesPrices';
 export const VAULT_TYPE_AND_ADDRESS = 'vaultTypeAndAddress';
 export const VAULT_COLLATERAL_AND_DEBT = 'vaultCollateralAndDebt';
 export const VAULT = 'vault';
-export const SAVINGS_DAI = 'savingsDai';
+export const DAI_LOCKED_IN_DSR = 'daiLockedInDsr';
+export const TOTAL_DAI_LOCKED_IN_DSR = 'totalDaiLockedInDsr';
 export const DEBT_VALUE = 'debtValue';
 export const COLLATERALIZATION_RATIO = 'collateralizationRatio';
 export const COLLATERAL_AMOUNT = 'collateralAmount';

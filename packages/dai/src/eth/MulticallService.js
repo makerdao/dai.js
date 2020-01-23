@@ -152,7 +152,32 @@ export default class MulticallService extends PublicService {
         }`
       );
 
-    const generatedSchema = schema.generate(...args);
+    let generatedSchema = schema.generate(...args);
+
+    // check only in base observables
+    if (!schema.computed) {
+      if (generatedSchema.returns && schema.returns) {
+        const isArrayReturn = Array.isArray(generatedSchema.returns[0]);
+        if (
+          !(isArrayReturn && Array.isArray(schema.returns[0])) &&
+          !(
+            typeof generatedSchema.returns[0] === 'string' &&
+            typeof schema.returns[0] === 'string'
+          )
+        ) {
+          throw new Error('Both return values must have same structure');
+        }
+        generatedSchema = {
+          ...generatedSchema,
+          returns: isArrayReturn
+            ? generatedSchema.returns.map(([_, cb]) =>
+                [fullPath, cb].filter(x => x)
+              )
+            : [[fullPath, generatedSchema.returns[1]].filter(x => x)]
+        };
+      }
+    }
+
     log2(
       `watchObservable() called for ${
         generatedSchema.computed ? 'computed ' : 'base '

@@ -6,7 +6,7 @@ import BigNumber from 'bignumber.js';
 
 import {
   TOTAL_SAVINGS_DAI,
-  SAVINGS_DAI_BY_PROXY,
+  SAVINGS_DAI,
   DAI_SAVINGS_RATE,
   ANNUAL_DAI_SAVINGS_RATE,
   DATE_EARNINGS_LAST_ACCRUED
@@ -56,17 +56,17 @@ afterAll(async () => {
 
 test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
-  expect(totalSavingsDai.symbol).toEqual('DSR-DAI');
-  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.999795, 5);
+  expect(BigNumber.isBigNumber(totalSavingsDai)).toEqual(true);
+  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.999795, 4);
 });
 
-test(SAVINGS_DAI_BY_PROXY, async () => {
-  const savingsDaiByProxy = await maker.latest(
-    SAVINGS_DAI_BY_PROXY,
+test(SAVINGS_DAI, async () => {
+  const savingsDai = await maker.latest(
+    SAVINGS_DAI,
     await maker.service('proxy').getProxyAddress()
   );
-  expect(savingsDaiByProxy.symbol).toEqual('DSR-DAI');
-  expect(savingsDaiByProxy.toNumber()).toBeCloseTo(0.99995);
+  expect(BigNumber.isBigNumber(savingsDai)).toEqual(true);
+  expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
 });
 
 test(DAI_SAVINGS_RATE, async () => {

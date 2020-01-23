@@ -2,6 +2,8 @@ import assert from 'assert';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { Currency } from '@makerdao/currency';
+import { defaultTokens } from '.';
+
 const web3Utils = new Web3().utils;
 
 export function stringToBytes(str) {
@@ -70,3 +72,6 @@ export function isCurrency(value) {
 
 export const isValidAddressString = addressString =>
   /^0x([A-Fa-f0-9]{40})$/.test(addressString);
+
+export const getMcdToken = token =>
+  defaultTokens.find(mcdToken => mcdToken.symbol === token);

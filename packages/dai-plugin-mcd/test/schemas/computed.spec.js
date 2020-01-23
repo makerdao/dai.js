@@ -3,13 +3,13 @@ import { ETH, BAT, MDAI, USD } from '../../src';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { fromWei } from '../../src/utils';
 import { ServiceRoles } from '../../src/constants';
+import BigNumber from 'bignumber.js';
 
 import {
   COLLATERAL_TYPE_PRICE,
   COLLATERAL_TYPES_PRICES,
   VAULT_TYPE_AND_ADDRESS,
   VAULT,
-  SAVINGS_DAI,
   DEBT_VALUE,
   COLLATERALIZATION_RATIO,
   COLLATERAL_AMOUNT,
@@ -18,18 +18,22 @@ import {
   DAI_AVAILABLE,
   MIN_SAFE_COLLATERAL_AMOUNT,
   COLLATERAL_AVAILABLE_AMOUNT,
-  COLLATERAL_AVAILABLE_VALUE
+  COLLATERAL_AVAILABLE_VALUE,
+  DAI_LOCKED_IN_DSR,
+  TOTAL_DAI_LOCKED_IN_DSR,
+  BALANCE
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
 import { cdpManagerUrns, cdpManagerIlks } from '../../src/schemas/cdpManager';
 import { spotIlks, liquidationRatio, spotPar } from '../../src/schemas/spot';
 import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
-import { potpie } from '../../src/schemas/pot';
+import { potPie, potpie, potChi } from '../../src/schemas/pot';
+import { tokenBalance } from '../../src/schemas/token';
 import computedSchemas from '../../src/schemas/computed';
 import { createCurrencyRatio } from '@makerdao/currency';
 
-let maker, address, snapshotData;
+let maker, snapshotData;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -59,13 +63,15 @@ beforeAll(async () => {
     spotPar,
     spotIlks,
     proxyRegistryProxies,
+    potPie,
     potpie,
+    potChi,
     liquidationRatio,
+    tokenBalance,
     ...computedSchemas
   });
   maker.service('multicall').start();
 
-  address = maker.service('web3').currentAddress();
   await setupCollateral(maker, 'ETH-A', {
     price: ETH_A_PRICE
   });
@@ -250,8 +256,47 @@ test(VAULT, async () => {
   expect(vault.unlockedCollateral).toEqual(expectedUnlockedCollateral);
 });
 
-test(SAVINGS_DAI, async () => {
-  const savingsDai = await maker.latest(SAVINGS_DAI, address);
-  expect(savingsDai.symbol).toEqual('DSR-DAI');
-  expect(savingsDai.toNumber()).toBeCloseTo(0.999795, 4);
+test(DAI_LOCKED_IN_DSR, async () => {
+  const daiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR);
+  expect(daiLockedInDsr.symbol).toEqual('DSR-DAI');
+  expect(daiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
+});
+
+test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
+  const totalDaiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR);
+  expect(totalDaiLockedInDsr.symbol).toEqual('DSR-DAI');
+  expect(totalDaiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
+});
+
+test(BALANCE, async () => {
+  expect.assertions(11);
+
+  const ethBalance = await maker.latest(BALANCE, 'ETH');
+  const batBalance = await maker.latest(BALANCE, 'BAT');
+
+  expect(ethBalance.symbol).toEqual('ETH');
+  expect(batBalance.symbol).toEqual('BAT');
+  expect(ethBalance.toNumber()).toBeCloseTo(93.675, 2);
+  expect(batBalance.toBigNumber()).toEqual(BigNumber('999'));
+
+  const daiBalance = await maker.latest(BALANCE, 'DAI');
+  const wethBalance = await maker.latest(BALANCE, 'WETH');
+
+  expect(daiBalance.symbol).toEqual('MDAI');
+  expect(daiBalance.toBigNumber()).toEqual(BigNumber('1'));
+
+  expect(wethBalance.symbol).toEqual('MWETH');
+  expect(wethBalance.toBigNumber()).toEqual(BigNumber('0'));
+
+  const dsrDaiBalance = await maker.latest(BALANCE, 'DSR-DAI');
+  expect(dsrDaiBalance.symbol).toEqual('DSR-DAI');
+  expect(dsrDaiBalance.toNumber()).toBeCloseTo(1, 18);
+
+  try {
+    await maker.latest(BALANCE, 'NON_MCD_TOKEN');
+  } catch (e) {
+    expect(e).toEqual(
+      Error('NON_MCD_TOKEN token is not part of the default tokens list')
+    );
+  }
 });

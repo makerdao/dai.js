@@ -1,6 +1,6 @@
 import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import { ETH, BAT } from '../../src';
+import { ETH, BAT, MWETH, MDAI } from '../../src';
 import BigNumber from 'bignumber.js';
 
 import { TOKEN_BALANCE, BALANCE } from '../../src/schemas';
@@ -30,17 +30,37 @@ afterAll(async () => {
 });
 
 test(TOKEN_BALANCE, async () => {
+  expect.assertions(8);
+
   const ethBalance = await maker.latest(TOKEN_BALANCE, address, 'ETH');
   const batBalance = await maker.latest(TOKEN_BALANCE, address, 'BAT');
 
-  expect(ethBalance).toEqual(BigNumber('94.69019922'));
-  expect(batBalance).toEqual(BigNumber('1000'));
-});
+  expect(ethBalance.symbol).toEqual('ETH');
+  expect(batBalance.symbol).toEqual('BAT');
+  expect(ethBalance.toBigNumber()).toEqual(BigNumber('94.69019922'));
+  expect(batBalance.toBigNumber()).toEqual(BigNumber('1000'));
 
-test(BALANCE, async () => {
-  const ethBalance = await maker.latest(BALANCE, 'ETH');
-  const batBalance = await maker.latest(BALANCE, 'BAT');
+  const daiBalance = await maker.latest(TOKEN_BALANCE, address, 'DAI');
+  const wethBalance = await maker.latest(TOKEN_BALANCE, address, 'WETH');
 
-  expect(ethBalance).toEqual(BigNumber('94.69019922'));
-  expect(batBalance).toEqual(BigNumber('1000'));
+  expect(daiBalance.symbol).toEqual('MDAI');
+  expect(wethBalance.symbol).toEqual('MWETH');
+
+  try {
+    await maker.latest(TOKEN_BALANCE, address, 'NON_MCD_TOKEN');
+  } catch (e) {
+    expect(e).toEqual(
+      Error('NON_MCD_TOKEN token is not part of the default tokens list')
+    );
+  }
+
+  try {
+    await maker.latest(TOKEN_BALANCE, address, 'DSR-DAI');
+  } catch (e) {
+    expect(e).toEqual(
+      Error(
+        "Balance of DAI in savings cannot be retrieved from a token contract call. To get DAI balance in savings call 'balance('DSR-DAI')'"
+      )
+    );
+  }
 });
