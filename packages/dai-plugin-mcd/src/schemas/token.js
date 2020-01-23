@@ -1,6 +1,5 @@
 import { TOKEN_BALANCE } from './constants';
-import { fromWei, getMcdToken } from '../utils';
-import { defaultTokens } from '../';
+import { getMcdToken } from '../utils';
 
 export const tokenBalance = {
   generate: (address, symbol) => {
@@ -32,25 +31,6 @@ export const tokenBalance = {
   returns: [TOKEN_BALANCE]
 };
 
-export const balance = {
-  generate: symbol => ({
-    dependencies: ({ get }) => {
-      const address = get('web3').currentAddress();
-      return [[TOKEN_BALANCE, address, symbol]];
-    },
-    computed: v => v
-  })
-};
-
-// export const allowance = {
-//   generate: (address, proxyAddress, symbol) => {
-//     if (symbol ===)
-//     return {}
-//   }
-
-export const tokenAllowance = {};
-
 export default {
-  tokenBalance,
-  balance
+  tokenBalance
 };

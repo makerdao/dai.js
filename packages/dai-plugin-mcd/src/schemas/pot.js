@@ -1,11 +1,11 @@
-import { fromRay } from '../utils';
-import { DSR_DAI } from '..';
+import { fromRay, fromWei } from '../utils';
 
 import {
   TOTAL_SAVINGS_DAI,
-  SAVINGS_DAI_BY_PROXY,
+  SAVINGS_DAI,
   DAI_SAVINGS_RATE,
-  DATE_EARNINGS_LAST_ACCRUED
+  DATE_EARNINGS_LAST_ACCRUED,
+  SAVINGS_RATE_ACCUMULATOR
 } from './constants';
 
 export const potPie = {
@@ -14,7 +14,7 @@ export const potPie = {
     contractName: 'MCD_POT',
     call: ['Pie()(uint256)']
   }),
-  returns: [[TOTAL_SAVINGS_DAI, v => DSR_DAI(v, 'wei')]]
+  returns: [[TOTAL_SAVINGS_DAI, fromWei]]
 };
 
 export const potpie = {
@@ -23,7 +23,7 @@ export const potpie = {
     contractName: 'MCD_POT',
     call: ['pie(address)(uint256)', proxyAddress]
   }),
-  returns: [[SAVINGS_DAI_BY_PROXY, v => DSR_DAI(v, 'wei')]]
+  returns: [[SAVINGS_DAI, fromWei]]
 };
 
 export const potDsr = {
@@ -33,6 +33,14 @@ export const potDsr = {
     call: ['dsr()(uint256)']
   }),
   returns: [[DAI_SAVINGS_RATE, fromRay]]
+};
+export const potChi = {
+  generate: () => ({
+    id: 'MCD_POT.dsr',
+    contractName: 'MCD_POT',
+    call: ['chi()(uint256)']
+  }),
+  returns: [[SAVINGS_RATE_ACCUMULATOR, fromRay]]
 };
 
 export const potRho = {
@@ -62,6 +70,7 @@ export default {
   potpie,
   potDsr,
   potRho,
+  potChi,
 
   // computed
   annualDaiSavingsRate
