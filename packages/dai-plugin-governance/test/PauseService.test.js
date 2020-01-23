@@ -32,5 +32,5 @@ test('can create Pause Service', async () => {
 
 test('get delay', async () => {
   const delay = await pauseService.getDelayInSeconds();
-  expect(delay.toNumber()).toBe(86400);
+  expect(delay.toNumber()).toBe(1);
 });
