@@ -1,12 +1,10 @@
 import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import BigNumber from 'bignumber.js';
 import { isValidAddressString } from '../../src/utils';
 import testnetAddresses from '../../contracts/addresses/testnet';
 
 import {
   PRICE_FEED_ADDRESS,
-  RAW_LIQUIDATION_RATIO,
   LIQUIDATION_RATIO,
   RATIO_DAI_USD
 } from '../../src/schemas';
@@ -41,20 +39,6 @@ test(PRICE_FEED_ADDRESS, async () => {
 
   expect(ethAPriceFeedAddress.toLowerCase()).toEqual(PIP_ETH);
   expect(batAPriceFeedAddress.toLowerCase()).toEqual(PIP_BAT);
-});
-
-test(RAW_LIQUIDATION_RATIO, async () => {
-  const ethARawLiquidationRatio = await maker.latest(
-    RAW_LIQUIDATION_RATIO,
-    'ETH-A'
-  );
-  const batARawLiquidationRatio = await maker.latest(
-    RAW_LIQUIDATION_RATIO,
-    'BAT-A'
-  );
-
-  expect(ethARawLiquidationRatio).toEqual(BigNumber('1.5'));
-  expect(batARawLiquidationRatio).toEqual(BigNumber('2.0'));
 });
 
 test(LIQUIDATION_RATIO, async () => {

@@ -25,7 +25,9 @@ export const tokenBalance = {
           : 'balanceOf(address)(uint256)',
         address
       ],
-      returns: [TOKEN_BALANCE, v => currencyToken(v, 'wei')]
+      transforms: {
+        [TOKEN_BALANCE]: v => currencyToken(v, 'wei')
+      }
     };
   },
   returns: [TOKEN_BALANCE]

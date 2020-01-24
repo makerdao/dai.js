@@ -31,7 +31,6 @@ import {
   MIN_SAFE_COLLATERAL_AMOUNT,
   COLLATERAL_AVAILABLE_AMOUNT,
   COLLATERAL_AVAILABLE_VALUE,
-  RAW_LIQUIDATION_RATIO,
   UNLOCKED_COLLATERAL,
   SAVINGS_RATE_ACCUMULATOR,
   DAI_LOCKED_IN_DSR,
@@ -143,17 +142,14 @@ export const liquidationPrice = {
     dependencies: [
       [COLLATERAL_AMOUNT, id],
       [DEBT_VALUE, id],
-      [RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]]
+      [LIQUIDATION_RATIO, [VAULT_TYPE, id]]
     ],
-    computed: (collateralAmount, debtValue, rawLiquidationRatio) => {
-      const ratio = createCurrencyRatio(USD, MDAI);
-      const liquidationRatio = ratio(rawLiquidationRatio.toNumber());
-      return calcLiquidationPrice(
+    computed: (collateralAmount, debtValue, liquidationRatio) =>
+      calcLiquidationPrice(
         collateralAmount,
         debtValue,
-        liquidationRatio
-      );
-    }
+        createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber())
+      )
   })
 };
 
@@ -162,13 +158,14 @@ export const daiAvailable = {
     dependencies: [
       [COLLATERAL_VALUE, id],
       [DEBT_VALUE, id],
-      [RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]]
+      [LIQUIDATION_RATIO, [VAULT_TYPE, id]]
     ],
-    computed: (collateralValue, debtValue, rawLiquidationRatio) => {
-      const ratio = createCurrencyRatio(USD, MDAI);
-      const liquidationRatio = ratio(rawLiquidationRatio.toNumber());
-      return calcDaiAvailable(collateralValue, debtValue, liquidationRatio);
-    }
+    computed: (collateralValue, debtValue, liquidationRatio) =>
+      calcDaiAvailable(
+        collateralValue,
+        debtValue,
+        createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber())
+      )
   })
 };
 
@@ -176,14 +173,15 @@ export const minSafeCollateralAmount = {
   generate: id => ({
     dependencies: [
       [DEBT_VALUE, id],
-      [RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]],
+      [LIQUIDATION_RATIO, [VAULT_TYPE, id]],
       [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]]
     ],
-    computed: (debtValue, rawLiquidationRatio, price) => {
-      const ratio = createCurrencyRatio(USD, MDAI);
-      const liquidationRatio = ratio(rawLiquidationRatio.toNumber());
-      return calcMinSafeCollateralAmount(debtValue, liquidationRatio, price);
-    }
+    computed: (debtValue, liquidationRatio, price) =>
+      calcMinSafeCollateralAmount(
+        debtValue,
+        createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber()),
+        price
+      )
   })
 };
 export const collateralAvailableAmount = {
@@ -207,12 +205,9 @@ export const collateralAvailableValue = {
 
 export const liquidationRatioSimple = {
   generate: id => ({
-    dependencies: [[RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]]],
-    computed: rawLiquidationRatio => {
-      const ratio = createCurrencyRatio(USD, MDAI);
-      const liquidationRatio = ratio(rawLiquidationRatio.toNumber());
-      return liquidationRatio;
-    }
+    dependencies: [[LIQUIDATION_RATIO, [VAULT_TYPE, id]]],
+    computed: liquidationRatio =>
+      createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber())
   })
 };
 
