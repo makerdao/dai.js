@@ -302,6 +302,7 @@ export const balance = {
       }
       return [[TOKEN_BALANCE, address, symbol]];
     },
+    demarcate: true,
     computed: v => v
   })
 };
@@ -312,6 +313,7 @@ export const allowance = {
       const address = get('web3').currentAddress();
       return [[TOKEN_ALLOWANCE, address, [PROXY_ADDRESS, address], symbol]];
     },
+    demarcate: true,
     computed: v => v.isEqualTo(ALLOWANCE_AMOUNT)
   })
 };

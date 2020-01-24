@@ -37,6 +37,10 @@ export default class MulticallService extends PublicService {
     this._addresses = this.get('smartContract').getContractAddresses();
   }
 
+  authenticate() {
+    this._connectedAddress = this.get('web3').currentAddress();
+  }
+
   createWatcher({
     useWeb3Provider = false,
     interval = 'block',
@@ -146,11 +150,22 @@ export default class MulticallService extends PublicService {
   }
 
   watchObservable(key, ...args) {
-    const path = args.join('.');
-    const fullPath = `${key}${path ? '.' : ''}${path}`;
     const schema = this.schemaByObservableKey(key);
     if (!schema)
       throw new Error(`No registered schema found for observable key: ${key}`);
+
+    // Generate schema
+    let generatedSchema = schema.generate(...args);
+
+    const path = [
+      generatedSchema.demarcate ? this.get('web3').currentAddress() : undefined,
+      ...args
+    ]
+      .filter(x => x)
+      .join('.');
+    const fullPath = `${key}${path ? '.' : ''}${path}`;
+
+    log2(`watchObservable() called for ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
 
     // Check if an observable already exists for this path (key + args)
     const existingObservable = get(this._observables, fullPath);
@@ -160,10 +175,6 @@ export default class MulticallService extends PublicService {
       log2(`Returning existing ${isComputed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
       return existingObservable;
     }
-
-    // Generate schema
-    let generatedSchema = schema.generate(...args);
-    log2(`watchObservable() called for ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
 
     if (args.length < generatedSchema.length)
       throw new Error(`Observable ${key} expects at least ${generatedSchema.length} argument${generatedSchema.length > 1 ? 's' : ''}`); // prettier-ignore
