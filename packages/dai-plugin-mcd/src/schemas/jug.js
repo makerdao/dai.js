@@ -4,7 +4,8 @@ import { RAY } from '../constants';
 
 import {
   ANNUAL_STABILITY_FEE,
-  DATE_STABILITY_FEES_LAST_LEVIED
+  DATE_STABILITY_FEES_LAST_LEVIED,
+  BASE_COLLATERAL_FEE
 } from './constants';
 
 const secondsPerYear = 60 * 60 * 24 * 365;
@@ -28,6 +29,16 @@ export const jugIlks = {
   ]
 };
 
+export const jugBase = {
+  generate: () => ({
+    id: 'MCD_JUG.base',
+    contractName: 'MCD_JUG',
+    call: ['base()(uint256)']
+  }),
+  returns: [[BASE_COLLATERAL_FEE, v => BigNumber(v)]]
+};
+
 export default {
-  jugIlks
+  jugIlks,
+  jugBase
 };

@@ -8,6 +8,7 @@ export const TOTAL_DAI_SUPPLY = 'totalDaiSupply';
 export const ENCUMBERED_COLLATERAL = 'encumberedCollateral';
 export const ENCUMBERED_DEBT = 'encumberedDebt';
 export const UNLOCKED_COLLATERAL = 'unlockedCollateral';
+export const GLOBAL_DEBT_CEILING = 'globalDebtCeiling';
 
 // spot
 export const PRICE_FEED_ADDRESS = 'priceFeedAddress';
@@ -18,6 +19,7 @@ export const LIQUIDATION_RATIO = 'liquidationRatio';
 // jug
 export const ANNUAL_STABILITY_FEE = 'annualStabilityFee';
 export const DATE_STABILITY_FEES_LAST_LEVIED = 'dateStabilityFeesLastLevied';
+export const BASE_COLLATERAL_FEE = 'baseCollateralFee';
 
 // proxyRegistry
 export const PROXY_ADDRESS = 'proxyAddress';
@@ -25,6 +27,8 @@ export const PROXY_ADDRESS = 'proxyAddress';
 // cdpManager
 export const VAULT_ADDRESS = 'vaultAddress';
 export const VAULT_TYPE = 'vaultType';
+export const VAULTS_CREATED = 'vaultCreated';
+export const VAULT_OWNER = 'vaultOwner';
 
 // pot
 export const TOTAL_SAVINGS_DAI = 'totalSavingsDai';
@@ -63,3 +67,4 @@ export const ALLOWANCE = 'allowance';
 // token
 export const TOKEN_BALANCE = 'tokenBalance';
 export const TOKEN_ALLOWANCE = 'tokenAllowance';
+export const ADAPTER_BALANCE = 'adapterBalance';

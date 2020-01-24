@@ -11,7 +11,8 @@ import {
   TOTAL_DAI_SUPPLY,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
-  UNLOCKED_COLLATERAL
+  UNLOCKED_COLLATERAL,
+  GLOBAL_DEBT_CEILING
 } from './constants';
 
 export const vatIlks = {
@@ -59,9 +60,19 @@ export const vatGem = {
   return: [UNLOCKED_COLLATERAL, fromWei]
 };
 
+export const vatLine = {
+  generate: () => ({
+    id: 'MCD_VAT.Line',
+    contractName: 'MCD_VAT',
+    call: ['Line()(uint256)']
+  }),
+  returns: [[GLOBAL_DEBT_CEILING, v => MDAI(v, 'rad')]]
+};
+
 export default {
   vatIlks,
   vatDebt,
   vatUrns,
-  vatGem
+  vatGem,
+  vatLine
 };

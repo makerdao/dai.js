@@ -1,5 +1,12 @@
-import { VAULT_ADDRESS, VAULT_TYPE } from './constants';
 import { bytesToString } from '../utils';
+import BigNumber from 'bignumber.js';
+
+import {
+  VAULT_ADDRESS,
+  VAULT_TYPE,
+  VAULTS_CREATED,
+  VAULT_OWNER
+} from './constants';
 
 export const cdpManagerUrns = {
   generate: id => ({
@@ -19,7 +26,27 @@ export const cdpManagerIlks = {
   returns: [[VAULT_TYPE, bytesToString]]
 };
 
+export const cdpManagerCdpi = {
+  generate: () => ({
+    id: 'CDP_MANAGER.cdpi',
+    contractName: 'CDP_MANAGER',
+    call: ['cdpi()(uint256)']
+  }),
+  returns: [[VAULTS_CREATED, v => BigNumber(v)]]
+};
+
+export const cdpManagerOwner = {
+  generate: id => ({
+    id: `CDP_MANAGER.owner(${id})`,
+    contractName: 'CDP_MANAGER',
+    call: ['owns(uint256)(address)', id]
+  }),
+  returns: [[VAULT_OWNER]]
+};
+
 export default {
   cdpManagerUrns,
-  cdpManagerIlks
+  cdpManagerIlks,
+  cdpManagerCdpi,
+  cdpManagerOwner
 };

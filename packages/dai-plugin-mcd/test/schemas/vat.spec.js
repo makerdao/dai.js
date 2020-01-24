@@ -14,7 +14,8 @@ import {
   TOTAL_DAI_SUPPLY,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
-  UNLOCKED_COLLATERAL
+  UNLOCKED_COLLATERAL,
+  GLOBAL_DEBT_CEILING
 } from '../../src/schemas';
 
 import vatSchemas from '../../src/schemas/vat';
@@ -212,4 +213,11 @@ test(UNLOCKED_COLLATERAL, async () => {
   );
 
   expect(col).toEqual(fromWei(expected));
+});
+
+test(GLOBAL_DEBT_CEILING, async () => {
+  const globalDebtCeiling = await maker.latest(GLOBAL_DEBT_CEILING);
+
+  expect(globalDebtCeiling.symbol).toEqual(MDAI.symbol);
+  expect(globalDebtCeiling.toBigNumber()).toEqual(BigNumber('1000000'));
 });

@@ -2,12 +2,19 @@ import { mcdMaker, setupCollateral } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ETH, BAT, MDAI } from '../../src';
 import { ServiceRoles } from '../../src/constants';
+import BigNumber from 'bignumber.js';
 
-import { VAULT_ADDRESS, VAULT_TYPE } from '../../src/schemas';
+import {
+  VAULT_ADDRESS,
+  VAULT_TYPE,
+  VAULTS_CREATED,
+  VAULT_OWNER,
+  TOTAL_OWNED_VAULTS
+} from '../../src/schemas';
 
 import cdpManagerSchemas from '../../src/schemas/cdpManager';
 
-let maker, snapshotData, cdpMgr;
+let maker, snapshotData, cdpMgr, proxyAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -32,8 +39,8 @@ beforeAll(async () => {
 
   cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
   const dai = maker.getToken(MDAI);
-  const _proxyAddress = await maker.service('proxy').ensureProxy();
-  await dai.approveUnlimited(_proxyAddress);
+  proxyAddress = await maker.service('proxy').ensureProxy();
+  await dai.approveUnlimited(proxyAddress);
 
   await cdpMgr.openLockAndDraw(
     'ETH-A',
@@ -58,4 +65,14 @@ test(VAULT_TYPE, async () => {
   const expected = 'ETH-A';
   const vaultType = await maker.latest(VAULT_TYPE, cdpId);
   expect(vaultType).toEqual(expected);
+});
+
+test(VAULTS_CREATED, async () => {
+  const vaultsCreated = await maker.latest(VAULTS_CREATED);
+  expect(vaultsCreated).toEqual(BigNumber('1'));
+});
+
+test(VAULT_OWNER, async () => {
+  const vaultOwner = await maker.latest(VAULT_OWNER, 1);
+  expect(vaultOwner).toEqual(proxyAddress);
 });

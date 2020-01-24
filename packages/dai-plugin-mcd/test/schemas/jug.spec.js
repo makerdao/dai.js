@@ -1,9 +1,11 @@
 import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import BigNumber from 'bignumber.js';
 
 import {
   ANNUAL_STABILITY_FEE,
-  DATE_STABILITY_FEES_LAST_LEVIED
+  DATE_STABILITY_FEES_LAST_LEVIED,
+  BASE_COLLATERAL_FEE
 } from '../../src/schemas';
 
 import jugSchemas from '../../src/schemas/jug';
@@ -40,4 +42,9 @@ test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
 
   expect(dateStabilityFeesLastLevied instanceof Date).toEqual(true);
   expect(timestamp - dateStabilityFeesLastLevied).toBeLessThanOrEqual(10);
+});
+
+test(BASE_COLLATERAL_FEE, async () => {
+  const baseCollateralFee = await maker.latest(BASE_COLLATERAL_FEE);
+  expect(baseCollateralFee).toEqual(BigNumber('0'));
 });

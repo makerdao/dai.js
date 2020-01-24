@@ -57,7 +57,31 @@ export const tokenAllowance = {
   returns: [[TOKEN_ALLOWANCE, v => BigNumber(v)]]
 };
 
+export const adapterBalance = {
+  generate: collateralTypeName => ({
+    dependencies: ({ get }) => {
+      collateralTypeName =
+        collateralTypeName === 'MDAI' ? 'DAI' : collateralTypeName;
+      let tokenSymbol = collateralTypeName.split('-')[0];
+      tokenSymbol = tokenSymbol === 'ETH' ? 'MWETH' : tokenSymbol;
+      return [
+        [
+          TOKEN_BALANCE,
+          get('smartContract').getContractAddress(
+            `MCD_JOIN_${collateralTypeName.replace('-', '_')}`
+          ),
+          tokenSymbol
+        ]
+      ];
+    },
+    computed: v => v
+  })
+};
+
 export default {
   tokenBalance,
-  tokenAllowance
+  tokenAllowance,
+
+  // computed
+  adapterBalance
 };
