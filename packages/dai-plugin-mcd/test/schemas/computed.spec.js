@@ -283,7 +283,7 @@ test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
   expect(totalDaiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
 });
 
-xtest(BALANCE, async () => {
+test(BALANCE, async () => {
   expect.assertions(11);
 
   const ethBalance = await maker.latest(BALANCE, 'ETH');
