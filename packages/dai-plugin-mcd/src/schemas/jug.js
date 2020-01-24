@@ -1,10 +1,13 @@
-import { annualStabilityFee } from '../math';
+import BigNumber from 'bignumber.js';
 import { toHex } from '../utils';
+import { RAY } from '../constants';
 
 import {
   ANNUAL_STABILITY_FEE,
   DATE_STABILITY_FEES_LAST_LEVIED
 } from './constants';
+
+const secondsPerYear = 60 * 60 * 24 * 365;
 
 export const jugIlks = {
   generate: collateralTypeName => ({
@@ -13,7 +16,14 @@ export const jugIlks = {
     call: ['ilks(bytes32)(uint256,uint48)', toHex(collateralTypeName)]
   }),
   returns: [
-    [ANNUAL_STABILITY_FEE, annualStabilityFee],
+    [
+      ANNUAL_STABILITY_FEE,
+      v => {
+        v = new BigNumber(v.toString()).dividedBy(RAY);
+        BigNumber.config({ POW_PRECISION: 100 });
+        return v.pow(secondsPerYear).minus(1);
+      }
+    ],
     [DATE_STABILITY_FEES_LAST_LEVIED, val => new Date(val * 1000)]
   ]
 };

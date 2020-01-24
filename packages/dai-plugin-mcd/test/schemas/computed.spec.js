@@ -30,6 +30,8 @@ import { spotIlks, liquidationRatio, spotPar } from '../../src/schemas/spot';
 import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
 import { potPie, potpie, potChi } from '../../src/schemas/pot';
 import { tokenBalance } from '../../src/schemas/token';
+import { catIlks } from '../../src/schemas/cat';
+import { jugIlks } from '../../src/schemas/jug';
 import computedSchemas from '../../src/schemas/computed';
 import { createCurrencyRatio } from '@makerdao/currency';
 
@@ -68,6 +70,8 @@ beforeAll(async () => {
     potChi,
     liquidationRatio,
     tokenBalance,
+    catIlks,
+    jugIlks,
     ...computedSchemas
   });
   maker.service('multicall').start();
@@ -217,10 +221,13 @@ test(VAULT, async () => {
   const expectedCollateralAvailableAmount = ETH(0.99);
   const expectedCollateralAvailableValue = USD(178.5);
   const expectedUnlockedCollateral = fromWei(0);
+  const expectedLiqRatio = createCurrencyRatio(USD, MDAI)(1.5);
+  const expectedLiqPenalty = BigNumber('0.05');
+  const expectedAnnStabilityFee = 0.04999999999989363;
 
   const vault = await maker.latest(VAULT, cdpId);
 
-  expect(Object.keys(vault).length).toBe(14);
+  expect(Object.keys(vault).length).toBe(17);
 
   expect(vault.vaultType).toEqual(expectedVaultType);
   expect(vault.vaultAddress).toEqual(expectedVaultAddress);
@@ -254,6 +261,9 @@ test(VAULT, async () => {
     expectedCollateralAvailableValue.toString()
   );
   expect(vault.unlockedCollateral).toEqual(expectedUnlockedCollateral);
+  expect(vault.liquidationRatioSimple).toEqual(expectedLiqRatio);
+  expect(vault.liquidationPenalty).toEqual(expectedLiqPenalty);
+  expect(vault.annualStabilityFee.toNumber()).toEqual(expectedAnnStabilityFee);
 });
 
 test(DAI_LOCKED_IN_DSR, async () => {

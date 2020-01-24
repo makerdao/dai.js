@@ -1,6 +1,6 @@
-import { toHex } from '../utils';
+import { toHex, fromRay } from '../utils';
 import BigNumber from 'bignumber.js';
-import { liquidationPenalty } from '../math';
+import { RAY } from '../constants';
 
 import {
   LIQUIDATOR_ADDRESS,
@@ -16,7 +16,7 @@ export const catIlks = {
   }),
   returns: [
     [LIQUIDATOR_ADDRESS],
-    [LIQUIDATION_PENALTY, liquidationPenalty],
+    [LIQUIDATION_PENALTY, v => fromRay(BigNumber(v).minus(RAY))],
     [MAX_AUCTION_LOT_SIZE, v => BigNumber(v).shiftedBy(-18)]
   ]
 };

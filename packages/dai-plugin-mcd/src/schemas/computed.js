@@ -35,7 +35,10 @@ import {
   UNLOCKED_COLLATERAL,
   SAVINGS_RATE_ACCUMULATOR,
   DAI_LOCKED_IN_DSR,
-  TOKEN_BALANCE
+  TOKEN_BALANCE,
+  LIQUIDATION_RATIO_SIMPLE,
+  LIQUIDATION_PENALTY,
+  ANNUAL_STABILITY_FEE
 } from './constants';
 
 export const collateralTypePrice = {
@@ -202,6 +205,17 @@ export const collateralAvailableValue = {
   })
 };
 
+export const liquidationRatioSimple = {
+  generate: id => ({
+    dependencies: [[RAW_LIQUIDATION_RATIO, [VAULT_TYPE, id]]],
+    computed: rawLiquidationRatio => {
+      const ratio = createCurrencyRatio(USD, MDAI);
+      const liquidationRatio = ratio(rawLiquidationRatio.toNumber());
+      return liquidationRatio;
+    }
+  })
+};
+
 export const vault = {
   generate: id => ({
     dependencies: [
@@ -218,7 +232,10 @@ export const vault = {
       [DAI_AVAILABLE, id],
       [COLLATERAL_AVAILABLE_AMOUNT, id],
       [COLLATERAL_AVAILABLE_VALUE, id],
-      [UNLOCKED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]]
+      [UNLOCKED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+      [LIQUIDATION_RATIO_SIMPLE, id],
+      [LIQUIDATION_PENALTY, [VAULT_TYPE, id]],
+      [ANNUAL_STABILITY_FEE, [VAULT_TYPE, id]]
     ],
     computed: (
       vaultType,
@@ -234,7 +251,10 @@ export const vault = {
       daiAvailable,
       collateralAvailableAmount,
       collateralAvailableValue,
-      unlockedCollateral
+      unlockedCollateral,
+      liquidationRatioSimple,
+      liquidationPenalty,
+      annualStabilityFee
     ) => ({
       vaultType,
       vaultAddress,
@@ -249,7 +269,10 @@ export const vault = {
       daiAvailable,
       collateralAvailableAmount,
       collateralAvailableValue,
-      unlockedCollateral
+      unlockedCollateral,
+      liquidationRatioSimple,
+      liquidationPenalty,
+      annualStabilityFee
     })
   })
 };
@@ -305,5 +328,6 @@ export default {
   collateralAvailableValue,
   daiLockedInDsr,
   totalDaiLockedInDsr,
-  balance
+  balance,
+  liquidationRatioSimple
 };

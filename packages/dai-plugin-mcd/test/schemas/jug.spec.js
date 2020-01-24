@@ -28,7 +28,7 @@ afterAll(async () => {
 test(ANNUAL_STABILITY_FEE, async () => {
   const expected = 0.04999999999989363;
   const annualStabilityFee = await maker.latest(ANNUAL_STABILITY_FEE, 'ETH-A');
-  expect(annualStabilityFee).toEqual(expected);
+  expect(annualStabilityFee.toNumber()).toEqual(expected);
 });
 
 test(DATE_STABILITY_FEES_LAST_LEVIED, async () => {
