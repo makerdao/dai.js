@@ -85,6 +85,10 @@ export const defaultCdpTypes = [
 
 export const SAI = createCurrency('SAI');
 
+export const ALLOWANCE_AMOUNT = BigNumber(
+  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+);
+
 export const defaultTokens = [
   ...new Set([
     ...defaultCdpTypes.map(type => type.currency),

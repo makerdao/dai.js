@@ -6,8 +6,7 @@ import {
   liquidationPrice as calcLiquidationPrice,
   minSafeCollateralAmount as calcMinSafeCollateralAmount
 } from '../math';
-import { defaultCdpTypes } from '../';
-import { USD, MDAI, DSR_DAI } from '../';
+import { USD, MDAI, DSR_DAI, defaultCdpTypes, ALLOWANCE_AMOUNT } from '../';
 
 import {
   RATIO_DAI_USD,
@@ -38,7 +37,8 @@ import {
   TOKEN_BALANCE,
   LIQUIDATION_RATIO_SIMPLE,
   LIQUIDATION_PENALTY,
-  ANNUAL_STABILITY_FEE
+  ANNUAL_STABILITY_FEE,
+  TOKEN_ALLOWANCE
 } from './constants';
 
 export const collateralTypePrice = {
@@ -311,6 +311,16 @@ export const balance = {
   })
 };
 
+export const allowance = {
+  generate: symbol => ({
+    dependencies: ({ get }) => {
+      const address = get('web3').currentAddress();
+      return [[TOKEN_ALLOWANCE, address, [PROXY_ADDRESS, address], symbol]];
+    },
+    computed: v => v.isEqualTo(ALLOWANCE_AMOUNT)
+  })
+};
+
 export default {
   collateralTypePrice,
   collateralTypesPrices,
@@ -329,5 +339,6 @@ export default {
   daiLockedInDsr,
   totalDaiLockedInDsr,
   balance,
-  liquidationRatioSimple
+  liquidationRatioSimple,
+  allowance
 };
