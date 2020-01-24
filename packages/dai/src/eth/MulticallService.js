@@ -1,8 +1,15 @@
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
-import { Observable, ReplaySubject, combineLatest, from, interval } from 'rxjs';
-import { map, first, flatMap, throttle } from 'rxjs/operators';
+import {
+  Observable,
+  ReplaySubject,
+  combineLatest,
+  from,
+  interval,
+  timer
+} from 'rxjs';
+import { map, first, flatMap, throttle, debounce, take } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -21,6 +28,8 @@ export default class MulticallService extends PublicService {
     this._watchingSchemasTotal = 0;
     this._multicallResultCache = {};
     this._addresses = {};
+    this._removeSchemaTimers = {};
+    this._removeSchemaDelay = 1000;
   }
 
   initialize() {
@@ -142,8 +151,6 @@ export default class MulticallService extends PublicService {
     const schema = this.schemaByObservableKey(key);
     if (!schema)
       throw new Error(`No registered schema found for observable key: ${key}`);
-    if (args.length < schema.generate.length)
-      throw new Error(`Observable ${key} expects at least ${schema.generate.length} argument${schema.generate.length > 1 ? 's' : ''}`); // prettier-ignore
 
     // Check if an observable already exists for this path (key + args)
     const existingObservable = get(this._observables, fullPath);
@@ -157,6 +164,9 @@ export default class MulticallService extends PublicService {
     // Generate schema
     let generatedSchema = schema.generate(...args);
     log2(`watchObservable() called for ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
+
+    if (args.length < generatedSchema.length)
+      throw new Error(`Observable ${key} expects at least ${generatedSchema.length} argument${generatedSchema.length > 1 ? 's' : ''}`); // prettier-ignore
 
     // Handle computed observable
     if (generatedSchema.computed) {
@@ -176,34 +186,34 @@ export default class MulticallService extends PublicService {
           return from(key());
         }
 
-        let atLeafNode = false;
-        const [checker] = trie;
-        if (!Array.isArray(checker)) {
-          atLeafNode = true;
-        }
+        const indexesAtLeafNodes = trie.map(node => !Array.isArray(node));
+        const allLeafNodes = indexesAtLeafNodes.every(node => node === true);
 
-        if (Array.isArray(trie) && !atLeafNode) {
-          if (trie.length > 1) {
-            return combineLatest(trie.map(recurseDependencyTree)).pipe(
-              throttle(() => interval(1)),
-              flatMap(result => {
-                return this.watchObservable(key, ...result);
-              })
-            );
-          } else {
-            const next = trie.shift();
-            return recurseDependencyTree(next).pipe(
-              flatMap(result => {
-                return Array.isArray(result)
-                  ? this.watchObservable(key, ...result)
-                  : this.watchObservable(key, result);
-              })
-            );
-          }
-        } else {
-          if (Array.isArray(trie) && trie.length === 0)
-            return this.watchObservable(key);
+        if (Array.isArray(trie) && trie.length === 0) {
+          // When trie is an empty array, indicates that we only need to return
+          // watchObservable on the key
+          return this.watchObservable(key);
+        } else if (allLeafNodes) {
+          // If the trie is an array it indicates that the observable is
+          // expecting arguments. These can be normal values or other
+          // observables. Where an index in the trie is an array, it is
+          // assumed that it is syntax for an observable argument. In the case
+          // where all indexes in the trie array are normal values, we use the
+          // spread operator to pass them to the returned watchObservable fn
           return this.watchObservable(key, ...trie);
+        } else {
+          // When a trie array has nested observables, recursively call this fn
+          // on indexes which have an array.
+          return combineLatest(
+            trie.map((node, idx) => {
+              return indexesAtLeafNodes[idx]
+                ? [node]
+                : recurseDependencyTree(node);
+            })
+          ).pipe(
+            throttle(() => interval(1)),
+            flatMap(result => this.watchObservable(key, ...result))
+          );
         }
       };
 
@@ -244,41 +254,18 @@ export default class MulticallService extends PublicService {
         });
       }
       this._watchingSchemasTotal++;
+      if (schema.watching[path] === undefined) schema.watching[path] = 0;
 
-      // First subscriber to this schema
-      if (!schema.watching[path]) {
-        schema.watching[path] = 1;
-        // Tap multicall to add schema (first subscriber to this schema)
-        this._tapMulticallWithSchema(schema, generatedSchema, path);
-        this._watcher.tap(s => {
-          log2(`Total schemas in multicall: ${s.filter(({ id }) => id).length}`); // prettier-ignore
-          return s;
-        });
-      } else schema.watching[path]++;
+      // If first subscriber to this schema add it to multicall
+      if (++schema.watching[path] === 1) this._addSchemaToMulticall(schema, generatedSchema, path); // prettier-ignore
       log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`); // prettier-ignore
 
       const sub = subject.subscribe(observer);
       return () => {
         sub.unsubscribe();
-        schema.watching[path]--;
-        if (schema.watching[path] === 0) {
-          // Tap multicall to remove schema (last unsubscriber from this schema)
-          log2(`Schema removed from multicall: ${generatedSchema.id}`);
-          this._watcher.tap(schemas =>
-            schemas.filter(({ id }) => id !== generatedSchema.id)
-          );
-          this._watcher.tap(s => {
-            log2(`Total schemas in multicall: ${s.filter(({ id }) => id).length}`); // prettier-ignore
-            return s;
-          });
-        } else log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`); // prettier-ignore
-
-        // If no schemas are being watched, unsubscribe from watcher updates
-        if (--this._watchingSchemasTotal === 0) {
-          log2('Unsubscribed from watcher updates');
-          this._watcherUpdates.unsub();
-          this._watcherUpdates = null;
-        }
+        // If last unsubscriber from this schema remove it from multicall
+        if (--schema.watching[path] === 0) this._removeSchemaFromMulticall(generatedSchema);
+        else log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`); // prettier-ignore
       };
     });
 
@@ -288,13 +275,24 @@ export default class MulticallService extends PublicService {
   }
 
   latest(key, ...args) {
+    // TODO Possible configuration setting for timer?
     return this.watchObservable(key, ...args)
-      .pipe(first())
+      .pipe(
+        debounce(() => timer(100)),
+        take(1)
+      )
       .toPromise();
   }
 
-  _tapMulticallWithSchema(schema, generatedSchema, path) {
+  _addSchemaToMulticall(schema, generatedSchema, path) {
     let { id, contractName, call, returns, transforms = {} } = generatedSchema;
+    // If this schema is already added but pending removal
+    if (this._removeSchemaTimers[id]) {
+      log2(`Cleared pending schema removal for: ${id}`);
+      clearTimeout(this._removeSchemaTimers[id]);
+      this._removeSchemaTimers[id] = null;
+      return;
+    }
     // Automatically generate return keys if not explicitly specified in generated schema
     if (!returns)
       returns = schema.returns.map(ret => {
@@ -319,8 +317,27 @@ export default class MulticallService extends PublicService {
     log2(`Schema added to multicall: ${id}`);
     this._watcher.tap(s => {
       log2('Current schemas: ' + s.filter(({ id }) => id).map(({ id }) => id).join(',')); // prettier-ignore
+      log2(`Total schemas in multicall: ${s.filter(({ id }) => id).length}`);
       return s;
     });
+  }
+
+  _removeSchemaFromMulticall({ id }) {
+    this._removeSchemaTimers[id] = setTimeout(() => {
+      this._removeSchemaTimers[id] = null;
+      log2(`Schema removed from multicall: ${id}`);
+      this._watcher.tap(schemas => schemas.filter(({ id: id_ }) => id_ !== id));
+      this._watcher.tap(s => {
+        log2(`Total schemas in multicall: ${s.filter(({ id }) => id).length}`);
+        return s;
+      });
+      // If no schemas are being watched, unsubscribe from watcher updates
+      if (--this._watchingSchemasTotal === 0) {
+        log2('Unsubscribed from watcher updates');
+        this._watcherUpdates.unsub();
+        this._watcherUpdates = null;
+      }
+    }, this._removeSchemaDelay);
   }
 
   disconnect() {

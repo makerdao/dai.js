@@ -1,6 +1,10 @@
 import { mcdMaker, setupCollateral } from '../helpers';
 import { ETH, BAT, MDAI, USD } from '../../src';
-import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import {
+  takeSnapshot,
+  restoreSnapshot,
+  TestAccountProvider
+} from '@makerdao/test-helpers';
 import { fromWei } from '../../src/utils';
 import { ServiceRoles } from '../../src/constants';
 import BigNumber from 'bignumber.js';
@@ -21,7 +25,8 @@ import {
   COLLATERAL_AVAILABLE_VALUE,
   DAI_LOCKED_IN_DSR,
   TOTAL_DAI_LOCKED_IN_DSR,
-  BALANCE
+  BALANCE,
+  ALLOWANCE
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
@@ -29,9 +34,9 @@ import { cdpManagerUrns, cdpManagerIlks } from '../../src/schemas/cdpManager';
 import { spotIlks, spotPar } from '../../src/schemas/spot';
 import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
 import { potPie, potpie, potChi } from '../../src/schemas/pot';
-import { tokenBalance } from '../../src/schemas/token';
 import { catIlks } from '../../src/schemas/cat';
 import { jugIlks } from '../../src/schemas/jug';
+import { tokenBalance, tokenAllowance } from '../../src/schemas/token';
 import computedSchemas from '../../src/schemas/computed';
 import { createCurrencyRatio } from '@makerdao/currency';
 
@@ -71,6 +76,7 @@ beforeAll(async () => {
     tokenBalance,
     catIlks,
     jugIlks,
+    tokenAllowance,
     ...computedSchemas
   });
   maker.service('multicall').start();
@@ -285,7 +291,7 @@ xtest(BALANCE, async () => {
 
   expect(ethBalance.symbol).toEqual('ETH');
   expect(batBalance.symbol).toEqual('BAT');
-  expect(ethBalance.toNumber()).toBeCloseTo(93.675, 2);
+  expect(ethBalance.toNumber()).toBeCloseTo(93.677, 2);
   expect(batBalance.toBigNumber()).toEqual(BigNumber('999'));
 
   const daiBalance = await maker.latest(BALANCE, 'DAI');
@@ -308,4 +314,25 @@ xtest(BALANCE, async () => {
       Error('NON_MCD_TOKEN token is not part of the default tokens list')
     );
   }
+});
+
+test(ALLOWANCE, async () => {
+  const nextAccount = TestAccountProvider.nextAccount();
+  await maker.addAccount({ ...nextAccount, type: 'privateKey' });
+  maker.useAccount(nextAccount.address);
+  const nextAccountProxy = await maker.service('proxy').ensureProxy();
+
+  let batAllowance;
+  batAllowance = await maker.latest(ALLOWANCE, 'BAT');
+  expect(batAllowance).toEqual(false);
+
+  await maker
+    .service('token')
+    .getToken('BAT')
+    .approveUnlimited(nextAccountProxy);
+
+  batAllowance = await maker.latest(ALLOWANCE, 'BAT');
+  expect(batAllowance).toEqual(true);
+
+  maker.useAccount('default');
 });

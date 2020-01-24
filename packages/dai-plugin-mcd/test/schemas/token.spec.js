@@ -1,13 +1,13 @@
 import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import { ETH, BAT, MWETH, MDAI } from '../../src';
+import { ETH, BAT, ALLOWANCE_AMOUNT } from '../../src';
 import BigNumber from 'bignumber.js';
 
-import { TOKEN_BALANCE, BALANCE } from '../../src/schemas';
+import { TOKEN_BALANCE, TOKEN_ALLOWANCE } from '../../src/schemas';
 
 import tokenSchemas from '../../src/schemas/token';
 
-let maker, snapshotData, address;
+let maker, snapshotData, address, proxyAddress;
 
 beforeAll(async () => {
   maker = await mcdMaker({
@@ -23,6 +23,7 @@ beforeAll(async () => {
   maker.service('multicall').registerSchemas(tokenSchemas);
   maker.service('multicall').start();
   address = maker.currentAddress();
+  proxyAddress = await maker.service('proxy').ensureProxy();
 });
 
 afterAll(async () => {
@@ -63,4 +64,31 @@ test(TOKEN_BALANCE, async () => {
       )
     );
   }
+});
+
+test(TOKEN_ALLOWANCE, async () => {
+  const unsetBatAllowance = await maker.latest(
+    TOKEN_ALLOWANCE,
+    address,
+    proxyAddress,
+    'BAT'
+  );
+
+  expect(BigNumber.isBigNumber(unsetBatAllowance)).toEqual(true);
+  expect(unsetBatAllowance).toEqual(BigNumber('0'));
+
+  await maker
+    .service('token')
+    .getToken('BAT')
+    .approveUnlimited(proxyAddress);
+
+  const setBatAllowance = await maker.latest(
+    TOKEN_ALLOWANCE,
+    address,
+    proxyAddress,
+    'BAT'
+  );
+
+  expect(BigNumber.isBigNumber(setBatAllowance)).toEqual(true);
+  expect(setBatAllowance).toEqual(BigNumber(ALLOWANCE_AMOUNT));
 });
