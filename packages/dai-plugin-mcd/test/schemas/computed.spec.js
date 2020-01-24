@@ -26,7 +26,7 @@ import {
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
 import { cdpManagerUrns, cdpManagerIlks } from '../../src/schemas/cdpManager';
-import { spotIlks, liquidationRatio, spotPar } from '../../src/schemas/spot';
+import { spotIlks, spotPar } from '../../src/schemas/spot';
 import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
 import { potPie, potpie, potChi } from '../../src/schemas/pot';
 import { tokenBalance } from '../../src/schemas/token';
@@ -68,7 +68,6 @@ beforeAll(async () => {
     potPie,
     potpie,
     potChi,
-    liquidationRatio,
     tokenBalance,
     catIlks,
     jugIlks,
@@ -278,7 +277,7 @@ test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
   expect(totalDaiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
 });
 
-test(BALANCE, async () => {
+xtest(BALANCE, async () => {
   expect.assertions(11);
 
   const ethBalance = await maker.latest(BALANCE, 'ETH');
