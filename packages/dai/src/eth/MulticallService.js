@@ -120,18 +120,16 @@ export default class MulticallService extends PublicService {
       schema.watching = {};
       // Automatically use schema key as return key if no return keys specified
       if (!schema.return && !schema.returns) schema.returns = [schema.key];
-      if (schema.return && schema.returns)
-        throw new Error(
-          'Ambiguous return definitions in schema: found both return and returns property'
-        );
+      if (schema.return && schema.returns) throw new Error('Ambiguous return definitions in schema: found both return and returns property'); // prettier-ignore
       if (schema.return) schema.returns = [schema.return];
-      if (!Array.isArray(schema.returns))
-        throw new Error('Schema must contain return/returns property');
-      // Use return keys to create observable keys => schema mapping
-      schema.returns.forEach(ret => {
-        if (Array.isArray(ret)) this._schemaByObservableKey[ret[0]] = schema;
-        else if (typeof ret === 'string')
-          this._schemaByObservableKey[ret] = schema;
+      if (!Array.isArray(schema.returns)) throw new Error('Schema must contain return/returns property'); // prettier-ignore
+      // Use return keys to create observable key => schema mapping
+      // and normalize as array of [key, transform] arrays
+      schema.returns = schema.returns.map(ret => {
+        if (!Array.isArray(ret)) ret = [ret];
+        this._schemaByObservableKey[ret[0]] = schema;
+        if (ret.length > 2) throw new Error('Returns array format should be [key, transform]'); // prettier-ignore
+        return ret;
       });
     });
     this._schemas = [...this._schemas, ...schemas];
@@ -141,58 +139,24 @@ export default class MulticallService extends PublicService {
   watchObservable(key, ...args) {
     const path = args.join('.');
     const fullPath = `${key}${path ? '.' : ''}${path}`;
-
     const schema = this.schemaByObservableKey(key);
     if (!schema)
       throw new Error(`No registered schema found for observable key: ${key}`);
     if (args.length < schema.generate.length)
-      throw new Error(
-        `Observable ${key} expects at least ${schema.generate.length} argument${
-          schema.generate.length > 1 ? 's' : ''
-        }`
-      );
+      throw new Error(`Observable ${key} expects at least ${schema.generate.length} argument${schema.generate.length > 1 ? 's' : ''}`); // prettier-ignore
 
-    let generatedSchema = schema.generate(...args);
-
-    // check only in base observables
-    if (!schema.computed) {
-      if (generatedSchema.returns && schema.returns) {
-        const isArrayReturn = Array.isArray(generatedSchema.returns[0]);
-        if (
-          !(isArrayReturn && Array.isArray(schema.returns[0])) &&
-          !(
-            typeof generatedSchema.returns[0] === 'string' &&
-            typeof schema.returns[0] === 'string'
-          )
-        ) {
-          throw new Error('Both return values must have same structure');
-        }
-        generatedSchema = {
-          ...generatedSchema,
-          returns: isArrayReturn
-            ? generatedSchema.returns.map(([_, cb]) =>
-                [fullPath, cb].filter(x => x)
-              )
-            : [[fullPath, generatedSchema.returns[1]].filter(x => x)]
-        };
-      }
-    }
-
-    log2(
-      `watchObservable() called for ${
-        generatedSchema.computed ? 'computed ' : 'base '
-      }observable: ${fullPath}`
-    );
-
+    // Check if an observable already exists for this path (key + args)
     const existingObservable = get(this._observables, fullPath);
     if (existingObservable) {
-      log2(
-        `Returning existing ${
-          generatedSchema.computed ? 'computed ' : 'base '
-        }observable: ${fullPath}`
-      );
+      const isComputed = !get(this._subjects, fullPath, subject);
+      log2(`watchObservable() called for ${isComputed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
+      log2(`Returning existing ${isComputed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
       return existingObservable;
     }
+
+    // Generate schema
+    let generatedSchema = schema.generate(...args);
+    log2(`watchObservable() called for ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
 
     // Handle computed observable
     if (generatedSchema.computed) {
@@ -286,23 +250,17 @@ export default class MulticallService extends PublicService {
         schema.watching[path] = 1;
         // Tap multicall to add schema (first subscriber to this schema)
         this._tapMulticallWithSchema(schema, generatedSchema, path);
+        this._watcher.tap(s => {
+          log2(`Total schemas in multicall: ${s.filter(({ id }) => id).length}`); // prettier-ignore
+          return s;
+        });
       } else schema.watching[path]++;
-
-      log2(
-        `Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`
-      );
+      log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`); // prettier-ignore
 
       const sub = subject.subscribe(observer);
       return () => {
-        // If no schemas are being watched, unsubscribe from watcher updates
-        if (--this._watchingSchemasTotal === 0) {
-          log2('Unsubscribed from watcher updates');
-          this._watcherUpdates.unsub();
-          this._watcherUpdates = null;
-        }
         sub.unsubscribe();
         schema.watching[path]--;
-        log2('Schema subscribers:', schema.watching[path]);
         if (schema.watching[path] === 0) {
           // Tap multicall to remove schema (last unsubscriber from this schema)
           log2(`Schema removed from multicall: ${generatedSchema.id}`);
@@ -310,9 +268,16 @@ export default class MulticallService extends PublicService {
             schemas.filter(({ id }) => id !== generatedSchema.id)
           );
           this._watcher.tap(s => {
-            log2(`Remaining schemas: ${s.filter(({ id }) => id).length}`);
+            log2(`Total schemas in multicall: ${s.filter(({ id }) => id).length}`); // prettier-ignore
             return s;
           });
+        } else log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`); // prettier-ignore
+
+        // If no schemas are being watched, unsubscribe from watcher updates
+        if (--this._watchingSchemasTotal === 0) {
+          log2('Unsubscribed from watcher updates');
+          this._watcherUpdates.unsub();
+          this._watcherUpdates = null;
         }
       };
     });
@@ -329,16 +294,19 @@ export default class MulticallService extends PublicService {
   }
 
   _tapMulticallWithSchema(schema, generatedSchema, path) {
-    let { id, contractName, call, returns } = generatedSchema;
-    // Automatically generate return keys if not specified in schema
+    let { id, contractName, call, returns, transforms = {} } = generatedSchema;
+    // Automatically generate return keys if not explicitly specified in generated schema
     if (!returns)
       returns = schema.returns.map(ret => {
-        let key = Array.isArray(ret) ? ret[0] : ret;
-        key = `${key}${path ? '.' : ''}${path}`;
-        return Array.isArray(ret) && ret.length == 2 ? [key, ret[1]] : [key];
+        const key = ret[0];
+        const fullPath = `${key}${path ? '.' : ''}${path}`;
+        return transforms[key]
+          ? [fullPath, transforms[key]] // Use transform mapping in generated schema if available
+          : ret.length == 2
+          ? [fullPath, ret[1]]
+          : [fullPath];
       });
-    if (!this._addresses[contractName])
-      throw new Error(`Can't find contract address for ${contractName}`);
+    if (!this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
     this._watcher.tap(calls => [
       ...calls,
       {
@@ -350,7 +318,7 @@ export default class MulticallService extends PublicService {
     ]);
     log2(`Schema added to multicall: ${id}`);
     this._watcher.tap(s => {
-      log2('Current schemas:', s.filter(({ id }) => id).map(({ id }) => id));
+      log2('Current schemas: ' + s.filter(({ id }) => id).map(({ id }) => id).join(',')); // prettier-ignore
       return s;
     });
   }
