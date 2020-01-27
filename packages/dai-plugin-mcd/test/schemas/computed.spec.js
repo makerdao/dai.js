@@ -229,10 +229,11 @@ test(VAULT, async () => {
   const expectedLiqRatio = createCurrencyRatio(USD, MDAI)(1.5);
   const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
+  const expectedDebtFloor = BigNumber('0');
 
   const vault = await maker.latest(VAULT, cdpId);
 
-  expect(Object.keys(vault).length).toBe(17);
+  expect(Object.keys(vault).length).toBe(18);
 
   expect(vault.vaultType).toEqual(expectedVaultType);
   expect(vault.vaultAddress).toEqual(expectedVaultAddress);
@@ -269,6 +270,7 @@ test(VAULT, async () => {
   expect(vault.liquidationRatioSimple).toEqual(expectedLiqRatio);
   expect(vault.liquidationPenalty).toEqual(expectedLiqPenalty);
   expect(vault.annualStabilityFee.toNumber()).toEqual(expectedAnnStabilityFee);
+  expect(vault.debtFloor).toEqual(expectedDebtFloor);
 });
 
 test(DAI_LOCKED_IN_DSR, async () => {

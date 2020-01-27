@@ -37,7 +37,8 @@ import {
   LIQUIDATION_RATIO_SIMPLE,
   LIQUIDATION_PENALTY,
   ANNUAL_STABILITY_FEE,
-  TOKEN_ALLOWANCE
+  TOKEN_ALLOWANCE,
+  DEBT_FLOOR
 } from './constants';
 
 export const collateralTypePrice = {
@@ -230,7 +231,8 @@ export const vault = {
       [UNLOCKED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
       [LIQUIDATION_RATIO_SIMPLE, id],
       [LIQUIDATION_PENALTY, [VAULT_TYPE, id]],
-      [ANNUAL_STABILITY_FEE, [VAULT_TYPE, id]]
+      [ANNUAL_STABILITY_FEE, [VAULT_TYPE, id]],
+      [DEBT_FLOOR, id]
     ],
     computed: (
       vaultType,
@@ -249,7 +251,8 @@ export const vault = {
       unlockedCollateral,
       liquidationRatioSimple,
       liquidationPenalty,
-      annualStabilityFee
+      annualStabilityFee,
+      debtFloor
     ) => ({
       vaultType,
       vaultAddress,
@@ -267,7 +270,8 @@ export const vault = {
       unlockedCollateral,
       liquidationRatioSimple,
       liquidationPenalty,
-      annualStabilityFee
+      annualStabilityFee,
+      debtFloor
     })
   })
 };
