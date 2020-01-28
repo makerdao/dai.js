@@ -271,7 +271,28 @@ export const vault = {
       liquidationRatioSimple,
       liquidationPenalty,
       annualStabilityFee,
-      debtFloor
+      debtFloor,
+      calculateLiquidationPrice({
+        collateralAmount = this.collateralAmount,
+        debtValue = this.debtValue,
+        liquidationRatioSimple = this.liquidationRatioSimple
+      } = {}) {
+        if (!collateralAmount || !debtValue || !liquidationRatioSimple) return;
+        return calcLiquidationPrice(
+          collateralAmount,
+          debtValue,
+          liquidationRatioSimple
+        );
+      },
+      calculateCollateralizationRatio({
+        collateralValue = this.collateralValue,
+        debtValue = this.debtValue
+      } = {}) {
+        if (!collateralValue || !debtValue) return;
+        return calcCollateralizationRatio(collateralValue, debtValue)
+          .times(100)
+          .toNumber();
+      }
     })
   })
 };
