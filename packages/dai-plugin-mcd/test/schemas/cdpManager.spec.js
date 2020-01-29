@@ -61,10 +61,15 @@ test(VAULT_ADDRESS, async () => {
 });
 
 test(VAULT_TYPE, async () => {
-  const cdpId = 1;
-  const expected = 'ETH-A';
-  const vaultType = await maker.latest(VAULT_TYPE, cdpId);
-  expect(vaultType).toEqual(expected);
+  const cdpId1 = 1;
+  const expected1 = 'ETH-A';
+  const vaultType1 = await maker.latest(VAULT_TYPE, cdpId1);
+  expect(vaultType1).toEqual(expected1);
+
+  const cdpId2 = 1000;
+  const expected2 = null;
+  const vaultType2 = await maker.latest(VAULT_TYPE, cdpId2);
+  expect(vaultType2).toEqual(expected2);
 });
 
 test(VAULTS_CREATED, async () => {

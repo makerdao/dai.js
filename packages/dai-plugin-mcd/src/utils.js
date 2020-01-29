@@ -18,6 +18,10 @@ export function bytesToString(hex) {
     .replace(/\x00/g, ''); // eslint-disable-line no-control-regex
 }
 
+export function nullIfEmpty(value) {
+  return value === '' ? null : value;
+}
+
 export function castAsCurrency(value, currency) {
   if (currency.isInstance(value)) return value;
   if (typeof value === 'string' || typeof value === 'number')

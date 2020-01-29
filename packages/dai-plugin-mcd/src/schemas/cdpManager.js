@@ -1,4 +1,4 @@
-import { bytesToString } from '../utils';
+import { bytesToString, nullIfEmpty } from '../utils';
 import BigNumber from 'bignumber.js';
 
 import {
@@ -23,7 +23,7 @@ export const cdpManagerIlks = {
     contractName: 'CDP_MANAGER',
     call: ['ilks(uint256)(bytes32)', parseInt(id)]
   }),
-  returns: [[VAULT_TYPE, bytesToString]]
+  returns: [[VAULT_TYPE, v => nullIfEmpty(bytesToString(v))]]
 };
 
 export const cdpManagerCdpi = {
