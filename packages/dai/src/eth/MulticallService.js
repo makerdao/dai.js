@@ -257,8 +257,10 @@ export default class MulticallService extends PublicService {
         log2('Subscribed to watcher updates');
         this._watcherUpdates = this._watcher.subscribe(update => {
           const subject = get(this._subjects, update.type);
-          if (subject) subject.next(update.value);
-          else this._multicallResultCache[update.type] = update.value;
+          if (subject) {
+            log2('Got watcher update for ' + update.type + ':', update.value);
+            subject.next(update.value);
+          } else this._multicallResultCache[update.type] = update.value;
         });
       }
       this._watchingSchemasTotal++;
