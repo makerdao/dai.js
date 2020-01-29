@@ -23,6 +23,7 @@ export const BASE_COLLATERAL_FEE = 'baseCollateralFee';
 
 // proxyRegistry
 export const PROXY_ADDRESS = 'proxyAddress';
+export const PROXY_OWNER = 'proxyOwner';
 
 // cdpManager
 export const VAULT_ADDRESS = 'vaultAddress';

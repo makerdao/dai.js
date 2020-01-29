@@ -6,22 +6,24 @@ import {
 } from '@makerdao/test-helpers';
 import { isValidAddressString } from '../../src/utils';
 
-import schemas, { PROXY_ADDRESS } from '../../src/schemas';
+import schemas, { PROXY_ADDRESS, PROXY_OWNER } from '../../src/schemas';
 
-let maker, address, address2, snapshotData;
+let maker, snapshotData, address, address2, proxyAddress, proxyAddress2;
+
 beforeAll(async () => {
   maker = await mcdMaker({ multicall: true });
   snapshotData = await takeSnapshot(maker);
-  maker.service('multicall').createWatcher({ interval: 'block' });
+  maker.service('multicall').createWatcher();
   maker.service('multicall').registerSchemas(schemas);
   maker.service('multicall').start();
 
   address = maker.service('web3').currentAddress();
+  proxyAddress = await maker.service('proxy').currentProxy();
   const account = TestAccountProvider.nextAccount();
   await maker.addAccount({ ...account, type: 'privateKey' });
   maker.useAccount(account.address);
   address2 = maker.service('web3').currentAddress();
-  await maker.service('proxy').ensureProxy();
+  proxyAddress2 = await maker.service('proxy').ensureProxy();
 });
 
 afterAll(async () => {
@@ -29,11 +31,17 @@ afterAll(async () => {
 });
 
 test(PROXY_ADDRESS, async () => {
-  const proxyAddress1 = await maker.latest(PROXY_ADDRESS, address);
-  expect(isValidAddressString(proxyAddress1)).toEqual(true);
-  expect(proxyAddress1).toEqual('0x570074CCb147ea3dE2E23fB038D4d78324278886');
+  const proxy1 = await maker.latest(PROXY_ADDRESS, address);
+  expect(isValidAddressString(proxy1)).toEqual(true);
+  expect(proxy1).toEqual(proxyAddress);
 
-  const proxyAddress2 = await maker.latest(PROXY_ADDRESS, address2);
-  expect(isValidAddressString(proxyAddress2)).toEqual(true);
-  expect(proxyAddress2).toEqual('0xa029495c24518097170824CDD905351BdD938e52');
+  const proxy2 = await maker.latest(PROXY_ADDRESS, address2);
+  expect(isValidAddressString(proxy2)).toEqual(true);
+  expect(proxy2).toEqual(proxyAddress2);
+});
+
+test(PROXY_OWNER, async () => {
+  const proxyOwner = await maker.latest(PROXY_OWNER, proxyAddress);
+  expect(isValidAddressString(proxyOwner)).toEqual(true);
+  expect(proxyOwner.toLowerCase()).toEqual(address);
 });
