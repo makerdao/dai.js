@@ -293,7 +293,14 @@ export default class MulticallService extends PublicService {
   }
 
   _addSchemaToMulticall(schema, generatedSchema, path) {
-    let { id, contractName, call, returns, transforms = {} } = generatedSchema;
+    let {
+      id,
+      target,
+      contractName,
+      call,
+      returns,
+      transforms = {}
+    } = generatedSchema;
     // If this schema is already added but pending removal
     if (this._removeSchemaTimers[id]) {
       log2(`Cleared pending schema removal for: ${id}`);
@@ -312,12 +319,13 @@ export default class MulticallService extends PublicService {
           ? [fullPath, ret[1]]
           : [fullPath];
       });
-    if (!this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
+    if (!target && !contractName) throw new Error(`Schema must specify target or contractName`); // prettier-ignore
+    if (!target && !this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
     this._watcher.tap(calls => [
       ...calls,
       {
         id,
-        target: this._addresses[contractName],
+        target: target || this._addresses[contractName],
         call,
         returns
       }
