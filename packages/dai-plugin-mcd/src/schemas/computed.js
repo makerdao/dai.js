@@ -15,6 +15,7 @@ import {
   COLLATERAL_TYPE_PRICE,
   VAULT_TYPE,
   VAULT_ADDRESS,
+  VAULT_OWNER,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
   SAVINGS_DAI,
@@ -217,6 +218,7 @@ export const vault = {
     dependencies: [
       [VAULT_TYPE, id],
       [VAULT_ADDRESS, id],
+      [VAULT_OWNER, id],
       [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
       [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
       [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]],
@@ -237,6 +239,7 @@ export const vault = {
     computed: (
       vaultType,
       vaultAddress,
+      ownerAddress,
       encumberedCollateral,
       encumberedDebt,
       collateralTypePrice,
@@ -256,6 +259,7 @@ export const vault = {
     ) => ({
       vaultType,
       vaultAddress,
+      ownerAddress,
       encumberedCollateral,
       encumberedDebt,
       collateralTypePrice,

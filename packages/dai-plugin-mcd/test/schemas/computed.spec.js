@@ -30,7 +30,11 @@ import {
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
-import { cdpManagerUrns, cdpManagerIlks } from '../../src/schemas/cdpManager';
+import {
+  cdpManagerUrns,
+  cdpManagerIlks,
+  cdpManagerOwner
+} from '../../src/schemas/cdpManager';
 import { spotIlks, spotPar } from '../../src/schemas/spot';
 import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
 import { potPie, potpie, potChi } from '../../src/schemas/pot';
@@ -40,7 +44,7 @@ import { tokenBalance, tokenAllowance } from '../../src/schemas/token';
 import computedSchemas from '../../src/schemas/computed';
 import { createCurrencyRatio } from '@makerdao/currency';
 
-let maker, snapshotData;
+let maker, snapshotData, proxyAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -67,6 +71,7 @@ beforeAll(async () => {
     vatGem,
     cdpManagerUrns,
     cdpManagerIlks,
+    cdpManagerOwner,
     spotPar,
     spotIlks,
     proxyRegistryProxies,
@@ -89,8 +94,8 @@ beforeAll(async () => {
   const mgr = await maker.service(ServiceRoles.CDP_MANAGER);
   const sav = await maker.service(ServiceRoles.SAVINGS);
   const dai = maker.getToken(MDAI);
-  const _proxyAddress = await maker.service('proxy').ensureProxy();
-  await dai.approveUnlimited(_proxyAddress);
+  proxyAddress = await maker.service('proxy').ensureProxy();
+  await dai.approveUnlimited(proxyAddress);
 
   await mgr.openLockAndDraw(
     'ETH-A',
@@ -214,6 +219,7 @@ test(VAULT, async () => {
   const cdpId = 1;
   const expectedVaultType = 'ETH-A';
   const expectedVaultAddress = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
+  const expectedOwner = proxyAddress;
   const expectedEncumberedCollateral = fromWei(1000000000000000000);
   const expectedEncumberedDebt = fromWei(995000000000000000);
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
@@ -233,10 +239,11 @@ test(VAULT, async () => {
 
   const vault = await maker.latest(VAULT, cdpId);
 
-  expect(Object.keys(vault).length).toBe(18);
+  expect(Object.keys(vault).length).toBe(21);
 
   expect(vault.vaultType).toEqual(expectedVaultType);
   expect(vault.vaultAddress).toEqual(expectedVaultAddress);
+  expect(vault.ownerAddress).toEqual(expectedOwner);
   expect(vault.encumberedCollateral).toEqual(expectedEncumberedCollateral);
   expect(vault.encumberedDebt.toNumber()).toBeCloseTo(
     expectedEncumberedDebt.toNumber()
