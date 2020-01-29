@@ -247,7 +247,7 @@ export default class MulticallService extends PublicService {
     // This is a base observable
     const subject = new ReplaySubject(1);
     set(this._subjects, fullPath, subject);
-    if (this._multicallResultCache[fullPath])
+    if (this._multicallResultCache[fullPath] !== undefined)
       subject.next(this._multicallResultCache[fullPath]);
 
     // Create base observable
