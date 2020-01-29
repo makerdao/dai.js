@@ -44,6 +44,7 @@ export default class MulticallService extends PublicService {
   createWatcher({
     useWeb3Provider = false,
     interval = 'block',
+    rpcUrl,
     ...config
   } = {}) {
     const web3 = this.get('web3');
@@ -54,23 +55,21 @@ export default class MulticallService extends PublicService {
       ...config
     };
 
-    let onNewBlockPolling;
-    if (interval === 'block') {
-      onNewBlockPolling = true;
-      config.interval = 60000; // 1 min polling fallback safeguard
-    }
+    const onNewBlockPolling = interval === 'block';
+    if (onNewBlockPolling) interval = 60000; // 1 min polling fallback safeguard
+
     if (useWeb3Provider) config.web3 = web3._web3;
-    else {
-      if (!web3.rpcUrl) throw new Error('Unable to get rpcUrl for multicall');
-      config.rpcUrl = web3.rpcUrl;
+    else if (!rpcUrl) {
+      if (!web3.rpcUrl) new Error('Unable to get rpcUrl for multicall');
+      rpcUrl = web3.rpcUrl;
     }
 
-    this._watcher = createWatcher([], config);
+    this._watcher = createWatcher([], { ...config, interval, rpcUrl });
 
     if (onNewBlockPolling) {
       log(
         `Watcher created with poll on new block mode using ${
-          config.rpcUrl ? `rpcUrl: ${config.rpcUrl}` : 'web3 provider'
+          rpcUrl ? `rpcUrl: ${rpcUrl}` : 'web3 provider'
         }`
       );
       web3.onNewBlock(blockNumber => {
@@ -79,10 +78,8 @@ export default class MulticallService extends PublicService {
       });
     } else {
       log(
-        `Watcher created with ${
-          config.interval ? config.interval + 'ms' : 'default'
-        } polling interval using ${
-          config.rpcUrl ? `rpcUrl: ${config.rpcUrl}` : 'web3 provider'
+        `Watcher created with ${interval}ms polling interval using ${
+          useWeb3Provider ? 'web3 provider' : `rpcUrl: ${rpcUrl}`
         }`
       );
     }
