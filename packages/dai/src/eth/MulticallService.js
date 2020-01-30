@@ -9,7 +9,7 @@ import {
   interval,
   timer
 } from 'rxjs';
-import { map, first, flatMap, throttle, debounce, take } from 'rxjs/operators';
+import { map, flatMap, throttle, debounce, take } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -168,7 +168,6 @@ export default class MulticallService extends PublicService {
     const existingObservable = get(this._observables, fullPath);
     if (existingObservable) {
       const isComputed = !get(this._subjects, fullPath, subject);
-      log2(`watchObservable() called for ${isComputed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
       log2(`Returning existing ${isComputed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
       return existingObservable;
     }
@@ -252,30 +251,22 @@ export default class MulticallService extends PublicService {
 
     // Create base observable
     const observable = Observable.create(observer => {
-      // Subscribe to watcher updates and emit them to subjects
-      if (!this._watcherUpdates) {
-        log2('Subscribed to watcher updates');
-        this._watcherUpdates = this._watcher.subscribe(update => {
-          const subject = get(this._subjects, update.type);
-          if (subject) {
-            log2('Got watcher update for ' + update.type + ':', update.value);
-            subject.next(update.value);
-          } else this._multicallResultCache[update.type] = update.value;
-        });
-      }
       this._watchingSchemasTotal++;
-      if (schema.watching[path] === undefined) schema.watching[path] = 0;
-
+      // Subscribe to watcher updates and emit them to subjects
+      if (!this._watcherUpdates) this._subscribeToWatcherUpdates();
       // If first subscriber to this schema add it to multicall
+      if (schema.watching[path] === undefined) schema.watching[path] = 0;
       if (++schema.watching[path] === 1) this._addSchemaToMulticall(schema, generatedSchema, path); // prettier-ignore
-      log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`); // prettier-ignore
-
+      // Subscribe this observer to the subject for this base observable
       const sub = subject.subscribe(observer);
+      log2(`Observer subscribed to ${generatedSchema.id} (${schema.watching[path]} subscribers)`); // prettier-ignore
+      // Return the function to call when this observer unsubscribes
       return () => {
-        sub.unsubscribe();
         // If last unsubscriber from this schema remove it from multicall
-        if (--schema.watching[path] === 0) this._removeSchemaFromMulticall(generatedSchema);
-        else log2(`Subscriber count for schema ${generatedSchema.id}: ${schema.watching[path]}`); // prettier-ignore
+        if (--schema.watching[path] === 0) this._removeSchemaFromMulticall(generatedSchema); // prettier-ignore
+        // Unsubscribe this observer from the subject for this base observable
+        sub.unsubscribe();
+        log2(`Observer unsubscribed from ${generatedSchema.id} (${schema.watching[path]} subscribers)`); // prettier-ignore
       };
     });
 
@@ -305,7 +296,7 @@ export default class MulticallService extends PublicService {
     } = generatedSchema;
     // If this schema is already added but pending removal
     if (this._removeSchemaTimers[id]) {
-      log2(`Cleared pending schema removal for: ${id}`);
+      log2(`Cancelled pending schema removal for: ${id}`);
       clearTimeout(this._removeSchemaTimers[id]);
       this._removeSchemaTimers[id] = null;
       return;
@@ -321,7 +312,7 @@ export default class MulticallService extends PublicService {
           ? [fullPath, ret[1]]
           : [fullPath];
       });
-    if (!target && !contractName) throw new Error(`Schema must specify target or contractName`); // prettier-ignore
+    if (!target && !contractName) throw new Error('Schema must specify target or contractName'); // prettier-ignore
     if (!target && !this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
     this._watcher.tap(calls => [
       ...calls,
@@ -356,6 +347,17 @@ export default class MulticallService extends PublicService {
         this._watcherUpdates = null;
       }
     }, this._removeSchemaDelay);
+  }
+
+  _subscribeToWatcherUpdates() {
+    log2('Subscribed to watcher updates');
+    this._watcherUpdates = this._watcher.subscribe(update => {
+      const subject = get(this._subjects, update.type);
+      if (subject) {
+        log2('Got watcher update for ' + update.type + ':', update.value);
+        subject.next(update.value);
+      } else this._multicallResultCache[update.type] = update.value;
+    });
   }
 
   disconnect() {
