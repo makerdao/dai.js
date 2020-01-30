@@ -79,3 +79,7 @@ export const isValidAddressString = addressString =>
 
 export const getMcdToken = token =>
   defaultTokens.find(mcdToken => mcdToken.symbol === token);
+
+export function promiseWait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
