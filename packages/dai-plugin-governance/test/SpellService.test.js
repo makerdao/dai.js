@@ -3,12 +3,12 @@ import {
   restoreSnapshotOriginal,
   sleep
 } from './helpers';
-import PauseService from '../src/PauseService';
+import SpellService from '../src/SpellService';
 
-let maker, pauseService;
+let maker, spellService;
 beforeAll(async () => {
   maker = await setupTestMakerInstance('mainnet');
-  pauseService = maker.service('pause');
+  spellService = maker.service('spell');
 });
 
 afterAll(async done => {
@@ -26,18 +26,18 @@ afterAll(async done => {
   }
 });
 
-test('can create Pause Service', async () => {
-  expect(pauseService).toBeInstanceOf(PauseService);
+test('can create spell Service', async () => {
+  expect(spellService).toBeInstanceOf(SpellService);
 });
 
 test('get delay', async () => {
-  const delay = await pauseService.getDelayInSeconds();
+  const delay = await spellService.getDelayInSeconds();
   expect(delay.toNumber()).toBe(1);
 });
 
 //currently this test works for mainnet
 test('get spell eta', async () => {
-  const eta = await pauseService.getEta(
+  const eta = await spellService.getEta(
     '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
   );
   expect(eta).toEqual(new Date(1580039599000));
@@ -45,7 +45,7 @@ test('get spell eta', async () => {
 
 //currently this test works for mainnet
 test('get spell done boolean', async () => {
-  const done = await pauseService.getDone(
+  const done = await spellService.getDone(
     '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
   );
   expect(done).toBe(true);

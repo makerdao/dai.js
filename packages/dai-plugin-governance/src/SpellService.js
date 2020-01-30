@@ -2,8 +2,8 @@ import { PublicService } from '@makerdao/services-core';
 import { PAUSE } from './utils/constants';
 import DsSpellAbi from '../contracts/abis/DSSpell.json';
 
-export default class PauseService extends PublicService {
-  constructor(name = 'pause') {
+export default class SpellService extends PublicService {
+  constructor(name = 'spell') {
     super(name, ['smartContract', 'web3']);
     this.eta = {};
     this.done = {};
