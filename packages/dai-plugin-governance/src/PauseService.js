@@ -5,6 +5,8 @@ import DsSpellAbi from '../contracts/abis/DSSpell.json';
 export default class PauseService extends PublicService {
   constructor(name = 'pause') {
     super(name, ['smartContract', 'web3']);
+    this.eta = {};
+    this.done = {};
   }
 
   getDelayInSeconds() {
@@ -14,16 +16,30 @@ export default class PauseService extends PublicService {
   }
 
   async getEta(spellAddress) {
+    if (this.eta[spellAddress]) return this.eta[spellAddress];
     const spell = this.get('smartContract').getContractByAddressAndAbi(
       spellAddress,
       DsSpellAbi
     );
     const eta = await spell.eta();
-    return new Date(eta.toNumber() * 1000);
+    this.eta[spellAddress] = new Date(eta.toNumber() * 1000);
+    return this.eta[spellAddress];
+  }
+
+  async getDone(spellAddress) {
+    if (this.done[spellAddress]) return this.done[spellAddress];
+    const spell = this.get('smartContract').getContractByAddressAndAbi(
+      spellAddress,
+      DsSpellAbi
+    );
+    this.done[spellAddress] = spell.done();
+    return this.done[spellAddress];
   }
 
   refresh() {
     this.delay = null;
+    this.eta = {};
+    this.done = {};
   }
 
   _pauseContract() {
