@@ -14,6 +14,10 @@ export const catIlks = {
     contractName: 'MCD_CAT',
     call: ['ilks(bytes32)(address,uint256,uint256)', toHex(collateralTypeName)]
   }),
+  validateParams: collateralTypeName => {
+    if (collateralTypeName === null)
+      throw new Error('Invalid collateral type name');
+  },
   returns: [
     [LIQUIDATOR_ADDRESS],
     [LIQUIDATION_PENALTY, v => fromRay(BigNumber(v).minus(RAY))],

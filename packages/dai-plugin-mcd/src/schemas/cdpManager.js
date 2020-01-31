@@ -23,6 +23,15 @@ export const cdpManagerIlks = {
     contractName: 'CDP_MANAGER',
     call: ['ilks(uint256)(bytes32)', parseInt(id)]
   }),
+  validateParams(id) {
+    if (!/^\d+$/.test(id))
+      throw new Error('Invalid vault id: must be a positive integer');
+  },
+  validateReturns: {
+    [VAULT_TYPE](vaultType) {
+      if (vaultType === null) throw new Error('Vault does not exist');
+    }
+  },
   returns: [[VAULT_TYPE, v => nullIfEmpty(bytesToString(v))]]
 };
 

@@ -9,6 +9,8 @@ export const proxyRegistryProxies = {
   returns: [[PROXY_ADDRESS]]
 };
 
+// TODO: throw an error if the DSProxy contract doesn't exist
+//       could use new multicall onError event listener
 export const proxyGetOwner = {
   generate: address => ({
     id: `DS_PROXY.owner(${address})`,

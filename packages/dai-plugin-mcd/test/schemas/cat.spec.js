@@ -32,6 +32,10 @@ test(LIQUIDATOR_ADDRESS, async () => {
   const { MCD_FLIP_ETH_A: expected } = testnetAddresses;
   const address = await maker.latest(LIQUIDATOR_ADDRESS, 'ETH-A');
   expect(address.toLowerCase()).toEqual(expected);
+
+  expect(() => {
+    maker.latest(LIQUIDATOR_ADDRESS, null);
+  }).toThrow(/invalid/i);
 });
 
 test(LIQUIDATION_PENALTY, async () => {

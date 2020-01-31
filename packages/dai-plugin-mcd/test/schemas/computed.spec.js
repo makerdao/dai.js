@@ -280,6 +280,19 @@ test(VAULT, async () => {
   expect(vault.debtFloor).toEqual(expectedDebtFloor);
 });
 
+test('vault with non-existent id', async () => {
+  const cdpId = 9000;
+  const vault = maker.latest(VAULT, cdpId);
+  await expect(vault).rejects.toThrow(/not exist/i);
+});
+
+test('vault with invalid id', async () => {
+  const cdpId = -9000;
+  expect(() => {
+    maker.latest(VAULT, cdpId);
+  }).toThrow(/invalid vault id/i);
+});
+
 test(DAI_LOCKED_IN_DSR, async () => {
   const daiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR);
   expect(daiLockedInDsr.symbol).toEqual('DSR-DAI');

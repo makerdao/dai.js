@@ -27,6 +27,10 @@ export const spotIlks = {
         )(fromRay(liqRatio))
     }
   }),
+  validateParams: collateralTypeName => {
+    if (collateralTypeName === null)
+      throw new Error('Invalid collateral type name');
+  },
   returns: [[PRICE_FEED_ADDRESS], [LIQUIDATION_RATIO]]
 };
 
