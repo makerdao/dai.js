@@ -13,6 +13,7 @@ import {
   COLLATERAL_TYPE_PRICE,
   COLLATERAL_TYPES_PRICES,
   VAULT_TYPE_AND_ADDRESS,
+  VAULT_EXTERNAL_OWNER,
   VAULT,
   DEBT_VALUE,
   COLLATERALIZATION_RATIO,
@@ -36,7 +37,10 @@ import {
   cdpManagerOwner
 } from '../../src/schemas/cdpManager';
 import { spotIlks, spotPar } from '../../src/schemas/spot';
-import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
+import {
+  proxyRegistryProxies,
+  proxyGetOwner
+} from '../../src/schemas/proxyRegistry';
 import { potPie, potpie, potChi } from '../../src/schemas/pot';
 import { catIlks } from '../../src/schemas/cat';
 import { jugIlks } from '../../src/schemas/jug';
@@ -44,7 +48,7 @@ import { tokenBalance, tokenAllowance } from '../../src/schemas/token';
 import computedSchemas from '../../src/schemas/computed';
 import { createCurrencyRatio } from '@makerdao/currency';
 
-let maker, snapshotData, proxyAddress;
+let maker, snapshotData, address, proxyAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -63,6 +67,7 @@ beforeAll(async () => {
     ],
     multicall: true
   });
+  address = maker.service('web3').currentAddress();
 
   maker.service('multicall').createWatcher({ interval: 'block' });
   maker.service('multicall').registerSchemas({
@@ -75,6 +80,7 @@ beforeAll(async () => {
     spotPar,
     spotIlks,
     proxyRegistryProxies,
+    proxyGetOwner,
     potPie,
     potpie,
     potChi,
@@ -141,6 +147,12 @@ test(VAULT_TYPE_AND_ADDRESS, async () => {
   );
   expect(collateralType).toEqual(expectedVaultType);
   expect(vaultAddress).toEqual(expectedVaultAddress);
+});
+
+test(VAULT_EXTERNAL_OWNER, async () => {
+  const cdpId = 1;
+  const owner = await maker.latest(VAULT_EXTERNAL_OWNER, cdpId);
+  expect(owner.toLowerCase()).toEqual(address);
 });
 
 test(COLLATERAL_AMOUNT, async () => {
@@ -220,6 +232,7 @@ test(VAULT, async () => {
   const expectedVaultType = 'ETH-A';
   const expectedVaultAddress = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const expectedOwner = proxyAddress;
+  const expectedExternalOwner = address;
   const expectedEncumberedCollateral = fromWei(1000000000000000000);
   const expectedEncumberedDebt = fromWei(995000000000000000);
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
@@ -239,11 +252,15 @@ test(VAULT, async () => {
 
   const vault = await maker.latest(VAULT, cdpId);
 
-  expect(Object.keys(vault).length).toBe(21);
+  expect(Object.keys(vault).length).toBe(23);
 
+  expect(vault.id).toEqual(cdpId);
   expect(vault.vaultType).toEqual(expectedVaultType);
   expect(vault.vaultAddress).toEqual(expectedVaultAddress);
   expect(vault.ownerAddress).toEqual(expectedOwner);
+  expect(vault.externalOwnerAddress.toLowerCase()).toEqual(
+    expectedExternalOwner
+  );
   expect(vault.encumberedCollateral).toEqual(expectedEncumberedCollateral);
   expect(vault.encumberedDebt.toNumber()).toBeCloseTo(
     expectedEncumberedDebt.toNumber()

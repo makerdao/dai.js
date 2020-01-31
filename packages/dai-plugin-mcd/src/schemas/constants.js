@@ -48,6 +48,7 @@ export const MAX_AUCTION_LOT_SIZE = 'maxAuctionLotSize';
 export const COLLATERAL_TYPE_PRICE = 'collateralTypePrice';
 export const COLLATERAL_TYPES_PRICES = 'collateralTypesPrices';
 export const VAULT_TYPE_AND_ADDRESS = 'vaultTypeAndAddress';
+export const VAULT_EXTERNAL_OWNER = 'vaultExternalOwner';
 export const VAULT_COLLATERAL_AND_DEBT = 'vaultCollateralAndDebt';
 export const VAULT = 'vault';
 export const DAI_LOCKED_IN_DSR = 'daiLockedInDsr';

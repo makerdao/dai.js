@@ -16,6 +16,7 @@ import {
   VAULT_TYPE,
   VAULT_ADDRESS,
   VAULT_OWNER,
+  VAULT_EXTERNAL_OWNER,
   ENCUMBERED_COLLATERAL,
   ENCUMBERED_DEBT,
   SAVINGS_DAI,
@@ -39,7 +40,8 @@ import {
   LIQUIDATION_PENALTY,
   ANNUAL_STABILITY_FEE,
   TOKEN_ALLOWANCE,
-  DEBT_FLOOR
+  DEBT_FLOOR,
+  PROXY_OWNER
 } from './constants';
 
 export const collateralTypePrice = {
@@ -78,6 +80,14 @@ export const vaultTypeAndAddress = {
   generate: id => ({
     dependencies: [[VAULT_TYPE, id], [VAULT_ADDRESS, id]],
     computed: (vaultType, vaultAddress) => [vaultType, vaultAddress]
+  })
+};
+
+export const vaultExternalOwner = {
+  generate: id => ({
+    dependencies: [[PROXY_OWNER, [VAULT_OWNER, id]]],
+    // TODO: throw error if no owner (DSProxy contract doesn't exist)
+    computed: owner => owner
   })
 };
 
@@ -219,6 +229,7 @@ export const vault = {
       [VAULT_TYPE, id],
       [VAULT_ADDRESS, id],
       [VAULT_OWNER, id],
+      [VAULT_EXTERNAL_OWNER, id],
       [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
       [ENCUMBERED_DEBT, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
       [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]],
@@ -240,6 +251,7 @@ export const vault = {
       vaultType,
       vaultAddress,
       ownerAddress,
+      externalOwnerAddress,
       encumberedCollateral,
       encumberedDebt,
       collateralTypePrice,
@@ -257,9 +269,11 @@ export const vault = {
       annualStabilityFee,
       debtFloor
     ) => ({
+      id: parseInt(id),
       vaultType,
       vaultAddress,
       ownerAddress,
+      externalOwnerAddress,
       encumberedCollateral,
       encumberedDebt,
       collateralTypePrice,
@@ -351,6 +365,7 @@ export default {
   collateralTypePrice,
   collateralTypesPrices,
   vaultTypeAndAddress,
+  vaultExternalOwner,
   vaultCollateralAndDebt,
   vault,
   collateralAmount,
