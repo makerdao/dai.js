@@ -14,7 +14,7 @@ import {
 
 import cdpManagerSchemas from '../../src/schemas/cdpManager';
 
-let maker, snapshotData, cdpMgr, proxyAddress;
+let maker, snapshotData, cdpMgr, proxyAddress, expectedVaultAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -42,11 +42,12 @@ beforeAll(async () => {
   proxyAddress = await maker.service('proxy').ensureProxy();
   await dai.approveUnlimited(proxyAddress);
 
-  await cdpMgr.openLockAndDraw(
+  const vault = await cdpMgr.openLockAndDraw(
     'ETH-A',
     ETH_A_COLLATERAL_AMOUNT,
     ETH_A_DEBT_AMOUNT
   );
+  expectedVaultAddress = await cdpMgr.getUrn(vault.id);
 });
 
 afterAll(async () => {
@@ -55,9 +56,8 @@ afterAll(async () => {
 
 test(VAULT_ADDRESS, async () => {
   const cdpId = 1;
-  const expected = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const vaultAddress = await maker.latest(VAULT_ADDRESS, cdpId);
-  expect(vaultAddress).toEqual(expected);
+  expect(vaultAddress).toEqual(expectedVaultAddress);
 });
 
 test(VAULT_TYPE, async () => {

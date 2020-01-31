@@ -48,7 +48,7 @@ import { tokenBalance, tokenAllowance } from '../../src/schemas/token';
 import computedSchemas from '../../src/schemas/computed';
 import { createCurrencyRatio } from '@makerdao/currency';
 
-let maker, snapshotData, address, proxyAddress;
+let maker, snapshotData, address, proxyAddress, expectedVaultAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -103,11 +103,13 @@ beforeAll(async () => {
   proxyAddress = await maker.service('proxy').ensureProxy();
   await dai.approveUnlimited(proxyAddress);
 
-  await mgr.openLockAndDraw(
+  const vault = await mgr.openLockAndDraw(
     'ETH-A',
     ETH_A_COLLATERAL_AMOUNT,
     ETH_A_DEBT_AMOUNT
   );
+  expectedVaultAddress = await mgr.getUrn(vault.id);
+
   await mgr.openLockAndDraw(
     'BAT-A',
     BAT_A_COLLATERAL_AMOUNT,
@@ -140,7 +142,6 @@ test(COLLATERAL_TYPES_PRICES, async () => {
 test(VAULT_TYPE_AND_ADDRESS, async () => {
   const cdpId = 1;
   const expectedVaultType = 'ETH-A';
-  const expectedVaultAddress = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const [collateralType, vaultAddress] = await maker.latest(
     VAULT_TYPE_AND_ADDRESS,
     cdpId
@@ -230,7 +231,6 @@ test(COLLATERAL_AVAILABLE_VALUE, async () => {
 test(VAULT, async () => {
   const cdpId = 1;
   const expectedVaultType = 'ETH-A';
-  const expectedVaultAddress = '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1';
   const expectedOwner = proxyAddress;
   const expectedExternalOwner = address;
   const expectedEncumberedCollateral = fromWei(1000000000000000000);
