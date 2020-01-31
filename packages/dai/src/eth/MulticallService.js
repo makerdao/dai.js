@@ -151,6 +151,9 @@ export default class MulticallService extends PublicService {
     if (!schema)
       throw new Error(`No registered schema found for observable key: ${key}`);
 
+    // Validate schema params
+    if (schema.validateParams) schema.validateParams(...args);
+
     // Generate schema
     let generatedSchema = schema.generate(...args);
 
@@ -246,7 +249,15 @@ export default class MulticallService extends PublicService {
     // This is a base observable
     const subject = new ReplaySubject(1);
     set(this._subjects, fullPath, subject);
-    if (this._multicallResultCache[fullPath] !== undefined)
+    // Emit initial value if cached result from multicall exists
+    if (
+      this._multicallResultCache[fullPath] !== undefined &&
+      this._validateResult(
+        subject,
+        fullPath,
+        this._multicallResultCache[fullPath]
+      )
+    )
       subject.next(this._multicallResultCache[fullPath]);
 
     // Create base observable
@@ -349,13 +360,29 @@ export default class MulticallService extends PublicService {
     }, this._removeSchemaDelay);
   }
 
+  _validateResult(subject, type, value) {
+    const [observableKey] = type.split('.');
+    const schema = this._schemaByObservableKey[observableKey];
+    if (!schema.validateReturns?.hasOwnProperty(observableKey)) return true;
+    const validator = schema.validateReturns[observableKey];
+    try {
+      validator(value);
+      return true;
+    } catch (err) {
+      log2('Validation error for ' + type + ' result:', value);
+      subject.error(err);
+      return false;
+    }
+  }
+
   _subscribeToWatcherUpdates() {
     log2('Subscribed to watcher updates');
     this._watcherUpdates = this._watcher.subscribe(update => {
       const subject = get(this._subjects, update.type);
       if (subject) {
         log2('Got watcher update for ' + update.type + ':', update.value);
-        subject.next(update.value);
+        if (this._validateResult(subject, update.type, update.value))
+          subject.next(update.value);
       } else this._multicallResultCache[update.type] = update.value;
     });
   }
