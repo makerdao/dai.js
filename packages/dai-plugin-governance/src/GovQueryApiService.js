@@ -77,8 +77,8 @@ export default class QueryApi extends PublicService {
     return parseInt(response.uniqueVoters.nodes[0]);
   }
 
-  async getMkrWeight(address, blockNumber) {
-    const query = `{totalMkrWeightProxyAndNoProxyByAddress(argAddress: "${address}", argBlockNumber: ${blockNumber}){
+  async getMkrWeight(address, unixTime) {
+    const query = `{totalMkrWeightProxyAndNoProxyByAddressAtTime(argAddress: "${address}", argUnix: ${unixTime}){
       nodes {
         address
         weight
@@ -113,8 +113,8 @@ export default class QueryApi extends PublicService {
     return response.timeToBlockNumber.nodes[0];
   }
 
-  async getMkrSupport(pollId, blockNumber) {
-    const query = `{voteOptionMkrWeights(argPollId: ${pollId}, argBlockNumber: ${blockNumber}){
+  async getMkrSupport(pollId, unixTime) {
+    const query = `{voteOptionMkrWeightsAtTime(argPollId: ${pollId}, argBlockNumber: ${unixTime}){
     nodes{
       optionId
       mkrSupport
