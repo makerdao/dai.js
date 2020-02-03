@@ -3,81 +3,109 @@ declare global {
   interface CurrencyRatio {}
   interface VaultResult {
      /**
+     * The id of this vault.
+     */
+    id: number;
+
+     /**
      * The collateral type of this vault.
-     *
-     * ```ts
-     * console.log('test code');
-     * ```
      */
     vaultType: string;
 
     /**
      * The address of this vault.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
-     * ```ts
-     * console.log('test code');
-     * ```
      */
     vaultAddress: string;
 
     /**
-     * Lorem ipsum.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
+     * The address of the proxy that owns this vault.
+     */
+    ownerAddress: string;
+
+    /**
+     * The address of the owner of the proxy, or ownerAddress.
+     */
+    externalOwnerAddress: string;
+
+    /**
+     * The amount of collateral locked for this vault.
      */
     encumberedCollateral: Currency;
 
     /**
-     * Lorem ipsum.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
+     * The amount of stablecoin debt owed for this vault.
      */
     encumberedDebt: Currency;
 
     /**
      * The price of this vault's collateral type.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
      */
     collateralTypePrice: CurrencyRatio;
 
     /**
      * The value in DAI of this vault's debt.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
      */
     debtValue: Currency;
 
     /**
+     * The ratio of collateral price to stablecoin debt.
+     */
+    collateralizationRatio: CurrencyRatio;
+
+    /**
+     * The amount of this vault's locked collateral.
+     */
+    collateralAmount: Currency;
+
+    /**
      * The value in USD of this vault's locked collateral.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
      */
     collateralValue: Currency;
 
     /**
+     * The minimum price of the collateral possible to remain above the liquidation ratio.
+     */
+    liquidationPrice: CurrencyRatio;
+
+    /**
      * The maximum amount DAI available to generate for this vault.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
      */
     daiAvailable: Currency;
 
+    /**
+     * The amount of collateral available to withdraw.
+     */
+    collateralAvailableAmount: Currency;
 
+    /**
+     * The value in USD of the collateral available to withdraw.
+     */
+    collateralAvailableValue: Currency;
+
+    /**
+     * The amount of collateral that has been joined, but not yet locked.
+     */
+    unlockedCollateral: Currency;
+
+    /**
+     * The minimum ratio of collateral price to debt allowed.
+     */
+    liquidationRatioSimple: CurrencyRatio;
+
+    /**
+     * The penalty incurred for liquidation of this vault.
+     */
+    liquidationPenalty: BigNumber;
+
+    /**
+     * The stability fee for this vault.
+     */
+    annualStabilityFee: number;
+
+    /**
+     * The minimum amount of stablecoin debt can exist this vault.
+     */
+    debtFloor: BigNumber;
   }
 
   interface WatchInterfaceMcd {
@@ -186,17 +214,22 @@ declare global {
 
     /**
      * Get a vault by id.
-     *
-     * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-     * tempor incididunt ut labore et dolore magna aliqua.
-     *
-     * ```js
-     * const vault = watch.vaultById(2)
-     * ```
-     *
      * @param id Numerical id of the vault
      */
     static vault(id: number): VaultResult;
+
+    /**
+     * @param id Numerical id of the vault
+     */
+    static minSafeCollateralAmount(id: number): Currency;
+    /**
+     * @param id Numerical id of the vault
+     */
+    static collateralAvailableAmount(id: number): Currency;
+    /**
+     * @param id Numerical id of the vault
+     */
+    static collateralAvailableValue(id: number): Currency;
   }
 }
 
