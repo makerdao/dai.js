@@ -86,8 +86,10 @@ export default class QueryApi extends PublicService {
     }
     }`;
     const response = await this.getQueryResponse(this.serverUrl, query);
-    if (!response.totalMkrWeightProxyAndNoProxyByAddress.nodes[0]) return 0;
-    return response.totalMkrWeightProxyAndNoProxyByAddress.nodes[0].weight;
+    if (!response.totalMkrWeightProxyAndNoProxyByAddressAtTime.nodes[0])
+      return 0;
+    return response.totalMkrWeightProxyAndNoProxyByAddressAtTime.nodes[0]
+      .weight;
   }
 
   async getOptionVotingFor(address, pollId) {
@@ -114,7 +116,7 @@ export default class QueryApi extends PublicService {
   }
 
   async getMkrSupport(pollId, unixTime) {
-    const query = `{voteOptionMkrWeightsAtTime(argPollId: ${pollId}, argBlockNumber: ${unixTime}){
+    const query = `{voteOptionMkrWeightsAtTime(argPollId: ${pollId}, argUnix: ${unixTime}){
     nodes{
       optionId
       mkrSupport
@@ -122,7 +124,7 @@ export default class QueryApi extends PublicService {
   }
   }`;
     const response = await this.getQueryResponseMemoized(this.serverUrl, query);
-    let weights = response.voteOptionMkrWeights.nodes;
+    let weights = response.voteOptionMkrWeightsAtTime.nodes;
     // We don't want to calculate votes for 0:abstain
     weights = weights.filter(o => o.optionId !== 0);
     const totalWeight = weights.reduce((acc, cur) => {
@@ -137,7 +139,6 @@ export default class QueryApi extends PublicService {
         : parseFloat(o.mkrSupport);
       o.mkrSupport = mkrSupport;
       o.percentage = (100 * mkrSupport) / totalWeight;
-      o.blockTimestamp = new Date(o.blockTimestamp);
       return o;
     });
   }
