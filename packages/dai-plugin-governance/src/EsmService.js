@@ -67,7 +67,8 @@ export default class EsmService extends PrivateService {
     return this._esmContract().join(mkrAmount.toFixed('wei'), {promise});
   }
 
-  async triggerEmergencyShutdown(skipChecks = false) {
+  @tracksTransactionsWithOptions({ numArguments: 2 })
+  async triggerEmergencyShutdown(skipChecks = false, { promise }) {
     if (!skipChecks) {
       const [thresholdAmount, totalStaked, canFire] = await Promise.all([
         this.thresholdAmount(),
