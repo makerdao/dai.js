@@ -1,132 +1,104 @@
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
-import { buildTestMulticallService } from '../helpers/serviceBuilders';
-import schemas from '../helpers/schemas';
-import addresses from '../../../dai-plugin-mcd/contracts/addresses/testnet.json';
-import { first } from 'rxjs/operators';
-// import { promiseWait } from '../../src/utils';
+import Maker from '../../src/index';
+import BigNumber from 'bignumber.js';
 
-let service;
-let watcher;
-let address;
+import schemas, {
+  TOTAL_CDP_DEBT,
+  ETH_PRICE,
+  CDP_COLLATERAL,
+  CDP_DEBT,
+  CDP_COLLATERAL_VALUE,
+  LAST_CREATED_CDP_COLLATERAL_VALUE
+} from '../helpers/schemas';
 
-beforeEach(async () => {
-  service = buildTestMulticallService();
-  await service.manager().authenticate();
+let maker, multicall, watcher, address, cdpId;
+
+beforeAll(async () => {
+  maker = await Maker.create('test', {
+    multicall: {
+      debounceTime: 1
+    },
+    log: false
+  });
+  await maker.authenticate();
   address = TestAccountProvider.nextAddress();
-  watcher = service.createWatcher({ interval: 'block' });
-  service.registerSchemas(schemas);
-  service._addresses = addresses;
-  service.start();
+  multicall = maker.service('multicall');
+  watcher = multicall.createWatcher();
+  multicall.registerSchemas(schemas);
+  // Lock 5 ETH and draw 100 DAI
+  const proxyAddress = await maker.service('proxy').ensureProxy();
+  ({ id: cdpId } = {}) = await maker.service('cdp').openProxyCdpLockEthAndDrawDai(5, 100, proxyAddress); // prettier-ignore
+});
+
+beforeEach(() => {
+  multicall.start();
+});
+
+afterEach(() => {
+  multicall.stop();
 });
 
 test('get eth balance via multicall', async () => {
+  const web3 = multicall.get('web3');
+  const fromWei = web3._web3.utils.fromWei;
   watcher.stop();
-  const initialBlock =
-    (await service.get('web3').getBlock('latest')).number + 1;
-  const initialEthBalance = service
-    .get('web3')
-    ._web3.utils.fromWei(
-      (await service.get('web3').getBalance(address)).toString()
-    );
-
-  service.tap(() => [
+  const initialBlock = (await web3.getBlock('latest')).number + 1;
+  const initialEthBalance = fromWei(await web3.getBalance(address)).toString();
+  watcher.tap(() => [
     {
       call: ['getEthBalance(address)(uint256)', address],
-      returns: [
-        [
-          'ETH_BALANCE',
-          v => service.get('web3')._web3.utils.fromWei(v.toString())
-        ]
-      ]
+      returns: [['ETH_BALANCE', v => fromWei(v.toString())]]
     }
   ]);
-  service.start();
-
-  let ethBalance = '';
-  const batchSub = watcher.subscribe(update => {
-    if (update.type === 'ETH_BALANCE') ethBalance = update.value;
-  });
-  let blockNumber;
-  const newBlockSub = watcher.onNewBlock(number => (blockNumber = number));
-
+  watcher.start();
+  const results = {};
+  const batchSub = watcher.subscribe(update => (results[update.type] = update.value.toString()));
+  const newBlockSub = watcher.onNewBlock(number => (results.blockNumber = number));
   await watcher.awaitInitialFetch();
-
   batchSub.unsub();
   newBlockSub.unsub();
 
-  expect(ethBalance.toString()).toEqual(initialEthBalance);
-  expect(parseInt(blockNumber)).toEqual(initialBlock);
+  expect(results.ETH_BALANCE).toEqual(initialEthBalance);
+  expect(parseInt(results.blockNumber)).toEqual(initialBlock);
 });
 
-test('watch multiple base observables from same schema', async () => {
-  const observable1 = service.watchObservable('debtCeiling', 'ETH-A');
-  const observable3 = service.watchObservable('debtScalingFactor', 'ETH-A');
-  const debtCeilingEth = await observable1.pipe(first()).toPromise();
-  const debtScalingFactorEth = await observable3.pipe(first()).toPromise();
-
-  expect(Number(debtCeilingEth)).toEqual(100000);
-  expect(Number(debtScalingFactorEth)).toEqual(1);
+test('base observable', async () => {
+  const expectedTotalCdpDebt = BigNumber(100);
+  const totalCdpDebt = await maker.latest(TOTAL_CDP_DEBT);
+  expect(totalCdpDebt).toEqual(expectedTotalCdpDebt);
 });
 
-test('watch multiple base observables from same schema with different schema params', async () => {
-  const observable1 = service.watchObservable('debtCeiling', 'ETH-A');
-  const observable2 = service.watchObservable('debtCeiling', 'BAT-A');
-  const debtCeilingEth = await observable1.pipe(first()).toPromise();
-  const debtCeilingBat = await observable2.pipe(first()).toPromise();
-
-  expect(Number(debtCeilingEth)).toEqual(100000);
-  expect(Number(debtCeilingBat)).toEqual(5000);
+test('base observable with arg', async () => {
+  const expectedCdpCollateral = BigNumber(5);
+  const cdpCollateral = await maker.latest(CDP_COLLATERAL, cdpId);
+  expect(cdpCollateral).toEqual(expectedCdpCollateral);
 });
 
-test('watch computed observable', async () => {
-  const observable = service.watchObservable('testComputed1', 'ETH-A');
-  const testComputed1 = await observable.pipe(first()).toPromise();
+test('multiple base observables', async () => {
+  const expectedCdpCollateral = BigNumber(5);
+  const expectedCdpDebt = BigNumber(100);
+  const expectedEthPrice = BigNumber(400);
 
-  expect(testComputed1).toEqual(100001);
+  const cdpCollateral = await maker.latest(CDP_COLLATERAL, cdpId);
+  const cdpDebt = await maker.latest(CDP_DEBT, cdpId);
+  const ethPrice = await maker.latest(ETH_PRICE);
+
+  expect(cdpCollateral).toEqual(expectedCdpCollateral);
+  expect(cdpDebt).toEqual(expectedCdpDebt);
+  expect(ethPrice).toEqual(expectedEthPrice);
+  expect(multicall.activeSchemasCount).toEqual(3);
 });
 
-test('watch computed observable with computed dependency', async () => {
-  const observable = service.watchObservable('testComputed2', 5);
-  const testComputed2 = await observable.pipe(first()).toPromise();
-
-  expect(testComputed2).toEqual(500005);
+test('computed observable', async () => {
+  const expectedCdpCollateralValue = BigNumber(2000);
+  const cdpCollateralValue = await maker.latest(CDP_COLLATERAL_VALUE, cdpId);
+  expect(cdpCollateralValue).toEqual(expectedCdpCollateralValue);
+  expect(multicall.activeSchemasCount).toEqual(2);
 });
 
-test('watch computed observable with promise dependency', async () => {
-  const observable = service.watchObservable('testComputed3', 2);
-  const testComputed3 = await observable.pipe(first()).toPromise();
-
-  expect(testComputed3).toEqual(2000020);
-});
-
-test('watch computed observable with dynamically generated dependencies', async () => {
-  const observable = service.watchObservable('ilkDebtCeilings', [
-    'ETH-A',
-    'BAT-A'
-  ]);
-  const ilkDebtCeilings = await observable.pipe(first()).toPromise();
-
-  expect(ilkDebtCeilings).toEqual([100000, 5000]);
-});
-
-test('watch same computed observable with dynamically generated dependencies more than once', async () => {
-  const observable1 = service.watchObservable('ilkDebtCeilings', [
-    'ETH-A',
-    'BAT-A'
-  ]);
-  const observable2 = service.watchObservable('ilkDebtCeilings', [
-    'ETH-A',
-    'BAT-A'
-  ]);
-  const ilkDebtCeilings1 = await observable1.pipe(first()).toPromise();
-  const ilkDebtCeilings2 = await observable2.pipe(first()).toPromise();
-
-  expect(ilkDebtCeilings1).toEqual([100000, 5000]);
-  expect(ilkDebtCeilings2).toEqual([100000, 5000]);
-});
-
-test('watch computed observable which chains calls to base observables', async () => {
-  const observable = service.watchObservable('testComputed4', address);
-  const res = await observable.pipe(first()).toPromise();
-  expect(res).toEqual(0);
+test('computed observable with nested dependencies', async () => {
+  const expectedLastCreatedCdpDebt = BigNumber(2000);
+  const lastCreatedCdpDebt = await maker.latest(LAST_CREATED_CDP_COLLATERAL_VALUE);
+  expect(lastCreatedCdpDebt).toEqual(expectedLastCreatedCdpDebt);
+  expect(multicall.activeSchemasCount).toEqual(3);
 });

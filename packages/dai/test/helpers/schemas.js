@@ -1,139 +1,78 @@
-/* eslint-disable */
-import BigNumber from 'bignumber.js';
+import { fromWei, numberToBytes32 } from '../../src/utils/conversion';
 
-function debtValue(art, rate) {
-  art = fromWei(art);
-  return art.times(rate).shiftedBy(-27);
-}
+export const TOTAL_CDP_DEBT = 'totalCdpDebt';
+export const ETH_PRICE = 'ethPrice';
+export const CDP_COLLATERAL = 'cdpCollateral';
+export const CDP_DEBT = 'cdpDebt';
+export const CDP_COUNT = 'cdpCount';
+export const CDP_COLLATERAL_VALUE = 'cdpCollateralValue';
+export const LAST_CREATED_CDP_COLLATERAL_VALUE = 'lastCreatedCdpCollateralValue'; // prettier-ignore
 
-export function padRight(string, chars, sign) {
-  return string + new Array(chars - string.length + 1).join(sign ? sign : '0');
-}
-
-export function toHex(str, { with0x = true, rightPadding = 64 } = {}) {
-  let result = '';
-  for (let i = 0; i < str.length; i++) {
-    result += str.charCodeAt(i).toString(16);
-  }
-  if (rightPadding > 0) result = padRight(result, rightPadding);
-  return with0x ? '0x' + result : result;
-}
-
-export function fromWei(value) {
-  return BigNumber(value).shiftedBy(-18);
-}
-
-export function fromRay(value) {
-  return BigNumber(value).shiftedBy(-27);
-}
-
-export function fromRad(value) {
-  return BigNumber(value).shiftedBy(-45);
-}
-
-const totalEncumberedDebt = 'totalEncumberedDebt';
-const debtScalingFactor = 'debtScalingFactor';
-const priceWithSafetyMargin = 'priceWithSafetyMargin';
-const debtCeiling = 'debtCeiling';
-const urnDebtFloor = 'urnDebtFloor';
-
-export const ilk = {
-  generate: ilkName => ({
-    id: `MCD_VAT.ilks(${ilkName})`,
-    contractName: 'MCD_VAT',
-    call: [
-      'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
-      toHex(ilkName)
-    ]
+export const tubRum = {
+  generate: () => ({
+    id: 'SAI_TUB.rum',
+    contractName: 'SAI_TUB',
+    call: ['rum()(uint256)']
   }),
-  returns: [
-    totalEncumberedDebt,
-    [debtScalingFactor, fromRay],
-    priceWithSafetyMargin,
-    [debtCeiling, fromRad],
-    urnDebtFloor
-  ]
+  returns: [[TOTAL_CDP_DEBT, fromWei]]
 };
 
-export const ilkDebt = {
-  generate: ilkName => ({
-    dependencies: [
-      ['totalEncumberedDebt', ilkName],
-      ['debtScalingFactor', ilkName]
-    ],
-    computed: (art, rate) => {
-      console.log('ilkDebt computed:', art, rate);
-      return debtValue(art, rate);
-    }
-  })
-};
-
-export const testComputed1 = {
-  generate: ilkName => ({
-    dependencies: [['debtScalingFactor', ilkName], ['debtCeiling', ilkName]],
-    computed: (debtScalingFactor, debtCeiling) =>
-      Number(debtScalingFactor) + Number(debtCeiling)
-  })
-};
-
-export const testComputed2 = {
-  generate: multiplyBy => ({
-    dependencies: [['testComputed1', 'ETH-A']],
-    computed: testComputed1 => testComputed1 * multiplyBy
-  })
-};
-
-export const testComputed3 = {
-  generate: multiplyBy => ({
-    dependencies: [
-      ['testComputed2', 10],
-      [() => new Promise(resolve => resolve(multiplyBy))]
-    ],
-    computed: (testComputed2, promiseResult) => testComputed2 * promiseResult
-  })
-};
-
-export const proxies = {
-  generate: address => ({
-    id: `PROXY_REGISTRY.proxies(${address})`,
-    contractName: 'PROXY_REGISTRY',
-    call: ['proxies(address)(address)', address]
+export const tubCupi = {
+  generate: () => ({
+    id: 'SAI_TUB.cupi',
+    contractName: 'SAI_TUB',
+    call: ['cupi()(uint256)']
   }),
-  returns: [['proxyAddress']]
+  returns: [[CDP_COUNT, parseInt]]
 };
 
-export const potpie = {
-  generate: proxyAddress => ({
-    id: `MCD_POT.pie(${proxyAddress})`,
-    contractName: 'MCD_POT',
-    call: ['pie(address)(uint256)', proxyAddress]
+export const tubInk = {
+  generate: id => ({
+    id: `SAI_TUB.ink(${id})`,
+    contractName: 'SAI_TUB',
+    call: ['ink(bytes32)(uint256)', numberToBytes32(id)]
   }),
-  returns: [['savingsDaiByProxy']]
+  returns: [[CDP_COLLATERAL, fromWei]]
 };
 
-export const testComputed4 = {
-  generate: address => ({
-    dependencies: [['savingsDaiByProxy', ['proxyAddress', address]]],
-    computed: res => Number(res)
+export const tubTab = {
+  generate: id => ({
+    id: `SAI_TUB.tab(${id})`,
+    contractName: 'SAI_TUB',
+    call: ['tab(bytes32)(uint256)', numberToBytes32(id)]
+  }),
+  returns: [[CDP_DEBT, fromWei]]
+};
+
+export const pipRead = {
+  generate: () => ({
+    id: 'SAI_PIP.read',
+    contractName: 'SAI_PIP',
+    call: ['read()(uint256)']
+  }),
+  returns: [[ETH_PRICE, fromWei]]
+};
+
+export const cdpCollateralValue = {
+  generate: id => ({
+    dependencies: () => [[CDP_COLLATERAL, id], [ETH_PRICE]],
+    computed: (cdpCollateral, ethPrice) => cdpCollateral.times(ethPrice)
   })
 };
 
-export const ilkDebtCeilings = {
-  generate: ilks => ({
-    // Dynamically generate dependencies
-    dependencies: () => ilks.map(ilkName => ['debtCeiling', ilkName]),
-    computed: (...results) => results.map(r => Number(r))
+export const lastCreatedCdpCollateralValue = {
+  generate: () => ({
+    dependencies: () => [[CDP_COLLATERAL, [CDP_COUNT]], [ETH_PRICE]],
+    computed: (cdpCollateral, ethPrice) => cdpCollateral.times(ethPrice)
   })
 };
 
 export default {
-  ilk,
-  ilkDebt,
-  testComputed1,
-  testComputed2,
-  testComputed3,
-  proxies,
-  potpie,
-  testComputed4,
-  ilkDebtCeilings
+  tubRum,
+  tubInk,
+  tubTab,
+  tubCupi,
+  pipRead,
+  cdpCollateralValue,
+  lastCreatedCdpCollateralValue
 };

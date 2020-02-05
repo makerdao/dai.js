@@ -1,0 +1,13 @@
+{
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": [
+        "MulticallService.*"
+      ],
+      "options": {
+        "printWidth": 100
+      }
+    }
+  ]
+}
