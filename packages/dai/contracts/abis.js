@@ -21,6 +21,8 @@ import vox from './abis/SaiVox.json';
 import mom from './abis/SaiMom.json';
 import pit from './abis/GemPit.json';
 
+import multicall from './abis/Multicall.json';
+
 const daiV1 = {
   saiTop,
   tub,
@@ -55,4 +57,4 @@ const proxies = {
   proxyRegistry
 };
 
-export { daiV1, dappHub, exchangesV1, general, proxies };
+export { daiV1, dappHub, exchangesV1, general, proxies, multicall };
