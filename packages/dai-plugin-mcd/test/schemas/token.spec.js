@@ -1,5 +1,9 @@
 import { mcdMaker } from '../helpers';
-import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
+import {
+  takeSnapshot,
+  restoreSnapshot,
+  mineBlocks
+} from '@makerdao/test-helpers';
 import { ETH, BAT, MDAI, MWETH, ALLOWANCE_AMOUNT } from '../../src';
 import BigNumber from 'bignumber.js';
 import { ServiceRoles } from '../../src/constants';
@@ -30,7 +34,7 @@ beforeAll(async () => {
   });
 
   snapshotData = await takeSnapshot(maker);
-  maker.service('multicall').createWatcher({ interval: 'block' });
+  maker.service('multicall').createWatcher();
   maker.service('multicall').registerSchemas(tokenSchemas);
   maker.service('multicall').start();
   address = maker.currentAddress();
@@ -92,6 +96,7 @@ test(TOKEN_ALLOWANCE, async () => {
     .service('token')
     .getToken('BAT')
     .approveUnlimited(proxyAddress);
+  await mineBlocks(maker.service('token'), 1);
 
   const setBatAllowance = await maker.latest(
     TOKEN_ALLOWANCE,

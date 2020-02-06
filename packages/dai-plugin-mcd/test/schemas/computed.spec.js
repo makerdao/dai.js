@@ -3,7 +3,8 @@ import { ETH, BAT, MDAI, USD } from '../../src';
 import {
   takeSnapshot,
   restoreSnapshot,
-  TestAccountProvider
+  TestAccountProvider,
+  mineBlocks
 } from '@makerdao/test-helpers';
 import { fromWei } from '../../src/utils';
 import { ServiceRoles } from '../../src/constants';
@@ -69,7 +70,7 @@ beforeAll(async () => {
   });
   address = maker.service('web3').currentAddress();
 
-  maker.service('multicall').createWatcher({ interval: 'block' });
+  maker.service('multicall').createWatcher();
   maker.service('multicall').registerSchemas({
     vatIlks,
     vatUrns,
@@ -369,6 +370,7 @@ test(ALLOWANCE, async () => {
     .service('token')
     .getToken('BAT')
     .approveUnlimited(nextAccountProxy);
+  await mineBlocks(maker.service('token'), 1);
 
   batAllowance = await maker.latest(ALLOWANCE, 'BAT');
   expect(batAllowance).toEqual(true);

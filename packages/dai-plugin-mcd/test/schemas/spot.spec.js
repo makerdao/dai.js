@@ -19,7 +19,7 @@ beforeAll(async () => {
   });
 
   snapshotData = await takeSnapshot(maker);
-  maker.service('multicall').createWatcher({ interval: 'block' });
+  maker.service('multicall').createWatcher();
   maker.service('multicall').registerSchemas(spotSchemas);
   maker.service('multicall').start();
 });

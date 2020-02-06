@@ -40,7 +40,7 @@ beforeAll(async () => {
   });
 
   snapshotData = await takeSnapshot(maker);
-  maker.service('multicall').createWatcher({ interval: 'block' });
+  maker.service('multicall').createWatcher();
   maker.service('multicall').registerSchemas(vatSchemas);
   maker.service('multicall').start();
   await setupCollateral(maker, 'ETH-A', {
