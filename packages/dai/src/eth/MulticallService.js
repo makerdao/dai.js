@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
@@ -19,7 +18,8 @@ export default class MulticallService extends PublicService {
     this._subjects = {};
     this._observables = {};
     this._watcherUpdates = null;
-    this._watchingSchemasTotal = 0;
+    this._totalSchemaSubscribers = 0;
+    this._totalActiveSchemas = 0;
     this._multicallResultCache = {};
     this._addresses = {};
     this._removeSchemaTimers = {};
@@ -118,8 +118,12 @@ export default class MulticallService extends PublicService {
     return this.activeSchemas.map(({ id }) => id);
   }
 
-  get activeSchemasCount() {
-    return this._watchingSchemasTotal;
+  get totalActiveSchemas() {
+    return this._totalActiveSchemas;
+  }
+
+  get totalSchemaSubscribers() {
+    return this._totalSchemaSubscribers;
   }
 
   registerSchemas(schemas) {
@@ -263,7 +267,7 @@ export default class MulticallService extends PublicService {
 
     // Create base observable
     const observable = Observable.create(observer => {
-      this._watchingSchemasTotal++;
+      this._totalSchemaSubscribers++;
       // Subscribe to watcher updates and emit them to subjects
       if (!this._watcherUpdates) this._subscribeToWatcherUpdates();
       // If first subscriber to this schema add it to multicall
@@ -302,7 +306,7 @@ export default class MulticallService extends PublicService {
     if (this._removeSchemaTimers[id]) {
       log2(`Cancelled pending schema removal: ${id}`);
       clearTimeout(this._removeSchemaTimers[id]);
-      this._removeSchemaTimers[id] = null;
+      delete this._removeSchemaTimers[id];
       return;
     }
     // Automatically generate return keys if not explicitly specified in generated schema
@@ -318,6 +322,7 @@ export default class MulticallService extends PublicService {
       });
     if (!target && !contractName) throw new Error('Schema must specify target or contractName');
     if (!target && !this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
+    this._totalActiveSchemas++;
     this._watcher.tap(calls => [
       ...calls,
       {
@@ -328,21 +333,24 @@ export default class MulticallService extends PublicService {
       }
     ]);
     log2(`Schema added to multicall: ${id}`);
-    log2(`Active schemas: ${this.activeSchemaIds.join(',')} (${this.activeSchemasCount} total)`);
+    if (process?.browser) log2('Active schemas (' + this._totalActiveSchemas + ' total):', this.activeSchemaIds);
+    else log2(`Active schemas (${this._totalActiveSchemas} total): ${this.activeSchemaIds.join(',')}`); // prettier-ignore
   }
 
   _removeSchemaImmediately(id) {
     if (this._removeSchemaTimers[id] !== undefined) delete this._removeSchemaTimers[id];
     log2(`Schema removed from multicall: ${id}`);
     this._watcher.tap(schemas => schemas.filter(({ id: id_ }) => id_ !== id));
+    if (--this._totalActiveSchemas === 0) log2('No remaining active schemas');
     // If no schemas are being watched, unsubscribe from watcher updates
-    if (--this._watchingSchemasTotal === 0) {
-      log2('No remaining active schemas');
+    if (--this._totalSchemaSubscribers === 0) {
       log2('Unsubscribed from watcher updates');
       this._watcherUpdates.unsub();
       this._watcherUpdates = null;
+    } else {
+      if (process?.browser) log2('Active schemas (' + this._totalActiveSchemas + ' total):', this.activeSchemaIds);
+      else log2(`Active schemas (${this._totalActiveSchemas} remaining): ${this.activeSchemaIds.join(',')}`); // prettier-ignore
     }
-    else log2(`Active schemas: ${this.activeSchemaIds.join(',')} (${this.activeSchemasCount} remaining)`); // prettier-ignore
   }
 
   _removeSchemaFromMulticall({ id, immediate = false }) {
@@ -385,8 +393,9 @@ export default class MulticallService extends PublicService {
     this._watcherUpdates = this._watcher.subscribe(update => {
       const subject = get(this._subjects, update.type);
       if (subject) {
-        let logValue = update.value;
-        if (logValue instanceof BigNumber) logValue = logValue.toFormat();
+        const logValue = update.value?._isBigNumber
+          ? `${update.value.toString()} (BigNumber)`
+          : update.value;
         log2('Got watcher update for ' + update.type + ':', logValue);
         if (this._validateResult(subject, update.type, update.value)) subject.next(update.value);
       } else this._multicallResultCache[update.type] = update.value;

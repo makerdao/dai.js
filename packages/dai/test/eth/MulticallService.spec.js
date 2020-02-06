@@ -86,19 +86,19 @@ test('multiple base observables', async () => {
   expect(cdpCollateral).toEqual(expectedCdpCollateral);
   expect(cdpDebt).toEqual(expectedCdpDebt);
   expect(ethPrice).toEqual(expectedEthPrice);
-  expect(multicall.activeSchemasCount).toEqual(3);
+  expect(multicall.totalActiveSchemas).toEqual(3);
 });
 
 test('computed observable', async () => {
   const expectedCdpCollateralValue = BigNumber(2000);
   const cdpCollateralValue = await maker.latest(CDP_COLLATERAL_VALUE, cdpId);
   expect(cdpCollateralValue).toEqual(expectedCdpCollateralValue);
-  expect(multicall.activeSchemasCount).toEqual(2);
+  expect(multicall.totalActiveSchemas).toEqual(2);
 });
 
 test('computed observable with nested dependencies', async () => {
   const expectedLastCreatedCdpDebt = BigNumber(2000);
   const lastCreatedCdpDebt = await maker.latest(LAST_CREATED_CDP_COLLATERAL_VALUE);
   expect(lastCreatedCdpDebt).toEqual(expectedLastCreatedCdpDebt);
-  expect(multicall.activeSchemasCount).toEqual(3);
+  expect(multicall.totalActiveSchemas).toEqual(3);
 });
