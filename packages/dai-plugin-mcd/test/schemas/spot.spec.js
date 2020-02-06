@@ -45,8 +45,8 @@ test(LIQUIDATION_RATIO, async () => {
   const ethALiquidationRatio = await maker.latest(LIQUIDATION_RATIO, 'ETH-A');
   const batALiquidationRatio = await maker.latest(LIQUIDATION_RATIO, 'BAT-A');
 
-  expect(ethALiquidationRatio.symbol).toEqual('(ETH/USD)/(MDAI/USD)');
-  expect(batALiquidationRatio.symbol).toEqual('(BAT/USD)/(MDAI/USD)');
+  expect(ethALiquidationRatio.symbol).toEqual('USD/MDAI');
+  expect(batALiquidationRatio.symbol).toEqual('USD/MDAI');
 
   expect(ethALiquidationRatio.toNumber()).toEqual(1.5);
   expect(batALiquidationRatio.toNumber()).toEqual(2.0);

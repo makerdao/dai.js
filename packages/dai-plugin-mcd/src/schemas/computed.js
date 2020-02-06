@@ -36,7 +36,6 @@ import {
   SAVINGS_RATE_ACCUMULATOR,
   DAI_LOCKED_IN_DSR,
   TOKEN_BALANCE,
-  LIQUIDATION_RATIO_SIMPLE,
   LIQUIDATION_PENALTY,
   ANNUAL_STABILITY_FEE,
   TOKEN_ALLOWANCE,
@@ -52,9 +51,8 @@ export const collateralTypePrice = {
       [LIQUIDATION_RATIO, collateralTypeName]
     ],
     computed: (ratioDaiUsd, priceWithSafetyMargin, liquidationRatio) => {
-      const currency = createCurrency(
-        liquidationRatio.numerator.symbol.substring(1, 4)
-      );
+      const [symbol] = collateralTypeName.split('-');
+      const currency = createCurrency(symbol);
       const ratio = createCurrencyRatio(USD, currency);
       const price = priceWithSafetyMargin
         .times(ratioDaiUsd.toNumber())
@@ -111,8 +109,8 @@ export const collateralAmount = {
       [ENCUMBERED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]]
     ],
     computed: (vaultType, encumberedCollateral) => {
-      // Todo: better way to get collateral name
-      const currency = createCurrency(vaultType.substring(0, 3));
+      const [symbol] = vaultType.split('-');
+      const currency = createCurrency(symbol);
       return currency(encumberedCollateral);
     }
   })
@@ -157,11 +155,7 @@ export const liquidationPrice = {
       [LIQUIDATION_RATIO, [VAULT_TYPE, id]]
     ],
     computed: (collateralAmount, debtValue, liquidationRatio) =>
-      calcLiquidationPrice(
-        collateralAmount,
-        debtValue,
-        createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber())
-      )
+      calcLiquidationPrice(collateralAmount, debtValue, liquidationRatio)
   })
 };
 
@@ -173,11 +167,7 @@ export const daiAvailable = {
       [LIQUIDATION_RATIO, [VAULT_TYPE, id]]
     ],
     computed: (collateralValue, debtValue, liquidationRatio) =>
-      calcDaiAvailable(
-        collateralValue,
-        debtValue,
-        createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber())
-      )
+      calcDaiAvailable(collateralValue, debtValue, liquidationRatio)
   })
 };
 
@@ -189,11 +179,7 @@ export const minSafeCollateralAmount = {
       [COLLATERAL_TYPE_PRICE, [VAULT_TYPE, id]]
     ],
     computed: (debtValue, liquidationRatio, price) =>
-      calcMinSafeCollateralAmount(
-        debtValue,
-        createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber()),
-        price
-      )
+      calcMinSafeCollateralAmount(debtValue, liquidationRatio, price)
   })
 };
 export const collateralAvailableAmount = {
@@ -212,14 +198,6 @@ export const collateralAvailableValue = {
     ],
     computed: (collateralAvailableAmount, collateralTypePrice) =>
       calcCollateralValue(collateralAvailableAmount, collateralTypePrice)
-  })
-};
-
-export const liquidationRatioSimple = {
-  generate: id => ({
-    dependencies: [[LIQUIDATION_RATIO, [VAULT_TYPE, id]]],
-    computed: liquidationRatio =>
-      createCurrencyRatio(USD, MDAI)(liquidationRatio.toNumber())
   })
 };
 
@@ -242,7 +220,7 @@ export const vault = {
       [COLLATERAL_AVAILABLE_AMOUNT, id],
       [COLLATERAL_AVAILABLE_VALUE, id],
       [UNLOCKED_COLLATERAL, [VAULT_TYPE, id], [VAULT_ADDRESS, id]],
-      [LIQUIDATION_RATIO_SIMPLE, id],
+      [LIQUIDATION_RATIO, [VAULT_TYPE, id]],
       [LIQUIDATION_PENALTY, [VAULT_TYPE, id]],
       [ANNUAL_STABILITY_FEE, [VAULT_TYPE, id]],
       [DEBT_FLOOR, id]
@@ -264,7 +242,7 @@ export const vault = {
       collateralAvailableAmount,
       collateralAvailableValue,
       unlockedCollateral,
-      liquidationRatioSimple,
+      liquidationRatio,
       liquidationPenalty,
       annualStabilityFee,
       debtFloor
@@ -286,20 +264,20 @@ export const vault = {
       collateralAvailableAmount,
       collateralAvailableValue,
       unlockedCollateral,
-      liquidationRatioSimple,
+      liquidationRatio,
       liquidationPenalty,
       annualStabilityFee,
       debtFloor,
       calculateLiquidationPrice({
         collateralAmount = this.collateralAmount,
         debtValue = this.debtValue,
-        liquidationRatioSimple = this.liquidationRatioSimple
+        liquidationRatio = this.liquidationRatio
       } = {}) {
-        if (!collateralAmount || !debtValue || !liquidationRatioSimple) return;
+        if (!collateralAmount || !debtValue || !liquidationRatio) return;
         return calcLiquidationPrice(
           collateralAmount,
           debtValue,
-          liquidationRatioSimple
+          liquidationRatio
         );
       },
       calculateCollateralizationRatio({
@@ -380,6 +358,5 @@ export default {
   daiLockedInDsr,
   totalDaiLockedInDsr,
   balance,
-  liquidationRatioSimple,
   allowance
 };

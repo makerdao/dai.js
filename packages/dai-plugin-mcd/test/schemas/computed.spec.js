@@ -292,7 +292,9 @@ test(VAULT, async () => {
     expectedCollateralAvailableValue.toString()
   );
   expect(vault.unlockedCollateral).toEqual(expectedUnlockedCollateral);
-  expect(vault.liquidationRatioSimple).toEqual(expectedLiqRatio);
+  expect(vault.liquidationRatio.toString()).toEqual(
+    expectedLiqRatio.toString()
+  );
   expect(vault.liquidationPenalty).toEqual(expectedLiqPenalty);
   expect(vault.annualStabilityFee.toNumber()).toEqual(expectedAnnStabilityFee);
   expect(vault.debtFloor).toEqual(expectedDebtFloor);
