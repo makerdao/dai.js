@@ -7,7 +7,6 @@ import GovPollingService from '../src/GovPollingService';
 import {
   dummyMkrSupportData,
   dummyAllPollsData,
-  dummyBlockNumber,
   dummyOption,
   dummyWeight,
   dummyNumUnique
@@ -132,22 +131,6 @@ test('getWinningProposal', async () => {
   const option = await govPollingService.getWinningProposal(1);
   expect(mockFn).toBeCalled();
   expect(option).toBe(2);
-});
-
-test('getVoteHistory', async () => {
-  // clear polls cache
-  govPollingService.refresh();
-  const mockFn1 = jest.fn(async () => dummyAllPollsData);
-  govQueryApiService.getAllWhitelistedPolls = mockFn1;
-  const mockFn2 = jest.fn(async () => dummyMkrSupportData);
-  govQueryApiService.getMkrSupport = mockFn2;
-  const mockFn3 = jest.fn(async t => dummyBlockNumber(t));
-  govQueryApiService.getBlockNumber = mockFn3;
-  const history = await govPollingService.getVoteHistory(1, 3);
-  expect(mockFn1).toBeCalled();
-  expect(mockFn2).toBeCalled();
-  expect(mockFn3).toBeCalled();
-  expect(history[0].options).toBe(dummyMkrSupportData);
 });
 
 test('getPercentageMkrVoted', async () => {
