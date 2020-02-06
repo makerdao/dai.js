@@ -120,37 +120,4 @@ export default class GovPollingService extends PrivateService {
     }
     return max ? max.optionId : 0;
   }
-
-  // async getVoteHistory(pollId, numPlots) {
-  //   const { startDate, endDate } = await this._getPoll(pollId);
-  //   const startUnix = Math.floor(startDate / 1000);
-  //   const endUnix = Math.floor(endDate / 1000);
-  //   const voteHistory = [];
-  //   const interval = Math.round((endUnix - startUnix) / numPlots);
-  //   if (interval === 0) {
-  //     const mkrSupport = await this.get('govQueryApi').getMkrSupport(
-  //       pollId,
-  //       endBlock
-  //     );
-  //     voteHistory.push([
-  //       {
-  //         time: mkrSupport[0].blockTimestamp,
-  //         options: mkrSupport
-  //       }
-  //     ]);
-  //   } else {
-  //     for (let i = endBlock; i >= startBlock; i -= interval) {
-  //       const mkrSupport = await this.get('govQueryApi').getMkrSupport(
-  //         pollId,
-  //         i
-  //       );
-  //       const time = mkrSupport.length > 0 ? mkrSupport[0].blockTimestamp : 0;
-  //       voteHistory.push({
-  //         time,
-  //         options: mkrSupport
-  //       });
-  //     }
-  //   }
-  //   return voteHistory;
-  // }
 }
