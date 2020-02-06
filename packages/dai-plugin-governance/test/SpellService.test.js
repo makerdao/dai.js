@@ -50,3 +50,11 @@ test('get spell done boolean', async () => {
   );
   expect(done).toBe(true);
 });
+
+//currently this test works for mainnet
+test('get spell action address', async () => {
+  const action = await spellService.getAction(
+    '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
+  );
+  expect(action).toBe('0x68D4e46c1ca8a346f82e36f324A9C0935041De79');
+});

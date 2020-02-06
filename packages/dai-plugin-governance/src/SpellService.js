@@ -7,6 +7,7 @@ export default class SpellService extends PublicService {
     super(name, ['smartContract', 'web3']);
     this.eta = {};
     this.done = {};
+    this.action = {};
   }
 
   getDelayInSeconds() {
@@ -34,6 +35,16 @@ export default class SpellService extends PublicService {
     );
     this.done[spellAddress] = spell.done();
     return this.done[spellAddress];
+  }
+
+  async getAction(spellAddress) {
+    if (this.action[spellAddress]) return this.action[spellAddress];
+    const spell = this.get('smartContract').getContractByAddressAndAbi(
+      spellAddress,
+      DsSpellAbi
+    );
+    this.action[spellAddress] = spell.action();
+    return this.action[spellAddress];
   }
 
   refresh() {
