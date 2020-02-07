@@ -314,7 +314,7 @@ test('vault with invalid id', async () => {
 });
 
 test(DAI_LOCKED_IN_DSR, async () => {
-  const daiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR);
+  const daiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR, address);
   expect(daiLockedInDsr.symbol).toEqual('DSR-DAI');
   expect(daiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
 });
@@ -328,16 +328,16 @@ test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
 test(BALANCE, async () => {
   expect.assertions(11);
 
-  const ethBalance = await maker.latest(BALANCE, 'ETH');
-  const batBalance = await maker.latest(BALANCE, 'BAT');
+  const ethBalance = await maker.latest(BALANCE, 'ETH', address);
+  const batBalance = await maker.latest(BALANCE, 'BAT', address);
 
   expect(ethBalance.symbol).toEqual('ETH');
   expect(batBalance.symbol).toEqual('BAT');
   expect(ethBalance.toNumber()).toBeCloseTo(93.677, 2);
   expect(batBalance.toBigNumber()).toEqual(BigNumber('999'));
 
-  const daiBalance = await maker.latest(BALANCE, 'DAI');
-  const wethBalance = await maker.latest(BALANCE, 'WETH');
+  const daiBalance = await maker.latest(BALANCE, 'DAI', address);
+  const wethBalance = await maker.latest(BALANCE, 'WETH', address);
 
   expect(daiBalance.symbol).toEqual('MDAI');
   expect(daiBalance.toBigNumber()).toEqual(BigNumber('1'));
@@ -345,7 +345,7 @@ test(BALANCE, async () => {
   expect(wethBalance.symbol).toEqual('MWETH');
   expect(wethBalance.toBigNumber()).toEqual(BigNumber('0'));
 
-  const dsrDaiBalance = await maker.latest(BALANCE, 'DSR-DAI');
+  const dsrDaiBalance = await maker.latest(BALANCE, 'DSR-DAI', address);
   expect(dsrDaiBalance.symbol).toEqual('DSR-DAI');
   expect(dsrDaiBalance.toNumber()).toBeCloseTo(1, 18);
 
@@ -365,7 +365,7 @@ test(ALLOWANCE, async () => {
   const nextAccountProxy = await maker.service('proxy').ensureProxy();
 
   let batAllowance;
-  batAllowance = await maker.latest(ALLOWANCE, 'BAT');
+  batAllowance = await maker.latest(ALLOWANCE, 'BAT', nextAccount.address);
   expect(batAllowance).toEqual(false);
 
   await maker
@@ -374,7 +374,7 @@ test(ALLOWANCE, async () => {
     .approveUnlimited(nextAccountProxy);
   await mineBlocks(maker.service('token'), 1);
 
-  batAllowance = await maker.latest(ALLOWANCE, 'BAT');
+  batAllowance = await maker.latest(ALLOWANCE, 'BAT', nextAccount.address);
   expect(batAllowance).toEqual(true);
 
   maker.useAccount('default');

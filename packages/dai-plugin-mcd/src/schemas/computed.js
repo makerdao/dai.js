@@ -318,11 +318,10 @@ export const totalDaiLockedInDsr = {
 };
 
 export const balance = {
-  generate: symbol => ({
-    dependencies: ({ get }) => {
-      const address = get('web3').currentAddress();
+  generate: (symbol, address) => ({
+    dependencies: () => {
       if (symbol === 'DSR-DAI') {
-        return [[DAI_LOCKED_IN_DSR]];
+        return [[DAI_LOCKED_IN_DSR, address]];
       }
       return [[TOKEN_BALANCE, address, symbol]];
     },
@@ -332,11 +331,10 @@ export const balance = {
 };
 
 export const allowance = {
-  generate: symbol => ({
-    dependencies: ({ get }) => {
-      const address = get('web3').currentAddress();
-      return [[TOKEN_ALLOWANCE, address, [PROXY_ADDRESS, address], symbol]];
-    },
+  generate: (symbol, address) => ({
+    dependencies: [
+      [TOKEN_ALLOWANCE, address, [PROXY_ADDRESS, address], symbol]
+    ],
     demarcate: true,
     computed: v => v.isEqualTo(ALLOWANCE_AMOUNT)
   })

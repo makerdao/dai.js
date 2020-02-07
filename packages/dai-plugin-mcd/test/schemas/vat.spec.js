@@ -64,10 +64,10 @@ beforeAll(async () => {
     BAT_A_DEBT_AMOUNT
   );
   cdpTypeService = maker.service(ServiceRoles.CDP_TYPE);
-
   ethAInfo = await cdpTypeService.getCdpType(ETH, 'ETH-A').ilkInfo();
   batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
-});
+  console.log(ethAInfo);
+}, 10000);
 
 afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
