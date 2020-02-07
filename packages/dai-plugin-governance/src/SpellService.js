@@ -3,10 +3,9 @@ import { PAUSE } from './utils/constants';
 import DsSpellAbi from '../contracts/abis/DSSpell.json';
 import padStart from 'lodash/padStart';
 import assert from 'assert';
-
-const PAUSE_EXEC_METHOD_SIG =
-  '0x168ccd6700000000000000000000000000000000000000000000000000000000';
-const DS_PAUSE_DEPLOY_BLOCK = 8928171;
+import contractInfo from '../contracts/contract-info.json';
+const pauseInfo = contractInfo.pause;
+import { netIdToName } from './utils/helpers';
 
 export default class SpellService extends PublicService {
   constructor(name = 'spell') {
@@ -61,16 +60,18 @@ export default class SpellService extends PublicService {
     assert(done, `spell ${spellAddress} has not been executed`);
     const pauseAddress = this._pauseContract().address;
     const web3Service = this.get('web3');
+    const netId = web3Service.network;
+    const networkName = netIdToName(netId);
     const paddedSpellAddress =
       '0x' + padStart(spellAddress.replace(/^0x/, ''), 64, '0');
     const [execEvent] = await web3Service.getPastLogs({
-      fromBlock: DS_PAUSE_DEPLOY_BLOCK,
+      fromBlock: pauseInfo.inception_block[networkName],
       toBlock: 'latest',
       address: pauseAddress,
-      topics: [PAUSE_EXEC_METHOD_SIG, paddedSpellAddress]
+      topics: [pauseInfo.events.exec, paddedSpellAddress]
     });
     const { timestamp } = await web3Service.getBlock(execEvent.blockNumber);
-    return timestamp;
+    return new Date(timestamp * 1000);
   }
 
   refresh() {
