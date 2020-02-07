@@ -40,7 +40,10 @@ import {
   ANNUAL_STABILITY_FEE,
   TOKEN_ALLOWANCE,
   DEBT_FLOOR,
-  PROXY_OWNER
+  PROXY_OWNER,
+  ANNUAL_DAI_SAVINGS_RATE,
+  DAI_SAVINGS_RATE,
+  DATE_EARNINGS_LAST_ACCRUED
 } from './constants';
 
 export const collateralTypePrice = {
@@ -294,9 +297,9 @@ export const vault = {
 };
 
 export const daiLockedInDsr = {
-  generate: () => ({
-    dependencies: ({ get }) => [
-      [SAVINGS_DAI, [PROXY_ADDRESS, get('web3').currentAddress()]],
+  generate: address => ({
+    dependencies: () => [
+      [SAVINGS_DAI, [PROXY_ADDRESS, address]],
       [SAVINGS_RATE_ACCUMULATOR]
     ],
     computed: (savingsDai, savingsRateAccumulator) => {
@@ -339,6 +342,31 @@ export const allowance = {
   })
 };
 
+export const savings = {
+  generate: address => ({
+    dependencies: [
+      [ANNUAL_DAI_SAVINGS_RATE],
+      [DAI_SAVINGS_RATE],
+      [DATE_EARNINGS_LAST_ACCRUED],
+      [DAI_LOCKED_IN_DSR, address],
+      [PROXY_ADDRESS, address]
+    ],
+    computed: (
+      annualDaiSavingsRate,
+      daiSavingsRate,
+      dateEarningsLastAccrued,
+      daiLockedInDsr,
+      proxyAddress
+    ) => ({
+      annualDaiSavingsRate,
+      daiSavingsRate,
+      dateEarningsLastAccrued,
+      daiLockedInDsr,
+      proxyAddress
+    })
+  })
+};
+
 export default {
   collateralTypePrice,
   collateralTypesPrices,
@@ -358,5 +386,6 @@ export default {
   daiLockedInDsr,
   totalDaiLockedInDsr,
   balance,
-  allowance
+  allowance,
+  savings
 };

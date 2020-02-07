@@ -65,6 +65,7 @@ export const COLLATERAL_AVAILABLE_VALUE = 'collateralAvailableValue';
 export const LIQUIDATION_RATIO_SIMPLE = 'liquidationRatioSimple';
 export const BALANCE = 'balance';
 export const ALLOWANCE = 'allowance';
+export const SAVINGS = 'savings';
 
 // token
 export const TOKEN_BALANCE = 'tokenBalance';
