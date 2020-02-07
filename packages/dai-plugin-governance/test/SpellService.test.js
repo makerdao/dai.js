@@ -30,6 +30,14 @@ test('can create spell Service', async () => {
   expect(spellService).toBeInstanceOf(SpellService);
 });
 
+test.only('can fetch events for pause', async () => {
+  console.log(
+    await spellService.getExecutionDate(
+      '0x48916a2b11fa7a895426eedf9acf2d70523b1677'
+    )
+  );
+});
+
 test('get delay', async () => {
   const delay = await spellService.getDelayInSeconds();
   expect(delay.toNumber()).toBe(1);

@@ -1,6 +1,12 @@
 import { PublicService } from '@makerdao/services-core';
 import { PAUSE } from './utils/constants';
 import DsSpellAbi from '../contracts/abis/DSSpell.json';
+import padStart from 'lodash/padStart';
+import assert from 'assert';
+
+const PAUSE_EXEC_METHOD_SIG =
+  '0x168ccd6700000000000000000000000000000000000000000000000000000000';
+const DS_PAUSE_DEPLOY_BLOCK = 8928171;
 
 export default class SpellService extends PublicService {
   constructor(name = 'spell') {
@@ -8,6 +14,7 @@ export default class SpellService extends PublicService {
     this.eta = {};
     this.done = {};
     this.action = {};
+    this.executionDate = {};
   }
 
   getDelayInSeconds() {
@@ -47,10 +54,30 @@ export default class SpellService extends PublicService {
     return this.action[spellAddress];
   }
 
+  async getExecutionDate(spellAddress) {
+    if (this.executionDate[spellAddress])
+      return this.executionDate[spellAddress];
+    const done = await this.getDone(spellAddress);
+    assert(done, `spell ${spellAddress} has not been executed`);
+    const pauseAddress = this._pauseContract().address;
+    const web3Service = this.get('web3');
+    const paddedSpellAddress =
+      '0x' + padStart(spellAddress.replace(/^0x/, ''), 64, '0');
+    const [execEvent] = await web3Service.getPastLogs({
+      fromBlock: DS_PAUSE_DEPLOY_BLOCK,
+      toBlock: 'latest',
+      address: pauseAddress,
+      topics: [PAUSE_EXEC_METHOD_SIG, paddedSpellAddress]
+    });
+    const { timestamp } = await web3Service.getBlock(execEvent.blockNumber);
+    return timestamp;
+  }
+
   refresh() {
     this.delay = null;
     this.eta = {};
     this.done = {};
+    this.executionDate = {};
   }
 
   _pauseContract() {
