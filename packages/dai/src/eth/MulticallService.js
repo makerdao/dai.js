@@ -159,6 +159,8 @@ export default class MulticallService extends PublicService {
   }
 
   watch(key, ...args) {
+    if (!key) throw new Error('Invalid observable key');
+
     const schema = this.schemaByObservableKey(key);
     if (!schema) throw new Error(`No registered schema found for observable key: ${key}`);
 

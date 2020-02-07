@@ -320,7 +320,7 @@ test(DAI_LOCKED_IN_DSR, async () => {
 });
 
 test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
-  const totalDaiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR);
+  const totalDaiLockedInDsr = await maker.latest(TOTAL_DAI_LOCKED_IN_DSR);
   expect(totalDaiLockedInDsr.symbol).toEqual('DSR-DAI');
   expect(totalDaiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
 });
