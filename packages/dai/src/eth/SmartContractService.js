@@ -126,15 +126,13 @@ export default class SmartContractService extends PrivateService {
         allContractInfo,
         (versions, name) => {
           const latest = findLatestContractInfo(versions);
-          const newAddress = resolveAddress(
-            this._addressOverrides[name] || latest.address,
-            networkName,
-            this._addressOverrides[name]
-          );
-          return newAddress !== latest.address
-            ? versions.map(v =>
-                v === latest ? { ...latest, address: newAddress } : v
-              )
+
+          const address =
+            getSingleAddress(this._addressOverrides[name], networkName) ||
+            getSingleAddress(latest.address, networkName);
+
+          return address !== latest.address
+            ? versions.map(v => (v === latest ? { ...latest, address } : v))
             : versions;
         }
       );
@@ -144,13 +142,6 @@ export default class SmartContractService extends PrivateService {
   }
 }
 
-function resolveAddress(address, networkName) {
-  if (!address) return;
-  if (typeof address === 'string') return address;
-  if (networkName.startsWith('test')) return address.test || address.testnet;
-  return address[networkName];
-}
-
 function findContractInfoForVersion(versions, version) {
   if (!version) version = Math.max(...versions.map(info => info.version));
   return versions.find(info => info.version === version);
@@ -158,4 +149,18 @@ function findContractInfoForVersion(versions, version) {
 
 function findLatestContractInfo(versions) {
   return findContractInfoForVersion(versions);
+}
+
+function getSingleAddress(addressGroup, networkName) {
+  if (!addressGroup) return;
+
+  if (typeof addressGroup === 'string') return addressGroup;
+
+  if (addressGroup[networkName]) return addressGroup[networkName];
+
+  // some configuration uses 'testnet' instead of 'test' as the network name
+  if (networkName.startsWith('test') && addressGroup.testnet)
+    return addressGroup.testnet;
+
+  // return nothing if addressGroup has no address defined for this network
 }
