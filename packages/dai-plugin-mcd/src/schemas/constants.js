@@ -37,7 +37,7 @@ export const SAVINGS_DAI = 'savingsDai';
 export const DAI_SAVINGS_RATE = 'daiSavingsRate';
 export const ANNUAL_DAI_SAVINGS_RATE = 'annualDaiSavingsRate';
 export const DATE_EARNINGS_LAST_ACCRUED = 'dateEarningsLastAccrued';
-export const SAVINGS_RATE_ACCUMUALTOR = 'savingsRateAccumulator';
+export const SAVINGS_RATE_ACCUMULATOR = 'savingsRateAccumulator';
 
 // cat
 export const LIQUIDATOR_ADDRESS = 'liquidatorAddress';
