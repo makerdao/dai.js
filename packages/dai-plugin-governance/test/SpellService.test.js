@@ -3,14 +3,8 @@ import {
   restoreSnapshotOriginal,
   sleep
 } from './helpers';
-import SpellService from '../src/SpellService';
 
 let maker, spellService;
-beforeAll(async () => {
-  //TODO: update these tests to use the testchain instead of mainnet
-  maker = await setupTestMakerInstance('mainnet');
-  spellService = maker.service('spell');
-});
 
 afterAll(async done => {
   if (global.useOldChain) {
@@ -27,40 +21,51 @@ afterAll(async done => {
   }
 });
 
-test('can create spell Service', async () => {
-  expect(spellService).toBeInstanceOf(SpellService);
+//NOTE: these tests use mainnet instead of the testchain, because the
+// testchain doesn't have spells (that have been executed) yet
+describe('use mainnet', () => {
+  beforeAll(async () => {
+    maker = await setupTestMakerInstance('mainnet');
+    spellService = maker.service('spell');
+  });
+
+  test('get spell execution date', async () => {
+    const date = await spellService.getExecutionDate(
+      '0x48916a2b11fa7a895426eedf9acf2d70523b1677'
+    );
+    expect(date).toEqual(new Date('2020-02-04T11:35:48.000Z'));
+  });
+
+  test('get spell eta', async () => {
+    const eta = await spellService.getEta(
+      '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
+    );
+    expect(eta).toEqual(new Date('2020-01-26T11:53:19.000Z'));
+  });
+
+  test('get spell done boolean', async () => {
+    const done = await spellService.getDone(
+      '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
+    );
+    expect(done).toBe(true);
+  });
+
+  test('get spell action address', async () => {
+    const action = await spellService.getAction(
+      '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
+    );
+    expect(action).toBe('0x68D4e46c1ca8a346f82e36f324A9C0935041De79');
+  });
 });
 
-test('get spell execution date', async () => {
-  const date = await spellService.getExecutionDate(
-    '0x48916a2b11fa7a895426eedf9acf2d70523b1677'
-  );
-  expect(date).toEqual(new Date('2020-02-04T11:35:48.000Z'));
-});
+describe('use testchain', () => {
+  beforeAll(async () => {
+    maker = await setupTestMakerInstance();
+    spellService = maker.service('spell');
+  });
 
-//Note: this test currently uses mainnet, so if it starts failing, it is probably because the pause delay on mainnet has been increased from 0
-test('get delay', async () => {
-  const delay = await spellService.getDelayInSeconds();
-  expect(delay.toNumber()).toBe(0);
-});
-
-test('get spell eta', async () => {
-  const eta = await spellService.getEta(
-    '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
-  );
-  expect(eta).toEqual(new Date('2020-01-26T11:53:19.000Z'));
-});
-
-test('get spell done boolean', async () => {
-  const done = await spellService.getDone(
-    '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
-  );
-  expect(done).toBe(true);
-});
-
-test('get spell action address', async () => {
-  const action = await spellService.getAction(
-    '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
-  );
-  expect(action).toBe('0x68D4e46c1ca8a346f82e36f324A9C0935041De79');
+  test('get delay', async () => {
+    const delay = await spellService.getDelayInSeconds();
+    expect(delay.toNumber()).toBe(1);
+  });
 });
