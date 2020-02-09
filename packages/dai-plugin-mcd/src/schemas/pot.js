@@ -36,7 +36,7 @@ export const potDsr = {
 };
 export const potChi = {
   generate: () => ({
-    id: 'MCD_POT.dsr',
+    id: 'MCD_POT.chi',
     contractName: 'MCD_POT',
     call: ['chi()(uint256)']
   }),
