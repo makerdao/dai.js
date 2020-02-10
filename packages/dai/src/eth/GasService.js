@@ -2,6 +2,9 @@ import { PublicService } from '@makerdao/services-core';
 import map from 'lodash/map';
 import fetch from 'isomorphic-fetch';
 
+export const API_URL =
+  'https://ethgasstation.info/json/ethgasAPI.json?api-key=';
+
 export default class GasService extends PublicService {
   constructor(name = 'gas') {
     super(name, ['web3', 'log']);
@@ -15,6 +18,8 @@ export default class GasService extends PublicService {
       this._parseConfig(settings.limit, 'limit');
       this._parseConfig(settings.price, 'price');
     }
+
+    this._settings = settings;
 
     this._gasStationDataPromise = this.disablePrice
       ? Promise.resolve({})
@@ -43,9 +48,7 @@ export default class GasService extends PublicService {
 
   async fetchGasStationData() {
     try {
-      const response = await fetch(
-        'https://ethgasstation.info/json/ethgasAPI.json'
-      );
+      const response = await fetch(API_URL + this._settings.apiKey);
       return response.json();
     } catch (err) {
       console.error('Error fetching gas data; disabling preset gas price');
