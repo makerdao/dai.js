@@ -350,7 +350,7 @@ test(BALANCE, async () => {
   expect(dsrDaiBalance.toNumber()).toBeCloseTo(1, 18);
 
   try {
-    await maker.latest(BALANCE, 'NON_MCD_TOKEN');
+    await maker.latest(BALANCE, 'NON_MCD_TOKEN', address);
   } catch (e) {
     expect(e).toEqual(
       Error('NON_MCD_TOKEN token is not part of the default tokens list')

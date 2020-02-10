@@ -66,7 +66,6 @@ beforeAll(async () => {
   cdpTypeService = maker.service(ServiceRoles.CDP_TYPE);
   ethAInfo = await cdpTypeService.getCdpType(ETH, 'ETH-A').ilkInfo();
   batAInfo = await cdpTypeService.getCdpType(BAT, 'BAT-A').ilkInfo();
-  console.log(ethAInfo);
 }, 10000);
 
 afterAll(async () => {

@@ -96,7 +96,7 @@ test(TOKEN_ALLOWANCE, async () => {
     .service('token')
     .getToken('BAT')
     .approveUnlimited(proxyAddress);
-  await mineBlocks(maker.service('token'), 1);
+  await mineBlocks(maker.service('token'));
 
   const setBatAllowance = await maker.latest(
     TOKEN_ALLOWANCE,
