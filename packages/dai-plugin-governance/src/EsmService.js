@@ -1,6 +1,10 @@
 import { PrivateService } from '@makerdao/services-core';
 import { MKR, ESM, END } from './utils/constants';
 import { getCurrency } from './utils/helpers';
+import tracksTransactions, {
+  tracksTransactionsWithOptions
+} from './utils/tracksTransactions';
+
 
 export default class EsmService extends PrivateService {
   constructor(name = 'esm') {
@@ -43,7 +47,8 @@ export default class EsmService extends PrivateService {
     return getCurrency(total, MKR).shiftedBy(-18);
   }
 
-  async stake(amount, skipChecks = false) {
+  @tracksTransactionsWithOptions({ numArguments: 3 })
+  async stake(amount, skipChecks = false, { promise }) {
     const mkrAmount = getCurrency(amount, MKR);
     if (!skipChecks) {
       const [fired, mkrBalance] = await Promise.all([
@@ -59,10 +64,11 @@ export default class EsmService extends PrivateService {
         throw new Error('amount to join is greater than the user balance');
       }
     }
-    return this._esmContract().join(mkrAmount.toFixed('wei'));
+    return this._esmContract().join(mkrAmount.toFixed('wei'), {promise});
   }
 
-  async triggerEmergencyShutdown(skipChecks = false) {
+  @tracksTransactionsWithOptions({ numArguments: 2 })
+  async triggerEmergencyShutdown(skipChecks = false, { promise }) {
     if (!skipChecks) {
       const [thresholdAmount, totalStaked, canFire] = await Promise.all([
         this.thresholdAmount(),

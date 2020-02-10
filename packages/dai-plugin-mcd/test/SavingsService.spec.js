@@ -179,9 +179,7 @@ describe('Savings Service', () => {
     );
   });
 
-  // testing with rejects somehow causes tx nonces to go out of sync, so
-  // commenting out this test for now
-  xtest('cannot exit pot more than joined', async () => {
+  test('cannot exit pot more than joined', async () => {
     await makeSomeDai(3);
 
     await service.join(MDAI(1));
@@ -189,7 +187,7 @@ describe('Savings Service', () => {
     const startingBalance = await dai.balance();
 
     const exit = service.exit(MDAI(2));
-    expect(exit).rejects.toThrow();
+    await expect(exit).rejects.toThrow();
 
     const endingBalance = await dai.balance();
     expect(endingBalance).toEqual(startingBalance);
