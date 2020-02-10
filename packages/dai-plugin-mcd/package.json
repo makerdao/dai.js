@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/dai-plugin-mcd",
   "description": "Plugin to add Multi-Collateral Dai support to dai.js",
-  "version": "1.0.6",
+  "version": "1.1.0-rc.1",
   "license": "MIT",
   "main": "dist",
   "scripts": {
