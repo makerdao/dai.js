@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.23.2",
+  "version": "0.24.0-rc.1",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -38,6 +38,7 @@
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
     "test": "yarn testchain --ci jest --runInBand",
+    "test:debug": "yarn testchain --ci node --inspect-brk ../../node_modules/.bin/jest --runInBand",
     "build:frontend": "./scripts/build-frontend.sh",
     "build:backend": "./scripts/build-backend.sh",
     "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
@@ -52,7 +53,7 @@
   "dependencies": {
     "@babel/runtime": "^7.3.4",
     "@makerdao/currency": "^0.9.5",
-    "@makerdao/multicall": "^0.9.0-rc.2",
+    "@makerdao/multicall": "^0.10.0-rc.4",
     "@makerdao/services-core": "^0.9.9",
     "assert": "^1.4.1",
     "bignumber.js": "^7.2.1",
@@ -66,6 +67,7 @@
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.11",
     "promise-props": "^1.0.0",
+    "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
     "web3": "1.2.1",
     "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
