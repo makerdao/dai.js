@@ -19,7 +19,7 @@ export default class GasService extends PublicService {
       this._parseConfig(settings.price, 'price');
     }
 
-    this._settings = settings;
+    this._settings = settings || {};
 
     this._gasStationDataPromise = this.disablePrice
       ? Promise.resolve({})
