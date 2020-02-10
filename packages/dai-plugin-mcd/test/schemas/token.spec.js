@@ -2,7 +2,8 @@ import { mcdMaker } from '../helpers';
 import {
   takeSnapshot,
   restoreSnapshot,
-  mineBlocks
+  mineBlocks,
+  TestAccountProvider
 } from '@makerdao/test-helpers';
 import { ETH, BAT, MDAI, MWETH, ALLOWANCE_AMOUNT } from '../../src';
 import BigNumber from 'bignumber.js';
@@ -16,7 +17,7 @@ import {
 
 import tokenSchemas from '../../src/schemas/token';
 
-let maker, snapshotData, address, proxyAddress;
+let maker, snapshotData, address, address2, proxyAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -38,6 +39,7 @@ beforeAll(async () => {
   maker.service('multicall').registerSchemas(tokenSchemas);
   maker.service('multicall').start();
   address = maker.currentAddress();
+  address2 = TestAccountProvider.nextAccount().address;
   proxyAddress = await maker.service('proxy').ensureProxy();
 });
 
@@ -48,12 +50,12 @@ afterAll(async () => {
 test(TOKEN_BALANCE, async () => {
   expect.assertions(8);
 
-  const ethBalance = await maker.latest(TOKEN_BALANCE, address, 'ETH');
+  const ethBalance = await maker.latest(TOKEN_BALANCE, address2, 'ETH');
   const batBalance = await maker.latest(TOKEN_BALANCE, address, 'BAT');
 
   expect(ethBalance.symbol).toEqual('ETH');
   expect(batBalance.symbol).toEqual('BAT');
-  expect(ethBalance.toBigNumber()).toEqual(BigNumber('94.69019922'));
+  expect(ethBalance.toBigNumber()).toEqual(BigNumber('100'));
   expect(batBalance.toBigNumber()).toEqual(BigNumber('1000'));
 
   const daiBalance = await maker.latest(TOKEN_BALANCE, address, 'DAI');
