@@ -96,6 +96,15 @@ export function contractInfo(network) {
       }
     ],
 
+    // Multicall
+    [contracts.MULTICALL]: [
+      {
+        version: 1,
+        address: addresses.MULTICALL,
+        abi: abis.multicall
+      }
+    ],
+
     // Proxies
     [contracts.SAI_PROXY]: [
       {
