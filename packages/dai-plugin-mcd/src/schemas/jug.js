@@ -13,7 +13,7 @@ const secondsPerYear = 60 * 60 * 24 * 365;
 export const jugIlks = {
   generate: collateralTypeName => ({
     id: `MCD_JUG.ilks(${collateralTypeName})`,
-    contractName: 'MCD_JUG',
+    contract: 'MCD_JUG',
     call: ['ilks(bytes32)(uint256,uint48)', toHex(collateralTypeName)]
   }),
   returns: [
@@ -32,7 +32,7 @@ export const jugIlks = {
 export const jugBase = {
   generate: () => ({
     id: 'MCD_JUG.base',
-    contractName: 'MCD_JUG',
+    contract: 'MCD_JUG',
     call: ['base()(uint256)']
   }),
   returns: [[BASE_COLLATERAL_FEE, v => BigNumber(v)]]

@@ -18,7 +18,7 @@ import {
 export const vatIlks = {
   generate: ilkName => ({
     id: `MCD_VAT.ilks(${ilkName})`,
-    contractName: 'MCD_VAT',
+    contract: 'MCD_VAT',
     call: [
       'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
       toHex(ilkName)
@@ -36,7 +36,7 @@ export const vatIlks = {
 export const vatDebt = {
   generate: () => ({
     id: 'MCD_VAT.debt()',
-    contractName: 'MCD_VAT',
+    contract: 'MCD_VAT',
     call: ['debt()(uint256)']
   }),
   returns: [[TOTAL_DAI_SUPPLY, v => MDAI(v, 'rad')]]
@@ -45,7 +45,7 @@ export const vatDebt = {
 export const vatUrns = {
   generate: (ilkName, urn) => ({
     id: `MCD_Vat.urns(${ilkName},${urn})`,
-    contractName: 'MCD_VAT',
+    contract: 'MCD_VAT',
     call: ['urns(bytes32,address)(uint256,uint256)', toHex(ilkName), urn]
   }),
   returns: [[ENCUMBERED_COLLATERAL, fromWei], [ENCUMBERED_DEBT, fromWei]]
@@ -54,7 +54,7 @@ export const vatUrns = {
 export const vatGem = {
   generate: (ilkName, urn) => ({
     id: `MCD_Vat.gem(${ilkName},${urn})`,
-    contractName: 'MCD_VAT',
+    contract: 'MCD_VAT',
     call: ['gem(bytes32,address)(uint)', toHex(ilkName), urn]
   }),
   return: [UNLOCKED_COLLATERAL, fromWei]
@@ -63,7 +63,7 @@ export const vatGem = {
 export const vatLine = {
   generate: () => ({
     id: 'MCD_VAT.Line',
-    contractName: 'MCD_VAT',
+    contract: 'MCD_VAT',
     call: ['Line()(uint256)']
   }),
   returns: [[GLOBAL_DEBT_CEILING, v => MDAI(v, 'rad')]]

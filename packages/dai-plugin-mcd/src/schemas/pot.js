@@ -11,7 +11,7 @@ import {
 export const potPie = {
   generate: () => ({
     id: 'MCD_POT.Pie',
-    contractName: 'MCD_POT',
+    contract: 'MCD_POT',
     call: ['Pie()(uint256)']
   }),
   returns: [[TOTAL_SAVINGS_DAI, fromWei]]
@@ -20,7 +20,7 @@ export const potPie = {
 export const potpie = {
   generate: proxyAddress => ({
     id: `MCD_POT.pie(${proxyAddress})`,
-    contractName: 'MCD_POT',
+    contract: 'MCD_POT',
     call: ['pie(address)(uint256)', proxyAddress]
   }),
   returns: [[SAVINGS_DAI, fromWei]]
@@ -29,7 +29,7 @@ export const potpie = {
 export const potDsr = {
   generate: () => ({
     id: 'MCD_POT.dsr',
-    contractName: 'MCD_POT',
+    contract: 'MCD_POT',
     call: ['dsr()(uint256)']
   }),
   returns: [[DAI_SAVINGS_RATE, fromRay]]
@@ -37,7 +37,7 @@ export const potDsr = {
 export const potChi = {
   generate: () => ({
     id: 'MCD_POT.chi',
-    contractName: 'MCD_POT',
+    contract: 'MCD_POT',
     call: ['chi()(uint256)']
   }),
   returns: [[SAVINGS_RATE_ACCUMULATOR, fromRay]]
@@ -46,7 +46,7 @@ export const potChi = {
 export const potRho = {
   generate: () => ({
     id: 'MCD_POT.rho',
-    contractName: 'MCD_POT',
+    contract: 'MCD_POT',
     call: ['rho()(uint256)']
   }),
   returns: [

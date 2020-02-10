@@ -329,10 +329,10 @@ export default class MulticallService extends PublicService {
         });
       }
       // Resolve target contract address if contract string is provided
-      const { target, contractName } = schemaInstance;
-      if (!target && !contractName) throw new Error('Schema must specify target or contractName');
-      if (!target && !this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
-      schemaInstance.target = target || this._addresses[contractName];
+      const { target, contract } = schemaInstance;
+      if (!target && !contract) throw new Error('Schema must specify target address or contract');
+      if (!target && !this._addresses[contract]) throw new Error(`Can't find contract address for ${contract}`); // prettier-ignore
+      schemaInstance.target = target || this._addresses[contract];
     }
 
     return schemaInstance;

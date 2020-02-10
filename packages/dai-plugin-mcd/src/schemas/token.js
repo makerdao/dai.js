@@ -20,7 +20,7 @@ export const tokenBalance = {
 
     return {
       id: `balance.${symbol}.${address}`,
-      contractName: symbol === 'ETH' ? 'MULTICALL' : contract,
+      contract: symbol === 'ETH' ? 'MULTICALL' : contract,
       call: [
         symbol === 'ETH'
           ? 'getEthBalance(address)(uint256)'
@@ -50,7 +50,7 @@ export const tokenAllowance = {
 
     return {
       id: `allowance.${symbol}.${address}`,
-      contractName: contract,
+      contract: contract,
       call: ['allowance(address,address)(uint256)', address, proxyAddress]
     };
   },

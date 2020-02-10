@@ -22,7 +22,7 @@ const validateLiquidationRatioResult = (result, [name]) => {
 export const spotIlks = {
   generate: collateralTypeName => ({
     id: `MCD_SPOT.ilks(${collateralTypeName})`,
-    contractName: 'MCD_SPOT',
+    contract: 'MCD_SPOT',
     call: ['ilks(bytes32)(address,uint256)', toHex(collateralTypeName)],
     transforms: {
       [LIQUIDATION_RATIO]: liqRatio =>
@@ -42,7 +42,7 @@ export const spotIlks = {
 export const spotPar = {
   generate: () => ({
     id: 'MCD_SPOT.par()',
-    contractName: 'MCD_SPOT',
+    contract: 'MCD_SPOT',
     call: ['par()(uint256)']
   }),
   returns: [[RATIO_DAI_USD, v => createCurrencyRatio(MDAI, USD)(fromRay(v))]]

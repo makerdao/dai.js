@@ -14,7 +14,7 @@ const validateCollateralTypeName = name =>
 export const catIlks = {
   generate: collateralTypeName => ({
     id: `MCD_CAT.ilks(${collateralTypeName})`,
-    contractName: 'MCD_CAT',
+    contract: 'MCD_CAT',
     call: ['ilks(bytes32)(address,uint256,uint256)', toHex(collateralTypeName)]
   }),
   validate: {
