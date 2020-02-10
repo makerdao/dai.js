@@ -1,12 +1,28 @@
-import { fromWei, numberToBytes32 } from '../../src/utils/conversion';
+import { fromWei, numberToBytes32, bytesToString } from '../../src/utils/conversion';
+import BigNumber from 'bignumber.js';
 
 export const TOTAL_CDP_DEBT = 'totalCdpDebt';
-export const ETH_PRICE = 'ethPrice';
+export const CDP_COUNT = 'cdpCount';
+export const CDP_OWNER = 'cdpOwner';
 export const CDP_COLLATERAL = 'cdpCollateral';
 export const CDP_DEBT = 'cdpDebt';
-export const CDP_COUNT = 'cdpCount';
+export const CDP_IRE = 'cdpIre';
+export const DEBT_CEILING = 'debtCeiling';
+export const ETH_PRICE = 'ethPrice';
 export const CDP_COLLATERAL_VALUE = 'cdpCollateralValue';
-export const LAST_CREATED_CDP_COLLATERAL_VALUE = 'lastCreatedCdpCollateralValue'; // prettier-ignore
+export const LAST_CREATED_CDP_COLLATERAL_VALUE = 'lastCreatedCdpCollateralValue';
+
+const Φ = BigNumber(
+  '1.6180339887498948482045868343656381177203091798057628621354486227052604628189'
+);
+
+const validateArgsCdpId = id => !/^\d+$/.test(id) && 'Invalid cdp id: must be a positive integer';
+
+const validateResultCdpCollateral = collateral =>
+  collateral.gt(Φ) && 'Collateral amounts greater than Φ throw this error';
+
+const validateResultCdpOwner = (owner, [id]) =>
+  !owner && `Not found: cdp with id ${id} does not exist`;
 
 export const tubRum = {
   generate: () => ({
@@ -26,22 +42,32 @@ export const tubCupi = {
   returns: [[CDP_COUNT, parseInt]]
 };
 
-export const tubInk = {
+export const tubCups = {
   generate: id => ({
-    id: `SAI_TUB.ink(${id})`,
+    id: `SAI_TUB.cups(${id})`,
     contractName: 'SAI_TUB',
-    call: ['ink(bytes32)(uint256)', numberToBytes32(id)]
+    call: ['cups(bytes32)(address,uint256,uint256,uint256)', numberToBytes32(id)]
   }),
-  returns: [[CDP_COLLATERAL, fromWei]]
+  validate: {
+    args: validateArgsCdpId,
+    [CDP_OWNER]: validateResultCdpOwner,
+    [CDP_COLLATERAL]: validateResultCdpCollateral
+  },
+  returns: [
+    [CDP_OWNER, bytesToString],
+    [CDP_COLLATERAL, fromWei],
+    [CDP_DEBT, fromWei],
+    [CDP_IRE, fromWei]
+  ]
 };
 
-export const tubTab = {
-  generate: id => ({
-    id: `SAI_TUB.tab(${id})`,
+export const tubCap = {
+  generate: () => ({
+    id: 'SAI_TUB.cap',
     contractName: 'SAI_TUB',
-    call: ['tab(bytes32)(uint256)', numberToBytes32(id)]
+    call: ['cap()(uint256)']
   }),
-  returns: [[CDP_DEBT, fromWei]]
+  returns: [[DEBT_CEILING, fromWei]]
 };
 
 export const pipRead = {
@@ -69,9 +95,9 @@ export const lastCreatedCdpCollateralValue = {
 
 export default {
   tubRum,
-  tubInk,
-  tubTab,
+  tubCups,
   tubCupi,
+  tubCap,
   pipRead,
   cdpCollateralValue,
   lastCreatedCdpCollateralValue

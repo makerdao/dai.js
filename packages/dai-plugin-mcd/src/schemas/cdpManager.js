@@ -1,4 +1,4 @@
-import { bytesToString, nullIfEmpty } from '../utils';
+import { bytesToString } from '../utils';
 import BigNumber from 'bignumber.js';
 
 import {
@@ -17,22 +17,23 @@ export const cdpManagerUrns = {
   returns: [VAULT_ADDRESS]
 };
 
+const validateVaultId = id =>
+  !/^\d+$/.test(id) && 'Invalid vault id: must be a positive integer';
+
+const validateVaultTypeResult = vaultType =>
+  !vaultType && 'Vault does not exist';
+
 export const cdpManagerIlks = {
   generate: id => ({
     id: `CDP_MANAGER.ilks(${id})`,
     contractName: 'CDP_MANAGER',
     call: ['ilks(uint256)(bytes32)', parseInt(id)]
   }),
-  validateParams(id) {
-    if (!/^\d+$/.test(id))
-      throw new Error('Invalid vault id: must be a positive integer');
+  validate: {
+    args: validateVaultId,
+    [VAULT_TYPE]: validateVaultTypeResult
   },
-  validateReturns: {
-    [VAULT_TYPE](vaultType) {
-      if (vaultType === null) throw new Error('Vault does not exist');
-    }
-  },
-  returns: [[VAULT_TYPE, v => nullIfEmpty(bytesToString(v))]]
+  returns: [[VAULT_TYPE, bytesToString]]
 };
 
 export const cdpManagerCdpi = {

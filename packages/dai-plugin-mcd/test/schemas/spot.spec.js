@@ -39,6 +39,13 @@ test(PRICE_FEED_ADDRESS, async () => {
 
   expect(ethAPriceFeedAddress.toLowerCase()).toEqual(PIP_ETH);
   expect(batAPriceFeedAddress.toLowerCase()).toEqual(PIP_BAT);
+
+  await expect(maker.latest(PRICE_FEED_ADDRESS, 'FOO')).rejects.toThrow(
+    /no collateral type/i
+  );
+  expect(() => {
+    maker.latest(PRICE_FEED_ADDRESS, '');
+  }).toThrow(/invalid collateral/i);
 });
 
 test(LIQUIDATION_RATIO, async () => {
@@ -50,6 +57,13 @@ test(LIQUIDATION_RATIO, async () => {
 
   expect(ethALiquidationRatio.toNumber()).toEqual(1.5);
   expect(batALiquidationRatio.toNumber()).toEqual(2.0);
+
+  await expect(maker.latest(LIQUIDATION_RATIO, 'FOO')).rejects.toThrow(
+    /no collateral type/i
+  );
+  expect(() => {
+    maker.latest(LIQUIDATION_RATIO, '');
+  }).toThrow(/invalid collateral/i);
 });
 
 test(RATIO_DAI_USD, async () => {

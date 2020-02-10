@@ -15,9 +15,11 @@ export default class MulticallService extends PublicService {
 
     this._schemas = [];
     this._schemaByObservableKey = {};
+    this._schemaInstances = {};
     this._subjects = {};
     this._observables = {};
     this._watcherUpdates = null;
+    this._schemaSubscribers = {};
     this._totalSchemaSubscribers = 0;
     this._totalActiveSchemas = 0;
     this._multicallResultCache = {};
@@ -28,7 +30,7 @@ export default class MulticallService extends PublicService {
   initialize(settings = {}) {
     this._addresses = settings.addresses || this.get('smartContract').getContractAddresses();
     this._removeSchemaDelay = settings.removeSchemaDelay || 1000;
-    this._debounceTime = settings.debounceTime || 100;
+    this._debounceTime = settings.debounceTime || 1;
     this._computedThrottleTime = settings.computedThrottleTime || 1;
   }
 
@@ -99,6 +101,9 @@ export default class MulticallService extends PublicService {
   }
 
   schemaByObservableKey(key) {
+    if (!key) throw new Error('Invalid observable key');
+    if (!this._schemaByObservableKey[key])
+      throw new Error(`No registered schema definition found with observable key: ${key}`);
     return this._schemaByObservableKey[key];
   }
 
@@ -126,17 +131,17 @@ export default class MulticallService extends PublicService {
     return this._totalSchemaSubscribers;
   }
 
+  // Register schema definitions
   registerSchemas(schemas) {
     if (typeof schemas !== 'object') throw new Error('Schemas must be object or array');
 
     // If schemas is key/val object use key as schema key and convert to array object
-    if (!Array.isArray(schemas))
-      schemas = Object.keys(schemas).map(key => ({ key, ...schemas[key] }));
+    if (!Array.isArray(schemas)) schemas = Object.keys(schemas).map(key => ({ key, ...schemas[key] })); // prettier-ignore
     // Clone if array
     else schemas = schemas.map(item => ({ ...item }));
 
     schemas.forEach(schema => {
-      schema.watching = {};
+      if (!schema.key) throw new Error('Schema definitions must have a unique key');
       // Automatically use schema key as return key if no return keys specified
       if (!schema.return && !schema.returns) schema.returns = [schema.key];
       if (schema.return && schema.returns) throw new Error('Ambiguous return definitions in schema: found both return and returns property'); // prettier-ignore
@@ -159,48 +164,41 @@ export default class MulticallService extends PublicService {
   }
 
   watch(key, ...args) {
-    if (!key) throw new Error('Invalid observable key');
+    // Find schema definition associated with this observable key
+    const schemaDefinition = this.schemaByObservableKey(key);
+    const expectedArgs = schemaDefinition.generate.length;
+    if (args.length < expectedArgs)
+      throw new Error(`Observable ${key} expects at least ${expectedArgs} argument(s)`);
 
-    const schema = this.schemaByObservableKey(key);
-    if (!schema) throw new Error(`No registered schema found for observable key: ${key}`);
+    // Validate arguments using schema args validator
+    if (schemaDefinition?.validate?.args) {
+      const validate = schemaDefinition.validate.args(...args);
+      if (validate) throw new Error(validate);
+    }
 
-    // Validate schema params
-    if (schema.validateParams) schema.validateParams(...args);
+    // Create or get existing schema instance for this instance path (schema definition + args)
+    const schemaInstance = this._createSchemaInstance(schemaDefinition, ...args);
+    const obsPath = `${key}${args.length > 0 ? '.' : ''}${args.join('.')}`;
+    const { computed } = schemaInstance;
+    log2(`watch() called for ${computed ? 'computed ' : 'base '}observable: ${obsPath}`);
 
-    // Generate schema
-    let generatedSchema = schema.generate(...args);
-
-    const path = [
-      generatedSchema.demarcate ? this.get('web3').currentAddress() : undefined,
-      ...args
-    ]
-      .filter(x => x)
-      .join('.');
-    const fullPath = `${key}${path ? '.' : ''}${path}`;
-
-    log2(`watch() called for ${generatedSchema.computed ? 'computed ' : 'base '}observable: ${fullPath}`); // prettier-ignore
-
-    // Check if an observable already exists for this path (key + args)
-    const existingObservable = get(this._observables, fullPath);
+    // Return existing observable if one already exists for this observer path (key + args)
+    const existingObservable = get(this._observables, obsPath);
     if (existingObservable) {
-      const isComputed = !get(this._subjects, fullPath, subject);
-      log2(`Returning existing ${isComputed ? 'computed ' : 'base '}observable: ${fullPath}`);
+      log2(`Returning existing ${computed ? 'computed ' : 'base '}observable: ${obsPath}`);
       return existingObservable;
     }
 
-    if (args.length < generatedSchema.length)
-      throw new Error(`Observable ${key} expects at least ${generatedSchema.length} argument${generatedSchema.length > 1 ? 's' : ''}`); // prettier-ignore
-
     // Handle computed observable
-    if (generatedSchema.computed) {
+    if (computed) {
       // Handle dynamically generated dependencies
       const dependencies =
-        typeof generatedSchema.dependencies === 'function'
-          ? generatedSchema.dependencies({
+        typeof schemaInstance.dependencies === 'function'
+          ? schemaInstance.dependencies({
               watch: this.watch.bind(this),
               get: this.get.bind(this)
             })
-          : generatedSchema.dependencies;
+          : schemaInstance.dependencies;
 
       const recurseDependencyTree = trie => {
         let key = trie.shift();
@@ -242,30 +240,29 @@ export default class MulticallService extends PublicService {
 
       const observerLatest = combineLatest(dependencySubs).pipe(
         throttleTime(this._computedThrottleTime),
-        map(result => generatedSchema.computed(...result))
+        map(result => computed(...result))
       );
 
-      // Create computed observable
+      // Create and return computed observable
       const observable = Observable.create(observer => {
         const sub = observerLatest.subscribe(observer);
         return () => {
           sub.unsubscribe();
         };
       });
-      log2(`Created new computed observable: ${fullPath}`);
-      set(this._observables, fullPath, observable);
+      log2(`Created new computed observable: ${obsPath}`);
+      set(this._observables, obsPath, observable);
       return observable;
     }
 
     // This is a base observable
+    const { id, path } = schemaInstance;
+    if (this._schemaSubscribers[path] === undefined) this._schemaSubscribers[path] = 0;
     const subject = new ReplaySubject(1);
-    set(this._subjects, fullPath, subject);
-    // Emit initial value if cached result from multicall exists
-    if (
-      this._multicallResultCache[fullPath] !== undefined &&
-      this._validateResult(subject, fullPath, this._multicallResultCache[fullPath])
-    )
-      subject.next(this._multicallResultCache[fullPath]);
+    set(this._subjects, obsPath, subject);
+    // Handle initial value if cached result from multicall exists
+    if (this._multicallResultCache[obsPath] !== undefined)
+      this._handleResult(subject, obsPath, this._multicallResultCache[obsPath]);
 
     // Create base observable
     const observable = Observable.create(observer => {
@@ -273,23 +270,24 @@ export default class MulticallService extends PublicService {
       // Subscribe to watcher updates and emit them to subjects
       if (!this._watcherUpdates) this._subscribeToWatcherUpdates();
       // If first subscriber to this schema add it to multicall
-      if (schema.watching[path] === undefined) schema.watching[path] = 0;
-      if (++schema.watching[path] === 1) this._addSchemaToMulticall(schema, generatedSchema, path);
+      if (++this._schemaSubscribers[path] === 1) this._addSchemaToMulticall(schemaInstance);
       // Subscribe this observer to the subject for this base observable
       const sub = subject.subscribe(observer);
-      log2(`Observer subscribed to ${generatedSchema.id} (${schema.watching[path]} subscribers)`);
+      log2(`Observer subscribed to ${id} (${this._schemaSubscribers[path]} subscribers)`);
       // Return the function to call when this observer unsubscribes
       return () => {
+        this._totalSchemaSubscribers--;
         // If last unsubscriber from this schema remove it from multicall
-        if (--schema.watching[path] === 0) this._removeSchemaFromMulticall(generatedSchema);
+        if (--this._schemaSubscribers[path] === 0)
+          this._removeSchemaFromMulticall(schemaInstance.id);
         // Unsubscribe this observer from the subject for this base observable
         sub.unsubscribe();
-        log2(`Observer unsubscribed from ${generatedSchema.id} (${schema.watching[path]} subscribers)`); // prettier-ignore
+        log2(`Observer unsubscribed from ${id} (${this._schemaSubscribers[path]} subscribers)`); // prettier-ignore
       };
     });
 
-    log2(`Created new base observable: ${fullPath}`);
-    set(this._observables, fullPath, observable);
+    log2(`Created new base observable: ${obsPath}`);
+    set(this._observables, obsPath, observable);
     return observable;
   }
 
@@ -302,34 +300,59 @@ export default class MulticallService extends PublicService {
       .toPromise();
   }
 
-  _addSchemaToMulticall(schema, generatedSchema, path) {
-    let { id, target, contractName, call, returns, transforms = {} } = generatedSchema;
-    // If this schema is already added but pending removal
+  _createSchemaInstance(schemaDefinition, ...args) {
+    const path = args.join('.');
+    const instancePath = `${schemaDefinition.key}${path ? '.' : ''}${path}`;
+
+    // Return existing schema if found for this instance path (schema key + args)
+    if (this._schemaInstances[instancePath]) return this._schemaInstances[instancePath];
+
+    // Generate schema instance
+    const schemaInstance = schemaDefinition.generate(...args);
+    this._schemaInstances[instancePath] = schemaInstance;
+    schemaInstance.args = [...args];
+
+    // Auto generate some fields if this is a base schema
+    if (!schemaInstance.computed) {
+      const { returns, transforms = {} } = schemaInstance;
+      schemaInstance.path = instancePath;
+      // Auto generate return keys for schema instance if not provided by generate()
+      if (!returns) {
+        schemaInstance.returns = schemaDefinition.returns.map(ret => {
+          const key = ret[0];
+          const fullPath = `${key}${path ? '.' : ''}${path}`;
+          return transforms[key]
+            ? [fullPath, transforms[key]] // Use transform mapping in generated schema instance if available
+            : ret.length == 2
+            ? [fullPath, ret[1]]
+            : [fullPath];
+        });
+      }
+      // Resolve target contract address if contract string is provided
+      const { target, contractName } = schemaInstance;
+      if (!target && !contractName) throw new Error('Schema must specify target or contractName');
+      if (!target && !this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
+      schemaInstance.target = target || this._addresses[contractName];
+    }
+
+    return schemaInstance;
+  }
+
+  _addSchemaToMulticall(schemaInstance) {
+    const { id, target, call, returns } = schemaInstance;
+    // If schema already added but pending removal then cancel pending removal
     if (this._removeSchemaTimers[id]) {
       log2(`Cancelled pending schema removal: ${id}`);
       clearTimeout(this._removeSchemaTimers[id]);
       delete this._removeSchemaTimers[id];
       return;
     }
-    // Automatically generate return keys if not explicitly specified in generated schema
-    if (!returns)
-      returns = schema.returns.map(ret => {
-        const key = ret[0];
-        const fullPath = `${key}${path ? '.' : ''}${path}`;
-        return transforms[key]
-          ? [fullPath, transforms[key]] // Use transform mapping in generated schema if available
-          : ret.length == 2
-          ? [fullPath, ret[1]]
-          : [fullPath];
-      });
-    if (!target && !contractName) throw new Error('Schema must specify target or contractName');
-    if (!target && !this._addresses[contractName]) throw new Error(`Can't find contract address for ${contractName}`); // prettier-ignore
     this._totalActiveSchemas++;
     this._watcher.tap(calls => [
       ...calls,
       {
         id,
-        target: target || this._addresses[contractName],
+        target,
         call,
         returns
       }
@@ -343,9 +366,9 @@ export default class MulticallService extends PublicService {
     if (this._removeSchemaTimers[id] !== undefined) delete this._removeSchemaTimers[id];
     log2(`Schema removed from multicall: ${id}`);
     this._watcher.tap(schemas => schemas.filter(({ id: id_ }) => id_ !== id));
-    if (--this._totalActiveSchemas === 0) log2('No remaining active schemas');
-    // If no schemas are being watched, unsubscribe from watcher updates
-    if (--this._totalSchemaSubscribers === 0) {
+    // If there are no active schemas unsubscribe from watcher updates
+    if (--this._totalActiveSchemas === 0) {
+      log2('No remaining active schemas');
       log2('Unsubscribed from watcher updates');
       this._watcherUpdates.unsub();
       this._watcherUpdates = null;
@@ -355,13 +378,11 @@ export default class MulticallService extends PublicService {
     }
   }
 
-  _removeSchemaFromMulticall({ id, immediate = false }) {
-    if (immediate) this._removeSchemaImmediately(id);
-    else
-      this._removeSchemaTimers[id] = setTimeout(
-        () => this._removeSchemaImmediately(id),
-        this._removeSchemaDelay
-      );
+  _removeSchemaFromMulticall(id) {
+    this._removeSchemaTimers[id] = setTimeout(
+      () => this._removeSchemaImmediately(id),
+      this._removeSchemaDelay
+    );
   }
 
   _flushPendingSchemaRemovals() {
@@ -375,18 +396,33 @@ export default class MulticallService extends PublicService {
     }
   }
 
-  _validateResult(subject, type, value) {
-    const [observableKey] = type.split('.');
-    const schema = this._schemaByObservableKey[observableKey];
-    if (!schema.validateReturns?.hasOwnProperty(observableKey)) return true;
-    const validator = schema.validateReturns[observableKey];
+  _handleResult(subject, obsPath, value) {
+    const err = this._validateResult(subject, obsPath, value);
+    // Trigger error on observable or emit result value to observable
+    if (err) subject.error(err);
+    else subject.next(value);
+  }
+
+  _validateResult(subject, obsPath, value) {
+    let [observableKey, ...args] = obsPath.split('.');
+    const schemaDefinition = this._schemaByObservableKey[observableKey];
+    const instancePath = `${schemaDefinition.key}${args.length > 0 ? '.' : ''}${args.join('.')}`;
+    const schemaInstance = this._schemaInstances[instancePath];
+    // Pass validation if no validator found for this schema definition
+    if (!schemaDefinition.validate?.hasOwnProperty(observableKey)) return;
     try {
-      validator(value);
-      return true;
+      // Call validation func on schema definition for result value and pass schema instance args
+      // as 2nd param and also this context
+      const validate = schemaDefinition.validate[observableKey].call(
+        { args: schemaInstance.args },
+        value,
+        schemaInstance.args
+      );
+      if (validate) throw new Error(validate);
+      return; // Pass validation
     } catch (err) {
-      log2('Validation error for ' + type + ' result:', value);
-      subject.error(err);
-      return false;
+      log2('Validation error for ' + obsPath + ' result:', value);
+      return err; // Fail validation
     }
   }
 
@@ -399,7 +435,7 @@ export default class MulticallService extends PublicService {
           ? `${update.value.toString()} (BigNumber)`
           : update.value;
         log2('Got watcher update for ' + update.type + ':', logValue);
-        if (this._validateResult(subject, update.type, update.value)) subject.next(update.value);
+        this._handleResult(subject, update.type, update.value);
       } else this._multicallResultCache[update.type] = update.value;
     });
   }

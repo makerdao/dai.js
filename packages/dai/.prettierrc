@@ -3,7 +3,8 @@
   "overrides": [
     {
       "files": [
-        "MulticallService.*"
+        "MulticallService.*",
+        "schemas.js"
       ],
       "options": {
         "printWidth": 100
