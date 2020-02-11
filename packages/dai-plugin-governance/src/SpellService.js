@@ -33,6 +33,13 @@ export default class SpellService extends PublicService {
     return this.eta[spellAddress];
   }
 
+  async getScheduledDate(spellAddress) {
+    const delay = await this.getDelayInSeconds();
+    const eta = await this.getEta(spellAddress);
+    assert(eta, `spell ${spellAddress} has not been scheduled yet`);
+    return new Date(eta.getTime() - (delay * 1000));
+  }
+
   async getDone(spellAddress) {
     if (this.done[spellAddress]) return this.done[spellAddress];
     const spell = this.get('smartContract').getContractByAddressAndAbi(

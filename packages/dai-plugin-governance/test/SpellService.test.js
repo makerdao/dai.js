@@ -68,4 +68,14 @@ describe('use testchain', () => {
     const delay = await spellService.getDelayInSeconds();
     expect(delay.toNumber()).toBe(1);
   });
+
+  test('get date spell was scheduled', async () => {
+    const mockGetEta = jest.fn(()=> new Date('2020-02-04T11:35:48.000Z'));
+    const tempGetEta = spellService.getEta;
+    spellService.getEta = mockGetEta;
+    const date = await spellService.getScheduledDate('mockSpellAddress');
+    expect(mockGetEta).toBeCalled();
+    expect(date).toEqual(new Date('2020-02-04T11:35:47.000Z')); //1 second before eta
+    spellService.getEta = tempGetEta;
+  });
 });
