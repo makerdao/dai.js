@@ -325,7 +325,6 @@ export const balance = {
       }
       return [[TOKEN_BALANCE, address, symbol]];
     },
-    demarcate: true,
     computed: v => v
   })
 };
@@ -335,7 +334,6 @@ export const allowance = {
     dependencies: [
       [TOKEN_ALLOWANCE, address, [PROXY_ADDRESS, address], symbol]
     ],
-    demarcate: true,
     computed: v => v.isEqualTo(ALLOWANCE_AMOUNT)
   })
 };
@@ -347,20 +345,26 @@ export const savings = {
       [DAI_SAVINGS_RATE],
       [DATE_EARNINGS_LAST_ACCRUED],
       [DAI_LOCKED_IN_DSR, address],
-      [PROXY_ADDRESS, address]
+      [PROXY_ADDRESS, address],
+      [SAVINGS_RATE_ACCUMULATOR],
+      [SAVINGS_DAI, [PROXY_ADDRESS, address]]
     ],
     computed: (
       annualDaiSavingsRate,
       daiSavingsRate,
       dateEarningsLastAccrued,
       daiLockedInDsr,
-      proxyAddress
+      proxyAddress,
+      savingsRateAccumulator,
+      savingsDai
     ) => ({
       annualDaiSavingsRate,
       daiSavingsRate,
       dateEarningsLastAccrued,
       daiLockedInDsr,
-      proxyAddress
+      proxyAddress,
+      savingsRateAccumulator,
+      savingsDai
     })
   })
 };
