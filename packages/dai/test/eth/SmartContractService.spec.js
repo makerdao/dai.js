@@ -4,7 +4,7 @@ import {
   buildTestService,
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
-import addresses from '../../contracts/addresses/testnet';
+import originalAddresses from '../../contracts/addresses/testnet';
 
 test('getContract should have proper error checking', async () => {
   const service = buildTestSmartContractService();
@@ -114,7 +114,7 @@ test('call constant function without account', async () => {
   const contract = service.getContract(contracts.SAI_TOP);
   const gem = await contract.gem();
   expect(contract.signer).toBeNull();
-  expect(gem.toLowerCase()).toEqual(addresses.GEM);
+  expect(gem.toLowerCase()).toEqual(originalAddresses.GEM);
 });
 
 test('addressOverrides', async () => {
@@ -131,4 +131,39 @@ test('addressOverrides', async () => {
   expect(addresses.PROXY_REGISTRY).toEqual('0xmock');
   expect(service.getContractAddress('PROXY_REGISTRY')).toEqual('0xmock');
   expect(service.lookupContractName('0xmock')).toEqual('PROXY_REGISTRY');
+});
+
+test('network-specific addressOverrides', async () => {
+  const service = buildTestService('smartContract', {
+    smartContract: {
+      addressOverrides: {
+        PROXY_REGISTRY: {
+          mainnet: '0xmock1',
+          testnet: '0xmock2'
+        }
+      }
+    }
+  });
+
+  await service.manager().authenticate();
+  const addresses = service.getContractAddresses();
+  expect(addresses.PROXY_REGISTRY).toEqual('0xmock2');
+  expect(service.getContractAddress('PROXY_REGISTRY')).toEqual('0xmock2');
+  expect(service.lookupContractName('0xmock2')).toEqual('PROXY_REGISTRY');
+});
+
+test('fallback if addressOverrides does not specify current network', async () => {
+  const service = buildTestService('smartContract', {
+    smartContract: {
+      addressOverrides: {
+        PROXY_REGISTRY: {
+          mainnet: '0xmock1'
+        }
+      }
+    }
+  });
+
+  await service.manager().authenticate();
+  const addresses = service.getContractAddresses();
+  expect(addresses.PROXY_REGISTRY).toEqual(originalAddresses.PROXY_REGISTRY);
 });
