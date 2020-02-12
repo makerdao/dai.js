@@ -44,6 +44,11 @@ export const LIQUIDATOR_ADDRESS = 'liquidatorAddress';
 export const LIQUIDATION_PENALTY = 'liquidationPenalty';
 export const MAX_AUCTION_LOT_SIZE = 'maxAuctionLotSize';
 
+// getCdp
+export const USER_VAULT_IDS = 'userVaultIds';
+export const USER_VAULT_ADDRESSES = 'userVaultAddresses';
+export const USER_VAULT_TYPES = 'userVaultTypes';
+
 // computed
 export const COLLATERAL_TYPE_PRICE = 'collateralTypePrice';
 export const COLLATERAL_TYPES_PRICES = 'collateralTypesPrices';
@@ -66,6 +71,7 @@ export const LIQUIDATION_RATIO_SIMPLE = 'liquidationRatioSimple';
 export const BALANCE = 'balance';
 export const ALLOWANCE = 'allowance';
 export const SAVINGS = 'savings';
+export const USER_VAULTS_LIST = 'userVaultsList';
 
 // token
 export const TOKEN_BALANCE = 'tokenBalance';

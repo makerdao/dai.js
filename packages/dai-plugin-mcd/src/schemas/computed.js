@@ -43,7 +43,10 @@ import {
   PROXY_OWNER,
   ANNUAL_DAI_SAVINGS_RATE,
   DAI_SAVINGS_RATE,
-  DATE_EARNINGS_LAST_ACCRUED
+  DATE_EARNINGS_LAST_ACCRUED,
+  USER_VAULT_IDS,
+  USER_VAULT_ADDRESSES,
+  USER_VAULT_TYPES
 } from './constants';
 
 export const collateralTypePrice = {
@@ -369,6 +372,33 @@ export const savings = {
   })
 };
 
+export const userVaultsList = {
+  generate: address => ({
+    dependencies: ({ get }) => {
+      const cdpManagerAddress = get('smartContract').getContractAddress(
+        'CDP_MANAGER'
+      );
+      return [
+        [USER_VAULT_IDS, cdpManagerAddress, [PROXY_ADDRESS, address]],
+        [USER_VAULT_ADDRESSES, cdpManagerAddress, [PROXY_ADDRESS, address]],
+        [USER_VAULT_TYPES, cdpManagerAddress, [PROXY_ADDRESS, address]]
+      ];
+    },
+    computed: (ids, addresses, types) =>
+      ids.reduce(
+        (acc, id, idx) => [
+          ...acc,
+          {
+            vaultId: id,
+            vaultAddress: addresses[idx],
+            vaultType: types[idx]
+          }
+        ],
+        []
+      )
+  })
+};
+
 export default {
   collateralTypePrice,
   collateralTypesPrices,
@@ -389,5 +419,6 @@ export default {
   totalDaiLockedInDsr,
   balance,
   allowance,
-  savings
+  savings,
+  userVaultsList
 };

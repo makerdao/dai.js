@@ -5,7 +5,7 @@ import cdpManager from './cdpManager';
 import jug from './jug';
 import pot from './pot';
 import cat from './cat';
-
+import getCdps from './getCdps';
 import computed from './computed';
 
 export * from './constants';
@@ -17,6 +17,7 @@ export default {
   ...jug,
   ...pot,
   ...cat,
+  ...getCdps,
   ...computed
 };
 

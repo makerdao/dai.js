@@ -28,7 +28,8 @@ import {
   DAI_LOCKED_IN_DSR,
   TOTAL_DAI_LOCKED_IN_DSR,
   BALANCE,
-  ALLOWANCE
+  ALLOWANCE,
+  USER_VAULTS_LIST
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
@@ -46,7 +47,9 @@ import { potPie, potpie, potChi } from '../../src/schemas/pot';
 import { catIlks } from '../../src/schemas/cat';
 import { jugIlks } from '../../src/schemas/jug';
 import { tokenBalance, tokenAllowance } from '../../src/schemas/token';
+import { getCdps } from '../../src/schemas/getCdps';
 import computedSchemas from '../../src/schemas/computed';
+
 import { createCurrencyRatio } from '@makerdao/currency';
 
 let maker, snapshotData, address, proxyAddress, expectedVaultAddress;
@@ -89,6 +92,7 @@ beforeAll(async () => {
     catIlks,
     jugIlks,
     tokenAllowance,
+    getCdps,
     ...computedSchemas
   });
   maker.service('multicall').start();
@@ -378,4 +382,21 @@ test(ALLOWANCE, async () => {
   expect(batAllowance).toEqual(true);
 
   maker.useAccount('default');
+});
+
+test.only(USER_VAULTS_LIST, async () => {
+  const [batVault, ethVault] = await maker.latest(USER_VAULTS_LIST, address);
+
+  expect(batVault.vaultId).toEqual(2);
+  expect(ethVault.vaultId).toEqual(1);
+
+  expect(batVault.vaultType).toEqual('BAT-A');
+  expect(ethVault.vaultType).toEqual('ETH-A');
+
+  expect(batVault.vaultAddress).toEqual(
+    '0x607260558161c7aB035C6527c19F9AC60eb4bC34'
+  );
+  expect(ethVault.vaultAddress).toEqual(
+    '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1'
+  );
 });
