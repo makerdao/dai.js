@@ -29,6 +29,7 @@ export default class SpellService extends PublicService {
       DsSpellAbi
     );
     const eta = await spell.eta();
+    assert(eta, `eta has not yet been set for spell ${spellAddress}`);
     this.eta[spellAddress] = new Date(eta.toNumber() * 1000);
     return this.eta[spellAddress];
   }
@@ -37,7 +38,7 @@ export default class SpellService extends PublicService {
     const delay = await this.getDelayInSeconds();
     const eta = await this.getEta(spellAddress);
     assert(eta, `spell ${spellAddress} has not been scheduled yet`);
-    return new Date(eta.getTime() - (delay * 1000));
+    return new Date(eta.getTime() - delay * 1000);
   }
 
   async getDone(spellAddress) {
@@ -78,7 +79,8 @@ export default class SpellService extends PublicService {
       topics: [pauseInfo.events.exec, paddedSpellAddress]
     });
     const { timestamp } = await web3Service.getBlock(execEvent.blockNumber);
-    return new Date(timestamp * 1000);
+    this.executionDate[spellAddress] = new Date(timestamp * 1000);
+    return this.executionDate[spellAddress];
   }
 
   refresh() {

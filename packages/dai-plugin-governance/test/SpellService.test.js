@@ -70,7 +70,7 @@ describe('use testchain', () => {
   });
 
   test('get date spell was scheduled', async () => {
-    const mockGetEta = jest.fn(()=> new Date('2020-02-04T11:35:48.000Z'));
+    const mockGetEta = jest.fn(() => new Date('2020-02-04T11:35:48.000Z'));
     const tempGetEta = spellService.getEta;
     spellService.getEta = mockGetEta;
     const date = await spellService.getScheduledDate('mockSpellAddress');
