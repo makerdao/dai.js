@@ -52,7 +52,7 @@ import computedSchemas from '../../src/schemas/computed';
 
 import { createCurrencyRatio } from '@makerdao/currency';
 
-let maker, snapshotData, address, proxyAddress, expectedVaultAddress;
+let maker, snapshotData, address, address2, proxyAddress, expectedVaultAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -72,6 +72,7 @@ beforeAll(async () => {
     multicall: true
   });
   address = maker.service('web3').currentAddress();
+  address2 = TestAccountProvider.nextAccount().address;
 
   maker.service('multicall').createWatcher();
   maker.service('multicall').registerSchemas({
@@ -332,12 +333,12 @@ test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
 test(BALANCE, async () => {
   expect.assertions(11);
 
-  const ethBalance = await maker.latest(BALANCE, 'ETH', address);
+  const ethBalance = await maker.latest(BALANCE, 'ETH', address2);
   const batBalance = await maker.latest(BALANCE, 'BAT', address);
 
   expect(ethBalance.symbol).toEqual('ETH');
   expect(batBalance.symbol).toEqual('BAT');
-  expect(ethBalance.toNumber()).toBeCloseTo(93.677, 2);
+  expect(ethBalance.toBigNumber()).toEqual(BigNumber('100'));
   expect(batBalance.toBigNumber()).toEqual(BigNumber('999'));
 
   const daiBalance = await maker.latest(BALANCE, 'DAI', address);
@@ -384,7 +385,7 @@ test(ALLOWANCE, async () => {
   maker.useAccount('default');
 });
 
-test.only(USER_VAULTS_LIST, async () => {
+test(USER_VAULTS_LIST, async () => {
   const [batVault, ethVault] = await maker.latest(USER_VAULTS_LIST, address);
 
   expect(batVault.vaultId).toEqual(2);
