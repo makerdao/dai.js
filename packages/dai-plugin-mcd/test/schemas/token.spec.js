@@ -31,7 +31,9 @@ beforeAll(async () => {
       { currency: ETH, ilk: 'ETH-A' },
       { currency: BAT, ilk: 'BAT-A' }
     ],
-    multicall: true
+    multicall: {
+      latestDebounceTime: 100
+    }
   });
 
   snapshotData = await takeSnapshot(maker);

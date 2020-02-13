@@ -7,6 +7,7 @@ import pot from './pot';
 import cat from './cat';
 import token from './token';
 
+import getCdps from './getCdps';
 import computed from './computed';
 
 export * from './constants';
@@ -19,7 +20,8 @@ export default {
   ...pot,
   ...cat,
   ...computed,
-  ...token
+  ...token,
+  ...getCdps
 };
 
 /*
