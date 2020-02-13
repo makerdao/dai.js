@@ -2,7 +2,7 @@ import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
 import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
-import { map, flatMap, throttleTime, debounceTime, take } from 'rxjs/operators';
+import { map, flatMap, auditTime, debounceTime, take } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -31,7 +31,7 @@ export default class MulticallService extends PublicService {
     this._addresses = settings.addresses || this.get('smartContract').getContractAddresses();
     this._removeSchemaDelay = settings.removeSchemaDelay || 1000;
     this._debounceTime = settings.debounceTime || 1;
-    this._computedThrottleTime = settings.computedThrottleTime || 1;
+    this._latestDebounceTime = settings.latestDebounceTime || 1;
   }
 
   authenticate() {
@@ -163,7 +163,20 @@ export default class MulticallService extends PublicService {
     log2(`Registered ${schemas.length} schemas`);
   }
 
+  latest(key, ...args) {
+    return this.watch(key, ...args)
+      .pipe(
+        debounceTime(this._latestDebounceTime),
+        take(1)
+      )
+      .toPromise();
+  }
+
   watch(key, ...args) {
+    return this._watch({ depth: 0 }, key, ...args);
+  }
+
+  _watch({ depth }, key, ...args) {
     // Find schema definition associated with this observable key
     const schemaDefinition = this.schemaByObservableKey(key);
     const expectedArgs = schemaDefinition.generate.length;
@@ -180,13 +193,19 @@ export default class MulticallService extends PublicService {
     const schemaInstance = this._createSchemaInstance(schemaDefinition, ...args);
     const obsPath = `${key}${args.length > 0 ? '.' : ''}${args.join('.')}`;
     const { computed } = schemaInstance;
-    log2(`watch() called for ${computed ? 'computed ' : 'base '}observable: ${obsPath}`);
+    log2(`watch() called for ${computed ? 'computed ' : 'base '}observable: ${obsPath} (depth: ${depth})`); // prettier-ignore
 
-    // Return existing observable if one already exists for this observer path (key + args)
-    const existingObservable = get(this._observables, obsPath);
-    if (existingObservable) {
-      log2(`Returning existing ${computed ? 'computed ' : 'base '}observable: ${obsPath}`);
-      return existingObservable;
+    // Return existing observable if one already exists for this observable path (key + args)
+    let existing = get(this._observables, obsPath);
+    if (existing) {
+      if (computed) {
+        log2(`Returning existing computed observable: ${obsPath} (depth: ${depth})`);
+        // Only debounce if call to watch() is not nested
+        if (depth === 0) existing = existing.pipe(auditTime(this._debounceTime));
+        return existing.pipe(map(result => computed(...result)));
+      }
+      log2(`Returning existing base observable: ${obsPath}`);
+      return existing;
     }
 
     // Handle computed observable
@@ -200,8 +219,9 @@ export default class MulticallService extends PublicService {
             })
           : schemaInstance.dependencies;
 
-      const recurseDependencyTree = trie => {
-        let key = trie.shift();
+      const recurseDependencyTree = trie_ => {
+        const key = trie_[0];
+        const trie = trie_.slice(1);
         // This is a promise dependency
         if (typeof key === 'function') {
           return from(key());
@@ -213,7 +233,7 @@ export default class MulticallService extends PublicService {
         if (Array.isArray(trie) && trie.length === 0) {
           // When trie is an empty array, indicates that we only need to return
           // watch on the key
-          return this.watch(key);
+          return this._watch({ depth: depth + 1 }, key);
         } else if (allLeafNodes) {
           // If the trie is an array it indicates that the observable is
           // expecting arguments. These can be normal values or other
@@ -221,7 +241,7 @@ export default class MulticallService extends PublicService {
           // assumed that it is syntax for an observable argument. In the case
           // where all indexes in the trie array are normal values, we use the
           // spread operator to pass them to the returned watch fn
-          return this.watch(key, ...trie);
+          return this._watch({ depth: depth + 1 }, key, ...trie);
         } else {
           // When a trie array has nested observables, recursively call this fn
           // on indexes which have an array.
@@ -229,30 +249,18 @@ export default class MulticallService extends PublicService {
             trie.map((node, idx) => {
               return indexesAtLeafNodes[idx] ? [node] : recurseDependencyTree(node);
             })
-          ).pipe(
-            throttleTime(this._computedThrottleTime),
-            flatMap(result => this.watch(key, ...result))
-          );
+          ).pipe(flatMap(result => this._watch({ depth: depth + 1 }, key, ...result)));
         }
       };
 
       const dependencySubs = dependencies.map(recurseDependencyTree);
+      let observable = combineLatest(dependencySubs);
 
-      const observerLatest = combineLatest(dependencySubs).pipe(
-        throttleTime(this._computedThrottleTime),
-        map(result => computed(...result))
-      );
-
-      // Create and return computed observable
-      const observable = Observable.create(observer => {
-        const sub = observerLatest.subscribe(observer);
-        return () => {
-          sub.unsubscribe();
-        };
-      });
-      log2(`Created new computed observable: ${obsPath}`);
+      log2(`Created new computed observable: ${obsPath} (depth: ${depth})`);
       set(this._observables, obsPath, observable);
-      return observable;
+      // Only debounce if call to watch() is not nested
+      if (depth === 0) observable = observable.pipe(auditTime(this._debounceTime));
+      return observable.pipe(map(result => computed(...result)));
     }
 
     // This is a base observable
@@ -289,15 +297,6 @@ export default class MulticallService extends PublicService {
     log2(`Created new base observable: ${obsPath}`);
     set(this._observables, obsPath, observable);
     return observable;
-  }
-
-  latest(key, ...args) {
-    return this.watch(key, ...args)
-      .pipe(
-        debounceTime(this._debounceTime),
-        take(1)
-      )
-      .toPromise();
   }
 
   _createSchemaInstance(schemaDefinition, ...args) {
