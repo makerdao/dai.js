@@ -29,7 +29,7 @@ export default class SpellService extends PublicService {
       DsSpellAbi
     );
     const eta = await spell.eta();
-    assert(eta, `eta has not yet been set for spell ${spellAddress}`);
+    if (!eta.toNumber()) return undefined;
     this.eta[spellAddress] = new Date(eta.toNumber() * 1000);
     return this.eta[spellAddress];
   }
