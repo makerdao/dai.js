@@ -46,7 +46,8 @@ import {
   DATE_EARNINGS_LAST_ACCRUED,
   USER_VAULT_IDS,
   USER_VAULT_ADDRESSES,
-  USER_VAULT_TYPES
+  USER_VAULT_TYPES,
+  VAULT
 } from './constants';
 
 export const collateralTypePrice = {
@@ -108,6 +109,8 @@ export const vaultCollateralAndDebt = {
   })
 };
 
+// TODO This should also account for unencumbered collateral which is collateral on the
+// join adapter
 export const collateralAmount = {
   generate: id => ({
     dependencies: [
@@ -188,11 +191,19 @@ export const minSafeCollateralAmount = {
       calcMinSafeCollateralAmount(debtValue, liquidationRatio, price)
   })
 };
+
 export const collateralAvailableAmount = {
   generate: id => ({
     dependencies: [[COLLATERAL_AMOUNT, id], [MIN_SAFE_COLLATERAL_AMOUNT, id]],
-    computed: (collateralAmount, minSafeCollateralAmount) =>
-      collateralAmount.minus(minSafeCollateralAmount)
+    computed: (collateralAmount, minSafeCollateralAmount) => {
+      if (
+        minSafeCollateralAmount.toBigNumber().gt(collateralAmount.toBigNumber())
+      ) {
+        return createCurrency(collateralAmount.symbol)(0);
+      } else {
+        return collateralAmount.minus(minSafeCollateralAmount);
+      }
+    }
   })
 };
 
@@ -399,6 +410,13 @@ export const userVaultsList = {
   })
 };
 
+export const userVaultsData = {
+  generate: ids => ({
+    dependencies: ids.map(id => [VAULT, id]),
+    computed: (...vaults) => vaults
+  })
+};
+
 export default {
   collateralTypePrice,
   collateralTypesPrices,
@@ -420,5 +438,6 @@ export default {
   balance,
   allowance,
   savings,
-  userVaultsList
+  userVaultsList,
+  userVaultsData
 };

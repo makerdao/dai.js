@@ -72,6 +72,7 @@ export const BALANCE = 'balance';
 export const ALLOWANCE = 'allowance';
 export const SAVINGS = 'savings';
 export const USER_VAULTS_LIST = 'userVaultsList';
+export const USER_VAULTS_DATA = 'userVaultsData';
 
 // token
 export const TOKEN_BALANCE = 'tokenBalance';
