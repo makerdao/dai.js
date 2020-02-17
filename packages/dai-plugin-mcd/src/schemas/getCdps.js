@@ -7,7 +7,7 @@ import { bytesToString } from '../utils';
 
 export const getCdps = {
   generate: (vaultManagerAddress, proxyAddress, descending = true) => ({
-    id: `GET_CDPS.getCdps${descending ? 'Desc' : 'Asc'}`,
+    id: `GET_CDPS.getCdps${descending ? 'Desc' : 'Asc'}(${proxyAddress})`,
     contract: 'GET_CDPS',
     call: [
       `getCdps${
