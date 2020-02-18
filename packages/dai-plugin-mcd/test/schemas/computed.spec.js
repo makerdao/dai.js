@@ -46,7 +46,11 @@ import {
 import { potPie, potpie, potChi } from '../../src/schemas/pot';
 import { catIlks } from '../../src/schemas/cat';
 import { jugIlks } from '../../src/schemas/jug';
-import { tokenBalance, tokenAllowance } from '../../src/schemas/token';
+import {
+  tokenBalance,
+  tokenAllowance,
+  tokenAllowanceBase
+} from '../../src/schemas/token';
 import { getCdps } from '../../src/schemas/getCdps';
 import computedSchemas from '../../src/schemas/computed';
 
@@ -93,6 +97,7 @@ beforeAll(async () => {
     catIlks,
     jugIlks,
     tokenAllowance,
+    tokenAllowanceBase,
     getCdps,
     ...computedSchemas
   });
