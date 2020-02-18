@@ -346,7 +346,9 @@ export const balance = {
 export const allowance = {
   generate: (symbol, address) => ({
     dependencies: [
-      [TOKEN_ALLOWANCE, address, [PROXY_ADDRESS, address], symbol]
+      symbol === 'ETH'
+        ? [[ALLOWANCE_AMOUNT]]
+        : [TOKEN_ALLOWANCE, address, [PROXY_ADDRESS, address], symbol]
     ],
     computed: v => v.isEqualTo(ALLOWANCE_AMOUNT)
   })

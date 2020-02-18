@@ -369,6 +369,13 @@ test(ALLOWANCE, async () => {
   maker.useAccount(nextAccount.address);
   const nextAccountProxy = await maker.service('proxy').ensureProxy();
 
+  const ethAllowance = await maker.latest(
+    ALLOWANCE,
+    'ETH',
+    nextAccount.address
+  );
+  expect(ethAllowance).toEqual(true);
+
   let batAllowance;
   batAllowance = await maker.latest(ALLOWANCE, 'BAT', nextAccount.address);
   expect(batAllowance).toEqual(false);
