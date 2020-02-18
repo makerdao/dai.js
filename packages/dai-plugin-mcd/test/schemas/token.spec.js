@@ -113,6 +113,18 @@ test(TOKEN_ALLOWANCE, async () => {
   expect(setBatAllowance).toEqual(BigNumber(ALLOWANCE_AMOUNT));
 });
 
+test(`${TOKEN_ALLOWANCE} for ETH`, async () => {
+  const ethAllowance = await maker.latest(
+    TOKEN_ALLOWANCE,
+    address,
+    proxyAddress,
+    'ETH'
+  );
+
+  expect(BigNumber.isBigNumber(ethAllowance)).toEqual(true);
+  expect(ethAllowance).toEqual(BigNumber(ALLOWANCE_AMOUNT));
+});
+
 test(ADAPTER_BALANCE, async () => {
   const mgr = await maker.service(ServiceRoles.CDP_MANAGER);
   await mgr.openLockAndDraw(

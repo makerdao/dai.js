@@ -1,7 +1,11 @@
 import { getMcdToken } from '../utils';
 import BigNumber from 'bignumber.js';
 
-import { TOKEN_BALANCE, TOKEN_ALLOWANCE } from './constants';
+import { TOKEN_BALANCE, TOKEN_ALLOWANCE_BASE } from './constants';
+
+export const ALLOWANCE_AMOUNT = BigNumber(
+  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+);
 
 export const tokenBalance = {
   generate: (address, symbol) => {
@@ -35,7 +39,7 @@ export const tokenBalance = {
   returns: [TOKEN_BALANCE]
 };
 
-export const tokenAllowance = {
+export const tokenAllowanceBase = {
   generate: (address, proxyAddress, symbol) => {
     if (symbol === 'WETH') symbol = 'MWETH';
     if (symbol === 'DAI') symbol = 'MDAI';
@@ -54,7 +58,18 @@ export const tokenAllowance = {
       call: ['allowance(address,address)(uint256)', address, proxyAddress]
     };
   },
-  returns: [[TOKEN_ALLOWANCE, v => BigNumber(v)]]
+  returns: [[TOKEN_ALLOWANCE_BASE, v => BigNumber(v)]]
+};
+
+export const tokenAllowance = {
+  generate: (address, proxyAddress, symbol) => ({
+    dependencies: [
+      symbol === 'ETH'
+        ? [[ALLOWANCE_AMOUNT]]
+        : [TOKEN_ALLOWANCE_BASE, address, proxyAddress, symbol]
+    ],
+    computed: v => v
+  })
 };
 
 export const adapterBalance = {
@@ -80,8 +95,9 @@ export const adapterBalance = {
 
 export default {
   tokenBalance,
-  tokenAllowance,
+  tokenAllowanceBase,
 
   // computed
-  adapterBalance
+  adapterBalance,
+  tokenAllowance
 };

@@ -76,5 +76,6 @@ export const USER_VAULTS_DATA = 'userVaultsData';
 
 // token
 export const TOKEN_BALANCE = 'tokenBalance';
+export const TOKEN_ALLOWANCE_BASE = 'tokenAllowanceBase';
 export const TOKEN_ALLOWANCE = 'tokenAllowance';
 export const ADAPTER_BALANCE = 'adapterBalance';
