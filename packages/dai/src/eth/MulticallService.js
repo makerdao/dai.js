@@ -2,7 +2,7 @@ import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
 import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
-import { map, flatMap, auditTime, debounceTime, take } from 'rxjs/operators';
+import { map, flatMap, debounceTime, take } from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -201,7 +201,7 @@ export default class MulticallService extends PublicService {
       if (computed) {
         log2(`Returning existing computed observable: ${obsPath} (depth: ${depth})`);
         // Only debounce if call to watch() is not nested
-        if (depth === 0) existing = existing.pipe(auditTime(this._debounceTime));
+        if (depth === 0) existing = existing.pipe(debounceTime(this._debounceTime));
         return existing.pipe(map(result => computed(...result)));
       }
       log2(`Returning existing base observable: ${obsPath}`);
@@ -222,10 +222,12 @@ export default class MulticallService extends PublicService {
       const recurseDependencyTree = trie_ => {
         const key = trie_[0];
         const trie = trie_.slice(1);
-        // This is a promise dependency
-        if (typeof key === 'function') {
-          return from(key());
-        }
+
+        // If the dependency key provided is a function, promise or array of
+        // values then this dependency is providing its own custom value
+        // rather than specifying an existing observable key
+        if (key instanceof Promise || Array.isArray(key)) return from(key);
+        if (typeof key === 'function') return from(key());
 
         const indexesAtLeafNodes = trie.map(node => !Array.isArray(node));
         const allLeafNodes = indexesAtLeafNodes.every(node => node === true);
@@ -259,7 +261,7 @@ export default class MulticallService extends PublicService {
       log2(`Created new computed observable: ${obsPath} (depth: ${depth})`);
       set(this._observables, obsPath, observable);
       // Only debounce if call to watch() is not nested
-      if (depth === 0) observable = observable.pipe(auditTime(this._debounceTime));
+      if (depth === 0) observable = observable.pipe(debounceTime(this._debounceTime));
       return observable.pipe(map(result => computed(...result)));
     }
 
