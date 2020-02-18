@@ -4,7 +4,13 @@ export const proxyRegistryProxies = {
   generate: address => ({
     id: `PROXY_REGISTRY.proxies(${address})`,
     contract: 'PROXY_REGISTRY',
-    call: ['proxies(address)(address)', address]
+    call: ['proxies(address)(address)', address],
+    transforms: {
+      [PROXY_ADDRESS]: proxyAddress =>
+        proxyAddress === '0x0000000000000000000000000000000000000000'
+          ? null
+          : proxyAddress
+    }
   }),
   returns: [[PROXY_ADDRESS]]
 };
