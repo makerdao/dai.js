@@ -68,6 +68,10 @@ export const DAI_AVAILABLE = 'daiAvailable';
 export const MIN_SAFE_COLLATERAL_AMOUNT = 'minSafeCollateralAmount';
 export const COLLATERAL_AVAILABLE_AMOUNT = 'collateralAvailableAmount';
 export const COLLATERAL_AVAILABLE_VALUE = 'collateralAvailableValue';
+export const COLLATERAL_DEBT = 'collateralDebt';
+export const COLLATERAL_TYPE_COLLATERALIZATION =
+  'collateralTypeCollateralization';
+export const SYSTEM_COLLATERALIZATION = 'systemCollateralization';
 export const BALANCE = 'balance';
 export const ALLOWANCE = 'allowance';
 export const SAVINGS = 'savings';

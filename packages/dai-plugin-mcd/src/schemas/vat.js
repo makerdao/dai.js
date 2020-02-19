@@ -25,7 +25,7 @@ export const vatIlks = {
     ]
   }),
   returns: [
-    [TOTAL_ENCUMBERED_DEBT, BigNumber],
+    [TOTAL_ENCUMBERED_DEBT, fromWei],
     [DEBT_SCALING_FACTOR, fromRay],
     [PRICE_WITH_SAFETY_MARGIN, fromRay],
     [DEBT_CEILING, v => MDAI(v, 'rad')],

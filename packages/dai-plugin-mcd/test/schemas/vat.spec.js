@@ -87,18 +87,14 @@ test(TOTAL_ENCUMBERED_DEBT, async () => {
   expect(isBigNumber(ethAEncumberedDebt)).toEqual(true);
   expect(isBigNumber(batAEncumberedDebt)).toEqual(true);
 
-  expect(ethAEncumberedDebt).toEqual(
-    ethADebtAmount
-      .shiftedBy(18)
-      .div(fromRay(ethARate))
-      .integerValue(0)
+  expect(ethAEncumberedDebt.toNumber()).toBeCloseTo(
+    ethADebtAmount.div(fromRay(ethARate)).toNumber(),
+    12
   );
 
-  expect(batAEncumberedDebt).toEqual(
-    batADebtAmount
-      .shiftedBy(18)
-      .div(fromRay(batARate))
-      .integerValue(0)
+  expect(batAEncumberedDebt.toNumber()).toBeCloseTo(
+    batADebtAmount.div(fromRay(batARate)).toNumber(),
+    12
   );
 });
 
