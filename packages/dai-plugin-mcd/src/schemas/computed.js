@@ -70,13 +70,23 @@ export const collateralTypePrice = {
 };
 
 export const collateralTypesPrices = {
-  generate: () => ({
-    dependencies: () => [
-      ...defaultCdpTypes.map(({ ilk: collateralTypeName }) => [
+  generate: types => ({
+    dependencies: () =>
+      types.map(collateralTypeName => [
         COLLATERAL_TYPE_PRICE,
         collateralTypeName
-      ])
-    ],
+      ]),
+    computed: (...prices) => prices
+  })
+};
+
+export const defaultCollateralTypesPrices = {
+  generate: () => ({
+    dependencies: () =>
+      defaultCdpTypes.map(({ ilk: collateralTypeName }) => [
+        COLLATERAL_TYPE_PRICE,
+        collateralTypeName
+      ]),
     computed: (...prices) => prices
   })
 };
@@ -422,6 +432,7 @@ export const userVaultsData = {
 export default {
   collateralTypePrice,
   collateralTypesPrices,
+  defaultCollateralTypesPrices,
   vaultTypeAndAddress,
   vaultExternalOwner,
   vaultCollateralAndDebt,

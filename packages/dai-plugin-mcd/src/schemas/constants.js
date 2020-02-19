@@ -28,7 +28,7 @@ export const PROXY_OWNER = 'proxyOwner';
 // cdpManager
 export const VAULT_ADDRESS = 'vaultAddress';
 export const VAULT_TYPE = 'vaultType';
-export const VAULTS_CREATED = 'vaultCreated';
+export const VAULTS_CREATED = 'vaultsCreated';
 export const VAULT_OWNER = 'vaultOwner';
 
 // pot
@@ -52,6 +52,7 @@ export const USER_VAULT_TYPES = 'userVaultTypes';
 // computed
 export const COLLATERAL_TYPE_PRICE = 'collateralTypePrice';
 export const COLLATERAL_TYPES_PRICES = 'collateralTypesPrices';
+export const DEFAULT_COLLATERAL_TYPES_PRICES = 'defaultCollateralTypesPrices';
 export const VAULT_TYPE_AND_ADDRESS = 'vaultTypeAndAddress';
 export const VAULT_EXTERNAL_OWNER = 'vaultExternalOwner';
 export const VAULT_COLLATERAL_AND_DEBT = 'vaultCollateralAndDebt';

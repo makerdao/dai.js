@@ -13,6 +13,7 @@ import BigNumber from 'bignumber.js';
 import {
   COLLATERAL_TYPE_PRICE,
   COLLATERAL_TYPES_PRICES,
+  DEFAULT_COLLATERAL_TYPES_PRICES,
   VAULT_TYPE_AND_ADDRESS,
   VAULT_EXTERNAL_OWNER,
   VAULT,
@@ -141,7 +142,22 @@ test(COLLATERAL_TYPE_PRICE, async () => {
 });
 
 test(COLLATERAL_TYPES_PRICES, async () => {
-  const [ethAPrice, batAPrice] = await maker.latest(COLLATERAL_TYPES_PRICES);
+  const [ethAPrice, batAPrice] = await maker.latest(COLLATERAL_TYPES_PRICES, [
+    'ETH-A',
+    'BAT-A'
+  ]);
+
+  expect(ethAPrice.toNumber()).toEqual(180);
+  expect(batAPrice.toNumber()).toEqual(40);
+
+  expect(ethAPrice.symbol).toEqual('USD/ETH');
+  expect(batAPrice.symbol).toEqual('USD/BAT');
+});
+
+test(DEFAULT_COLLATERAL_TYPES_PRICES, async () => {
+  const [ethAPrice, batAPrice] = await maker.latest(
+    DEFAULT_COLLATERAL_TYPES_PRICES
+  );
 
   expect(ethAPrice.toNumber()).toEqual(180);
   expect(batAPrice.toNumber()).toEqual(40);

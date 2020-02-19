@@ -39,6 +39,13 @@ export const tokenBalance = {
   returns: [TOKEN_BALANCE]
 };
 
+export const tokenBalances = {
+  generate: (address, symbols) => ({
+    dependencies: symbols.map(symbol => [TOKEN_BALANCE, address, symbol]),
+    computed: (...balances) => balances
+  })
+};
+
 export const tokenAllowanceBase = {
   generate: (address, proxyAddress, symbol) => {
     if (symbol === 'WETH') symbol = 'MWETH';
@@ -99,5 +106,6 @@ export default {
 
   // computed
   adapterBalance,
-  tokenAllowance
+  tokenAllowance,
+  tokenBalances
 };
