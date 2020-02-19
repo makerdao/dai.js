@@ -7,7 +7,7 @@ import {
   minSafeCollateralAmount as calcMinSafeCollateralAmount
 } from '../math';
 import { USD, MDAI, DSR_DAI, defaultCdpTypes, ALLOWANCE_AMOUNT } from '../';
-
+import BigNumber from 'bignumber.js';
 import {
   RATIO_DAI_USD,
   LIQUIDATION_RATIO,
@@ -47,7 +47,11 @@ import {
   USER_VAULT_IDS,
   USER_VAULT_ADDRESSES,
   USER_VAULT_TYPES,
-  VAULT
+  VAULT,
+  TOTAL_ENCUMBERED_DEBT,
+  ADAPTER_BALANCE,
+  COLLATERAL_DEBT,
+  COLLATERAL_TYPE_COLLATERALIZATION
 } from './constants';
 
 export const collateralTypePrice = {
@@ -429,6 +433,70 @@ export const userVaultsData = {
   })
 };
 
+export const collateralDebt = {
+  generate: collateralTypeName => ({
+    dependencies: [
+      [TOTAL_ENCUMBERED_DEBT, collateralTypeName],
+      [DEBT_SCALING_FACTOR, collateralTypeName]
+    ],
+    computed: (totalEncumberedDebt, debtScalingFactor) => {
+      return MDAI(totalEncumberedDebt).times(debtScalingFactor);
+    }
+  })
+};
+
+export const collateralTypeCollateralization = {
+  generate: (collateralTypeName, percentage = true) => ({
+    dependencies: [
+      [COLLATERAL_DEBT, collateralTypeName],
+      [COLLATERAL_TYPE_PRICE, collateralTypeName],
+      [ADAPTER_BALANCE, collateralTypeName]
+    ],
+    computed: (debt, price, amount) => {
+      const collateral = calcCollateralValue(amount, price.toBigNumber());
+      const ratio = calcCollateralizationRatio(
+        collateral,
+        debt.toBigNumber()
+      ).times(100);
+      return percentage
+        ? ratio
+        : { collateralValue: collateral, debtValue: debt };
+    }
+  })
+};
+
+export const systemCollateralization = {
+  generate: vaultTypes => ({
+    dependencies: vaultTypes.map(vaultType => [
+      COLLATERAL_TYPE_COLLATERALIZATION,
+      vaultType,
+      false
+    ]),
+    computed: (...collateralizationValues) => {
+      const {
+        totalCollateralValue,
+        totalDebtValue
+      } = collateralizationValues.reduce(
+        (acc, { collateralValue, debtValue }) => ({
+          totalCollateralValue: acc.totalCollateralValue.plus(
+            collateralValue.toBigNumber()
+          ),
+          totalDebtValue: acc.totalDebtValue.plus(debtValue.toBigNumber())
+        }),
+        {
+          totalCollateralValue: BigNumber(0),
+          totalDebtValue: BigNumber(0)
+        }
+      );
+
+      return calcCollateralizationRatio(
+        totalCollateralValue,
+        totalDebtValue
+      ).times(100);
+    }
+  })
+};
+
 export default {
   collateralTypePrice,
   collateralTypesPrices,
@@ -452,5 +520,8 @@ export default {
   allowance,
   savings,
   userVaultsList,
-  userVaultsData
+  userVaultsData,
+  collateralDebt,
+  collateralTypeCollateralization,
+  systemCollateralization
 };
