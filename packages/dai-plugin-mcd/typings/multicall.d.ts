@@ -90,7 +90,7 @@ declare global {
     /**
      * The minimum ratio of collateral price to debt allowed.
      */
-    liquidationRatioSimple: CurrencyRatio;
+    liquidationRatio: CurrencyRatio;
 
     /**
      * The penalty incurred for liquidation of this vault.

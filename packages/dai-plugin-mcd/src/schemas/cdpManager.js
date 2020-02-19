@@ -18,7 +18,7 @@ export const cdpManagerUrns = {
 };
 
 const validateVaultId = id =>
-  !/^\d+$/.test(id) && 'Invalid vault id: must be a positive integer';
+  !/^\d+$/.test(id) && `Invalid vault id: must be a positive integer. Received ${id}`;
 
 const validateVaultTypeResult = vaultType =>
   !vaultType && 'Vault does not exist';
