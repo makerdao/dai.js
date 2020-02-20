@@ -38,12 +38,9 @@ const cdp2 = await cdpManager.openLockAndDraw('ETH-A', ETH(50), MDAI(1000));
 const cdp3 = await cdpManager.openLockAndDraw('TOK-Z', TOK(50), MDAI(1000));
 ```
 
-### Functionality
+Please visit [docs.makerdao.com](https://docs.makerdao.com/building-with-maker/daijs) for more documentation.
 
-- Creating and manipulating CDPs (via the [CDP Manager](https://github.com/makerdao/dss-cdp-manager) via a user's [DSProxy](https://github.com/dapphub/ds-proxy))
-- Reading data about the MCD system.
-
-### Notes
+### Developer notes
 
 The MCD contracts store the stability fee per second in a variable called `tax`
 as a number in the form 1.X _ 10^27 (e.g. `1000000000472114805215157978`), and
@@ -56,6 +53,7 @@ rates (e.g. `0.015` and `0.01`).
 Run the tests from the top-level dai.js directory.
 
 ### Local Development
+
 Due to the way that Babel7 handles transpilation it is not possible to use `yarn link` when locally developing this plugin, and importing it. We recommend using [yalc](https://github.com/whitecolor/yalc) instead. We've also found that a watcher tool called [sane](https://github.com/amasad/sane) is helpful.
 
 Steps to Run:
