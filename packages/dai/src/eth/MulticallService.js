@@ -277,13 +277,13 @@ export default class MulticallService extends PublicService {
     // Create base observable
     const observable = Observable.create(observer => {
       this._totalSchemaSubscribers++;
-      // Subscribe to watcher updates and emit them to subjects
-      if (!this._watcherUpdates) this._subscribeToWatcherUpdates();
+      log2(`Observer subscribed to ${id} (${this._schemaSubscribers[path] + 1} subscribers)`);
       // If first subscriber to this schema add it to multicall
       if (++this._schemaSubscribers[path] === 1) this._addSchemaToMulticall(schemaInstance);
+      // Subscribe to watcher updates and emit them to subjects
+      if (!this._watcherUpdates) this._subscribeToWatcherUpdates();
       // Subscribe this observer to the subject for this base observable
       const sub = subject.subscribe(observer);
-      log2(`Observer subscribed to ${id} (${this._schemaSubscribers[path]} subscribers)`);
       // Return the function to call when this observer unsubscribes
       return () => {
         this._totalSchemaSubscribers--;
