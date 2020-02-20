@@ -8,6 +8,7 @@ import set from 'lodash/set';
 
 const log = debug('dai:MulticallService');
 const log2 = debug('dai:MulticallService:observables');
+const spacing = spaces => ' '.repeat(spaces);
 
 export default class MulticallService extends PublicService {
   constructor(name = 'multicall') {
@@ -193,18 +194,18 @@ export default class MulticallService extends PublicService {
     const schemaInstance = this._createSchemaInstance(schemaDefinition, ...args);
     const obsPath = `${key}${args.length > 0 ? '.' : ''}${args.join('.')}`;
     const { computed } = schemaInstance;
-    log2(`watch() called for ${computed ? 'computed ' : 'base '}observable: ${obsPath} (depth: ${depth})`); // prettier-ignore
+    log2(`${spacing(depth)}watch() called for ${computed ? 'computed ' : 'base '}observable: ${obsPath} (depth: ${depth})`); // prettier-ignore
 
     // Return existing observable if one already exists for this observable path (key + args)
     let existing = get(this._observables, obsPath);
     if (existing) {
       if (computed) {
-        log2(`Returning existing computed observable: ${obsPath} (depth: ${depth})`);
+        log2(`${spacing(depth)}Returning existing computed observable: ${obsPath} (depth: ${depth})`);
         // Only debounce if call to watch() is not nested
         if (depth === 0) existing = existing.pipe(debounceTime(this._debounceTime));
         return existing.pipe(map(result => computed(...result)));
       }
-      log2(`Returning existing base observable: ${obsPath}`);
+      log2(`${spacing(depth)}Returning existing base observable: ${obsPath}`);
       return existing;
     }
 
@@ -258,7 +259,7 @@ export default class MulticallService extends PublicService {
       const dependencySubs = dependencies.map(recurseDependencyTree);
       let observable = combineLatest(dependencySubs);
 
-      log2(`Created new computed observable: ${obsPath} (depth: ${depth})`);
+      log2(`${spacing(depth)}Created new computed observable: ${obsPath} (depth: ${depth})`);
       set(this._observables, obsPath, observable);
       // Only debounce if call to watch() is not nested
       if (depth === 0) observable = observable.pipe(debounceTime(this._debounceTime));
@@ -296,7 +297,7 @@ export default class MulticallService extends PublicService {
       };
     });
 
-    log2(`Created new base observable: ${obsPath}`);
+    log2(`${spacing(depth)}Created new base observable: ${obsPath}`);
     set(this._observables, obsPath, observable);
     return observable;
   }
