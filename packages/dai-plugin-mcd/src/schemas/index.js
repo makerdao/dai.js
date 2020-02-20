@@ -10,7 +10,7 @@ import token from './token';
 import getCdps from './getCdps';
 import computed from './computed';
 
-export * from './constants';
+export * from './_constants';
 export default {
   ...vat,
   ...spot,

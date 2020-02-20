@@ -1,5 +1,4 @@
 import { toHex, fromRay, fromRad, fromWei } from '../utils';
-import BigNumber from 'bignumber.js';
 import { MDAI } from '../..';
 
 import {
@@ -13,7 +12,7 @@ import {
   ENCUMBERED_DEBT,
   UNLOCKED_COLLATERAL,
   GLOBAL_DEBT_CEILING
-} from './constants';
+} from './_constants';
 
 export const vatIlks = {
   generate: ilkName => ({

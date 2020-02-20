@@ -52,7 +52,8 @@ import {
   ADAPTER_BALANCE,
   COLLATERAL_DEBT,
   COLLATERAL_TYPE_COLLATERALIZATION
-} from './constants';
+} from './_constants';
+import { validateAddress } from './_validators';
 
 export const collateralTypePrice = {
   generate: collateralTypeName => ({
@@ -326,14 +327,17 @@ export const vault = {
 
 export const daiLockedInDsr = {
   generate: address => ({
-    dependencies: () => [
+    dependencies: [
       [SAVINGS_DAI, [PROXY_ADDRESS, address]],
       [SAVINGS_RATE_ACCUMULATOR]
     ],
     computed: (savingsDai, savingsRateAccumulator) => {
       return DSR_DAI(savingsDai.times(savingsRateAccumulator));
     }
-  })
+  }),
+  validate: {
+    args: validateAddress`Invalid address: ${'address'}`
+  }
 };
 
 export const totalDaiLockedInDsr = {
@@ -396,7 +400,10 @@ export const savings = {
       savingsRateAccumulator,
       savingsDai
     })
-  })
+  }),
+  validate: {
+    args: validateAddress`Invalid address: ${'address'}`
+  }
 };
 
 export const userVaultsList = {
@@ -423,7 +430,10 @@ export const userVaultsList = {
         ],
         []
       )
-  })
+  }),
+  validate: {
+    args: validateAddress`Invalid address: ${'address'}`
+  }
 };
 
 export const userVaultsData = {
@@ -497,6 +507,29 @@ export const systemCollateralization = {
   })
 };
 
+export const proxyOwner = {
+  generate: address => ({
+    dependencies: ({ get }) => [
+      [
+        async () => {
+          try {
+            return await get('smartContract')
+              .get('transactionManager')
+              .get('proxy')
+              .getOwner(address);
+          } catch (e) {
+            return null;
+          }
+        }
+      ]
+    ],
+    computed: owner => owner
+  }),
+  validate: {
+    args: validateAddress`Invalid address for proxyOwner: ${'address'}`
+  }
+};
+
 export default {
   collateralTypePrice,
   collateralTypesPrices,
@@ -523,5 +556,6 @@ export default {
   userVaultsData,
   collateralDebt,
   collateralTypeCollateralization,
-  systemCollateralization
+  systemCollateralization,
+  proxyOwner
 };

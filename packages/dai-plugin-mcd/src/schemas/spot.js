@@ -6,7 +6,7 @@ import {
   PRICE_FEED_ADDRESS,
   LIQUIDATION_RATIO,
   RATIO_DAI_USD
-} from './constants';
+} from './_constants';
 
 const validateCollateralTypeName = name =>
   !name && 'Invalid collateral type name';

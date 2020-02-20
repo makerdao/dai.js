@@ -6,7 +6,8 @@ import {
   DAI_SAVINGS_RATE,
   DATE_EARNINGS_LAST_ACCRUED,
   SAVINGS_RATE_ACCUMULATOR
-} from './constants';
+} from './_constants';
+import { validateAddress } from './_validators';
 
 export const potPie = {
   generate: () => ({
@@ -18,11 +19,14 @@ export const potPie = {
 };
 
 export const potpie = {
-  generate: proxyAddress => ({
-    id: `MCD_POT.pie(${proxyAddress})`,
+  generate: address => ({
+    id: `MCD_POT.pie(${address})`,
     contract: 'MCD_POT',
-    call: ['pie(address)(uint256)', proxyAddress]
+    call: ['pie(address)(uint256)', address]
   }),
+  validate: {
+    args: validateAddress`Invalid address: ${'address'}`
+  },
   returns: [[SAVINGS_DAI, fromWei]]
 };
 

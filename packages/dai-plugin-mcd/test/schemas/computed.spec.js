@@ -6,7 +6,7 @@ import {
   TestAccountProvider,
   mineBlocks
 } from '@makerdao/test-helpers';
-import { fromWei } from '../../src/utils';
+import { fromWei, isValidAddressString } from '../../src/utils';
 import { ServiceRoles } from '../../src/constants';
 import BigNumber from 'bignumber.js';
 
@@ -30,7 +30,8 @@ import {
   TOTAL_DAI_LOCKED_IN_DSR,
   BALANCE,
   ALLOWANCE,
-  USER_VAULTS_LIST
+  USER_VAULTS_LIST,
+  PROXY_OWNER
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
@@ -40,10 +41,7 @@ import {
   cdpManagerOwner
 } from '../../src/schemas/cdpManager';
 import { spotIlks, spotPar } from '../../src/schemas/spot';
-import {
-  proxyRegistryProxies,
-  proxyGetOwner
-} from '../../src/schemas/proxyRegistry';
+import { proxyRegistryProxies } from '../../src/schemas/proxyRegistry';
 import { potPie, potpie, potChi } from '../../src/schemas/pot';
 import { catIlks } from '../../src/schemas/cat';
 import { jugIlks } from '../../src/schemas/jug';
@@ -90,7 +88,6 @@ beforeAll(async () => {
     spotPar,
     spotIlks,
     proxyRegistryProxies,
-    proxyGetOwner,
     potPie,
     potpie,
     potChi,
@@ -326,13 +323,13 @@ test(VAULT, async () => {
   expect(vault.debtFloor).toEqual(expectedDebtFloor);
 });
 
-test('vault with non-existent id', async () => {
+test(`${VAULT} with non-existent id`, async () => {
   const cdpId = 9000;
   const vault = maker.latest(VAULT, cdpId);
   await expect(vault).rejects.toThrow(/not exist/i);
 });
 
-test('vault with invalid id', async () => {
+test(`${VAULT} with invalid id`, async () => {
   const cdpId = -9000;
   expect(() => {
     maker.latest(VAULT, cdpId);
@@ -343,6 +340,17 @@ test(DAI_LOCKED_IN_DSR, async () => {
   const daiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR, address);
   expect(daiLockedInDsr.symbol).toEqual('DSR-DAI');
   expect(daiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
+});
+
+test(`${DAI_LOCKED_IN_DSR} using invalid account address`, async () => {
+  expect(() => {
+    maker.latest(DAI_LOCKED_IN_DSR, '0xfoobar');
+  }).toThrow(/invalid/i);
+});
+
+test(`${DAI_LOCKED_IN_DSR} using account with no proxy`, async () => {
+  const promise = maker.latest(DAI_LOCKED_IN_DSR, address2);
+  await expect(promise).rejects.toThrow();
 });
 
 test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
@@ -428,4 +436,10 @@ test(USER_VAULTS_LIST, async () => {
   expect(ethVault.vaultAddress).toEqual(
     '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1'
   );
+});
+
+test(PROXY_OWNER, async () => {
+  const proxyOwner = await maker.latest(PROXY_OWNER, proxyAddress);
+  expect(isValidAddressString(proxyOwner)).toEqual(true);
+  expect(proxyOwner.toLowerCase()).toEqual(address);
 });

@@ -6,7 +6,7 @@ import {
   ANNUAL_STABILITY_FEE,
   DATE_STABILITY_FEES_LAST_LEVIED,
   BASE_COLLATERAL_FEE
-} from './constants';
+} from './_constants';
 
 const secondsPerYear = 60 * 60 * 24 * 365;
 

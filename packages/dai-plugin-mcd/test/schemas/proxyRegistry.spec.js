@@ -6,7 +6,7 @@ import {
 } from '@makerdao/test-helpers';
 import { isValidAddressString } from '../../src/utils';
 
-import schemas, { PROXY_ADDRESS, PROXY_OWNER } from '../../src/schemas';
+import schemas, { PROXY_ADDRESS } from '../../src/schemas';
 
 let maker, snapshotData, address, address2, proxyAddress, proxyAddress2;
 
@@ -40,8 +40,16 @@ test(PROXY_ADDRESS, async () => {
   expect(proxy2).toEqual(proxyAddress2);
 });
 
-test(PROXY_OWNER, async () => {
-  const proxyOwner = await maker.latest(PROXY_OWNER, proxyAddress);
-  expect(isValidAddressString(proxyOwner)).toEqual(true);
-  expect(proxyOwner.toLowerCase()).toEqual(address);
+test(`${PROXY_ADDRESS} using invalid account address`, async () => {
+  expect(() => {
+    maker.latest(PROXY_ADDRESS, '0xfoobar');
+  }).toThrow(/invalid/i);
+});
+
+test(`${PROXY_ADDRESS} using account with no proxy`, async () => {
+  const promise = maker.latest(
+    PROXY_ADDRESS,
+    '0x1111111111111111111111111111111111111111'
+  );
+  await expect(promise).rejects.toThrow(/no proxy found/i);
 });

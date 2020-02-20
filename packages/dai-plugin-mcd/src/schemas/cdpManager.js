@@ -6,7 +6,7 @@ import {
   VAULT_TYPE,
   VAULTS_CREATED,
   VAULT_OWNER
-} from './constants';
+} from './_constants';
 
 export const cdpManagerUrns = {
   generate: id => ({

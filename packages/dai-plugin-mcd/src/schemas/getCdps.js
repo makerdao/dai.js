@@ -2,7 +2,7 @@ import {
   USER_VAULT_IDS,
   USER_VAULT_ADDRESSES,
   USER_VAULT_TYPES
-} from './constants';
+} from './_constants';
 import { bytesToString } from '../utils';
 
 export const getCdps = {

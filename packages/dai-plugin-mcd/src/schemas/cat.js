@@ -6,7 +6,7 @@ import {
   LIQUIDATOR_ADDRESS,
   LIQUIDATION_PENALTY,
   MAX_AUCTION_LOT_SIZE
-} from './constants';
+} from './_constants';
 
 const validateCollateralTypeName = name =>
   !name && 'Invalid collateral type name';

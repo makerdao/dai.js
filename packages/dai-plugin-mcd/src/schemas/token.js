@@ -1,7 +1,7 @@
 import { getMcdToken } from '../utils';
 import BigNumber from 'bignumber.js';
 
-import { TOKEN_BALANCE, TOKEN_ALLOWANCE_BASE } from './constants';
+import { TOKEN_BALANCE, TOKEN_ALLOWANCE_BASE } from './_constants';
 
 export const ALLOWANCE_AMOUNT = BigNumber(
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
