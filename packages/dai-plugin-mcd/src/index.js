@@ -68,6 +68,9 @@ export const USD_ETH = createCurrencyRatio(USD, ETH);
 export const MWETH = createCurrency('MWETH');
 export const MDAI = createCurrency('MDAI');
 
+// Casting for savings dai
+export const DSR_DAI = createCurrency('DSR-DAI');
+
 export const REP = createCurrency('REP');
 export const ZRX = createCurrency('ZRX');
 export const OMG = createCurrency('OMG');
@@ -75,9 +78,25 @@ export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
 
-const defaultCdpTypes = [
+export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: BAT, ilk: 'BAT-A' }
+];
+
+export const SAI = createCurrency('SAI');
+
+export const ALLOWANCE_AMOUNT = BigNumber(
+  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+);
+
+export const defaultTokens = [
+  ...new Set([
+    ...defaultCdpTypes.map(type => type.currency),
+    MDAI,
+    MWETH,
+    SAI,
+    DSR_DAI
+  ])
 ];
 
 export default {

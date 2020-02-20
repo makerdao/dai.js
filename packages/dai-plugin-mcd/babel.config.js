@@ -3,6 +3,7 @@ module.exports = function(api) {
 
   const presets = ['@babel/preset-env'];
   const plugins = [
+    '@babel/plugin-proposal-optional-chaining',
     ['@babel/plugin-proposal-decorators', { legacy: true }],
     '@babel/plugin-proposal-function-sent',
     '@babel/plugin-proposal-export-namespace-from',

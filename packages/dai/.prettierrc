@@ -1,0 +1,14 @@
+{
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": [
+        "MulticallService.*",
+        "schemas.js"
+      ],
+      "options": {
+        "printWidth": 100
+      }
+    }
+  ]
+}

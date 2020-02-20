@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { createCurrencyRatio } from '@makerdao/currency';
-import Maker from '@makerdao/dai';
+import Maker from '../../dai/src';
 import McdPlugin, { ETH, USD, GNT } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { stringToBytes } from '../src/utils';

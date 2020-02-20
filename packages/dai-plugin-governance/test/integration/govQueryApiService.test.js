@@ -3,7 +3,7 @@ import { setupTestMakerInstance } from '../helpers';
 let service;
 
 beforeAll(async () => {
-  const maker = await setupTestMakerInstance();
+  const maker = await setupTestMakerInstance('kovan');
   service = maker.service('govQueryApi');
   jest.setTimeout(10000);
 });

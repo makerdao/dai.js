@@ -16,7 +16,7 @@ import VoteProxyFactoryService from './VoteProxyFactoryService';
 import GovPollingService from './GovPollingService';
 import GovQueryApiService from './GovQueryApiService';
 import EsmService from './EsmService';
-import PauseService from './PauseService';
+import SpellService from './SpellService';
 
 export default {
   addConfig: function(config, { network = 'mainnet', staging = false }) {
@@ -74,7 +74,7 @@ export default {
         'govPolling',
         'govQueryApi',
         'esm',
-        'pause'
+        'spell'
       ],
       chief: [ChiefService],
       voteProxy: [VoteProxyService],
@@ -82,7 +82,7 @@ export default {
       govPolling: [GovPollingService],
       govQueryApi: [GovQueryApiService, { staging }],
       esm: [EsmService],
-      pause: [PauseService],
+      spell: [SpellService],
       smartContract: { addContracts },
       token: {
         erc20: [
