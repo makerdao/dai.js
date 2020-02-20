@@ -51,7 +51,8 @@ import {
   TOTAL_ENCUMBERED_DEBT,
   ADAPTER_BALANCE,
   COLLATERAL_DEBT,
-  COLLATERAL_TYPE_COLLATERALIZATION
+  COLLATERAL_TYPE_COLLATERALIZATION,
+  COLLATERAL_TYPE_DATA
 } from './_constants';
 import { validateAddress } from './_validators';
 
@@ -230,6 +231,55 @@ export const collateralAvailableValue = {
     ],
     computed: (collateralAvailableAmount, collateralTypePrice) =>
       calcCollateralValue(collateralAvailableAmount, collateralTypePrice)
+  })
+};
+
+export const collateralTypeData = {
+  generate: collateralTypeName => ({
+    dependencies: [
+      [COLLATERAL_TYPE_PRICE, collateralTypeName],
+      [ANNUAL_STABILITY_FEE, collateralTypeName],
+      [LIQUIDATION_PENALTY, collateralTypeName],
+      [LIQUIDATION_RATIO, collateralTypeName]
+    ],
+    computed: (
+      collateralTypePrice,
+      annualStabilityFee,
+      liquidationPenalty,
+      liquidationRatio
+    ) => ({
+      symbol: collateralTypeName,
+      collateralTypePrice,
+      annualStabilityFee,
+      liquidationRatio,
+      liquidationPenalty,
+      calculateCollateralizationRatio(collateralAmount, debtValue) {
+        return calcCollateralizationRatio(
+          this.collateralTypePrice.times(collateralAmount),
+          debtValue
+        )
+          .times(100)
+          .toNumber();
+      },
+      calculateliquidationPrice(collateralAmount, debtValue) {
+        return calcLiquidationPrice(
+          collateralAmount,
+          debtValue,
+          this.liquidationRatio
+        );
+      }
+    })
+  })
+};
+
+export const collateralTypesData = {
+  generate: types => ({
+    dependencies: () =>
+      types.map(collateralTypeName => [
+        COLLATERAL_TYPE_DATA,
+        collateralTypeName
+      ]),
+    computed: (...collateralTypes) => collateralTypes
   })
 };
 
@@ -557,5 +607,7 @@ export default {
   collateralDebt,
   collateralTypeCollateralization,
   systemCollateralization,
-  proxyOwner
+  proxyOwner,
+  collateralTypeData,
+  collateralTypesData
 };

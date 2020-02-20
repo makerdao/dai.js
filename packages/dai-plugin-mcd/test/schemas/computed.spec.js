@@ -31,7 +31,9 @@ import {
   BALANCE,
   ALLOWANCE,
   USER_VAULTS_LIST,
-  PROXY_OWNER
+  PROXY_OWNER,
+  COLLATERAL_TYPE_DATA,
+  COLLATERAL_TYPES_DATA
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
@@ -442,4 +444,44 @@ test(PROXY_OWNER, async () => {
   const proxyOwner = await maker.latest(PROXY_OWNER, proxyAddress);
   expect(isValidAddressString(proxyOwner)).toEqual(true);
   expect(proxyOwner.toLowerCase()).toEqual(address);
+});
+
+test(COLLATERAL_TYPE_DATA, async () => {
+  const collateralType = 'ETH-A';
+  const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
+  const expectedLiqRatio = createCurrencyRatio(USD, MDAI)(1.5);
+  const expectedLiqPenalty = BigNumber('0.05');
+  const expectedAnnStabilityFee = 0.04999999999989363;
+
+  const colData = await maker.latest(COLLATERAL_TYPE_DATA, collateralType);
+
+  expect(Object.keys(colData).length).toBe(7);
+
+  expect(colData.symbol).toEqual(collateralType);
+  expect(colData.collateralTypePrice.toString()).toEqual(
+    expectedColTypePrice.toString()
+  );
+  expect(colData.liquidationRatio.toString()).toEqual(
+    expectedLiqRatio.toString()
+  );
+  expect(colData.liquidationPenalty).toEqual(expectedLiqPenalty);
+  expect(colData.annualStabilityFee.toNumber()).toEqual(
+    expectedAnnStabilityFee
+  );
+});
+
+test(COLLATERAL_TYPES_DATA, async () => {
+  const [ethAData, batAData] = await maker.latest(COLLATERAL_TYPES_DATA, [
+    'ETH-A',
+    'BAT-A'
+  ]);
+
+  const expectedEth = await maker.latest(COLLATERAL_TYPE_DATA, 'ETH-A');
+  const expectedBat = await maker.latest(COLLATERAL_TYPE_DATA, 'BAT-A');
+
+  expect(Object.entries(ethAData).length).toBe(7);
+  expect(Object.entries(batAData).length).toBe(7);
+
+  expect(JSON.stringify(ethAData)).toEqual(JSON.stringify(expectedEth));
+  expect(JSON.stringify(batAData)).toEqual(JSON.stringify(expectedBat));
 });

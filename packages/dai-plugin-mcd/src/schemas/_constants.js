@@ -77,6 +77,8 @@ export const SAVINGS = 'savings';
 export const USER_VAULTS_LIST = 'userVaultsList';
 export const USER_VAULTS_DATA = 'userVaultsData';
 export const PROXY_OWNER = 'proxyOwner';
+export const COLLATERAL_TYPE_DATA = 'collateralTypeData';
+export const COLLATERAL_TYPES_DATA = 'collateralTypesData';
 
 // token
 export const TOKEN_BALANCE = 'tokenBalance';

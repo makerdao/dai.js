@@ -107,6 +107,33 @@ declare global {
      */
     debtFloor: BigNumber;
   }
+  
+  interface CollateralTypeDataResult {
+     /**
+     * The id of this vault.
+     */
+    symbol: string;
+
+    /**
+     * The price of this vault's collateral type.
+     */
+    collateralTypePrice: CurrencyRatio;
+
+    /**
+     * The stability fee for this vault.
+     */
+    annualStabilityFee: number;
+
+    /**
+     * The minimum ratio of collateral price to debt allowed.
+     */
+    liquidationRatio: CurrencyRatio;
+
+    /**
+     * The penalty incurred for liquidation of this vault.
+     */
+    liquidationPenalty: BigNumber;
+  }
 
   interface WatchInterfaceMcd {
     /** Watch the total encumbered debt of a collateral type
@@ -230,6 +257,12 @@ declare global {
      * @param id Numerical id of the vault
      */
     static collateralAvailableValue(id: number): Currency;
+
+    /**
+     * Get risk parameter data of a collateral type.
+     * @param collateralTypeName String uniquely identifying a collateral type
+     */
+    static collateralTypeData(collateralTypeName: string): CollateralTypeDataResult;
   }
 }
 
