@@ -56,9 +56,9 @@ export function buildTestService(name, settings = {}) {
   return buildTestContainer(settings).service(name);
 }
 
-export function buildTestEthereumCdpService(settings = {}) {
-  return buildTestService('cdp', { ...settings, cdp: true });
-}
+// export function buildTestEthereumCdpService(settings = {}) {
+//   return buildTestService('cdp', { ...settings, cdp: true });
+// }
 
 export function buildTestEthereumTokenService(settings = {}) {
   return buildTestService('token', { ...settings, token: true });

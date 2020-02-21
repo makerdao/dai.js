@@ -48,7 +48,7 @@ export default class Maker {
         'useAccount',
         'useAccountWithAddress'
       ],
-      cdp: ['getCdp', 'openCdp', 'getCdpIds'],
+      // cdp: ['getCdp', 'openCdp', 'getCdpIds'],
       event: ['on'],
       proxy: ['currentProxy'],
       token: ['getToken'],

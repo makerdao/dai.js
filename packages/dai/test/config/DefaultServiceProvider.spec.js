@@ -37,7 +37,7 @@ test('create a container from a service configuration', async () => {
     ...config,
     log: false
   }).buildContainer();
-
+  console.log('########', Object.keys(container._services))
   expect(
     Object.keys(container._services).indexOf('smartContract')
   ).toBeGreaterThan(-1);
