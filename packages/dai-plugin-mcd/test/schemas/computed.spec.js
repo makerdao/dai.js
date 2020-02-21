@@ -344,13 +344,13 @@ test(DAI_LOCKED_IN_DSR, async () => {
   expect(daiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
 });
 
-test(`${DAI_LOCKED_IN_DSR} using invalid account address`, async () => {
+test.skip(`${DAI_LOCKED_IN_DSR} using invalid account address`, async () => {
   expect(() => {
     maker.latest(DAI_LOCKED_IN_DSR, '0xfoobar');
   }).toThrow(/invalid/i);
 });
 
-test(`${DAI_LOCKED_IN_DSR} using account with no proxy`, async () => {
+test.skip(`${DAI_LOCKED_IN_DSR} using account with no proxy`, async () => {
   const promise = maker.latest(DAI_LOCKED_IN_DSR, address2);
   await expect(promise).rejects.toThrow();
 });
