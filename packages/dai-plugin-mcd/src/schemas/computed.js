@@ -240,19 +240,25 @@ export const collateralTypeData = {
       [COLLATERAL_TYPE_PRICE, collateralTypeName],
       [ANNUAL_STABILITY_FEE, collateralTypeName],
       [LIQUIDATION_PENALTY, collateralTypeName],
-      [LIQUIDATION_RATIO, collateralTypeName]
+      [LIQUIDATION_RATIO, collateralTypeName],
+      [PRICE_WITH_SAFETY_MARGIN, collateralTypeName],
+      [DEBT_FLOOR, collateralTypeName]
     ],
     computed: (
       collateralTypePrice,
       annualStabilityFee,
       liquidationPenalty,
-      liquidationRatio
+      liquidationRatio,
+      priceWithSafetyMargin,
+      debtFloor
     ) => ({
       symbol: collateralTypeName,
       collateralTypePrice,
       annualStabilityFee,
       liquidationRatio,
       liquidationPenalty,
+      priceWithSafetyMargin,
+      debtFloor,
       calculateCollateralizationRatio(collateralAmount, debtValue) {
         return calcCollateralizationRatio(
           this.collateralTypePrice.times(collateralAmount),
@@ -267,6 +273,9 @@ export const collateralTypeData = {
           debtValue,
           this.liquidationRatio
         );
+      },
+      calculateMaxDai(collateralAmount) {
+        return priceWithSafetyMargin.times(collateralAmount);
       }
     })
   })
@@ -305,7 +314,7 @@ export const vault = {
       [LIQUIDATION_RATIO, [VAULT_TYPE, id]],
       [LIQUIDATION_PENALTY, [VAULT_TYPE, id]],
       [ANNUAL_STABILITY_FEE, [VAULT_TYPE, id]],
-      [DEBT_FLOOR, id]
+      [DEBT_FLOOR, [VAULT_TYPE, id]]
     ],
     computed: (
       vaultType,

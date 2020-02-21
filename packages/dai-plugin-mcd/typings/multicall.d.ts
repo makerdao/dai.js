@@ -133,6 +133,16 @@ declare global {
      * The penalty incurred for liquidation of this vault.
      */
     liquidationPenalty: BigNumber;
+
+    /**
+     * The maximum stablecoin allowed per unit of collateral
+     */
+    priceWithSafetyMargin: BigNumber;
+
+    /**
+     * The minimum amount of stablecoin debt can exist this vault.
+     */
+    debtFloor: BigNumber;
   }
 
   interface WatchInterfaceMcd {

@@ -40,13 +40,13 @@ test(PROXY_ADDRESS, async () => {
   expect(proxy2).toEqual(proxyAddress2);
 });
 
-test(`${PROXY_ADDRESS} using invalid account address`, async () => {
+test.skip(`${PROXY_ADDRESS} using invalid account address`, async () => {
   expect(() => {
     maker.latest(PROXY_ADDRESS, '0xfoobar');
   }).toThrow(/invalid/i);
 });
 
-test(`${PROXY_ADDRESS} using account with no proxy`, async () => {
+test.skip(`${PROXY_ADDRESS} using account with no proxy`, async () => {
   const promise = maker.latest(
     PROXY_ADDRESS,
     '0x1111111111111111111111111111111111111111'
