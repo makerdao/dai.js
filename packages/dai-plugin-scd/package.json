@@ -1,0 +1,23 @@
+{
+  "name": "dai-plugin-scd",
+  "description": "Plugin to add Single-Collateral Dai support to dai.js",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "dist",
+  "scripts": {
+    "test": "test"
+  },
+  "peerDependencies": {
+    "@makerdao/dai": ">=0.18.9"
+  },
+  "dependencies": {
+    "@makerdao/currency": "^0.9.5",
+    "@makerdao/services-core": "^0.9.9",
+    "bignumber.js": "^8.1.1",
+    "ethereumjs-util": "^6.2.0",
+    "ethers": "^4.0.45",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.17.15",
+    "web3-eth-abi": "^1.2.6"
+  }
+}

@@ -4,7 +4,6 @@ import AllowanceService from '../eth/AllowanceService';
 import CacheService from '../utils/CacheService';
 import ConsoleLogger from '../utils/loggers/ConsoleLogger';
 import DSProxyService from '../eth/DSProxyService';
-import EthereumCdpService from '../eth/EthereumCdpService';
 import EthereumTokenService from '../eth/EthereumTokenService';
 import EventService from '../utils/events/EventService';
 import GasService from '../eth/GasService';
@@ -12,7 +11,6 @@ import MulticallService from '../eth/MulticallService';
 import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
-import PriceService from '../eth/PriceService';
 import SmartContractService from '../eth/SmartContractService';
 import TimerService from '../utils/TimerService';
 import TokenConversionService from '../eth/TokenConversionService';
@@ -25,14 +23,12 @@ export const resolver = {
     accounts: 'AccountsService',
     allowance: 'AllowanceService',
     cache: 'CacheService',
-    cdp: 'EthereumCdpService',
     conversion: 'TokenConversionService',
     event: 'EventService',
     gas: 'GasService',
     log: 'ConsoleLogger',
     multicall: 'MulticallService',
     nonce: 'NonceService',
-    price: 'PriceService',
     proxy: 'DSProxyService',
     smartContract: 'SmartContractService',
     timer: 'TimerService',
@@ -65,7 +61,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         CacheService,
         ConsoleLogger,
         DSProxyService,
-        EthereumCdpService,
         EthereumTokenService,
         EventService,
         GasService,
@@ -73,7 +68,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         NonceService,
         NullEventService,
         NullLogger,
-        PriceService,
         SmartContractService,
         TimerService,
         TokenConversionService,
