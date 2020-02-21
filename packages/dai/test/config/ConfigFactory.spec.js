@@ -58,7 +58,7 @@ test('it handles url, privateKey, provider, and web3 options', () => {
           url: 'http://foo.net'
         }
       }
-    ],
+    ]
   });
 });
 
