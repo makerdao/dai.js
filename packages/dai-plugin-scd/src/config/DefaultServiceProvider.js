@@ -1,6 +1,6 @@
 import { ServiceProvider } from '@makerdao/services-core';
-import EthereumCdpService from '../EthereumCdpService'
-import PriceService from '../PriceService'
+import EthereumCdpService from '../EthereumCdpService';
+import PriceService from '../PriceService';
 import { getSettings } from './index';
 
 export const resolver = {
