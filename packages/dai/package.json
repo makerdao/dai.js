@@ -46,6 +46,7 @@
     "@makerdao/currency": "^0.9.5",
     "@makerdao/multicall": "^0.10.0-rc.4",
     "@makerdao/services-core": "^0.9.9",
+    "@makerdao/test-helpers": "^0.2.1",
     "assert": "^1.4.1",
     "bignumber.js": "^7.2.1",
     "chalk": "^2.4.1",

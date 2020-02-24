@@ -4,5 +4,7 @@
       "type": "HTTP",
       "url": "http://localhost:2000"
     }
-  }
+  },
+  "proxy": true,
+  "smartContract": true
 }
