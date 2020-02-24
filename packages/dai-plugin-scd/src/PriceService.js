@@ -1,6 +1,6 @@
 import { PrivateService } from '@makerdao/services-core';
-import contracts from '../../contracts/contracts';
-import { RAY } from '../utils/constants';
+import contracts from '../contracts/contracts';
+import { RAY } from './utils/constants';
 import BigNumber from 'bignumber.js';
 import abi from 'web3-eth-abi';
 import { getCurrency, ETH, USD_PETH, MKR, USD_ETH, USD_MKR } from './Currency';

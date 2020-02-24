@@ -1,10 +1,10 @@
 import { PrivateService } from '@makerdao/services-core';
-import contracts from '../../contracts/contracts';
+import contracts from '../contracts/contracts';
 import Cdp from './Cdp';
 import ProxyCdp from './ProxyCdp';
-import QueryApi from '../QueryApiScdService';
+import QueryApi from './QueryApiScdService';
 import BigNumber from 'bignumber.js';
-import { WAD, RAY } from '../utils/constants';
+import { WAD, RAY } from './utils/constants';
 import {
   getCurrency,
   USD_DAI,
@@ -16,8 +16,8 @@ import {
   MKR,
   USD
 } from './Currency';
-import { numberToBytes32 } from '../utils/conversion';
-import tracksTransactions from '../utils/tracksTransactions';
+import { numberToBytes32 } from './utils/conversion';
+import tracksTransactions from './utils/tracksTransactions';
 import assert from 'assert';
 
 export default class EthereumCdpService extends PrivateService {

@@ -1,6 +1,6 @@
 import sharedTests from './Cdp.shared';
-import { PETH, WETH } from '../../src/eth/Currency';
-import { buildTestEthereumCdpService } from '../helpers/serviceBuilders';
+import { PETH, WETH } from '../src/Currency';
+import { buildTestEthereumCdpService } from './helpers/serviceBuilders';
 
 async function initCdpService() {
   const service = buildTestEthereumCdpService();

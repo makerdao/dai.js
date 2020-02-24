@@ -1,4 +1,4 @@
-import contracts from '../../contracts/contracts';
+import contracts from '../contracts/contracts';
 import { getCurrency, DAI, ETH, USD } from './Currency';
 
 export default class ProxyCdp {

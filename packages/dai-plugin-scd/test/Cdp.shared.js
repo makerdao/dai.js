@@ -1,12 +1,12 @@
-import { DAI, PETH, USD, USD_ETH, ETH, MKR } from '../../src/eth/Currency';
+import { DAI, PETH, USD, USD_ETH, ETH, MKR } from '../src/Currency';
 import {
   mineBlocks,
   takeSnapshot,
   restoreSnapshot
 } from '@makerdao/test-helpers';
-import { buildTestService } from '../helpers/serviceBuilders';
+import { buildTestService } from './helpers/serviceBuilders';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
-import { promiseWait } from '../../src/utils';
+import { promiseWait } from '../src/utils';
 
 let priceService, currentAddress;
 

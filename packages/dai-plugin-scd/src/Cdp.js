@@ -1,4 +1,4 @@
-import contracts from '../../contracts/contracts';
+import contracts from '../contracts/contracts';
 import { USD } from './Currency';
 
 export default class Cdp {

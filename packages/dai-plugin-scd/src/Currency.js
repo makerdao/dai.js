@@ -1,4 +1,4 @@
-import tokens from '../../contracts/tokens';
+import tokens from '../contracts/tokens';
 import values from 'lodash/values';
 
 import {
