@@ -7,6 +7,7 @@ import {
   VAULTS_CREATED,
   VAULT_OWNER
 } from './_constants';
+import { validateVaultId, validateVaultTypeResult } from './_validators';
 
 export const cdpManagerUrns = {
   generate: id => ({
@@ -16,13 +17,6 @@ export const cdpManagerUrns = {
   }),
   returns: [VAULT_ADDRESS]
 };
-
-const validateVaultId = id =>
-  !/^\d+$/.test(id) &&
-  `Invalid vault id: must be a positive integer. Received ${id}`;
-
-const validateVaultTypeResult = vaultType =>
-  !vaultType && 'Vault does not exist';
 
 export const cdpManagerIlks = {
   generate: id => ({

@@ -33,9 +33,8 @@ test(LIQUIDATOR_ADDRESS, async () => {
   const address = await maker.latest(LIQUIDATOR_ADDRESS, 'ETH-A');
   expect(address.toLowerCase()).toEqual(expected);
 
-  expect(() => {
-    maker.latest(LIQUIDATOR_ADDRESS, null);
-  }).toThrow(/invalid/i);
+  const promise = maker.latest(LIQUIDATOR_ADDRESS, null);
+  await expect(promise).rejects.toThrow(/invalid/i);
 });
 
 test(LIQUIDATION_PENALTY, async () => {

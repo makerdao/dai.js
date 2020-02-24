@@ -57,7 +57,13 @@ import computedSchemas from '../../src/schemas/computed';
 
 import { createCurrencyRatio } from '@makerdao/currency';
 
-let maker, snapshotData, address, address2, proxyAddress, expectedVaultAddress;
+let maker,
+  multicall,
+  snapshotData,
+  address,
+  address2,
+  proxyAddress,
+  expectedVaultAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
@@ -78,9 +84,9 @@ beforeAll(async () => {
   });
   address = maker.service('web3').currentAddress();
   address2 = TestAccountProvider.nextAccount().address;
-
-  maker.service('multicall').createWatcher();
-  maker.service('multicall').registerSchemas({
+  multicall = maker.service('multicall');
+  multicall.createWatcher();
+  multicall.registerSchemas({
     vatIlks,
     vatUrns,
     vatGem,
@@ -101,7 +107,7 @@ beforeAll(async () => {
     getCdps,
     ...computedSchemas
   });
-  maker.service('multicall').start();
+  multicall.start();
 
   await setupCollateral(maker, 'ETH-A', {
     price: ETH_A_PRICE
@@ -132,6 +138,42 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
+});
+
+test(DAI_LOCKED_IN_DSR, async () => {
+  const daiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR, address);
+  expect(daiLockedInDsr.symbol).toEqual('DSR-DAI');
+  expect(daiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
+});
+
+test(`${DAI_LOCKED_IN_DSR} using invalid account address`, async () => {
+  const promise = maker.latest(DAI_LOCKED_IN_DSR, '0xfoobar');
+  await expect(promise).rejects.toThrow(/invalid/i);
+});
+
+test(`${DAI_LOCKED_IN_DSR} before and after account has proxy`, async () => {
+  const nextAccount = TestAccountProvider.nextAccount();
+  await maker.addAccount({ ...nextAccount, type: 'privateKey' });
+  maker.useAccount(nextAccount.address);
+
+  const promise = maker.latest(DAI_LOCKED_IN_DSR, nextAccount.address);
+  await expect(promise).rejects.toThrow(/invalid/i);
+
+  await maker.service('proxy').ensureProxy();
+  await mineBlocks(maker.service('token'), 1);
+
+  const daiLockedInDsr = await maker.latest(
+    DAI_LOCKED_IN_DSR,
+    nextAccount.address
+  );
+  expect(daiLockedInDsr.symbol).toEqual('DSR-DAI');
+  expect(daiLockedInDsr.toNumber()).toEqual(0);
+});
+
+test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
+  const totalDaiLockedInDsr = await maker.latest(TOTAL_DAI_LOCKED_IN_DSR);
+  expect(totalDaiLockedInDsr.symbol).toEqual('DSR-DAI');
+  expect(totalDaiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
 });
 
 test(COLLATERAL_TYPE_PRICE, async () => {
@@ -333,32 +375,8 @@ test(`${VAULT} with non-existent id`, async () => {
 
 test(`${VAULT} with invalid id`, async () => {
   const cdpId = -9000;
-  expect(() => {
-    maker.latest(VAULT, cdpId);
-  }).toThrow(/invalid vault id/i);
-});
-
-test(DAI_LOCKED_IN_DSR, async () => {
-  const daiLockedInDsr = await maker.latest(DAI_LOCKED_IN_DSR, address);
-  expect(daiLockedInDsr.symbol).toEqual('DSR-DAI');
-  expect(daiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
-});
-
-test.skip(`${DAI_LOCKED_IN_DSR} using invalid account address`, async () => {
-  expect(() => {
-    maker.latest(DAI_LOCKED_IN_DSR, '0xfoobar');
-  }).toThrow(/invalid/i);
-});
-
-test.skip(`${DAI_LOCKED_IN_DSR} using account with no proxy`, async () => {
-  const promise = maker.latest(DAI_LOCKED_IN_DSR, address2);
-  await expect(promise).rejects.toThrow();
-});
-
-test(TOTAL_DAI_LOCKED_IN_DSR, async () => {
-  const totalDaiLockedInDsr = await maker.latest(TOTAL_DAI_LOCKED_IN_DSR);
-  expect(totalDaiLockedInDsr.symbol).toEqual('DSR-DAI');
-  expect(totalDaiLockedInDsr.toNumber()).toBeCloseTo(1, 18);
+  const vault = maker.latest(VAULT, cdpId);
+  await expect(vault).rejects.toThrow(/invalid vault id/i);
 });
 
 test(BALANCE, async () => {
@@ -423,6 +441,16 @@ test(ALLOWANCE, async () => {
   maker.useAccount('default');
 });
 
+test(`${ALLOWANCE} using invalid account address`, async () => {
+  const promise = maker.latest(ALLOWANCE, 'BAT', null);
+  await expect(promise).rejects.toThrow(/invalid address/i);
+});
+
+test(`${ALLOWANCE} for account with no proxy`, async () => {
+  const promise = maker.latest(ALLOWANCE, 'BAT', address2);
+  await expect(promise).rejects.toThrow(/invalid proxy/i);
+});
+
 test(USER_VAULTS_LIST, async () => {
   const [batVault, ethVault] = await maker.latest(USER_VAULTS_LIST, address);
 
@@ -438,6 +466,16 @@ test(USER_VAULTS_LIST, async () => {
   expect(ethVault.vaultAddress).toEqual(
     '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1'
   );
+});
+
+test(`${USER_VAULTS_LIST} for account with no proxy`, async () => {
+  const promise = maker.latest(USER_VAULTS_LIST, address2);
+  await expect(promise).rejects.toThrow(/invalid/i);
+});
+
+test(`${USER_VAULTS_LIST} for account with no proxy`, async () => {
+  const promise = maker.latest(USER_VAULTS_LIST, address2);
+  await expect(promise).rejects.toThrow(/invalid/i);
 });
 
 test(PROXY_OWNER, async () => {

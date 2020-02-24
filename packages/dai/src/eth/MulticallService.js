@@ -1,13 +1,32 @@
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
-import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
-import { map, flatMap, debounceTime, take } from 'rxjs/operators';
+import { Observable, ReplaySubject, combineLatest, from, throwError, timer } from 'rxjs';
+import {
+  map,
+  flatMap,
+  debounceTime,
+  take,
+  catchError,
+  filter,
+  takeUntil,
+  throwIfEmpty,
+  tap
+} from 'rxjs/operators';
 import get from 'lodash/get';
 import set from 'lodash/set';
+import find from 'lodash/find';
 
 const log = debug('dai:MulticallService');
 const log2 = debug('dai:MulticallService:observables');
+
+const throwIfErrorInValues = values => values.map(v => { if (v instanceof Error) throw v; }); // prettier-ignore
+const checkForErrors = values => find(values, v => v instanceof Error) === undefined;
+const catchNestedErrors = key => f =>
+  catchError(err => {
+    log2(`Caught nested error in ${key}: ${err}`);
+    return from([new Error(err)]);
+  })(f);
 
 export default class MulticallService extends PublicService {
   constructor(name = 'multicall') {
@@ -32,6 +51,7 @@ export default class MulticallService extends PublicService {
     this._removeSchemaDelay = settings.removeSchemaDelay || 1000;
     this._debounceTime = settings.debounceTime || 1;
     this._latestDebounceTime = settings.latestDebounceTime || 1;
+    this._latestTimeout = settings.latestTimeout || 10000;
   }
 
   authenticate() {
@@ -164,8 +184,14 @@ export default class MulticallService extends PublicService {
   }
 
   latest(key, ...args) {
-    return this.watch(key, ...args)
+    const obsPath = `${key}${args.length > 0 ? '.' : ''}${args.join('.')}`;
+    return this._watch({ depth: 0, throwIfError: true }, key, ...args)
       .pipe(
+        catchError(err => {
+          throw new Error(err);
+        }),
+        takeUntil(timer(this._latestTimeout)),
+        throwIfEmpty(() => new Error(`Timed out waiting for latest value of: ${obsPath}`)),
         debounceTime(this._latestDebounceTime),
         take(1)
       )
@@ -176,22 +202,26 @@ export default class MulticallService extends PublicService {
     return this._watch({ depth: 0 }, key, ...args);
   }
 
-  _watch({ depth }, key, ...args) {
+  _watch({ depth, throwIfError = false }, key, ...args) {
     // Find schema definition associated with this observable key
     const schemaDefinition = this.schemaByObservableKey(key);
     const expectedArgs = schemaDefinition.generate.length;
     if (args.length < expectedArgs)
-      throw new Error(`Observable ${key} expects at least ${expectedArgs} argument(s)`);
+      return throwError(`Observable ${key} expects at least ${expectedArgs} argument(s)`);
+
+    const obsPath = `${key}${args.length > 0 ? '.' : ''}${args.join('.')}`;
 
     // Validate arguments using schema args validator
     if (schemaDefinition?.validate?.args) {
       const validate = schemaDefinition.validate.args(...args);
-      if (validate) throw new Error(validate);
+      if (validate) {
+        log2(`Input validation failed for observable: ${obsPath} (depth: ${depth})`);
+        return throwError(validate);
+      }
     }
 
     // Create or get existing schema instance for this instance path (schema definition + args)
     const schemaInstance = this._createSchemaInstance(schemaDefinition, ...args);
-    const obsPath = `${key}${args.length > 0 ? '.' : ''}${args.join('.')}`;
     const { computed } = schemaInstance;
     log2(`watch() called for ${computed ? 'computed ' : 'base '}observable: ${obsPath} (depth: ${depth})`); // prettier-ignore
 
@@ -202,7 +232,13 @@ export default class MulticallService extends PublicService {
         log2(`Returning existing computed observable: ${obsPath} (depth: ${depth})`);
         // Only debounce if call to watch() is not nested
         if (depth === 0) existing = existing.pipe(debounceTime(this._debounceTime));
-        return existing.pipe(map(result => computed(...result)));
+        if (throwIfError) existing = existing.pipe(tap(throwIfErrorInValues));
+        return existing.pipe(
+          // Don't pass values to computed() if any of them are errors
+          filter(checkForErrors),
+          // Pass values to computed() on the computed observable
+          map(result => computed(...result))
+        );
       }
       log2(`Returning existing base observable: ${obsPath}`);
       return existing;
@@ -251,7 +287,11 @@ export default class MulticallService extends PublicService {
             trie.map((node, idx) => {
               return indexesAtLeafNodes[idx] ? [node] : recurseDependencyTree(node);
             })
-          ).pipe(flatMap(result => this._watch({ depth: depth + 1 }, key, ...result)));
+          ).pipe(
+            flatMap(result =>
+              this._watch({ depth: depth + 1 }, key, ...result).pipe(catchNestedErrors(key))
+            )
+          );
         }
       };
 
@@ -262,7 +302,13 @@ export default class MulticallService extends PublicService {
       set(this._observables, obsPath, observable);
       // Only debounce if call to watch() is not nested
       if (depth === 0) observable = observable.pipe(debounceTime(this._debounceTime));
-      return observable.pipe(map(result => computed(...result)));
+      if (throwIfError) observable = observable.pipe(tap(throwIfErrorInValues));
+      return observable.pipe(
+        // Don't pass values to computed() if any of them are errors
+        filter(checkForErrors),
+        // Pass values to computed() on the computed observable
+        map(result => computed(...result))
+      );
     }
 
     // This is a base observable

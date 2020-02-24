@@ -2,6 +2,7 @@ import { getMcdToken } from '../utils';
 import BigNumber from 'bignumber.js';
 
 import { TOKEN_BALANCE, TOKEN_ALLOWANCE_BASE } from './_constants';
+import { validateAddress } from './_validators';
 
 export const ALLOWANCE_AMOUNT = BigNumber(
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
@@ -76,7 +77,16 @@ export const tokenAllowance = {
         : [TOKEN_ALLOWANCE_BASE, address, proxyAddress, symbol]
     ],
     computed: v => v
-  })
+  }),
+  validate: {
+    args: (address, proxyAddress) =>
+      validateAddress`Invalid address for tokenAllowance: ${'address'}`(
+        address
+      ) ||
+      validateAddress`Invalid proxy address for tokenAllowance: ${'address'}`(
+        proxyAddress
+      )
+  }
 };
 
 export const adapterBalance = {

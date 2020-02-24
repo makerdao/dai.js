@@ -3,6 +3,7 @@ import {
   USER_VAULT_ADDRESSES,
   USER_VAULT_TYPES
 } from './_constants';
+import { validateAddress } from './_validators';
 import { bytesToString } from '../utils';
 
 export const getCdps = {
@@ -17,6 +18,10 @@ export const getCdps = {
       proxyAddress
     ]
   }),
+  validate: {
+    args: (_, address) =>
+      validateAddress`Invalid address for getCdps: ${'address'}`(address)
+  },
   returns: [
     [USER_VAULT_IDS, v => v.map(n => n.toNumber())],
     [USER_VAULT_ADDRESSES],
