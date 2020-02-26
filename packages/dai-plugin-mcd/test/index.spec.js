@@ -1,4 +1,4 @@
-import McdPlugin, { BAT } from '../src';
+import { McdPlugin, BAT } from '../src';
 import { mcdMaker } from './helpers';
 import addresses from '../contracts/addresses/testnet.json';
 
@@ -59,4 +59,9 @@ test('BAT token basic functionality', async () => {
   const token = maker.getToken('BAT');
   expect(token.address()).toEqual(addresses.BAT);
   expect(await token.balance()).toEqual(BAT(1000));
+});
+
+test('McdPlugin has a named and a default export', async () => {
+  expect(require('../src').default).toEqual(McdPlugin);
+  expect(require('../src').McdPlugin).toEqual(McdPlugin);
 });

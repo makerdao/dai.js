@@ -99,7 +99,7 @@ export const defaultTokens = [
   ])
 ];
 
-export default {
+export const McdPlugin = {
   addConfig: (
     _,
     { cdpTypes = defaultCdpTypes, addressOverrides, prefetch = true } = {}
@@ -153,3 +153,5 @@ export default {
     };
   }
 };
+
+export default McdPlugin;
