@@ -27,7 +27,7 @@ export const ETH = currencies.ETH;
 export const MKR = currencies.MKR;
 export const PETH = currencies.PETH;
 export const WETH = currencies.WETH;
-export const SAI = currencies.SAI
+export const SAI = currencies.SAI;
 export const USD = currencies.USD;
 
 export const USD_ETH = createCurrencyRatio(USD, ETH);
