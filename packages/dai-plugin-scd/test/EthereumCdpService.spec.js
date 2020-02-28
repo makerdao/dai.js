@@ -1,8 +1,6 @@
-import { buildTestEthereumCdpService } from './helpers/serviceBuilders';
-import { USD_DAI } from '../src/Currency';
+import { USD_SAI } from '../src/Currency';
 import Cdp from '../src/Cdp';
 import { mineBlocks } from '@makerdao/test-helpers';
-import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { scdMaker } from './helpers/maker';
 import { ServiceRoles } from '../src/utils/constants';
 
@@ -37,7 +35,7 @@ test('can read the annual governance fee', async () => {
 
 test('can read the target price', async () => {
   const tp = await cdpService.getTargetPrice();
-  expect(tp).toEqual(USD_DAI(1));
+  expect(tp).toEqual(USD_SAI(1));
 });
 
 describe('find cdp', () => {
@@ -55,14 +53,8 @@ describe('find cdp', () => {
     expect(sameCdp.dsProxyAddress).not.toBeDefined();
   });
 
-  test.skip('regression: handle null proxy correctly', async () => {
-    const cdps = buildTestEthereumCdpService({
-      accounts: {
-        default: { type: 'privateKey', ...TestAccountProvider.nextAccount() }
-      }
-    });
-    await cdps.manager().authenticate();
-    const sameCdp = await cdps.getCdp(cdp.id);
+  test('regression: handle null proxy correctly', async () => {
+    const sameCdp = await cdpService.getCdp(cdp.id);
     expect(sameCdp.id).toEqual(cdp.id);
     expect(sameCdp.dsProxyAddress).not.toBeDefined();
   });
@@ -107,7 +99,7 @@ test('can calculate system collateralization', async () => {
   let lock = cdp.lockEth(0.1);
   mineBlocks(cdpService);
   await lock;
-  await cdp.drawDai(1);
+  await cdp.drawSai(1);
   const scA = await cdpService.getSystemCollateralization();
 
   lock = cdp.lockEth(0.1);
@@ -116,7 +108,7 @@ test('can calculate system collateralization', async () => {
   const scB = await cdpService.getSystemCollateralization();
   expect(scB).toBeGreaterThan(scA);
 
-  await cdp.drawDai(1);
+  await cdp.drawSai(1);
   const scC = await cdpService.getSystemCollateralization();
   expect(scC).toBeLessThan(scB);
 });

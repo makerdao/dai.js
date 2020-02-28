@@ -6,7 +6,7 @@ export default {
   SAI_DAD: 'SAI_DAD',
   SAI_MOM: 'SAI_MOM',
   SAI_VOX: 'SAI_VOX',
-  SAI_TUB: 'SAI_TUB',
+  SAI_TUB: 'TUB',
   SAI_TAP: 'SAI_TAP',
   SAI_TOP: 'SAI_TOP',
   MAKER_OTC: 'MAKER_OTC',

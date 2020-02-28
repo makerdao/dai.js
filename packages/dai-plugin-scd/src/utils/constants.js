@@ -17,6 +17,7 @@ export const AccountType = {
 export const ServiceRoles = {
   CDP: 'cdp',
   PRICE: 'price'
+  // CONVERSION: 'conversion'
   // QUERY_API: 'queryApi'
 };
 

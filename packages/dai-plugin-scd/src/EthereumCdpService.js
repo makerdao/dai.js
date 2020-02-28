@@ -7,9 +7,9 @@ import BigNumber from 'bignumber.js';
 import { WAD, RAY } from './utils/constants';
 import {
   getCurrency,
-  USD_DAI,
+  USD_SAI,
   USD_ETH,
-  DAI,
+  SAI,
   ETH,
   PETH,
   WETH,
@@ -103,7 +103,7 @@ export default class EthereumCdpService extends PrivateService {
     return new Cdp(this, id);
   }
 
-  async _throwIfNotEnoughMkrToWipe(cdpId, amountToWipe, unit = DAI) {
+  async _throwIfNotEnoughMkrToWipe(cdpId, amountToWipe, unit = SAI) {
     const enoughMkrToWipe = await this.enoughMkrToWipe(
       cdpId,
       amountToWipe,
@@ -113,9 +113,9 @@ export default class EthereumCdpService extends PrivateService {
       throw new Error('not enough MKR balance to cover governance fee');
   }
 
-  async enoughMkrToWipe(cdpId, amountToWipe, unit = DAI) {
-    const dai = getCurrency(amountToWipe, unit);
-    if (dai.eq(0)) return;
+  async enoughMkrToWipe(cdpId, amountToWipe, unit = SAI) {
+    const sai = getCurrency(amountToWipe, unit);
+    if (sai.eq(0)) return;
     const MkrToken = this.get('token').getToken(MKR);
     const ownerAddress = this.get('token')
       .get('web3')
@@ -125,7 +125,7 @@ export default class EthereumCdpService extends PrivateService {
       MkrToken.balanceOf(ownerAddress),
       this.getDebtValue(cdpId)
     ]);
-    const mkrOwed = dai
+    const mkrOwed = sai
       .div(debt)
       .toBigNumber()
       .times(fee.toBigNumber());
@@ -143,11 +143,11 @@ export default class EthereumCdpService extends PrivateService {
     return new ProxyCdp(this, dsProxy).transactionObject();
   }
 
-  openProxyCdpLockEthAndDrawDai(amountEth, amountDai, dsProxy = null) {
+  openProxyCdpLockEthAndDrawSai(amountEth, amountSai, dsProxy = null) {
     return new ProxyCdp(this, dsProxy, null, {
       lockAndDraw: true,
       amountEth,
-      amountDai
+      amountSai
     }).transactionObject();
   }
 
@@ -163,7 +163,7 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async shut(cdpId) {
-    const debt = await this.getDebtValue(cdpId, DAI);
+    const debt = await this.getDebtValue(cdpId, SAI);
     await this._throwIfNotEnoughMkrToWipe(cdpId, debt);
     const hexCdpId = numberToBytes32(cdpId);
     await this.get('allowance').requireAllowance(
@@ -171,7 +171,7 @@ export default class EthereumCdpService extends PrivateService {
       this._tubContract().address
     );
     await this.get('allowance').requireAllowance(
-      DAI,
+      SAI,
       this._tubContract().address
     );
     return this._tubContract().shut(hexCdpId);
@@ -218,14 +218,14 @@ export default class EthereumCdpService extends PrivateService {
     return this._tubContract().free(hexCdpId, value, { promise });
   }
 
-  drawDai(cdpId, amount, { unit = DAI, promise } = {}) {
+  drawSai(cdpId, amount, { unit = SAI, promise } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toFixed('wei');
     return this._tubContract().draw(hexCdpId, value, { promise });
   }
 
   @tracksTransactions
-  async wipeDai(cdpId, amount, { unit = DAI, promise }) {
+  async wipeSai(cdpId, amount, { unit = SAI, promise }) {
     const value = getCurrency(amount, unit).toFixed('wei');
     await this._throwIfNotEnoughMkrToWipe(cdpId, amount, unit);
     const hexCdpId = numberToBytes32(cdpId);
@@ -234,7 +234,7 @@ export default class EthereumCdpService extends PrivateService {
       this._tubContract().address
     );
     await this.get('allowance').requireAllowance(
-      DAI,
+      SAI,
       this._tubContract().address
     );
     return this._tubContract().wipe(hexCdpId, value, { promise });
@@ -265,7 +265,7 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  async getDebtValue(cdpId, unit = DAI) {
+  async getDebtValue(cdpId, unit = SAI) {
     const hexCdpId = numberToBytes32(cdpId);
     // we need to use the Web3.js contract interface to get the return value
     // from the non-constant function `tab`
@@ -275,13 +275,13 @@ export default class EthereumCdpService extends PrivateService {
         .tab(hexCdpId)
         .call({}, (err, val) => (err ? reject(err) : resolve(val)))
     );
-    const daiDebt = DAI.wei(tab.toString());
+    const saiDebt = SAI.wei(tab.toString());
     switch (unit) {
-      case DAI:
-        return daiDebt;
+      case SAI:
+        return saiDebt;
       case USD: {
         const targetPrice = await this.getTargetPrice();
-        return daiDebt.times(targetPrice);
+        return saiDebt.times(targetPrice);
       }
     }
   }
@@ -351,7 +351,7 @@ export default class EthereumCdpService extends PrivateService {
         .call({}, (err, val) => (err ? reject(err) : resolve(val)))
     );
 
-    return USD_DAI.ray(par);
+    return USD_SAI.ray(par);
   }
 
   async getLiquidationPrice(cdpId) {
@@ -387,24 +387,24 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async getSystemCollateralization() {
-    const dai = this.get('token').getToken(DAI);
+    const sai = this.get('token').getToken(SAI);
     const [
       totalWethLocked,
       wethPrice,
-      daiSupply,
+      saiSupply,
       targetPrice
     ] = await Promise.all([
       this._tubContract().pie(),
       this.get('price').getEthPrice(),
-      dai.totalSupply(),
+      sai.totalSupply(),
       this.getTargetPrice()
     ]);
 
     const totalCollateralValue = new BigNumber(totalWethLocked)
       .div(WAD)
       .times(wethPrice.toBigNumber());
-    const systemDaiDebt = daiSupply.times(targetPrice);
-    return totalCollateralValue.div(systemDaiDebt.toBigNumber()).toNumber();
+    const systemSaiDebt = saiSupply.times(targetPrice);
+    return totalCollateralValue.div(systemSaiDebt.toBigNumber()).toNumber();
   }
 
   async getWethToPethRatio() {
@@ -466,15 +466,15 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  lockEthAndDrawDaiProxy(dsProxy, cdpId, amountEth, amountDai) {
+  lockEthAndDrawSaiProxy(dsProxy, cdpId, amountEth, amountSai) {
     const hexCdpId = numberToBytes32(cdpId);
     const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
-    const valueDai = getCurrency(amountDai, DAI).toFixed('wei');
+    const valueSai = getCurrency(amountSai, SAI).toFixed('wei');
 
     return this._saiProxyTubContract().lockAndDraw(
       this._tubContract().address,
       hexCdpId,
-      valueDai,
+      valueSai,
       {
         dsProxy,
         value: valueEth,
@@ -483,7 +483,7 @@ export default class EthereumCdpService extends PrivateService {
             name: 'lockAndDraw',
             id: cdpId,
             lockAmount: getCurrency(amountEth, ETH),
-            drawAmount: getCurrency(amountDai, DAI),
+            drawAmount: getCurrency(amountSai, SAI),
             proxy: dsProxy
           }
         }
@@ -491,9 +491,9 @@ export default class EthereumCdpService extends PrivateService {
     );
   }
 
-  drawDaiProxy(dsProxy, cdpId, amount) {
+  drawSaiProxy(dsProxy, cdpId, amount) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, DAI).toFixed('wei');
+    const value = getCurrency(amount, SAI).toFixed('wei');
 
     return this._saiProxyTubContract().draw(
       this._tubContract().address,
@@ -505,7 +505,7 @@ export default class EthereumCdpService extends PrivateService {
           action: {
             name: 'draw',
             id: cdpId,
-            amount: getCurrency(amount, DAI),
+            amount: getCurrency(amount, SAI),
             proxy: dsProxy
           }
         }
@@ -535,17 +535,17 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   @tracksTransactions
-  async wipeDaiProxy(dsProxy, cdpId, amount, { useOtc, promise }) {
+  async wipeSaiProxy(dsProxy, cdpId, amount, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
-    const value = getCurrency(amount, DAI).toFixed('wei');
+    const value = getCurrency(amount, SAI).toFixed('wei');
 
-    await this.get('allowance').requireAllowance(DAI, dsProxy, {
+    await this.get('allowance').requireAllowance(SAI, dsProxy, {
       promise
     });
     // Only require MKR allowance if paying fee using MKR (if using OTC, no need
     // to approve MKR right now)
     if (!useOtc) {
-      await this._throwIfNotEnoughMkrToWipe(cdpId, amount, DAI);
+      await this._throwIfNotEnoughMkrToWipe(cdpId, amount, SAI);
       await this.get('allowance').requireAllowance(MKR, dsProxy, {
         promise
       });
@@ -557,7 +557,7 @@ export default class EthereumCdpService extends PrivateService {
         action: {
           name: 'wipe',
           id: cdpId,
-          amount: getCurrency(amount, DAI),
+          amount: getCurrency(amount, SAI),
           otc: useOtc,
           proxy: dsProxy
         }
@@ -586,13 +586,13 @@ export default class EthereumCdpService extends PrivateService {
   async shutProxy(dsProxy, cdpId, { useOtc, promise }) {
     const hexCdpId = numberToBytes32(cdpId);
 
-    await this.get('allowance').requireAllowance(DAI, dsProxy, {
+    await this.get('allowance').requireAllowance(SAI, dsProxy, {
       promise
     });
     // Only require MKR allowance and balance if paying fee using MKR (if using
     // OTC, no need to approve MKR right now)
     if (!useOtc) {
-      const debt = await this.getDebtValue(cdpId, DAI);
+      const debt = await this.getDebtValue(cdpId, SAI);
       await this._throwIfNotEnoughMkrToWipe(cdpId, debt);
       await this.get('allowance').requireAllowance(MKR, dsProxy, {
         promise

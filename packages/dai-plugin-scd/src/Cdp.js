@@ -20,7 +20,7 @@ export default class Cdp {
         ETH: () => this.getCollateralValue()
       },
       DEBT: {
-        dai: () => this.getDebtValue()
+        sai: () => this.getDebtValue()
       }
     });
   }
@@ -49,7 +49,7 @@ export default class Cdp {
 // with the cdp's id as the first argument
 const passthroughMethods = [
   'bite',
-  'drawDai',
+  'drawSai',
   'enoughMkrToWipe',
   'freeEth',
   'freePeth',
@@ -65,7 +65,7 @@ const passthroughMethods = [
   'lockPeth',
   'lockWeth',
   'shut',
-  'wipeDai'
+  'wipeSai'
 ];
 
 Object.assign(

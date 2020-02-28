@@ -72,15 +72,16 @@ export default {
       smartContract: { addContracts },
       token: {
         erc20: [
-          { currency: PETH, address: addContracts.SKR.address },
-          { currency: WETH, address: addContracts.GEM.address },
-          { currency: MKR, address: addContracts.GOV.address },
+          // { currency: PETH, address: addContracts.SKR.address },
+          // { currency: WETH, address: addContracts.GEM.address },
+          // { currency: MKR, address: addContracts.GOV.address },
           { currency: SAI, address: addContracts.SAI.address }
         ]
       },
       additionalServices: [CDP, PRICE],
       [CDP]: EthereumCdpService,
       [PRICE]: PriceService
+      // [CONVERSION]: TokenConversionService
     };
   }
 };

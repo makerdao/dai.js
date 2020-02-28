@@ -1,12 +1,12 @@
 import contracts from '../contracts/contracts';
-import { getCurrency, DAI, ETH, USD } from './Currency';
+import { getCurrency, SAI, ETH, USD } from './Currency';
 
 export default class ProxyCdp {
   constructor(
     cdpService,
     dsProxyAddress,
     cdpId,
-    { lockAndDraw = false, amountEth = null, amountDai = null } = {}
+    { lockAndDraw = false, amountEth = null, amountSai = null } = {}
   ) {
     this._cdpService = cdpService;
     this._smartContractService = this._cdpService.get('smartContract');
@@ -14,7 +14,7 @@ export default class ProxyCdp {
 
     if (dsProxyAddress) this.dsProxyAddress = dsProxyAddress.toLowerCase();
     if (lockAndDraw) {
-      this._create({ lockAndDraw, amountEth, amountDai });
+      this._create({ lockAndDraw, amountEth, amountSai });
     } else {
       if (!cdpId) this._create();
       else this.id = cdpId;
@@ -28,12 +28,12 @@ export default class ProxyCdp {
         ETH: () => this.getCollateralValue()
       },
       DEBT: {
-        dai: () => this.getDebtValue()
+        sai: () => this.getDebtValue()
       }
     });
   }
 
-  _create({ lockAndDraw = false, amountEth = null, amountDai = null } = {}) {
+  _create({ lockAndDraw = false, amountEth = null, amountSai = null } = {}) {
     const tub = this._smartContractService.getContract(contracts.SAI_TUB);
     const saiProxy = this._smartContractService.getContract(contracts.SAI_PROXY); // prettier-ignore
 
@@ -43,18 +43,18 @@ export default class ProxyCdp {
 
       if (lockAndDraw) {
         const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
-        const valueDai = getCurrency(amountDai, DAI).toFixed('wei');
+        const valueSai = getCurrency(amountSai, SAI).toFixed('wei');
         method = 'createOpenLockAndDraw';
         args = [
           proxyRegistryAddress,
           tub.address,
-          valueDai,
+          valueSai,
           {
             metadata: {
               action: {
                 name: method,
                 amountEth: getCurrency(amountEth, ETH),
-                amountDai: getCurrency(amountDai, DAI)
+                amountSai: getCurrency(amountSai, SAI)
               }
             },
             value: valueEth,
@@ -79,17 +79,17 @@ export default class ProxyCdp {
     } else {
       if (lockAndDraw) {
         const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
-        const valueDai = getCurrency(amountDai, DAI).toFixed('wei');
+        const valueSai = getCurrency(amountSai, SAI).toFixed('wei');
         method = 'lockAndDraw(address,uint256)';
         args = [
           tub.address,
-          valueDai,
+          valueSai,
           {
             metadata: {
               action: {
                 name: 'openLockAndDraw',
                 amountEth: getCurrency(amountEth, ETH),
-                amountDai: getCurrency(amountDai, DAI),
+                amountSai: getCurrency(amountSai, SAI),
                 proxy: this.dsProxyAddress
               }
             },
@@ -158,7 +158,7 @@ export default class ProxyCdp {
 // Otherwise the method name is called and the just CDP id is passed
 const passthroughMethods = [
   ['bite', false],
-  ['drawDai', true],
+  ['drawSai', true],
   ['enoughMkrToWipe', false],
   ['freeEth', true],
   // 'freePeth',
@@ -174,8 +174,8 @@ const passthroughMethods = [
   // 'lockPeth',
   // 'lockWeth',
   ['shut', true],
-  ['wipeDai', true],
-  ['lockEthAndDrawDai', true]
+  ['wipeSai', true],
+  ['lockEthAndDrawSai', true]
 ];
 
 Object.assign(
