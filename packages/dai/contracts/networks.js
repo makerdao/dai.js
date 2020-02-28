@@ -3,11 +3,13 @@ import contracts from './contracts';
 import * as abis from './abis';
 import kovanAddresses from './addresses/kovan.json';
 import mainnetAddresses from './addresses/mainnet.json';
+import rinkebyAddresses from './addresses/rinkeby.json';
 import testnetAddresses from './addresses/testnet.json';
 
 const addressMapping = {
   mainnet: mainnetAddresses,
   kovan: kovanAddresses,
+  rinkeby: rinkebyAddresses,
   testnet: testnetAddresses
 };
 
@@ -149,7 +151,7 @@ export default [
   { name: 'mainnet', networkId: 1, contracts: contractInfo('mainnet') },
   { name: 'morden', networkId: 2 },
   { name: 'ropsten', networkId: 3 },
-  { name: 'rinkeby', networkId: 4 },
+  { name: 'rinkeby', networkId: 4, contracts: contractInfo('rinkeby') },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
   { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },
   { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('testnet') }
