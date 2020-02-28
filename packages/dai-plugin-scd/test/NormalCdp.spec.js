@@ -1,11 +1,13 @@
 import sharedTests from './Cdp.shared';
 import { PETH, WETH } from '../src/Currency';
-import { buildTestEthereumCdpService } from './helpers/serviceBuilders';
+import { scdMaker } from './helpers/maker';
+import { ServiceRoles } from '../src/utils/constants';
 
 async function initCdpService() {
-  const service = buildTestEthereumCdpService();
-  await service.manager().authenticate();
-  return service;
+  const maker = await scdMaker();
+  const cdpService = await maker.service(ServiceRoles.CDP);
+  await cdpService.manager().authenticate();
+  return cdpService;
 }
 
 sharedTests(cdpService => cdpService.openCdp(), initCdpService);

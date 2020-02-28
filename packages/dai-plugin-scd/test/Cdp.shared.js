@@ -4,7 +4,6 @@ import {
   takeSnapshot,
   restoreSnapshot
 } from '@makerdao/test-helpers';
-import { buildTestService } from './helpers/serviceBuilders';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { promiseWait } from '../src/utils';
 import { scdMaker } from './helpers/maker';
@@ -14,25 +13,23 @@ let priceService, currentAddress;
 
 async function setPrice(type, amount) {
   if (!priceService) {
-    priceService = buildTestService('price');
-    await priceService.manager().authenticate();
+    const maker = await scdMaker();
+    priceService = maker.service(ServiceRoles.PRICE);
   }
   const method = type === MKR ? 'setMkrPrice' : 'setEthPrice';
   await priceService[method](amount);
 }
 
 export default function sharedTests(openCdp, initCdpService) {
-  let cdp, cdpService, dai;
+  let cdp, cdpService, sai;
 
   beforeAll(async () => {
-    const maker = await scdMaker();
-    const cdpService = maker.service(ServiceRoles.CDP);
-    // cdpService = await initCdpService();
+    cdpService = await initCdpService();
     currentAddress = cdpService
       .get('token')
       .get('web3')
       .currentAddress();
-    dai = cdpService.get('token').getToken(SAI);
+    sai = cdpService.get('token').getToken(SAI);
   });
 
   describe('basic checks', () => {
@@ -85,7 +82,7 @@ export default function sharedTests(openCdp, initCdpService) {
       const tx = cdp.lockEth(0.1);
       mineBlocks(cdpService);
       await tx;
-      await cdp.drawDai(13);
+      await cdp.drawSai(13);
     });
 
     afterAll(async () => {
@@ -141,9 +138,9 @@ export default function sharedTests(openCdp, initCdpService) {
     });
 
     describe('with debt', () => {
-      beforeAll(() => cdp.drawDai(5));
+      beforeAll(() => cdp.drawSai(5));
 
-      test('read debt in dai', async () => {
+      test('read debt in sai', async () => {
         const debt = await cdp.getDebtValue();
         expect(debt).toEqual(SAI(5));
       });
@@ -207,7 +204,7 @@ export default function sharedTests(openCdp, initCdpService) {
           const enoughMkrToWipe = await cdp.enoughMkrToWipe(1);
           expect(enoughMkrToWipe).toBe(false);
           try {
-            await cdp.wipeDai(1);
+            await cdp.wipeSai(1);
           } catch (err) {
             expect(err).toBeTruthy();
             expect(err.message).toBe(
@@ -243,7 +240,7 @@ export default function sharedTests(openCdp, initCdpService) {
           const mkr = cdpService.get('token').getToken(MKR);
           const debt1 = await cdp.getDebtValue();
           const balance1 = await mkr.balanceOf(currentAddress);
-          await cdp.wipeDai(1);
+          await cdp.wipeSai(1);
           const debt2 = await cdp.getDebtValue();
           const balance2 = await mkr.balanceOf(currentAddress);
           expect(debt1.minus(debt2)).toEqual(SAI(1));
@@ -251,9 +248,9 @@ export default function sharedTests(openCdp, initCdpService) {
         });
 
         test('wipe', async () => {
-          const balance1 = parseFloat(await dai.balanceOf(currentAddress));
-          await cdp.wipeDai('5');
-          const balance2 = parseFloat(await dai.balanceOf(currentAddress));
+          const balance1 = parseFloat(await sai.balanceOf(currentAddress));
+          await cdp.wipeSai('5');
+          const balance2 = parseFloat(await sai.balanceOf(currentAddress));
           expect(balance2 - balance1).toBeCloseTo(-5);
           const debt = await cdp.getDebtValue();
           expect(debt).toEqual(SAI(0));
