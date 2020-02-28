@@ -157,6 +157,11 @@ export default [
     name: 'rinkeby',
     networkId: 4
   },
+  {
+    name: 'goerli',
+    networkId: 5
+  },
+
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
   { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },
   { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('testnet') }
