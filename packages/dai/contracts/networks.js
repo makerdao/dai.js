@@ -3,18 +3,15 @@ import contracts from './contracts';
 import * as abis from './abis';
 import kovanAddresses from './addresses/kovan.json';
 import mainnetAddresses from './addresses/mainnet.json';
-import rinkebyAddresses from './addresses/rinkeby.json';
 import testnetAddresses from './addresses/testnet.json';
 
 const addressMapping = {
   mainnet: mainnetAddresses,
   kovan: kovanAddresses,
-  rinkeby: rinkebyAddresses,
   testnet: testnetAddresses
 };
 
-export function contractInfo(network) {
-  const addresses = addressMapping[network];
+export function contractAddressesInfo(addresses) {
   return {
     // Tokens
     [tokens.DAI]: [
@@ -145,6 +142,11 @@ export function contractInfo(network) {
   };
 }
 
+export function contractInfo(network) {
+  const addresses = addressMapping[network];
+  return contractAddressesInfo(addresses);
+}
+
 export const TESTNET_ID = 999;
 
 export default [
@@ -153,8 +155,7 @@ export default [
   { name: 'ropsten', networkId: 3 },
   {
     name: 'rinkeby',
-    networkId: 4,
-    contracts: contractInfo('rinkeby')
+    networkId: 4
   },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
   { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },

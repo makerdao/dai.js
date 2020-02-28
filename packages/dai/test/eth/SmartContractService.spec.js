@@ -167,3 +167,21 @@ test('fallback if addressOverrides does not specify current network', async () =
   const addresses = service.getContractAddresses();
   expect(addresses.PROXY_REGISTRY).toEqual(originalAddresses.PROXY_REGISTRY);
 });
+
+test('can use address overrides for contract info', async () => {
+  const service = buildTestService('smartContract', {
+    smartContract: {
+      addressOverrides: {
+        PROXY_REGISTRY: {
+          rinkeby: '0xmock1'
+        }
+      }
+    }
+  });
+
+  service.get('web3').networkId = () => 4;
+  service.get('web3');
+  await service.manager().authenticate();
+  const addresses = service.getContractAddresses();
+  expect(addresses.PROXY_REGISTRY).toEqual('0xmock1');
+});
