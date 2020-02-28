@@ -30,7 +30,7 @@ export const WETH = currencies.WETH;
 export const SAI = currencies.SAI;
 export const USD = currencies.USD;
 
-export const USD_SAI = createCurrencyRatio(USD, SAI)
+export const USD_SAI = createCurrencyRatio(USD, SAI);
 export const USD_ETH = createCurrencyRatio(USD, ETH);
 export const USD_MKR = createCurrencyRatio(USD, MKR);
 export const USD_PETH = createCurrencyRatio(USD, PETH);
