@@ -25,6 +25,7 @@ afterAll(async done => {
 // testchain doesn't have spells (that have been executed) yet
 describe('use mainnet', () => {
   beforeAll(async () => {
+    jest.setTimeout(10000);
     maker = await setupTestMakerInstance('mainnet');
     spellService = maker.service('spell');
   });
@@ -34,6 +35,13 @@ describe('use mainnet', () => {
       '0x48916a2b11fa7a895426eedf9acf2d70523b1677'
     );
     expect(date).toEqual(new Date('2020-02-04T11:35:48.000Z'));
+  });
+
+  test('get date spell was scheduled', async () => {
+    const date = await spellService.getScheduledDate(
+      '0x48916a2b11fa7a895426eedf9acf2d70523b1677'
+    );
+    expect(date).toEqual(new Date('2020-02-04T11:34:53.000Z'));
   });
 
   test('get spell eta', async () => {
@@ -67,15 +75,5 @@ describe('use testchain', () => {
   test('get delay', async () => {
     const delay = await spellService.getDelayInSeconds();
     expect(delay.toNumber()).toBe(1);
-  });
-
-  test('get date spell was scheduled', async () => {
-    const mockGetEta = jest.fn(() => new Date('2020-02-04T11:35:48.000Z'));
-    const tempGetEta = spellService.getEta;
-    spellService.getEta = mockGetEta;
-    const date = await spellService.getScheduledDate('mockSpellAddress');
-    expect(mockGetEta).toBeCalled();
-    expect(date).toEqual(new Date('2020-02-04T11:35:47.000Z')); //1 second before eta
-    spellService.getEta = tempGetEta;
   });
 });
