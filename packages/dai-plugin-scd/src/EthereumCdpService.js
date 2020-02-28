@@ -2,7 +2,7 @@ import { PrivateService } from '@makerdao/services-core';
 import contracts from '../contracts/contracts';
 import Cdp from './Cdp';
 import ProxyCdp from './ProxyCdp';
-import QueryApi from './QueryApiScdService';
+import QueryApi from './QueryApiScd';
 import BigNumber from 'bignumber.js';
 import { WAD, RAY } from './utils/constants';
 import {

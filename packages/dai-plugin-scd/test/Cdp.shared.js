@@ -1,4 +1,4 @@
-import { DAI, PETH, USD, USD_ETH, ETH, MKR } from '../src/Currency';
+import { SAI, PETH, USD, USD_ETH, ETH, MKR } from '../src/Currency';
 import {
   mineBlocks,
   takeSnapshot,
@@ -7,6 +7,8 @@ import {
 import { buildTestService } from './helpers/serviceBuilders';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { promiseWait } from '../src/utils';
+import { scdMaker } from './helpers/maker';
+import { ServiceRoles } from '../src/utils/constants';
 
 let priceService, currentAddress;
 
@@ -23,12 +25,14 @@ export default function sharedTests(openCdp, initCdpService) {
   let cdp, cdpService, dai;
 
   beforeAll(async () => {
-    cdpService = await initCdpService();
+    const maker = await scdMaker();
+    const cdpService = maker.service(ServiceRoles.CDP);
+    // cdpService = await initCdpService();
     currentAddress = cdpService
       .get('token')
       .get('web3')
       .currentAddress();
-    dai = cdpService.get('token').getToken(DAI);
+    dai = cdpService.get('token').getToken(SAI);
   });
 
   describe('basic checks', () => {
@@ -141,7 +145,7 @@ export default function sharedTests(openCdp, initCdpService) {
 
       test('read debt in dai', async () => {
         const debt = await cdp.getDebtValue();
-        expect(debt).toEqual(DAI(5));
+        expect(debt).toEqual(SAI(5));
       });
 
       test('read debt in usd', async () => {
@@ -186,7 +190,7 @@ export default function sharedTests(openCdp, initCdpService) {
 
         test('fail to wipe debt due to insufficient MKR', async () => {
           expect.assertions(3);
-          const amountToWipe = DAI(1);
+          const amountToWipe = SAI(1);
           const mkr = cdpService.get('token').getToken(MKR);
           const [fee, debt, balance] = await Promise.all([
             cdp.getGovernanceFee(MKR),
@@ -242,7 +246,7 @@ export default function sharedTests(openCdp, initCdpService) {
           await cdp.wipeDai(1);
           const debt2 = await cdp.getDebtValue();
           const balance2 = await mkr.balanceOf(currentAddress);
-          expect(debt1.minus(debt2)).toEqual(DAI(1));
+          expect(debt1.minus(debt2)).toEqual(SAI(1));
           expect(balance1.gt(balance2)).toBeTruthy();
         });
 
@@ -252,7 +256,7 @@ export default function sharedTests(openCdp, initCdpService) {
           const balance2 = parseFloat(await dai.balanceOf(currentAddress));
           expect(balance2 - balance1).toBeCloseTo(-5);
           const debt = await cdp.getDebtValue();
-          expect(debt).toEqual(DAI(0));
+          expect(debt).toEqual(SAI(0));
         });
 
         test('free', async () => {

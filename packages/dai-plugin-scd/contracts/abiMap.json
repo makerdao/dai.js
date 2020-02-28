@@ -1,0 +1,20 @@
+{
+    "PIP": "DSValue",
+    "PEP": "DSValue",
+    "PIT": "GemPit",
+    "SIN": "ERC20",
+    "MOM": "SaiMom",
+    "VOX": "SaiVox",
+    "TUB": "SaiTub",
+    "TAP": "SaiTap",
+    "TOP": "SaiTop",
+    "SKR": "ERC20",
+    "GEM": "WETH9",
+    "GOV": "ERC20",
+    "SAI": "ERC20",
+    "SAI_PROXY": "SaiProxyCreateAndExecute",
+    "PROXY_REGISTRY": "ProxyRegistry",
+    "DS_PROXY_FACTORY": "DSProxyFactory",
+    "DS_PROXY": "DSProxy",
+    "MULTICALL": "Multicall"
+}

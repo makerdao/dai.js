@@ -1,5 +1,3 @@
-import networks from '../../contracts/networks';
-
 export function captureConsole(cb) {
   // eslint-disable-next-line
   const origConsoleLog = console.log,
@@ -24,16 +22,6 @@ export function promisify(fn) {
     });
   };
 }
-
-// export function getNetworkName(networkId) {
-//   const result = networks.filter(n => n.networkId === networkId);
-//
-//   if (result.length < 1) {
-//     throw new Error('No network with ID ' + networkId + ' found.');
-//   }
-//
-//   return result[0].name;
-// }
 
 export function slug() {
   return (

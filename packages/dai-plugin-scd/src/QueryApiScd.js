@@ -1,27 +1,8 @@
-import assert from 'assert';
 import ethUtil from 'ethereumjs-util';
-import fetch from 'isomorphic-fetch';
+import { getQueryResponse } from '@makerdao/dai/dist/src/QueryApi';
 
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
 const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';
-
-export async function getQueryResponse(serverUrl, query, variables) {
-  const resp = await fetch(serverUrl, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query,
-      variables
-    })
-  });
-
-  const { data } = await resp.json();
-  assert(data, `error fetching data from ${serverUrl}`);
-  return data;
-}
 
 export default class QueryApi {
   constructor(network) {

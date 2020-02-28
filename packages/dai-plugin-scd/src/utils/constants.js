@@ -15,13 +15,10 @@ export const AccountType = {
 };
 
 export const ServiceRoles = {
-  CDP: 'scd:cdp',
-  PRICE: 'scd:price',
-  PROXY_CDP: 'scd:proxyCdp',
-  QUERY_API: 'scd:queryApi'
+  CDP: 'cdp',
+  PRICE: 'price'
+  // QUERY_API: 'queryApi'
 };
 
-export const CDP = 'CDP';
-export const PRICE = 'PRICE';
-export const PROXY_CDP = 'PROXY_CDP';
-export const QUERY_API = 'QUERY_API';
+// export const CDP = 'cdp';
+// export const PRICE = 'price';
