@@ -161,7 +161,7 @@ describe('SCD to MCD CDP Migration', () => {
       const mcdDebt = mcdCdp.debtValue.toNumber();
 
       expect(mcdCollateral).toEqual(scdCollateral.toNumber());
-      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber(), 1);
+      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber(), 0.9);
 
       let message;
       try {
