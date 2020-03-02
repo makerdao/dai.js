@@ -113,7 +113,7 @@ export default class SmartContractService extends PrivateService {
 
   _getAllContractInfo() {
     let { networkName } = this.get('web3');
-    let mapping = networks.find(m => m.name === networkName);
+    const mapping = networks.find(m => m.name === networkName);
     assert(mapping, `Network "${networkName}" not found in mapping.`);
 
     if (!mapping.contracts)
