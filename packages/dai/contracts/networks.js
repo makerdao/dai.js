@@ -11,8 +11,7 @@ const addressMapping = {
   testnet: testnetAddresses
 };
 
-export function contractInfo(network) {
-  const addresses = addressMapping[network];
+export function contractAddressesInfo(addresses) {
   return {
     // Tokens
     [tokens.DAI]: [
@@ -143,13 +142,26 @@ export function contractInfo(network) {
   };
 }
 
+export function contractInfo(network) {
+  const addresses = addressMapping[network];
+  return contractAddressesInfo(addresses);
+}
+
 export const TESTNET_ID = 999;
 
 export default [
   { name: 'mainnet', networkId: 1, contracts: contractInfo('mainnet') },
   { name: 'morden', networkId: 2 },
   { name: 'ropsten', networkId: 3 },
-  { name: 'rinkeby', networkId: 4 },
+  {
+    name: 'rinkeby',
+    networkId: 4
+  },
+  {
+    name: 'goerli',
+    networkId: 5
+  },
+
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
   { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },
   { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('testnet') }

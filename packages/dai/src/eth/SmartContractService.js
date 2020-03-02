@@ -1,7 +1,7 @@
 import { PrivateService } from '@makerdao/services-core';
 import contracts from '../../contracts/contracts';
 import tokens from '../../contracts/tokens';
-import networks from '../../contracts/networks';
+import networks, { contractAddressesInfo } from '../../contracts/networks';
 import { Contract } from 'ethers';
 import { wrapContract } from './smartContract/wrapContract';
 import mapValues from 'lodash/mapValues';
@@ -116,21 +116,25 @@ export default class SmartContractService extends PrivateService {
     const mapping = networks.find(m => m.name === networkName);
     assert(mapping, `Network "${networkName}" not found in mapping.`);
 
+    if (!mapping.contracts)
+      mapping.contracts = contractAddressesInfo(this._addressOverrides);
+
     if (!this._contractInfoCache) this._contractInfoCache = {};
     if (!this._contractInfoCache[networkName]) {
       const allContractInfo = this._addedContracts
-        ? { ...mapping.contracts, ...this._addedContracts }
+        ? {
+            ...mapping.contracts,
+            ...this._addedContracts
+          }
         : mapping.contracts;
 
       this._contractInfoCache[networkName] = mapValues(
         allContractInfo,
         (versions, name) => {
           const latest = findLatestContractInfo(versions);
-
           const address =
             getSingleAddress(this._addressOverrides[name], networkName) ||
             getSingleAddress(latest.address, networkName);
-
           return address !== latest.address
             ? versions.map(v => (v === latest ? { ...latest, address } : v))
             : versions;
