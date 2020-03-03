@@ -10,9 +10,7 @@ import { castAsCurrency, stringToBytes, bytesToString } from './utils';
 import has from 'lodash/has';
 import padStart from 'lodash/padStart';
 import { MDAI, ETH, GNT } from './index';
-const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
-import BigNumber from 'bignumber.js';
-import { RAY } from './constants';
+const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA } = ServiceRoles;
 import getEventHistoryImpl from './EventHistory';
 
 export default class CdpManager extends LocalService {
@@ -21,7 +19,6 @@ export default class CdpManager extends LocalService {
       'smartContract',
       CDP_TYPE,
       SYSTEM_DATA,
-      QUERY_API,
       'accounts',
       'proxy',
       'token',
@@ -71,21 +68,6 @@ export default class CdpManager extends LocalService {
       })
     );
     return debts.reduce((a, b) => a.plus(b));
-  }
-
-  async getCombinedEventHistory(proxyAddress) {
-    const cdpIds = await this.getCdpIds(proxyAddress);
-    const ilksAndUrns = await Promise.all(
-      cdpIds.map(async c => {
-        const urn = await this.getUrn(c.id);
-        const ilk = stringToBytes(c.ilk);
-        return { urn, ilk };
-      })
-    );
-    const events = await this.get(QUERY_API).getCdpEventsForArrayOfIlksAndUrns(
-      ilksAndUrns
-    );
-    return this.parseFrobEvents(events, this.get(CDP_TYPE));
   }
 
   @tracksTransactions
@@ -324,42 +306,6 @@ export default class CdpManager extends LocalService {
 
   getOwner(id) {
     return this._manager.owns(this.getIdBytes(id));
-  }
-
-  parseFrobEvents(events) {
-    return events.map(e => {
-      const ilk = e.ilkIdentifier;
-      const currency = this.get(CDP_TYPE).getCdpType(null, ilk).currency;
-      const transactionHash = e.tx.transactionHash;
-      const rate = new BigNumber(e.ilkRate.toString()).dividedBy(RAY);
-      const changeInCollateral = currency.wei(Math.abs(e.dink));
-      let collateralAction;
-      if (parseInt(e.dink) !== 0) {
-        collateralAction = parseInt(e.dink) > 0 ? 'lock' : 'free';
-      }
-      const dart = MDAI.wei(Math.abs(e.dart));
-      const changeInDai = dart.times(rate);
-      let daiAction;
-      if (parseInt(e.dart) !== 0) {
-        daiAction = parseInt(e.dart) > 0 ? 'draw' : 'wipe';
-      }
-      const time = new Date(e.tx.era.iso);
-      const senderAddress = e.tx.txFrom;
-      //const resultingCollateral = currency.wei(e.urn.nodes[0].ink);
-      //const resultingDebt = MDAI.wei(e.urn.nodes[0].art);
-      return {
-        transactionHash,
-        changeInCollateral,
-        collateralAction,
-        changeInDai,
-        daiAction,
-        ilk,
-        time,
-        senderAddress
-        //resultingCollateral,
-        //resultingDebt
-      };
-    });
   }
 
   getIdBytes(id, prefix = true) {

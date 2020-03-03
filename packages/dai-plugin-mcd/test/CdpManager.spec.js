@@ -3,9 +3,7 @@ import { mcdMaker, setupCollateral } from './helpers';
 import { setMethod, transferToBag } from '../src/CdpManager';
 import { ServiceRoles } from '../src/constants';
 import { ETH, MDAI, GNT, DGD, BAT } from '../src';
-import { dummyEventData, formattedDummyEventData } from './fixtures';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 
 let maker, cdpMgr, txMgr, snapshotData;
@@ -80,20 +78,6 @@ test('getCdp can disable prefetch', async () => {
     cache: false
   });
   expect(sameCdp._urnInfoPromise).toBeUndefined();
-});
-
-test('getCombinedEventHistory', async () => {
-  const proxy = await maker.currentProxy();
-  const mockFn = jest.fn(async () => dummyEventData('ETH-A'));
-  maker.service(
-    ServiceRoles.QUERY_API
-  ).getCdpEventsForArrayOfIlksAndUrns = mockFn;
-  const events = await cdpMgr.getCombinedEventHistory(proxy);
-  expect(mockFn).toBeCalled();
-  const GEM = maker
-    .service(ServiceRoles.CDP_TYPE)
-    .getCdpType(null, events[0].ilk).currency;
-  expect(events).toEqual(formattedDummyEventData(GEM, events[0].ilk));
 });
 
 test('transaction tracking for openLockAndDraw', async () => {
