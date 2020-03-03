@@ -16,13 +16,7 @@ import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
 
 export const ServiceRoles = ServiceRoles_;
-const {
-  CDP_MANAGER,
-  CDP_TYPE,
-  SYSTEM_DATA,
-  AUCTION,
-  SAVINGS
-} = ServiceRoles;
+const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, AUCTION, SAVINGS } = ServiceRoles;
 
 // look up contract ABIs using abiMap.
 // if an exact match is not found, prefix-match against keys ending in *, e.g.

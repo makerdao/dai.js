@@ -2,12 +2,12 @@ import { PublicService } from '@makerdao/services-core';
 import CdpType from './CdpType';
 import { ServiceRoles } from './constants';
 import assert from 'assert';
-const { CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
+const { CDP_TYPE, SYSTEM_DATA } = ServiceRoles;
 import * as math from './math';
 
 export default class CdpTypeService extends PublicService {
   constructor(name = CDP_TYPE) {
-    super(name, [SYSTEM_DATA, QUERY_API]);
+    super(name, [SYSTEM_DATA]);
   }
 
   initialize(settings = {}) {
