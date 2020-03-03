@@ -2,10 +2,8 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ETH, MDAI, USD, BAT, GNT, DGD } from '../src';
 import { ServiceRoles } from '../src/constants';
-import { dummyEventData, formattedDummyEventData } from './fixtures';
 import { createCurrencyRatio } from '@makerdao/currency';
-
-const { CDP_MANAGER, QUERY_API } = ServiceRoles;
+const { CDP_MANAGER } = ServiceRoles;
 
 let dai, maker, proxy, snapshotData, txMgr;
 
@@ -157,15 +155,6 @@ describe.each([
     const cdp = await maker.service(CDP_MANAGER).open(ilk);
     expect(cdp.id).toBeGreaterThan(0);
     await expectValues(cdp, { collateral: 0, debt: 0 });
-  });
-
-  test('getEventHistory', async () => {
-    const mockFn = jest.fn(async () => dummyEventData(ilk));
-    maker.service(QUERY_API).getCdpEventsForIlkAndUrn = mockFn;
-    const cdp = await maker.service(CDP_MANAGER).open(ilk);
-    const events = await cdp.getEventHistory();
-    expect(mockFn).toBeCalled();
-    expect(events).toEqual(formattedDummyEventData(GEM, ilk));
   });
 
   test('getOwner', async () => {

@@ -5,7 +5,6 @@ export const ServiceRoles = {
   CDP_TYPE: 'mcd:cdpType',
   AUCTION: 'mcd:auction',
   SYSTEM_DATA: 'mcd:systemData',
-  QUERY_API: 'mcd:queryApi',
   SAVINGS: 'mcd:savings'
 };
 

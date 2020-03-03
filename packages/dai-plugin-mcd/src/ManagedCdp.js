@@ -76,18 +76,6 @@ export default class ManagedCdp {
     return this._cdpManager.getOwner(this.id);
   }
 
-  async getEventHistory() {
-    const urn = await this.getUrn();
-    const events = await this._cdpManager
-      .get(ServiceRoles.QUERY_API)
-      .getCdpEventsForIlkAndUrn(this.ilk, urn);
-    return this._cdpManager.parseFrobEvents(
-      events,
-      this._cdpManager.get(ServiceRoles.CDP_TYPE)
-    );
-  }
-
-  //todo: add caching?
   getUrn() {
     return this._cdpManager.getUrn(this.id);
   }

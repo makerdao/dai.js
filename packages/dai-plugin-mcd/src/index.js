@@ -12,7 +12,6 @@ import SavingsService from './SavingsService';
 import CdpTypeService from './CdpTypeService';
 import AuctionService from './AuctionService';
 import SystemDataService from './SystemDataService';
-import QueryApiMcdService from './QueryApiMcdService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
 
@@ -22,7 +21,6 @@ const {
   CDP_TYPE,
   SYSTEM_DATA,
   AUCTION,
-  QUERY_API,
   SAVINGS
 } = ServiceRoles;
 
@@ -141,15 +139,13 @@ export const McdPlugin = {
         CDP_TYPE,
         AUCTION,
         SYSTEM_DATA,
-        QUERY_API,
         SAVINGS
       ],
       [CDP_TYPE]: [CdpTypeService, { cdpTypes, prefetch }],
       [CDP_MANAGER]: CdpManager,
       [SAVINGS]: SavingsService,
       [AUCTION]: AuctionService,
-      [SYSTEM_DATA]: SystemDataService,
-      [QUERY_API]: QueryApiMcdService
+      [SYSTEM_DATA]: SystemDataService
     };
   }
 };

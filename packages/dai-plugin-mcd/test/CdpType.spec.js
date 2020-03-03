@@ -2,7 +2,7 @@ import { createCurrencyRatio } from '@makerdao/currency';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { ETH, MDAI, USD, BAT } from '../src';
-const { CDP_MANAGER, CDP_TYPE, QUERY_API } = ServiceRoles;
+const { CDP_MANAGER, CDP_TYPE } = ServiceRoles;
 
 let maker, service;
 
@@ -76,28 +76,6 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
     expect((cdpType.annualStabilityFee * 100).toFixed(1)).toBe(
       systemValues[ilk][5]
     );
-  });
-
-  test('get price history', async () => {
-    const dummyData = [
-      {
-        val: '177315000000000000000',
-        blockNumber: '1'
-      }
-    ];
-    const formattedDummyData = [
-      {
-        price: GEM(177.315),
-        time: new Date(
-          1000 * (await cdpType._web3Service.getBlock(1)).timestamp
-        )
-      }
-    ];
-    const mockFn = jest.fn(async () => dummyData);
-    maker.service(QUERY_API).getPriceHistoryForPip = mockFn;
-    const prices = await cdpType.getPriceHistory();
-    expect(mockFn).toBeCalled();
-    expect(prices).toEqual(formattedDummyData);
   });
 
   test('get ilk id', () => {
