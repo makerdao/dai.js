@@ -8,6 +8,7 @@ import McdPlugin, {
   GNT,
   USD
 } from '@makerdao/dai-plugin-mcd';
+import ScdPlugin from '@makerdao/dai-plugin-scd'
 import ethAbi from 'web3-eth-abi';
 import { utils } from 'ethers';
 
@@ -60,6 +61,7 @@ export async function migrationMaker({
   const maker = await Maker.create(preset, {
     plugins: [
       [McdPlugin, { network }],
+      [ScdPlugin, { network }],
       [MigrationPlugin, { addressOverrides, network }]
     ],
     log: false,
@@ -118,7 +120,7 @@ async function offer(
 }
 
 export async function drawSaiAndMigrateToDai(drawAmount, maker) {
-  const cdp = await maker.openCdp();
+  const cdp = await maker.service('cdp').openCdp();
   await cdp.lockEth('20');
   await cdp.drawDai(drawAmount);
   await migrateSaiToDai(10, maker);

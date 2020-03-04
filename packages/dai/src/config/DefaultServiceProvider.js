@@ -13,7 +13,6 @@ import NullEventService from '../utils/events/NullEventService';
 import NullLogger from '../utils/loggers/NullLogger';
 import SmartContractService from '../eth/SmartContractService';
 import TimerService from '../utils/TimerService';
-import TokenConversionService from '../eth/TokenConversionService';
 import TransactionManager from '../eth/TransactionManager';
 import Web3Service from '../eth/Web3Service';
 import { getSettings } from './index';
@@ -23,7 +22,6 @@ export const resolver = {
     accounts: 'AccountsService',
     allowance: 'AllowanceService',
     cache: 'CacheService',
-    conversion: 'TokenConversionService',
     event: 'EventService',
     gas: 'GasService',
     log: 'ConsoleLogger',
@@ -70,7 +68,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         NullLogger,
         SmartContractService,
         TimerService,
-        TokenConversionService,
         TransactionManager,
         Web3Service
       },

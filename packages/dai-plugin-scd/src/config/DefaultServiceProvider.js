@@ -1,12 +1,14 @@
 import { ServiceProvider } from '@makerdao/services-core';
 import EthereumCdpService from '../EthereumCdpService';
 import PriceService from '../PriceService';
+import TokenConversionService from '../TokenConversionService'
 import { getSettings } from './index';
 
 export const resolver = {
   defaults: {
     cdp: 'EthereumCdpService',
-    price: 'PriceService'
+    price: 'PriceService',
+    conversion: 'TokenConversionService'
   },
   disabled: {
     event: 'NullEventService',
@@ -29,7 +31,8 @@ export default class DefaultServiceProvider extends ServiceProvider {
     super(config, {
       services: {
         EthereumCdpService,
-        PriceService
+        PriceService,
+        TokenConversionService
       },
       ...resolver
     });

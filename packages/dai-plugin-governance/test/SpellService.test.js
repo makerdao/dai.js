@@ -28,7 +28,7 @@ describe('use mainnet', () => {
     jest.setTimeout(10000);
     maker = await setupTestMakerInstance('mainnet');
     spellService = maker.service('spell');
-    jest.setTimeout(20000)
+    jest.setTimeout(20000);
   });
 
   test('get spell execution date', async () => {
