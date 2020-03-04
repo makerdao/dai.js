@@ -8,7 +8,7 @@ import McdPlugin, {
   GNT,
   USD
 } from '@makerdao/dai-plugin-mcd';
-import ScdPlugin from '@makerdao/dai-plugin-scd'
+import ScdPlugin from '@makerdao/dai-plugin-scd';
 import ethAbi from 'web3-eth-abi';
 import { utils } from 'ethers';
 
