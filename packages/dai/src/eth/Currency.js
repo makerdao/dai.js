@@ -24,6 +24,7 @@ export const getCurrency = createGetCurrency(currencies);
 // is convenient when you are picking a currency based on a symbol from input
 
 export const DAI = currencies.DAI;
+export const SAI = currencies.SAI;
 export const ETH = currencies.ETH;
 export const MKR = currencies.MKR;
 export const PETH = currencies.PETH;
