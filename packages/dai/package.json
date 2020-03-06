@@ -12,7 +12,14 @@
   ],
   "description": "Library for interacting with the Dai Stablecoin System.",
   "license": "MIT",
-  "keywords": ["makerdao", "mkr", "dai", "cdp", "eth", "margin"],
+  "keywords": [
+    "makerdao",
+    "mkr",
+    "dai",
+    "cdp",
+    "eth",
+    "margin"
+  ],
   "bugs": {
     "url": "https://github.com/makerdao/dai.js/issues",
     "email": "wouter@makerdao.com"
@@ -21,7 +28,9 @@
     "type": "git",
     "url": "https://github.com/makerdao/dai.js.git"
   },
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "module": "dist/src/index.js",
   "main": "dist/src/index.js",
   "scripts": {
@@ -61,7 +70,7 @@
     "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
     "web3": "1.2.1",
-    "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
+    "web3-provider-engine": "^14.2.1"
   },
   "engines": {
     "node": ">=10.16"
