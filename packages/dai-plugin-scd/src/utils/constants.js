@@ -16,5 +16,6 @@ export const AccountType = {
 
 export const ServiceRoles = {
   CDP: 'cdp',
-  PRICE: 'price'
+  PRICE: 'price',
+  CONVERSION: 'conversion'
 };

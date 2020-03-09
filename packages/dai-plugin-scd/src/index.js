@@ -7,11 +7,12 @@ import mainnetAddresses from '../contracts/addresses/mainnet.json';
 import abiMap from '../contracts/abiMap.json';
 import EthereumCdpService from './EthereumCdpService';
 import PriceService from './PriceService';
+import TokenConversionService from './TokenConversionService'
 import { ServiceRoles as ServiceRoles_ } from './utils/constants';
 import BigNumber from 'bignumber.js';
 
 export const ServiceRoles = ServiceRoles_;
-const { CDP, PRICE } = ServiceRoles;
+const { CDP, PRICE, CONVERSION } = ServiceRoles;
 
 // look up contract ABIs using abiMap.
 // if an exact match is not found, prefix-match against keys ending in *, e.g.
@@ -78,10 +79,10 @@ export default {
           { currency: SAI, address: addContracts.SAI.address }
         ]
       },
-      additionalServices: [CDP, PRICE],
+      additionalServices: [CDP, PRICE, CONVERSION],
       [CDP]: EthereumCdpService,
-      [PRICE]: PriceService
-      // [CONVERSION]: TokenConversionService
+      [PRICE]: PriceService,
+      [CONVERSION]: TokenConversionService
     };
   }
 };

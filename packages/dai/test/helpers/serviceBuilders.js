@@ -66,8 +66,8 @@ export function buildTestEthereumTokenService(settings = {}) {
 
 export function buildTestSmartContractService(settings = {}) {
   return buildTestService('smartContract', {
-    ...settings,
-    smartContract: true
+    smartContract: true,
+    ...settings
   });
 }
 

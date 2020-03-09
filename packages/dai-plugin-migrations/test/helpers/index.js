@@ -71,6 +71,7 @@ export async function migrationMaker({
     ...settings
   });
   await maker.authenticate();
+  console.log(maker)
   return maker;
 }
 
