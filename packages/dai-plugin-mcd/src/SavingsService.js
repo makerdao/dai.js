@@ -118,7 +118,7 @@ export default class SavingsService extends PublicService {
       if (type === 'DSR_DEPOSIT') sum = sum.plus(amount);
       if (type === 'DSR_WITHDRAW') sum = sum.minus(amount);
     });
-    const balance = await this.balance();
+    const balance = await this.balanceOf(address);
     return balance.gt(sum) ? balance.minus(sum) : MDAI(0);
   }
 

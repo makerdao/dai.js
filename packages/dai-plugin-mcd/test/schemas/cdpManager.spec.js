@@ -73,9 +73,8 @@ test(VAULT_TYPE, async () => {
   await expect(vaultType2).rejects.toThrow(/does not exist/i);
 
   const cdpId3 = -9000;
-  expect(() => {
-    maker.latest(VAULT_TYPE, cdpId3);
-  }).toThrow(/invalid vault id/i);
+  const vaultType3 = maker.latest(VAULT_TYPE, cdpId3);
+  await expect(vaultType3).rejects.toThrow(/invalid vault id/i);
 });
 
 test(VAULTS_CREATED, async () => {

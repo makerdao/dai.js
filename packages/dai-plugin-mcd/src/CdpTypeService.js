@@ -2,12 +2,12 @@ import { PublicService } from '@makerdao/services-core';
 import CdpType from './CdpType';
 import { ServiceRoles } from './constants';
 import assert from 'assert';
-const { CDP_TYPE, SYSTEM_DATA, QUERY_API } = ServiceRoles;
+const { CDP_TYPE, SYSTEM_DATA } = ServiceRoles;
 import * as math from './math';
 
 export default class CdpTypeService extends PublicService {
   constructor(name = CDP_TYPE) {
-    super(name, [SYSTEM_DATA, QUERY_API]);
+    super(name, [SYSTEM_DATA]);
   }
 
   initialize(settings = {}) {
@@ -18,9 +18,7 @@ export default class CdpTypeService extends PublicService {
   }
 
   async connect() {
-    if (this.settings.prefetch) {
-      await Promise.all(this.cdpTypes.map(type => type.prefetch()));
-    }
+    if (this.settings.prefetch) await this.prefetchAllCdpTypes();
   }
 
   getCdpType(currency, ilk) {
@@ -42,18 +40,12 @@ export default class CdpTypeService extends PublicService {
     assert(types.length > 0, `${label} matches no cdp type`);
   }
 
-  async resetAllCdpTypes() {
-    this.cdpTypes.forEach(cdpType => {
-      this.getCdpType(null, cdpType.ilk).reset();
-    });
+  resetAllCdpTypes() {
+    this.cdpTypes.forEach(type => type.reset());
   }
 
   async prefetchAllCdpTypes() {
-    await Promise.all(
-      this.cdpTypes.map(cdpType =>
-        this.getCdpType(null, cdpType.ilk).prefetch()
-      )
-    );
+    await Promise.all(this.cdpTypes.map(type => type.prefetch()));
   }
 
   //--system-wide functions

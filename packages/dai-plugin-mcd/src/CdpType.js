@@ -58,22 +58,6 @@ export default class CdpType {
     return math.annualStabilityFee(this._getCached('jugInfo').duty);
   }
 
-  async getPriceHistory(num = 100) {
-    const prices = await this._cdpTypeService
-      .get(ServiceRoles.QUERY_API)
-      .getPriceHistoryForPip(this._pipAddress, num);
-    return Promise.all(
-      prices.map(async e => {
-        const price = this.currency.wei(e.val);
-        //todo: update this query to read the datetime directly from vdb once vdb is updated with that functionality
-        const timestamp = (await this._web3Service.getBlock(e.blockNumber))
-          .timestamp;
-        const time = new Date(1000 * timestamp);
-        return { price, time };
-      })
-    );
-  }
-
   async ilkInfo(contract = 'vat') {
     return this._systemData[contract].ilks(this._ilkBytes);
   }

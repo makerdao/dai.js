@@ -8,7 +8,13 @@ export const tag = (strings, ...keys) => (...values) => {
 };
 
 export const validateAddress = (...args) => address =>
-  !/^0x[0-9a-fA-F]{40}$/.test(address) && tag(...args)({ address });
+  (!/^0x[0-9a-fA-F]{40}$/.test(address) ||
+    address === '0x0000000000000000000000000000000000000000') &&
+  tag(...args)({ address: address === null ? '(null)' : address });
 
-export const validatProxyAddressResult = (...args) => (proxyAddress, [address]) =>
-  proxyAddress === '0x0000000000000000000000000000000000000000' && tag(...args)({ address }); // prettier-ignore
+export const validateVaultId = id =>
+  !/^\d+$/.test(id) &&
+  `Invalid vault id: must be a positive integer. Received ${id}`;
+
+export const validateVaultTypeResult = vaultType =>
+  !vaultType && 'Vault does not exist';

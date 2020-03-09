@@ -107,7 +107,7 @@ declare global {
      */
     debtFloor: BigNumber;
   }
-  
+
   interface CollateralTypeDataResult {
      /**
      * The id of this vault.
@@ -149,44 +149,44 @@ declare global {
     /** Watch the total encumbered debt of a collateral type
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static totalEncumberedDebt(collateralTypeName: string): Currency;
+    totalEncumberedDebt(collateralTypeName: string): Currency;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static debtScalingFactor(collateralTypeName: string): BigNumber;
+    debtScalingFactor(collateralTypeName: string): BigNumber;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static priceWithSafetyMargin(collateralTypeName: string): BigNumber;
+    priceWithSafetyMargin(collateralTypeName: string): BigNumber;
 
     /** Get the Dai debt ceiling for a particular collateral type
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static debtCeiling(collateralTypeName: string): Currency;
+    debtCeiling(collateralTypeName: string): Currency;
 
     /** Minimum amount of debt that can be generated when opening a vault of that type
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static debtFloor(collateralTypeName: string): BigNumber;
+    debtFloor(collateralTypeName: string): BigNumber;
 
     /** Watch the price of a collateral type
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static collateralTypePrice(collateralTypeName: string): Currency;
+    collateralTypePrice(collateralTypeName: string): Currency;
 
     /** Watch the prices of ilks defined in the system
      *
      * Default ilks defined in the dai.js mcd-plugin
      */
-    static collateralTypesPrices(): Currency;
+    collateralTypesPrices(): Currency;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      * @param vaultAddress String hexidecimal address of the vault handler
      */
-    static unlockedCollateral(
+    unlockedCollateral(
       collateralTypeName: string,
       vaultAddress: string
     ): BigNumber;
@@ -195,7 +195,7 @@ declare global {
      * @param collateralTypeName String uniquely identifying a collateral type
      * @param vaultAddress String hexidecimal address of the vault handler
      */
-    static encumberedCollateral(
+    encumberedCollateral(
       collateralTypeName: string,
       vaultAddress: string
     ): BigNumber;
@@ -204,7 +204,7 @@ declare global {
      * @param collateralTypeName String uniquely identifying a collateral type
      * @param vaultAddress String hexidecimal address of the vault handler
      */
-    static encumberedDebt(
+    encumberedDebt(
       collateralTypeName: string,
       vaultAddress: string
     ): BigNumber;
@@ -212,67 +212,67 @@ declare global {
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static annualStabilityFee(collateralTypeName: string): number;
+    annualStabilityFee(collateralTypeName: string): number;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static feeUpdateTimestamp(collateralTypeName: string): number;
+    feeUpdateTimestamp(collateralTypeName: string): number;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static liquidatorAddress(collateralTypeName: string): string;
+    liquidatorAddress(collateralTypeName: string): string;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static liquidationPenalty(collateralTypeName: string): number;
+    liquidationPenalty(collateralTypeName: string): number;
 
     /**
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static maxAuctionLotSize(collateralTypeName: string): BigNumber;
+    maxAuctionLotSize(collateralTypeName: string): BigNumber;
 
     /**
      * @param id Numerical id of the vault
      */
-    static debtValue(id: number): Currency;
+    debtValue(id: number): Currency;
 
     /**
      * @param id Numerical id of the vault
      */
-    static collateralValue(id: number): Currency;
+    collateralValue(id: number): Currency;
 
     /**
      * @param id Numerical id of the vault
      */
-    static daiAvailable(id: number): Currency;
+    daiAvailable(id: number): Currency;
 
     /**
      * Get a vault by id.
      * @param id Numerical id of the vault
      */
-    static vault(id: number): VaultResult;
+    vault(id: number): VaultResult;
 
     /**
      * @param id Numerical id of the vault
      */
-    static minSafeCollateralAmount(id: number): Currency;
+    minSafeCollateralAmount(id: number): Currency;
     /**
      * @param id Numerical id of the vault
      */
-    static collateralAvailableAmount(id: number): Currency;
+    collateralAvailableAmount(id: number): Currency;
     /**
      * @param id Numerical id of the vault
      */
-    static collateralAvailableValue(id: number): Currency;
+    collateralAvailableValue(id: number): Currency;
 
     /**
      * Get risk parameter data of a collateral type.
      * @param collateralTypeName String uniquely identifying a collateral type
      */
-    static collateralTypeData(collateralTypeName: string): CollateralTypeDataResult;
+    collateralTypeData(collateralTypeName: string): CollateralTypeDataResult;
   }
 }
 

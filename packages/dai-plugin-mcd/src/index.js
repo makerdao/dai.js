@@ -12,19 +12,11 @@ import SavingsService from './SavingsService';
 import CdpTypeService from './CdpTypeService';
 import AuctionService from './AuctionService';
 import SystemDataService from './SystemDataService';
-import QueryApiMcdService from './QueryApiMcdService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
 
 export const ServiceRoles = ServiceRoles_;
-const {
-  CDP_MANAGER,
-  CDP_TYPE,
-  SYSTEM_DATA,
-  AUCTION,
-  QUERY_API,
-  SAVINGS
-} = ServiceRoles;
+const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, AUCTION, SAVINGS } = ServiceRoles;
 
 // look up contract ABIs using abiMap.
 // if an exact match is not found, prefix-match against keys ending in *, e.g.
@@ -99,7 +91,7 @@ export const defaultTokens = [
   ])
 ];
 
-export default {
+export const McdPlugin = {
   addConfig: (
     _,
     { cdpTypes = defaultCdpTypes, addressOverrides, prefetch = true } = {}
@@ -141,15 +133,15 @@ export default {
         CDP_TYPE,
         AUCTION,
         SYSTEM_DATA,
-        QUERY_API,
         SAVINGS
       ],
       [CDP_TYPE]: [CdpTypeService, { cdpTypes, prefetch }],
       [CDP_MANAGER]: CdpManager,
       [SAVINGS]: SavingsService,
       [AUCTION]: AuctionService,
-      [SYSTEM_DATA]: SystemDataService,
-      [QUERY_API]: QueryApiMcdService
+      [SYSTEM_DATA]: SystemDataService
     };
   }
 };
+
+export default McdPlugin;

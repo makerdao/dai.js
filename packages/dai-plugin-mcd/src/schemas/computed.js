@@ -54,7 +54,7 @@ import {
   COLLATERAL_TYPE_COLLATERALIZATION,
   COLLATERAL_TYPE_DATA
 } from './_constants';
-import { validateAddress } from './_validators';
+import { validateAddress, validateVaultId } from './_validators';
 
 export const collateralTypePrice = {
   generate: collateralTypeName => ({
@@ -106,8 +106,7 @@ export const vaultTypeAndAddress = {
 
 export const vaultExternalOwner = {
   generate: id => ({
-    dependencies: [[PROXY_OWNER, [VAULT_OWNER, id]]],
-    // TODO: throw error if no owner (DSProxy contract doesn't exist)
+    dependencies: [[PROXY_OWNER, [VAULT_OWNER, id]], [VAULT_OWNER, id]],
     computed: owner => owner
   })
 };
@@ -381,7 +380,10 @@ export const vault = {
           .toNumber();
       }
     })
-  })
+  }),
+  validate: {
+    args: validateVaultId
+  }
 };
 
 export const daiLockedInDsr = {
@@ -395,7 +397,7 @@ export const daiLockedInDsr = {
     }
   }),
   validate: {
-    args: validateAddress`Invalid address: ${'address'}`
+    args: validateAddress`Invalid address for daiLockedInDsr: ${'address'}`
   }
 };
 
@@ -461,7 +463,7 @@ export const savings = {
     })
   }),
   validate: {
-    args: validateAddress`Invalid address: ${'address'}`
+    args: validateAddress`Invalid address for savings: ${'address'}`
   }
 };
 
@@ -491,7 +493,7 @@ export const userVaultsList = {
       )
   }),
   validate: {
-    args: validateAddress`Invalid address: ${'address'}`
+    args: validateAddress`Invalid address for userVaultsList: ${'address'}`
   }
 };
 

@@ -11,7 +11,6 @@ import {
   ANNUAL_DAI_SAVINGS_RATE,
   DATE_EARNINGS_LAST_ACCRUED
 } from '../../src/schemas';
-
 import potSchemas from '../../src/schemas/pot';
 
 let maker, snapshotData, cdpMgr, saveService;
@@ -67,6 +66,17 @@ test(SAVINGS_DAI, async () => {
   );
   expect(BigNumber.isBigNumber(savingsDai)).toEqual(true);
   expect(savingsDai.toNumber()).toBeCloseTo(0.99995);
+});
+
+test(`${SAVINGS_DAI} using invalid account address`, async () => {
+  const promise1 = maker.latest(SAVINGS_DAI, '0xfoobar');
+  await expect(promise1).rejects.toThrow(/invalid/i);
+
+  const promise2 = maker.latest(
+    SAVINGS_DAI,
+    '0x0000000000000000000000000000000000000000'
+  );
+  await expect(promise2).rejects.toThrow(/invalid/i);
 });
 
 test(DAI_SAVINGS_RATE, async () => {
