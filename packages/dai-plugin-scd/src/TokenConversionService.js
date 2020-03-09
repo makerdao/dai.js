@@ -12,7 +12,7 @@ export default class TokenConversionService extends PrivateService {
   }
 
   _getToken(token) {
-    console.log('token', token)
+    console.log('token', token);
     return this.get('token').getToken(token);
   }
 

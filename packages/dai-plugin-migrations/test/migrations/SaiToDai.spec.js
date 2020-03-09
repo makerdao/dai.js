@@ -7,7 +7,7 @@ let maker, migration, snapshot;
 describe('SAI to DAI Migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
-    console.log(maker)
+    console.log(maker);
     const service = maker.service(ServiceRoles.MIGRATION);
     migration = service.getMigration(Migrations.SAI_TO_DAI);
     snapshot = await takeSnapshot(maker);

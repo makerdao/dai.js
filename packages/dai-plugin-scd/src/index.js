@@ -7,7 +7,7 @@ import mainnetAddresses from '../contracts/addresses/mainnet.json';
 import abiMap from '../contracts/abiMap.json';
 import EthereumCdpService from './EthereumCdpService';
 import PriceService from './PriceService';
-import TokenConversionService from './TokenConversionService'
+import TokenConversionService from './TokenConversionService';
 import { ServiceRoles as ServiceRoles_ } from './utils/constants';
 import BigNumber from 'bignumber.js';
 
