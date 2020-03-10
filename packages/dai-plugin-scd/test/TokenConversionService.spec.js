@@ -1,20 +1,13 @@
-import { buildTestService } from './helpers/serviceBuilders';
 import { PETH, WETH } from '../src/Currency';
+import { scdMaker } from './helpers/maker';
 
-let owner, weth, peth, conversionService, tokenService;
+let owner, weth, peth, conversionService, tokenService, maker;
 
-async function buildTestTokenConversionService(maxAllowance = true) {
-  const service = buildTestService('conversion', {
-    allowance: maxAllowance ? true : { useMinimizeAllowancePolicy: true },
-    conversion: true
-  });
-
-  await service.manager().authenticate();
-  return service;
-}
-
+beforeAll(async () => {
+  maker = await scdMaker();
+});
 beforeEach(async () => {
-  conversionService = await buildTestTokenConversionService();
+  conversionService = await maker.service('conversion');
   tokenService = conversionService.get('token');
   owner = tokenService.get('web3').currentAddress();
   weth = tokenService.getToken(WETH);
