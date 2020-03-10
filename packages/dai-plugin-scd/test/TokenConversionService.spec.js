@@ -1,5 +1,5 @@
-import { buildTestService } from '../helpers/serviceBuilders';
-import { PETH, WETH } from '../../src/eth/Currency';
+import { buildTestService } from './helpers/serviceBuilders';
+import { PETH, WETH } from '../src/Currency';
 
 let owner, weth, peth, conversionService, tokenService;
 

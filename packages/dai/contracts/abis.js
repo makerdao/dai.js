@@ -15,7 +15,7 @@ import saiProxy from './abis/SaiProxyCreateAndExecute.json';
 import proxyRegistry from './abis/ProxyRegistry.json';
 
 // import saiTop from './abis/SaiTop.json';
-// import tub from './abis/SaiTub.json';
+import tub from './abis/SaiTub.json';
 // import tap from './abis/SaiTap.json';
 // import vox from './abis/SaiVox.json';
 // import mom from './abis/SaiMom.json';
@@ -23,14 +23,14 @@ import proxyRegistry from './abis/ProxyRegistry.json';
 
 import multicall from './abis/Multicall.json';
 
-// const daiV1 = {
+const daiV1 = {
 //   saiTop,
-//   tub,
+  tub,
 //   tap,
 //   vox,
 //   mom,
 //   pit
-// };
+};
 
 const dappHub = {
   dsValue,
@@ -57,4 +57,4 @@ const proxies = {
   proxyRegistry
 };
 
-export { dappHub, exchangesV1, general, proxies, multicall };
+export { daiV1, dappHub, exchangesV1, general, proxies, multicall };

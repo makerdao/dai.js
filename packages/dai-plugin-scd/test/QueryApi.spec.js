@@ -1,4 +1,4 @@
-import QueryApi from '../src/QueryApi';
+import QueryApi from '../src/QueryApiScd';
 
 test('getCdpIdsForOwner on kovan', async () => {
   const q = new QueryApi('kovan');

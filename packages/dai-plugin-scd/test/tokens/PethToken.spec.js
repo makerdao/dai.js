@@ -1,7 +1,7 @@
-import { buildTestEthereumTokenService } from '../../helpers/serviceBuilders';
-import contracts from '../../../contracts/contracts';
+import { buildTestEthereumTokenService } from '../helpers/serviceBuilders';
+import contracts from '../../contracts/contracts';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
-import { WETH, PETH } from '../../../src/eth/Currency';
+import { WETH, PETH } from '../../src/Currency';
 
 let tokenService, owner, weth, peth;
 

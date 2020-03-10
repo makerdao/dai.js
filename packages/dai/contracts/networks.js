@@ -82,9 +82,9 @@ export function contractAddressesInfo(addresses) {
     // [contracts.SAI_TAP]: [
     //   { version: 1, address: addresses.TAP, abi: abis.daiV1.tap }
     // ],
-    // [contracts.SAI_TUB]: [
-    //   { version: 1, address: addresses.TUB, abi: abis.daiV1.tub }
-    // ],
+    [contracts.SAI_TUB]: [
+      { version: 1, address: addresses.TUB, abi: abis.daiV1.tub }
+    ],
 
     // Exchanges
     [contracts.MAKER_OTC]: [
@@ -105,13 +105,13 @@ export function contractAddressesInfo(addresses) {
     ],
 
     // Proxies
-    // [contracts.SAI_PROXY]: [
-    //   {
-    //     version: 1,
-    //     address: addresses.SAI_PROXY,
-    //     abi: abis.proxies.saiProxy
-    //   }
-    // ],
+    [contracts.SAI_PROXY]: [
+      {
+        version: 1,
+        address: addresses.SAI_PROXY,
+        abi: abis.proxies.saiProxy
+      }
+    ],
     [contracts.OASIS_PROXY]: [
       {
         version: 1,

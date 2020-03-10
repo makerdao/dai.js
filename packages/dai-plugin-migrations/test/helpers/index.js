@@ -71,7 +71,6 @@ export async function migrationMaker({
     ...settings
   });
   await maker.authenticate();
-  console.log(maker);
   return maker;
 }
 
@@ -123,7 +122,7 @@ async function offer(
 export async function drawSaiAndMigrateToDai(drawAmount, maker) {
   const cdp = await maker.service('cdp').openCdp();
   await cdp.lockEth('20');
-  await cdp.drawDai(drawAmount);
+  await cdp.drawSai(drawAmount);
   await migrateSaiToDai(10, maker);
 }
 

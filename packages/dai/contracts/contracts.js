@@ -1,4 +1,5 @@
 export default {
+  SAI_TUB: 'SAI_TUB',
   MAKER_OTC: 'MAKER_OTC',
   OASIS_PROXY: 'OASIS_PROXY',
   SAI_PROXY: 'SAI_PROXY',

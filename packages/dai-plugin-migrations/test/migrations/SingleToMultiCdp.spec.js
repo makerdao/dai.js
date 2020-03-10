@@ -22,7 +22,7 @@ async function openLockAndDrawScdCdp(drawAmount) {
   const proxy = await maker.service('proxy').currentProxy();
   const cdp = await maker.service('cdp').openCdp();
   await cdp.lockEth('20');
-  await cdp.drawDai(drawAmount);
+  await cdp.drawSai(drawAmount);
   await cdp.give(proxy);
   return cdp;
 }
