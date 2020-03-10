@@ -16,11 +16,7 @@ beforeAll(async () => {
 
 test('get PETH balance of address', async () => {
   const balance = await peth.balanceOf(TestAccountProvider.nextAddress());
-  const type = jest.fn();
-  const testVal = PETH(0);
-  balance.type = type;
-  testVal.type = type;
-  expect(balance).toEqual(testVal);
+  expect(balance.toString()).toEqual(PETH(0).toString());
 });
 
 test('get PETH allowance of address', async () => {
@@ -28,11 +24,7 @@ test('get PETH allowance of address', async () => {
     TestAccountProvider.nextAddress(),
     TestAccountProvider.nextAddress()
   );
-  const type = jest.fn();
-  const testVal = PETH(0);
-  allowance.type = type;
-  testVal.type = type;
-  expect(allowance).toEqual(testVal);
+  expect(allowance.toString()).toEqual(PETH(0).toString());
 });
 
 test('should successfully join and exit PETH', async () => {
@@ -54,27 +46,15 @@ test('should successfully join and exit PETH', async () => {
 
 test('should return the wrapper ratio', async () => {
   const ratio = await peth.wrapperRatio();
-  const type = jest.fn();
-  const testVal = WETH(1);
-  ratio.type = type;
-  testVal.type = type;
-  expect(ratio).toEqual(testVal);
+  expect(ratio.toString()).toEqual(WETH(1).toString());
 });
 
 test('should return the join price in weth', async () => {
   const price = await peth.joinPrice(3);
-  const type = jest.fn();
-  const testVal = WETH(3);
-  price.type = type;
-  testVal.type = type;
-  expect(price).toEqual(testVal);
+  expect(price.toString()).toEqual(WETH(3).toString());
 });
 
 test('should return the exit price in weth', async () => {
   const price = await peth.exitPrice(2);
-  const type = jest.fn();
-  const testVal = WETH(2);
-  price.type = type;
-  testVal.type = type;
-  expect(price).toEqual(testVal);
+  expect(price.toString()).toEqual(WETH(2).toString());
 });
