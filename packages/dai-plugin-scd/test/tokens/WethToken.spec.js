@@ -1,11 +1,11 @@
-import { buildTestEthereumTokenService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { WETH } from '../../src/Currency';
-
+import { scdMaker } from '../helpers/maker';
 let tokenService, weth;
 
 beforeAll(async () => {
-  tokenService = buildTestEthereumTokenService();
+  const maker = await scdMaker();
+  tokenService = await maker.service('token');
   await tokenService.manager().authenticate();
   weth = tokenService.getToken(WETH);
 });
@@ -15,7 +15,11 @@ test('get WETH allowance of address', async () => {
     TestAccountProvider.nextAddress(),
     TestAccountProvider.nextAddress()
   );
-  expect(allowance).toEqual(WETH(0));
+  const type = jest.fn();
+  const testVal = WETH(0);
+  allowance.type = type;
+  testVal.type = type;
+  expect(allowance).toEqual(testVal);
 });
 
 test('token name and symbol are correct', async () => {
