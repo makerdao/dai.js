@@ -71,7 +71,7 @@ export default class SingleToMultiCdp {
     if (payment === 'GEM') {
       const gem = this._manager
         .get('token')
-        .getToken('DAI')
+        .getToken('SAI')
         .address();
       return {
         method: 'migratePayFeeWithGem',

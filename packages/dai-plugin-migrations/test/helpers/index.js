@@ -8,7 +8,7 @@ import McdPlugin, {
   GNT,
   USD
 } from '@makerdao/dai-plugin-mcd';
-import ScdPlugin from '@makerdao/dai-plugin-scd';
+import ScdPlugin from '../../../dai-plugin-scd/src';
 import ethAbi from 'web3-eth-abi';
 import { utils } from 'ethers';
 
@@ -61,7 +61,7 @@ export async function migrationMaker({
   const maker = await Maker.create(preset, {
     plugins: [
       [McdPlugin, { network }],
-      [ScdPlugin, { network }],
+      [ScdPlugin, { addressOverrides, network }],
       [MigrationPlugin, { addressOverrides, network }]
     ],
     log: false,
@@ -75,8 +75,8 @@ export async function migrationMaker({
 }
 
 export async function placeLimitOrder(migrationService) {
-  const daiToken = migrationService.get('token').getToken('DAI');
-  const daiAddress = daiToken.address();
+  const saiToken = migrationService.get('token').getToken('SAI');
+  const saiAddress = saiToken.address();
   const oasisAddress = migrationService
     .get('smartContract')
     .getContractByName('MAKER_OTC').address;
@@ -85,14 +85,14 @@ export async function placeLimitOrder(migrationService) {
   const value = utils.parseEther('10.0');
 
   await mkrToken.approveUnlimited(oasisAddress);
-  await daiToken.approveUnlimited(oasisAddress);
+  await saiToken.approveUnlimited(oasisAddress);
 
   return await offer(
     migrationService,
     utils.parseEther('0.5'),
     mkrAddress,
     value,
-    daiAddress,
+    saiAddress,
     1
   );
 }
@@ -122,7 +122,7 @@ async function offer(
 export async function drawSaiAndMigrateToDai(drawAmount, maker) {
   const cdp = await maker.service('cdp').openCdp();
   await cdp.lockEth('20');
-  await cdp.drawSai(drawAmount);
+  await cdp.drawSai(cdp.id, drawAmount);
   await migrateSaiToDai(10, maker);
 }
 

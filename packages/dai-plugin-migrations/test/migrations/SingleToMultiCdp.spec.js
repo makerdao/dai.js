@@ -95,8 +95,8 @@ describe('SCD to MCD CDP Migration', () => {
       await maker
         .service('mcd:cdpManager')
         .openLockAndDraw('ETH-A', ETH(2), DAI(99998));
-
       const available = await migration.migrationSaiAvailable();
+      // 999850480759163986
       expect(available.toFixed('wei')).toBe('1999999999999999999');
     });
 
@@ -165,7 +165,7 @@ describe('SCD to MCD CDP Migration', () => {
 
       let message;
       try {
-        await maker.getCdp(cdp.id);
+        await maker.service('cdp').getCdp(cdp.id);
       } catch (err) {
         message = err.message;
       }
