@@ -1,7 +1,4 @@
-import {
-  migrationMaker,
-  drawSaiAndMigrateToDai
-} from '../helpers';
+import { migrationMaker, drawSaiAndMigrateToDai } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ETH } from '@makerdao/dai-plugin-mcd/dist';
