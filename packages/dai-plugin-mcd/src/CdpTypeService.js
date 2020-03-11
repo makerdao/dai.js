@@ -8,6 +8,7 @@ import * as math from './math';
 export default class CdpTypeService extends PublicService {
   constructor(name = CDP_TYPE) {
     super(name, [SYSTEM_DATA]);
+    this.reset = this.resetAllCdpTypes;
   }
 
   initialize(settings = {}) {

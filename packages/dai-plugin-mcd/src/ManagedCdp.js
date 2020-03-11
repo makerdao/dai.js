@@ -194,6 +194,7 @@ export default class ManagedCdp {
   reset() {
     this._urnInfoPromise = null;
     this.cache = {};
+    this.type.reset();
   }
 }
 
