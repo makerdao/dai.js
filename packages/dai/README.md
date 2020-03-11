@@ -56,7 +56,7 @@ const info = await cdp.getInfo();
 console.log(info);
 ```
 
-For full documentation, please refer to [docs.makerdao.com](https://docs.makerdao.com/build/dai.js).
+For full documentation, please refer to [docs.makerdao.com](https://docs.makerdao.com/dai.js).
 
 For example code that consumes the library, check out [this repository](https://github.com/makerdao/integration-examples).
 
