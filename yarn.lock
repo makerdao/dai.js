@@ -1734,10 +1734,10 @@
     babel-runtime "^6.26.0"
     ramda "^0.26.1"
 
-"@makerdao/multicall@^0.10.0-rc.4":
-  version "0.10.0-rc.4"
-  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.10.0-rc.4.tgz#05cd24b3db34ba46f9173ede1c34347a2001e560"
-  integrity sha512-TTHXf78SPnBkNUGMhDKs42TnLCa8aoNBy4cMO/QzqWB+a0+/H8wI1SlFxD7mHLMjTdxVdncZ/99/p0Mk375kVg==
+"@makerdao/multicall@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.11.0.tgz#690f0fc85f0ca0d430263034df6956b3ad71cbf7"
+  integrity sha512-qr5Isrw42z3MAxqn3vcb2z56/RmecZ+cC59hTbTrBrPwCOVpTRC8bD9trh6Q0HD2P9sXnbMa8PAJDaUyjaGiPg==
   dependencies:
     "@babel/runtime" "^7.7.4"
     cross-fetch "^3.0.4"
