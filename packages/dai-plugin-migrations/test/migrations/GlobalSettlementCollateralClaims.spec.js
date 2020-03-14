@@ -86,4 +86,18 @@ describe('Global Settlement Collateral Claims migration', () => {
 
     expect(await migration.check()).toBeTruthy();
   });
+
+  test.only('freeEth', async () => {
+    await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
+    const cdp = await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(1));
+    mockContracts(smartContract, {
+      MCD_END_1: globalSettlement.afterCageCollateral({ 'ETH-A': 150 })
+    });
+    //somehow check eth balance to be returned
+    //check Eth balance
+    //call free eth
+    await migration.freeEth(cdp.id);
+    //confirm eth balance = prev eth balance - eth to be freed
+
+  });
 });
