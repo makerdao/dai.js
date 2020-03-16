@@ -70,11 +70,13 @@ export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
 export const zBTC = createCurrency('zBTC');
+export const USDC = createCurrency('USDC');
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: BAT, ilk: 'BAT-A' },
-  { currency: zBTC, ilk: 'zBTC-A' }
+  { currency: zBTC, ilk: 'zBTC-A' },
+  { currency: USDC, ilk: 'USDC-A' }
 ];
 
 export const SAI = createCurrency('SAI');
@@ -104,6 +106,7 @@ export const McdPlugin = {
         address: addressOverrides[name] || contractDetails.address
       }));
     }
+    console.log('cdpTypes (look for decimals)', cdpTypes);
     const tokens = uniqBy(cdpTypes, 'currency').map(
       ({ currency, address, abi, decimals }) => {
         const data =

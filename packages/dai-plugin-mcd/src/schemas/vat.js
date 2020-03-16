@@ -15,7 +15,7 @@ import {
 } from './_constants';
 
 export const vatIlks = {
-  generate: ilkName => ({
+  generate: ilkName => console.log('***ilkName for vatIlks', ilkName) || ({
     id: `MCD_VAT.ilks(${ilkName})`,
     contract: 'MCD_VAT',
     call: [

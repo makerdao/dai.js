@@ -12,8 +12,10 @@ export const tokenBalance = {
   generate: (address, symbol) => {
     if (symbol === 'WETH') symbol = 'MWETH';
     if (symbol === 'DAI') symbol = 'MDAI';
+    console.log('symbol', symbol);
 
     const currencyToken = getMcdToken(symbol);
+    console.log('***currencyToken', currencyToken);
     const contract =
       symbol === 'MDAI' ? 'MCD_DAI' : symbol === 'MWETH' ? 'ETH' : symbol;
     if (!currencyToken)
@@ -33,7 +35,10 @@ export const tokenBalance = {
         address
       ],
       transforms: {
-        [TOKEN_BALANCE]: v => currencyToken(v, 'wei')
+        [TOKEN_BALANCE]: v => {
+          console.log('balance before wei', symbol, v);
+          symbol === 'USDC' ? currencyToken(v, -6) : currencyToken(v, 'wei');
+        }
       }
     };
   },
