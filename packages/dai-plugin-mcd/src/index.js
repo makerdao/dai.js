@@ -69,7 +69,6 @@ export const OMG = createCurrency('OMG');
 export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
-// export const zBTC = createCurrency('zBTC');
 export const USDC = createCurrency('USDC');
 
 export const defaultCdpTypes = [
