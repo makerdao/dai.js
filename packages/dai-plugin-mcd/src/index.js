@@ -105,7 +105,6 @@ export const McdPlugin = {
         address: addressOverrides[name] || contractDetails.address
       }));
     }
-    console.log('cdpTypes (look for decimals)', cdpTypes);
     const tokens = uniqBy(cdpTypes, 'currency').map(
       ({ currency, address, abi, decimals }) => {
         const data =

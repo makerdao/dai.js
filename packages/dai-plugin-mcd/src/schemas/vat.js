@@ -15,15 +15,14 @@ import {
 } from './_constants';
 
 export const vatIlks = {
-  generate: ilkName =>
-    console.log('***ilkName for vatIlks', ilkName) || {
-      id: `MCD_VAT.ilks(${ilkName})`,
-      contract: 'MCD_VAT',
-      call: [
-        'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
-        toHex(ilkName)
-      ]
-    },
+  generate: ilkName => ({
+    id: `MCD_VAT.ilks(${ilkName})`,
+    contract: 'MCD_VAT',
+    call: [
+      'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
+      toHex(ilkName)
+    ]
+  }),
   returns: [
     [TOTAL_ENCUMBERED_DEBT, fromWei],
     [DEBT_SCALING_FACTOR, fromRay],

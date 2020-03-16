@@ -57,24 +57,22 @@ import {
 import { validateAddress, validateVaultId } from './_validators';
 
 export const collateralTypePrice = {
-  generate: collateralTypeName =>
-    console.log('***collateralTypePrice name:', collateralTypeName) || {
-      dependencies: [
-        [RATIO_DAI_USD],
-        [PRICE_WITH_SAFETY_MARGIN, collateralTypeName],
-        [LIQUIDATION_RATIO, collateralTypeName]
-      ],
-      computed: (ratioDaiUsd, priceWithSafetyMargin, liquidationRatio) => {
-        console.log('***priceWithSafetyMargin:', priceWithSafetyMargin);
-        const [symbol] = collateralTypeName.split('-');
-        const currency = createCurrency(symbol);
-        const ratio = createCurrencyRatio(USD, currency);
-        const price = priceWithSafetyMargin
-          .times(ratioDaiUsd.toNumber())
-          .times(liquidationRatio.toNumber());
-        return ratio(price);
-      }
+  generate: collateralTypeName => ({
+    dependencies: [
+      [RATIO_DAI_USD],
+      [PRICE_WITH_SAFETY_MARGIN, collateralTypeName],
+      [LIQUIDATION_RATIO, collateralTypeName]
+    ],
+    computed: (ratioDaiUsd, priceWithSafetyMargin, liquidationRatio) => {
+      const [symbol] = collateralTypeName.split('-');
+      const currency = createCurrency(symbol);
+      const ratio = createCurrencyRatio(USD, currency);
+      const price = priceWithSafetyMargin
+        .times(ratioDaiUsd.toNumber())
+        .times(liquidationRatio.toNumber());
+      return ratio(price);
     }
+  })
 };
 
 export const collateralTypesPrices = {
