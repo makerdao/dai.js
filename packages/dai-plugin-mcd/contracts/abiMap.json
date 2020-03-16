@@ -38,5 +38,6 @@
   "PROXY_ACTIONS": "DssProxyActions",
   "PROXY_ACTIONS_DSR": "DssProxyActionsDsr",
   "MIGRATION": "ScdMcdMigration",
-  "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions"
+  "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions",
+  "zBTC": "zBTC"
 }
