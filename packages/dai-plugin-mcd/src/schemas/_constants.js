@@ -85,3 +85,7 @@ export const TOKEN_BALANCE = 'tokenBalance';
 export const TOKEN_ALLOWANCE_BASE = 'tokenAllowanceBase';
 export const TOKEN_ALLOWANCE = 'tokenAllowance';
 export const ADAPTER_BALANCE = 'adapterBalance';
+
+// end
+export const EMERGENCY_SHUTDOWN_ACTIVE = 'emergencyShutdownActive';
+export const EMERGENCY_SHUTDOWN_TIME = 'emergencyShutdownTime';
