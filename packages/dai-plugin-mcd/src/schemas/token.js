@@ -37,7 +37,12 @@ export const tokenBalance = {
       transforms: {
         [TOKEN_BALANCE]: v => {
           console.log('balance before wei', symbol, v);
-          symbol === 'USDC' ? currencyToken(v, -6) : currencyToken(v, 'wei');
+          if (symbol === 'USDC') {
+            console.log('***symbol is USDC');
+            return currencyToken(v, -6);
+          } else {
+            return currencyToken(v, 'wei');
+          }
         }
       }
     };
