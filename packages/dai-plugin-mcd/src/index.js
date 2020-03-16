@@ -74,7 +74,7 @@ export const zBTC = createCurrency('zBTC');
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: BAT, ilk: 'BAT-A' },
-  { currency: zBTC, ilk: 'zBTC-A' },
+  { currency: zBTC, ilk: 'zBTC-A' }
 ];
 
 export const SAI = createCurrency('SAI');
