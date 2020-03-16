@@ -33,7 +33,13 @@ export const tokenBalance = {
         address
       ],
       transforms: {
-        [TOKEN_BALANCE]: v => currencyToken(v, 'wei')
+        [TOKEN_BALANCE]: v => {
+          if (symbol === 'USDC') {
+            return currencyToken(v, -6);
+          } else {
+            return currencyToken(v, 'wei');
+          }
+        }
       }
     };
   },

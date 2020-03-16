@@ -69,10 +69,13 @@ export const OMG = createCurrency('OMG');
 export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
+// export const zBTC = createCurrency('zBTC');
+export const USDC = createCurrency('USDC');
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
-  { currency: BAT, ilk: 'BAT-A' }
+  { currency: BAT, ilk: 'BAT-A' },
+  { currency: USDC, ilk: 'USDC-A', decimals: 6 }
 ];
 
 export const SAI = createCurrency('SAI');
