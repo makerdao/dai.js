@@ -22,9 +22,9 @@ describe('DAI to SAI Migration', () => {
       .service('token')
       .getToken('MDAI')
       .balance();
-    expect(amount.toNumber()).toBe(1);
+    expect(amount.toNumber()).toBe(0);
 
-    expect((await migration.check()).eq(1)).toBeTruthy();
+    expect((await migration.check()).eq(0)).toBeTruthy();
   });
 
   test('if the account has some DAI, return the balance', async () => {
@@ -34,9 +34,9 @@ describe('DAI to SAI Migration', () => {
       .service('token')
       .getToken('MDAI')
       .balance();
-    expect(amount.toNumber()).toBe(2);
+    expect(amount.toNumber()).toBe(1);
 
-    expect((await migration.check()).eq(2)).toBeTruthy();
+    expect((await migration.check()).eq(1)).toBeTruthy();
   });
 
   test('execute migrates DAI to SAI', async () => {
