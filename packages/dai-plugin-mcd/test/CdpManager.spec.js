@@ -22,6 +22,10 @@ beforeAll(async () => {
   snapshotData = await takeSnapshot(maker);
 });
 
+afterEach(() => {
+  cdpMgr.reset();
+});
+
 afterAll(async () => {
   await restoreSnapshot(snapshotData, maker);
 });
@@ -36,7 +40,6 @@ test('getCdpIds gets empty CDP data from a proxy', async () => {
 test('getCdpIds gets all CDP data from the proxy', async () => {
   const cdp1 = await cdpMgr.open('ETH-A');
   const cdp2 = await cdpMgr.open('BAT-A');
-  cdpMgr.reset();
   const currentProxy = await maker.currentProxy();
   const cdps = await cdpMgr.getCdpIds(currentProxy);
 
@@ -49,7 +52,7 @@ test('getCombinedDebtValue', async () => {
   await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
   await cdpMgr.openLockAndDraw('ETH-A', ETH(1), MDAI(3));
   await cdpMgr.openLockAndDraw('ETH-A', ETH(2), MDAI(5));
-  cdpMgr.reset();
+  maker.service(ServiceRoles.CDP_TYPE).reset();
   const currentProxy = await maker.currentProxy();
   const totalDebt = await cdpMgr.getCombinedDebtValue(currentProxy);
   expect(totalDebt.toNumber()).toBeCloseTo(8, 1);

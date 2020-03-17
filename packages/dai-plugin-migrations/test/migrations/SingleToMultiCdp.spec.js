@@ -156,12 +156,13 @@ describe('SCD to MCD CDP Migration', () => {
       const mcdCdpId = mcdCdpsAfterMigration[0].id;
       expect(newId).toEqual(mcdCdpId);
 
+      maker.service('mcd:cdpType').reset();
       const mcdCdp = await manager.getCdp(mcdCdpId);
       const mcdCollateral = mcdCdp.collateralAmount.toNumber();
       const mcdDebt = mcdCdp.debtValue.toNumber();
 
       expect(mcdCollateral).toEqual(scdCollateral.toNumber());
-      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber(), 0.9);
+      expect(mcdDebt).toBeCloseTo(scdDebt.toNumber(), 1);
 
       let message;
       try {

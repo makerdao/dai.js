@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -12,7 +12,14 @@
   ],
   "description": "Library for interacting with the Dai Stablecoin System.",
   "license": "MIT",
-  "keywords": ["makerdao", "mkr", "dai", "cdp", "eth", "margin"],
+  "keywords": [
+    "makerdao",
+    "mkr",
+    "dai",
+    "cdp",
+    "eth",
+    "margin"
+  ],
   "bugs": {
     "url": "https://github.com/makerdao/dai.js/issues",
     "email": "wouter@makerdao.com"
@@ -21,7 +28,9 @@
     "type": "git",
     "url": "https://github.com/makerdao/dai.js.git"
   },
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "module": "dist/src/index.js",
   "main": "dist/src/index.js",
   "scripts": {
@@ -44,7 +53,7 @@
   "dependencies": {
     "@babel/runtime": "^7.3.4",
     "@makerdao/currency": "^0.9.5",
-    "@makerdao/multicall": "^0.10.0-rc.4",
+    "@makerdao/multicall": "^0.11.0",
     "@makerdao/services-core": "^0.9.9",
     "@makerdao/test-helpers": "^0.2.1",
     "assert": "^1.4.1",

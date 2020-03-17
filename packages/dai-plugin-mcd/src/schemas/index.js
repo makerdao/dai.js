@@ -6,7 +6,7 @@ import jug from './jug';
 import pot from './pot';
 import cat from './cat';
 import token from './token';
-
+import end from './end';
 import getCdps from './getCdps';
 import computed from './computed';
 
@@ -21,7 +21,8 @@ export default {
   ...cat,
   ...computed,
   ...token,
-  ...getCdps
+  ...getCdps,
+  ...end
 };
 
 /*

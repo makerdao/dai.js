@@ -6,6 +6,10 @@
 Uses [Lerna](https://github.com/lerna/lerna). Automatically lints and prettifies
 code on commit.
 
+## Documentation
+
+Please view `README.md` for each individual package (e.g. [packages/dai](https://github.com/makerdao/dai.js/blob/dev/packages/dai/README.md)) and/or [docs.makerdao.com](https://docs.makerdao.com/dai.js).
+
 ## Getting started
 
 ```
