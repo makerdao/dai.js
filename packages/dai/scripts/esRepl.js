@@ -30,8 +30,11 @@ async function main() {
       // url: 'http://localhost:2000'
       url: 'https://kovan.infura.io/v3/c3f0f26a4c1742e0949d8eedfc47be67',
       privateKey: process.env.KOVAN_PRIVATE_KEY,
-      smartContract: {
-        addressOverrides
+      smartContract: { addressOverrides },
+      token: {
+        addressOverrides: {
+          PETH: addressOverrides.SAI_SKR
+        }
       }
     });
 
@@ -42,7 +45,9 @@ async function main() {
       // add your helpers as repl globals here
       maker,
       addr,
-      scs: maker.service('smartContract')
+      scs: maker.service('smartContract'),
+      weth: maker.service('token').getToken('WETH'),
+      peth: maker.service('token').getToken('PETH')
     });
   } catch (err) {
     console.error(err);

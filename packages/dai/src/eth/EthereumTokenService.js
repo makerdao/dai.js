@@ -24,6 +24,8 @@ export default class EthereumTokenService extends PrivateService {
         this._addedTokens[symbol] = [token];
       }
     }
+
+    this._addressOverrides = settings.addressOverrides || {};
   }
 
   getTokens() {
@@ -49,10 +51,13 @@ export default class EthereumTokenService extends PrivateService {
       );
     }
 
-    const { address, decimals, abi, currency } = this._getTokenInfo(
+    let { address, decimals, abi, currency } = this._getTokenInfo(
       symbol,
       version
     );
+
+    if (this._addressOverrides[symbol])
+      address = this._addressOverrides[symbol];
 
     const scs = this.get('smartContract');
     const contract = scs.getContractByAddressAndAbi(
