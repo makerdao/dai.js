@@ -56,9 +56,6 @@ export default class EthereumTokenService extends PrivateService {
       version
     );
 
-    if (this._addressOverrides[symbol])
-      address = this._addressOverrides[symbol];
-
     const scs = this.get('smartContract');
     const contract = scs.getContractByAddressAndAbi(
       address,
@@ -94,6 +91,9 @@ export default class EthereumTokenService extends PrivateService {
     const tokenInfo = version
       ? tokenInfoList[version - 1]
       : tokenInfoList[tokenInfoList.length - 1];
+
+    if (this._addressOverrides[symbol])
+      tokenInfo.address = this._addressOverrides[symbol];
 
     if (typeof tokenInfo.address === 'string') return tokenInfo;
 
