@@ -51,3 +51,21 @@ test('_getTokenInfo returns token address for current network', () => {
   const tokenInfo = ethereumTokenService._getTokenInfo('FOO');
   expect(tokenInfo).toEqual({ address: '0xtest' });
 });
+
+test('addressOverrides', async () => {
+  const service = buildTestEthereumTokenService({
+    token: {
+      addressOverrides: {
+        PETH: {
+          testnet: '0xmockpeth',
+          kovan: '0xmockpeth2'
+        },
+        WETH: '0xmockweth'
+      }
+    }
+  });
+  await service.manager().authenticate();
+
+  expect(service.getToken('PETH')._contract.address).toBe('0xmockpeth');
+  expect(service.getToken('WETH')._contract.address).toBe('0xmockweth');
+});

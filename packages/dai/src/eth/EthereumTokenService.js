@@ -51,7 +51,7 @@ export default class EthereumTokenService extends PrivateService {
       );
     }
 
-    let { address, decimals, abi, currency } = this._getTokenInfo(
+    const { address, decimals, abi, currency } = this._getTokenInfo(
       symbol,
       version
     );
