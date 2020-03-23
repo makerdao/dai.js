@@ -92,6 +92,8 @@ export default class EthereumTokenService extends PrivateService {
       ? tokenInfoList[version - 1]
       : tokenInfoList[tokenInfoList.length - 1];
 
+    if (this._addressOverrides[symbol])
+      tokenInfo.address = this._addressOverrides[symbol];
 
     if (typeof tokenInfo.address === 'string') return tokenInfo;
 
