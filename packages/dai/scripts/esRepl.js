@@ -33,7 +33,8 @@ async function main() {
       smartContract: { addressOverrides },
       token: {
         addressOverrides: {
-          PETH: addressOverrides.SAI_SKR
+          PETH: addressOverrides.SAI_SKR,
+          DAI: addressOverrides.SAI_SAI
         }
       }
     });
@@ -47,7 +48,8 @@ async function main() {
       addr,
       scs: maker.service('smartContract'),
       weth: maker.service('token').getToken('WETH'),
-      peth: maker.service('token').getToken('PETH')
+      peth: maker.service('token').getToken('PETH'),
+      sai: maker.service('token').getToken('DAI')
     });
   } catch (err) {
     console.error(err);
