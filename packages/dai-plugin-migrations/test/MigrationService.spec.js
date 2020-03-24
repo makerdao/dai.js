@@ -26,7 +26,7 @@ test('can access migration contracts', async () => {
   const migrationManager = await migration.cdpManager();
 
   expect(migration).toBeDefined();
-  expect(migrationManager.toLowerCase()).toBe(managerAddress);
+  expect(migrationManager).toBe(managerAddress);
   expect(migrationProxyActions).toBeDefined();
 });
 
