@@ -36,20 +36,45 @@ async function main() {
           PETH: addressOverrides.SAI_SKR,
           DAI: addressOverrides.SAI_SAI
         }
-      }
+      },
+      log: false
     });
 
     const r = repl.start();
     r.on('exit', () => process.exit());
 
+    const scs = maker.service('smartContract');
+    const w3s = maker.service('web3');
+    const { utils } = w3s._web3;
+    const { LogNewCup } = scs.getContract('SAI_TUB').interface.events;
+
+    const getCdpIds = async () => {
+      const logs = await w3s.getPastLogs(
+        {
+          address: scs.getContractAddress('SAI_TUB'),
+          topics: [
+            utils.keccak256(utils.toHex(LogNewCup.signature)),
+            '0x000000000000000000000000' + maker.currentAddress().replace(/^0x/, '')
+          ],
+          fromBlock: 4750000 // Dec 17, 2017 on mainnet; earlier on Kovan
+        },
+      );
+      return logs.map(l => parseInt(l.data, 16));
+    };
+
     Object.assign(r.context, {
       // add your helpers as repl globals here
       maker,
       addr,
-      scs: maker.service('smartContract'),
+      scs,
       weth: maker.service('token').getToken('WETH'),
       peth: maker.service('token').getToken('PETH'),
-      sai: maker.service('token').getToken('DAI')
+      sai: maker.service('token').getToken('DAI'),
+      getCdpIds,
+      tub: scs.getContract('SAI_TUB'),
+      top: scs.getContract('SAI_TOP'),
+      WAD: '1000000000000000000',
+      RAY: '1000000000000000000000000000'
     });
   } catch (err) {
     console.error(err);
