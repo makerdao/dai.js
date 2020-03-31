@@ -89,3 +89,9 @@ export const ADAPTER_BALANCE = 'adapterBalance';
 // end
 export const EMERGENCY_SHUTDOWN_ACTIVE = 'emergencyShutdownActive';
 export const EMERGENCY_SHUTDOWN_TIME = 'emergencyShutdownTime';
+
+// osm
+export const CURRENT_PRICE_FEED_VALUE = 'currentPriceFeedValue';
+export const CURRENT_PRICE_FEED_VALID = 'currentPriceFeedValid';
+export const NEXT_PRICE_FEED_VALUE = 'nextPriceFeedValue';
+export const NEXT_PRICE_FEED_VALID = 'nextPriceFeedValid';
