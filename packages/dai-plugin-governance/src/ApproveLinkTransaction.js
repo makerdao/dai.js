@@ -1,5 +1,3 @@
-import { utils } from 'ethers';
-
 export default class ApproveLinkTransaction {
   constructor(contract, transactionManager) {
     this._contract = contract;
@@ -30,10 +28,11 @@ export default class ApproveLinkTransaction {
   }
 
   _parseLogs(logs) {
-    //use lower level ethersJS functions to parse logs
     const { LinkConfirmed } = this._contract.interface.events;
     const web3 = this._txMgr.get('web3')._web3;
-    const topic = utils.keccak256(web3.utils.toHex(LinkConfirmed.signature));
+    const topic = web3.utils.keccak256(
+      web3.utils.toHex(LinkConfirmed.signature)
+    );
     const receiptEvent = logs.filter(
       e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for LinkConfirmed events
     );
