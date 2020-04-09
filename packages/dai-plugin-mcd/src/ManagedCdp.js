@@ -11,7 +11,7 @@ export default class ManagedCdp {
   constructor(id, ilk, cdpManager, options = { prefetch: true }) {
     assert(typeof id === 'number', 'ID must be a number');
     this.id = id;
-
+    console.log(ilk);
     assert(ilk && typeof ilk === 'string', 'Must specify ilk');
     this.ilk = ilk;
     this._cdpManager = cdpManager;

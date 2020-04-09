@@ -109,6 +109,7 @@ export default class CdpManager extends LocalService {
     const op = this.lockAndDraw(null, type.ilk, lockAmount, drawAmount, {
       promise
     });
+    console.log(type.ilk);
     const cdp = await ManagedCdp.create(await op, type.ilk, this);
     this._putInInstanceCache(cdp.id, cdp, cache);
     return cdp;
