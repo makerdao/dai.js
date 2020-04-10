@@ -195,7 +195,6 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
         fromBlock
       }),
       result: r =>
-        console.log('result', r) ||
         r.map(
           ({
             address,
@@ -205,28 +204,11 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
             topics,
             transactionLogIndex
           }) => {
-            console.log('address for this result', address);
-            let decoded = decodeVatFrob(data);
-            console.log('decoded', decoded);
-            let { ilk, dink, urnHandler } = decoded;
+            let { ilk, dink, urnHandler } = decodeVatFrob(data);
             dink = new BigNumber(dink);
-            console.log(
-              'parseInt(transactionLogIndex, 16)',
-              parseInt(transactionLogIndex, 16)
-            );
-            console.log('urnhandler', urnHandler.toLowerCase());
-            console.log('bytesToString(topics[2])', bytesToString(topics[2]));
-            console.log(
-              'topics[2].toLowerCase().includes(urnHandler.toLowerCase())',
-              topics[2].toLowerCase().includes(urnHandler.toLowerCase())
-            );
             const reclaim =
-              bytesToString(topics[2])
-                .toLowerCase()
-                .includes(urnHandler.toLowerCase()) &&
-              bytesToString(topics[2])
-                .toLowerCase()
-                .includes(urnHandler.toLowerCase()) &&
+              formatAddress(topics[2]) === urnHandler.toLowerCase() &&
+              formatAddress(topics[3]) == urnHandler.toLowerCase() &&
               parseInt(transactionLogIndex, 16) === 1;
             return dink.lt(0) || dink.gt(0)
               ? {
