@@ -52,10 +52,29 @@ export default class ChiefService extends LocalService {
       if (address.length === 42) candidates.push(address);
     }
     return candidates;
-  }
+  };
 
   // helper for when we might call getSlateAddresses with the same slate several times
   memoizedGetSlateAddresses = memoizeWith(identity, this.getSlateAddresses);
+
+  getDetailedLockLogs = async () => {
+    const chiefAddress = this._chiefContract().address;
+    const web3Service = this.get('web3');
+    const netId = web3Service.network;
+    const networkName = netIdToName(netId);
+    const locks = await web3Service.getPastLogs({
+      fromBlock: chiefInfo.inception_block[networkName],
+      toBlock: 'latest',
+      address: chiefAddress,
+      topics: [chiefInfo.events.lock]
+    });
+
+    return locks.map(lockLog => ({
+      blockNumber: lockLog.blockNumber,
+      sender: this.paddedBytes32ToAddress(lockLog.topics[1]),
+      amount: MKR.wei(lockLog.topics[2])
+    }));;
+  };
 
   getLockLogs = async () => {
     const chiefAddress = this._chiefContract().address;
@@ -86,14 +105,14 @@ export default class ChiefService extends LocalService {
       toBlock: 'latest',
       address: chiefAddress,
       topics: [chiefInfo.events.vote_addresses]
-    })
+    });
 
     return votes.map(voteLog => ({
       blockNumber: voteLog.blockNumber,
       sender: this.paddedBytes32ToAddress(voteLog.topics[1]),
       candidates: this.parseVoteAddressData(voteLog.data)
     }));
-  }
+  };
 
   getVoteSlateLogs = async () => {
     const chiefAddress = this._chiefContract().address;
@@ -105,14 +124,14 @@ export default class ChiefService extends LocalService {
       toBlock: 'latest',
       address: chiefAddress,
       topics: [chiefInfo.events.vote_slate]
-    })
+    });
 
     return votes.map(voteLog => ({
       blockNumber: voteLog.blockNumber,
       sender: this.paddedBytes32ToAddress(voteLog.topics[1]),
       slate: voteLog.topics[2]
     }));
-  }
+  };
 
   async getVoteTally() {
     const voters = await this.getLockLogs();
