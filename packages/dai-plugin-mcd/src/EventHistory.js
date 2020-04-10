@@ -195,13 +195,46 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
         fromBlock
       }),
       result: r =>
+        console.log('result', r) ||
         r.map(
-          ({ address, blockNumber: block, transactionHash: txHash, data }) => {
-            let { ilk, dink } = decodeVatFrob(data);
+          ({
+            address,
+            blockNumber: block,
+            transactionHash: txHash,
+            data,
+            topics,
+            transactionLogIndex
+          }) => {
+            console.log('address for this result', address);
+            let decoded = decodeVatFrob(data);
+            console.log('decoded', decoded);
+            let { ilk, dink, urnHandler } = decoded;
             dink = new BigNumber(dink);
+            console.log(
+              'parseInt(transactionLogIndex, 16)',
+              parseInt(transactionLogIndex, 16)
+            );
+            console.log('urnhandler', urnHandler.toLowerCase());
+            console.log('bytesToString(topics[2])', bytesToString(topics[2]));
+            console.log(
+              'topics[2].toLowerCase().includes(urnHandler.toLowerCase())',
+              topics[2].toLowerCase().includes(urnHandler.toLowerCase())
+            );
+            const reclaim =
+              bytesToString(topics[2])
+                .toLowerCase()
+                .includes(urnHandler.toLowerCase()) &&
+              bytesToString(topics[2])
+                .toLowerCase()
+                .includes(urnHandler.toLowerCase()) &&
+              parseInt(transactionLogIndex, 16) === 1;
             return dink.lt(0) || dink.gt(0)
               ? {
-                  type: dink.lt(0) ? 'WITHDRAW' : 'DEPOSIT',
+                  type: dink.lt(0)
+                    ? 'WITHDRAW'
+                    : reclaim
+                    ? 'RECLAIM'
+                    : 'DEPOSIT',
                   order: dink.lt(0) ? 3 : 1,
                   block,
                   txHash,
