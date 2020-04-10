@@ -82,7 +82,9 @@ export const collateralTypesPrices = {
         COLLATERAL_TYPE_PRICE,
         collateralTypeName
       ]),
-    computed: (...prices) => prices
+    computed: (...prices) => {
+      return prices;
+    }
   })
 };
 
