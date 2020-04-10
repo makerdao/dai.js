@@ -73,7 +73,26 @@ export default class ChiefService extends LocalService {
       blockNumber: lockLog.blockNumber,
       sender: this.paddedBytes32ToAddress(lockLog.topics[1]),
       amount: MKR.wei(lockLog.topics[2])
-    }));;
+    }));
+  };
+
+  getDetailedFreeLogs = async () => {
+    const chiefAddress = this._chiefContract().address;
+    const web3Service = this.get('web3');
+    const netId = web3Service.network;
+    const networkName = netIdToName(netId);
+    const frees = await web3Service.getPastLogs({
+      fromBlock: chiefInfo.inception_block[networkName],
+      toBlock: 'latest',
+      address: chiefAddress,
+      topics: [chiefInfo.events.free]
+    });
+
+    return frees.map(freeLog => ({
+      blockNumber: freeLog.blockNumber,
+      sender: this.paddedBytes32ToAddress(freeLog.topics[1]),
+      amount: MKR.wei(freeLog.topics[2])
+    }));
   };
 
   getLockLogs = async () => {
