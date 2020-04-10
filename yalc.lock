@@ -1,9 +1,0 @@
-{
-  "version": "v1",
-  "packages": {
-    "@makerdao/dai-plugin-mcd": {
-      "signature": "3d8aa6f181ae7293c435076bc817ba05",
-      "pure": true
-    }
-  }
-}
