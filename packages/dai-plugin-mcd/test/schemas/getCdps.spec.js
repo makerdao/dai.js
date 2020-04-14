@@ -77,7 +77,7 @@ test(USER_VAULT_ADDRESSES, async () => {
 
   // todo: make expected addresses dynamic
   expect(userVaultAddresses[0]).toEqual(
-    '0xB3BaD1Db5e2EF682Bdb7061708a50eb784A39635'
+    '0xfCEED937ad17C6Ef4155B45c7d3016d06De2D226'
   );
   expect(userVaultAddresses[1]).toEqual(
     '0x7fE39828aebf2e95aBb4d801Bb407fd824C74903'
