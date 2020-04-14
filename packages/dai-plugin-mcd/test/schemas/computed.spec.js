@@ -320,7 +320,7 @@ test(VAULT, async () => {
 
   const vault = await maker.latest(VAULT, cdpId);
 
-  expect(Object.keys(vault).length).toBe(23);
+  expect(Object.keys(vault).length).toBe(24);
 
   expect(vault.id).toEqual(cdpId);
   expect(vault.vaultType).toEqual(expectedVaultType);

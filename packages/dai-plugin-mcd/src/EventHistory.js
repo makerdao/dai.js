@@ -77,6 +77,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
     .get('smartContract')
     .getContractAddress('MIGRATION');
   const MCD_VAT = cdpManager.get('smartContract').getContractAddress('MCD_VAT');
+  const MCD_CAT = cdpManager.get('smartContract').getContractAddress('MCD_CAT');
 
   const id = managedCdp.id;
   if (cache[id]) return cache[id];
@@ -101,6 +102,10 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   const { NewCdp } = cdpManager
     .get('smartContract')
     .getContract('CDP_MANAGER').interface.events;
+
+  const { Bite } = cdpManager
+    .get('smartContract')
+    .getContract('MCD_CAT').interface.events;
 
   const lookups = [
     {
@@ -191,12 +196,27 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
       }),
       result: r =>
         r.map(
-          ({ address, blockNumber: block, transactionHash: txHash, data }) => {
-            let { ilk, dink } = decodeVatFrob(data);
+          ({
+            address,
+            blockNumber: block,
+            transactionHash: txHash,
+            data,
+            topics,
+            transactionLogIndex
+          }) => {
+            let { ilk, dink, urnHandler } = decodeVatFrob(data);
             dink = new BigNumber(dink);
+            const reclaim =
+              formatAddress(topics[2]) === urnHandler.toLowerCase() &&
+              formatAddress(topics[3]) == urnHandler.toLowerCase() &&
+              parseInt(transactionLogIndex, 16) === 1;
             return dink.lt(0) || dink.gt(0)
               ? {
-                  type: dink.lt(0) ? 'WITHDRAW' : 'DEPOSIT',
+                  type: dink.lt(0)
+                    ? 'WITHDRAW'
+                    : reclaim
+                    ? 'RECLAIM'
+                    : 'DEPOSIT',
                   order: dink.lt(0) ? 3 : 1,
                   block,
                   txHash,
@@ -227,6 +247,45 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
             prevOwner,
             id: numberFromNumeric(topics[2]),
             newOwner: formatAddress(topics[3])
+          };
+        })
+    },
+    {
+      request: web3.getPastLogs({
+        address: MCD_CAT,
+        topics: [
+          utils.keccak256(utils.toHex(Bite.signature)),
+          null,
+          '0x' + padStart(urnHandler.slice(2), 64, '0')
+        ],
+        fromBlock
+      }),
+      result: r =>
+        r.map(tx => {
+          const {
+            topics,
+            data,
+            blockNumber: block,
+            transactionHash: txHash
+          } = tx;
+          const inputs = Bite.inputs.names.reduceRight((acc, name, idx) => {
+            if (['ilk', 'urn'].some(indexed => indexed === name)) return acc;
+            return [
+              {
+                type: Bite.inputs.types[idx],
+                name
+              },
+              ...acc
+            ];
+          }, []);
+          const { id, ink } = ethAbi.decodeLog(inputs, data, topics);
+          return {
+            type: 'BITE',
+            auctionId: numberFromNumeric(id),
+            amount: new BigNumber(ink).shiftedBy(-18),
+            gem: managedCdp.currency.symbol,
+            block,
+            txHash
           };
         })
     }

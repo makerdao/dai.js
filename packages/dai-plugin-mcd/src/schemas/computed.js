@@ -82,7 +82,9 @@ export const collateralTypesPrices = {
         COLLATERAL_TYPE_PRICE,
         collateralTypeName
       ]),
-    computed: (...prices) => prices
+    computed: (...prices) => {
+      return prices;
+    }
   })
 };
 
@@ -99,14 +101,20 @@ export const defaultCollateralTypesPrices = {
 
 export const vaultTypeAndAddress = {
   generate: id => ({
-    dependencies: [[VAULT_TYPE, id], [VAULT_ADDRESS, id]],
+    dependencies: [
+      [VAULT_TYPE, id],
+      [VAULT_ADDRESS, id]
+    ],
     computed: (vaultType, vaultAddress) => [vaultType, vaultAddress]
   })
 };
 
 export const vaultExternalOwner = {
   generate: id => ({
-    dependencies: [[PROXY_OWNER, [VAULT_OWNER, id]], [VAULT_OWNER, id]],
+    dependencies: [
+      [PROXY_OWNER, [VAULT_OWNER, id]],
+      [VAULT_OWNER, id]
+    ],
     computed: owner => owner
   })
 };
@@ -165,7 +173,10 @@ export const debtValue = {
 
 export const collateralizationRatio = {
   generate: id => ({
-    dependencies: [[COLLATERAL_VALUE, id], [DEBT_VALUE, id]],
+    dependencies: [
+      [COLLATERAL_VALUE, id],
+      [DEBT_VALUE, id]
+    ],
     computed: (collateralValue, debtValue) =>
       calcCollateralizationRatio(collateralValue, debtValue)
   })
@@ -209,7 +220,10 @@ export const minSafeCollateralAmount = {
 
 export const collateralAvailableAmount = {
   generate: id => ({
-    dependencies: [[COLLATERAL_AMOUNT, id], [MIN_SAFE_COLLATERAL_AMOUNT, id]],
+    dependencies: [
+      [COLLATERAL_AMOUNT, id],
+      [MIN_SAFE_COLLATERAL_AMOUNT, id]
+    ],
     computed: (collateralAmount, minSafeCollateralAmount) => {
       if (
         minSafeCollateralAmount.toBigNumber().gt(collateralAmount.toBigNumber())
@@ -313,7 +327,8 @@ export const vault = {
       [LIQUIDATION_RATIO, [VAULT_TYPE, id]],
       [LIQUIDATION_PENALTY, [VAULT_TYPE, id]],
       [ANNUAL_STABILITY_FEE, [VAULT_TYPE, id]],
-      [DEBT_FLOOR, [VAULT_TYPE, id]]
+      [DEBT_FLOOR, [VAULT_TYPE, id]],
+      [MIN_SAFE_COLLATERAL_AMOUNT, id]
     ],
     computed: (
       vaultType,
@@ -335,7 +350,8 @@ export const vault = {
       liquidationRatio,
       liquidationPenalty,
       annualStabilityFee,
-      debtFloor
+      debtFloor,
+      minSafeCollateralAmount
     ) => ({
       id: parseInt(id),
       vaultType,
@@ -358,6 +374,7 @@ export const vault = {
       liquidationPenalty,
       annualStabilityFee,
       debtFloor,
+      minSafeCollateralAmount,
       calculateLiquidationPrice({
         collateralAmount = this.collateralAmount,
         debtValue = this.debtValue,
