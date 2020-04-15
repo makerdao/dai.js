@@ -89,3 +89,9 @@ export const ADAPTER_BALANCE = 'adapterBalance';
 // end
 export const EMERGENCY_SHUTDOWN_ACTIVE = 'emergencyShutdownActive';
 export const EMERGENCY_SHUTDOWN_TIME = 'emergencyShutdownTime';
+
+// osm
+export const TOKEN_PRICE_NEXT_UPDATE = 'tokenPriceNextUpdate';
+export const TOKEN_PRICES_NEXT_UPDATES = 'tokenPricesNextUpdates';
+export const TOKEN_PRICE_UPDATE_INTERVAL = 'tokenPriceUpdateInterval';
+export const TOKEN_PRICE_LAST_UPDATE = 'tokenPriceLastUpdate';

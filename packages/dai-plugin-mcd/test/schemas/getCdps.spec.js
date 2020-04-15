@@ -75,11 +75,12 @@ test(USER_VAULT_ADDRESSES, async () => {
     proxyAddress
   );
 
+  // todo: make expected addresses dynamic
   expect(userVaultAddresses[0]).toEqual(
-    '0x607260558161c7aB035C6527c19F9AC60eb4bC34'
+    '0xDCaBb01efa573f4F27AfA9E63bAD3610d033061c'
   );
   expect(userVaultAddresses[1]).toEqual(
-    '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1'
+    '0x9FD3432c61615F3BeE9f29225934B569246302eB'
   );
 });
 

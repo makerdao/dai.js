@@ -320,7 +320,7 @@ test(VAULT, async () => {
 
   const vault = await maker.latest(VAULT, cdpId);
 
-  expect(Object.keys(vault).length).toBe(23);
+  expect(Object.keys(vault).length).toBe(24);
 
   expect(vault.id).toEqual(cdpId);
   expect(vault.vaultType).toEqual(expectedVaultType);
@@ -460,11 +460,12 @@ test(USER_VAULTS_LIST, async () => {
   expect(batVault.vaultType).toEqual('BAT-A');
   expect(ethVault.vaultType).toEqual('ETH-A');
 
+  // todo: make expected addresses dynamic
   expect(batVault.vaultAddress).toEqual(
-    '0x607260558161c7aB035C6527c19F9AC60eb4bC34'
+    '0xDCaBb01efa573f4F27AfA9E63bAD3610d033061c'
   );
   expect(ethVault.vaultAddress).toEqual(
-    '0x6D43e8f5A6D2b5aD2b242A1D3CF957C71AfC48a1'
+    '0x9FD3432c61615F3BeE9f29225934B569246302eB'
   );
 });
 

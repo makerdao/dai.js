@@ -104,6 +104,15 @@ export function contractAddressesInfo(addresses) {
       }
     ],
 
+    // CageFree
+    [contracts.CAGE_FREE]: [
+      {
+        version: 1,
+        address: addresses.SAI_CAGEFREE,
+        abi: abis.cageFree
+      }
+    ],
+
     // Proxies
     [contracts.SAI_PROXY]: [
       {

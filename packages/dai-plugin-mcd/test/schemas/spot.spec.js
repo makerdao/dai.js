@@ -37,8 +37,8 @@ test(PRICE_FEED_ADDRESS, async () => {
   expect(isValidAddressString(ethAPriceFeedAddress)).toEqual(true);
   expect(isValidAddressString(batAPriceFeedAddress)).toEqual(true);
 
-  expect(ethAPriceFeedAddress.toLowerCase()).toEqual(PIP_ETH);
-  expect(batAPriceFeedAddress.toLowerCase()).toEqual(PIP_BAT);
+  expect(ethAPriceFeedAddress).toEqual(PIP_ETH);
+  expect(batAPriceFeedAddress).toEqual(PIP_BAT);
 
   const promise1 = maker.latest(PRICE_FEED_ADDRESS, 'FOO');
   await expect(promise1).rejects.toThrow(/no collateral type/i);

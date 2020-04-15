@@ -31,9 +31,17 @@ beforeAll(async () => {
   multicall.registerSchemas(schemas);
 
   const proxyAddress = await maker.service('proxy').ensureProxy();
-  ({ id: cdpId1 } = {}) = await maker.service('cdp').openProxyCdpLockEthAndDrawDai(1, 100, proxyAddress); // prettier-ignore
-  ({ id: cdpId2 } = {}) = await maker.service('cdp').openProxyCdpLockEthAndDrawDai(5, 100, proxyAddress); // prettier-ignore
+  const { id: _cdpId1 } = await maker
+    .service('cdp')
+    .openProxyCdpLockEthAndDrawDai(1, 100, proxyAddress);
+
+  const { id: _cdpId2 } = await maker
+    .service('cdp')
+    .openProxyCdpLockEthAndDrawDai(5, 100, proxyAddress);
   await maker.service('cdp').openProxyCdpLockEthAndDrawDai(1, 50, proxyAddress);
+
+  cdpId1 = _cdpId1;
+  cdpId2 = _cdpId2;
 });
 
 beforeEach(() => {
