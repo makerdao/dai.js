@@ -127,7 +127,7 @@ describe('lifecycle hooks', () => {
     await priceService.setEthPrice(400);
   });
 
-  test.only('lifecycle hooks for open and lock', async () => {
+  test('lifecycle hooks for open and lock', async () => {
     log('open id:', uniqueId(open));
     const openHandlers = makeHandlers('open');
 

@@ -1821,10 +1821,10 @@
     lodash "^4.17.11"
     ws "^7.2.0"
 
-"@makerdao/testchain@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.1.2.tgz#5e204ccfc7e8cab77734cca9424ea830265d8799"
-  integrity sha512-aXK+Mo5CVXOefO2jvyD8qImMu/lLm/jsPGuCac/vfkEKgO7fLANVW0Ptrh6atbl07BPvDNcqK/2uscBSHRjahg==
+"@makerdao/testchain@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.1.3.tgz#b7fdd86b1c2a87424c622d22f5da50e673997408"
+  integrity sha512-dXZ9PujltGfg3QoUz7j0uuQwDIqQtTQhGnMYueYjnIl7v8lDGno6W9t+ogIx3caiWPh34DIoM4CfN0Di4g2HjA==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 
