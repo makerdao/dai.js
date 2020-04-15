@@ -31,7 +31,7 @@ afterAll(async () => {
 test(LIQUIDATOR_ADDRESS, async () => {
   const { MCD_FLIP_ETH_A: expected } = testnetAddresses;
   const address = await maker.latest(LIQUIDATOR_ADDRESS, 'ETH-A');
-  expect(address.toLowerCase()).toEqual(expected);
+  expect(address).toEqual(expected);
 
   const promise = maker.latest(LIQUIDATOR_ADDRESS, null);
   await expect(promise).rejects.toThrow(/invalid/i);

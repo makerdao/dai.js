@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { mcdMaker, setupCollateral } from './helpers';
-import { ETH, MDAI, USD, BAT, GNT, DGD } from '../src';
+import { ETH, MDAI, USD, BAT, GNT, DGD, USDC } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { createCurrencyRatio } from '@makerdao/currency';
 const { CDP_MANAGER } = ServiceRoles;
@@ -13,7 +13,8 @@ beforeAll(async () => {
       { currency: ETH, ilk: 'ETH-A' },
       { currency: BAT, ilk: 'BAT-A' },
       { currency: DGD, ilk: 'DGD-A', decimals: 9 },
-      { currency: GNT, ilk: 'GNT-A' }
+      { currency: GNT, ilk: 'GNT-A' },
+      { currency: USDC, ilk: 'USDC-A', decimals: 6 }
     ]
   });
   dai = maker.getToken(MDAI);
@@ -137,6 +138,12 @@ describe.each([
     'DGD-A',
     DGD,
     async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
+  ],
+  [
+    'USDC-A',
+    USDC,
+    async () =>
+      setupCollateral(maker, 'USDC-A', { price: 100, debtCeiling: 50 })
   ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;

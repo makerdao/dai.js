@@ -7,6 +7,7 @@ import pot from './pot';
 import cat from './cat';
 import token from './token';
 import end from './end';
+import osm from './osm';
 import getCdps from './getCdps';
 import computed from './computed';
 
@@ -22,7 +23,8 @@ export default {
   ...computed,
   ...token,
   ...getCdps,
-  ...end
+  ...end,
+  ...osm
 };
 
 /*
