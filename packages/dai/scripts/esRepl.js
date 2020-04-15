@@ -1,5 +1,6 @@
 import repl from 'repl';
 import Maker from '../src';
+import testAccounts from '../../test-helpers/src/testAccounts.json';
 
 let maker;
 
@@ -24,10 +25,17 @@ const addressOverrides = {
 // example of a helper function
 const addr = async () => maker.currentAddress();
 
-async function main() {
-  try {
-    maker = await Maker.create('http', {
-      // url: 'http://localhost:2000'
+const env = {
+  testnet: {
+    fromBlock: 0,
+    config: {
+      url: 'http://localhost:2000',
+      privateKey: testAccounts.keys[0],
+    }
+  },
+  kovan: {
+    fromBlock: 4750000,
+    config: {
       url: 'https://kovan.infura.io/v3/c3f0f26a4c1742e0949d8eedfc47be67',
       privateKey: process.env.KOVAN_PRIVATE_KEY,
       smartContract: { addressOverrides },
@@ -36,7 +44,18 @@ async function main() {
           PETH: addressOverrides.SAI_SKR,
           DAI: addressOverrides.SAI_SAI
         }
-      },
+      }
+    }
+  }
+}
+
+const currentEnv = env.testnet;
+
+async function main() {
+  try {
+    const { config, fromBlock } = currentEnv;
+    maker = await Maker.create('http', {
+      ...config,
       log: false
     });
 
@@ -56,7 +75,7 @@ async function main() {
             utils.keccak256(utils.toHex(LogNewCup.signature)),
             '0x000000000000000000000000' + maker.currentAddress().replace(/^0x/, '')
           ],
-          fromBlock: 4750000 // Dec 17, 2017 on mainnet; earlier on Kovan
+          fromBlock
         },
       );
       return logs.map(l => parseInt(l.data, 16));
@@ -67,9 +86,10 @@ async function main() {
       maker,
       addr,
       scs,
-      weth: maker.service('token').getToken('WETH'),
-      peth: maker.service('token').getToken('PETH'),
-      sai: maker.service('token').getToken('DAI'),
+      eth: maker.getToken('ETH'),
+      weth: maker.getToken('WETH'),
+      peth: maker.getToken('PETH'),
+      sai: maker.getToken('DAI'),
       getCdpIds,
       tub: scs.getContract('SAI_TUB'),
       top: scs.getContract('SAI_TOP'),
