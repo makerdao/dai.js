@@ -41,7 +41,7 @@ export default class AccountsService extends PublicService {
     if (accountNames.length === 0) {
       await this.addAccount('default', { type: AccountType.PROVIDER });
     }
-    this._engine.start();
+    if (!this._engine._running) this._engine.start();
   }
 
   getProvider() {
@@ -130,14 +130,16 @@ export default class AccountsService extends PublicService {
     }
 
     if (this._currentAccount) {
-      this._engine.stop();
+      // Issue/bug with Web3ProviderEngine where start/stop/start causes multiple
+      // latest block polling to happen possibly via the EthBlockTracker block tracker (eth-block-tracker)
+      // this._engine.stop();
       this._engine.removeProvider(this.currentWallet());
     }
 
     this._currentAccount = name;
     // add the provider at index 0 so that it takes precedence over RpcSource
-    this._engine.addProvider(this.currentWallet(), 0);
-    this._engine.start();
+    this._engine.addProvider(this.currentWallet(), 1);
+    if (!this._engine._running) this._engine.start();
     if (this.hasAccount()) {
       this.get('event').emit('accounts/CHANGE', {
         account: this.currentAccount()

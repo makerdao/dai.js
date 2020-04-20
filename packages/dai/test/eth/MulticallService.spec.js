@@ -27,7 +27,7 @@ beforeAll(async () => {
   await maker.authenticate();
   address = TestAccountProvider.nextAddress();
   multicall = maker.service('multicall');
-  watcher = multicall.createWatcher();
+  watcher = multicall.createWatcher({ useWeb3Provider: true });
   multicall.registerSchemas(schemas);
 
   const proxyAddress = await maker.service('proxy').ensureProxy();

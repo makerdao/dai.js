@@ -93,7 +93,7 @@
     "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
     "web3": "1.2.1",
-    "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist",
+    "web3-provider-engine": "^15.0.7",
     "webpack-bundle-analyzer": "^3.3.2"
   },
   "engines": {

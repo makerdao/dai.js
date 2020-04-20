@@ -4,6 +4,17 @@ import WebsocketSubprovider from 'web3-provider-engine/dist/es5/subproviders/web
 import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
 import SubscriptionSubprovider from 'web3-provider-engine/dist/es5/subproviders/subscriptions';
 import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
+import MulticallProvider from '../../MulticallProvider';
+
+// const EthBlockTracker = require('eth-block-tracker/src/subscribe.js')
+//   // block polling
+//   const directProvider = { sendAsync: self._handleAsync.bind(self) }
+//   const blockTrackerProvider = opts.blockTrackerProvider || directProvider
+//   self._blockTracker = opts.blockTracker || new EthBlockTracker({
+//     provider: blockTrackerProvider,
+//     pollingInterval: opts.pollingInterval || 4000,
+//     setSkipCacheFlag: true,
+//   })
 
 const DEFAULT_POLLING_INTERVAL = 4000;
 
@@ -11,16 +22,16 @@ export async function setupEngine(settings) {
   const { provider: providerSettings, pollingInterval } = settings.web3;
 
   const engine = new Web3ProviderEngine({
-    pollingInterval: pollingInterval || DEFAULT_POLLING_INTERVAL
+    pollingInterval: pollingInterval || DEFAULT_POLLING_INTERVAL,
+    // blockTracker:
   });
+  engine.addProvider(new MulticallProvider({ multicallAddress: '0xA70B7c2a55a76f89b64b4b15381FfF87279dD3d7' }), 0);
+
   const result = { engine };
 
   const getHttpProvider = () => {
     const rpcUrl = getRpcUrl(providerSettings);
     const subscriptionProvider = new SubscriptionSubprovider();
-    subscriptionProvider.on('data', (err, data) =>
-      engine.emit('data', err, data)
-    );
     engine.addProvider(subscriptionProvider);
     return new RpcSource({ rpcUrl });
   };
@@ -28,9 +39,6 @@ export async function setupEngine(settings) {
   const getWebsocketProvider = () => {
     const rpcUrl = getRpcUrl(providerSettings);
     const subscriptionProvider = new SubscriptionSubprovider();
-    subscriptionProvider.on('data', (err, data) =>
-      engine.emit('data', err, data)
-    );
     engine.addProvider(subscriptionProvider);
     return new WebsocketSubprovider({ rpcUrl });
   };
