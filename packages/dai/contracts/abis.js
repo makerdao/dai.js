@@ -23,6 +23,8 @@ import tub from './abis/SaiTub.json';
 
 import multicall from './abis/Multicall.json';
 
+import cageFree from './abis/CageFree.json';
+
 const daiV1 = {
   //   saiTop,
   tub
@@ -57,4 +59,4 @@ const proxies = {
   proxyRegistry
 };
 
-export { daiV1, dappHub, exchangesV1, general, proxies, multicall };
+export { daiV1, dappHub, exchangesV1, general, proxies, multicall, cageFree };

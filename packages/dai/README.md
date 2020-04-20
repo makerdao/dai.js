@@ -4,6 +4,7 @@
 [![NPM][npm]][npm-url]
 [![Build Status][build]][build-url]
 [![Coverage Status][cover]][cover-url]
+[![Bundle Size][bundle]][bundle-url]
 
 
 **Dai.js** is a JavaScript library that makes it easy to build applications on top of [MakerDAO][makerdao]'s Dai Stablecoin System. You can use Maker's contracts to open Collateralized Debt Positions, withdraw loans in Dai, trade tokens on OasisDEX, and more.
@@ -132,6 +133,9 @@ prefixing the path with `dist`. E.g. `/contracts/addresses/kovan.json` now becom
 
 [cover]: https://codecov.io/gh/makerdao/dai.js/branch/dev/graph/badge.svg
 [cover-url]: https://codecov.io/github/makerdao/dai.js?branch=dev
+
+[bundle]: https://badgen.net/bundlephobia/min/@makerdao/dai
+[bundle-url]: https://bundlephobia.com/result?p=@makerdao/dai
 
 [makerdao]: https://makerdao.com
 [wiki]: https://github.com/makerdao/dai.js/wiki

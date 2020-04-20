@@ -123,7 +123,7 @@ describe('SCD to MCD CDP Migration', () => {
       await restoreSnapshot(snapshotData, maker);
     });
 
-    test('execute', async () => {
+    xtest('execute', async () => {
       let maxPayAmount, minRatio;
 
       if (payment !== 'MKR') {
