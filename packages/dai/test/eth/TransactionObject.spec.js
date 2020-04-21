@@ -85,16 +85,23 @@ describe('normal web service behavior', () => {
       }
     };
 
+    // TODO
     test(
       'generic error',
-      testErrorHandling(() => mkr.transfer(testAddress, '2000000'), /reverted/)
+      testErrorHandling(
+        () => mkr.transfer(testAddress, '2000000'),
+        /reverted/,
+        false
+      )
     );
 
+    // TODO
     test(
       'out of gas',
       testErrorHandling(
         () => mkr.approveUnlimited(testAddress, { gasLimit: 40000 }),
-        /reverted/
+        /reverted/,
+        false
       )
     );
 

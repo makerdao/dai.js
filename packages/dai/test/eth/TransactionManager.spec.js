@@ -9,6 +9,27 @@ import { mineBlocks } from '@makerdao/test-helpers';
 import size from 'lodash/size';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');
+import Maker from '../../src';
+import ScdPlugin from '@makerdao/dai-plugin-scd';
+
+async function scdMaker({
+  preset = 'test',
+  network = 'testnet',
+  log = false,
+  addressOverrides,
+  ...settings
+} = {}) {
+  const maker = await Maker.create(preset, {
+    plugins: [[ScdPlugin, { addressOverrides, network }]],
+    web3: {
+      pollingInterval: 100
+    },
+    log,
+    ...settings
+  });
+  await maker.authenticate();
+  return maker;
+}
 
 function buildTestServices() {
   const container = buildTestContainer({
@@ -93,7 +114,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
 });
 
 // TODO
-describe.skip('lifecycle hooks', () => {
+describe('lifecycle hooks', () => {
   let service, txMgr, priceService, open, cdp;
 
   const makeListener = (label, state) =>
@@ -111,6 +132,11 @@ describe.skip('lifecycle hooks', () => {
   });
 
   beforeAll(async () => {
+    const maker = await scdMaker();
+    service = await maker.service('cdp');
+    await service.manager().authenticate();
+    txMgr = service.get('smartContract').get('transactionManager');
+    priceService = service.get('price');
     // service = buildTestEthereumCdpService();
     // await service.manager().authenticate();
     // txMgr = service.get('smartContract').get('transactionManager');
@@ -118,14 +144,14 @@ describe.skip('lifecycle hooks', () => {
   });
 
   beforeEach(async () => {
-    // jest.setTimeout(15000);
-    // open = service.openCdp();
-    // cdp = await open;
+    jest.setTimeout(15000);
+    open = service.openCdp();
+    cdp = await open;
   });
 
   afterAll(async () => {
-    // set price back to 400
-    // await priceService.setEthPrice(400);
+    // set price back to 400s
+    await priceService.setEthPrice(400);
   });
 
   test('lifecycle hooks for open and lock', async () => {
@@ -282,7 +308,7 @@ describe.skip('lifecycle hooks', () => {
   });
 });
 
-describe.skip('transaction options', () => {
+describe('transaction options', () => {
   let txManager, service, contract;
 
   beforeEach(async () => {

@@ -114,18 +114,18 @@ describe('execute', () => {
     });
     await maker.authenticate();
     const contractService = maker.service('smartContract');
-    // tubContract = maker.service('smartContract').getContract('SAI_TUB');
+    tubContract = contractService.getContract('SAI_TUB');
     await maker.service('proxy').ensureProxy();
   });
 
-  test.skip('should execute without a provided proxy address', async () => {
+  test('should execute without a provided proxy address', async () => {
     const hash = await maker
       .service('proxy')
       .execute(tubContract, 'open', [], { gasLimit: 4000000 });
     expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
 
-  test.skip('should execute with a provided proxy address', async () => {
+  test('should execute with a provided proxy address', async () => {
     const hash = await maker
       .service('proxy')
       .execute(
@@ -138,7 +138,7 @@ describe('execute', () => {
     expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
 
-  test.skip('should throw error if no proxy is available', async () => {
+  test('should throw error if no proxy is available', async () => {
     expect.assertions(1);
     maker.service('proxy')._currentProxy = null;
     try {
