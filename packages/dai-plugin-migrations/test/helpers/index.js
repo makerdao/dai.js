@@ -8,7 +8,7 @@ import McdPlugin, {
   GNT,
   USD
 } from '@makerdao/dai-plugin-mcd';
-import ScdPlugin from '../../../dai-plugin-scd/src';
+import ScdPlugin from '@makerdao/dai-plugin-scd';
 import ethAbi from 'web3-eth-abi';
 import { utils } from 'ethers';
 
@@ -122,7 +122,7 @@ async function offer(
 export async function drawSaiAndMigrateToDai(drawAmount, maker) {
   const cdp = await maker.service('cdp').openCdp();
   await cdp.lockEth('20');
-  await cdp.drawSai(cdp.id, drawAmount);
+  await cdp.drawSai(drawAmount);
   await migrateSaiToDai(10, maker);
 }
 
@@ -132,3 +132,12 @@ export async function migrateSaiToDai(amount, maker) {
     .getMigration(Migrations.SAI_TO_DAI);
   await daiMigration.execute(amount);
 }
+
+// // Get wad amount of SAI from user's wallet:
+// saiJoin.gem().transferFrom(msg.sender, address(this), wad);
+// // Join the SAI wad amount to the `vat`:
+// saiJoin.join(address(this), wad);
+// // Lock the SAI wad amount to the CDP and generate the same wad amount of DAI
+// vat.frob(saiJoin.ilk(), address(this), address(this), address(this), toInt(wad), toInt(wad));
+// // Send DAI wad amount as a ERC20 token to the user's wallet
+// daiJoin.exit(msg.sender, wad);
