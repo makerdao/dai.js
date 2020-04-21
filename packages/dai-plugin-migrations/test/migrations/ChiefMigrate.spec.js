@@ -41,7 +41,7 @@ describe('Chief Migration', () => {
       .getToken(MKR)
       .approveUnlimited(oldChief.address);
 
-    const LOCK_AMOUNT = MKR('6.12345678912345671');
+    const LOCK_AMOUNT = MKR('7.12345678912345671');
     await oldChief.lock(LOCK_AMOUNT.toFixed('wei'));
 
     const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
