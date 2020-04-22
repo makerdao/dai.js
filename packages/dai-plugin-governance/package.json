@@ -20,6 +20,7 @@
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",
     "test": "yarn testchain --ci jest --runInBand --config ./test/config/jestTestchainConfigOriginal.json",
+    "coverage": "yarn test --coverage",
     "test:integration": "jest --runInBand --config ./test/config/jestIntegrationConfig.json"
   },
   "lint-staged": {
