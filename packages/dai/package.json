@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.28.5",
+  "version": "0.29.0",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -92,7 +92,7 @@
     "promise-props": "^1.0.0",
     "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
-    "web3": "1.2.1",
+    "web3": "1.2.6",
     "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist",
     "webpack-bundle-analyzer": "^3.3.2"
   },
