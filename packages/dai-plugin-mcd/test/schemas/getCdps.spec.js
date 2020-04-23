@@ -68,7 +68,7 @@ test(USER_VAULT_IDS, async () => {
   expect(userVaultIds[1]).toEqual(1);
 });
 
-test(USER_VAULT_ADDRESSES, async () => {
+test.only(USER_VAULT_ADDRESSES, async () => {
   const userVaultAddresses = await maker.latest(
     USER_VAULT_ADDRESSES,
     CDP_MANAGER,
@@ -77,10 +77,10 @@ test(USER_VAULT_ADDRESSES, async () => {
 
   // todo: make expected addresses dynamic
   expect(userVaultAddresses[0]).toEqual(
-    '0xDCaBb01efa573f4F27AfA9E63bAD3610d033061c'
+    '0xE16f8767B7Dd2F74f5878e94cBcc7c1a1E0eF944'
   );
   expect(userVaultAddresses[1]).toEqual(
-    '0x9FD3432c61615F3BeE9f29225934B569246302eB'
+    '0xA1480ae6E4A767D8CbC9167816d2Efb3e294e558'
   );
 });
 
