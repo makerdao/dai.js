@@ -12,6 +12,7 @@ afterEach(() => {
 let snapshotData;
 
 beforeAll(async () => {
+  // Deploy contract as a singleton here to be used for each
   snapshotData = await takeSnapshot();
 });
 

@@ -5,7 +5,6 @@ import tracksTransactions, {
   tracksTransactionsWithOptions
 } from './utils/tracksTransactions';
 
-
 export default class EsmService extends PrivateService {
   constructor(name = 'esm') {
     super(name, ['smartContract', 'web3', 'token', 'allowance', 'govQueryApi']);
@@ -64,7 +63,7 @@ export default class EsmService extends PrivateService {
         throw new Error('amount to join is greater than the user balance');
       }
     }
-    return this._esmContract().join(mkrAmount.toFixed('wei'), {promise});
+    return this._esmContract().join(mkrAmount.toFixed('wei'), { promise });
   }
 
   @tracksTransactionsWithOptions({ numArguments: 2 })

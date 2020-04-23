@@ -28,6 +28,7 @@ describe('use mainnet', () => {
     jest.setTimeout(10000);
     maker = await setupTestMakerInstance('mainnet');
     spellService = maker.service('spell');
+    jest.setTimeout(20000);
   });
 
   test('get spell execution date', async () => {
@@ -72,7 +73,7 @@ xdescribe('use testchain', () => {
     spellService = maker.service('spell');
   });
 
-  test('get delay', async () => {
+  xtest('get delay', async () => {
     const delay = await spellService.getDelayInSeconds();
     expect(delay.toNumber()).toBe(1);
   });
