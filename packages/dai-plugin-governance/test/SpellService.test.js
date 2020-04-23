@@ -67,7 +67,7 @@ describe('use mainnet', () => {
   });
 });
 
-describe('use testchain', () => {
+xdescribe('use testchain', () => {
   beforeAll(async () => {
     maker = await setupTestMakerInstance();
     spellService = maker.service('spell');
