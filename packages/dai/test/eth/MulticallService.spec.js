@@ -17,7 +17,7 @@ let maker, multicall, watcher, address, cdpId1, cdpId2;
 
 beforeAll(async () => {
   maker = await Maker.create('test', {
-    plugins: [[ScdPlugin, { network: 'test' }]],
+    plugins: [[ScdPlugin, { network: 'testnet' }]],
     web3: {
       pollingInterval: 100
     },
