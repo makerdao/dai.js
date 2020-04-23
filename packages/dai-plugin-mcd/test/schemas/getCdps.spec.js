@@ -68,7 +68,7 @@ test(USER_VAULT_IDS, async () => {
   expect(userVaultIds[1]).toEqual(1);
 });
 
-test.only(USER_VAULT_ADDRESSES, async () => {
+test(USER_VAULT_ADDRESSES, async () => {
   const userVaultAddresses = await maker.latest(
     USER_VAULT_ADDRESSES,
     CDP_MANAGER,
