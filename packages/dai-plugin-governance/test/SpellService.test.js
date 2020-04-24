@@ -67,13 +67,13 @@ describe('use mainnet', () => {
   });
 });
 
-xdescribe('use testchain', () => {
+describe('use testchain', () => {
   beforeAll(async () => {
     maker = await setupTestMakerInstance();
     spellService = maker.service('spell');
   });
 
-  xtest('get delay', async () => {
+  test('get delay', async () => {
     const delay = await spellService.getDelayInSeconds();
     expect(delay.toNumber()).toBe(1);
   });
