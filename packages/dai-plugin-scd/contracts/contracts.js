@@ -1,0 +1,18 @@
+export default {
+  SAI_PIP: 'PIP',
+  SAI_PEP: 'PEP',
+  SAI_PIT: 'PIT',
+  SAI_SIN: 'SIN',
+  // DAD: 'DAD',
+  SAI_MOM: 'MOM',
+  SAI_VOX: 'VOX',
+  SAI_TUB: 'TUB',
+  SAI_TAP: 'TAP',
+  SAI_TOP: 'TOP',
+  SAI_PROXY: 'SAI_PROXY',
+  PROXY_REGISTRY: 'PROXY_REGISTRY',
+  DS_PROXY_FACTORY: 'DS_PROXY_FACTORY',
+  DS_PROXY: 'DS_PROXY',
+  // do I need this
+  MULTICALL: 'MULTICALL'
+};

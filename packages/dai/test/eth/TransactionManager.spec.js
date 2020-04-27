@@ -1,6 +1,6 @@
 import {
   buildTestContainer,
-  buildTestEthereumCdpService,
+  // buildTestEthereumCdpService,
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
 import tokens from '../../contracts/tokens';
@@ -8,7 +8,28 @@ import { uniqueId } from '../../src/utils';
 import { mineBlocks } from '@makerdao/test-helpers';
 import size from 'lodash/size';
 import debug from 'debug';
-const log = debug('dai:testing:TxMgr.spec');
+const log = debug('sai:testing:TxMgr.spec');
+import Maker from '../../src';
+import ScdPlugin from '@makerdao/dai-plugin-scd';
+
+async function scdMaker({
+  preset = 'test',
+  network = 'testnet',
+  log = false,
+  addressOverrides,
+  ...settings
+} = {}) {
+  const maker = await Maker.create(preset, {
+    plugins: [[ScdPlugin, { addressOverrides, network }]],
+    web3: {
+      pollingInterval: 100
+    },
+    log,
+    ...settings
+  });
+  await maker.authenticate();
+  return maker;
+}
 
 function buildTestServices() {
   const container = buildTestContainer({
@@ -49,7 +70,7 @@ test('reuse the same web3 and log service in test services', () => {
 
 test('wrapped contract call accepts a businessObject option', async () => {
   expect.assertions(3);
-  const dai = services.contract.getContract(tokens.DAI);
+  const sai = services.contract.getContract(tokens.SAI);
 
   const businessObject = {
     a: 1,
@@ -58,7 +79,7 @@ test('wrapped contract call accepts a businessObject option', async () => {
     }
   };
 
-  const txo = dai.approve(services.currentAddress, '1000000000000000000', {
+  const txo = sai.approve(services.currentAddress, '1000000000000000000', {
     businessObject
   });
 
@@ -74,14 +95,14 @@ test('wrapped contract call accepts a businessObject option', async () => {
 
 test('wrapped contract call adds nonce, web3 settings', async () => {
   const { txMgr, currentAddress, contract } = services;
-  const dai = contract.getContract(tokens.DAI);
+  const sai = contract.getContract(tokens.SAI);
   const gasPrice = await txMgr.get('gas').getGasPrice();
   jest.spyOn(txMgr, '_execute');
 
-  await dai.approve(currentAddress, 20000);
+  await sai.approve(currentAddress, 20000);
 
   expect(txMgr._execute).toHaveBeenCalledWith(
-    dai.wrappedContract,
+    sai.wrappedContract,
     'approve',
     [currentAddress, 20000],
     {
@@ -92,6 +113,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
   );
 });
 
+// TODO
 describe('lifecycle hooks', () => {
   let service, txMgr, priceService, open, cdp;
 
@@ -110,10 +132,15 @@ describe('lifecycle hooks', () => {
   });
 
   beforeAll(async () => {
-    service = buildTestEthereumCdpService();
+    const maker = await scdMaker();
+    service = await maker.service('cdp');
     await service.manager().authenticate();
     txMgr = service.get('smartContract').get('transactionManager');
     priceService = service.get('price');
+    // service = buildTestEthereumCdpService();
+    // await service.manager().authenticate();
+    // txMgr = service.get('smartContract').get('transactionManager');
+    // priceService = service.get('price');
   });
 
   beforeEach(async () => {
@@ -123,7 +150,7 @@ describe('lifecycle hooks', () => {
   });
 
   afterAll(async () => {
-    // set price back to 400
+    // set price back to 400s
     await priceService.setEthPrice(400);
   });
 
@@ -168,7 +195,7 @@ describe('lifecycle hooks', () => {
     const lock = cdp.lockEth(0.1);
     await Promise.all([lock, mineBlocks(service)]);
 
-    const draw = cdp.drawDai(13);
+    const draw = cdp.drawSai(13);
     await Promise.all([txMgr.confirm(draw), mineBlocks(service)]);
 
     // set price to make cdp unsafe
@@ -216,7 +243,7 @@ describe('lifecycle hooks', () => {
     const lock = cdp.lockEth(0.01);
     await Promise.all([lock, mineBlocks(service)]);
 
-    const draw = cdp.drawDai(1000);
+    const draw = cdp.drawSai(1000);
     const drawId = uniqueId(draw).toString();
     const drawTx = txMgr._tracker.get(drawId);
     const drawHandlers = makeHandlers('draw');
@@ -266,7 +293,7 @@ describe('lifecycle hooks', () => {
     const lock = cdp.lockEth(0.01);
     await Promise.all([lock, mineBlocks(service)]);
 
-    const draw = cdp.drawDai(1000);
+    const draw = cdp.drawSai(1000);
     const drawId = uniqueId(draw).toString();
     const drawTx = txMgr._tracker.get(drawId);
 

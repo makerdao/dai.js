@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"name":"whom","type":"address"},{"name":"mana","type":"uint256"},{"name":"data","type":"bytes"}],"name":"make","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

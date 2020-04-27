@@ -1,7 +1,4 @@
-import {
-  migrationMaker,
-  drawSaiAndMigrateToDai
-} from '../helpers';
+import { migrationMaker, drawSaiAndMigrateToDai } from '../helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ETH } from '@makerdao/dai-plugin-mcd/dist';
@@ -49,7 +46,7 @@ describe('DAI to SAI Migration', () => {
     const daiBalanceBeforeMigration = await migration._dai.balanceOf(address);
     const saiBalanceBeforeMigration = await maker
       .service('token')
-      .getToken('DAI')
+      .getToken('SAI')
       .balanceOf(address);
 
     await migration.execute(1);
@@ -57,7 +54,7 @@ describe('DAI to SAI Migration', () => {
     const daiBalanceAfterMigration = await migration._dai.balanceOf(address);
     const saiBalanceAfterMigration = await maker
       .service('token')
-      .getToken('DAI')
+      .getToken('SAI')
       .balanceOf(address);
 
     expect(saiBalanceBeforeMigration.toNumber()).toEqual(

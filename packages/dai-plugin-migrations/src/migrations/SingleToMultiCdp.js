@@ -22,9 +22,7 @@ export default class SingleToMultiCdp {
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
   async execute(cupId, payment = 'MKR', maxPayAmount, minRatio, { promise }) {
-    const jug = this._manager
-      .get('smartContract')
-      .getContract('MCD_JUG')
+    const jug = this._manager.get('smartContract').getContract('MCD_JUG')
       .address;
     const migrationProxy = this._manager
       .get('smartContract')
@@ -71,7 +69,7 @@ export default class SingleToMultiCdp {
     if (payment === 'GEM') {
       const gem = this._manager
         .get('token')
-        .getToken('DAI')
+        .getToken('SAI')
         .address();
       return {
         method: 'migratePayFeeWithGem',

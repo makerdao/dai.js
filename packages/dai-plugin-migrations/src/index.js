@@ -30,7 +30,7 @@ const allContracts = Object.entries(testnetAddresses).reduce(
 );
 
 export const OLD_MKR = createCurrency('OLD_MKR');
-export const SAI = createCurrency('DAI');
+export const SAI = createCurrency('SAI');
 export const DAI = createCurrency('MDAI');
 export const MKR = createCurrency('MKR');
 

@@ -41,12 +41,12 @@ describe('Chief Migration', () => {
       .getToken(MKR)
       .approveUnlimited(oldChief.address);
 
-    const LOCK_AMOUNT = MKR('5.123456789123456789');
+    const LOCK_AMOUNT = MKR('7.12345678912345671');
     await oldChief.lock(LOCK_AMOUNT.toFixed('wei'));
 
     const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
-    expect(mkrLockedDirectly.isEqual(LOCK_AMOUNT)).toBeTruthy();
     expect(mkrLockedViaProxy.toNumber()).toBe(0);
+    expect(mkrLockedDirectly.isEqual(LOCK_AMOUNT)).toBeTruthy();
   });
 
   test('if the account has some MKR locked via proxy in old chief, return the amount', async () => {
@@ -85,7 +85,7 @@ describe('Chief Migration', () => {
     await voteProxy.lock(LOCK_AMOUNT.toFixed('wei'));
 
     const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
-    expect(mkrLockedDirectly.toNumber()).toBe(0);
     expect(mkrLockedViaProxy.isEqual(LOCK_AMOUNT)).toBeTruthy();
+    expect(mkrLockedDirectly.toNumber()).toBe(0);
   });
 });

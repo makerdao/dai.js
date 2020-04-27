@@ -5,5 +5,6 @@
       "url": "http://localhost:2000"
     }
   },
-  "cdp": true
+  "proxy": true,
+  "smartContract": true
 }

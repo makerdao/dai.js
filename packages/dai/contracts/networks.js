@@ -14,7 +14,7 @@ const addressMapping = {
 export function contractAddressesInfo(addresses) {
   return {
     // Tokens
-    [tokens.DAI]: [
+    [tokens.SAI]: [
       {
         version: 1,
         address: addresses.SAI,
@@ -55,32 +55,8 @@ export function contractAddressesInfo(addresses) {
     ],
 
     // SAI
-    [contracts.SAI_TOP]: [
-      { version: 1, address: addresses.TOP, abi: abis.daiV1.saiTop }
-    ],
     [contracts.SAI_PIP]: [
       { version: 1, address: addresses.PIP, abi: abis.dappHub.dsValue }
-    ],
-    [contracts.SAI_PEP]: [
-      { version: 1, address: addresses.PEP, abi: abis.dappHub.dsValue }
-    ],
-    [contracts.SAI_PIT]: [
-      { version: 1, address: addresses.PIT, abi: abis.daiV1.pit }
-    ],
-    [contracts.SAI_SIN]: [
-      { version: 1, address: addresses.SIN, abi: abis.general.erc20 }
-    ],
-    [contracts.SAI_DAD]: [
-      { version: 1, address: addresses.DAD, abi: abis.dappHub.dsGuard }
-    ],
-    [contracts.SAI_MOM]: [
-      { version: 1, address: addresses.MOM, abi: abis.daiV1.mom }
-    ],
-    [contracts.SAI_VOX]: [
-      { version: 1, address: addresses.VOX, abi: abis.daiV1.vox }
-    ],
-    [contracts.SAI_TAP]: [
-      { version: 1, address: addresses.TAP, abi: abis.daiV1.tap }
     ],
     [contracts.SAI_TUB]: [
       { version: 1, address: addresses.TUB, abi: abis.daiV1.tub }
@@ -101,6 +77,15 @@ export function contractAddressesInfo(addresses) {
         version: 1,
         address: addresses.MULTICALL,
         abi: abis.multicall
+      }
+    ],
+
+    // CageFree
+    [contracts.CAGE_FREE]: [
+      {
+        version: 1,
+        address: addresses.SAI_CAGEFREE,
+        abi: abis.cageFree
       }
     ],
 
