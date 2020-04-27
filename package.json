@@ -64,7 +64,7 @@
     "sane": "^4.0.3",
     "solc": "^0.4.23",
     "uglifyjs-webpack-plugin": "^1.2.5",
-    "webpack": "^3.11.0",
-    "webpack-bundle-analyzer": "^3.3.2"
+    "webpack": "^4.43.0",
+    "webpack-bundle-analyzer": "^3.7.0"
   }
 }
