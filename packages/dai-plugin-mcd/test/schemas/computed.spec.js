@@ -462,10 +462,10 @@ test(USER_VAULTS_LIST, async () => {
 
   // todo: make expected addresses dynamic
   expect(batVault.vaultAddress).toEqual(
-    '0xB3BaD1Db5e2EF682Bdb7061708a50eb784A39635'
+    '0xE16f8767B7Dd2F74f5878e94cBcc7c1a1E0eF944'
   );
   expect(ethVault.vaultAddress).toEqual(
-    '0x7fE39828aebf2e95aBb4d801Bb407fd824C74903'
+    '0xA1480ae6E4A767D8CbC9167816d2Efb3e294e558'
   );
 });
 

@@ -14,22 +14,24 @@ import oasisProxy from './abis/ProxyCreationAndExecute.json';
 import saiProxy from './abis/SaiProxyCreateAndExecute.json';
 import proxyRegistry from './abis/ProxyRegistry.json';
 
-import saiTop from './abis/SaiTop.json';
+// import saiTop from './abis/SaiTop.json';
 import tub from './abis/SaiTub.json';
-import tap from './abis/SaiTap.json';
-import vox from './abis/SaiVox.json';
-import mom from './abis/SaiMom.json';
-import pit from './abis/GemPit.json';
+// import tap from './abis/SaiTap.json';
+// import vox from './abis/SaiVox.json';
+// import mom from './abis/SaiMom.json';
+// import pit from './abis/GemPit.json';
 
 import multicall from './abis/Multicall.json';
 
+import cageFree from './abis/CageFree.json';
+
 const daiV1 = {
-  saiTop,
-  tub,
-  tap,
-  vox,
-  mom,
-  pit
+  //   saiTop,
+  tub
+  //   tap,
+  //   vox,
+  //   mom,
+  //   pit
 };
 
 const dappHub = {
@@ -57,4 +59,4 @@ const proxies = {
   proxyRegistry
 };
 
-export { daiV1, dappHub, exchangesV1, general, proxies, multicall };
+export { daiV1, dappHub, exchangesV1, general, proxies, multicall, cageFree };

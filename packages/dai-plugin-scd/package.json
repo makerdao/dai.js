@@ -1,0 +1,47 @@
+{
+  "name": "@makerdao/dai-plugin-scd",
+  "description": "Plugin to add Single-Collateral Dai support to dai.js",
+  "version": "1.0.1",
+  "license": "MIT",
+  "main": "dist",
+  "scripts": {
+    "build": "../../scripts/build.sh",
+    "prepublishOnly": "yarn build",
+    "testchain": "../../scripts/run-testchain.sh",
+    "coverage": "yarn test --coverage",
+    "test": "yarn testchain --ci jest --runInBand",
+    "test:debug": "yarn testchain --ci node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:kovan": "export NETWORK='kovan' && yarn test --config ./test/config/jestIntegrationConfig.json",
+    "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json"
+  },
+  "peerDependencies": {
+    "@makerdao/dai": ">=0.18.9"
+  },
+  "dependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.4.5",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.3.4",
+    "@babel/plugin-proposal-decorators": "^7.3.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.2.0",
+    "@babel/plugin-proposal-function-sent": "^7.2.0",
+    "@babel/plugin-proposal-numeric-separator": "^7.2.0",
+    "@babel/plugin-proposal-throw-expressions": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.3.4",
+    "@babel/preset-env": "^7.4.5",
+    "@makerdao/currency": "^0.9.5",
+    "@makerdao/services-core": "^0.9.9",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^24.8.0",
+    "bignumber.js": "^8.1.1",
+    "chokidar": "^2.0.4",
+    "copyfiles": "^2.0.0",
+    "eslint-loader": "^2.1.2",
+    "husky": "^3.0.8",
+    "jest": "^24.5.0",
+    "lerna": "^3.15.0",
+    "lodash": "^4.17.15",
+    "prettier": "^1.12.1",
+    "webpack-bundle-analyzer": "^3.3.2"
+  }
+}
