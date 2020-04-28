@@ -14,7 +14,7 @@
   "scripts": {
     "build": "yarn clean && yarn build:cjs && yarn build:umd",
     "build:umd": "webpack --config ../../webpack.config.js",
-    "build:cjs": "babel -d dist src",
+    "build:cjs": "../../scripts/build.sh",
     "prepublishOnly": "yarn build",
     "clean": "rm -rf ./dist ./umd",
     "testchain": "../../scripts/run-testchain.sh",
@@ -29,20 +29,19 @@
     ]
   },
   "dependencies": {
+    "@makerdao/currency": ">=0.9.0",
+    "@makerdao/services-core": ">=0.9.0",
     "assert": "^2.0.0",
     "debug": "^4.1.1",
     "ramda": "^0.25.0"
   },
   "peerDependencies": {
-    "@makerdao/currency": ">=0.9.0",
-    "@makerdao/dai": ">=0.18.9",
-    "@makerdao/services-core": ">=0.9.0"
+    "@makerdao/dai": ">=0.18.9"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@makerdao/dai": "^0.29.0",
     "@makerdao/dai-plugin-config": "^0.2.14-rc.1",
-    "web3-utils": "^1.2.6",
-    "webpack-cli": "^3.3.11"
+    "web3-utils": "^1.2.6"
   }
 }
