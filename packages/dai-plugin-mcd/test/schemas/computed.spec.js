@@ -195,7 +195,7 @@ test(COLLATERAL_TYPES_PRICES, async () => {
   expect(batAPrice.symbol).toEqual('USD/BAT');
 });
 
-test(DEFAULT_COLLATERAL_TYPES_PRICES, async () => {
+test.skip(DEFAULT_COLLATERAL_TYPES_PRICES, async () => {
   const [ethAPrice, batAPrice] = await maker.latest(
     DEFAULT_COLLATERAL_TYPES_PRICES
   );

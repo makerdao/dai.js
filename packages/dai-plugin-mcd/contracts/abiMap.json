@@ -39,5 +39,6 @@
   "PROXY_ACTIONS_DSR": "DssProxyActionsDsr",
   "MIGRATION": "ScdMcdMigration",
   "MIGRATION_PROXY_ACTIONS": "MigrationProxyActions",
-  "USDC": "USDC"
+  "USDC": "USDC",
+  "WBTC": "WBTC"
 }
