@@ -14,9 +14,9 @@
   "scripts": {
     "build": "yarn clean && yarn build:cjs && yarn build:umd",
     "build:umd": "webpack --config ../../webpack.config.js",
+    "clean": "rm -rf ./dist ./umd",
     "build:cjs": "../../scripts/build.sh",
     "prepublishOnly": "yarn build",
-    "clean": "rm -rf ./dist ./umd",
     "testchain": "../../scripts/run-testchain.sh",
     "test": "yarn testchain --ci jest --runInBand",
     "coverage": "yarn test --coverage",

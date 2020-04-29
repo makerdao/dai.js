@@ -62,7 +62,7 @@
     "prettier": "^1.12.1",
     "sane": "^4.0.3",
     "solc": "^0.4.23",
-    "uglifyjs-webpack-plugin": "^1.2.5",
+    "terser-webpack-plugin": "^2.3.6",
     "webpack": "^4.43.0",
     "webpack-bundle-analyzer": "^3.7.0"
   }
