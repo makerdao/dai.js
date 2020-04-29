@@ -70,11 +70,13 @@ export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
 export const USDC = createCurrency('USDC');
+export const WBTC = createCurrency('WBTC');
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: BAT, ilk: 'BAT-A' },
-  { currency: USDC, ilk: 'USDC-A', decimals: 6 }
+  { currency: USDC, ilk: 'USDC-A', decimals: 6 },
+  { currency: WBTC, ilk: 'WBTC-A', decimals: 8 }
 ];
 
 export const SAI = createCurrency('SAI');
@@ -105,7 +107,7 @@ export const McdPlugin = {
       }));
     }
     const tokens = uniqBy(cdpTypes, 'currency').map(
-      ({ currency, address, abi, decimals }) => {
+      ({ currency, address, abi, decimals }, idx) => {
         const data =
           address && abi ? { address, abi } : addContracts[currency.symbol];
         assert(data, `No address and ABI found for "${currency.symbol}"`);

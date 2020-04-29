@@ -36,6 +36,8 @@ export const tokenBalance = {
         [TOKEN_BALANCE]: v => {
           if (symbol === 'USDC') {
             return currencyToken(v, -6);
+          } else if (symbol === 'WBTC') {
+            return currencyToken(v, -8);
           } else {
             return currencyToken(v, 'wei');
           }
