@@ -14,6 +14,7 @@ const picks = [
   '0x26EC003c72ebA27749083d588cdF7EBA665c0A1D',
   '0x54F4E468FB0297F55D8DfE57336D186009A1455a'
 ];
+
 const mkrToLock = 3;
 
 jest.setTimeout(60000);
@@ -112,4 +113,60 @@ test('get hat should return lifted address', async () => {
 
   const newHat = await chiefService.getHat();
   expect(newHat).toBe(addressToLift);
+});
+
+test('get detailed lock logs', async () => {
+  await setUpAllowance(maker, chiefService._chiefContract().address);
+  await chiefService.lock(2);
+
+  const lockLog = await chiefService.getDetailedLockLogs();
+
+  const { sender, amount } = lockLog[0];
+  expect(sender).toBe(maker.currentAddress());
+  expect(amount.toNumber()).toBe(2);
+});
+
+test('get detailed free logs', async () => {
+  const chiefAddress = chiefService._chiefContract().address;
+  await setUpAllowance(maker, chiefAddress);
+  await chiefService.lock(2);
+  const iou = await maker.getToken('IOU');
+
+  await iou.approveUnlimited(chiefAddress);
+  await chiefService.free(1);
+
+  const freeLog = await chiefService.getDetailedFreeLogs();
+
+  const { sender, amount } = freeLog[0];
+  expect(sender).toBe(maker.currentAddress());
+  expect(amount.toNumber()).toBe(1);
+});
+
+test('get vote address logs', async () => {
+  await chiefService.vote(picks);
+
+  const voteAddressLog = await chiefService.getVoteAddressLogs();
+  expect(voteAddressLog.length).toBe(2); // note modifier is hit twice for a vote(address[])
+
+  const { sender, candidates } = voteAddressLog[0];
+  expect(sender).toBe(maker.currentAddress());
+  expect(candidates.map(t => t.toLowerCase())).toMatchObject(
+    picks.map(t => t.toLowerCase())
+  );
+});
+
+test('get vote slate logs', async () => {
+  await chiefService.etch(picks);
+
+  const hash = web3utils.soliditySha3({ type: 'address[]', value: picks });
+
+  await chiefService.vote(hash);
+
+  const voteSlateLog = await chiefService.getVoteSlateLogs();
+
+  expect(voteSlateLog.length).toBe(1); // note modifier is hit only once for a vote(bytes32)
+
+  const { sender, slate } = voteSlateLog[0];
+  expect(sender).toBe(maker.currentAddress());
+  expect(slate).toBe(hash);
 });
