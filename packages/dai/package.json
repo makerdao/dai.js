@@ -102,8 +102,5 @@
   },
   "engines": {
     "node": ">=10.16"
-  },
-  "devDependencies": {
-    "webpack-cli": "^3.3.11"
   }
 }
