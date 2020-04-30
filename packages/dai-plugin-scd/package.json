@@ -3,9 +3,9 @@
   "description": "Plugin to add Single-Collateral Dai support to dai.js",
   "version": "1.1.0",
   "license": "MIT",
-  "main": "dist",
+  "main": "dist/src/index.js",
   "scripts": {
-    "build": "../../scripts/build.sh",
+    "build": "./scripts/build.sh",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
