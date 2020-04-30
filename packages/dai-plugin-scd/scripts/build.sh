@@ -14,6 +14,7 @@ babel src --out-dir ./dist/src
 
 copyfiles \
   contracts/abis/* \
+  contracts/abiMap.json \
   src/config/presets/* \
   contracts/addresses/* \
   contracts/abiMap.json \
