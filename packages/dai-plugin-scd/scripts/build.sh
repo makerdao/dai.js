@@ -16,4 +16,5 @@ copyfiles \
   contracts/abis/* \
   src/config/presets/* \
   contracts/addresses/* \
+  contracts/abiMap.json \
   dist
