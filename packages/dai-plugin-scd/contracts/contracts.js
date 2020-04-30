@@ -13,6 +13,5 @@ export default {
   PROXY_REGISTRY: 'PROXY_REGISTRY',
   DS_PROXY_FACTORY: 'DS_PROXY_FACTORY',
   DS_PROXY: 'DS_PROXY',
-  // do I need this
   MULTICALL: 'MULTICALL'
 };
