@@ -46,7 +46,7 @@ describe('SAI to DAI Migration', () => {
     const saiBalanceBeforeMigration = await migration._sai.balanceOf(address);
     const daiBalanceBeforeMigration = await maker
       .service('token')
-      .getToken('MDAI')
+      .getToken('DAI')
       .balanceOf(address);
 
     await migration.execute(1);
@@ -54,7 +54,7 @@ describe('SAI to DAI Migration', () => {
     const saiBalanceAfterMigration = await migration._sai.balanceOf(address);
     const daiBalanceAfterMigration = await maker
       .service('token')
-      .getToken('MDAI')
+      .getToken('DAI')
       .balanceOf(address);
 
     expect(saiBalanceBeforeMigration.toNumber()).toEqual(

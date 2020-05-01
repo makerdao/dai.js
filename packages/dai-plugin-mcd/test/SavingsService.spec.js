@@ -6,7 +6,7 @@ import {
 } from '@makerdao/test-helpers';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import { MDAI, ETH } from '../src/index';
+import { DAI, ETH } from '../src/index';
 import BigNumber from 'bignumber.js';
 import findIndex from 'lodash/findIndex';
 
@@ -39,19 +39,19 @@ describe('Savings Service', () => {
   async function makeSomeDai(amount) {
     const cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpMgr.openLockAndDraw('ETH-A', ETH(1), MDAI(amount));
+    await cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(amount));
   }
 
   beforeAll(async () => {
     maker = await mcdMaker();
     service = maker.service(ServiceRoles.SAVINGS);
-    dai = maker.getToken(MDAI);
+    dai = maker.getToken(DAI);
     proxyAddress = await maker.service('proxy').ensureProxy();
     await dai.approveUnlimited(proxyAddress);
   });
 
   afterAll(async () => {
-    await maker.service('allowance').removeAllowance('MDAI', proxyAddress);
+    await maker.service('allowance').removeAllowance('DAI', proxyAddress);
   });
 
   beforeEach(async () => {
@@ -73,7 +73,7 @@ describe('Savings Service', () => {
     const potTotalBeforeJoin = await service.getTotalDai();
     expect(potTotalBeforeJoin.toNumber()).toBe(0);
 
-    await service.join(MDAI(2));
+    await service.join(DAI(2));
 
     const potTotalAfterJoin = await service.getTotalDai();
     expect(potTotalAfterJoin.toNumber()).toBe(2);
@@ -85,7 +85,7 @@ describe('Savings Service', () => {
     expect(potTotalBeforeJoin.toNumber()).toBe(0);
 
     const joinAmount = 2;
-    await service.join(MDAI(joinAmount));
+    await service.join(DAI(joinAmount));
 
     const potTotalAfterJoin = await service.getTotalDai();
     expect(potTotalAfterJoin.toNumber()).toBe(2);
@@ -102,13 +102,13 @@ describe('Savings Service', () => {
 
   test('check amount in balance', async () => {
     const amount = await service.balance();
-    expect(MDAI.isInstance(amount)).toBeTruthy();
+    expect(DAI.isInstance(amount)).toBeTruthy();
   });
 
   test('check amount using balance of', async () => {
     const proxyAddress = await maker.currentProxy();
     const amount = await service.balanceOf(proxyAddress);
-    expect(MDAI.isInstance(amount)).toBeTruthy();
+    expect(DAI.isInstance(amount)).toBeTruthy();
   });
 
   test('get balance without proxy', async () => {
@@ -127,7 +127,7 @@ describe('Savings Service', () => {
     await makeSomeDai(3);
 
     const joinAmount = 2;
-    await service.join(MDAI(joinAmount));
+    await service.join(DAI(joinAmount));
 
     const balanceBeforeTime = await service.balanceOf(proxyAddress);
     expect(balanceBeforeTime.toNumber()).toBe(joinAmount);
@@ -144,7 +144,7 @@ describe('Savings Service', () => {
 
   test('check balance after join with multiple accounts', async () => {
     await makeSomeDai(3);
-    await service.join(MDAI(2));
+    await service.join(DAI(2));
 
     const { address, key } = TestAccountProvider.nextAccount();
     await maker
@@ -152,7 +152,7 @@ describe('Savings Service', () => {
       .addAccount(address, { type: 'privateKey', key });
 
     const otherAccountJoinAmount = 1;
-    await maker.getToken(MDAI).transfer(address, otherAccountJoinAmount);
+    await maker.getToken(DAI).transfer(address, otherAccountJoinAmount);
 
     await mineBlocks(maker.service('web3'), 3);
     await maker
@@ -163,7 +163,7 @@ describe('Savings Service', () => {
     maker.service('accounts').useAccount(address);
     const otherProxyAddress = await maker.service('proxy').ensureProxy();
     await dai.approveUnlimited(otherProxyAddress);
-    await service.join(MDAI(otherAccountJoinAmount));
+    await service.join(DAI(otherAccountJoinAmount));
 
     const [chi1, chi2] = await mineBlocksAndReturnChi(3);
     const accruedInterest = calculateAccruedInterest(
@@ -182,11 +182,11 @@ describe('Savings Service', () => {
   test('cannot exit pot more than joined', async () => {
     await makeSomeDai(3);
 
-    await service.join(MDAI(1));
+    await service.join(DAI(1));
 
     const startingBalance = await dai.balance();
 
-    const exit = service.exit(MDAI(2));
+    const exit = service.exit(DAI(2));
     await expect(exit).rejects.toThrow();
 
     const endingBalance = await dai.balance();
@@ -200,7 +200,7 @@ describe('Savings Service', () => {
     const amountBeforeJoin = await service.balance();
     const joinAmount = 2;
 
-    await service.join(MDAI(joinAmount));
+    await service.join(DAI(joinAmount));
 
     const amountAfterJoin = await service.balance();
     expect(amountAfterJoin.toNumber()).toBeCloseTo(
@@ -214,7 +214,7 @@ describe('Savings Service', () => {
     const [chi1, chi2] = await mineBlocksAndReturnChi(3);
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
 
-    await service.exit(MDAI(joinAmount));
+    await service.exit(DAI(joinAmount));
 
     const amountAfterExit = await service.balance();
     expect(amountAfterExit.toNumber()).toBeCloseTo(accruedInterest, 8);
@@ -222,8 +222,8 @@ describe('Savings Service', () => {
     const endingBalance = await dai.balance();
 
     // Due to how 'exit' handles rounding sub-wei amounts, the ending balance can be one wei less than expected
-    const amountLessWei = MDAI(startingBalance)
-      .minus(MDAI.wei(1))
+    const amountLessWei = DAI(startingBalance)
+      .minus(DAI.wei(1))
       .toBigNumber()
       .toString();
     expect(
@@ -238,7 +238,7 @@ describe('Savings Service', () => {
 
     const startingBalance = (await dai.balance()).toNumber();
     const joinAmount = 2;
-    await service.join(MDAI(joinAmount));
+    await service.join(DAI(joinAmount));
 
     const [chi1, chi2] = await mineBlocksAndReturnChi(3);
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
@@ -254,11 +254,11 @@ describe('Savings Service', () => {
 
   xtest('get dsr event history via web3', async () => {
     await makeSomeDai(10);
-    await service.join(MDAI(3));
+    await service.join(DAI(3));
     await mineBlocks(maker.service('web3'), 5);
 
     const exitAmount = '2';
-    await service.exit(MDAI(exitAmount));
+    await service.exit(DAI(exitAmount));
     const events = await service.getEventHistory(proxyAddress);
 
     const depositEventIdx = findIndex(events, { type: 'DSR_DEPOSIT' });
@@ -272,15 +272,15 @@ describe('Savings Service', () => {
     expect(events[withdrawEventIdx].gem).toEqual('DAI');
 
     // Due to how 'exit' handles rounding sub-wei amounts, the exit amount returned can be one wei less than intended
-    const amountLessWei = MDAI(exitAmount)
-      .minus(MDAI.wei(1))
+    const amountLessWei = DAI(exitAmount)
+      .minus(DAI.wei(1))
       .toBigNumber()
       .toString();
     expect(
       [exitAmount, amountLessWei].includes(events[withdrawEventIdx].amount)
     ).toBe(true);
 
-    await service.join(MDAI(1));
+    await service.join(DAI(1));
 
     const cachedEvents = await service.getEventHistory(proxyAddress);
     expect(cachedEvents.length).toEqual(2);
@@ -289,7 +289,7 @@ describe('Savings Service', () => {
   test('earnings to date', async () => {
     await makeSomeDai(10);
     const joinAmount = 10;
-    await service.join(MDAI(joinAmount));
+    await service.join(DAI(joinAmount));
 
     const etdA = await service.getEarningsToDate(proxyAddress);
     const [chi1, chi2] = await mineBlocksAndReturnChi(10);

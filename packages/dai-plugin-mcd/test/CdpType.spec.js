@@ -1,7 +1,7 @@
 import { createCurrencyRatio } from '@makerdao/currency';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import { ETH, MDAI, USD, BAT } from '../src';
+import { ETH, DAI, USD, BAT } from '../src';
 const { CDP_MANAGER, CDP_TYPE } = ServiceRoles;
 
 let maker, service;
@@ -14,7 +14,10 @@ beforeAll(async () => {
 
 // these CDP types should be available to the Maker instance because
 // of the configuration passed into it (see test/helpers.js)
-const scenarios = [['ETH-A', ETH], ['BAT-A', BAT]];
+const scenarios = [
+  ['ETH-A', ETH],
+  ['BAT-A', BAT]
+];
 
 /*
   The following arrays are expected values for each tested
@@ -57,7 +60,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
   });
 
   test('get debt ceiling', () => {
-    expect(cdpType.debtCeiling).toEqual(MDAI(systemValues[ilk][2]));
+    expect(cdpType.debtCeiling).toEqual(DAI(systemValues[ilk][2]));
   });
 
   test('get liquidation ratio', () => {

@@ -1,4 +1,4 @@
-import { MDAI_1 } from '../index';
+import { DAI_1 } from '../index';
 
 export default class GlobalSettlementDaiRedeemer {
   constructor(container) {
@@ -18,7 +18,7 @@ export default class GlobalSettlementDaiRedeemer {
 
     const daiBalance = await this._container
       .get('token')
-      .getToken(MDAI_1)
+      .getToken(DAI_1)
       .balance();
     if (daiBalance.lte(0)) return false;
 

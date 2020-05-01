@@ -9,7 +9,7 @@ import ManagedCdp from './ManagedCdp';
 import { castAsCurrency, stringToBytes, bytesToString } from './utils';
 import has from 'lodash/has';
 import padStart from 'lodash/padStart';
-import { MDAI, ETH, GNT } from './index';
+import { DAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA } = ServiceRoles;
 import getEventHistoryImpl from './EventHistory';
 
@@ -115,13 +115,13 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
-  async lockAndDraw(id, ilk, lockAmount, drawAmount = MDAI(0), { promise }) {
+  async lockAndDraw(id, ilk, lockAmount, drawAmount = DAI(0), { promise }) {
     assert(lockAmount && drawAmount, 'both amounts must be specified');
     assert(
       lockAmount instanceof Currency,
       'lockAmount must be a Currency value'
     );
-    drawAmount = castAsCurrency(drawAmount, MDAI);
+    drawAmount = castAsCurrency(drawAmount, DAI);
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
     const isEth = ETH.isInstance(lockAmount);
@@ -194,13 +194,13 @@ export default class CdpManager extends LocalService {
       this.get('smartContract').getContractAddress('MCD_JUG'),
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
-      castAsCurrency(drawAmount, MDAI).toFixed('wei'),
+      castAsCurrency(drawAmount, DAI).toFixed('wei'),
       { dsProxy: true, promise, metadata: { id, ilk, drawAmount } }
     );
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
-  wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
+  wipeAndFree(id, ilk, wipeAmount = DAI(0), freeAmount, { promise }) {
     const isEth = ETH.isInstance(freeAmount);
     const method = isEth ? 'wipeAndFreeETH' : 'wipeAndFreeGem';
     return this.proxyActions[method](

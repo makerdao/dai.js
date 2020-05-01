@@ -3,7 +3,7 @@ import { mockContracts, globalSettlement } from '../helpers/mocks';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import { ServiceRoles, Migrations } from '../../src/constants';
-import { MDAI, ETH } from '@makerdao/dai-plugin-mcd';
+import { DAI, ETH } from '@makerdao/dai-plugin-mcd';
 
 let maker, migration, smartContract, cdpManager, snapshot;
 
@@ -11,7 +11,7 @@ describe('Global Settlement Dai Redeemer migration', () => {
   beforeAll(async () => {
     maker = await migrationMaker();
 
-    await maker.getToken(MDAI).approveUnlimited(await maker.currentProxy());
+    await maker.getToken(DAI).approveUnlimited(await maker.currentProxy());
     smartContract = maker.service('smartContract');
     cdpManager = maker.service('mcd:cdpManager');
     migration = maker
@@ -42,7 +42,7 @@ describe('Global Settlement Dai Redeemer migration', () => {
 
   test('if the system is in global settlement, user owns some DAI, but collateral price has not been fixed, return false', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(9));
+    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(9));
 
     mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage() });
 
@@ -61,7 +61,7 @@ describe('Global Settlement Dai Redeemer migration', () => {
 
   test('if the system IS in global settlement, collateral price has been fixed, the user owns DAI, and the user has locked collateral, return true', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(9));
+    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(9));
 
     mockContracts(smartContract, {
       MCD_END_1: globalSettlement.afterFlow({
@@ -74,11 +74,11 @@ describe('Global Settlement Dai Redeemer migration', () => {
 
   test('if the system IS in global settlement, collateral price has been fixed, the user owns DAI, but the user does NOT have locked collateral, return false', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(9));
+    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(9));
 
     const account2 = TestAccountProvider.nextAccount();
 
-    const mdai = maker.service('token').getToken(MDAI);
+    const mdai = maker.service('token').getToken(DAI);
     await mdai.transfer(account2.address, 9);
 
     await maker.addAccount({ ...account2, type: 'privateKey' });

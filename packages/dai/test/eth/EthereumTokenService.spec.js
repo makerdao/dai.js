@@ -11,7 +11,6 @@ beforeAll(async () => {
 
 test('getTokens returns tokens', () => {
   const tokensList = ethereumTokenService.getTokens();
-  expect(tokensList.includes(tokens.DAI)).toBe(true);
   expect(tokensList.includes(tokens.MKR)).toBe(true);
 });
 

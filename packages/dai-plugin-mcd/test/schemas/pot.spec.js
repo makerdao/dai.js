@@ -1,6 +1,6 @@
 import { mcdMaker, setupCollateral } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import { ETH, MDAI } from '../../src';
+import { ETH, DAI } from '../../src';
 import { ServiceRoles } from '../../src/constants';
 import BigNumber from 'bignumber.js';
 
@@ -16,7 +16,7 @@ import potSchemas from '../../src/schemas/pot';
 let maker, snapshotData, cdpMgr, saveService;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = DAI(1);
 const ETH_A_PRICE = 180;
 
 beforeAll(async () => {
@@ -36,7 +36,7 @@ beforeAll(async () => {
   cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
   saveService = await maker.service(ServiceRoles.SAVINGS);
 
-  const dai = maker.getToken(MDAI);
+  const dai = maker.getToken(DAI);
   const _proxyAddress = await maker.service('proxy').ensureProxy();
   await dai.approveUnlimited(_proxyAddress);
 
@@ -46,7 +46,7 @@ beforeAll(async () => {
     ETH_A_DEBT_AMOUNT
   );
 
-  await saveService.join(MDAI(1));
+  await saveService.join(DAI(1));
 });
 
 afterAll(async () => {

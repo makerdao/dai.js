@@ -1,5 +1,5 @@
 import { mcdMaker, setupCollateral } from '../helpers';
-import { ETH, BAT, MDAI, USD } from '../../src';
+import { ETH, BAT, DAI, USD } from '../../src';
 import {
   takeSnapshot,
   restoreSnapshot,
@@ -66,11 +66,11 @@ let maker,
   expectedVaultAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = DAI(1);
 const ETH_A_PRICE = 180;
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = MDAI(1);
+const BAT_A_DEBT_AMOUNT = DAI(1);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {
@@ -116,7 +116,7 @@ beforeAll(async () => {
 
   const mgr = await maker.service(ServiceRoles.CDP_MANAGER);
   const sav = await maker.service(ServiceRoles.SAVINGS);
-  const dai = maker.getToken(MDAI);
+  const dai = maker.getToken(DAI);
   proxyAddress = await maker.service('proxy').ensureProxy();
   await dai.approveUnlimited(proxyAddress);
 
@@ -133,7 +133,7 @@ beforeAll(async () => {
     BAT_A_DEBT_AMOUNT
   );
 
-  await sav.join(MDAI(1));
+  await sav.join(DAI(1));
 });
 
 afterAll(async () => {
@@ -243,7 +243,7 @@ test(COLLATERAL_VALUE, async () => {
 test(COLLATERALIZATION_RATIO, async () => {
   const cdpId = 1;
   const colRatio = await maker.latest(COLLATERALIZATION_RATIO, cdpId);
-  const expected = createCurrencyRatio(USD, MDAI)(180);
+  const expected = createCurrencyRatio(USD, DAI)(180);
 
   expect(colRatio.toString()).toEqual(expected.toString());
 });
@@ -251,7 +251,7 @@ test(COLLATERALIZATION_RATIO, async () => {
 test(DEBT_VALUE, async () => {
   const cdpId = 1;
   const debtValue = await maker.latest(DEBT_VALUE, cdpId);
-  const expected = MDAI(1);
+  const expected = DAI(1);
 
   expect(debtValue.toNumber()).toEqual(expected.toNumber());
 });
@@ -267,7 +267,7 @@ test(LIQUIDATION_PRICE, async () => {
 test(DAI_AVAILABLE, async () => {
   const cdpId = 1;
   const daiAvailable = await maker.latest(DAI_AVAILABLE, cdpId);
-  const expected = MDAI(119);
+  const expected = DAI(119);
 
   expect(daiAvailable.toString()).toEqual(expected.toString());
 });
@@ -304,16 +304,16 @@ test(VAULT, async () => {
   const expectedEncumberedCollateral = fromWei(1000000000000000000);
   const expectedEncumberedDebt = fromWei(995000000000000000);
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
-  const expectedDebtValue = MDAI(1);
-  const expectedColRatio = createCurrencyRatio(USD, MDAI)(180);
+  const expectedDebtValue = DAI(1);
+  const expectedColRatio = createCurrencyRatio(USD, DAI)(180);
   const expectedCollateralAmount = ETH(1);
   const expectedCollateralValue = USD(180);
   const expectedLiquidationPrice = createCurrencyRatio(USD, ETH)(1.5);
-  const expectedDaiAvailable = MDAI(119);
+  const expectedDaiAvailable = DAI(119);
   const expectedCollateralAvailableAmount = ETH(0.99);
   const expectedCollateralAvailableValue = USD(178.5);
   const expectedUnlockedCollateral = fromWei(0);
-  const expectedLiqRatio = createCurrencyRatio(USD, MDAI)(1.5);
+  const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
   const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedDebtFloor = BigNumber('0');
@@ -393,10 +393,10 @@ test(BALANCE, async () => {
   const daiBalance = await maker.latest(BALANCE, 'DAI', address);
   const wethBalance = await maker.latest(BALANCE, 'WETH', address);
 
-  expect(daiBalance.symbol).toEqual('MDAI');
+  expect(daiBalance.symbol).toEqual('DAI');
   expect(daiBalance.toBigNumber()).toEqual(BigNumber('1'));
 
-  expect(wethBalance.symbol).toEqual('MWETH');
+  expect(wethBalance.symbol).toEqual('WETH');
   expect(wethBalance.toBigNumber()).toEqual(BigNumber('0'));
 
   const dsrDaiBalance = await maker.latest(BALANCE, 'DSR-DAI', address);
@@ -488,7 +488,7 @@ test(PROXY_OWNER, async () => {
 test(COLLATERAL_TYPE_DATA, async () => {
   const collateralType = 'ETH-A';
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
-  const expectedLiqRatio = createCurrencyRatio(USD, MDAI)(1.5);
+  const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
   const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedPriceWithSafetyMargin = BigNumber('120');

@@ -5,7 +5,7 @@ import {
   mineBlocks,
   TestAccountProvider
 } from '@makerdao/test-helpers';
-import { ETH, BAT, MDAI, MWETH, ALLOWANCE_AMOUNT } from '../../src';
+import { ETH, BAT, DAI, WETH, ALLOWANCE_AMOUNT } from '../../src';
 import BigNumber from 'bignumber.js';
 import { ServiceRoles } from '../../src/constants';
 
@@ -20,10 +20,10 @@ import tokenSchemas from '../../src/schemas/token';
 let maker, snapshotData, address, address2, proxyAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = DAI(1);
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = MDAI(1);
+const BAT_A_DEBT_AMOUNT = DAI(1);
 
 beforeAll(async () => {
   maker = await mcdMaker({
@@ -63,8 +63,8 @@ test(TOKEN_BALANCE, async () => {
   const daiBalance = await maker.latest(TOKEN_BALANCE, address, 'DAI');
   const wethBalance = await maker.latest(TOKEN_BALANCE, address, 'WETH');
 
-  expect(daiBalance.symbol).toEqual('MDAI');
-  expect(wethBalance.symbol).toEqual('MWETH');
+  expect(daiBalance.symbol).toEqual('DAI');
+  expect(wethBalance.symbol).toEqual('WETH');
 
   try {
     await maker.latest(TOKEN_BALANCE, address, 'NON_MCD_TOKEN');
@@ -141,7 +141,7 @@ test(ADAPTER_BALANCE, async () => {
   const ethAdapterBalance = await maker.latest(ADAPTER_BALANCE, 'ETH-A');
   const batAdapterBalance = await maker.latest(ADAPTER_BALANCE, 'BAT-A');
 
-  expect(ethAdapterBalance.symbol).toEqual(MWETH.symbol);
+  expect(ethAdapterBalance.symbol).toEqual(WETH.symbol);
   expect(batAdapterBalance.symbol).toEqual(BAT.symbol);
 
   expect(ethAdapterBalance.toBigNumber()).toEqual(BigNumber('1'));
