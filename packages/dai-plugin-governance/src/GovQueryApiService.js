@@ -1,6 +1,11 @@
 import { PublicService } from '@makerdao/services-core';
 import assert from 'assert';
-import { netIdtoSpockUrl, netIdtoSpockUrlStaging } from './utils/helpers';
+import {
+  netIdtoSpockUrl,
+  netIdtoSpockUrlStaging,
+  toBuffer,
+  paddedArray
+} from './utils/helpers';
 
 export default class QueryApi extends PublicService {
   constructor(name = 'govQueryApi') {
@@ -113,6 +118,26 @@ export default class QueryApi extends PublicService {
     }`;
     const response = await this.getQueryResponseMemoized(this.serverUrl, query);
     return response.timeToBlockNumber.nodes[0];
+  }
+
+  async getMkrSupportRankedChoice(pollId, unixTime) {
+    const query = `{voteMkrWeightsAtTimeRankedChoice(argPollId: ${pollId}, argUnix: ${unixTime}){
+      nodes{
+        optionIdRaw
+        mkrSupport
+      }
+    }
+    }`;
+    const response = await this.getQueryResponseMemoized(this.serverUrl, query);
+
+    return response.voteMkrWeightsAtTimeRankedChoice.nodes.map(vote => {
+      const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+      const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+      return {
+        ...vote,
+        ballot
+      };
+    });
   }
 
   async getMkrSupport(pollId, unixTime) {

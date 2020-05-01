@@ -12,6 +12,7 @@
     "@makerdao/currency": "^0.9.5",
     "@makerdao/services-core": "^0.9.5",
     "assert": "^2.0.0",
+    "bignumber": "^1.1.0",
     "ramda": "^0.25.0",
     "web3-utils": "^1.0.0-beta.36"
   },
