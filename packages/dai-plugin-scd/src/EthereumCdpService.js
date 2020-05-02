@@ -248,7 +248,7 @@ export default class EthereumCdpService extends PrivateService {
   async getCollateralValue(cdpId, unit = ETH) {
     const hexCdpId = numberToBytes32(cdpId);
     const pethValue = PETH.wei(await this._tubContract().ink(hexCdpId));
-    if (unit === PETH) return pethValue;
+    if (unit.symbol === PETH.symbol) return pethValue;
 
     const pethPrice = await this.get('price').getWethToPethRatio();
     const ethValue = ETH(pethValue.times(pethPrice));
@@ -258,7 +258,7 @@ export default class EthereumCdpService extends PrivateService {
     const ethPrice = await this.get('price').getEthPrice();
     const usdValue = ethValue.times(ethPrice);
 
-    if (unit === USD) return usdValue;
+    if (unit.symbol === USD.symbol) return usdValue;
 
     throw new Error(
       `Don't know how to get collateral value in ${unit ? unit.symbol : unit}`
@@ -302,10 +302,10 @@ export default class EthereumCdpService extends PrivateService {
         .call({}, (err, val) => (err ? reject(err) : resolve(val)));
     });
     const usdFee = USD.wei(rap);
-    switch (unit) {
-      case USD:
+    switch (unit.symbol) {
+      case USD.symbol:
         return usdFee;
-      case MKR: {
+      case MKR.symbol: {
         const price = await this.get('price').getMkrPrice();
         return usdFee.div(price);
       }
