@@ -1,4 +1,4 @@
-import tracksTransactions from '@makerdao/dai/dist/src/utils/tracksTransactions';
+import { tracksTransactions } from '../utils';
 import { DAI } from '..';
 
 export default class DaiToSai {
