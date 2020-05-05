@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.30.0",
+  "version": "0.31.1",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -29,7 +29,8 @@
     "url": "https://github.com/makerdao/dai.js.git"
   },
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "umd/*"
   ],
   "main": "dist/src/index.js",
   "browser": "umd/index.js",
