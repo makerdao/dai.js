@@ -21,7 +21,8 @@
     "README.md",
     "LICENSE",
     "src/**/*.js",
-    "dist/**/*.js"
+    "dist/**/*.js",
+    "umd/*"
   ],
   "dependencies": {
     "babel-runtime": "^6.26.0",
