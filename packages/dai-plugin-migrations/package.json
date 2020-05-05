@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/dai-plugin-migrations",
   "description": "Plugin to add migrations to dai.js",
-  "version": "1.0.12",
+  "version": "1.1.0",
   "license": "MIT",
   "main": "dist/index.js",
   "browser": "umd/index.js",
