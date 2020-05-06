@@ -119,8 +119,8 @@ export default class QueryApi extends PublicService {
       }
     }`;
     const response = await this.getQueryResponse(this.serverUrl, query);
-    if (!response.currentVote.nodes[0]) return null;
-    return response.currentVote.nodes[0].optionIdRaw;
+    if (!response.currentVoteRankedChoice.nodes[0]) return null;
+    return response.currentVoteRankedChoice.nodes[0].optionIdRaw;
   }
 
   async getBlockNumber(unixTime) {
