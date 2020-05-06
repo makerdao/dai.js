@@ -2,7 +2,7 @@ import { PrivateService } from '@makerdao/services-core';
 import { POLLING } from './utils/constants';
 import { MKR } from './utils/constants';
 import BigNumber from 'bignumber.js';
-import { fromBuffer } from './utils/helpers';
+import { fromBuffer, toBuffer, paddedArray } from './utils/helpers';
 
 const POSTGRES_MAX_INT = 2147483647;
 
@@ -82,10 +82,12 @@ export default class GovPollingService extends PrivateService {
   }
 
   async getOptionVotingForRankedChoice(address, pollId) {
-    return this.get('govQueryApi').getOptionVotingForRankedChoice(
-      address.toLowerCase(),
-      pollId
-    );
+    const optionIdRaw = await this.get(
+      'govQueryApi'
+    ).getOptionVotingForRankedChoice(address.toLowerCase(), pollId);
+    const ballotBuffer = toBuffer(optionIdRaw, { endian: 'little' });
+    const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+    return ballot.reverse().filter(choice => choice !== 0 && choice !== '0');
   }
 
   async getNumUniqueVoters(pollId) {

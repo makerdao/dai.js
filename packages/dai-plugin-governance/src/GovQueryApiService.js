@@ -120,7 +120,7 @@ export default class QueryApi extends PublicService {
     }`;
     const response = await this.getQueryResponse(this.serverUrl, query);
     if (!response.currentVote.nodes[0]) return null;
-    return response.currentVote.nodes[0].optionId;
+    return response.currentVote.nodes[0].optionIdRaw;
   }
 
   async getBlockNumber(unixTime) {
