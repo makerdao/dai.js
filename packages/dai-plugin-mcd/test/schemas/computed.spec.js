@@ -63,8 +63,8 @@ let maker,
   address,
   address2,
   proxyAddress,
-  expectedVaultAddress;
-
+  expectedEthVaultAddress,
+  expectedBatVaultAddress;
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
 const ETH_A_DEBT_AMOUNT = MDAI(1);
 const ETH_A_PRICE = 180;
@@ -120,18 +120,19 @@ beforeAll(async () => {
   proxyAddress = await maker.service('proxy').ensureProxy();
   await dai.approveUnlimited(proxyAddress);
 
-  const vault = await mgr.openLockAndDraw(
+  let vault = await mgr.openLockAndDraw(
     'ETH-A',
     ETH_A_COLLATERAL_AMOUNT,
     ETH_A_DEBT_AMOUNT
   );
-  expectedVaultAddress = await mgr.getUrn(vault.id);
+  expectedEthVaultAddress = await mgr.getUrn(vault.id);
 
-  await mgr.openLockAndDraw(
+  vault = await mgr.openLockAndDraw(
     'BAT-A',
     BAT_A_COLLATERAL_AMOUNT,
     BAT_A_DEBT_AMOUNT
   );
+  expectedBatVaultAddress = await mgr.getUrn(vault.id);
 
   await sav.join(MDAI(1));
 });
@@ -215,7 +216,7 @@ test(VAULT_TYPE_AND_ADDRESS, async () => {
     cdpId
   );
   expect(collateralType).toEqual(expectedVaultType);
-  expect(vaultAddress).toEqual(expectedVaultAddress);
+  expect(vaultAddress).toEqual(expectedEthVaultAddress);
 });
 
 test(VAULT_EXTERNAL_OWNER, async () => {
@@ -324,7 +325,7 @@ test(VAULT, async () => {
 
   expect(vault.id).toEqual(cdpId);
   expect(vault.vaultType).toEqual(expectedVaultType);
-  expect(vault.vaultAddress).toEqual(expectedVaultAddress);
+  expect(vault.vaultAddress).toEqual(expectedEthVaultAddress);
   expect(vault.ownerAddress).toEqual(expectedOwner);
   expect(vault.externalOwnerAddress.toLowerCase()).toEqual(
     expectedExternalOwner
@@ -460,13 +461,8 @@ test(USER_VAULTS_LIST, async () => {
   expect(batVault.vaultType).toEqual('BAT-A');
   expect(ethVault.vaultType).toEqual('ETH-A');
 
-  // todo: make expected addresses dynamic
-  expect(batVault.vaultAddress).toEqual(
-    '0xE16f8767B7Dd2F74f5878e94cBcc7c1a1E0eF944'
-  );
-  expect(ethVault.vaultAddress).toEqual(
-    '0xA1480ae6E4A767D8CbC9167816d2Efb3e294e558'
-  );
+  expect(batVault.vaultAddress).toEqual(expectedBatVaultAddress);
+  expect(ethVault.vaultAddress).toEqual(expectedEthVaultAddress);
 });
 
 test(`${USER_VAULTS_LIST} for account with no proxy`, async () => {
