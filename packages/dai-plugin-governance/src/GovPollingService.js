@@ -2,6 +2,7 @@ import { PrivateService } from '@makerdao/services-core';
 import { POLLING } from './utils/constants';
 import { MKR } from './utils/constants';
 import BigNumber from 'bignumber.js';
+import { fromBuffer } from './utils/helpers';
 
 const POSTGRES_MAX_INT = 2147483647;
 
@@ -26,6 +27,15 @@ export default class GovPollingService extends PrivateService {
   }
 
   vote(pollId, optionId) {
+    return this._pollingContract().vote(pollId, optionId);
+  }
+
+  voteRankedChoice(pollId, rankings) {
+    const byteArray = new Uint8Array(32);
+    rankings.forEach((optionIndex, i) => {
+      byteArray[byteArray.length - i - 1] = optionIndex + 1;
+    });
+    const optionId = fromBuffer(byteArray).toString();
     return this._pollingContract().vote(pollId, optionId);
   }
 
@@ -71,6 +81,13 @@ export default class GovPollingService extends PrivateService {
     );
   }
 
+  async getOptionVotingForRankedChoice(address, pollId) {
+    return this.get('govQueryApi').getOptionVotingForRankedChoice(
+      address.toLowerCase(),
+      pollId
+    );
+  }
+
   async getNumUniqueVoters(pollId) {
     return this.get('govQueryApi').getNumUniqueVoters(pollId);
   }
@@ -105,7 +122,12 @@ export default class GovPollingService extends PrivateService {
       BigNumber(0)
     );
 
-    const tally = { rounds: 1, winner: null, options: {} };
+    const tally = {
+      rounds: 1,
+      winner: null,
+      totalMkrParticipation,
+      options: {}
+    };
     const defaultOptionObj = {
       firstChoice: BigNumber(0),
       transfer: BigNumber(0),

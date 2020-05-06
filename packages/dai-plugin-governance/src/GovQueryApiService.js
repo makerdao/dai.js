@@ -110,6 +110,19 @@ export default class QueryApi extends PublicService {
     return response.currentVote.nodes[0].optionId;
   }
 
+  async getOptionVotingForRankedChoice(address, pollId) {
+    const query = `{
+      currentVoteRankedChoice(argAddress: "${address}", argPollId: ${pollId}){
+        nodes{
+          optionIdRaw
+        }
+      }
+    }`;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    if (!response.currentVote.nodes[0]) return null;
+    return response.currentVote.nodes[0].optionId;
+  }
+
   async getBlockNumber(unixTime) {
     const query = `{
       timeToBlockNumber(argUnix: ${unixTime}){
@@ -130,14 +143,16 @@ export default class QueryApi extends PublicService {
     }`;
     const response = await this.getQueryResponseMemoized(this.serverUrl, query);
 
-    return response.voteMkrWeightsAtTimeRankedChoice.nodes.map(vote => {
-      const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
-      const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
-      return {
-        ...vote,
-        ballot
-      };
-    });
+    return response.voteMkrWeightsAtTimeRankedChoice.nodes
+      .filter(vote => vote.optionIdRaw !== '0')
+      .map(vote => {
+        const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        return {
+          ...vote,
+          ballot
+        };
+      });
   }
 
   async getMkrSupport(pollId, unixTime) {
