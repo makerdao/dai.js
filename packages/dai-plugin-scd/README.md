@@ -5,23 +5,23 @@
 [![Build Status][build]][build-url]
 [![Coverage Status][cover]][cover-url]
 
-
 **Dai.js** is a JavaScript library that makes it easy to build applications on top of [MakerDAO][makerdao]'s Dai Stablecoin System. You can use Maker's contracts to open Collateralized Debt Positions, withdraw loans in Dai, trade tokens on OasisDEX, and more.
 
 The library features a pluggable, service-based architecture, which allows users maximal control when integrating the Maker functionality into existing infrastructures. It also includes convenient configuration presets for out-of-the-box usability, a powerful smart contract state inspector, and support for both front-end and back-end applications.
 
 Maker's entire suite of contracts will eventually be accessible through this library—including the DAO governance and the upcoming multi-collateral release—but functionality is limited in the current alpha version to the following areas:
 
-* Opening and shutting CDPs
-* Locking and unlocking collateral
-* Withdrawing and repaying Dai
-* Automated token conversions
-* Token contract functionality for WETH, PETH, MKR, Dai, and ETH
-* Buying and selling MKR and Dai with built-in DEX integration
+- Opening and shutting CDPs
+- Locking and unlocking collateral
+- Withdrawing and repaying Dai
+- Automated token conversions
+- Token contract functionality for WETH, PETH, MKR, Dai, and ETH
+- Buying and selling MKR and Dai with built-in DEX integration
 
 ## Usage
 
 Use NPM or Yarn to install the library:
+
 ```
 npm install @makerdao/dai
 ```
@@ -35,6 +35,7 @@ const Maker = require('@makerdao/dai');
 ```
 
 Example for transferring Dai:
+
 ```js
 import Maker from '@makerdao/dai';
 const maker = Maker.create('test');
@@ -47,6 +48,7 @@ transferDai(address, amount) {
 ```
 
 Example for using CDPs:
+
 ```js
 import Maker from '@makerdao/dai';
 const maker = Maker.create('test');
@@ -95,8 +97,8 @@ If you have deployed contract code changes to the testchain, run `scripts/instal
 
 ### Commands
 
-- `yarn build:backend` - create backend build in `dist` folder
-- `yarn build:frontend` - create a UMD build in `dist` folder
+- `yarn build:cjs` - create a commonJS build in `dist` folder
+- `yarn build:umd` - create a UMD build in `umd` folder
 - `yarn lint` - run an ESLint check
 - `yarn coverage` - run code coverage and generate report in the `coverage` folder
 - `yarn test` - start a test chain and run all tests
@@ -111,8 +113,8 @@ If you have deployed contract code changes to the testchain, run `scripts/instal
 ### 0.17.0
 
 - **BREAKING CHANGE**: Importing a file directly from the package must now be done by
-prefixing the path with `dist`. E.g. `/contracts/addresses/kovan.json` now becomes
-`/dist/contract/addresses/kovan.json`.
+  prefixing the path with `dist`. E.g. `/contracts/addresses/kovan.json` now becomes
+  `/dist/contract/addresses/kovan.json`.
 
 ## License
 
@@ -120,18 +122,13 @@ prefixing the path with `dist`. E.g. `/contracts/addresses/kovan.json` now becom
 
 [npm]: https://img.shields.io/npm/v/@makerdao/dai.svg?style=flat
 [npm-url]: https://www.npmjs.com/package/@makerdao/dai
-
 [tests]: http://img.shields.io/travis/makerdao/dai.js.svg
 [tests-url]: https://travis-ci.org/makerdao/dai.js
-
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-url]: https://github.com/makerdao/dai.js/blob/dev/LICENSE
-
 [build]: https://travis-ci.com/makerdao/dai.js.svg?branch=dev
 [build-url]: https://travis-ci.com/makerdao/dai.js
-
 [cover]: https://codecov.io/gh/makerdao/dai.js/branch/dev/graph/badge.svg
 [cover-url]: https://codecov.io/github/makerdao/dai.js?branch=dev
-
 [makerdao]: https://makerdao.com
 [wiki]: https://github.com/makerdao/dai.js/wiki
