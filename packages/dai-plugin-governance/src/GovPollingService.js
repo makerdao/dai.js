@@ -85,6 +85,7 @@ export default class GovPollingService extends PrivateService {
     const optionIdRaw = await this.get(
       'govQueryApi'
     ).getOptionVotingForRankedChoice(address.toLowerCase(), pollId);
+    if (!optionIdRaw) return [];
     const ballotBuffer = toBuffer(optionIdRaw, { endian: 'little' });
     const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
     return ballot.reverse().filter(choice => choice !== 0 && choice !== '0');
