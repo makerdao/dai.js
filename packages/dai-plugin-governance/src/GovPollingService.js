@@ -6,6 +6,8 @@ import { fromBuffer, toBuffer, paddedArray } from './utils/helpers';
 
 const POSTGRES_MAX_INT = 2147483647;
 
+const MAX_ROUNDS = 32;
+
 export default class GovPollingService extends PrivateService {
   constructor(name = 'govPolling') {
     super(name, ['smartContract', 'govQueryApi', 'token']);
@@ -171,8 +173,8 @@ export default class GovPollingService extends PrivateService {
           const [, curVotes] = cur;
           if (
             curVotes.firstChoice
-              .add(curVotes.transfer)
-              .lt(prvVotes.firstChoice.add(prvVotes.transfer))
+              .plus(curVotes.transfer)
+              .lt(prvVotes.firstChoice.plus(prvVotes.transfer))
           )
             return cur;
           return prv;
@@ -200,10 +202,24 @@ export default class GovPollingService extends PrivateService {
       // look for a candidate with the majority
       Object.entries(tally.options).forEach(
         ([option, { firstChoice, transfer }]) => {
-          if (firstChoice.add(transfer).gt(totalMkrParticipation.div(2)))
+          if (firstChoice.plus(transfer).gt(totalMkrParticipation.div(2)))
             tally.winner = option;
         }
       );
+
+      //if there's no more rounds, the winner is the option with the most votes
+      if (tally.rounds > MAX_ROUNDS && !tally.winner) {
+        let max = BigNumber(0);
+        let maxOption;
+        Object.entries(tally.options).forEach(
+          ([option, { firstChoice, transfer }]) => {
+            if (firstChoice.plus(transfer).gt(max))
+              max = firstChoice.plus(transfer);
+            maxOption = option;
+          }
+        );
+        tally.winner = maxOption;
+      }
 
       // sanity checks
       if (Object.keys(tally.options).length === 2) {
