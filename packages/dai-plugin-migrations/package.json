@@ -1,11 +1,17 @@
 {
   "name": "@makerdao/dai-plugin-migrations",
   "description": "Plugin to add migrations to dai.js",
-  "version": "1.0.12",
+  "version": "1.1.0",
   "license": "MIT",
-  "main": "dist",
+  "main": "dist/index.js",
+  "browser": "umd/index.js",
+  "unpkg": "umd/index.js",
+  "jsdelivr": "umd/index.js",
   "scripts": {
-    "build": "../../scripts/build.sh",
+    "build": "yarn clean && yarn build:cjs && yarn build:umd",
+    "build:umd": "webpack --config ../../webpack.config.js",
+    "build:cjs": "../../scripts/build.sh",
+    "clean": "rm -rf ./dist ./umd",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
@@ -16,7 +22,7 @@
   },
   "dependencies": {
     "@makerdao/currency": "^0.9.5",
-    "@makerdao/services-core": "^0.9.5",
+    "@makerdao/services-core": "^0.9.9",
     "bignumber.js": "^8.1.1"
   }
 }

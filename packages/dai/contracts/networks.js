@@ -81,7 +81,7 @@ export function contractAddressesInfo(addresses) {
     ],
 
     // CageFree
-    [contracts.CAGE_FREE]: [
+    [contracts.SAI_CAGEFREE]: [
       {
         version: 1,
         address: addresses.SAI_CAGEFREE,

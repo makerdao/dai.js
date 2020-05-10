@@ -107,7 +107,7 @@ describe('SCD to MCD CDP Migration', () => {
     });
   });
 
-  describe.each(['MKR', 'DEBT', 'GEM'])('pay with %s', payment => {
+  describe.each(['DEBT', 'GEM'])('pay with %s', payment => {
     let cdp, proxyAddress;
 
     beforeEach(async () => {

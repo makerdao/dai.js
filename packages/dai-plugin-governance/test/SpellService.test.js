@@ -73,7 +73,7 @@ describe('use testchain', () => {
     spellService = maker.service('spell');
   });
 
-  test('get delay', async () => {
+  xtest('get delay', async () => {
     const delay = await spellService.getDelayInSeconds();
     expect(delay.toNumber()).toBe(1);
   });
