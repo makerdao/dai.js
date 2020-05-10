@@ -9,7 +9,11 @@ import {
   dummyAllPollsData,
   dummyOption,
   dummyWeight,
-  dummyNumUnique
+  dummyNumUnique,
+  dummyBallotNoMajority,
+  dummyBallotNoMajorityExpect,
+  dummyBallotWithMajority,
+  dummyBallotWithMajorityExpect
 } from './fixtures';
 import { MKR } from '../src/utils/constants';
 
@@ -139,4 +143,32 @@ test('getPercentageMkrVoted', async () => {
   const percentage = await govPollingService.getPercentageMkrVoted(1);
   expect(mockFn).toBeCalled();
   expect(percentage).toBe(40);
+});
+
+test('ranked choice tallying algorithm with majority', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotWithMajority
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotWithMajorityExpect)
+  );
+});
+
+test('ranked choice tallying algorithm with no majority', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotNoMajority
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotNoMajorityExpect)
+  );
 });
