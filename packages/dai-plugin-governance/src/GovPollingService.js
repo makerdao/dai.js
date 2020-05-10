@@ -188,14 +188,15 @@ export default class GovPollingService extends PrivateService {
       // 1) it's currently for the eliminated candidate
       // 2) there's another choice further down in the voter's preference list
       const votesToBeMoved = votes
-        .filter(vote => vote.choice === optionToEliminate)
-        .filter(vote => vote.ballot[vote.ballot.length - 1] !== '0');
+        .map((vote, index) => ({ ...vote, index }))
+        .filter(vote => parseInt(vote.choice) === parseInt(optionToEliminate))
+        .filter(vote => vote.ballot[vote.ballot.length - 1] !== 0);
 
       // move votes to the next choice on their preference list
       votesToBeMoved.forEach(vote => {
-        vote.choice = vote.ballot.pop();
-        tally.options[vote.choice].transfer = BigNumber(
-          tally.options[vote.choice].transfer
+        votes[vote.index].choice = votes[vote.index].ballot.pop();
+        tally.options[votes[vote.index].choice].transfer = BigNumber(
+          tally.options[votes[vote.index].choice].transfer
         ).plus(vote.mkrSupport || 0);
       });
 
