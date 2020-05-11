@@ -214,9 +214,10 @@ export default class GovPollingService extends PrivateService {
         let maxOption;
         Object.entries(tally.options).forEach(
           ([option, { firstChoice, transfer }]) => {
-            if (firstChoice.plus(transfer).gt(max))
+            if (firstChoice.plus(transfer).gt(max)) {
               max = firstChoice.plus(transfer);
-            maxOption = option;
+              maxOption = option;
+            }
           }
         );
         tally.winner = maxOption;
