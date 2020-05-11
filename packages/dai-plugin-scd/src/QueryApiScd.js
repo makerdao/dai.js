@@ -1,5 +1,5 @@
 import ethUtil from 'ethereumjs-util';
-import { getQueryResponse } from '@makerdao/dai/dist/src/QueryApi';
+import { getQueryResponse } from './utils/getQueryResponse';
 
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
 const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';

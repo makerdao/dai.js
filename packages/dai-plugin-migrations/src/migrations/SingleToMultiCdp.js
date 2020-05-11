@@ -1,4 +1,4 @@
-import { tracksTransactionsWithOptions } from '@makerdao/dai/dist/src/utils/tracksTransactions';
+import { tracksTransactionsWithOptions } from '../utils';
 import { getIdBytes, stringToBytes } from '../utils';
 import { SAI, MKR } from '..';
 
@@ -39,9 +39,10 @@ export default class SingleToMultiCdp {
     );
 
     if (payment !== 'DEBT') await this._requireAllowance(cupId, payment);
-    return migrationProxy[method](...args, { dsProxy: true, promise }).then(
-      txo => this._manager.get('mcd:cdpManager').getNewCdpId(txo)
-    );
+    return migrationProxy[method](...args, {
+      dsProxy: true,
+      promise
+    }).then(txo => this._manager.get('mcd:cdpManager').getNewCdpId(txo));
   }
 
   async _requireAllowance(cupId, payment) {
