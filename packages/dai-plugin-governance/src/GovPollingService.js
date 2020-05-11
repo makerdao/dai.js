@@ -167,8 +167,9 @@ export default class GovPollingService extends PrivateService {
       tally.rounds++;
 
       // eliminate the weakest candidate
-      const [optionToEliminate] = Object.entries(tally.options).reduce(
-        (prv, cur) => {
+      const [optionToEliminate] = Object.entries(tally.options)
+        .filter(([, optionDetails]) => !optionDetails.eliminated)
+        .reduce((prv, cur) => {
           const [, prvVotes] = prv;
           const [, curVotes] = cur;
           if (
@@ -178,8 +179,7 @@ export default class GovPollingService extends PrivateService {
           )
             return cur;
           return prv;
-        }
-      );
+        });
 
       tally.options[optionToEliminate].eliminated = true;
       tally.options[optionToEliminate].transfer = BigNumber(0);
