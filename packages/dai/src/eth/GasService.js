@@ -51,7 +51,7 @@ export default class GasService extends PublicService {
       const response = await fetch(API_URL + this._settings.apiKey);
       return response.json();
     } catch (err) {
-      console.error('Error fetching gas data; disabling preset gas price');
+      console.error('Error fetching gas data; disabling preset gas price', err);
       this.disablePrice = true;
     }
   }
