@@ -86,17 +86,14 @@ export const parsedDummyEsmData = [
 
 export const dummyBallotWithMajority = [
   {
-    optionIdRaw: '769',
     mkrSupport: '60.025000000000000000',
     ballot: createBallot([1, 3]) // [1st choice, 2nd choice, ...]
   },
   {
-    optionIdRaw: '259',
     mkrSupport: '200.598801867883985831',
     ballot: createBallot([3, 1])
   },
   {
-    optionIdRaw: '770',
     mkrSupport: '64.068823529411764706',
     ballot: createBallot([2, 3])
   }
@@ -132,17 +129,14 @@ export const dummyBallotWithMajorityExpect = {
 
 export const dummyBallotNoMajority = [
   {
-    optionIdRaw: '769',
     mkrSupport: '60.025000000000000000',
     ballot: createBallot([1, 3]) // [1st choice, 2nd choice, ...]
   },
   {
-    optionIdRaw: '259',
     mkrSupport: '102.598801867883985831',
     ballot: createBallot([3, 1])
   },
   {
-    optionIdRaw: '770',
     mkrSupport: '64.068823529411764706',
     ballot: createBallot([2, 3])
   }
@@ -170,6 +164,59 @@ export const dummyBallotNoMajorityExpect = {
       transfer: '60.025',
       winner: true,
       eliminated: false
+    }
+  }
+};
+
+// ---
+
+export const dummyBallotMultipleRounds = [
+  {
+    mkrSupport: '60.025000000000000000',
+    ballot: createBallot([1, 3]) // [1st choice, 2nd choice, ...]
+  },
+  {
+    mkrSupport: '102.598801867883985831',
+    ballot: createBallot([3, 1])
+  },
+  {
+    mkrSupport: '64.068823529411764706',
+    ballot: createBallot([2, 3])
+  },
+  {
+    mkrSupport: '4',
+    ballot: createBallot([4, 1])
+  }
+];
+
+export const dummyBallotMultipleRoundsExpect = {
+  rounds: 3,
+  winner: '3',
+  totalMkrParticipation: '230.692625397295750537',
+  options: {
+    '1': {
+      firstChoice: '60.025',
+      transfer: '0',
+      winner: false,
+      eliminated: true
+    },
+    '2': {
+      firstChoice: '64.068823529411764706',
+      transfer: '0',
+      winner: false,
+      eliminated: false
+    },
+    '3': {
+      firstChoice: '102.598801867883985831',
+      transfer: '60.025',
+      winner: true,
+      eliminated: false
+    },
+    '4': {
+      firstChoice: '4',
+      transfer: '0',
+      winner: false,
+      eliminated: true
     }
   }
 };
