@@ -21,7 +21,7 @@
     "@makerdao/dai": ">0.17.0"
   },
   "dependencies": {
-    "@makerdao/currency": "^0.9.5",
+    "@makerdao/currency": "^0.9.8",
     "@makerdao/services-core": "^0.9.9",
     "bignumber.js": "^8.1.1"
   }
