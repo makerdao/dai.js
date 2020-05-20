@@ -25,6 +25,7 @@
   "MCD_JOIN_DAI": "DaiJoin",
   "MCD_JUG": "Jug",
   "MCD_END": "End",
+  "MCD_ESM": "ESM",
   "MCD_MOVE_*": "GemMove",
   "MCD_MOVE_DAI": "DaiMove",
   "MCD_PAUSE": "DSPause",

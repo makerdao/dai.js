@@ -25,7 +25,6 @@ export async function mcdMaker({
     log,
     ...settings
   });
-  await maker.authenticate();
   return maker;
 }
 
