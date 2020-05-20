@@ -88,6 +88,8 @@ export default class EthereumTokenService extends PrivateService {
     const tokenInfoList =
       this._addedTokens[symbol] || this._getNetworkMapping(network)[symbol];
 
+    assert(tokenInfoList, `cannot find token info for "${symbol}"`);
+
     const tokenInfo = version
       ? tokenInfoList[version - 1]
       : tokenInfoList[tokenInfoList.length - 1];
