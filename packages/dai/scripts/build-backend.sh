@@ -9,7 +9,6 @@ else
 fi
 
 babel contracts --out-dir ./dist/contracts
-babel contracts/addresses --out-dir ./dist/contracts/addresses
 babel src --out-dir ./dist/src
 
 copyfiles \
