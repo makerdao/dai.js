@@ -1,4 +1,4 @@
-exports.default = {
+module.exports = {
   REP: require('./abis/REP.json'),
   ZRX: require('./abis/ZRX.json'),
   OMG: require('./abis/OMG.json'),

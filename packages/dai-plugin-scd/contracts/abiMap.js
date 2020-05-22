@@ -1,4 +1,4 @@
-exports.default = {
+module.exports = {
   SAI_PIP: require('./abis/DSValue'),
   SAI_PEP: require('./abis/DSValue'),
   SAI_PIT: require('./abis/GemPit'),

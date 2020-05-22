@@ -1,4 +1,4 @@
-exports.default = {
+module.exports = {
   TUB: require('./abis/SaiTub'),
   MCD_END_1: require('./abis/End'),
   MCD_VAT_1: require('./abis/Vat'),
