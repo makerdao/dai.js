@@ -2,7 +2,7 @@ import { createCurrency } from '@makerdao/currency';
 import testnetAddresses from '../contracts/addresses/testnet.json';
 import kovanAddresses from '../contracts/addresses/kovan.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
-import abiMap from '../contracts/abiMap.json';
+import abiMap from '../contracts/abiMap';
 import MigrationService from './MigrationService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 export const ServiceRoles = ServiceRoles_;
@@ -11,11 +11,11 @@ const { MIGRATION } = ServiceRoles;
 // this implementation assumes that all contracts in kovan.json, mainnet.json are also in testnet.json
 const allContracts = Object.entries(testnetAddresses).reduce(
   (contracts, [name, testnetAddress]) => {
-    const abiName = abiMap[name];
+    const abi = abiMap[name];
 
-    if (abiName) {
+    if (abi) {
       contracts[name] = {
-        abi: require(`../contracts/abis/${abiName}.json`),
+        abi,
         address: {
           testnet: testnetAddress,
           kovan: kovanAddresses[name],
