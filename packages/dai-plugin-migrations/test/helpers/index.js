@@ -133,11 +133,40 @@ export async function migrateSaiToDai(amount, maker) {
   await daiMigration.execute(amount);
 }
 
-// // Get wad amount of SAI from user's wallet:
-// saiJoin.gem().transferFrom(msg.sender, address(this), wad);
-// // Join the SAI wad amount to the `vat`:
-// saiJoin.join(address(this), wad);
-// // Lock the SAI wad amount to the CDP and generate the same wad amount of DAI
-// vat.frob(saiJoin.ilk(), address(this), address(this), address(this), toInt(wad), toInt(wad));
-// // Send DAI wad amount as a ERC20 token to the user's wallet
-// daiJoin.exit(msg.sender, wad);
+export async function shutDown(randomize) {
+  const maker = await migrationMaker();
+  const top = maker.service('smartContract').getContract('SAI_TOP');
+  const proxy = await maker.service('proxy').ensureProxy();
+  const normalCdp = await openLockAndDrawScdCdp(maker, randomize);
+
+  const bites = [];
+  for (let i = 0; i < (randomize ? 5 : 1); i++) {
+    console.log('creating', i);
+    const proxyCdp = await maker
+      .service('cdp')
+      .openProxyCdpLockEthAndDrawSai(
+        2 + (randomize ? Math.random() : 0),
+        103 + (randomize ? Math.random() * 20 : 0),
+        proxy
+      );
+
+    bites.push(() => proxyCdp.bite());
+  }
+
+  await top.cage();
+  await normalCdp.bite();
+  for (let i = 0; i < bites.length; i++) {
+    console.log('biting', i);
+    await bites[i]();
+  }
+  await top.setCooldown(0);
+  await new Promise(r => setTimeout(r, 1000));
+  await top.flow();
+}
+
+async function openLockAndDrawScdCdp(maker, randomize) {
+  const cdp = await maker.service('cdp').openCdp();
+  await cdp.lockEth(1 + (randomize ? Math.random() : 0));
+  await cdp.drawSai(111 + (randomize ? Math.random() * 20 : 0));
+  return cdp;
+}
