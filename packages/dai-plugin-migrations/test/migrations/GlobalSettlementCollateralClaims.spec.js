@@ -89,7 +89,7 @@ describe('Global Settlement Collateral Claims migration', () => {
 
   xtest('freeEth', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    const cdp = await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(1));
+    const cdp = await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(1));
     mockContracts(smartContract, {
       MCD_END_1: globalSettlement.afterCageCollateral({ 'ETH-A': 150 })
     });

@@ -54,11 +54,11 @@ export default class GlobalSettlementDaiRedeemer {
   async bagAmount(address) {
     const end = this._container.get('smartContract').getContract('MCD_END_1');
     const bag = await end.bag(address);
-    return MDAI_1.wei(bag);
+    return DAI_1.wei(bag);
   }
 
   async packDai(daiAmount) {
-    const formattedAmount = MDAI_1(daiAmount).toFixed('wei');
+    const formattedAmount = DAI_1(daiAmount).toFixed('wei');
     const endAddress = this._container
       .get('smartContract')
       .getContractAddress('MCD_END_1');
@@ -72,7 +72,7 @@ export default class GlobalSettlementDaiRedeemer {
   }
 
   async cashEth(daiAmount) {
-    const formattedAmount = MDAI_1(daiAmount).toFixed('wei');
+    const formattedAmount = DAI_1(daiAmount).toFixed('wei');
     const joinAddress = this._container
       .get('smartContract')
       .getContractAddress('MCD_JOIN_ETH_A');
@@ -89,7 +89,7 @@ export default class GlobalSettlementDaiRedeemer {
   }
 
   async cashBat(daiAmount) {
-    const formattedAmount = MDAI_1(daiAmount).toFixed('wei');
+    const formattedAmount = DAI_1(daiAmount).toFixed('wei');
     const joinAddress = this._container
       .get('smartContract')
       .getContractAddress('MCD_JOIN_BAT_A');
@@ -106,7 +106,7 @@ export default class GlobalSettlementDaiRedeemer {
   }
 
   async cashUsdc(daiAmount) {
-    const formattedAmount = MDAI_1(daiAmount).toFixed('wei');
+    const formattedAmount = DAI_1(daiAmount).toFixed('wei');
     const joinAddress = this._container
       .get('smartContract')
       .getContractAddress('MCD_JOIN_USDC_A');
