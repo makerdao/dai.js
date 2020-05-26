@@ -31,7 +31,7 @@ const allContracts = Object.entries(testnetAddresses).reduce(
 
 export const OLD_MKR = createCurrency('OLD_MKR');
 export const SAI = createCurrency('SAI');
-export const DAI = createCurrency('MDAI');
+export const DAI = createCurrency('DAI');
 export const MKR = createCurrency('MKR');
 
 function overrideContractAddresses(addressOverrides, contracts) {
@@ -44,7 +44,7 @@ function overrideContractAddresses(addressOverrides, contracts) {
   return contracts;
 }
 
-export const MDAI_1 = createCurrency('MDAI_1');
+export const DAI_1 = createCurrency('DAI_1');
 
 export default {
   addConfig: (_, { addressOverrides } = {}) => {
@@ -61,7 +61,7 @@ export default {
             decimals: 18,
             address: addContracts.OLD_MKR.address
           },
-          { currency: MDAI_1, address: addContracts.MCD_DAI_1.address }
+          { currency: DAI_1, address: addContracts.MCD_DAI_1.address }
         ]
       },
       additionalServices: [MIGRATION],

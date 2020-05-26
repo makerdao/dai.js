@@ -1,6 +1,6 @@
 import { mcdMaker } from '../helpers';
 import { ServiceRoles } from '../../src/constants';
-import { ETH, MDAI } from '../../src';
+import { ETH, DAI } from '../../src';
 import { uniqueId } from '../../src/utils/index';
 import debug from 'debug';
 import { infuraProjectId } from './index';
@@ -35,7 +35,7 @@ beforeAll(async () => {
 
   await maker.authenticate();
 
-  dai = maker.getToken(MDAI);
+  dai = maker.getToken(DAI);
   proxy = await maker.currentProxy();
 
   txMgr = maker.service('transactionManager');
@@ -59,7 +59,7 @@ async function expectValues(cdp, { collateral, debt, myGem, myDai }) {
     expect(await cdp.getCollateralAmount()).toEqual(cdp.currency(collateral));
   }
   if (debt !== undefined) {
-    expect(await cdp.getDebtValue()).toEqual(MDAI(debt));
+    expect(await cdp.getDebtValue()).toEqual(DAI(debt));
   }
   if (myGem !== undefined) {
     const balance = await maker.getToken(cdp.currency).balance();
@@ -131,7 +131,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
     startingGemBalance = await maker.getToken(GEM).balance();
     startingDaiBalance = await dai.balance();
     await dai.approveUnlimited(proxy);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(0.01), MDAI(0.1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(0.01), DAI(0.1));
     await expectValues(cdp, {
       collateral: 0.01,
       debt: 0.1,
@@ -172,7 +172,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
       myDai: startingDaiBalance.plus(0.15)
     });
 
-    await cdp.wipeAndFree(MDAI(0.1), GEM(0.005));
+    await cdp.wipeAndFree(DAI(0.1), GEM(0.005));
     await expectValues(cdp, {
       collateral: 0.005,
       debt: 0.05,

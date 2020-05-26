@@ -2,7 +2,7 @@ import { mcdMaker, setupCollateral } from '../helpers';
 import { CDP_MANAGER } from '../../contracts/addresses/testnet';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles } from '../../src/constants';
-import { ETH, BAT, MDAI } from '../../src';
+import { ETH, BAT, DAI } from '../../src';
 
 import {
   USER_VAULT_IDS,
@@ -15,11 +15,11 @@ import getCdpsSchemas from '../../src/schemas/getCdps';
 let maker, snapshotData, proxyAddress, mgr, ethCdp, batCdp;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = DAI(1);
 const ETH_A_PRICE = 180;
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = MDAI(1);
+const BAT_A_DEBT_AMOUNT = DAI(1);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {
@@ -27,7 +27,7 @@ beforeAll(async () => {
     multicall: true
   });
   mgr = await maker.service(ServiceRoles.CDP_MANAGER);
-  const dai = maker.getToken(MDAI);
+  const dai = maker.getToken(DAI);
 
   snapshotData = await takeSnapshot(maker);
   proxyAddress = await maker.service('proxy').ensureProxy();

@@ -1,6 +1,6 @@
 import { mcdMaker, setupCollateral } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import { ETH, BAT, MDAI } from '../../src';
+import { ETH, BAT, DAI } from '../../src';
 import { ServiceRoles } from '../../src/constants';
 import BigNumber from 'bignumber.js';
 
@@ -8,8 +8,7 @@ import {
   VAULT_ADDRESS,
   VAULT_TYPE,
   VAULTS_CREATED,
-  VAULT_OWNER,
-  TOTAL_OWNED_VAULTS
+  VAULT_OWNER
 } from '../../src/schemas';
 
 import cdpManagerSchemas from '../../src/schemas/cdpManager';
@@ -17,7 +16,7 @@ import cdpManagerSchemas from '../../src/schemas/cdpManager';
 let maker, snapshotData, cdpMgr, proxyAddress, expectedVaultAddress;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = DAI(1);
 const ETH_A_PRICE = 180;
 
 beforeAll(async () => {
@@ -38,7 +37,7 @@ beforeAll(async () => {
   });
 
   cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
-  const dai = maker.getToken(MDAI);
+  const dai = maker.getToken(DAI);
   proxyAddress = await maker.service('proxy').ensureProxy();
   await dai.approveUnlimited(proxyAddress);
 

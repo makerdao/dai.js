@@ -12,7 +12,7 @@ import {
   takeSnapshot,
   restoreSnapshot
 } from '@makerdao/test-helpers';
-import { USD, MDAI as DAI, ETH } from '@makerdao/dai-plugin-mcd';
+import { USD, DAI, ETH } from '@makerdao/dai-plugin-mcd';
 import { SAI, MKR } from '../../src';
 import { createCurrencyRatio } from '@makerdao/currency';
 
