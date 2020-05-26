@@ -36,7 +36,7 @@ export default class SystemDataService extends PublicService {
 
   async getSystemSurplus() {
     const vowAddr = this.get('smartContract').getContractAddress('MCD_VOW');
-    const [ dai, sin ] = await Promise.all([
+    const [dai, sin] = await Promise.all([
       this.vat.dai(vowAddr),
       this.vat.sin(vowAddr)
     ]);
