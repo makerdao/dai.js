@@ -29,8 +29,8 @@ describe('Global Settlement Collateral Claims migration', () => {
 
   test('if the system is NOT in global settlement and there is no collateral, return false', async () => {
     mockContracts(smartContract, { MCD_END_1: globalSettlement.beforeCage() });
-
-    expect(await migration.check()).toBeFalsy();
+    const check = await migration.check();
+    expect(check).toBe(false);
   });
 
   test('if the system is NOT in global settlement and there is collateral, return false', async () => {
@@ -38,14 +38,14 @@ describe('Global Settlement Collateral Claims migration', () => {
 
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
     await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(1));
-
-    expect(await migration.check()).toBeFalsy();
+    const check = await migration.check();
+    expect(check).toBe(false);
   });
 
   test('if the system IS in global settlement, but collateral is not caged, and there is no collateral, return false', async () => {
     mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage() });
-
-    expect(await migration.check()).toBeFalsy();
+    const check = await migration.check();
+    expect(check).toBe(false);
   });
 
   test('if the system IS in global settlement, but collateral is not caged, and there is collateral, return false', async () => {
@@ -53,16 +53,16 @@ describe('Global Settlement Collateral Claims migration', () => {
     await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(1));
 
     mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage() });
-
-    expect(await migration.check()).toBeFalsy();
+    const check = await migration.check();
+    expect(check).toBe(false);
   });
 
   test('if the system IS in global settlement and collateral is caged, and there is no collateral, return false', async () => {
     mockContracts(smartContract, {
       MCD_END_1: globalSettlement.afterCageCollateral({ 'ETH-A': 150 })
     });
-
-    expect(await migration.check()).toBeFalsy();
+    const check = await migration.check();
+    expect(check).toBe(false);
   });
 
   test('if the system IS in global settlement and collateral is caged, and there is NO collateral to skim, return false', async () => {
@@ -72,8 +72,8 @@ describe('Global Settlement Collateral Claims migration', () => {
     mockContracts(smartContract, {
       MCD_END_1: globalSettlement.afterCageCollateral({ 'ETH-A': 80 })
     });
-
-    expect(await migration.check()).toBeFalsy();
+    const check = await migration.check();
+    expect(check).toBe(false);
   });
 
   test('if the system IS in global settlement and collateral is caged, and there IS collateral to skim, return true', async () => {
@@ -83,7 +83,20 @@ describe('Global Settlement Collateral Claims migration', () => {
     mockContracts(smartContract, {
       MCD_END_1: globalSettlement.afterCageCollateral({ 'ETH-A': 150 })
     });
+    const num = (await migration.check()).filter(c => c.redeemable).length;
+    expect(num).toBe(1);
+  });
 
-    expect(await migration.check()).toBeTruthy();
+  xtest('freeEth', async () => {
+    await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
+    const cdp = await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(1));
+    mockContracts(smartContract, {
+      MCD_END_1: globalSettlement.afterCageCollateral({ 'ETH-A': 150 })
+    });
+    //somehow check eth balance to be returned
+    //check Eth balance
+    //call free eth
+    await migration.freeEth(cdp.id);
+    //confirm eth balance = prev eth balance - eth to be freed
   });
 });

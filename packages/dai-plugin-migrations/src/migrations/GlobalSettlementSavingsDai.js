@@ -7,7 +7,7 @@ export default class GlobalSettlementSavingsDai {
   async check() {
     const smartContract = this._container.get('smartContract');
     const end = smartContract.getContract('MCD_END_1');
-    const isInGlobalSettlement = !(await end.live());
+    const isInGlobalSettlement = (await end.live()).eq(0);
     if (!isInGlobalSettlement) return false;
 
     const address =
