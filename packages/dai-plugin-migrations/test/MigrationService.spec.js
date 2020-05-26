@@ -7,6 +7,8 @@ import GlobalSettlementSavingsDai from '../src/migrations/GlobalSettlementSaving
 import GlobalSettlementCollateralClaims from '../src/migrations/GlobalSettlementCollateralClaims';
 import GlobalSettlementDaiRedeemer from '../src/migrations/GlobalSettlementDaiRedeemer';
 import MkrRedeemer from '../src/migrations/MkrRedeemer';
+import RedeemSai from '../src/migrations/RedeemSai';
+import RedeemCollateral from '../src/migrations/RedeemCollateral';
 
 let maker, service;
 
@@ -41,10 +43,12 @@ test('can fetch a list of all migrations', () => {
       Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS,
       Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER,
       Migrations.MKR_REDEEMER,
-      Migrations.CHIEF_MIGRATE
+      Migrations.CHIEF_MIGRATE,
+      Migrations.REDEEM_SAI,
+      Migrations.REDEEM_COLLATERAL
     ])
   );
-  expect(ids.length).toEqual(8);
+  expect(ids.length).toEqual(10);
 });
 
 test('getting each migration returns a valid migration', () => {
@@ -64,6 +68,10 @@ test('getting each migration returns a valid migration', () => {
   expect(service.getMigration(Migrations.MKR_REDEEMER)).toBeInstanceOf(
     MkrRedeemer
   );
+  expect(service.getMigration(Migrations.REDEEM_SAI)).toBeInstanceOf(RedeemSai);
+  expect(service.getMigration(Migrations.REDEEM_COLLATERAL)).toBeInstanceOf(
+    RedeemCollateral
+  );
 });
 
 test('getting a non-existent migration returns undefined', () => {
@@ -78,7 +86,8 @@ test('runAllChecks', async () => {
     [Migrations.DAI_TO_SAI]: expect.anything(),
     [Migrations.SINGLE_TO_MULTI_CDP]: {},
     [Migrations.CHIEF_MIGRATE]: expect.anything(),
-    [Migrations.MKR_REDEEMER]: expect.anything()
+    [Migrations.MKR_REDEEMER]: expect.anything(),
+    [Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS]: expect.anything()
   });
-  // expect(result[Migrations.SAI_TO_DAI].eq(0)).toBeTruthy();
+  expect(result[Migrations.SAI_TO_DAI].eq(0)).toBeTruthy();
 });

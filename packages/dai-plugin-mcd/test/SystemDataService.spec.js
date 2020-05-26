@@ -1,5 +1,6 @@
 import { mcdMaker } from './helpers';
 import { ServiceRoles } from '../src/constants';
+import { MDAI } from '../src/index';
 
 let service;
 let maker;
@@ -22,4 +23,10 @@ test('get system-wide debt ceiling', async () => {
 test('get global settlement status', async () => {
   const cage = await service.isGlobalSettlementInvoked();
   expect(cage).toBe(false);
+});
+
+test('get system surplus', async () => {
+  const surplus = await service.getSystemSurplus();
+  console.log('surplus.toNumber', surplus.toNumber());
+  expect(surplus).toEqual(MDAI(0)); //TODO change to expect non-zero number
 });

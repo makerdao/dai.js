@@ -74,6 +74,7 @@ const BAT_A_DEBT_AMOUNT = DAI(1);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {
+  jest.setTimeout(10000);
   snapshotData = await takeSnapshot(maker);
   maker = await mcdMaker({
     cdpTypes: [

@@ -16,6 +16,15 @@ test('import vs require', () => {
   expect(Maker2.LocalService).toEqual(LocalService);
 });
 
+test('throws for delegated cdp methods', async () => {
+  const maker = await createMaker();
+  try {
+    await maker.openCdp();
+  } catch (err) {
+    expect(err.message).toBe("\"openCdp\" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').openCdp");
+  }
+});
+
 // test('openCdp', async () => {
 //   const maker = await createMaker();
 //   const cdp = await maker.openCdp();

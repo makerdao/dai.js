@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.31.2",
+  "version": "0.31.4",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -68,7 +68,7 @@
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/runtime": "^7.3.4",
-    "@makerdao/currency": "^0.9.5",
+    "@makerdao/currency": "^0.9.8",
     "@makerdao/multicall": "^0.11.0",
     "@makerdao/services-core": "^0.9.9",
     "@makerdao/test-helpers": "^0.2.1",
