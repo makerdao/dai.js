@@ -6,7 +6,7 @@ import { createCurrency, createCurrencyRatio } from '@makerdao/currency';
 import testnetAddresses from '../contracts/addresses/testnet.json';
 import kovanAddresses from '../contracts/addresses/kovan.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
-import abiMap from '../contracts/abiMap.json';
+import abiMap from '../contracts/abiMap';
 import CdpManager from './CdpManager';
 import SavingsService from './SavingsService';
 import CdpTypeService from './CdpTypeService';
@@ -26,18 +26,18 @@ const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, AUCTION, SAVINGS } = ServiceRoles;
 let addContracts = reduce(
   testnetAddresses,
   (result, testnetAddress, name) => {
-    let abiName = abiMap[name];
-    if (!abiName) {
+    let abi = abiMap[name];
+    if (!abi) {
       const prefix = Object.keys(abiMap).find(
         k =>
           k.substring(k.length - 1) == '*' &&
           k.substring(0, k.length - 1) == name.substring(0, k.length - 1)
       );
-      if (prefix) abiName = abiMap[prefix];
+      if (prefix) abi = abiMap[prefix];
     }
-    if (abiName) {
+    if (abi) {
       result[name] = {
-        abi: require(`../contracts/abis/${abiName}.json`),
+        abi,
         address: {
           testnet: testnetAddress,
           kovan: kovanAddresses[name],
