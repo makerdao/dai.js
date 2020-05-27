@@ -167,19 +167,21 @@ export default class GovPollingService extends PrivateService {
       tally.rounds++;
 
       // eliminate the weakest candidate
-      const [optionToEliminate] = Object.entries(tally.options)
-        .filter(([, optionDetails]) => !optionDetails.eliminated)
-        .reduce((prv, cur) => {
-          const [, prvVotes] = prv;
-          const [, curVotes] = cur;
-          if (
-            curVotes.firstChoice
-              .plus(curVotes.transfer)
-              .lt(prvVotes.firstChoice.plus(prvVotes.transfer))
-          )
-            return cur;
-          return prv;
-        });
+      const filteredOptions = Object.entries(tally.options).filter(
+        ([, optionDetails]) => !optionDetails.eliminated
+      );
+
+      const [optionToEliminate] = filteredOptions.reduce((prv, cur) => {
+        const [, prvVotes] = prv;
+        const [, curVotes] = cur;
+        if (
+          curVotes.firstChoice
+            .plus(curVotes.transfer)
+            .lt(prvVotes.firstChoice.plus(prvVotes.transfer))
+        )
+          return cur;
+        return prv;
+      });
 
       tally.options[optionToEliminate].eliminated = true;
       tally.options[optionToEliminate].transfer = BigNumber(0);
@@ -208,8 +210,12 @@ export default class GovPollingService extends PrivateService {
         }
       );
 
-      //if there's no more rounds, the winner is the option with the most votes
-      if (tally.rounds > MAX_ROUNDS && !tally.winner) {
+      //if there's no more rounds, or if there's only one option that hasn't been eliminated
+      // the winner is the option with the most votes
+      if (
+        (tally.rounds > MAX_ROUNDS && !tally.winner) ||
+        (filteredOptions.length === 1 && !tally.winner)
+      ) {
         let max = BigNumber(0);
         let maxOption;
         Object.entries(tally.options).forEach(

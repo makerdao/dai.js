@@ -1,6 +1,7 @@
 import { PublicService } from '@makerdao/services-core';
 import { RAD, RAY, ServiceRoles, SECONDS_PER_YEAR } from './constants';
 import BigNumber from 'bignumber.js';
+import { DAI } from './index';
 
 export default class SystemDataService extends PublicService {
   constructor(name = ServiceRoles.SYSTEM_DATA) {
@@ -31,6 +32,15 @@ export default class SystemDataService extends PublicService {
       .getContract('MCD_END')
       .live();
     return live.eq(0);
+  }
+
+  async getSystemSurplus() {
+    const vowAddr = this.get('smartContract').getContractAddress('MCD_VOW');
+    const [dai, sin] = await Promise.all([
+      this.vat.dai(vowAddr),
+      this.vat.sin(vowAddr)
+    ]);
+    return DAI.rad(dai).minus(DAI.rad(sin));
   }
 
   // Helpers ----------------------------------------------

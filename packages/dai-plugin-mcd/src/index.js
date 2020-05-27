@@ -14,6 +14,7 @@ import AuctionService from './AuctionService';
 import SystemDataService from './SystemDataService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
+import wethAbi from '../contracts/abis/WETH9.json';
 
 export const ServiceRoles = ServiceRoles_;
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, AUCTION, SAVINGS } = ServiceRoles;
@@ -54,11 +55,8 @@ export const MKR = createCurrency('MKR');
 export const USD = createCurrency('USD');
 export const USD_ETH = createCurrencyRatio(USD, ETH);
 
-// these are prefixed with M so that they don't override their SCD versions--
-// otherwise, adding the MCD plugin would break MCD. maybe there's a better way
-// to work around this?
-export const MWETH = createCurrency('MWETH');
-export const MDAI = createCurrency('MDAI');
+export const WETH = createCurrency('WETH');
+export const DAI = createCurrency('DAI');
 
 // Casting for savings dai
 export const DSR_DAI = createCurrency('DSR-DAI');
@@ -88,8 +86,8 @@ export const ALLOWANCE_AMOUNT = BigNumber(
 export const defaultTokens = [
   ...new Set([
     ...defaultCdpTypes.map(type => type.currency),
-    MDAI,
-    MWETH,
+    DAI,
+    WETH,
     SAI,
     DSR_DAI
   ])
@@ -107,7 +105,7 @@ export const McdPlugin = {
       }));
     }
     const tokens = uniqBy(cdpTypes, 'currency').map(
-      ({ currency, address, abi, decimals }, idx) => {
+      ({ currency, address, abi, decimals }) => {
         const data =
           address && abi ? { address, abi } : addContracts[currency.symbol];
         assert(data, `No address and ABI found for "${currency.symbol}"`);
@@ -127,8 +125,8 @@ export const McdPlugin = {
       smartContract: { addContracts },
       token: {
         erc20: [
-          { currency: MDAI, address: addContracts.MCD_DAI.address },
-          { currency: MWETH, address: addContracts.ETH.address },
+          { currency: DAI, address: addContracts.MCD_DAI.address },
+          { currency: WETH, address: addContracts.ETH.address, abi: wethAbi },
           ...tokens
         ]
       },

@@ -11,5 +11,14 @@ module.exports = {
   MIGRATION_PROXY_ACTIONS: require('./abis/MigrationProxyActions'),
   OLD_CHIEF: require('./abis/DSChief'),
   OLD_VOTE_PROXY_FACTORY: require('./abis/VoteProxyFactory'),
-  OLD_MKR: require('./abis/DSToken')
+  'MCD_JOIN_*': require('./abis/GemJoin'),
+  PROXY_ACTIONS_END: require('./abis/DssProxyActionsEnd'),
+  SAI_CAGEFREE: require('./abis/CageFree'),
+  MCD_ESM: require('./abis/ESM'),
+  MCD_END: require('./abis/End'),
+  MCD_VAT: require('./abis/Vat'),
+  GET_CDPS: require('./abis/GetCdps'),
+  CDP_MANAGER: require('./abis/DssCdpManager'),
+  MCD_DAI: require('./abis/Dai'),
+  MCD_POT: require('./abis/Pot')
 };

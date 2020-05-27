@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { ServiceRoles } from './constants';
 import { stringToBytes } from './utils';
-import { MDAI, ETH, MWETH } from './index';
+import { DAI, ETH, WETH } from './index';
 import * as math from './math';
 
 export default class CdpType {
@@ -28,7 +28,7 @@ export default class CdpType {
 
   get totalDebt() {
     const { Art, rate } = this._getCached('vatInfo');
-    return MDAI.wei(Art)
+    return DAI.wei(Art)
       .times(rate)
       .shiftedBy(-27);
   }
@@ -72,7 +72,7 @@ export default class CdpType {
     // separate calls
     if (!this._prefetchPromise) {
       const adapterAddress = this._systemData.adapterAddress(this.ilk);
-      const { symbol } = this.currency === ETH ? MWETH : this.currency;
+      const { symbol } = this.currency === ETH ? WETH : this.currency;
 
       this._prefetchPromise = Promise.all([
         this._systemData
