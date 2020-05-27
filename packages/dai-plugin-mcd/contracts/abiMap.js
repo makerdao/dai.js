@@ -1,3 +1,4 @@
+// not run through babel, so we must use an ES5-safe export
 module.exports = {
   REP: require('./abis/REP.json'),
   ZRX: require('./abis/ZRX.json'),

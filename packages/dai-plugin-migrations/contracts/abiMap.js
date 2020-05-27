@@ -1,3 +1,4 @@
+// not run through babel, so we must use an ES5-safe export
 module.exports = {
   TUB: require('./abis/SaiTub'),
   MCD_END_1: require('./abis/End'),

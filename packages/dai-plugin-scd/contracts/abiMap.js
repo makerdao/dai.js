@@ -1,3 +1,4 @@
+// might not be run through babel in the future, so we must use an ES5-safe export
 module.exports = {
   SAI_PIP: require('./abis/DSValue'),
   SAI_PEP: require('./abis/DSValue'),
