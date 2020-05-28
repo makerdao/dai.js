@@ -115,6 +115,18 @@ export default class GovPollingService extends PrivateService {
     return MKR(weights.reduce((acc, cur) => acc + cur.mkrSupport, 0));
   }
 
+  async getMkrAmtVotedRankedChoice(pollId) {
+    const { endDate } = await this._getPoll(pollId);
+    const endUnix = Math.floor(endDate / 1000);
+    const weights = await this.get('govQueryApi').getMkrSupportRankedChoice(
+      pollId,
+      endUnix
+    );
+    return MKR(
+      weights.reduce((acc, cur) => acc + parseFloat(cur.mkrSupport), 0)
+    );
+  }
+
   async getTallyRankedChoiceIrv(pollId) {
     const { endDate } = await this._getPoll(pollId);
     const endUnix = Math.floor(endDate / 1000);
@@ -250,6 +262,19 @@ export default class GovPollingService extends PrivateService {
   async getPercentageMkrVoted(pollId) {
     const [voted, total] = await Promise.all([
       this.getMkrAmtVoted(pollId),
+      this.get('token')
+        .getToken(MKR)
+        .totalSupply()
+    ]);
+    return voted
+      .div(total)
+      .times(100)
+      .toNumber();
+  }
+
+  async getPercentageMkrVotedRankedChoice(pollId) {
+    const [voted, total] = await Promise.all([
+      this.getMkrAmtVotedRankedChoice(pollId),
       this.get('token')
         .getToken(MKR)
         .totalSupply()
