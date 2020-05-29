@@ -107,6 +107,19 @@ test('getMkrAmtVoted', async () => {
   expect(total).toEqual(MKR(160));
 });
 
+test('getMkrAmtVotedRankedChoice', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotWithMajority
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const amount = await govPollingService.getMkrAmtVotedRankedChoice();
+  expect(amount.toNumber()).toBe(
+    parseFloat(dummyBallotWithMajorityExpect.totalMkrParticipation)
+  );
+});
+
 test('getOptionVotingFor', async () => {
   const mockFn = jest.fn(async () => dummyOption);
   govQueryApiService.getOptionVotingFor = mockFn;
@@ -147,6 +160,26 @@ test('getPercentageMkrVoted', async () => {
   expect(percentage).toBe(40);
 });
 
+test('getPercentageMkrVotedRankedChoice', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotWithMajority
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const percentage = await govPollingService.getPercentageMkrVotedRankedChoice();
+  const mkrSupply = await maker
+    .service('token')
+    .getToken(MKR)
+    .totalSupply();
+  expect(percentage).toBe(
+    MKR(dummyBallotWithMajorityExpect.totalMkrParticipation)
+      .div(mkrSupply.toNumber())
+      .times(100)
+      .toNumber()
+  );
+});
+
 test('ranked choice tally with majority', async () => {
   govQueryApiService.getMkrSupportRankedChoice = jest.fn(
     () => dummyBallotWithMajority
@@ -175,7 +208,7 @@ test('ranked choice tally with no majority', async () => {
   );
 });
 
-test.only('ranked choice tally with multiple rounds', async () => {
+test('ranked choice tally with multiple rounds', async () => {
   govQueryApiService.getMkrSupportRankedChoice = jest.fn(
     () => dummyBallotMultipleRounds
   );
