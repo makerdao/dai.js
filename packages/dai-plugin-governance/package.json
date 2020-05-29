@@ -8,7 +8,6 @@
     "url": "https://github.com/makerdao/dai-plugin-governance.git"
   },
   "main": "dist/index.js",
-  "browser": "umd/index.js",
   "unpkg": "umd/index.js",
   "jsdelivr": "umd/index.js",
   "scripts": {

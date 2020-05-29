@@ -4,7 +4,6 @@
   "version": "1.2.3",
   "license": "MIT",
   "main": "dist/src/index.js",
-  "browser": "umd/index.js",
   "unpkg": "umd/index.js",
   "jsdelivr": "umd/index.js",
   "scripts": {

@@ -4,6 +4,8 @@
   "version": "1.5.3",
   "license": "MIT",
   "main": "dist/index.js",
+  "unpkg": "umd/index.js",
+  "jsdelivr": "umd/index.js",
   "scripts": {
     "build": "yarn clean && yarn build:cjs && yarn build:umd",
     "build:umd": "webpack --config ../../webpack.config.js",
