@@ -4,7 +4,6 @@
   "version": "0.3.0",
   "license": "MIT",
   "main": "dist/index.js",
-  "browser": "umd/index.js",
   "unpkg": "umd/index.js",
   "dependencies": {
     "node-fetch": "^2.6.0"

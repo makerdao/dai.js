@@ -33,7 +33,6 @@
     "umd/*"
   ],
   "main": "dist/src/index.js",
-  "browser": "umd/index.js",
   "unpkg": "umd/index.js",
   "jsdelivr": "umd/index.js",
   "scripts": {
