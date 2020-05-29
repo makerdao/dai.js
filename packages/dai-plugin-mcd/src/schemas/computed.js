@@ -381,18 +381,18 @@ export const vault = {
         liquidationRatio = this.liquidationRatio
       } = {}) {
         if (!collateralAmount || !debtValue || !liquidationRatio) return;
-        if (collateralAmount.eq(0)) {
-          const ratio = createCurrencyRatio(USD, collateralAmount.type);
-          return ratio(Infinity);
-        }
-        return debtValue._amount.times(liquidationRatio._amount).div(collateralAmount._amount);
+        return calcLiquidationPrice(
+          collateralAmount,
+          debtValue,
+          liquidationRatio
+        );
       },
       calculateCollateralizationRatio({
         collateralValue = this.collateralValue,
         debtValue = this.debtValue
       } = {}) {
         if (!collateralValue || !debtValue) return;
-        return calcCollateralizationRatio(collateralValue._amount, debtValue._amount)
+        return calcCollateralizationRatio(collateralValue, debtValue)
           .times(100)
           .toNumber();
       }
