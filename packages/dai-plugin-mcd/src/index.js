@@ -77,7 +77,7 @@ export const defaultCdpTypes = [
   { currency: USDC, ilk: 'USDC-A', decimals: 6 },
   { currency: WBTC, ilk: 'WBTC-A', decimals: 8 },
   { currency: USDC, ilk: 'USDC-B', decimals: 8 },
-  { currency: TUSD, ilk: 'TUSD-A' }
+  { currency: TUSD, ilk: 'TUSD-A', decimals: 18 }
 ];
 
 export const SAI = createCurrency('SAI');
