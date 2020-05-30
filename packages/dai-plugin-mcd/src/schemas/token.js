@@ -98,8 +98,6 @@ export const tokenAllowance = {
 export const adapterBalance = {
   generate: collateralTypeName => ({
     dependencies: ({ get }) => {
-      collateralTypeName =
-        collateralTypeName === 'DAI' ? 'DAI' : collateralTypeName;
       let tokenSymbol = collateralTypeName.split('-')[0];
       tokenSymbol = tokenSymbol === 'ETH' ? 'WETH' : tokenSymbol;
       return [

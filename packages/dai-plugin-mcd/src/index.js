@@ -69,12 +69,15 @@ export const DGD = createCurrency('DGD');
 export const GNT = createCurrency('GNT');
 export const USDC = createCurrency('USDC');
 export const WBTC = createCurrency('WBTC');
+export const TUSD = createCurrency('TUSD');
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: BAT, ilk: 'BAT-A' },
   { currency: USDC, ilk: 'USDC-A', decimals: 6 },
-  { currency: WBTC, ilk: 'WBTC-A', decimals: 8 }
+  { currency: WBTC, ilk: 'WBTC-A', decimals: 8 },
+  { currency: USDC, ilk: 'USDC-B', decimals: 6 },
+  { currency: TUSD, ilk: 'TUSD-A', decimals: 18 }
 ];
 
 export const SAI = createCurrency('SAI');
