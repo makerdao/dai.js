@@ -169,7 +169,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this._adapterAddress(ilk),
       id,
-      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount, ilk)),
       owner,
       {
         dsProxy: true,
@@ -208,7 +208,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
-      freeAmount.toFixed(this._precision(freeAmount)),
+      freeAmount.toFixed(this._precision(freeAmount, ilk)),
       wipeAmount.toFixed('wei'),
       { dsProxy: true, promise, metadata: { id, ilk, wipeAmount, freeAmount } }
     );
@@ -269,7 +269,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
-      freeAmount.toFixed(this._precision(freeAmount)),
+      freeAmount.toFixed(this._precision(freeAmount, ilk)),
       { dsProxy: true, promise, metadata: { id, ilk, freeAmount } }
     );
   }
