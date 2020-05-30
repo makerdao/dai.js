@@ -6,7 +6,12 @@ import tracksTransactions, {
 import { ServiceRoles } from './constants';
 import assert from 'assert';
 import ManagedCdp from './ManagedCdp';
-import { castAsCurrency, stringToBytes, bytesToString } from './utils';
+import {
+  castAsCurrency,
+  stringToBytes,
+  bytesToString,
+  promiseWait
+} from './utils';
 import has from 'lodash/has';
 import padStart from 'lodash/padStart';
 import { DAI, ETH, GNT } from './index';
@@ -47,7 +52,16 @@ export default class CdpManager extends LocalService {
     const cacheEnabled = !has(options, 'cache') || options.cache;
     let cdp = this._getFromInstanceCache(id, cacheEnabled);
     if (cdp) return cdp;
-    const ilk = await this.getIlkForCdp(id);
+
+    // This lookup can sometimes miss when a vault is created
+    // causing an assertion error on a missing ilk.
+    let ilk;
+    for (let i = 0; i < 5; i++) {
+      ilk = await this.getIlkForCdp(id);
+      if (ilk) break;
+      await promiseWait(5000);
+    }
+
     cdp = new ManagedCdp(id, ilk, this, options);
 
     this._putInInstanceCache(id, cdp, cacheEnabled);
