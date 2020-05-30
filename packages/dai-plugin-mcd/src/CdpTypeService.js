@@ -37,9 +37,8 @@ export default class CdpTypeService extends PublicService {
       .filter(x => x)
       .join(', ');
 
-    //assert(types.length <= 1, `${label} matches more than one cdp type`);
+    assert(types.length <= 1, `${label} matches more than one cdp type`);
     assert(types.length > 0, `${label} matches no cdp type`);
-    return types[0];
   }
 
   resetAllCdpTypes() {

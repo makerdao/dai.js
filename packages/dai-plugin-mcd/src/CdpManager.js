@@ -133,7 +133,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       id || stringToBytes(ilk),
-      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount, ilk)),
       drawAmount.toFixed('wei'),
       {
         dsProxy: true,
@@ -342,10 +342,10 @@ export default class CdpManager extends LocalService {
     return this.get(SYSTEM_DATA).adapterAddress(ilk);
   }
 
-  _precision(amount) {
+  _precision(amount, ilk) {
     return amount.type.symbol === 'ETH'
       ? 'wei'
-      : this.get(CDP_TYPE).getCdpType(amount.type).decimals;
+      : this.get(CDP_TYPE).getCdpType(amount.type, ilk).decimals;
   }
 
   _getFromInstanceCache(id, enabled) {

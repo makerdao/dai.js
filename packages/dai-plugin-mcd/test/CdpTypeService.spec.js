@@ -25,7 +25,7 @@ describe('with default types', () => {
   });
 });
 
-test.skip('getCdpType with too many matches throws an error', async () => {
+test('getCdpType with too many matches throws an error', async () => {
   maker = await mcdMaker({
     cdpTypes: [
       { currency: ETH, ilk: 'ETH-A' },
