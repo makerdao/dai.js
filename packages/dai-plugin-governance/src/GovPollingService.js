@@ -93,6 +93,28 @@ export default class GovPollingService extends PrivateService {
     return ballot.reverse().filter(choice => choice !== 0 && choice !== '0');
   }
 
+  async getAllOptionsVotingFor(address) {
+    const options = await this.get('govQueryApi').getAllOptionsVotingFor(
+      address.toLowerCase()
+    );
+    if (!options) return [];
+    return options.map(o => {
+      let rankedChoiceOption = null;
+      if (o.optionIdRaw) {
+        const ballotBuffer = toBuffer(o.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        rankedChoiceOption = ballot
+          .reverse()
+          .filter(choice => choice !== 0 && choice !== '0');
+      }
+      return {
+        pollId: o.pollId,
+        option: o.optionId,
+        rankedChoiceOption
+      };
+    });
+  }
+
   async getNumUniqueVoters(pollId) {
     return this.get('govQueryApi').getNumUniqueVoters(pollId);
   }

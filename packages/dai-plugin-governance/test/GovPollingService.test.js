@@ -8,6 +8,8 @@ import {
   dummyMkrSupportData,
   dummyAllPollsData,
   dummyOption,
+  dummyAllOptions,
+  allOptionsExpect,
   dummyWeight,
   dummyNumUnique,
   dummyBallotNoMajority,
@@ -126,6 +128,14 @@ test('getOptionVotingFor', async () => {
   const option = await govPollingService.getOptionVotingFor('0xaddress', 1);
   expect(mockFn).toBeCalled();
   expect(option).toEqual(dummyOption);
+});
+
+test('getAllOptionsVotingFor', async () => {
+  const mockFn = jest.fn(async () => dummyAllOptions);
+  govQueryApiService.getAllOptionsVotingFor = mockFn;
+  const options = await govPollingService.getAllOptionsVotingFor('0xaddress');
+  expect(mockFn).toBeCalled();
+  expect(options).toEqual(allOptionsExpect);
 });
 
 test('getNumUniqueVoters', async () => {
