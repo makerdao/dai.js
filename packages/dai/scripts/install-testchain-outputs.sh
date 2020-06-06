@@ -2,8 +2,8 @@
 set -e
 
 CWD=`dirname $0`
-CONTRACTS=$CWD/../contracts
-SOURCE=${1:-$CWD/../../../node_modules/@makerdao/testchain}
+CONTRACTS=$CWD/../packages/dai/contracts
+SOURCE=${1:-$CWD/../node_modules/@makerdao/testchain}
 
 function jq_inplace {
   TMP=$(mktemp)
