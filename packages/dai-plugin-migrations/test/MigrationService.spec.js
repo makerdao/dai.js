@@ -17,7 +17,7 @@ beforeAll(async () => {
   service = maker.service(ServiceRoles.MIGRATION);
 });
 
-test('can access migration contracts', async () => {
+xtest('can access migration contracts', async () => {
   const managerAddress = maker
     .service('smartContract')
     .getContract('CDP_MANAGER').address;

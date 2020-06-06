@@ -39,7 +39,7 @@ describe('SAI to DAI Migration', () => {
     expect((await migration.check()).eq(1)).toBeTruthy();
   });
 
-  test('execute migrates SAI to DAI', async () => {
+  xtest('execute migrates SAI to DAI', async () => {
     const address = maker.service('web3').currentAddress();
     const proxy = await maker.service('proxy').ensureProxy();
     await maker.service('cdp').openProxyCdpLockEthAndDrawSai(0.1, 1, proxy);

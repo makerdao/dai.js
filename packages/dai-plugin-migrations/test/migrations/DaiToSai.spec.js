@@ -39,7 +39,7 @@ describe('DAI to SAI Migration', () => {
     expect((await migration.check()).eq(1)).toBeTruthy();
   });
 
-  test('execute migrates DAI to SAI', async () => {
+  xtest('execute migrates DAI to SAI', async () => {
     await drawSaiAndMigrateToDai(10, maker);
     const address = maker.service('web3').currentAddress();
     await maker.service('mcd:cdpManager').openLockAndDraw('ETH-A', ETH(1), 1);
