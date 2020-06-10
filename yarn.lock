@@ -1791,7 +1791,15 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@makerdao/currency@>=0.9.0", "@makerdao/currency@^0.9.3", "@makerdao/currency@^0.9.5":
+"@makerdao/currency@>=0.9.0", "@makerdao/currency@^0.9.9":
+  version "0.9.9"
+  resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.9.tgz#b5f847362cb4648c30548313f005c80c1c878c9e"
+  integrity sha512-fr6MaiWxQ1IxEaSO8znnhcZTPb8P5ZJU5PS76lx5zAX8CF/ZykfDCX7lb4AMaOVCWajQ8OPN8ekO5a0MOJb3wg==
+  dependencies:
+    babel-runtime "^6.26.0"
+    bignumber.js "^8.1.1"
+
+"@makerdao/currency@^0.9.3", "@makerdao/currency@^0.9.5":
   version "0.9.7"
   resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.7.tgz#7b7310cc4feb75ce78330116ae15dad2267040e0"
   integrity sha512-7N4w25lYwJf105RJZk/WZpxzUMs3GOxSJ4Qg2yro7V1bnsEHaZ0IeyrFOtUfo87Ia3tvld+k9JLG6ykYOxI3kw==
