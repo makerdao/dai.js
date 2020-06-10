@@ -27,6 +27,5 @@ test('get global settlement status', async () => {
 
 test('get system surplus', async () => {
   const surplus = await service.getSystemSurplus();
-  console.log('surplus.toNumber', surplus.toNumber());
   expect(surplus).toEqual(DAI(0)); //TODO change to expect non-zero number
 });
