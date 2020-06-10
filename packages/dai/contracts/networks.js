@@ -33,7 +33,7 @@ export function contractAddressesInfo(addresses) {
     [tokens.PETH]: [
       {
         version: 1,
-        address: addresses.SKR,
+        address: addresses.SAI_SKR,
         abi: abis.general.erc20,
         decimals: 18
       }

@@ -276,7 +276,7 @@ describe('lifecycle hooks', () => {
     expect(openHandlers.confirmed).toBeCalled();
   });
 
-  test.only('return error message with error callback', async () => {
+  test('return error message with error callback', async () => {
     const makeListener = () =>
       jest.fn((tx, err) => {
         log('Tx error:', err);
