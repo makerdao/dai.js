@@ -25,7 +25,7 @@ export function contractAddressesInfo(addresses) {
     [tokens.WETH]: [
       {
         version: 1,
-        address: addresses.GEM,
+        address: addresses.SAI_GEM,
         abi: abis.dappHub.dsEthToken,
         decimals: 18
       }
@@ -33,7 +33,7 @@ export function contractAddressesInfo(addresses) {
     [tokens.PETH]: [
       {
         version: 1,
-        address: addresses.SKR,
+        address: addresses.SAI_SKR,
         abi: abis.general.erc20,
         decimals: 18
       }
@@ -48,7 +48,7 @@ export function contractAddressesInfo(addresses) {
       },
       {
         version: 2,
-        address: addresses.GOV,
+        address: addresses.SAI_GOV,
         abi: abis.general.erc20,
         decimals: 18
       }
@@ -56,10 +56,10 @@ export function contractAddressesInfo(addresses) {
 
     // SAI
     [contracts.SAI_PIP]: [
-      { version: 1, address: addresses.PIP, abi: abis.dappHub.dsValue }
+      { version: 1, address: addresses.SAI_PIP, abi: abis.dappHub.dsValue }
     ],
     [contracts.SAI_TUB]: [
-      { version: 1, address: addresses.TUB, abi: abis.daiV1.tub }
+      { version: 1, address: addresses.SAI_TUB, abi: abis.daiV1.tub }
     ],
 
     // Exchanges

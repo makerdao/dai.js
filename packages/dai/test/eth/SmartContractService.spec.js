@@ -114,7 +114,7 @@ test('call constant function without account', async () => {
   const contract = service.getContract(contracts.SAI_TUB);
   const gem = await contract.gem();
   expect(contract.signer).toBeNull();
-  expect(gem.toLowerCase()).toEqual(originalAddresses.GEM);
+  expect(gem.toLowerCase()).toEqual(originalAddresses.SAI_GEM);
 });
 
 test('addressOverrides', async () => {

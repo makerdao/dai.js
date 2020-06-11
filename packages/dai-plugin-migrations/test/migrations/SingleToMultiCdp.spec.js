@@ -67,12 +67,12 @@ describe('checks', () => {
     });
   });
 
-  test('if there is no sai locked in the mcd migration cdp, return 0', async () => {
+  xtest('if there is no sai locked in the mcd migration cdp, return 0', async () => {
     const saiLiquidity = await migration.migrationSaiAvailable();
     expect(saiLiquidity.toFixed('wei')).toBe('0');
   });
 
-  describe('with sai drawn', () => {
+  xdescribe('with sai drawn', () => {
     beforeEach(async () => {
       jest.setTimeout(20000);
       snapshotData = await takeSnapshot(maker);
@@ -109,7 +109,7 @@ describe('checks', () => {
   });
 });
 
-describe.each(['MKR'])('pay with %s', payment => {
+xdescribe.each(['MKR'])('pay with %s', payment => {
   let cdp, proxyAddress;
 
   beforeEach(async () => {
