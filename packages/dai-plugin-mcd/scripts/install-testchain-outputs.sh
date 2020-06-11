@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# TODO take the source directory as a parameter
-
 CONTRACTS=$MCD/contracts
 
 for file in $SOURCE/out/mcd/*.abi; do
