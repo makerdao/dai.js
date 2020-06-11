@@ -8,7 +8,7 @@ CONTRACTS=$CWD/../packages/dai-plugin-migrations/contracts
 SOURCE=${1:-$CWD/../node_modules/@makerdao/testchain}
 
 # Relevant contracts from SCD:
-for CONTRACT in "TUB","SaiTub" "REDEEMER","Redeemer" "OLD_MKR","DSToken" "OLD_CHIEF","DSChief" "SAI_CAGEFREE","CageFree" "OLD_VOTE_PROXY_FACTORY","VoteProxyFactory"
+for CONTRACT in "SAI_TUB","SaiTub" "REDEEMER","Redeemer" "OLD_MKR","DSToken" "OLD_CHIEF","DSChief" "SAI_CAGEFREE","CageFree" "OLD_VOTE_PROXY_FACTORY","VoteProxyFactory"
 do
   IFS=',' read NAME ABI <<< "${CONTRACT}"
   ADDRESS=`jq ".$NAME" "$SOURCE/out/addresses.json"`
