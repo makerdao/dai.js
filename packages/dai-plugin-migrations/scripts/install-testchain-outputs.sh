@@ -3,9 +3,7 @@ set -e
 
 # TODO take the source directory as a parameter
 
-CWD=`dirname $0`
-CONTRACTS=$CWD/../packages/dai-plugin-migrations/contracts
-SOURCE=${1:-$CWD/../node_modules/@makerdao/testchain}
+CONTRACTS=$MIGRATIONS/contracts
 
 # Relevant contracts from SCD:
 for CONTRACT in "SAI_TUB","SaiTub" "REDEEMER","Redeemer" "OLD_MKR","DSToken" "OLD_CHIEF","DSChief" "SAI_CAGEFREE","CageFree" "OLD_VOTE_PROXY_FACTORY","VoteProxyFactory"

@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-CWD=`dirname $0`
-CONTRACTS=$CWD/../packages/dai-plugin-governance/contracts
-SOURCE=${1:-$CWD/../node_modules/@makerdao/testchain}
+CONTRACTS=$GOVERNANCE/contracts
 
 CHIEF=`jq ".MCD_ADM" "$SOURCE/out/addresses-mcd.json"`
 jq ".CHIEF=$CHIEF" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json

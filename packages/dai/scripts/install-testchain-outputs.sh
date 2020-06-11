@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-CWD=`dirname $0`
-CONTRACTS=$CWD/../packages/dai/contracts
-SOURCE=${1:-$CWD/../node_modules/@makerdao/testchain}
-
-function jq_inplace {
-  TMP=$(mktemp)
-  jq "$1" > $TMP && mv $TMP "$2"
-}
+CONTRACTS=$DAI/contracts
 
 for file in $SOURCE/out/*.abi; do
   cp $file $CONTRACTS/abis/$(basename $file .abi).json
