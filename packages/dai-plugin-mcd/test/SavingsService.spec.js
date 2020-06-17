@@ -65,7 +65,7 @@ describe('Savings Service', () => {
 
   test('get dai savings rate', async () => {
     const dsr = await service.getYearlyRate();
-    expect(dsr.toNumber()).toBe(1.0099999999998925);
+    expect(dsr.toNumber()).toBeCloseTo(0.01);
   });
 
   test('get total amount of dai in pot', async () => {
