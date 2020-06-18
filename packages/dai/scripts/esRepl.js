@@ -1,6 +1,7 @@
 import repl from 'repl';
 import Maker from '../src';
 import testAccounts from '../../test-helpers/src/testAccounts.json';
+import ScdPlugin from '@makerdao/dai-plugin-scd';
 
 let maker;
 
@@ -46,16 +47,23 @@ const env = {
         }
       }
     }
+  },
+  mainnet: {
+    config: {
+      fromBlock: 4750000,
+      url: 'https://mainnet.infura.io/v3/c3f0f26a4c1742e0949d8eedfc47be67'
+    }
   }
-}
+};
 
-const currentEnv = env.testnet;
+const currentEnv = env.mainnet;
 
 async function main() {
   try {
     const { config, fromBlock } = currentEnv;
     maker = await Maker.create('http', {
       ...config,
+      plugins: [ScdPlugin],
       log: false
     });
 
@@ -89,7 +97,7 @@ async function main() {
       eth: maker.getToken('ETH'),
       weth: maker.getToken('WETH'),
       peth: maker.getToken('PETH'),
-      sai: maker.getToken('DAI'),
+      sai: maker.getToken('SAI'),
       getCdpIds,
       tub: scs.getContract('SAI_TUB'),
       top: scs.getContract('SAI_TOP'),
