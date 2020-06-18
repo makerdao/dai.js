@@ -58,24 +58,27 @@ test('it handles url, privateKey, provider, and web3 options', () => {
           url: 'http://foo.net'
         }
       }
-    ],
-    cdp: true
+    ]
   });
 });
 
+//TODO
 test('it overwrites a service name', () => {
-  const config = ConfigFactory.create('http', { cdp: 'OtherService' });
-  expect(config.cdp).toEqual(['OtherService', {}]);
+  const config = ConfigFactory.create('http', { allowance: 'OtherService' });
+  // expect(config.allowance).toEqual(['OtherService', {}]);
+  expect(config.allowance).toEqual('OtherService');
 });
 
 test('it adds service options', () => {
-  const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
-  expect(config.cdp).toEqual([true, { foo: 'bar' }]);
+  const config = ConfigFactory.create('http', { allowance: { foo: 'bar' } });
+  // expect(config.allowance).toEqual([true, { foo: 'bar' }]);
+  expect(config.allowance).toEqual({ foo: 'bar' });
 });
 
 test('it passes service options for an omitted service', () => {
-  const config = ConfigFactory.create('http', { cdp: { foo: 'bar' } });
-  expect(config.cdp).toEqual([true, { foo: 'bar' }]);
+  const config = ConfigFactory.create('http', { allowance: { foo: 'bar' } });
+  // expect(config.allowance).toEqual([true, { foo: 'bar' }]);
+  expect(config.allowance).toEqual({ foo: 'bar' });
 });
 
 test('it preserves the preset service name', () => {

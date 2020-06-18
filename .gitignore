@@ -1,5 +1,6 @@
 coverage/
 dist/
+umd/
 node_modules/
 .idea/
 *.iml

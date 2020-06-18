@@ -1,7 +1,7 @@
 import { mcdMaker } from './helpers';
 import { ServiceRoles } from '../src/constants';
 
-const scenarios = [['ETH-A'], ['MDAI'], ['MKR']];
+const scenarios = [['ETH-A'], ['DAI'], ['MKR']];
 
 /*
   The following arrays are expected values for each tested
@@ -10,7 +10,7 @@ const scenarios = [['ETH-A'], ['MDAI'], ['MKR']];
 */
 const systemData = {
   'ETH-A': [1, 0.01],
-  MDAI: [3, 0.05],
+  DAI: [3, 0.05],
   MKR: [3, 0.05]
 };
 

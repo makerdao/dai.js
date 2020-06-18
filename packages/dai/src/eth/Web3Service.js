@@ -128,7 +128,7 @@ export default class Web3Service extends PrivateService {
     this._listenForNewBlocks();
 
     this._installDisconnectCheck();
-    await this._initEventPolling();
+    this._initEventPolling();
     this._defaultEmitter.emit('web3/CONNECTED', {
       ...this._info
     });

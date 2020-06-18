@@ -3,6 +3,7 @@ import Maker from '@makerdao/dai';
 import govPlugin from '../../src/index';
 import configPlugin from '@makerdao/dai-plugin-config';
 import { createCurrency } from '@makerdao/currency';
+import { paddedArray } from '../../src/utils/helpers';
 
 const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67';
 
@@ -61,7 +62,7 @@ export async function restoreSnapshotOriginal(snapId) {
   }
 }
 
-export const setupMakerOld = async (network) => {
+export const setupMakerOld = async network => {
   const accounts = {
     owner: {
       type: 'privateKey',
@@ -82,7 +83,7 @@ export const setupMakerOld = async (network) => {
   };
 
   let url;
-  if(network==='ganache') url = 'http://localhost:2000';
+  if (network === 'ganache') url = 'http://localhost:2000';
   const preset = network === 'ganache' ? 'http' : network;
   const maker = await Maker.create(preset, {
     plugins: [[govPlugin, { network }]],
@@ -211,3 +212,11 @@ export const setUpAllowance = async (maker, address) => {
 };
 
 export const addressRegex = /^0x[a-fA-F0-9]{40}$/;
+
+export const createBallot = preferenceList => {
+  const reversedPreferenceList = preferenceList.reverse();
+  return paddedArray(
+    32 - reversedPreferenceList.length,
+    reversedPreferenceList
+  );
+};

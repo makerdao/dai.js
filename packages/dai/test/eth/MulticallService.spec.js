@@ -1,6 +1,7 @@
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import Maker from '../../src/index';
 import BigNumber from 'bignumber.js';
+import ScdPlugin from '@makerdao/dai-plugin-scd';
 
 import schemas, {
   TOTAL_CDP_DEBT,
@@ -16,6 +17,7 @@ let maker, multicall, watcher, address, cdpId1, cdpId2;
 
 beforeAll(async () => {
   maker = await Maker.create('test', {
+    plugins: [[ScdPlugin, { network: 'testnet' }]],
     web3: {
       pollingInterval: 100
     },
@@ -30,15 +32,16 @@ beforeAll(async () => {
   watcher = multicall.createWatcher();
   multicall.registerSchemas(schemas);
 
+  // TODO
   const proxyAddress = await maker.service('proxy').ensureProxy();
   const { id: _cdpId1 } = await maker
     .service('cdp')
-    .openProxyCdpLockEthAndDrawDai(1, 100, proxyAddress);
+    .openProxyCdpLockEthAndDrawSai(1, 100, proxyAddress);
 
   const { id: _cdpId2 } = await maker
     .service('cdp')
-    .openProxyCdpLockEthAndDrawDai(5, 100, proxyAddress);
-  await maker.service('cdp').openProxyCdpLockEthAndDrawDai(1, 50, proxyAddress);
+    .openProxyCdpLockEthAndDrawSai(5, 100, proxyAddress);
+  await maker.service('cdp').openProxyCdpLockEthAndDrawSai(1, 50, proxyAddress);
 
   cdpId1 = _cdpId1;
   cdpId2 = _cdpId2;

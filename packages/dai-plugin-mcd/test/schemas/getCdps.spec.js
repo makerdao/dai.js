@@ -2,7 +2,7 @@ import { mcdMaker, setupCollateral } from '../helpers';
 import { CDP_MANAGER } from '../../contracts/addresses/testnet';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles } from '../../src/constants';
-import { ETH, BAT, MDAI } from '../../src';
+import { ETH, BAT, DAI } from '../../src';
 
 import {
   USER_VAULT_IDS,
@@ -12,22 +12,22 @@ import {
 
 import getCdpsSchemas from '../../src/schemas/getCdps';
 
-let maker, snapshotData, proxyAddress;
+let maker, snapshotData, proxyAddress, mgr, ethCdp, batCdp;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = DAI(1);
 const ETH_A_PRICE = 180;
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = MDAI(1);
+const BAT_A_DEBT_AMOUNT = DAI(1);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {
   maker = await mcdMaker({
     multicall: true
   });
-  const mgr = await maker.service(ServiceRoles.CDP_MANAGER);
-  const dai = maker.getToken(MDAI);
+  mgr = await maker.service(ServiceRoles.CDP_MANAGER);
+  const dai = maker.getToken(DAI);
 
   snapshotData = await takeSnapshot(maker);
   proxyAddress = await maker.service('proxy').ensureProxy();
@@ -41,12 +41,12 @@ beforeAll(async () => {
 
   await dai.approveUnlimited();
 
-  await mgr.openLockAndDraw(
+  ethCdp = await mgr.openLockAndDraw(
     'ETH-A',
     ETH_A_COLLATERAL_AMOUNT,
     ETH_A_DEBT_AMOUNT
   );
-  await mgr.openLockAndDraw(
+  batCdp = await mgr.openLockAndDraw(
     'BAT-A',
     BAT_A_COLLATERAL_AMOUNT,
     BAT_A_DEBT_AMOUNT
@@ -75,13 +75,8 @@ test(USER_VAULT_ADDRESSES, async () => {
     proxyAddress
   );
 
-  // todo: make expected addresses dynamic
-  expect(userVaultAddresses[0]).toEqual(
-    '0xDCaBb01efa573f4F27AfA9E63bAD3610d033061c'
-  );
-  expect(userVaultAddresses[1]).toEqual(
-    '0x9FD3432c61615F3BeE9f29225934B569246302eB'
-  );
+  expect(userVaultAddresses[0]).toEqual(await mgr.getUrn(batCdp.id));
+  expect(userVaultAddresses[1]).toEqual(await mgr.getUrn(ethCdp.id));
 });
 
 test(USER_VAULT_TYPES, async () => {

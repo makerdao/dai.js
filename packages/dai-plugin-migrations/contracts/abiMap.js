@@ -1,0 +1,26 @@
+// not run through babel, so we must use an ES5-safe export
+module.exports = {
+  TUB: require('./abis/SaiTub.json'),
+  MCD_END_1: require('./abis/End.json'),
+  MCD_VAT_1: require('./abis/Vat.json'),
+  GET_CDPS_1: require('./abis/GetCdps.json'),
+  CDP_MANAGER_1: require('./abis/DssCdpManager.json'),
+  MCD_DAI_1: require('./abis/Dai.json'),
+  MCD_POT_1: require('./abis/Pot.json'),
+  MCD_END: require('./abis/End.json'),
+  MCD_VAT: require('./abis/Vat.json'),
+  GET_CDPS: require('./abis/GetCdps.json'),
+  CDP_MANAGER: require('./abis/DssCdpManager.json'),
+  MCD_DAI: require('./abis/Dai.json'),
+  MCD_POT: require('./abis/Pot.json'),
+  REDEEMER: require('./abis/Redeemer.json'),
+  MIGRATION: require('./abis/ScdMcdMigration.json'),
+  MIGRATION_PROXY_ACTIONS: require('./abis/MigrationProxyActions.json'),
+  OLD_CHIEF: require('./abis/DSChief.json'),
+  OLD_VOTE_PROXY_FACTORY: require('./abis/VoteProxyFactory.json'),
+  OLD_MKR: require('./abis/DSToken.json'),
+  'MCD_JOIN_*': require('./abis/GemJoin.json'),
+  PROXY_ACTIONS_END: require('./abis/DssProxyActionsEnd.json'),
+  SAI_CAGEFREE: require('./abis/CageFree.json'),
+  MCD_ESM: require('./abis/ESM.json')
+};

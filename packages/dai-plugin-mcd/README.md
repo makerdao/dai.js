@@ -6,7 +6,7 @@ multi-collateral dai contracts
 ### Example usage
 
 ```js
-import { McdPlugin, ETH, REP, MDAI } from '@makerdao/dai-plugin-mcd';
+import { McdPlugin, ETH, REP, DAI } from '@makerdao/dai-plugin-mcd';
 import Maker from '@makerdao/dai';
 import { createCurrency } from '@makerdao/currency';
 import { tokenAddress, tokenAbi } from 'someOtherTokenData';
@@ -33,9 +33,9 @@ const maker = await Maker.create('http', {
 
 await maker.service('proxy').ensureProxy();
 const cdpManager = maker.service('mcd:cdpManager');
-const cdp1 = await cdpManager.openLockAndDraw('REP-A', REP(50), MDAI(1000));
-const cdp2 = await cdpManager.openLockAndDraw('ETH-A', ETH(50), MDAI(1000));
-const cdp3 = await cdpManager.openLockAndDraw('TOK-Z', TOK(50), MDAI(1000));
+const cdp1 = await cdpManager.openLockAndDraw('REP-A', REP(50), DAI(1000));
+const cdp2 = await cdpManager.openLockAndDraw('ETH-A', ETH(50), DAI(1000));
+const cdp3 = await cdpManager.openLockAndDraw('TOK-Z', TOK(50), DAI(1000));
 ```
 
 Please visit [docs.makerdao.com](https://docs.makerdao.com/building-with-maker/daijs) for more documentation.

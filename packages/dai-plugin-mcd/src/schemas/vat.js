@@ -1,5 +1,5 @@
 import { toHex, fromRay, fromRad, fromWei } from '../utils';
-import { MDAI } from '../..';
+import { DAI } from '..';
 
 import {
   TOTAL_ENCUMBERED_DEBT,
@@ -27,7 +27,7 @@ export const vatIlks = {
     [TOTAL_ENCUMBERED_DEBT, fromWei],
     [DEBT_SCALING_FACTOR, fromRay],
     [PRICE_WITH_SAFETY_MARGIN, fromRay],
-    [DEBT_CEILING, v => MDAI(v, 'rad')],
+    [DEBT_CEILING, v => DAI(v, 'rad')],
     [DEBT_FLOOR, fromRad]
   ]
 };
@@ -38,7 +38,7 @@ export const vatDebt = {
     contract: 'MCD_VAT',
     call: ['debt()(uint256)']
   }),
-  returns: [[TOTAL_DAI_SUPPLY, v => MDAI(v, 'rad')]]
+  returns: [[TOTAL_DAI_SUPPLY, v => DAI(v, 'rad')]]
 };
 
 export const vatUrns = {
@@ -47,7 +47,10 @@ export const vatUrns = {
     contract: 'MCD_VAT',
     call: ['urns(bytes32,address)(uint256,uint256)', toHex(ilkName), urn]
   }),
-  returns: [[ENCUMBERED_COLLATERAL, fromWei], [ENCUMBERED_DEBT, fromWei]]
+  returns: [
+    [ENCUMBERED_COLLATERAL, fromWei],
+    [ENCUMBERED_DEBT, fromWei]
+  ]
 };
 
 export const vatGem = {
@@ -65,7 +68,7 @@ export const vatLine = {
     contract: 'MCD_VAT',
     call: ['Line()(uint256)']
   }),
-  returns: [[GLOBAL_DEBT_CEILING, v => MDAI(v, 'rad')]]
+  returns: [[GLOBAL_DEBT_CEILING, v => DAI(v, 'rad')]]
 };
 
 export default {

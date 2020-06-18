@@ -1,6 +1,7 @@
-import { tracksTransactionsWithOptions } from '@makerdao/dai/dist/src/utils/tracksTransactions';
+import { tracksTransactionsWithOptions } from '../utils';
 import { getIdBytes, stringToBytes } from '../utils';
 import { SAI, MKR } from '..';
+import dsValue from '../../contracts/abis/DSValue.json';
 
 export default class SingleToMultiCdp {
   constructor(manager) {
@@ -10,6 +11,36 @@ export default class SingleToMultiCdp {
 
   async check() {
     const address = this._manager.get('accounts').currentAddress();
+
+    if (global.scdESTest) {
+      if (global.testnet) {
+        console.log('fudging cdp id data for testnet');
+        const proxyAddress = await this._manager.get('proxy').currentProxy();
+        return {
+          [address]: [1],
+          [proxyAddress]: [2, 3, 4, 5, 6]
+        };
+      }
+
+      console.log('looking up cdp ids from logs; excludes proxy cdps');
+      const scs = this._manager.get('smartContract');
+      const ws = this._manager.get('web3');
+      const { utils } = ws._web3;
+      const { LogNewCup } = scs.getContract('SAI_TUB').interface.events;
+
+      const logs = await ws.getPastLogs({
+        address: scs.getContractAddress('SAI_TUB'),
+        topics: [
+          utils.keccak256(utils.toHex(LogNewCup.signature)),
+          '0x000000000000000000000000' + address.replace(/^0x/, '')
+        ],
+        fromBlock: 4750000 // Dec 17, 2017 on mainnet; earlier on Kovan
+      });
+      return logs.length > 0
+        ? { [address]: logs.map(l => parseInt(l.data, 16)) }
+        : {};
+    }
+
     const proxyAddress = await this._manager.get('proxy').currentProxy();
     const idsFromProxy = proxyAddress
       ? await this._manager.get('cdp').getCdpIds(proxyAddress)
@@ -22,9 +53,7 @@ export default class SingleToMultiCdp {
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
   async execute(cupId, payment = 'MKR', maxPayAmount, minRatio, { promise }) {
-    const jug = this._manager
-      .get('smartContract')
-      .getContract('MCD_JUG')
+    const jug = this._manager.get('smartContract').getContract('MCD_JUG')
       .address;
     const migrationProxy = this._manager
       .get('smartContract')
@@ -41,12 +70,24 @@ export default class SingleToMultiCdp {
     );
 
     if (payment !== 'DEBT') await this._requireAllowance(cupId, payment);
-    return migrationProxy[method](...args, { dsProxy: true, promise }).then(
-      txo => this._manager.get('mcd:cdpManager').getNewCdpId(txo)
-    );
+    return migrationProxy[method](...args, {
+      dsProxy: true,
+      promise
+    }).then(txo => this._manager.get('mcd:cdpManager').getNewCdpId(txo));
   }
 
   async _requireAllowance(cupId, payment) {
+    const pepAddress = await this._manager
+      .get('smartContract')
+      .getContract('SAI_TUB')
+      .pep();
+    const mkrOracleActive = (
+      await this._manager
+        .get('smartContract')
+        .getContractByAddressAndAbi(pepAddress, dsValue)
+        .peek()
+    )[1];
+    if (payment === 'MKR' && !mkrOracleActive) return;
     const address = this._manager.get('web3').currentAddress();
     const proxyAddress = await this._manager.get('proxy').currentProxy();
     const cdp = await this._manager.get('cdp').getCdp(cupId);
@@ -71,7 +112,7 @@ export default class SingleToMultiCdp {
     if (payment === 'GEM') {
       const gem = this._manager
         .get('token')
-        .getToken('DAI')
+        .getToken('SAI')
         .address();
       return {
         method: 'migratePayFeeWithGem',

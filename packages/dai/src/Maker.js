@@ -83,8 +83,14 @@ export default class Maker {
 function delegateToServices(maker, services) {
   for (const serviceName in services) {
     for (const methodName of services[serviceName]) {
-      maker[methodName] = (...args) =>
-        maker.service(serviceName)[methodName](...args);
+      if (serviceName === 'cdp') {
+        maker[methodName] = () => {
+          throw new Error(`"${methodName}" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').${methodName}`);
+        }
+      } else {
+        maker[methodName] = (...args) =>
+          maker.service(serviceName)[methodName](...args);
+      }
     }
   }
 }

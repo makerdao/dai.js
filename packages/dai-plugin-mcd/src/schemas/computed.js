@@ -6,7 +6,7 @@ import {
   liquidationPrice as calcLiquidationPrice,
   minSafeCollateralAmount as calcMinSafeCollateralAmount
 } from '../math';
-import { USD, MDAI, DSR_DAI, defaultCdpTypes, ALLOWANCE_AMOUNT } from '../';
+import { USD, DAI, DSR_DAI, defaultCdpTypes, ALLOWANCE_AMOUNT } from '../';
 import BigNumber from 'bignumber.js';
 import {
   RATIO_DAI_USD,
@@ -166,7 +166,7 @@ export const debtValue = {
       [DEBT_SCALING_FACTOR, [VAULT_TYPE, id]]
     ],
     computed: (encumberedDebt, debtScalingFactor) => {
-      return MDAI(encumberedDebt).times(debtScalingFactor);
+      return DAI(encumberedDebt).times(debtScalingFactor);
     }
   })
 };
@@ -528,7 +528,7 @@ export const collateralDebt = {
       [DEBT_SCALING_FACTOR, collateralTypeName]
     ],
     computed: (totalEncumberedDebt, debtScalingFactor) => {
-      return MDAI(totalEncumberedDebt).times(debtScalingFactor);
+      return DAI(totalEncumberedDebt).times(debtScalingFactor);
     }
   })
 };

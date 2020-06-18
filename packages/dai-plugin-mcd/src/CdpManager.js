@@ -6,10 +6,15 @@ import tracksTransactions, {
 import { ServiceRoles } from './constants';
 import assert from 'assert';
 import ManagedCdp from './ManagedCdp';
-import { castAsCurrency, stringToBytes, bytesToString } from './utils';
+import {
+  castAsCurrency,
+  stringToBytes,
+  bytesToString,
+  promiseWait
+} from './utils';
 import has from 'lodash/has';
 import padStart from 'lodash/padStart';
-import { MDAI, ETH, GNT } from './index';
+import { DAI, ETH, GNT } from './index';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA } = ServiceRoles;
 import getEventHistoryImpl from './EventHistory';
 
@@ -47,7 +52,16 @@ export default class CdpManager extends LocalService {
     const cacheEnabled = !has(options, 'cache') || options.cache;
     let cdp = this._getFromInstanceCache(id, cacheEnabled);
     if (cdp) return cdp;
-    const ilk = await this.getIlkForCdp(id);
+
+    // This lookup can sometimes miss when a vault is created
+    // causing an assertion error on a missing ilk.
+    let ilk;
+    for (let i = 0; i < 5; i++) {
+      ilk = await this.getIlkForCdp(id);
+      if (ilk) break;
+      await promiseWait(5000);
+    }
+
     cdp = new ManagedCdp(id, ilk, this, options);
 
     this._putInInstanceCache(id, cdp, cacheEnabled);
@@ -115,13 +129,13 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
-  async lockAndDraw(id, ilk, lockAmount, drawAmount = MDAI(0), { promise }) {
+  async lockAndDraw(id, ilk, lockAmount, drawAmount = DAI(0), { promise }) {
     assert(lockAmount && drawAmount, 'both amounts must be specified');
     assert(
       lockAmount instanceof Currency,
       'lockAmount must be a Currency value'
     );
-    drawAmount = castAsCurrency(drawAmount, MDAI);
+    drawAmount = castAsCurrency(drawAmount, DAI);
     const proxyAddress = await this.get('proxy').ensureProxy({ promise });
     const jugAddress = this.get('smartContract').getContractAddress('MCD_JUG');
     const isEth = ETH.isInstance(lockAmount);
@@ -133,7 +147,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       id || stringToBytes(ilk),
-      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount, ilk)),
       drawAmount.toFixed('wei'),
       {
         dsProxy: true,
@@ -169,7 +183,7 @@ export default class CdpManager extends LocalService {
       this._managerAddress,
       this._adapterAddress(ilk),
       id,
-      !isEth && lockAmount.toFixed(this._precision(lockAmount)),
+      !isEth && lockAmount.toFixed(this._precision(lockAmount, ilk)),
       owner,
       {
         dsProxy: true,
@@ -194,13 +208,13 @@ export default class CdpManager extends LocalService {
       this.get('smartContract').getContractAddress('MCD_JUG'),
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
-      castAsCurrency(drawAmount, MDAI).toFixed('wei'),
+      castAsCurrency(drawAmount, DAI).toFixed('wei'),
       { dsProxy: true, promise, metadata: { id, ilk, drawAmount } }
     );
   }
 
   @tracksTransactionsWithOptions({ numArguments: 5 })
-  wipeAndFree(id, ilk, wipeAmount = MDAI(0), freeAmount, { promise }) {
+  wipeAndFree(id, ilk, wipeAmount = DAI(0), freeAmount, { promise }) {
     const isEth = ETH.isInstance(freeAmount);
     const method = isEth ? 'wipeAndFreeETH' : 'wipeAndFreeGem';
     return this.proxyActions[method](
@@ -208,7 +222,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
-      freeAmount.toFixed(this._precision(freeAmount)),
+      freeAmount.toFixed(this._precision(freeAmount, ilk)),
       wipeAmount.toFixed('wei'),
       { dsProxy: true, promise, metadata: { id, ilk, wipeAmount, freeAmount } }
     );
@@ -269,7 +283,7 @@ export default class CdpManager extends LocalService {
       this._adapterAddress(ilk),
       this._adapterAddress('DAI'),
       this.getIdBytes(id),
-      freeAmount.toFixed(this._precision(freeAmount)),
+      freeAmount.toFixed(this._precision(freeAmount, ilk)),
       { dsProxy: true, promise, metadata: { id, ilk, freeAmount } }
     );
   }
@@ -342,10 +356,10 @@ export default class CdpManager extends LocalService {
     return this.get(SYSTEM_DATA).adapterAddress(ilk);
   }
 
-  _precision(amount) {
+  _precision(amount, ilk) {
     return amount.type.symbol === 'ETH'
       ? 'wei'
-      : this.get(CDP_TYPE).getCdpType(amount.type).decimals;
+      : this.get(CDP_TYPE).getCdpType(amount.type, ilk).decimals;
   }
 
   _getFromInstanceCache(id, enabled) {

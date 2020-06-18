@@ -33,6 +33,11 @@ test('get mkr weight by option', async () => {
   console.log('weights', weights);
 });
 
+test('get ranked choice mkr weight by option', async () => {
+  const votes = await service.getMkrSupportRankedChoice(1, 999999999);
+  console.log('votes', votes);
+});
+
 test('get block number', async () => {
   const num = await service.getBlockNumber(1511634513);
   console.log('num', num);
@@ -41,4 +46,11 @@ test('get block number', async () => {
 test('get esm joins', async () => {
   const joins = await service.getEsmJoins();
   console.log('joins', joins);
+});
+
+test('get all current votes', async () => {
+  const options = await service.getAllOptionsVotingFor(
+    '0xb93f14636678d680dcbbed20c77f2b6220b52c39'
+  );
+  console.log('options', options);
 });

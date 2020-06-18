@@ -101,20 +101,7 @@ test('throws on invalid transaction speed', () => {
 });
 
 test('fetches gas station data', async () => {
-  const keys = [
-    'fast',
-    'fastest',
-    'safeLow',
-    'average',
-    'block_time',
-    'blockNum',
-    'speed',
-    'safeLowWait',
-    'avgWait',
-    'fastWait',
-    'fastestWait',
-    'gasPriceRange'
-  ];
+  const keys = ['fast', 'fastWait'];
 
   expect(Object.keys(await gasService._gasStationDataPromise)).toEqual(keys);
 });

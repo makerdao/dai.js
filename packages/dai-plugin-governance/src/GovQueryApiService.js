@@ -1,6 +1,11 @@
 import { PublicService } from '@makerdao/services-core';
 import assert from 'assert';
-import { netIdtoSpockUrl, netIdtoSpockUrlStaging } from './utils/helpers';
+import {
+  netIdtoSpockUrl,
+  netIdtoSpockUrlStaging,
+  toBuffer,
+  paddedArray
+} from './utils/helpers';
 
 export default class QueryApi extends PublicService {
   constructor(name = 'govQueryApi') {
@@ -105,6 +110,34 @@ export default class QueryApi extends PublicService {
     return response.currentVote.nodes[0].optionId;
   }
 
+  async getAllOptionsVotingFor(address) {
+    const query = `{
+      allCurrentVotes(argAddress: "${address}"){
+        nodes{
+          pollId
+          optionId
+          optionIdRaw
+        }
+      }
+    }`;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    if (!response.allCurrentVotes.nodes[0]) return null;
+    return response.allCurrentVotes.nodes;
+  }
+
+  async getOptionVotingForRankedChoice(address, pollId) {
+    const query = `{
+      currentVoteRankedChoice(argAddress: "${address}", argPollId: ${pollId}){
+        nodes{
+          optionIdRaw
+        }
+      }
+    }`;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    if (!response.currentVoteRankedChoice.nodes[0]) return null;
+    return response.currentVoteRankedChoice.nodes[0].optionIdRaw;
+  }
+
   async getBlockNumber(unixTime) {
     const query = `{
       timeToBlockNumber(argUnix: ${unixTime}){
@@ -113,6 +146,28 @@ export default class QueryApi extends PublicService {
     }`;
     const response = await this.getQueryResponseMemoized(this.serverUrl, query);
     return response.timeToBlockNumber.nodes[0];
+  }
+
+  async getMkrSupportRankedChoice(pollId, unixTime) {
+    const query = `{voteMkrWeightsAtTimeRankedChoice(argPollId: ${pollId}, argUnix: ${unixTime}){
+      nodes{
+        optionIdRaw
+        mkrSupport
+      }
+    }
+    }`;
+    const response = await this.getQueryResponseMemoized(this.serverUrl, query);
+
+    return response.voteMkrWeightsAtTimeRankedChoice.nodes
+      .filter(vote => vote.optionIdRaw !== '0')
+      .map(vote => {
+        const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        return {
+          ...vote,
+          ballot
+        };
+      });
   }
 
   async getMkrSupport(pollId, unixTime) {

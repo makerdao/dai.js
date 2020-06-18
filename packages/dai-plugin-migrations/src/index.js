@@ -2,7 +2,7 @@ import { createCurrency } from '@makerdao/currency';
 import testnetAddresses from '../contracts/addresses/testnet.json';
 import kovanAddresses from '../contracts/addresses/kovan.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
-import abiMap from '../contracts/abiMap.json';
+import abiMap from '../contracts/abiMap';
 import MigrationService from './MigrationService';
 import { ServiceRoles as ServiceRoles_ } from './constants';
 export const ServiceRoles = ServiceRoles_;
@@ -11,11 +11,11 @@ const { MIGRATION } = ServiceRoles;
 // this implementation assumes that all contracts in kovan.json, mainnet.json are also in testnet.json
 const allContracts = Object.entries(testnetAddresses).reduce(
   (contracts, [name, testnetAddress]) => {
-    const abiName = abiMap[name];
+    const abi = abiMap[name];
 
-    if (abiName) {
+    if (abi) {
       contracts[name] = {
-        abi: require(`../contracts/abis/${abiName}.json`),
+        abi,
         address: {
           testnet: testnetAddress,
           kovan: kovanAddresses[name],
@@ -30,8 +30,8 @@ const allContracts = Object.entries(testnetAddresses).reduce(
 );
 
 export const OLD_MKR = createCurrency('OLD_MKR');
-export const SAI = createCurrency('DAI');
-export const DAI = createCurrency('MDAI');
+export const SAI = createCurrency('SAI');
+export const DAI = createCurrency('DAI');
 export const MKR = createCurrency('MKR');
 
 function overrideContractAddresses(addressOverrides, contracts) {
@@ -44,7 +44,7 @@ function overrideContractAddresses(addressOverrides, contracts) {
   return contracts;
 }
 
-export const MDAI_1 = createCurrency('MDAI_1');
+export const DAI_1 = createCurrency('DAI_1');
 
 export default {
   addConfig: (_, { addressOverrides } = {}) => {
@@ -61,7 +61,7 @@ export default {
             decimals: 18,
             address: addContracts.OLD_MKR.address
           },
-          { currency: MDAI_1, address: addContracts.MCD_DAI_1.address }
+          { currency: DAI_1, address: addContracts.MCD_DAI_1.address }
         ]
       },
       additionalServices: [MIGRATION],

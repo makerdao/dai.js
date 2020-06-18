@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { mcdMaker, setupCollateral } from './helpers';
-import { ETH, MDAI, USD, BAT, GNT, DGD, USDC } from '../src';
+import { ETH, DAI, USD, BAT, GNT, DGD, USDC } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { createCurrencyRatio } from '@makerdao/currency';
 const { CDP_MANAGER } = ServiceRoles;
@@ -17,7 +17,7 @@ beforeAll(async () => {
       { currency: USDC, ilk: 'USDC-A', decimals: 6 }
     ]
   });
-  dai = maker.getToken(MDAI);
+  dai = maker.getToken(DAI);
   // the current account has a proxy only because the testchain setup script
   // creates it -- this is probably not a future-proof assumption
   proxy = await maker.currentProxy();
@@ -53,7 +53,7 @@ test('liquidationPrice and collateralizationRatio are infinite with 0 collateral
   const cdp = await maker.service(CDP_MANAGER).open('BAT-A');
   await cdp.prefetch();
   const ratio = createCurrencyRatio(USD, BAT);
-  const ratio2 = createCurrencyRatio(USD, MDAI);
+  const ratio2 = createCurrencyRatio(USD, DAI);
   expect(cdp.liquidationPrice).toEqual(ratio(Infinity));
   expect(cdp.collateralizationRatio).toEqual(ratio2(Infinity));
 });
@@ -114,7 +114,7 @@ async function expectValues(
     expect(cdp.isSafe).toBe(isSafe);
   }
   if (daiAvailable !== undefined) {
-    cdp.daiAvailable.eq(MDAI(daiAvailable));
+    cdp.daiAvailable.eq(DAI(daiAvailable));
   }
 }
 
@@ -142,7 +142,8 @@ describe.each([
   [
     'USDC-A',
     USDC,
-    async () => setupCollateral(maker, 'USDC-A', { price: 100, debtCeiling: 50 })
+    async () =>
+      setupCollateral(maker, 'USDC-A', { price: 100, debtCeiling: 50 })
   ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
@@ -200,7 +201,7 @@ describe.each([
   test('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
     await expectValues(cdp, {
       collateral: 1,
       debt: 1,
@@ -248,7 +249,7 @@ describe.each([
       myDai: startingDaiBalance.plus(1.5)
     });
 
-    await cdp.wipeAndFree(MDAI(1), GEM(0.5));
+    await cdp.wipeAndFree(DAI(1), GEM(0.5));
     await expectValuesAfterReset(cdp, {
       collateral: 0.5,
       debt: 0.5,
@@ -260,7 +261,7 @@ describe.each([
   test('openLockAndDraw, wipeAll, give', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
     await expectValuesAfterReset(cdp, {
       debt: 1,
       myDai: startingDaiBalance.plus(1)
@@ -297,7 +298,7 @@ describe.each([
   test('openLockAndDraw, wipeAllAndFree, giveToProxy', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
     await expectValuesAfterReset(cdp, {
       collateral: 1,
       debt: 1,
@@ -341,9 +342,9 @@ describe.each([
   test('openLockAndDraw, unsafeWipe', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
 
-    const unsafeWipe = cdp.unsafeWipe(MDAI(1));
+    const unsafeWipe = cdp.unsafeWipe(DAI(1));
     const unsafeWipeHandler = jest.fn((tx, state) => {
       expect(tx.metadata.method).toEqual(expect.stringContaining('wipe'));
       expect(state).toBe(txStates[unsafeWipeHandler.mock.calls.length - 1]);
@@ -356,7 +357,7 @@ describe.each([
   test('openLockAndDraw, unsafeWipeAll', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), MDAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
 
     const unsafeWipeAll = cdp.unsafeWipeAll();
     const unsafeWipeAllHandler = jest.fn((tx, state) => {
