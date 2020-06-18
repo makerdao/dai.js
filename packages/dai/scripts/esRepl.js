@@ -75,13 +75,13 @@ async function main() {
     const { utils } = w3s._web3;
     const { LogNewCup } = scs.getContract('SAI_TUB').interface.events;
 
-    const getCdpIds = async () => {
+    const getCdpIds = async address => {
       const logs = await w3s.getPastLogs(
         {
           address: scs.getContractAddress('SAI_TUB'),
           topics: [
             utils.keccak256(utils.toHex(LogNewCup.signature)),
-            '0x000000000000000000000000' + maker.currentAddress().replace(/^0x/, '')
+            '0x000000000000000000000000' + (address || maker.currentAddress()).replace(/^0x/, '')
           ],
           fromBlock
         },
