@@ -52,7 +52,7 @@
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
     "test:build": "yarn test --config ./test/config/jestBuildConfig.json",
-    "esrepl":  "../../node_modules/.bin/babel-node --experimental-repl-await scripts/esRepl.js"
+    "repl":  "../../node_modules/.bin/babel-node --experimental-repl-await scripts/repl.js"
   },
   "dependencies": {
     "@babel/cli": "^7.2.3",

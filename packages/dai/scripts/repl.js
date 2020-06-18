@@ -1,3 +1,6 @@
+// this is just a rough cut which is occasionally useful; 
+// don't take anything happening here as authoritative
+
 import repl from 'repl';
 import Maker from '../src';
 import testAccounts from '../../test-helpers/src/testAccounts.json';
