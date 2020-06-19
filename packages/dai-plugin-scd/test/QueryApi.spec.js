@@ -5,5 +5,5 @@ test('getCdpIdsForOwner on kovan', async () => {
   const ids = await q.getCdpIdsForOwner(
     '0x90d01f84f8db06d9af09054fe06fb69c1f8ee9e9'
   );
-  expect(ids).toEqual([4756]);
+  expect(ids).toEqual([4756, 4751, 1821]);
 });

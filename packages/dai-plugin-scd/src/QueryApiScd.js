@@ -35,15 +35,9 @@ export default class QueryApi {
       }
     }`;
 
-    const { cups1, cups2 } = await getQueryResponse(
-      this.serverUrl,
-      query,
-      {
-        lad: address
-      }
-    );
-    return uniq(
-      cups1.nodes.map(n => n.id).concat(cups2.nodes.map(n => n.id))
-    );
+    const { cups1, cups2 } = await getQueryResponse(this.serverUrl, query, {
+      lad: address
+    });
+    return uniq(cups1.nodes.map(n => n.id).concat(cups2.nodes.map(n => n.id)));
   }
 }
