@@ -174,6 +174,10 @@ export default class GovPollingService extends PrivateService {
       eliminated: false
     };
 
+    if (votes.length === 0) {
+      return tally;
+    }
+
     // run the first round
     votes.forEach(vote => {
       vote.choice = vote.ballot.pop();
@@ -244,11 +248,12 @@ export default class GovPollingService extends PrivateService {
         }
       );
 
-      //if there's no more rounds, or if there's only one option that hasn't been eliminated
+      //if there's no more rounds, or if there is one or fewer options that haven't been eliminated
       // the winner is the option with the most votes
       if (
         (tally.rounds > MAX_ROUNDS && !tally.winner) ||
-        (filteredOptions.length === 1 && !tally.winner)
+        ((filteredOptions.length === 1 || filteredOptions.length === 0) &&
+          !tally.winner)
       ) {
         let max = BigNumber(0);
         let maxOption;
