@@ -1791,7 +1791,15 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@makerdao/currency@>=0.9.0", "@makerdao/currency@^0.9.3", "@makerdao/currency@^0.9.5":
+"@makerdao/currency@>=0.9.0", "@makerdao/currency@^0.9.9":
+  version "0.9.9"
+  resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.9.tgz#b5f847362cb4648c30548313f005c80c1c878c9e"
+  integrity sha512-fr6MaiWxQ1IxEaSO8znnhcZTPb8P5ZJU5PS76lx5zAX8CF/ZykfDCX7lb4AMaOVCWajQ8OPN8ekO5a0MOJb3wg==
+  dependencies:
+    babel-runtime "^6.26.0"
+    bignumber.js "^8.1.1"
+
+"@makerdao/currency@^0.9.3", "@makerdao/currency@^0.9.5":
   version "0.9.7"
   resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.7.tgz#7b7310cc4feb75ce78330116ae15dad2267040e0"
   integrity sha512-7N4w25lYwJf105RJZk/WZpxzUMs3GOxSJ4Qg2yro7V1bnsEHaZ0IeyrFOtUfo87Ia3tvld+k9JLG6ykYOxI3kw==
@@ -1896,10 +1904,10 @@
   dependencies:
     node-fetch "^2.6.0"
 
-"@makerdao/testchain@^1.1.5":
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.1.5.tgz#85be3f25cf245d21aa54263eb07a29cb54a6714c"
-  integrity sha512-a1wmYI97UeVFa9IJfhEK6yuFmEjJzkcHPWzTlrAmEu2uc4LO3E9NchE6xQlAj5S0E4NXNn2B9CciqmbrllNA+g==
+"@makerdao/testchain@^1.1.8":
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.1.8.tgz#1894c79d090d3eb0d11b1738b8fad868d6dd1ec8"
+  integrity sha512-YlkT3TBGfxwOu6baLdLvmmPnQQ4uKDMkN3z+HEAfKJ4eMXTDhkq+iVeqtgVzg4ODVf3+T8Y0z+3iwsD4NSV7+Q==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 

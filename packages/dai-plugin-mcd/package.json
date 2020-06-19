@@ -1,10 +1,9 @@
 {
   "name": "@makerdao/dai-plugin-mcd",
   "description": "Plugin to add Multi-Collateral Dai support to dai.js",
-  "version": "1.4.3",
+  "version": "1.5.9",
   "license": "MIT",
   "main": "dist/index.js",
-  "browser": "umd/index.js",
   "unpkg": "umd/index.js",
   "jsdelivr": "umd/index.js",
   "scripts": {
@@ -24,7 +23,7 @@
     "@makerdao/dai": ">=0.18.9"
   },
   "dependencies": {
-    "@makerdao/currency": "^0.9.8",
+    "@makerdao/currency": "^0.9.9",
     "@makerdao/services-core": "^0.9.9",
     "bignumber.js": "^8.1.1",
     "rxjs": "^6.5.4"

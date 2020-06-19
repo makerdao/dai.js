@@ -110,6 +110,21 @@ export default class QueryApi extends PublicService {
     return response.currentVote.nodes[0].optionId;
   }
 
+  async getAllOptionsVotingFor(address) {
+    const query = `{
+      allCurrentVotes(argAddress: "${address}"){
+        nodes{
+          pollId
+          optionId
+          optionIdRaw
+        }
+      }
+    }`;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    if (!response.allCurrentVotes.nodes[0]) return null;
+    return response.allCurrentVotes.nodes;
+  }
+
   async getOptionVotingForRankedChoice(address, pollId) {
     const query = `{
       currentVoteRankedChoice(argAddress: "${address}", argPollId: ${pollId}){

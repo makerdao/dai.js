@@ -1,6 +1,6 @@
 import { toHex, fromRay } from '../utils';
 import { createCurrencyRatio } from '@makerdao/currency';
-import { MDAI, USD } from '../..';
+import { DAI, USD } from '..';
 
 import {
   PRICE_FEED_ADDRESS,
@@ -27,7 +27,7 @@ export const spotIlks = {
     transforms: {
       [LIQUIDATION_RATIO]: liqRatio =>
         liqRatio.toString() !== '0'
-          ? createCurrencyRatio(USD, MDAI)(fromRay(liqRatio))
+          ? createCurrencyRatio(USD, DAI)(fromRay(liqRatio))
           : null
     }
   }),
@@ -45,7 +45,7 @@ export const spotPar = {
     contract: 'MCD_SPOT',
     call: ['par()(uint256)']
   }),
-  returns: [[RATIO_DAI_USD, v => createCurrencyRatio(MDAI, USD)(fromRay(v))]]
+  returns: [[RATIO_DAI_USD, v => createCurrencyRatio(DAI, USD)(fromRay(v))]]
 };
 
 export default {

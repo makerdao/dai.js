@@ -1,6 +1,6 @@
 import { mcdMaker, setupCollateral } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import { ETH, BAT, MDAI } from '../../src';
+import { ETH, BAT, DAI } from '../../src';
 import { ServiceRoles } from '../../src/constants';
 import { fromRay, fromWei, isBigNumber, isCurrency } from '../../src/utils';
 import BigNumber from 'bignumber.js';
@@ -23,11 +23,11 @@ import vatSchemas from '../../src/schemas/vat';
 let maker, snapshotData, ethAInfo, batAInfo, cdpMgr, cdpTypeService;
 
 const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = MDAI(1);
+const ETH_A_DEBT_AMOUNT = DAI(1);
 const ETH_A_PRICE = 180;
 
 const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = MDAI(1);
+const BAT_A_DEBT_AMOUNT = DAI(1);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {
@@ -49,7 +49,7 @@ beforeAll(async () => {
   await setupCollateral(maker, 'BAT-A', { price: BAT_A_PRICE });
 
   cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
-  const dai = maker.getToken(MDAI);
+  const dai = maker.getToken(DAI);
   const _proxyAddress = await maker.service('proxy').ensureProxy();
   await dai.approveUnlimited(_proxyAddress);
 
@@ -147,8 +147,8 @@ test(DEBT_CEILING, async () => {
   expect(isCurrency(ethADebtCeiling)).toEqual(true);
   expect(isCurrency(batADebtCeiling)).toEqual(true);
 
-  expect(ethADebtCeiling.isEqual(MDAI(100000))).toEqual(true);
-  expect(batADebtCeiling.isEqual(MDAI(5000))).toEqual(true);
+  expect(ethADebtCeiling.isEqual(DAI(100000))).toEqual(true);
+  expect(batADebtCeiling.isEqual(DAI(5000))).toEqual(true);
 });
 
 test(DEBT_FLOOR, async () => {
@@ -166,13 +166,13 @@ test(TOTAL_DAI_SUPPLY, async () => {
   const { Art: ethAArt, rate: ethARate } = ethAInfo;
   const { Art: batAArt, rate: batARate } = batAInfo;
 
-  const ethADaiGenerated = MDAI.rad(BigNumber(ethAArt).times(ethARate));
-  const batADaiGenerated = MDAI.rad(BigNumber(batAArt).times(batARate));
+  const ethADaiGenerated = DAI.rad(BigNumber(ethAArt).times(ethARate));
+  const batADaiGenerated = DAI.rad(BigNumber(batAArt).times(batARate));
   const sumOfDaiGeneratedFromIlks = ethADaiGenerated.plus(batADaiGenerated);
 
   const totalDaiAmount = await maker.latest(TOTAL_DAI_SUPPLY);
 
-  expect(totalDaiAmount.symbol).toEqual('MDAI');
+  expect(totalDaiAmount.symbol).toEqual('DAI');
   expect(totalDaiAmount.isEqual(sumOfDaiGeneratedFromIlks)).toEqual(true);
 });
 
@@ -213,6 +213,6 @@ test(UNLOCKED_COLLATERAL, async () => {
 test(GLOBAL_DEBT_CEILING, async () => {
   const globalDebtCeiling = await maker.latest(GLOBAL_DEBT_CEILING);
 
-  expect(globalDebtCeiling.symbol).toEqual(MDAI.symbol);
+  expect(globalDebtCeiling.symbol).toEqual(DAI.symbol);
   expect(globalDebtCeiling.toBigNumber()).toEqual(BigNumber('1000000'));
 });

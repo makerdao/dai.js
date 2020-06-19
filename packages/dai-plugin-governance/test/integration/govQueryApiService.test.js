@@ -47,3 +47,10 @@ test('get esm joins', async () => {
   const joins = await service.getEsmJoins();
   console.log('joins', joins);
 });
+
+test('get all current votes', async () => {
+  const options = await service.getAllOptionsVotingFor(
+    '0xb93f14636678d680dcbbed20c77f2b6220b52c39'
+  );
+  console.log('options', options);
+});

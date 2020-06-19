@@ -31,7 +31,7 @@ describe('Chief Migration', () => {
     expect(mkrLockedViaProxy.toNumber()).toBe(0);
   });
 
-  xtest('if the account has some MKR locked directly in old chief, return the amount', async () => {
+  test('if the account has some MKR locked directly in old chief, return the amount', async () => {
     const oldChief = maker
       .service('smartContract')
       .getContractByName('OLD_CHIEF');
@@ -45,11 +45,11 @@ describe('Chief Migration', () => {
     await oldChief.lock(LOCK_AMOUNT.toFixed('wei'));
 
     const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
-    expect(mkrLockedViaProxy.toNumber()).toBe(0);
     expect(mkrLockedDirectly.isEqual(LOCK_AMOUNT)).toBeTruthy();
+    expect(mkrLockedViaProxy.toNumber()).toBe(0);
   });
 
-  xtest('if the account has some MKR locked via proxy in old chief, return the amount', async () => {
+  test('if the account has some MKR locked via proxy in old chief, return the amount', async () => {
     const oldVoteProxyFactory = maker
       .service('smartContract')
       .getContractByName('OLD_VOTE_PROXY_FACTORY');
@@ -85,7 +85,7 @@ describe('Chief Migration', () => {
     await voteProxy.lock(LOCK_AMOUNT.toFixed('wei'));
 
     const { mkrLockedDirectly, mkrLockedViaProxy } = await migration.check();
-    expect(mkrLockedViaProxy.isEqual(LOCK_AMOUNT)).toBeTruthy();
     expect(mkrLockedDirectly.toNumber()).toBe(0);
+    expect(mkrLockedViaProxy.isEqual(LOCK_AMOUNT)).toBeTruthy();
   });
 });

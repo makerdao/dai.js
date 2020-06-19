@@ -1,7 +1,6 @@
 import Maker from '@makerdao/dai';
 import McdPlugin from '@makerdao/dai-plugin-mcd';
 import MigrationPlugin from '../../src';
-import { SAI, MKR } from '../../src';
 import { ServiceRoles, Migrations } from '../../src/constants';
 
 async function mcdMaker({
@@ -35,16 +34,14 @@ async function mcdMaker({
 }
 
 async function openLockAndDrawScdCdp(drawAmount, maker) {
-  const cdp = await maker.openCdp({ dsProxy: true });
+  const cdp = await maker.service('cdp').openCdp({ dsProxy: true });
   await cdp.lockEth('0.1', { dsProxy: true });
-  await cdp.drawDai(drawAmount, { dsProxy: true });
+  await cdp.drawSai(drawAmount, { dsProxy: true });
   return cdp;
 }
 
 xtest('kovan', async () => {
   const maker = await mcdMaker();
-  const sai = maker.getToken(SAI);
-  const mkr = maker.getToken(MKR);
   const migrationContract = maker
     .service('smartContract')
     .getContract('MIGRATION');
@@ -59,7 +56,6 @@ xtest('kovan', async () => {
   // await mkr.approveUnlimited(proxyAddress);
 
   const cdp = await openLockAndDrawScdCdp('1', maker);
-  const info = await cdp.getInfo();
   await cdp.give(proxyAddress);
   const id = cdp.id;
   await migrationContract.swapSaiToDai('5000000000000000000');

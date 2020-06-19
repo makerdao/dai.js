@@ -93,6 +93,28 @@ export default class GovPollingService extends PrivateService {
     return ballot.reverse().filter(choice => choice !== 0 && choice !== '0');
   }
 
+  async getAllOptionsVotingFor(address) {
+    const options = await this.get('govQueryApi').getAllOptionsVotingFor(
+      address.toLowerCase()
+    );
+    if (!options) return [];
+    return options.map(o => {
+      let rankedChoiceOption = null;
+      if (o.optionIdRaw) {
+        const ballotBuffer = toBuffer(o.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        rankedChoiceOption = ballot
+          .reverse()
+          .filter(choice => choice !== 0 && choice !== '0');
+      }
+      return {
+        pollId: o.pollId,
+        option: o.optionId,
+        rankedChoiceOption
+      };
+    });
+  }
+
   async getNumUniqueVoters(pollId) {
     return this.get('govQueryApi').getNumUniqueVoters(pollId);
   }
@@ -113,6 +135,18 @@ export default class GovPollingService extends PrivateService {
       endUnix
     );
     return MKR(weights.reduce((acc, cur) => acc + cur.mkrSupport, 0));
+  }
+
+  async getMkrAmtVotedRankedChoice(pollId) {
+    const { endDate } = await this._getPoll(pollId);
+    const endUnix = Math.floor(endDate / 1000);
+    const weights = await this.get('govQueryApi').getMkrSupportRankedChoice(
+      pollId,
+      endUnix
+    );
+    return MKR(
+      weights.reduce((acc, cur) => acc + parseFloat(cur.mkrSupport), 0)
+    );
   }
 
   async getTallyRankedChoiceIrv(pollId) {
@@ -255,6 +289,19 @@ export default class GovPollingService extends PrivateService {
   async getPercentageMkrVoted(pollId) {
     const [voted, total] = await Promise.all([
       this.getMkrAmtVoted(pollId),
+      this.get('token')
+        .getToken(MKR)
+        .totalSupply()
+    ]);
+    return voted
+      .div(total)
+      .times(100)
+      .toNumber();
+  }
+
+  async getPercentageMkrVotedRankedChoice(pollId) {
+    const [voted, total] = await Promise.all([
+      this.getMkrAmtVotedRankedChoice(pollId),
       this.get('token')
         .getToken(MKR)
         .totalSupply()

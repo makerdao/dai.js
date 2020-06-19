@@ -2,7 +2,7 @@ import { migrationMaker, setupCollateral } from '../helpers';
 import { mockContracts, globalSettlement } from '../helpers/mocks';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
-import { ETH, MDAI } from '@makerdao/dai-plugin-mcd';
+import { ETH, DAI } from '@makerdao/dai-plugin-mcd';
 
 let maker, migration, cdpManager, smartContract, snapshot;
 
@@ -25,7 +25,7 @@ describe('Global Settlement Savings DAI Migration', () => {
     cdpManager = maker.service('mcd:cdpManager');
     smartContract = maker.service('smartContract');
 
-    const dai = maker.getToken(MDAI);
+    const dai = maker.getToken(DAI);
     const proxyAddress = await maker.service('proxy').ensureProxy();
     await dai.approveUnlimited(proxyAddress);
 
@@ -49,8 +49,8 @@ describe('Global Settlement Savings DAI Migration', () => {
 
   test('if the system is in global settlement and there is DAI in savings DAI, return true', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(1));
-    await joinSavings(MDAI(1));
+    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(1));
+    await joinSavings(DAI(1));
 
     mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage() });
 
@@ -65,9 +65,9 @@ describe('Global Settlement Savings DAI Migration', () => {
 
   test('if the system is NOT in global settlement and there is DAI in savings DAI, return false', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), MDAI(1));
+    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(1));
     mockContracts(smartContract, { MCD_END_1: globalSettlement.beforeCage() });
-    await joinSavings(MDAI(1));
+    await joinSavings(DAI(1));
 
     expect(await migration.check()).toBeFalsy();
   });

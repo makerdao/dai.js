@@ -2,7 +2,7 @@ import findIndex from 'lodash/findIndex';
 import { mcdMaker, setupCollateral } from './helpers';
 import { setMethod, transferToBag } from '../src/CdpManager';
 import { ServiceRoles } from '../src/constants';
-import { ETH, MDAI, GNT, DGD, BAT } from '../src';
+import { ETH, DAI, GNT, DGD, BAT } from '../src';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 
@@ -50,8 +50,8 @@ test('getCdpIds gets all CDP data from the proxy', async () => {
 
 test('getCombinedDebtValue', async () => {
   await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-  await cdpMgr.openLockAndDraw('ETH-A', ETH(1), MDAI(3));
-  await cdpMgr.openLockAndDraw('ETH-A', ETH(2), MDAI(5));
+  await cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(3));
+  await cdpMgr.openLockAndDraw('ETH-A', ETH(2), DAI(5));
   maker.service(ServiceRoles.CDP_TYPE).reset();
   const currentProxy = await maker.currentProxy();
   const totalDebt = await cdpMgr.getCombinedDebtValue(currentProxy);
@@ -86,7 +86,7 @@ test('getCdp can disable prefetch', async () => {
 test('transaction tracking for openLockAndDraw', async () => {
   const cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   const txMgr = maker.service('transactionManager');
-  const open = cdpMgr.openLockAndDraw('ETH-A', ETH(1), MDAI(0));
+  const open = cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(0));
   expect.assertions(5);
   const handlers = {
     pending: jest.fn(({ metadata: { contract, method } }) => {
@@ -194,7 +194,7 @@ describe('using a different account', () => {
 
 test('get event history via web3', async () => {
   await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-  const cdp = await cdpMgr.openLockAndDraw('ETH-A', ETH(1), MDAI(3));
+  const cdp = await cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(3));
   await cdp.freeCollateral(ETH(0.5));
   await cdpMgr.give(cdp.id, '0x1000000000000000000000000000000000000000');
   const events = await cdpMgr.getEventHistory(cdp);

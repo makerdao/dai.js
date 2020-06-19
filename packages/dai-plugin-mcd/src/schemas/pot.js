@@ -1,4 +1,8 @@
 import { fromRay, fromWei } from '../utils';
+import BigNumber from 'bignumber.js';
+
+// the call to `pow` below can be very slow without this
+BigNumber.config({ POW_PRECISION: 100 });
 
 import {
   TOTAL_SAVINGS_DAI,

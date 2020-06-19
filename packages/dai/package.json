@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.31.4",
+  "version": "0.31.6",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -33,7 +33,6 @@
     "umd/*"
   ],
   "main": "dist/src/index.js",
-  "browser": "umd/index.js",
   "unpkg": "umd/index.js",
   "jsdelivr": "umd/index.js",
   "scripts": {
@@ -52,7 +51,8 @@
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
-    "test:build": "yarn test --config ./test/config/jestBuildConfig.json"
+    "test:build": "yarn test --config ./test/config/jestBuildConfig.json",
+    "repl":  "../../node_modules/.bin/babel-node --experimental-repl-await scripts/repl.js"
   },
   "dependencies": {
     "@babel/cli": "^7.2.3",

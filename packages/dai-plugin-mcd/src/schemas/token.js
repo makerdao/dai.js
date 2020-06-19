@@ -10,12 +10,12 @@ export const ALLOWANCE_AMOUNT = BigNumber(
 
 export const tokenBalance = {
   generate: (address, symbol) => {
-    if (symbol === 'WETH') symbol = 'MWETH';
-    if (symbol === 'DAI') symbol = 'MDAI';
+    if (symbol === 'WETH') symbol = 'WETH';
+    if (symbol === 'DAI') symbol = 'DAI';
 
     const currencyToken = getMcdToken(symbol);
     const contract =
-      symbol === 'MDAI' ? 'MCD_DAI' : symbol === 'MWETH' ? 'ETH' : symbol;
+      symbol === 'DAI' ? 'MCD_DAI' : symbol === 'WETH' ? 'ETH' : symbol;
     if (!currencyToken)
       throw new Error(`${symbol} token is not part of the default tokens list`);
     if (symbol === 'DSR-DAI')
@@ -57,14 +57,12 @@ export const tokenBalances = {
 
 export const tokenAllowanceBase = {
   generate: (address, proxyAddress, symbol) => {
-    if (symbol === 'WETH') symbol = 'MWETH';
-    if (symbol === 'DAI') symbol = 'MDAI';
     if (symbol === 'ETH' || symbol === 'DSR-DAI')
       throw new Error(`${symbol} does not require an allowance to be set`);
 
     const currencyToken = getMcdToken(symbol);
     const contract =
-      symbol === 'MDAI' ? 'MCD_DAI' : symbol === 'MWETH' ? 'ETH' : symbol;
+      symbol === 'DAI' ? 'MCD_DAI' : symbol === 'WETH' ? 'ETH' : symbol;
     if (!currencyToken)
       throw new Error(`${symbol} token is not part of the default tokens list`);
 
@@ -100,10 +98,8 @@ export const tokenAllowance = {
 export const adapterBalance = {
   generate: collateralTypeName => ({
     dependencies: ({ get }) => {
-      collateralTypeName =
-        collateralTypeName === 'MDAI' ? 'DAI' : collateralTypeName;
       let tokenSymbol = collateralTypeName.split('-')[0];
-      tokenSymbol = tokenSymbol === 'ETH' ? 'MWETH' : tokenSymbol;
+      tokenSymbol = tokenSymbol === 'ETH' ? 'WETH' : tokenSymbol;
       return [
         [
           TOKEN_BALANCE,

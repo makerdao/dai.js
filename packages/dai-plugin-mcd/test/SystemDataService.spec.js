@@ -1,6 +1,6 @@
 import { mcdMaker } from './helpers';
 import { ServiceRoles } from '../src/constants';
-import { MDAI } from '../src/index';
+import { DAI } from '../src/index';
 
 let service;
 let maker;
@@ -27,6 +27,5 @@ test('get global settlement status', async () => {
 
 test('get system surplus', async () => {
   const surplus = await service.getSystemSurplus();
-  console.log('surplus.toNumber', surplus.toNumber());
-  expect(surplus).toEqual(MDAI(0)); //TODO change to expect non-zero number
+  expect(surplus).toEqual(DAI(0)); //TODO change to expect non-zero number
 });

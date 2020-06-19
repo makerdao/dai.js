@@ -27,7 +27,10 @@ describe('with default types', () => {
 
 test('getCdpType with too many matches throws an error', async () => {
   maker = await mcdMaker({
-    cdpTypes: [{ currency: ETH, ilk: 'ETH-A' }, { currency: ETH, ilk: 'ETH-B' }]
+    cdpTypes: [
+      { currency: ETH, ilk: 'ETH-A' },
+      { currency: ETH, ilk: 'ETH-B' }
+    ]
   });
   service = maker.service(ServiceRoles.CDP_TYPE);
 

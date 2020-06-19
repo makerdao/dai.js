@@ -1,10 +1,9 @@
 {
   "name": "@makerdao/dai-plugin-scd",
   "description": "Plugin to add Single-Collateral Dai support to dai.js",
-  "version": "1.2.3",
+  "version": "1.2.5",
   "license": "MIT",
   "main": "dist/src/index.js",
-  "browser": "umd/index.js",
   "unpkg": "umd/index.js",
   "jsdelivr": "umd/index.js",
   "scripts": {

@@ -3,7 +3,6 @@ import {
   // buildTestEthereumCdpService,
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
-import tokens from '../../contracts/tokens';
 import { uniqueId } from '../../src/utils';
 import { mineBlocks } from '@makerdao/test-helpers';
 import size from 'lodash/size';
@@ -70,7 +69,7 @@ test('reuse the same web3 and log service in test services', () => {
 
 test('wrapped contract call accepts a businessObject option', async () => {
   expect.assertions(3);
-  const sai = services.contract.getContract(tokens.SAI);
+  const token = services.contract.getContract('WETH');
 
   const businessObject = {
     a: 1,
@@ -79,7 +78,7 @@ test('wrapped contract call accepts a businessObject option', async () => {
     }
   };
 
-  const txo = sai.approve(services.currentAddress, '1000000000000000000', {
+  const txo = token.approve(services.currentAddress, '1000000000000000000', {
     businessObject
   });
 
@@ -95,14 +94,14 @@ test('wrapped contract call accepts a businessObject option', async () => {
 
 test('wrapped contract call adds nonce, web3 settings', async () => {
   const { txMgr, currentAddress, contract } = services;
-  const sai = contract.getContract(tokens.SAI);
+  const token = contract.getContract('WETH');
   const gasPrice = await txMgr.get('gas').getGasPrice();
   jest.spyOn(txMgr, '_execute');
 
-  await sai.approve(currentAddress, 20000);
+  await token.approve(currentAddress, 20000);
 
   expect(txMgr._execute).toHaveBeenCalledWith(
-    sai.wrappedContract,
+    token.wrappedContract,
     'approve',
     [currentAddress, 20000],
     {
