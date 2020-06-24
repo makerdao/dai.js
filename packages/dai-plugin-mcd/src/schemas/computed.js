@@ -9,6 +9,7 @@ import {
 import { USD, DAI, DSR_DAI, defaultCdpTypes, ALLOWANCE_AMOUNT } from '../';
 import BigNumber from 'bignumber.js';
 import {
+  DEBT_CEILING,
   RATIO_DAI_USD,
   LIQUIDATION_RATIO,
   PRICE_WITH_SAFETY_MARGIN,
@@ -533,6 +534,21 @@ export const collateralDebt = {
   })
 };
 
+export const collateralDebtCeilings = {
+  generate: cdpTypes => ({
+    dependencies: () => cdpTypes.map(type => [DEBT_CEILING, type]),
+    computed: (...ceilings) => {
+      return cdpTypes.reduce(
+        (acc, cdpType, idx) => ({
+          ...acc,
+          [cdpType]: ceilings[idx]
+        }),
+        {}
+      );
+    }
+  })
+};
+
 export const collateralTypeCollateralization = {
   generate: (collateralTypeName, percentage = true) => ({
     dependencies: [
@@ -637,5 +653,6 @@ export default {
   systemCollateralization,
   proxyOwner,
   collateralTypeData,
-  collateralTypesData
+  collateralTypesData,
+  collateralDebtCeilings
 };
