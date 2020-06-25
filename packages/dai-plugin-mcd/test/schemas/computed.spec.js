@@ -33,7 +33,8 @@ import {
   USER_VAULTS_LIST,
   PROXY_OWNER,
   COLLATERAL_TYPE_DATA,
-  COLLATERAL_TYPES_DATA
+  COLLATERAL_TYPES_DATA,
+  COLLATERAL_DEBT_CEILINGS
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
@@ -524,4 +525,13 @@ test(COLLATERAL_TYPES_DATA, async () => {
 
   expect(JSON.stringify(ethAData)).toEqual(JSON.stringify(expectedEth));
   expect(JSON.stringify(batAData)).toEqual(JSON.stringify(expectedBat));
+});
+
+test(COLLATERAL_DEBT_CEILINGS, async () => {
+  const debtCeilings = await maker.latest(COLLATERAL_DEBT_CEILINGS, [
+    'ETH-A',
+    'BAT-A'
+  ]);
+  expect(debtCeilings['ETH-A'].toNumber()).toEqual(100000);
+  expect(debtCeilings['BAT-A'].toNumber()).toEqual(5000);
 });
