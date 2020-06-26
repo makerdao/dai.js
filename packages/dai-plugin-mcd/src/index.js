@@ -63,6 +63,7 @@ export const DSR_DAI = createCurrency('DSR-DAI');
 
 export const REP = createCurrency('REP');
 export const ZRX = createCurrency('ZRX');
+export const KNC = createCurrency('KNC');
 export const OMG = createCurrency('OMG');
 export const BAT = createCurrency('BAT');
 export const DGD = createCurrency('DGD');
@@ -77,7 +78,9 @@ export const defaultCdpTypes = [
   { currency: USDC, ilk: 'USDC-A', decimals: 6 },
   { currency: WBTC, ilk: 'WBTC-A', decimals: 8 },
   { currency: USDC, ilk: 'USDC-B', decimals: 6 },
-  { currency: TUSD, ilk: 'TUSD-A', decimals: 18 }
+  { currency: TUSD, ilk: 'TUSD-A', decimals: 18 },
+  { currency: KNC, ilk: 'KNC-A', decimals: 18 },
+  { currency: ZRX, ilk: 'ZRX-A', decimals: 18 }
 ];
 
 export const SAI = createCurrency('SAI');

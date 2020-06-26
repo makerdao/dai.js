@@ -5,6 +5,7 @@ module.exports = {
   OMG: require('./abis/OMG.json'),
   BAT: require('./abis/BAT.json'),
   DGD: require('./abis/DGD.json'),
+  KNC: require('./abis/KNC.json'),
   GNT: require('./abis/GNT.json'),
   SAI: require('./abis/DSToken.json'),
   CDP_MANAGER: require('./abis/DssCdpManager.json'),
