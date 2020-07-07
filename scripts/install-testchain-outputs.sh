@@ -9,6 +9,16 @@ function jq_inplace {
   jq "$1" > $TMP && mv $TMP "$2"
 }
 
+function add_prefix {
+  for CONTRACT in "GEM" "GOV" "PIP" "PEP" "PIT" "ADM" "SIN" "SKR" "DAD" "MOM" "VOX" "TUB" "TAP" "TOP"
+  do
+    if [ `jq ".$CONTRACT" "$1"` != null ]
+    then
+      cat $1 | jq_inplace ".SAI_$CONTRACT = .$CONTRACT | del(.$CONTRACT)" $1
+    fi
+  done
+}
+
 DAI=$CWD/../packages/dai
 MCD=$CWD/../packages/dai-plugin-mcd
 SCD=$CWD/../packages/dai-plugin-scd

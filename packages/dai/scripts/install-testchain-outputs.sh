@@ -13,7 +13,4 @@ MULTICALL=$(cat $SOURCE/out/addresses-mcd.json | jq '.MULTICALL')
 
 cat $TESTNET_ADDRESSES | jq_inplace ".MULTICALL = $(echo $MULTICALL)" $TESTNET_ADDRESSES
 
-for CONTRACT in "GEM" "GOV" "PIP" "PEP" "PIT" "ADM" "SIN" "SKR" "DAD" "MOM" "VOX" "TUB" "TAP" "TOP"
-do
-  cat $TESTNET_ADDRESSES | jq_inplace ".SAI_$CONTRACT = .$CONTRACT | del(.$CONTRACT)" $TESTNET_ADDRESSES
-done
+add_prefix $TESTNET_ADDRESSES

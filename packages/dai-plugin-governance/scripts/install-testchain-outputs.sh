@@ -14,8 +14,8 @@ POLLING=`jq ".POLLING" "$SOURCE/out/addresses.json"`
 jq ".POLLING=$POLLING" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
 cp $SOURCE/out/PollingEmitter.abi $CONTRACTS/abis/Polling.json
 
-GOV=`jq ".SAI_GOV" "$SOURCE/out/addresses.json"`
-jq ".GOV=$GOV" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
+GOV=`jq ".GOV" "$SOURCE/out/addresses.json"`
+jq ".SAI_GOV=$GOV" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
 
 for CONTRACT in "VOTE_PROXY_FACTORY","VoteProxyFactory" "MCD_ESM","ESM" "MCD_END","End"
 do
