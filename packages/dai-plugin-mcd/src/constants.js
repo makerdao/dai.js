@@ -6,7 +6,7 @@ export const ServiceRoles = {
   AUCTION: 'mcd:auction',
   SYSTEM_DATA: 'mcd:systemData',
   SAVINGS: 'mcd:savings',
-  PSM: 'mcd:psm'
+  PSM_TYPE: 'mcd:psmType'
 };
 
 export const WAD = new BigNumber('1e18');

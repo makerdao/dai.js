@@ -12,12 +12,21 @@ import SavingsService from './SavingsService';
 import CdpTypeService from './CdpTypeService';
 import AuctionService from './AuctionService';
 import SystemDataService from './SystemDataService';
+import PsmService from './PsmService';
+
 import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
 import wethAbi from '../contracts/abis/WETH9.json';
 
 export const ServiceRoles = ServiceRoles_;
-const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, AUCTION, SAVINGS } = ServiceRoles;
+const {
+  CDP_MANAGER,
+  CDP_TYPE,
+  SYSTEM_DATA,
+  AUCTION,
+  SAVINGS,
+  PSM_TYPE
+} = ServiceRoles;
 
 // look up contract ABIs using abiMap.
 // if an exact match is not found, prefix-match against keys ending in *, e.g.
@@ -83,6 +92,10 @@ export const defaultCdpTypes = [
   { currency: ZRX, ilk: 'ZRX-A', decimals: 18 }
 ];
 
+export const defaultPsmTypes = [
+  { currency: USDC, ilk: 'PSM-USDC-A', decimals: 6 }
+];
+
 export const SAI = createCurrency('SAI');
 
 export const ALLOWANCE_AMOUNT = BigNumber(
@@ -102,7 +115,12 @@ export const defaultTokens = [
 export const McdPlugin = {
   addConfig: (
     _,
-    { cdpTypes = defaultCdpTypes, addressOverrides, prefetch = true } = {}
+    {
+      cdpTypes = defaultCdpTypes,
+      psmTypes = defaultPsmTypes,
+      addressOverrides,
+      prefetch = true
+    } = {}
   ) => {
     if (addressOverrides) {
       addContracts = mapValues(addContracts, (contractDetails, name) => ({
@@ -141,13 +159,15 @@ export const McdPlugin = {
         CDP_TYPE,
         AUCTION,
         SYSTEM_DATA,
-        SAVINGS
+        SAVINGS,
+        PSM_TYPE
       ],
       [CDP_TYPE]: [CdpTypeService, { cdpTypes, prefetch }],
       [CDP_MANAGER]: CdpManager,
       [SAVINGS]: SavingsService,
       [AUCTION]: AuctionService,
-      [SYSTEM_DATA]: SystemDataService
+      [SYSTEM_DATA]: SystemDataService,
+      [PSM_TYPE]: [PsmService, { psmTypes, prefetch }]
     };
   }
 };
