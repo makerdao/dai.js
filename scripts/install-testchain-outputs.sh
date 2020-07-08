@@ -19,7 +19,7 @@ function set_address_and_abi {
   ADDRESS=`jq ".$NAME" "$2"`
   cp $3/$ABI.abi $CONTRACTS/abis/$ABI.json
   
-  if [[ $5 != null ]]
+  if [ $5 ]
   then
     NAME=$NAME$5
   fi
