@@ -2,25 +2,19 @@
 set -e
 
 CONTRACTS=$GOVERNANCE/contracts
+TESTNET_ADDRESSES=$CONTRACTS/addresses/testnet.json
 
-CHIEF=`jq ".MCD_ADM" "$SOURCE/out/addresses-mcd.json"`
-jq ".CHIEF=$CHIEF" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-cp $SOURCE/out/DSChief.abi $CONTRACTS/abis/DSChief.json
-
-IOU=`jq ".MCD_IOU" "$SOURCE/out/addresses-mcd.json"`
-jq ".IOU=$IOU" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-
-POLLING=`jq ".POLLING" "$SOURCE/out/addresses.json"`
-jq ".POLLING=$POLLING" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-cp $SOURCE/out/PollingEmitter.abi $CONTRACTS/abis/Polling.json
-
-GOV=`jq ".GOV" "$SOURCE/out/addresses.json"`
-jq ".SAI_GOV=$GOV" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-
-for CONTRACT in "VOTE_PROXY_FACTORY","VoteProxyFactory" "MCD_ESM","ESM" "MCD_END","End"
+# Relevant contracts from SCD:
+for CONTRACT in "POLLING","PollingEmitter" "GOV","DSToken"
 do
-  IFS=',' read NAME ABI <<< "${CONTRACT}"
-  ADDRESS=`jq ".$NAME" "$SOURCE/out/addresses-mcd.json"`
-  jq ".$NAME=$ADDRESS" $CONTRACTS/addresses/testnet.json > testnet.tmp && mv testnet.tmp $CONTRACTS/addresses/testnet.json
-  cp $SOURCE/out/mcd/$ABI.abi $CONTRACTS/abis/$ABI.json
+  set_address_and_abi $CONTRACT $SCD_ADDRESSES $SOURCE/out $TESTNET_ADDRESSES
 done
+
+# Relevant contracts from MCD:
+for CONTRACT in "VOTE_PROXY_FACTORY","VoteProxyFactory" "MCD_ESM","ESM" "MCD_END","End" "MCD_ADM","DSChief" "MCD_IOU","DSToken"
+do
+  set_address_and_abi $CONTRACT $MCD_ADDRESSES $SOURCE/out/mcd $TESTNET_ADDRESSES
+done
+
+# Add 'SAI_' prefix to relevant contracts
+add_prefix $TESTNET_ADDRESSES
