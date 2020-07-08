@@ -5,7 +5,8 @@ export const ServiceRoles = {
   CDP_TYPE: 'mcd:cdpType',
   AUCTION: 'mcd:auction',
   SYSTEM_DATA: 'mcd:systemData',
-  SAVINGS: 'mcd:savings'
+  SAVINGS: 'mcd:savings',
+  PSM: 'mcd:psm'
 };
 
 export const WAD = new BigNumber('1e18');
