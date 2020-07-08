@@ -3,14 +3,17 @@ set -e
 
 CWD=`dirname $0`
 SOURCE=${1:-$CWD/../node_modules/@makerdao/testchain}
+
+SCD_ABIS=$SOURCE/out
 SCD_ADDRESSES=$SOURCE/out/addresses.json
+MCD_ABIS=$SOURCE/out/mcd
 MCD_ADDRESSES=$SOURCE/out/addresses-mcd.json
 
-function jq_inplace {
-  TMP=$(mktemp)
-  jq "$1" > $TMP && mv $TMP "$2"
-}
-
+# $1: Contract name and ABI filename as a tuple, e.g. "GOV","DSToken"
+# $2: Contract addresses from testchain source (SCD or MCD, defined above)
+# $3: Contract ABIs from testchain source (SCD or MCD, defined above)
+# $4: Addresses file in target plugin
+# $5 (optional): Contract version to be appended to the name
 function set_address_and_abi {
   IFS=',' read NAME ABI <<< "${1}"
   ADDRESS=`jq ".$NAME" "$2"`
@@ -22,6 +25,11 @@ function set_address_and_abi {
   fi
 
   cat $4 | jq_inplace ".$NAME=$ADDRESS" $4
+}
+
+function jq_inplace {
+  TMP=$(mktemp)
+  jq "$1" > $TMP && mv $TMP "$2"
 }
 
 function add_prefix {
