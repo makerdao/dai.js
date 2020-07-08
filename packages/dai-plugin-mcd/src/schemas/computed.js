@@ -53,7 +53,8 @@ import {
   ADAPTER_BALANCE,
   COLLATERAL_DEBT,
   COLLATERAL_TYPE_COLLATERALIZATION,
-  COLLATERAL_TYPE_DATA
+  COLLATERAL_TYPE_DATA,
+  COLLATERAL_DEBT_AVAILABLE
 } from './_constants';
 import { validateAddress, validateVaultId } from './_validators';
 
@@ -256,7 +257,8 @@ export const collateralTypeData = {
       [LIQUIDATION_PENALTY, collateralTypeName],
       [LIQUIDATION_RATIO, collateralTypeName],
       [PRICE_WITH_SAFETY_MARGIN, collateralTypeName],
-      [DEBT_FLOOR, collateralTypeName]
+      [DEBT_FLOOR, collateralTypeName],
+      [COLLATERAL_DEBT_AVAILABLE, collateralTypeName]
     ],
     computed: (
       collateralTypePrice,
@@ -264,7 +266,8 @@ export const collateralTypeData = {
       liquidationPenalty,
       liquidationRatio,
       priceWithSafetyMargin,
-      debtFloor
+      debtFloor,
+      collateralDebtAvailable
     ) => ({
       symbol: collateralTypeName,
       collateralTypePrice,
@@ -273,6 +276,7 @@ export const collateralTypeData = {
       liquidationPenalty,
       priceWithSafetyMargin,
       debtFloor,
+      collateralDebtAvailable,
       calculateCollateralizationRatio(collateralAmount, debtValue) {
         return calcCollateralizationRatio(
           this.collateralTypePrice.times(collateralAmount),
@@ -329,7 +333,8 @@ export const vault = {
       [LIQUIDATION_PENALTY, [VAULT_TYPE, id]],
       [ANNUAL_STABILITY_FEE, [VAULT_TYPE, id]],
       [DEBT_FLOOR, [VAULT_TYPE, id]],
-      [MIN_SAFE_COLLATERAL_AMOUNT, id]
+      [MIN_SAFE_COLLATERAL_AMOUNT, id],
+      [COLLATERAL_DEBT_AVAILABLE, [VAULT_TYPE, id]]
     ],
     computed: (
       vaultType,
@@ -352,7 +357,8 @@ export const vault = {
       liquidationPenalty,
       annualStabilityFee,
       debtFloor,
-      minSafeCollateralAmount
+      minSafeCollateralAmount,
+      collateralDebtAvailable
     ) => ({
       id: parseInt(id),
       vaultType,
@@ -376,6 +382,7 @@ export const vault = {
       annualStabilityFee,
       debtFloor,
       minSafeCollateralAmount,
+      collateralDebtAvailable,
       calculateLiquidationPrice({
         collateralAmount = this.collateralAmount,
         debtValue = this.debtValue,
@@ -549,6 +556,22 @@ export const collateralDebtCeilings = {
   })
 };
 
+export const collateralDebtAvailable = {
+  generate: collateralTypeName => ({
+    dependencies: [
+      [COLLATERAL_DEBT, collateralTypeName],
+      [DEBT_CEILING, collateralTypeName]
+    ],
+    computed: (collateralDebt, debtCeiling) => {
+      collateralDebt = collateralDebt
+        .toBigNumber()
+        .decimalPlaces(18, BigNumber.ROUND_DOWN);
+
+      return debtCeiling.minus(collateralDebt);
+    }
+  })
+};
+
 export const collateralTypeCollateralization = {
   generate: (collateralTypeName, percentage = true) => ({
     dependencies: [
@@ -654,5 +677,6 @@ export default {
   proxyOwner,
   collateralTypeData,
   collateralTypesData,
-  collateralDebtCeilings
+  collateralDebtCeilings,
+  collateralDebtAvailable
 };
