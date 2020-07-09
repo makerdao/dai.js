@@ -1,6 +1,5 @@
 import assert from 'assert';
 import { stringToBytes } from './utils';
-import tracksTransactions from './utils/tracksTransactions';
 
 export default class PsmType {
   constructor(
@@ -19,11 +18,17 @@ export default class PsmType {
     if (options.prefetch) this.prefetch();
   }
 
-  get feeIn() {}
+  get feeIn() {
+    return null;
+  }
 
-  get feeOut() {}
+  get feeOut() {
+    return null;
+  }
 
-  prefetch() {}
+  prefetch() {
+    return null;
+  }
 
   async reset() {
     this._prefetchPromise = null;
