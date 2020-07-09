@@ -6,13 +6,13 @@ import * as math from './math';
 
 export default class CdpType {
   constructor(
-    cdpTypeService,
+    typeService,
     { currency, ilk, decimals },
     options = { prefetch: true }
   ) {
     assert(currency && ilk, 'currency and ilk are required');
-    this._cdpTypeService = cdpTypeService;
-    this._systemData = cdpTypeService.get(ServiceRoles.SYSTEM_DATA);
+    this._cdpTypeService = typeService;
+    this._systemData = typeService.get(ServiceRoles.SYSTEM_DATA);
     this._web3Service = this._systemData.get('smartContract').get('web3');
     this.currency = currency;
     this.decimals = decimals || 18;
@@ -90,7 +90,7 @@ export default class CdpType {
     return this._prefetchPromise;
   }
 
-  async reset() {
+  reset() {
     this._prefetchPromise = null;
     this.cache = {};
   }

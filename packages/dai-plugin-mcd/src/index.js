@@ -12,7 +12,7 @@ import SavingsService from './SavingsService';
 import CdpTypeService from './CdpTypeService';
 import AuctionService from './AuctionService';
 import SystemDataService from './SystemDataService';
-import PsmService from './PsmService';
+import PsmTypeService from './PsmTypeService';
 
 import { ServiceRoles as ServiceRoles_ } from './constants';
 import BigNumber from 'bignumber.js';
@@ -167,7 +167,7 @@ export const McdPlugin = {
       [SAVINGS]: SavingsService,
       [AUCTION]: AuctionService,
       [SYSTEM_DATA]: SystemDataService,
-      [PSM_TYPE]: [PsmService, { psmTypes, prefetch }]
+      [PSM_TYPE]: [PsmTypeService, { psmTypes, prefetch }]
     };
   }
 };
