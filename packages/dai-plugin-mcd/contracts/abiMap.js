@@ -42,5 +42,6 @@ module.exports = {
   MIGRATION_PROXY_ACTIONS: require('./abis/MigrationProxyActions.json'),
   USDC: require('./abis/USDC.json'),
   WBTC: require('./abis/WBTC.json'),
-  TUSD: require('./abis/DSToken.json')
+  TUSD: require('./abis/DSToken.json'),
+  'PSM_*': require('./abis/Psm.json')
 };

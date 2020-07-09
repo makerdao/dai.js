@@ -1,5 +1,6 @@
 import assert from 'assert';
 import CdpType from './CdpType';
+import { ServiceRoles } from './constants';
 
 export default class PsmType {
   constructor(
@@ -10,6 +11,9 @@ export default class PsmType {
     assert(currency && ilk, 'currency and ilk are required');
 
     this._psmTypeService = psmTypeService;
+    this._smartContractService = this._psmTypeService
+      .get(ServiceRoles.SYSTEM_DATA)
+      .get('smartContract');
     this._cdpType = new CdpType(
       this._psmTypeService,
       { currency, ilk, decimals },
@@ -23,11 +27,11 @@ export default class PsmType {
   }
 
   get feeIn() {
-    return null;
+    return this.psm.feeIn();
   }
 
   get feeOut() {
-    return null;
+    return this.psm.feeOut();
   }
 
   async prefetch() {
@@ -52,5 +56,9 @@ export default class PsmType {
   _getCached(name) {
     assert(this.cache()[name], `${name} is not cached`);
     return this.cache()[name];
+  }
+
+  get psm() {
+    return this._smartContractService.getContract(this.ilk.replace(/-/g, '_'));
   }
 }
