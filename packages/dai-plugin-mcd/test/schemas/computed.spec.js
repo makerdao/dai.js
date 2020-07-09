@@ -34,7 +34,8 @@ import {
   PROXY_OWNER,
   COLLATERAL_TYPE_DATA,
   COLLATERAL_TYPES_DATA,
-  COLLATERAL_DEBT_CEILINGS
+  COLLATERAL_DEBT_CEILINGS,
+  COLLATERAL_DEBT_AVAILABLE
 } from '../../src/schemas';
 
 import { vatIlks, vatUrns, vatGem } from '../../src/schemas/vat';
@@ -320,10 +321,11 @@ test(VAULT, async () => {
   const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedDebtFloor = BigNumber('0');
+  const expectedCollateralDebtAvailable = DAI(99999);
 
   const vault = await maker.latest(VAULT, cdpId);
 
-  expect(Object.keys(vault).length).toBe(24);
+  expect(Object.keys(vault).length).toBe(25);
 
   expect(vault.id).toEqual(cdpId);
   expect(vault.vaultType).toEqual(expectedVaultType);
@@ -368,6 +370,9 @@ test(VAULT, async () => {
   expect(vault.liquidationPenalty).toEqual(expectedLiqPenalty);
   expect(vault.annualStabilityFee.toNumber()).toEqual(expectedAnnStabilityFee);
   expect(vault.debtFloor).toEqual(expectedDebtFloor);
+  expect(vault.collateralDebtAvailable.toString()).toEqual(
+    expectedCollateralDebtAvailable.toString()
+  );
 });
 
 test(`${VAULT} with non-existent id`, async () => {
@@ -491,10 +496,11 @@ test(COLLATERAL_TYPE_DATA, async () => {
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedPriceWithSafetyMargin = BigNumber('120');
   const expectedDebtFloor = BigNumber('0');
+  const expectedCollateralDebtAvailable = DAI(99999);
 
   const colData = await maker.latest(COLLATERAL_TYPE_DATA, collateralType);
 
-  expect(Object.keys(colData).length).toBe(10);
+  expect(Object.keys(colData).length).toBe(11);
 
   expect(colData.symbol).toEqual(collateralType);
   expect(colData.collateralTypePrice.toString()).toEqual(
@@ -509,6 +515,10 @@ test(COLLATERAL_TYPE_DATA, async () => {
   );
   expect(colData.priceWithSafetyMargin).toEqual(expectedPriceWithSafetyMargin);
   expect(colData.debtFloor).toEqual(expectedDebtFloor);
+
+  expect(colData.collateralDebtAvailable.toString()).toEqual(
+    expectedCollateralDebtAvailable.toString()
+  );
 });
 
 test(COLLATERAL_TYPES_DATA, async () => {
@@ -520,8 +530,8 @@ test(COLLATERAL_TYPES_DATA, async () => {
   const expectedEth = await maker.latest(COLLATERAL_TYPE_DATA, 'ETH-A');
   const expectedBat = await maker.latest(COLLATERAL_TYPE_DATA, 'BAT-A');
 
-  expect(Object.entries(ethAData).length).toBe(10);
-  expect(Object.entries(batAData).length).toBe(10);
+  expect(Object.entries(ethAData).length).toBe(11);
+  expect(Object.entries(batAData).length).toBe(11);
 
   expect(JSON.stringify(ethAData)).toEqual(JSON.stringify(expectedEth));
   expect(JSON.stringify(batAData)).toEqual(JSON.stringify(expectedBat));
@@ -534,4 +544,13 @@ test(COLLATERAL_DEBT_CEILINGS, async () => {
   ]);
   expect(debtCeilings['ETH-A'].toNumber()).toEqual(100000);
   expect(debtCeilings['BAT-A'].toNumber()).toEqual(5000);
+});
+
+test(COLLATERAL_DEBT_AVAILABLE, async () => {
+  const ethACollateralDebt = await maker.latest(
+    COLLATERAL_DEBT_AVAILABLE,
+    'ETH-A'
+  );
+
+  expect(ethACollateralDebt.toNumber()).toEqual(99999);
 });

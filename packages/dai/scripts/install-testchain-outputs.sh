@@ -2,12 +2,15 @@
 set -e
 
 CONTRACTS=$DAI/contracts
+PLUGIN_ADDRESSES=$CONTRACTS/addresses/testnet.json
 
-for file in $SOURCE/out/*.abi; do
+for file in $SCD_ABIS/*.abi; do
   cp $file $CONTRACTS/abis/$(basename $file .abi).json
 done
 
-cp $SOURCE/out/addresses.json $CONTRACTS/addresses/testnet.json
-MULTICALL=$(cat $SOURCE/out/addresses-mcd.json | jq '.MULTICALL')
+cp $SCD_ADDRESSES $PLUGIN_ADDRESSES
 
-cat $CONTRACTS/addresses/testnet.json | jq_inplace ".MULTICALL = $(echo $MULTICALL)" $CONTRACTS/addresses/testnet.json
+MULTICALL=`jq ".MULTICALL" "$MCD_ADDRESSES"`
+cat $PLUGIN_ADDRESSES | jq_inplace ".MULTICALL = $(echo $MULTICALL)" $PLUGIN_ADDRESSES
+
+add_prefix $PLUGIN_ADDRESSES
