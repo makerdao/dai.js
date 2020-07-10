@@ -97,3 +97,12 @@ export const TOKEN_PRICE_NEXT_UPDATE = 'tokenPriceNextUpdate';
 export const TOKEN_PRICES_NEXT_UPDATES = 'tokenPricesNextUpdates';
 export const TOKEN_PRICE_UPDATE_INTERVAL = 'tokenPriceUpdateInterval';
 export const TOKEN_PRICE_LAST_UPDATE = 'tokenPriceLastUpdate';
+
+// psm
+export const PSM_FEE_IN = 'psmFeeIn';
+export const PSM_FEE_OUT = 'psmFeeOut';
+export const PSM_FEES = 'psmFees';
+export const PSM_ALLOWANCE = 'psmAllowance';
+export const PSM_ALLOWANCES = 'psmAllowances';
+export const PSM_TYPES_INFO = 'psmTypesInfo';
+export const PSM_TYPE_COLLATERAL_AMOUNT = 'psmTypeCollateralAmount';

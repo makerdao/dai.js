@@ -32,6 +32,7 @@ const {
 // if an exact match is not found, prefix-match against keys ending in *, e.g.
 // MCD_JOIN_ETH_B matches MCD_JOIN_*
 // this implementation assumes that all contracts in kovan.json are also in testnet.json
+
 let addContracts = reduce(
   testnetAddresses,
   (result, testnetAddress, name) => {
@@ -93,7 +94,7 @@ export const defaultCdpTypes = [
 ];
 
 export const defaultPsmTypes = [
-  { currency: USDC, ilk: 'PSM-USDC-A', decimals: 6 }
+  { currency: USDC, ilk: 'PSM-USDC-A', decimals: 6, pair: DAI }
 ];
 
 export const SAI = createCurrency('SAI');
