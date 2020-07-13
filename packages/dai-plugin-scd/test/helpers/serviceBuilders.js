@@ -22,8 +22,7 @@ export const websocketProviderConfig = {
       url: 'ws://localhost:2000'
     },
     pollingInterval: 50
-  },
-  log: false
+  }
 };
 
 export const httpProviderConfig = {
@@ -33,8 +32,7 @@ export const httpProviderConfig = {
       url: 'http://localhost:2000'
     },
     pollingInterval: 50
-  },
-  log: false
+  }
 };
 
 export const defaultConfig = process.env.TEST_WS

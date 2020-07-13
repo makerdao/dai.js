@@ -9,7 +9,7 @@ const log = debug('dai:TransactionManager');
 
 export default class TransactionManager extends PublicService {
   constructor(name = 'transactionManager') {
-    super(name, ['web3', 'log', 'nonce', 'proxy', 'gas']);
+    super(name, ['web3', 'nonce', 'proxy', 'gas']);
     this._newTxListeners = [];
     this._tracker = new Tracker();
   }

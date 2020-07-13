@@ -89,7 +89,6 @@ export const setupMakerOld = async network => {
     plugins: [[govPlugin, { network }]],
     url,
     accounts,
-    log: false,
     web3: {
       provider: {
         infuraProjectId

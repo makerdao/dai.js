@@ -23,8 +23,7 @@ beforeAll(async () => {
     },
     multicall: {
       debounceTime: 1
-    },
-    log: false
+    }
   });
   await maker.authenticate();
   address = TestAccountProvider.nextAddress();

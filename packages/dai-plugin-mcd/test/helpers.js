@@ -12,7 +12,6 @@ export async function mcdMaker({
   preset = 'test',
   network = 'testnet',
   prefetch = true,
-  log = false,
   addressOverrides,
   cdpTypes,
   ...settings
@@ -22,7 +21,6 @@ export async function mcdMaker({
     web3: {
       pollingInterval: 100
     },
-    log,
     ...settings
   });
   return maker;

@@ -5,7 +5,7 @@ process and/or package.json, since the other Jest tests run
 against the original source.*/
 
 async function createMaker() {
-  return Maker.create('test', { log: false });
+  return Maker.create('test');
 }
 
 test('can get a service from maker', async () => {

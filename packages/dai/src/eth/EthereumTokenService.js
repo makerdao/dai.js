@@ -11,7 +11,7 @@ import assert from 'assert';
 
 export default class EthereumTokenService extends PrivateService {
   constructor(name = 'token') {
-    super(name, ['smartContract', 'web3', 'log', 'gas', 'transactionManager']);
+    super(name, ['smartContract', 'web3', 'gas', 'transactionManager']);
     this._tokens = tokens;
     this._addedTokens = {};
   }

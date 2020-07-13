@@ -109,8 +109,7 @@ describe('execute', () => {
 
   beforeAll(async () => {
     maker = await Maker.create('test', {
-      web3: { confirmedBlockCount: '0' },
-      log: false
+      web3: { confirmedBlockCount: '0' }
     });
     await maker.authenticate();
     const contractService = maker.service('smartContract');

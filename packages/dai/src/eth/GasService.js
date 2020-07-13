@@ -7,7 +7,7 @@ export const API_URL =
 
 export default class GasService extends PublicService {
   constructor(name = 'gas') {
-    super(name, ['web3', 'log']);
+    super(name, ['web3']);
     this._fallback = 4000000;
     this._multiplier = 1.55;
     this._transactionSpeed = 'fast';

@@ -66,8 +66,7 @@ async function main() {
     const { config, fromBlock } = currentEnv;
     maker = await Maker.create('http', {
       ...config,
-      plugins: [ScdPlugin],
-      log: false
+      plugins: [ScdPlugin]
     });
 
     const r = repl.start();

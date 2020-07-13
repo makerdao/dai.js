@@ -9,7 +9,7 @@ import assert from 'assert';
 
 export default class SmartContractService extends PrivateService {
   constructor(name = 'smartContract') {
-    super(name, ['web3', 'log', 'transactionManager']);
+    super(name, ['web3', 'transactionManager']);
 
     // aliases
     this.getContractByName = this.getContract;

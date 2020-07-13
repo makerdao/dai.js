@@ -14,7 +14,6 @@ import ScdPlugin from '@makerdao/dai-plugin-scd';
 async function scdMaker({
   preset = 'test',
   network = 'testnet',
-  log = false,
   addressOverrides,
   ...settings
 } = {}) {
@@ -23,7 +22,6 @@ async function scdMaker({
     web3: {
       pollingInterval: 100
     },
-    log,
     ...settings
   });
   await maker.authenticate();
@@ -57,13 +55,10 @@ beforeEach(async () => {
   services = await buildTestServices();
 });
 
-test('reuse the same web3 and log service in test services', () => {
+test('reuse the same web3 service in test services', () => {
   expect(services.contract.manager().isConnected()).toBe(true);
   expect(services.txMgr.manager().isConnected()).toBe(true);
   expect(services.txMgr.get('web3')).toBe(services.contract.get('web3'));
-  expect(services.txMgr.get('log')).toBe(
-    services.contract.get('web3').get('log')
-  );
   expect(services.currentAddress).toMatch(/^0x[0-9A-Fa-f]+$/);
 });
 
