@@ -1,61 +1,7 @@
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
-import { captureConsole } from '../../src/utils';
 import { buildTestService as buildTestServiceCore } from '../helpers/serviceBuilders';
 import { infuraProjectId } from '../helpers/serviceBuilders';
-
-function buildDisconnectingService(disconnectAfter = 25) {
-  const service = buildTestService(null, disconnectAfter + 25);
-
-  service.manager().onConnected(() => {
-    service
-      .get('timer')
-      .createTimer('disconnect', disconnectAfter, false, () => {
-        service._web3.eth.net.getId = () => {
-          throw new Error('fake disconnection error');
-        };
-      });
-  });
-
-  return service;
-}
-
-function buildNetworkChangingService(changeNetworkAfter = 25) {
-  const service = buildTestService(null, changeNetworkAfter + 25);
-  service.manager().onConnected(() => {
-    service
-      .get('timer')
-      .createTimer('changeNetwork', changeNetworkAfter, false, () => {
-        service._info.network = cb => cb(undefined, 999); //fake network id
-      });
-  });
-  return service;
-}
-
-function buildDeauthenticatingService(deauthenticateAfter = 25) {
-  const service = buildTestService(null, deauthenticateAfter + 25);
-
-  service.manager().onAuthenticated(() => {
-    service
-      .get('timer')
-      .createTimer('deauthenticate', deauthenticateAfter, false, () => {
-        service._web3.eth.getAccounts = cb => cb(undefined, []);
-      });
-  });
-  return service;
-}
-
-function buildAccountChangingService(changeAccountAfter = 25) {
-  const service = buildTestService(null, changeAccountAfter + 25);
-  service.manager().onAuthenticated(() => {
-    service
-      .get('timer')
-      .createTimer('changeAccount', changeAccountAfter, false, () => {
-        service._web3.eth.getAccounts = cb => cb(undefined, ['0x123456789']); //fake account
-      });
-  });
-  return service;
-}
 
 function buildTestService(key, statusTimerDelay = 5000) {
   const config = {
@@ -138,78 +84,6 @@ test('be authenticated and know default address when private key passed in', don
       );
       done();
     });
-});
-
-test('determine correct connection status', async done => {
-  const service = buildTestService();
-
-  expect(await service._isStillConnected()).toBe(false);
-  await service.manager().connect();
-  expect(await service._isStillConnected()).toBe(true);
-
-  service.manager().onDisconnected(async () => {
-    expect(await service._isStillConnected()).toBe(false);
-    done();
-  });
-
-  service.get('timer').createTimer('disconnect', 25, false, () => {
-    service._web3.eth.net.getId = () => {
-      throw new Error('fake disconnection error');
-    };
-  });
-});
-
-test('handle automatic disconnect', done => {
-  captureConsole(() => {
-    const service = buildDisconnectingService();
-
-    service.manager().onDisconnected(() => {
-      expect(service.manager().isConnected()).toBe(false);
-      done();
-    });
-
-    service.manager().connect();
-  });
-});
-
-test('handle automatic change of network as a disconnect', done => {
-  const service = buildNetworkChangingService();
-  service.manager().onDisconnected(() => {
-    expect(service.manager().isConnected()).toBe(false);
-    done();
-  });
-  service.manager().connect();
-});
-
-//this test needs to be commented out in order to push it to git and have it pass the tests
-//need to run this test individually and then disconnect the wifi for it to pass
-/*
-test('handle a manual disconnect', (done) => {
-  const service = Web3Service.buildRemoteService();
-  service.manager().onDisconnected(()=>{
-    expect(service.manager().isConnected()).toBe(false);
-    done();
-  });
-  service.manager().connect();
-});
-*/
-
-test('handle automatic deauthentication', async done => {
-  const service = buildDeauthenticatingService();
-  service.manager().onDeauthenticated(() => {
-    expect(service.manager().isAuthenticated()).toBe(false);
-    done();
-  });
-  await service.manager().authenticate();
-});
-
-test('handle automatic change of account as a deauthenticate', async done => {
-  const service = buildAccountChangingService();
-  service.manager().onDeauthenticated(() => {
-    expect(service.manager().isAuthenticated()).toBe(false);
-    done();
-  });
-  await service.manager().authenticate();
 });
 
 test('connect to ganache testnet with account 0x16fb9...', done => {

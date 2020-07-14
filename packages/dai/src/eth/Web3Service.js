@@ -3,15 +3,10 @@ import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import promiseProps from 'promise-props';
 import Web3 from 'web3';
-import ProviderType from './web3/ProviderType';
 import makeSigner from './web3/ShimEthersSigner';
 import last from 'lodash/last';
 import debug from 'debug';
 const log = debug('dai:Web3Service');
-
-const TIMER_CONNECTION = 'web3CheckConnectionStatus';
-const TIMER_AUTHENTICATION = 'web3CheckAuthenticationStatus';
-const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
@@ -19,7 +14,6 @@ export default class Web3Service extends PrivateService {
 
     this._blockListeners = {};
     this._info = {};
-    this._statusTimerDelay = TIMER_DEFAULT_DELAY;
     Web3ServiceList.push(this);
   }
 
@@ -50,12 +44,6 @@ export default class Web3Service extends PrivateService {
 
   transactionSettings() {
     return this._transactionSettings;
-  }
-
-  usingWebsockets() {
-    return (
-      this._serviceManager._settings.provider.type === ProviderType.WEBSOCKET
-    );
   }
 
   confirmedBlockCount() {
@@ -99,10 +87,9 @@ export default class Web3Service extends PrivateService {
       }
     });
 
-    this._setStatusTimerDelay(settings.statusTimerDelay);
-    this._installCleanUpHooks();
+    this.manager().onDisconnected(() => this._stopListeningForNewBlocks());
     this._defaultEmitter.emit('web3/INITIALIZED', {
-      provider: { ...settings.provider }
+      provider: settings.provider
     });
     this._transactionSettings = settings.transactionSettings;
     this._confirmedBlockCount = settings.confirmedBlockCount || 5;
@@ -127,8 +114,7 @@ export default class Web3Service extends PrivateService {
     this._updateBlockNumber(this._currentBlock);
     this._listenForNewBlocks();
 
-    this._installDisconnectCheck();
-    this._initEventPolling();
+    this.onNewBlock(this.get('event').ping);
     this._defaultEmitter.emit('web3/CONNECTED', {
       ...this._info
     });
@@ -141,7 +127,6 @@ export default class Web3Service extends PrivateService {
     this._defaultEmitter.emit('web3/AUTHENTICATED', {
       account: this.currentAddress()
     });
-    this._installDeauthenticationCheck();
   }
 
   /*
@@ -183,6 +168,33 @@ export default class Web3Service extends PrivateService {
     return this._currentBlock;
   }
 
+  onNewBlock(callback) {
+    if (!this._blockListeners['*']) {
+      this._blockListeners['*'] = [];
+    }
+
+    this._blockListeners['*'].push(callback);
+  }
+
+  async waitForBlockNumber(blockNumber) {
+    if (blockNumber < this._currentBlock) {
+      console.error('Attempted to wait for past block ' + blockNumber);
+      return;
+    }
+
+    if (blockNumber === this._currentBlock) {
+      return Promise.resolve(blockNumber);
+    }
+
+    if (!this._blockListeners[blockNumber]) {
+      this._blockListeners[blockNumber] = [];
+    }
+
+    return new Promise(resolve => {
+      this._blockListeners[blockNumber].push(resolve);
+    });
+  }
+
   _listenForNewBlocks() {
     if (this.networkName !== 'test') {
       log('Using newBlockHeaders subscription for block detection');
@@ -211,33 +223,6 @@ export default class Web3Service extends PrivateService {
     }
   }
 
-  onNewBlock(callback) {
-    if (!this._blockListeners['*']) {
-      this._blockListeners['*'] = [];
-    }
-
-    this._blockListeners['*'].push(callback);
-  }
-
-  async waitForBlockNumber(blockNumber) {
-    if (blockNumber < this._currentBlock) {
-      console.error('Attempted to wait for past block ' + blockNumber);
-      return;
-    }
-
-    if (blockNumber === this._currentBlock) {
-      return Promise.resolve(blockNumber);
-    }
-
-    if (!this._blockListeners[blockNumber]) {
-      this._blockListeners[blockNumber] = [];
-    }
-
-    return new Promise(resolve => {
-      this._blockListeners[blockNumber].push(resolve);
-    });
-  }
-
   _updateBlockNumber(blockNumber) {
     log(`Latest block: ${blockNumber}`);
 
@@ -252,79 +237,13 @@ export default class Web3Service extends PrivateService {
     }
   }
 
-  _initEventPolling() {
-    this.onNewBlock(this.get('event').ping);
-  }
-
-  _removeBlockUpdates() {
-    if (this.usingWebsockets()) {
-      this._newBlocksSubscription.unsubscribe((err, success) => {
-        if (!success) throw new Error(err);
+  _stopListeningForNewBlocks() {
+    if (this._newBlocksSubscription) {
+      this._newBlocksSubscription.unsubscribe(err => {
+        if (err) throw err;
       });
-    } else {
+    } else if (this._updateBlocksInterval) {
       clearInterval(this._updateBlocksInterval);
     }
-  }
-
-  _installCleanUpHooks() {
-    this.manager().onDisconnected(() => {
-      this._removeBlockUpdates();
-      this.get('timer').disposeTimer(TIMER_CONNECTION);
-    });
-
-    this.manager().onDeauthenticated(() => {
-      this.get('timer').disposeTimer(TIMER_AUTHENTICATION);
-    });
-  }
-
-  _setStatusTimerDelay(delay) {
-    this._statusTimerDelay = delay ? parseInt(delay) : TIMER_DEFAULT_DELAY;
-  }
-
-  _installDisconnectCheck() {
-    this.get('timer').createTimer(
-      TIMER_CONNECTION,
-      this._statusTimerDelay,
-      true,
-      () =>
-        this._isStillConnected().then(connected => {
-          if (!connected) {
-            this._defaultEmitter.emit('web3/DISCONNECTED');
-            this.disconnect();
-          }
-        })
-    );
-  }
-
-  _isStillConnected() {
-    // only determine network change as disconnect if service is connected
-    if (!this.manager().isConnected()) {
-      return false;
-    }
-    return promisify(this._web3.eth.net.getId)()
-      .then(network => network === this._info['network'])
-      .catch(() => false);
-  }
-
-  _installDeauthenticationCheck() {
-    this.get('timer').createTimer(
-      TIMER_AUTHENTICATION,
-      this._statusTimerDelay, //what should this number be?
-      true,
-      () =>
-        this._isStillAuthenticated().then(authenticated => {
-          if (!authenticated) {
-            this._defaultEmitter.emit('web3/DEAUTHENTICATED');
-            this.deauthenticate();
-          }
-        })
-    );
-  }
-
-  async _isStillAuthenticated() {
-    if (this.get('accounts').hasNonProviderAccount())
-      return this._isStillConnected();
-    const account = (await promisify(this._web3.eth.getAccounts)())[0];
-    return account === this.currentAddress();
   }
 }
