@@ -2,7 +2,6 @@ import { ServiceProvider } from '@makerdao/services-core';
 import AccountsService from '../eth/AccountsService';
 import AllowanceService from '../eth/AllowanceService';
 import CacheService from '../utils/CacheService';
-import ConsoleLogger from '../utils/loggers/ConsoleLogger';
 import DSProxyService from '../eth/DSProxyService';
 import EthereumTokenService from '../eth/EthereumTokenService';
 import EventService from '../utils/events/EventService';
@@ -10,7 +9,6 @@ import GasService from '../eth/GasService';
 import MulticallService from '../eth/MulticallService';
 import NonceService from '../eth/NonceService';
 import NullEventService from '../utils/events/NullEventService';
-import NullLogger from '../utils/loggers/NullLogger';
 import SmartContractService from '../eth/SmartContractService';
 import TimerService from '../utils/TimerService';
 import TransactionManager from '../eth/TransactionManager';
@@ -24,7 +22,6 @@ export const resolver = {
     cache: 'CacheService',
     event: 'EventService',
     gas: 'GasService',
-    log: 'ConsoleLogger',
     multicall: 'MulticallService',
     nonce: 'NonceService',
     proxy: 'DSProxyService',
@@ -35,8 +32,7 @@ export const resolver = {
     web3: 'Web3Service'
   },
   disabled: {
-    event: 'NullEventService',
-    log: 'NullLogger'
+    event: 'NullEventService'
   }
 };
 
@@ -57,7 +53,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         AccountsService,
         AllowanceService,
         CacheService,
-        ConsoleLogger,
         DSProxyService,
         EthereumTokenService,
         EventService,
@@ -65,7 +60,6 @@ export default class DefaultServiceProvider extends ServiceProvider {
         MulticallService,
         NonceService,
         NullEventService,
-        NullLogger,
         SmartContractService,
         TimerService,
         TransactionManager,

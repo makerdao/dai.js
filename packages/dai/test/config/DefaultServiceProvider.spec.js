@@ -33,10 +33,7 @@ test('add web3 config into accounts config', () => {
 });
 
 test('create a container from a service configuration', async () => {
-  const container = new DefaultServiceProvider({
-    ...config,
-    log: false
-  }).buildContainer();
+  const container = new DefaultServiceProvider(config).buildContainer();
   expect(
     Object.keys(container._services).indexOf('smartContract')
   ).toBeGreaterThan(-1);

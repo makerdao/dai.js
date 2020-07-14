@@ -3,7 +3,7 @@ import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider'
 const Maker2 = require('../src/index');
 
 async function createMaker(privateKey) {
-  return await Maker.create('test', { privateKey, log: false });
+  return await Maker.create('test', { privateKey });
 }
 
 test('create without any options', async () => {
@@ -103,8 +103,7 @@ test('smartContract.addressOverrides can override plugins', async () => {
     ],
     smartContract: {
       addressOverrides: { FOO: '0xfoo2' }
-    },
-    log: false
+    }
   });
 
   // addressOverrides should be able to modify contracts added by plugins

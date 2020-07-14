@@ -64,7 +64,6 @@ export async function migrationMaker({
       [ScdPlugin, { addressOverrides, network }],
       [MigrationPlugin, { addressOverrides, network }]
     ],
-    log: false,
     web3: {
       pollingInterval: 50
     },

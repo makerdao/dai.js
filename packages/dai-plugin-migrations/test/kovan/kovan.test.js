@@ -7,7 +7,6 @@ async function mcdMaker({
   preset = 'kovan',
   network = 'kovan',
   prefetch = true,
-  log = true,
   addressOverrides,
   ...settings
 } = {}) {
@@ -25,7 +24,6 @@ async function mcdMaker({
         infuraProjectId: 'c3f0f26a4c1742e0949d8eedfc47be67'
       }
     },
-    log,
     addressOverrides: { MCD_JOIN_ETH_B: '0x0', MCD_JOIN_ZRX_A: '0x0' },
     ...settings
   });

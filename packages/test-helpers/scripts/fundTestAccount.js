@@ -10,10 +10,7 @@ import uniq from 'lodash/uniq';
 const amount = 5;
 
 async function main() {
-  const maker = await Maker.create('test', {
-    plugins: [McdPlugin],
-    log: false
-  });
+  const maker = await Maker.create('test', { plugins: [McdPlugin] });
   const address = process.argv[process.argv.length - 1];
   if (!isAddress(address)) {
     console.log('Pass a valid address as the last argument.');

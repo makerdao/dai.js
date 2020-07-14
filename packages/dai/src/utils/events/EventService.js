@@ -1,13 +1,15 @@
 import { PrivateService } from '@makerdao/services-core';
 import { slug } from '../index';
 import EventEmitter from './EventEmitter';
+import debug from 'debug';
+const log = debug('dai:EventService');
 
 export default class EventService extends PrivateService {
   /**
    * @param {string} name
    */
   constructor(name = 'event') {
-    super(name, ['log']);
+    super(name, []);
 
     this._block = null;
     // all of our emitters – we can have many of these
@@ -65,6 +67,6 @@ export default class EventService extends PrivateService {
   }
 
   _logError(name, msg) {
-    this.get('log').error(`Problem encountered in emitter ${name} -> ${msg}`);
+    log(`Problem encountered in emitter ${name} -> ${msg}`);
   }
 }

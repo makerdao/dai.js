@@ -11,16 +11,6 @@ test('throws an error when requesting a non-existing preset', () => {
   );
 });
 
-test('can take an options object in addition to a preset name', () => {
-  const config = ConfigFactory.create('test', { log: false });
-  expect(config.log).toEqual(false);
-});
-
-test('can take an options object as first argument', () => {
-  const config = ConfigFactory.create({ preset: 'test', log: false });
-  expect(config.log).toEqual(false);
-});
-
 test('it handles url, privateKey, provider, and web3 options', () => {
   const config = ConfigFactory.create(
     'http',
@@ -82,9 +72,9 @@ test('it passes service options for an omitted service', () => {
 });
 
 test('it preserves the preset service name', () => {
-  const preset = { log: 'BunyanLogger' };
-  const config = ConfigFactory.create({ preset, log: { verbose: true } });
-  expect(config.log).toEqual(['BunyanLogger', { verbose: true }]);
+  const preset = { proxy: 'AltProxyService' };
+  const config = ConfigFactory.create({ preset, proxy: { foo: true } });
+  expect(config.proxy).toEqual(['AltProxyService', { foo: true }]);
 });
 
 test('skip unknown service roles', () => {

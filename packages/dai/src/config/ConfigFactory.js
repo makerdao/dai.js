@@ -20,7 +20,6 @@ const serviceRoles = [
   'accounts',
   'allowance',
   'gas',
-  'log',
   'multicall',
   'nonce',
   'proxy',

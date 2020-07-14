@@ -11,8 +11,7 @@ export const resolver = {
     conversion: 'TokenConversionService'
   },
   disabled: {
-    event: 'NullEventService',
-    log: 'NullLogger'
+    event: 'NullEventService'
   }
 };
 

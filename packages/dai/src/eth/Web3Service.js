@@ -15,7 +15,7 @@ const TIMER_DEFAULT_DELAY = 5000;
 
 export default class Web3Service extends PrivateService {
   constructor(name = 'web3') {
-    super(name, ['accounts', 'log', 'timer', 'cache', 'event']);
+    super(name, ['accounts', 'timer', 'cache', 'event']);
 
     this._blockListeners = {};
     this._info = {};
@@ -67,7 +67,7 @@ export default class Web3Service extends PrivateService {
   }
 
   initialize(settings) {
-    this.get('log').info('Web3 is initializing...');
+    log('initializing...');
     this._defaultEmitter = this.get('event');
 
     this._web3 = new Web3();
@@ -110,7 +110,7 @@ export default class Web3Service extends PrivateService {
   }
 
   async connect() {
-    this.get('log').info('Web3 is connecting...');
+    log('connecting...');
 
     this._info = await promiseProps({
       api: this._web3.version,
@@ -132,11 +132,11 @@ export default class Web3Service extends PrivateService {
     this._defaultEmitter.emit('web3/CONNECTED', {
       ...this._info
     });
-    this.get('log').info('Web3 version: ', this._info.api);
+    log(`Web3 version: ${this._info.api}`);
   }
 
   async authenticate() {
-    this.get('log').info('Web3 is authenticating...');
+    log('authenticating...');
 
     this._defaultEmitter.emit('web3/AUTHENTICATED', {
       account: this.currentAddress()

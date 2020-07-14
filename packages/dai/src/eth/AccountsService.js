@@ -11,12 +11,14 @@ import {
 import { setupEngine } from './accounts/setup';
 import { AccountType } from '../utils/constants';
 import assert from 'assert';
+import debug from 'debug';
+const log = debug('dai:AccountsService');
 
 const sanitizeAccount = pick(['name', 'type', 'address']);
 
 export default class AccountsService extends PublicService {
   constructor(name = 'accounts') {
-    super(name, ['log', 'event']);
+    super(name, ['event']);
     this._accounts = {};
     this._accountFactories = {
       privateKey: privateKeyAccountFactory,
@@ -73,7 +75,7 @@ export default class AccountsService extends PublicService {
     // TODO allow this to silently fail only in situations where it's expected,
     // e.g. when connecting to a read-only provider
     if (!accountData.address) {
-      this.get('log').info(`Not adding account "${name}" (no address found)`);
+      log(`Not adding account "${name}" (no address found)`);
       return;
     }
     accountData.address = accountData.address.toLowerCase();
