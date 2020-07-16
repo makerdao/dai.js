@@ -158,7 +158,7 @@ export default class EthereumCdpService extends PrivateService {
         .currentAddress();
     }
 
-    const api = new QueryApi(this._web3Service().networkId());
+    const api = new QueryApi(this._web3Service().network);
     return api.getCdpIdsForOwner(address);
   }
 

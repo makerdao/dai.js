@@ -1,10 +1,10 @@
 import { PrivateService } from '@makerdao/services-core';
 import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
-import promiseProps from 'promise-props';
 import Web3 from 'web3';
 import makeSigner from './web3/ShimEthersSigner';
 import last from 'lodash/last';
+import assert from 'assert';
 import debug from 'debug';
 const log = debug('dai:Web3Service');
 
@@ -15,18 +15,6 @@ export default class Web3Service extends PrivateService {
     this._blockListeners = {};
     this._info = {};
     Web3ServiceList.push(this);
-  }
-
-  info() {
-    return this._info;
-  }
-
-  networkId() {
-    const result = this.info().network;
-    if (!result) {
-      throw new Error('Cannot resolve network ID. Are you connected?');
-    }
-    return parseInt(result);
   }
 
   currentAddress() {
@@ -99,17 +87,7 @@ export default class Web3Service extends PrivateService {
   async connect() {
     log('connecting...');
 
-    this._info = await promiseProps({
-      api: this._web3.version,
-      node: promisify(this._web3.eth.getNodeInfo)(),
-      network: promisify(this._web3.eth.net.getId)(),
-      ethereum: promisify(this._web3.eth.getProtocolVersion)()
-    });
-
-    if (!this._info.node.includes('MetaMask')) {
-      this._info.whisper = this._web3.shh;
-    }
-
+    this._networkId = parseInt(await promisify(this._web3.eth.net.getId)());
     this._currentBlock = await this._web3.eth.getBlockNumber();
     this._updateBlockNumber(this._currentBlock);
     this._listenForNewBlocks();
@@ -118,7 +96,6 @@ export default class Web3Service extends PrivateService {
     this._defaultEmitter.emit('web3/CONNECTED', {
       ...this._info
     });
-    log(`Web3 version: ${this._info.api}`);
   }
 
   async authenticate() {
@@ -151,12 +128,18 @@ export default class Web3Service extends PrivateService {
     });
   }
 
+  networkId() {
+    console.warn('.networkId() is deprecated; use .network instead');
+    return this.network;
+  }
+
   get network() {
-    return this._info.network;
+    assert(this._networkId, 'Cannot resolve network ID. Are you connected?');
+    return this._networkId;
   }
 
   get networkName() {
-    return getNetworkName(this.networkId());
+    return getNetworkName(this.network);
   }
 
   get rpcUrl() {

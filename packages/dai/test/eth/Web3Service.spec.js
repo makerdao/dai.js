@@ -36,34 +36,16 @@ function buildInfuraService(network, privateKey = null) {
   });
 }
 
-test('fetch version info on connect', done => {
-  const web3 = buildTestService();
-
-  web3
-    .manager()
-    .connect()
-    .then(() => {
-      expect(web3.info().api).toMatch(
-        /^([0-9]+\.)*[0-9]([-][b][e][t][a][.]([0-9])*)*$/
-      );
-      expect(web3.info().node).toMatch(/^(Parity)|(MetaMask)|(EthereumJS.*)$/);
-      expect(web3.info().network.toString()).toMatch(/^[0-9]+$/);
-      expect(web3.info().ethereum).toMatch(/^[0-9]+$/);
-      done();
-    });
-});
-
 test('throw error on a failure to connect', async () => {
   expect.assertions(1);
   const service = buildTestService();
   await service.manager().initialize();
-  service._web3.eth.getNodeInfo = cb => {
+  service._web3.eth.net.getId = cb => {
     cb(new Error('fake connection failure error'));
   };
 
   try {
     await service.manager().connect();
-    console.log(service._info);
   } catch (err) {
     expect(err).toBeInstanceOf(Error);
   }
@@ -126,7 +108,7 @@ test('connect to kovan', async () => {
     console.log(err);
   }
   expect(service.manager().isConnected()).toBe(true);
-  expect(service.networkId()).toBe(42);
+  expect(service.network).toBe(42);
 });
 
 test('stores transaction settings from config', async () => {

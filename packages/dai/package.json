@@ -52,7 +52,7 @@
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
     "test:build": "yarn test --config ./test/config/jestBuildConfig.json",
-    "repl":  "../../node_modules/.bin/babel-node --experimental-repl-await scripts/repl.js"
+    "repl": "../../node_modules/.bin/babel-node --experimental-repl-await scripts/repl.js"
   },
   "dependencies": {
     "@babel/cli": "^7.2.3",
@@ -97,7 +97,7 @@
     "promise-props": "^1.0.0",
     "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
-    "web3": "1.2.6",
+    "web3": "1.2.9",
     "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist",
     "webpack-bundle-analyzer": "^3.3.2"
   },
