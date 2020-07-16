@@ -86,7 +86,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   const utils = web3._web3.utils;
 
   // 8600000 is 2019-09-22 on mainnet and 2018-09-04 on kovan
-  const fromBlock = [1, 42].includes(web3.network)) ? 8600000 : 1;
+  const fromBlock = [1, 42].includes(web3.network) ? 8600000 : 1;
 
   const promisesBlockTimestamp = {};
   const getBlockTimestamp = block => {
