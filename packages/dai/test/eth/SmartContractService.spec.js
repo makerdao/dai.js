@@ -179,9 +179,8 @@ test('can use address overrides for contract info', async () => {
     }
   });
 
-  service.get('web3').networkId = () => 4;
-  service.get('web3');
   await service.manager().authenticate();
+  service.get('web3')._networkId = 4;
   const addresses = service.getContractAddresses();
   expect(addresses.PROXY_REGISTRY).toEqual('0xmock1');
 });
