@@ -14,7 +14,10 @@ export default class GovPollingService extends PrivateService {
   }
 
   async createPoll(startDate, endDate, multiHash, url) {
-    if (url) console.warn(`The parameter '${url}' is no longer passed into createPoll`);
+    if (url)
+      console.warn(
+        `The parameter '${url}' is no longer passed into createPoll`
+      );
     const txo = await this._pollingContract().createPoll(
       startDate,
       endDate,
@@ -29,7 +32,7 @@ export default class GovPollingService extends PrivateService {
   }
 
   vote(pollId, optionId) {
-    return this._pollingContract().vote(pollId, optionId);
+    return this._pollingContract().vote([pollId], [optionId]);
   }
 
   voteRankedChoice(pollId, rankings) {
