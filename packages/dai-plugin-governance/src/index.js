@@ -56,7 +56,7 @@ export default {
       },
       [POLLING]: {
         address: map(prop('POLLING'), contractAddresses),
-        abi: require('../contracts/abis/Polling.json')
+        abi: require('../contracts/abis/PollingEmitter.json')
       },
       [PAUSE]: {
         address: map(prop('PAUSE'), contractAddresses),
