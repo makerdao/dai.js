@@ -77,6 +77,15 @@ test('can vote', async () => {
   expect(loggedOptionId).toBe(OPTION_ID);
 });
 
+test('can vote in batches', async () => {
+  const POLL_IDS = [0, 1];
+  const OPTION_IDS = [3, 4];
+  const txo = await govPollingService.vote(POLL_IDS, OPTION_IDS);
+  const loggedOptionIds = parseInt(txo.receipt.logs[0].topics[3]);
+  // this will fail if the event was not emitted
+  expect(loggedOptionIds).toBeDefined();
+});
+
 test('can withdraw poll', async () => {
   const POLL_ID = 0;
   const txo = await govPollingService.withdrawPoll(POLL_ID);
