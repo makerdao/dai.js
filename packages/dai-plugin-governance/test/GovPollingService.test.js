@@ -54,20 +54,17 @@ test('can create poll', async () => {
   const START_DATE = Math.floor(new Date().getTime() / 1000) + 100;
   const END_DATE = START_DATE + 5000;
   const MULTI_HASH = 'dummy hash';
-  const URL = 'dummy url';
   const firstPollId = await govPollingService.createPoll(
     START_DATE,
     END_DATE,
-    MULTI_HASH,
-    URL
+    MULTI_HASH
   );
   expect(firstPollId).not.toBeNaN();
 
   const secondPollId = await govPollingService.createPoll(
     START_DATE,
     END_DATE,
-    MULTI_HASH,
-    URL
+    MULTI_HASH
   );
   expect(secondPollId).toBe(firstPollId + 1);
 });

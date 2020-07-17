@@ -23,7 +23,7 @@ export default class GovPollingService extends PrivateService {
       endDate,
       multiHash
     );
-    const pollId = parseInt(txo.receipt.logs[0].topics[2]);
+    const pollId = parseInt(txo.receipt.logs[0].topics[1]);
     return pollId;
   }
 
