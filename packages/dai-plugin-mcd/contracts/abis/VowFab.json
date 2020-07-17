@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"internalType":"address","name":"vat","type":"address"},{"internalType":"address","name":"flap","type":"address"},{"internalType":"address","name":"flop","type":"address"}],"name":"newVow","outputs":[{"internalType":"contract Vow","name":"vow","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

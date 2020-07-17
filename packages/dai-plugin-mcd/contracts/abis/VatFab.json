@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[],"name":"newVat","outputs":[{"internalType":"contract Vat","name":"vat","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

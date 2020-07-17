@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"internalType":"uint256","name":"chainId","type":"uint256"}],"name":"newDai","outputs":[{"internalType":"contract Dai","name":"dai","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

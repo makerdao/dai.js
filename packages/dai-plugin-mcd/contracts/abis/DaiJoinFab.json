@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"internalType":"address","name":"vat","type":"address"},{"internalType":"address","name":"dai","type":"address"}],"name":"newDaiJoin","outputs":[{"internalType":"contract DaiJoin","name":"daiJoin","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

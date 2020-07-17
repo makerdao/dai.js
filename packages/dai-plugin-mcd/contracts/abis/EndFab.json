@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[],"name":"newEnd","outputs":[{"internalType":"contract End","name":"end","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

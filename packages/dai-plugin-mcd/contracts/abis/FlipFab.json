@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"internalType":"address","name":"vat","type":"address"},{"internalType":"bytes32","name":"ilk","type":"bytes32"}],"name":"newFlip","outputs":[{"internalType":"contract Flipper","name":"flip","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

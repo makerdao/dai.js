@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"internalType":"address","name":"vat","type":"address"},{"internalType":"address","name":"gov","type":"address"}],"name":"newFlop","outputs":[{"internalType":"contract Flopper","name":"flop","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

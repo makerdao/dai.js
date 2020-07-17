@@ -124,27 +124,27 @@ describe.each([
     ETH,
     async () => setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 })
   ],
-  [
-    'BAT-A',
-    BAT,
-    async () => setupCollateral(maker, 'BAT-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'GNT-A',
-    GNT,
-    async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'DGD-A',
-    DGD,
-    async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
-  ],
-  [
-    'USDC-A',
-    USDC,
-    async () =>
-      setupCollateral(maker, 'USDC-A', { price: 100, debtCeiling: 50 })
-  ]
+  // [
+  //   'BAT-A',
+  //   BAT,
+  //   async () => setupCollateral(maker, 'BAT-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'GNT-A',
+  //   GNT,
+  //   async () => setupCollateral(maker, 'GNT-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'DGD-A',
+  //   DGD,
+  //   async () => setupCollateral(maker, 'DGD-A', { price: 100, debtCeiling: 50 })
+  // ],
+  // [
+  //   'USDC-A',
+  //   USDC,
+  //   async () =>
+  //     setupCollateral(maker, 'USDC-A', { price: 100, debtCeiling: 50 })
+  // ]
 ])('%s', (ilk, GEM, setup) => {
   let startingGemBalance, startingDaiBalance;
 
@@ -170,7 +170,7 @@ describe.each([
     expect(await cdp.getOwner()).toBe(proxy);
   });
 
-  test('openLock, lock, lockAndDraw, free', async () => {
+  test.only('openLock, lock, lockAndDraw, free', async () => {
     const cdp = await maker.service(CDP_MANAGER).openLockAndDraw(ilk, GEM(1));
     await expectValues(cdp, {
       collateral: 1,

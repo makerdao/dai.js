@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"internalType":"address","name":"vat","type":"address"}],"name":"newPot","outputs":[{"internalType":"contract Pot","name":"pot","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]

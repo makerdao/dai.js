@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"internalType":"address","name":"vat","type":"address"}],"name":"newSpotter","outputs":[{"internalType":"contract Spotter","name":"spotter","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]
