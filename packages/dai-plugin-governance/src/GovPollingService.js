@@ -14,16 +14,13 @@ export default class GovPollingService extends PrivateService {
   }
 
   async createPoll(startDate, endDate, multiHash, url) {
-    if (url)
-      console.warn(
-        `The parameter '${url}' is no longer passed into createPoll`
-      );
     const txo = await this._pollingContract().createPoll(
       startDate,
       endDate,
-      multiHash
+      multiHash,
+      url
     );
-    const pollId = parseInt(txo.receipt.logs[0].topics[1]);
+    const pollId = parseInt(txo.receipt.logs[0].topics[2]);
     return pollId;
   }
 
