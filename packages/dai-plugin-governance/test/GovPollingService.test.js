@@ -82,9 +82,12 @@ test('can vote', async () => {
 
 test('can vote in batches', async () => {
   const POLL_IDS = [0, 1];
-  const OPTION_IDS = [3, 4];
+  const OPTION_IDS = [3, 3];
   const txo = await govPollingService.vote(POLL_IDS, OPTION_IDS);
-  const loggedOptionIds = parseInt(txo.receipt.logs[0].topics[3]);
+  const loggedOptionIds = [
+    parseInt(txo.receipt.logs[0].topics[3]),
+    parseInt(txo.receipt.logs[0].topics[4])
+  ];
   // this will fail if the event was not emitted
   expect(loggedOptionIds).toBeDefined();
 });

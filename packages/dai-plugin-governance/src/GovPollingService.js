@@ -28,10 +28,9 @@ export default class GovPollingService extends PrivateService {
     return this._pollingContract().withdrawPoll(pollId);
   }
 
-  vote(pollIds, optionIds) {
-    if (typeof pollIds !== Array) pollIds = [pollIds];
-    if (typeof optionIds !== Array) optionIds = [optionIds];
-    return this._pollingContract().vote(pollIds, optionIds);
+  vote(pollId, optionId) {
+    const func = 'vote(uint256,uint256)';
+    return this._pollingContract()[func](pollId, optionId);
   }
 
   voteRankedChoice(pollId, rankings) {
