@@ -72,24 +72,26 @@ test('can create poll', async () => {
   expect(secondPollId).toBe(firstPollId + 1);
 });
 
-test('can vote', async () => {
-  const OPTION_ID = 3;
-  const txo = await govPollingService.vote(0, OPTION_ID);
+test.only('can vote', async () => {
+  const POLL_ID = [0];
+  const OPTION_ID = [3];
+  const txo = await govPollingService.vote(POLL_ID, OPTION_ID);
   const loggedOptionId = parseInt(txo.receipt.logs[0].topics[3]);
   // this will fail if the event was not emitted
-  expect(loggedOptionId).toBe(OPTION_ID);
+  expect(loggedOptionId).toBe(OPTION_ID[0]);
 });
 
-test('can vote in batches', async () => {
+test.only('can vote in batches', async () => {
   const POLL_IDS = [0, 1];
-  const OPTION_IDS = [3, 3];
+  const OPTION_IDS = [3, 4];
   const txo = await govPollingService.vote(POLL_IDS, OPTION_IDS);
   const loggedOptionIds = [
     parseInt(txo.receipt.logs[0].topics[3]),
-    parseInt(txo.receipt.logs[0].topics[4])
+    parseInt(txo.receipt.logs[1].topics[3])
   ];
   // this will fail if the event was not emitted
-  expect(loggedOptionIds).toBeDefined();
+  expect(loggedOptionIds[0]).toBe(OPTION_IDS[0]);
+  expect(loggedOptionIds[1]).toBe(OPTION_IDS[1]);
 });
 
 test('can withdraw poll', async () => {
