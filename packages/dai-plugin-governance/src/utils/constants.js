@@ -6,6 +6,7 @@ export const IOU = createCurrency('IOU');
 /* Contracts */
 export const VOTE_PROXY_FACTORY = 'VOTE_PROXY_FACTORY';
 export const POLLING = 'POLLING';
+export const BATCH_POLLING = 'BATCH_POLLING';
 export const CHIEF = 'CHIEF';
 export const ESM = 'ESM';
 export const END = 'END';

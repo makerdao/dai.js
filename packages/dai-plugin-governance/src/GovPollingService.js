@@ -1,5 +1,5 @@
 import { PrivateService } from '@makerdao/services-core';
-import { POLLING } from './utils/constants';
+import { POLLING, BATCH_POLLING } from './utils/constants';
 import { MKR } from './utils/constants';
 import BigNumber from 'bignumber.js';
 import { fromBuffer, toBuffer, paddedArray } from './utils/helpers';
@@ -35,10 +35,10 @@ export default class GovPollingService extends PrivateService {
       );
     if (pollIds.length === 1) {
       const func = 'vote(uint256,uint256)';
-      return this._pollingContract()[func](pollIds[0], optionIds[0]);
+      return this._batchPollingContract()[func](pollIds[0], optionIds[0]);
     } else {
       const func = 'vote(uint256[],uint256[])';
-      return this._pollingContract()[func](pollIds, optionIds);
+      return this._batchPollingContract()[func](pollIds, optionIds);
     }
   }
 
@@ -48,11 +48,15 @@ export default class GovPollingService extends PrivateService {
       byteArray[byteArray.length - i - 1] = optionIndex + 1;
     });
     const optionId = fromBuffer(byteArray).toString();
-    return this._pollingContract().vote(pollId, optionId);
+    return this._batchPollingContract().vote(pollId, optionId);
   }
 
   _pollingContract() {
     return this.get('smartContract').getContractByName(POLLING);
+  }
+
+  _batchPollingContract() {
+    return this.get('smartContract').getContractByName(BATCH_POLLING);
   }
 
   //--- cache queries
