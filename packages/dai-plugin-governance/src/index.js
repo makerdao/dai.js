@@ -3,6 +3,7 @@ import {
   VOTE_PROXY_FACTORY,
   CHIEF,
   POLLING,
+  BATCH_POLLING,
   ESM,
   END,
   PAUSE,
@@ -57,6 +58,10 @@ export default {
       [POLLING]: {
         address: map(prop('POLLING'), contractAddresses),
         abi: require('../contracts/abis/PollingEmitter.json')
+      },
+      [BATCH_POLLING]: {
+        address: map(prop('BATCH_POLLING'), contractAddresses),
+        abi: require('../contracts/abis/BatchPollingEmitter.json')
       },
       [PAUSE]: {
         address: map(prop('PAUSE'), contractAddresses),
