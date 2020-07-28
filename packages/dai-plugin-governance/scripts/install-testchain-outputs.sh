@@ -5,7 +5,7 @@ CONTRACTS=$GOVERNANCE/contracts
 PLUGIN_ADDRESSES=$CONTRACTS/addresses/testnet.json
 
 # Relevant contracts from SCD:
-for CONTRACT in "POLLING","PollingEmitter" "GOV","DSToken"
+for CONTRACT in "POLLING","PollingEmitter" "BATCH_POLLING","PollingEmitter" "GOV","DSToken"
 do
   set_address_and_abi $CONTRACT $SCD_ADDRESSES $SCD_ABIS $PLUGIN_ADDRESSES
 done
