@@ -47,7 +47,7 @@ export default {
 
     const addContracts = {
       [CHIEF]: {
-        address: map(prop('CHIEF'), contractAddresses),
+        address: map(prop('MCD_ADM'), contractAddresses),
         // TODO check for MCD-specific version of DSChief
         abi: require('../contracts/abis/DSChief.json')
       },
@@ -99,7 +99,7 @@ export default {
           {
             currency: IOU,
             symbol: IOU.symbol,
-            address: contractAddresses[addressKey].IOU
+            address: contractAddresses[addressKey].MCD_IOU
           }
         ]
       }
