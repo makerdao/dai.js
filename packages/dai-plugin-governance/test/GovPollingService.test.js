@@ -1,7 +1,8 @@
 import {
   setupTestMakerInstance,
   restoreSnapshotOriginal,
-  sleep
+  sleep,
+  linkAccounts
 } from './helpers';
 import GovPollingService from '../src/GovPollingService';
 import {
@@ -160,12 +161,19 @@ test('getNumUniqueVoters', async () => {
   expect(option).toEqual(dummyNumUnique);
 });
 
-test('getMkrWeight', async () => {
+test('getMkrWeight with cache', async () => {
   const mockFn = jest.fn(async () => dummyWeight);
   govQueryApiService.getMkrWeight = mockFn;
-  const option = await govPollingService.getMkrWeight('0xaddress');
+  const weight = await govPollingService.getMkrWeight('0xaddress', true);
   expect(mockFn).toBeCalled();
-  expect(option).toEqual(MKR(dummyWeight));
+  expect(weight).toEqual(MKR(dummyWeight));
+});
+
+test('getMkrWeight from blockchain without cache', async () => {
+  const currentAccount = maker.currentAccount().address;
+  await linkAccounts(maker, currentAccount, maker.listAccounts()[1].address);
+  const weight = await govPollingService.getMkrWeight(currentAccount, false);
+  expect(weight).toEqual(MKR(800));
 });
 
 test('getWinningProposal', async () => {

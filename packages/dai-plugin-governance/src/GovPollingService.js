@@ -10,7 +10,13 @@ const MAX_ROUNDS = 32;
 
 export default class GovPollingService extends PrivateService {
   constructor(name = 'govPolling') {
-    super(name, ['smartContract', 'govQueryApi', 'token']);
+    super(name, [
+      'smartContract',
+      'govQueryApi',
+      'token',
+      'chief',
+      'voteProxy'
+    ]);
   }
 
   async createPoll(startDate, endDate, multiHash, url) {
@@ -133,12 +139,39 @@ export default class GovPollingService extends PrivateService {
     return this.get('govQueryApi').getNumUniqueVoters(pollId);
   }
 
-  async getMkrWeight(address) {
-    const weight = await this.get('govQueryApi').getMkrWeight(
-      address.toLowerCase(),
-      POSTGRES_MAX_INT
-    );
-    return MKR(weight);
+  async getMkrWeight(address, useCache = true) {
+    if (useCache) {
+      const weight = await this.get('govQueryApi').getMkrWeight(
+        address.toLowerCase(),
+        POSTGRES_MAX_INT
+      );
+      return MKR(weight);
+    } else {
+      const { hasProxy, voteProxy } = await this.get('voteProxy').getVoteProxy(
+        address
+      );
+      let balancePromises = [
+        this.get('token')
+          .getToken(MKR)
+          .balance(address),
+        this.get('chief').getNumDeposits(address)
+      ];
+      if (hasProxy) {
+        const otherAddress =
+          address.toLowerCase() === voteProxy.getHotAddress().toLowerCase()
+            ? voteProxy.getColdAddress()
+            : voteProxy.getHotAddress();
+        balancePromises = balancePromises.concat([
+          this.get('token')
+            .getToken(MKR)
+            .balance(otherAddress),
+          this.get('chief').getNumDeposits(otherAddress),
+          this.get('chief').getNumDeposits(voteProxy.getProxyAddress())
+        ]);
+      }
+      const balances = await Promise.all(balancePromises);
+      return balances.reduce((total, num) => total.plus(num), MKR(0));
+    }
   }
 
   async getMkrAmtVoted(pollId) {
