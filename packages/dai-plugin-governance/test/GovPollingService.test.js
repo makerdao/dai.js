@@ -164,7 +164,7 @@ test('getNumUniqueVoters', async () => {
 test('getMkrWeight with cache', async () => {
   const mockFn = jest.fn(async () => dummyWeight);
   govQueryApiService.getMkrWeight = mockFn;
-  const weight = await govPollingService.getMkrWeight('0xaddress', true);
+  const weight = await govPollingService.getMkrWeight('0xaddress');
   expect(mockFn).toBeCalled();
   expect(weight).toEqual(MKR(dummyWeight));
 });
@@ -172,8 +172,17 @@ test('getMkrWeight with cache', async () => {
 test('getMkrWeight from blockchain without cache', async () => {
   const currentAccount = maker.currentAccount().address;
   await linkAccounts(maker, currentAccount, maker.listAccounts()[1].address);
-  const weight = await govPollingService.getMkrWeight(currentAccount, false);
-  expect(weight).toEqual(MKR(800));
+  const weightObject = await govPollingService.getMkrWeightFromChain(
+    currentAccount
+  );
+  expect(weightObject).toEqual({
+    chiefBalance: MKR(0),
+    linkedChiefBalance: MKR(0),
+    linkedMkrBalance: MKR(400),
+    mkrBalance: MKR(400),
+    proxyChiefBalance: MKR(0),
+    total: MKR(800)
+  });
 });
 
 test('getWinningProposal', async () => {
