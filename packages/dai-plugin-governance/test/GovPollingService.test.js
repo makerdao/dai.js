@@ -178,10 +178,10 @@ test('getMkrWeight from blockchain without cache', async () => {
   expect(weightObject).toEqual({
     chiefBalance: MKR(0),
     linkedChiefBalance: MKR(0),
-    linkedMkrBalance: MKR(400),
+    linkedMkrBalance: MKR(0),
     mkrBalance: MKR(400),
     proxyChiefBalance: MKR(0),
-    total: MKR(800)
+    total: MKR(400)
   });
 });
 
