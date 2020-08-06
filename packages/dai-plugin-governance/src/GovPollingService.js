@@ -154,7 +154,7 @@ export default class GovPollingService extends PrivateService {
     let balancePromises = [
       this.get('token')
         .getToken(MKR)
-        .balance(address),
+        .balanceOf(address),
       this.get('chief').getNumDeposits(address)
     ];
     if (hasProxy) {
@@ -165,7 +165,7 @@ export default class GovPollingService extends PrivateService {
       balancePromises = balancePromises.concat([
         this.get('token')
           .getToken(MKR)
-          .balance(otherAddress),
+          .balanceOf(otherAddress),
         this.get('chief').getNumDeposits(otherAddress),
         this.get('chief').getNumDeposits(voteProxy.getProxyAddress())
       ]);
