@@ -262,3 +262,20 @@ test('ranked choice tally with multiple rounds', async () => {
     JSON.stringify(dummyBallotMultipleRoundsExpect)
   );
 });
+
+test('can get vote logs from contract', async () => {
+  const START_DATE = Math.floor(new Date().getTime() / 1000) + 100;
+  const END_DATE = START_DATE + 5000;
+  const MULTI_HASH = 'dummy hash';
+  const URL = 'dummy url';
+  const option = [1];
+  const pollId = await govPollingService.createPoll(
+    START_DATE,
+    END_DATE,
+    MULTI_HASH,
+    URL
+  );
+  await govPollingService.vote([pollId], [option]);
+  const voteLogs = await govPollingService.getVoteLogs();
+  expect(voteLogs[0].topics.length).toBe(4);
+});
