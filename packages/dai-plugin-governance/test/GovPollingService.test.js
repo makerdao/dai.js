@@ -95,6 +95,19 @@ test('can vote in batches', async () => {
   expect(loggedOptionIds[1]).toBe(OPTION_IDS[1]);
 });
 
+test('can vote in batches with array options (ranked choice)', async () => {
+  const POLL_IDS = [0, 1];
+  const OPTION_IDS = [3, [1, 4]];
+  const txo = await govPollingService.vote(POLL_IDS, OPTION_IDS);
+  const loggedOptionIds = [
+    parseInt(txo.receipt.logs[0].topics[3]),
+    parseInt(txo.receipt.logs[1].topics[3])
+  ];
+  // this will fail if the event was not emitted
+  expect(loggedOptionIds[0]).toBe(OPTION_IDS[0]);
+  expect(loggedOptionIds[1]).toBe(1025);
+});
+
 test('can withdraw poll', async () => {
   const POLL_ID = 0;
   const txo = await govPollingService.withdrawPoll(POLL_ID);

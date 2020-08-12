@@ -34,11 +34,22 @@ export default class GovPollingService extends PrivateService {
     return this._pollingContract().withdrawPoll(pollId);
   }
 
-  vote(pollIds, optionIds) {
-    if (pollIds.length !== optionIds.length || pollIds.length === 0)
+  vote(pollIds, options) {
+    if (pollIds.length !== options.length || pollIds.length === 0)
       throw new Error(
         'poll id array and option id array must be the same length and have a non-zero number of elements'
       );
+
+    const optionIds = options.map(option => {
+      if (!Array.isArray(option)) return option;
+      if (option.length === 1) return option[0];
+      const byteArray = new Uint8Array(32);
+      option.forEach((optionIndex, i) => {
+        byteArray[byteArray.length - i - 1] = optionIndex;
+      });
+      return fromBuffer(byteArray).toString();
+    });
+
     if (pollIds.length === 1) {
       const func = 'vote(uint256,uint256)';
       return this._batchPollingContract()[func](pollIds[0], optionIds[0]);
