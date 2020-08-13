@@ -43,6 +43,10 @@ export default class SystemDataService extends PublicService {
     return DAI.rad(dai).minus(DAI.rad(sin));
   }
 
+  async getTotalDai() {
+    return DAI.rad(await this.vat.debt());
+  }
+
   // Helpers ----------------------------------------------
 
   get cat() {
