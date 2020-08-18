@@ -408,10 +408,32 @@ export default class GovPollingService extends PrivateService {
   async getCompletedPolls(address) {
     let polls = [];
     const logs = await this.getVoteLogs();
+
     logs.map(log => {
-      if (`0x${log.topics[1].slice(-40)}` === address)
-        polls.push(parseInt(log.topics[2]));
+      if (`0x${log.topics[1].slice(-40)}` === address) {
+        const option = parseInt(log.topics[3]);
+        let rankedChoiceOption = [];
+        if (option > 100)
+          rankedChoiceOption = this._decodeRankedChoiceOptions(log.topics[3]);
+        polls.push({
+          pollId: parseInt(log.topics[2]),
+          option,
+          rankedChoiceOption
+        });
+      }
     });
+
     return polls;
+  }
+
+  _decodeRankedChoiceOptions(options) {
+    let rankedChoiceOption = [];
+    options = options.match(/.{1,2}/g).reverse();
+    options.map(choice => {
+      choice = parseInt(choice);
+      if (choice > 0) rankedChoiceOption.push(choice);
+    });
+
+    return rankedChoiceOption;
   }
 }
