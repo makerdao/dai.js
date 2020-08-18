@@ -76,16 +76,6 @@ export default class GovPollingService extends PrivateService {
     return this.get('smartContract').getContractByName(BATCH_POLLING);
   }
 
-  // For networks without Spock, e.g. the testchain
-  async getVoteLogs(from = 0, to = 'latest') {
-    const web3 = this.get('smartContract').get('web3');
-    return web3.getPastLogs({
-      address: this._batchPollingContract().address,
-      from,
-      to
-    });
-  }
-
   //--- cache queries
 
   async getPoll(multiHash) {
@@ -402,5 +392,26 @@ export default class GovPollingService extends PrivateService {
       }
     }
     return max ? max.optionId : 0;
+  }
+
+  // --- cache queries for networks without Spock, e.g. the testchain
+
+  async getVoteLogs(fromBlock = 0, toBlock = 'latest') {
+    const web3 = this.get('smartContract').get('web3');
+    return web3.getPastLogs({
+      address: this._batchPollingContract().address,
+      toBlock,
+      fromBlock
+    });
+  }
+
+  async getCompletedPolls(address) {
+    let polls = [];
+    const logs = await this.getVoteLogs();
+    logs.map(log => {
+      if (`0x${log.topics[1].slice(-40)}` === address)
+        polls.push(parseInt(log.topics[2]));
+    });
+    return polls;
   }
 }

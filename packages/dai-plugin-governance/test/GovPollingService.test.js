@@ -292,3 +292,38 @@ test('can get vote logs from contract', async () => {
   const voteLogs = await govPollingService.getVoteLogs();
   expect(voteLogs[0].topics.length).toBe(4);
 });
+
+test('can get completed polls by address', async () => {
+  const START_DATE = Math.floor(new Date().getTime() / 1000) + 100;
+  const END_DATE = START_DATE + 5000;
+  const MULTI_HASH = 'dummy hash';
+  const URL = 'dummy url';
+  const option = [1];
+  const pollId = await govPollingService.createPoll(
+    START_DATE,
+    END_DATE,
+    MULTI_HASH,
+    URL
+  );
+  const secondPoll = await govPollingService.createPoll(
+    START_DATE,
+    END_DATE,
+    MULTI_HASH,
+    URL
+  );
+
+  await govPollingService.vote([pollId], [option]);
+  await maker.addAccount('altAccount', {
+    key: '07749b1cfe4632db2223a2d4ca7b113b49f01434a5c836660c809ec7a32a5bc0',
+    type: 'privateKey'
+  });
+  maker.useAccount('altAccount');
+  await govPollingService.vote([secondPoll], [option]);
+
+  const logs = await govPollingService.getVoteLogs();
+  const completedPollsForCurrentAddress = await govPollingService.getCompletedPolls(
+    maker.currentAddress()
+  );
+  expect(completedPollsForCurrentAddress.length).toBeLessThan(logs.length);
+  expect(typeof completedPollsForCurrentAddress[0]).toBe('number');
+});
