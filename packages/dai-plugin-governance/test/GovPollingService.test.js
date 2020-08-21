@@ -326,13 +326,20 @@ test('can get completed polls by address', async () => {
   );
 
   expect(completedPollsForCurrentAddress.length).toBeLessThan(logs.length);
-  expect(Object.keys(completedPollsForCurrentAddress[0])).toEqual(['pollId', 'option', 'rankedChoiceOption']);
+  expect(Object.keys(completedPollsForCurrentAddress[0])).toEqual([
+    'pollId',
+    'option',
+    'rankedChoiceOption'
+  ]);
 });
 
 test('should correctly decode ranked choice options from event logs', () => {
-  const rawOptions = '0x0000000000000000000000000000000000000000000000000000000004030201';
+  const rawOptions =
+    '0x0000000000000000000000000000000000000000000000000000000004030201';
   const expectedOptions = [1, 2, 3, 4];
-  const decodedOptions = govPollingService._decodeRankedChoiceOptions(rawOptions);
+  const decodedOptions = govPollingService._decodeRankedChoiceOptions(
+    rawOptions
+  );
 
   expect(decodedOptions).toEqual(expectedOptions);
 });
