@@ -71,49 +71,19 @@ export default class GlobalSettlementDaiRedeemer {
       .pack(daiJoinAddress, endAddress, formattedAmount, { dsProxy: true });
   }
 
-  async cashEth(daiAmount) {
-    const formattedAmount = DAI_1(daiAmount).toFixed('wei');
-    const joinAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_JOIN_ETH_A');
-    const endAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_END_1');
-    const ilkBytes = stringToBytes('ETH-A');
-    return this._container
-      .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')
-      .cashETH(joinAddress, endAddress, ilkBytes, formattedAmount, {
-        dsProxy: true
-      });
+  _ilkToAdapter(ilk) {
+    return 'MCD_JOIN_' + ilk.replace(/-/g, '_');
   }
 
-  async cashBat(daiAmount) {
+  async cash(daiAmount, ilk) {
     const formattedAmount = DAI_1(daiAmount).toFixed('wei');
     const joinAddress = this._container
       .get('smartContract')
-      .getContractAddress('MCD_JOIN_BAT_A');
+      .getContractAddress(this._ilkToAdapter(ilk));
     const endAddress = this._container
       .get('smartContract')
       .getContractAddress('MCD_END_1');
-    const ilkBytes = stringToBytes('BAT-A');
-    return this._container
-      .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')
-      .cashGem(joinAddress, endAddress, ilkBytes, formattedAmount, {
-        dsProxy: true
-      });
-  }
-
-  async cashUsdc(daiAmount) {
-    const formattedAmount = DAI_1(daiAmount).toFixed('wei');
-    const joinAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_JOIN_USDC_A');
-    const endAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_END_1');
-    const ilkBytes = stringToBytes('USDC-A');
+    const ilkBytes = stringToBytes(ilk);
     return this._container
       .get('smartContract')
       .getContract('PROXY_ACTIONS_END')
