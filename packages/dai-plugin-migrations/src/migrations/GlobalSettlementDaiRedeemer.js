@@ -84,10 +84,11 @@ export default class GlobalSettlementDaiRedeemer {
       .get('smartContract')
       .getContractAddress('MCD_END_1');
     const ilkBytes = stringToBytes(ilk);
+    const methodName = ilk.substring(0, 3) === 'ETH' ? 'cashETH' : 'cashGem';
     return this._container
       .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')
-      .cashGem(joinAddress, endAddress, ilkBytes, formattedAmount, {
+      .getContract('PROXY_ACTIONS_END')[methodName](
+        joinAddress, endAddress, ilkBytes, formattedAmount, {
         dsProxy: true
       });
   }

@@ -61,10 +61,11 @@ export default class GlobalSettlementCollateralClaims {
     const joinAddress = this._container
       .get('smartContract')
       .getContractAddress(this._ilkToAdapter(ilk));
+    const methodName = ilk.substring(0, 3) === 'ETH' ? 'freeETH' : 'freeGem';
     return this._container
       .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')
-      .freeETH(cdpManagerAddress, joinAddress, endAddress, cdpId, {
+      .getContract('PROXY_ACTIONS_END')[methodName](
+        cdpManagerAddress, joinAddress, endAddress, cdpId, {
         dsProxy: true
       });
   }
