@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { createCurrencyRatio } from '@makerdao/currency';
-import { RAY } from './constants';
+import { RAY, WAD } from './constants';
 import { DAI, USD } from './index';
 
 // NOTE: When a function below has an argument with the same name as a function
@@ -17,7 +17,7 @@ export function debtCeiling(line) {
 
 export function liquidationPenalty(chop) {
   return new BigNumber(chop.toString())
-    .dividedBy(RAY)
+    .dividedBy(WAD)
     .minus(1)
     .toNumber();
 }
