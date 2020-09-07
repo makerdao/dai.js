@@ -5,6 +5,7 @@ import repl from 'repl';
 import Maker from '../src';
 import testAccounts from '../../test-helpers/src/testAccounts.json';
 import ScdPlugin from '@makerdao/dai-plugin-scd';
+import GovPlugin from '@makerdao/dai-plugin-governance';
 
 let maker;
 
@@ -66,7 +67,7 @@ async function main() {
     const { config, fromBlock } = currentEnv;
     maker = await Maker.create('http', {
       ...config,
-      plugins: [ScdPlugin]
+      plugins: [ScdPlugin, GovPlugin]
     });
 
     const r = repl.start();

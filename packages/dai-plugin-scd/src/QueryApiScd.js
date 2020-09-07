@@ -2,10 +2,9 @@ import ethUtil from 'ethereumjs-util';
 import { getQueryResponse } from './utils/getQueryResponse';
 import uniq from 'lodash/uniq';
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
-const KOVAN_SERVER_URL = 'https://sai-kovan.makerfoundation.com/v1';
 
 export default class QueryApi {
-  constructor(network) {
+  constructor(network = 'mainnet') {
     switch (network) {
       case 'mainnet':
       case 1:
@@ -13,8 +12,7 @@ export default class QueryApi {
         break;
       case 'kovan':
       case 42:
-        this.serverUrl = KOVAN_SERVER_URL;
-        break;
+        throw new Error('Kovan is no longer supported');
       default:
         throw new Error(`don't know what to do for network "${network}"`);
     }
