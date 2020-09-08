@@ -43,5 +43,7 @@ module.exports = {
   USDC: require('./abis/USDC.json'),
   WBTC: require('./abis/WBTC.json'),
   TUSD: require('./abis/DSToken.json'),
-  MANA: require('./abis/DSToken.json')
+  MANA: require('./abis/DSToken.json'),
+  USDT: require('./abis/DSToken.json'),
+  PAXUSD: require('./abis/DSToken.json')
 };

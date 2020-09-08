@@ -1,9 +1,9 @@
 import QueryApi from '../src/QueryApiScd';
 
-test('getCdpIdsForOwner on kovan', async () => {
-  const q = new QueryApi('kovan');
+test('getCdpIdsForOwner on mainnet', async () => {
+  const q = new QueryApi();
   const ids = await q.getCdpIdsForOwner(
-    '0x90d01f84f8db06d9af09054fe06fb69c1f8ee9e9'
+    '0xCd5f8fa45E0cA0937F86006B9eE8fE1eEdEe5FC4'
   );
-  expect(ids).toEqual([4756, 4751, 1821]);
+  expect(ids.includes(1)).toBeTruthy();
 });
