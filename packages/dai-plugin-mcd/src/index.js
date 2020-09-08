@@ -72,6 +72,8 @@ export const USDC = createCurrency('USDC');
 export const WBTC = createCurrency('WBTC');
 export const TUSD = createCurrency('TUSD');
 export const MANA = createCurrency('MANA');
+export const USDT = createCurrency('USDT');
+export const PAXUSD = createCurrency('PAXUSD');
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
@@ -82,7 +84,9 @@ export const defaultCdpTypes = [
   { currency: TUSD, ilk: 'TUSD-A', decimals: 18 },
   { currency: KNC, ilk: 'KNC-A', decimals: 18 },
   { currency: ZRX, ilk: 'ZRX-A', decimals: 18 },
-  { currency: MANA, ilk: 'MANA-A', decimals: 18 }
+  { currency: MANA, ilk: 'MANA-A', decimals: 18 },
+  { currency: USDT, ilk: 'USDT-A', decimals: 6 },
+  { currency: PAXUSD, ilk: 'PAXUSD-A', decimals: 18 }
 ];
 
 export const SAI = createCurrency('SAI');

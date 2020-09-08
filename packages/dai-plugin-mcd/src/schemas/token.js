@@ -34,7 +34,7 @@ export const tokenBalance = {
       ],
       transforms: {
         [TOKEN_BALANCE]: v => {
-          if (symbol === 'USDC') {
+          if (symbol === 'USDC' || symbol === 'USDT') {
             return currencyToken(v, -6);
           } else if (symbol === 'WBTC') {
             return currencyToken(v, -8);
