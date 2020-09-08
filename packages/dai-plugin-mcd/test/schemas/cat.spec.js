@@ -38,7 +38,7 @@ test(LIQUIDATOR_ADDRESS, async () => {
 });
 
 test(LIQUIDATION_PENALTY, async () => {
-  const expected = BigNumber('1049999999');
+  const expected = BigNumber('0.05');
   const liquidationPenalty = await maker.latest(LIQUIDATION_PENALTY, 'ETH-A');
   expect(liquidationPenalty).toEqual(expected);
 });

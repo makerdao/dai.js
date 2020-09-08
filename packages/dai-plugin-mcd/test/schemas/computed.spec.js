@@ -318,10 +318,10 @@ test(VAULT, async () => {
   const expectedCollateralAvailableValue = USD(750);
   const expectedUnlockedCollateral = fromWei(0);
   const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
-  const expectedLiqPenalty = BigNumber('1049999999');
+  const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
-  const expectedDebtFloor = BigNumber('0');
-  const expectedCollateralDebtAvailable = DAI(99999);
+  const expectedDebtFloor = BigNumber('100');
+  const expectedCollateralDebtAvailable = DAI(99900);
 
   const vault = await maker.latest(VAULT, cdpId);
 
@@ -492,11 +492,11 @@ test(COLLATERAL_TYPE_DATA, async () => {
   const collateralType = 'ETH-A';
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
   const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
-  const expectedLiqPenalty = BigNumber('1049999999');
+  const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedPriceWithSafetyMargin = BigNumber('120');
-  const expectedDebtFloor = BigNumber('0');
-  const expectedCollateralDebtAvailable = DAI(99999);
+  const expectedDebtFloor = BigNumber('100');
+  const expectedCollateralDebtAvailable = DAI(99900);
 
   const colData = await maker.latest(COLLATERAL_TYPE_DATA, collateralType);
 
