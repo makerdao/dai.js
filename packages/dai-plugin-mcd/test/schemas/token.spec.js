@@ -19,11 +19,11 @@ import tokenSchemas from '../../src/schemas/token';
 
 let maker, snapshotData, address, address2, proxyAddress;
 
-const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = DAI(1);
+const ETH_A_COLLATERAL_AMOUNT = ETH(5);
+const ETH_A_DEBT_AMOUNT = DAI(100);
 
-const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = DAI(1);
+const BAT_A_COLLATERAL_AMOUNT = BAT(100);
+const BAT_A_DEBT_AMOUNT = DAI(100);
 
 beforeAll(async () => {
   maker = await mcdMaker({
@@ -144,7 +144,7 @@ test(ADAPTER_BALANCE, async () => {
   expect(ethAdapterBalance.symbol).toEqual(WETH.symbol);
   expect(batAdapterBalance.symbol).toEqual(BAT.symbol);
 
-  expect(ethAdapterBalance.toBigNumber()).toEqual(BigNumber('1'));
-  expect(batAdapterBalance.toBigNumber()).toEqual(BigNumber('1'));
+  expect(ethAdapterBalance.toBigNumber()).toEqual(BigNumber('5'));
+  expect(batAdapterBalance.toBigNumber()).toEqual(BigNumber('100'));
   await restoreSnapshot(snapshotData, maker);
 });

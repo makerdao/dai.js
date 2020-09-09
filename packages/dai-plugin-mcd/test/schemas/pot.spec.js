@@ -15,8 +15,8 @@ import potSchemas from '../../src/schemas/pot';
 
 let maker, snapshotData, cdpMgr, saveService;
 
-const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = DAI(1);
+const ETH_A_COLLATERAL_AMOUNT = ETH(5);
+const ETH_A_DEBT_AMOUNT = DAI(100);
 const ETH_A_PRICE = 180;
 
 beforeAll(async () => {

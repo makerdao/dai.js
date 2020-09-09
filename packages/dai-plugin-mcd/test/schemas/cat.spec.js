@@ -44,7 +44,7 @@ test(LIQUIDATION_PENALTY, async () => {
 });
 
 test(MAX_AUCTION_LOT_SIZE, async () => {
-  const expected = BigNumber('1.5');
+  const expected = BigNumber('500');
   const maxLotSize = await maker.latest(MAX_AUCTION_LOT_SIZE, 'ETH-A');
   expect(maxLotSize).toEqual(expected);
 });
