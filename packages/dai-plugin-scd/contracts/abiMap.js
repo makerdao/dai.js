@@ -17,5 +17,6 @@ module.exports = {
   PROXY_REGISTRY: require('./abis/ProxyRegistry'),
   DS_PROXY_FACTORY: require('./abis/DSProxyFactory'),
   DS_PROXY: require('./abis/DSProxy'),
-  MULTICALL: require('./abis/Multicall')
+  MULTICALL: require('./abis/Multicall'),
+  SAI_TUB_CONSTANT: require('./abis/SaiTubConstant')
 };
