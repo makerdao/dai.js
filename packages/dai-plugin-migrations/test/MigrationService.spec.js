@@ -2,7 +2,6 @@ import { migrationMaker } from './helpers';
 import { mockCdpIds } from './helpers/mocks';
 import { ServiceRoles, Migrations } from '../src/constants';
 import SingleToMultiCdp from '../src/migrations/SingleToMultiCdp';
-import SaiToDai from '../src/migrations/SaiToDai';
 import GlobalSettlementSavingsDai from '../src/migrations/GlobalSettlementSavingsDai';
 import GlobalSettlementCollateralClaims from '../src/migrations/GlobalSettlementCollateralClaims';
 import GlobalSettlementDaiRedeemer from '../src/migrations/GlobalSettlementDaiRedeemer';
@@ -38,7 +37,6 @@ test('can fetch a list of all migrations', () => {
   expect(ids).toEqual(
     expect.arrayContaining([
       Migrations.SINGLE_TO_MULTI_CDP,
-      Migrations.SAI_TO_DAI,
       Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI,
       Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS,
       Migrations.GLOBAL_SETTLEMENT_DAI_REDEEMER,
@@ -48,14 +46,13 @@ test('can fetch a list of all migrations', () => {
       Migrations.REDEEM_COLLATERAL
     ])
   );
-  expect(ids.length).toEqual(10);
+  expect(ids.length).toEqual(8);
 });
 
 test('getting each migration returns a valid migration', () => {
   expect(service.getMigration(Migrations.SINGLE_TO_MULTI_CDP)).toBeInstanceOf(
     SingleToMultiCdp
   );
-  expect(service.getMigration(Migrations.SAI_TO_DAI)).toBeInstanceOf(SaiToDai);
   expect(
     service.getMigration(Migrations.GLOBAL_SETTLEMENT_SAVINGS_DAI)
   ).toBeInstanceOf(GlobalSettlementSavingsDai);
@@ -82,12 +79,9 @@ test('runAllChecks', async () => {
   await mockCdpIds(maker);
   const result = await service.runAllChecks();
   expect(result).toEqual({
-    [Migrations.SAI_TO_DAI]: expect.anything(),
-    [Migrations.DAI_TO_SAI]: expect.anything(),
     [Migrations.SINGLE_TO_MULTI_CDP]: {},
     [Migrations.CHIEF_MIGRATE]: expect.anything(),
     [Migrations.MKR_REDEEMER]: expect.anything(),
     [Migrations.GLOBAL_SETTLEMENT_COLLATERAL_CLAIMS]: expect.anything()
   });
-  expect(result[Migrations.SAI_TO_DAI].eq(0)).toBeTruthy();
 });
