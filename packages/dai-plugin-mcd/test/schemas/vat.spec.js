@@ -189,7 +189,7 @@ test(ENCUMBERED_COLLATERAL, async () => {
 
 test(ENCUMBERED_DEBT, async () => {
   const cdpId = 1;
-  const expected = fromWei(99960000000000000000);
+  const expected = fromWei(99940000000000000000);
   const encumberedDebt = await maker.latest(
     ENCUMBERED_DEBT,
     'ETH-A',
