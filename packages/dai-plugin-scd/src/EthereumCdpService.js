@@ -267,14 +267,12 @@ export default class EthereumCdpService extends PrivateService {
 
   async getDebtValue(cdpId, unit = SAI) {
     const hexCdpId = numberToBytes32(cdpId);
-    // we need to use the Web3.js contract interface to get the return value
-    // from the non-constant function `tab`
-    const tub = this._smartContract().getWeb3ContractByName(contracts.SAI_TUB);
-    const tab = await new Promise((resolve, reject) =>
-      tub.methods
-        .tab(hexCdpId)
-        .call({}, (err, val) => (err ? reject(err) : resolve(val)))
+    // use an altered abi that treats tub.tab() like a constant function
+    // so we can read from it, even though it's actually a non-constant function
+    const TubConstantTab = this._smartContract().getContract(
+      contracts.SAI_TUB_CONSTANT
     );
+    const tab = await TubConstantTab.tab(hexCdpId);
     const saiDebt = SAI.wei(tab.toString());
     switch (unit) {
       case SAI:
