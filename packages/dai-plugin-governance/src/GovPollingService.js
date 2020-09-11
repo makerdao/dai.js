@@ -59,6 +59,10 @@ export default class GovPollingService extends PrivateService {
     }
   }
 
+  voteLegacy(pollId, optionId) {
+    return this._pollingContract().vote(pollId, optionId);
+  }
+
   voteRankedChoice(pollId, rankings) {
     const byteArray = new Uint8Array(32);
     rankings.forEach((optionIndex, i) => {
@@ -66,6 +70,15 @@ export default class GovPollingService extends PrivateService {
     });
     const optionId = fromBuffer(byteArray).toString();
     return this._batchPollingContract().vote(pollId, optionId);
+  }
+
+  voteRankedChoiceLegacy(pollId, rankings) {
+    const byteArray = new Uint8Array(32);
+    rankings.forEach((optionIndex, i) => {
+      byteArray[byteArray.length - i - 1] = optionIndex + 1;
+    });
+    const optionId = fromBuffer(byteArray).toString();
+    return this._pollingContract().vote(pollId, optionId);
   }
 
   _pollingContract() {
