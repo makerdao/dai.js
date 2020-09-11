@@ -301,6 +301,8 @@ export default class GovPollingService extends PrivateService {
       // move votes to the next choice on their preference list
       votesToBeMoved.forEach(vote => {
         votes[vote.index].choice = votes[vote.index].ballot.pop();
+        if (!tally.options[votes[vote.index].choice])
+          tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
         tally.options[votes[vote.index].choice].transfer = BigNumber(
           tally.options[votes[vote.index].choice].transfer
         ).plus(vote.mkrSupport || 0);
