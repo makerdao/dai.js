@@ -336,7 +336,8 @@ test(VAULT, async () => {
   );
   expect(vault.encumberedCollateral).toEqual(expectedEncumberedCollateral);
   expect(vault.encumberedDebt.toNumber()).toBeCloseTo(
-    expectedEncumberedDebt.toNumber()
+    expectedEncumberedDebt.toNumber(),
+    1
   );
   expect(vault.collateralTypePrice.toString()).toEqual(
     expectedColTypePrice.toString()
