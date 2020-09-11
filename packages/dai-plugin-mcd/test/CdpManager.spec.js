@@ -50,12 +50,12 @@ test('getCdpIds gets all CDP data from the proxy', async () => {
 
 test('getCombinedDebtValue', async () => {
   await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-  await cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(3));
-  await cdpMgr.openLockAndDraw('ETH-A', ETH(2), DAI(5));
+  await cdpMgr.openLockAndDraw('ETH-A', ETH(10), DAI(100));
+  await cdpMgr.openLockAndDraw('ETH-A', ETH(20), DAI(100));
   maker.service(ServiceRoles.CDP_TYPE).reset();
   const currentProxy = await maker.currentProxy();
   const totalDebt = await cdpMgr.getCombinedDebtValue(currentProxy);
-  expect(totalDebt.toNumber()).toBeCloseTo(8, 1);
+  expect(totalDebt.toNumber()).toBeCloseTo(200, 1);
 });
 
 test('getCdp looks up ilk and has cache', async () => {
@@ -86,7 +86,7 @@ test('getCdp can disable prefetch', async () => {
 test('transaction tracking for openLockAndDraw', async () => {
   const cdpMgr = maker.service(ServiceRoles.CDP_MANAGER);
   const txMgr = maker.service('transactionManager');
-  const open = cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(0));
+  const open = cdpMgr.openLockAndDraw('ETH-A', ETH(5), DAI(100));
   expect.assertions(5);
   const handlers = {
     pending: jest.fn(({ metadata: { contract, method } }) => {
@@ -194,7 +194,7 @@ describe('using a different account', () => {
 
 test('get event history via web3', async () => {
   await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-  const cdp = await cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(3));
+  const cdp = await cdpMgr.openLockAndDraw('ETH-A', ETH(5), DAI(100));
   await cdp.freeCollateral(ETH(0.5));
   await cdpMgr.give(cdp.id, '0x1000000000000000000000000000000000000000');
   const events = await cdpMgr.getEventHistory(cdp);
@@ -211,11 +211,11 @@ test('get event history via web3', async () => {
   expect(depositEventIdx).toBeGreaterThan(-1);
   expect(events[depositEventIdx].ilk).toEqual('ETH-A');
   expect(events[depositEventIdx].gem).toEqual('ETH');
-  expect(events[depositEventIdx].amount).toEqual('1');
+  expect(events[depositEventIdx].amount).toEqual('5');
 
   expect(generateEventIdx).toBeGreaterThan(-1);
   expect(events[generateEventIdx].ilk).toEqual('ETH-A');
-  expect(events[generateEventIdx].amount).toEqual('3');
+  expect(events[generateEventIdx].amount).toEqual('100');
 
   expect(withdrawEventIdx).toBeGreaterThan(-1);
   expect(events[withdrawEventIdx].ilk).toEqual('ETH-A');

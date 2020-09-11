@@ -14,12 +14,12 @@ import getCdpsSchemas from '../../src/schemas/getCdps';
 
 let maker, snapshotData, proxyAddress, mgr, ethCdp, batCdp;
 
-const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = DAI(1);
+const ETH_A_COLLATERAL_AMOUNT = ETH(5);
+const ETH_A_DEBT_AMOUNT = DAI(100);
 const ETH_A_PRICE = 180;
 
-const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = DAI(1);
+const BAT_A_COLLATERAL_AMOUNT = BAT(100);
+const BAT_A_DEBT_AMOUNT = DAI(100);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {

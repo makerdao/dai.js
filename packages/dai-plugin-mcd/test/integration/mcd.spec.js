@@ -125,7 +125,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
     });
   }, 180000);
 
-  test('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
+  xtest('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
     startingGemBalance = await maker.getToken(GEM).balance();

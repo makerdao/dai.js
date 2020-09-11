@@ -41,7 +41,7 @@ describe('Global Settlement Dai Redeemer migration', () => {
 
   test('if the system is in global settlement, user owns some DAI, but collateral price has not been fixed, return false', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(9));
+    await cdpManager.openLockAndDraw('ETH-A', ETH(5), DAI(100));
 
     mockContracts(smartContract, { MCD_END_1: globalSettlement.afterCage() });
 
@@ -60,7 +60,7 @@ describe('Global Settlement Dai Redeemer migration', () => {
 
   xtest('if the system IS in global settlement, collateral price has been fixed, the user owns DAI, return true', async () => {
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpManager.openLockAndDraw('ETH-A', ETH(0.1), DAI(9));
+    await cdpManager.openLockAndDraw('ETH-A', ETH(5), DAI(100));
 
     mockContracts(smartContract, {
       MCD_END_1: globalSettlement.afterFlow({

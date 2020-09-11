@@ -2,14 +2,20 @@ import { createCurrencyRatio } from '@makerdao/currency';
 import { mcdMaker, setupCollateral } from './helpers';
 import { ServiceRoles } from '../src/constants';
 import { ETH, DAI, USD, BAT } from '../src';
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 const { CDP_MANAGER, CDP_TYPE } = ServiceRoles;
 
-let maker, service;
+let maker, service, snapshotData;
 
 beforeAll(async () => {
   maker = await mcdMaker();
+  snapshotData = await takeSnapshot(maker);
   service = maker.service(CDP_TYPE);
   jest.setTimeout(8000);
+});
+
+afterAll(async () => {
+  await restoreSnapshot(snapshotData, maker);
 });
 
 // these CDP types should be available to the Maker instance because
@@ -26,9 +32,9 @@ const scenarios = [
   liquidation penalty, annual stability fee]
 */
 const systemValues = {
-  'ETH-A': [2, 4, 100000, 1.5, 0.05, '5.0'],
+  'ETH-A': [80, 200, 100000, 1.5, 0.05, '5.0'],
   // 'ETH-B': [2, 4, 100000, 2, 0.05, '4.0'],
-  'BAT-A': [2, 4, 5000, 2, 0.08, '10.5']
+  'BAT-A': [80, 200, 5000, 2, 0.08, '10.5']
 };
 
 describe.each(scenarios)('%s', (ilk, GEM) => {
@@ -40,7 +46,7 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
     await setupCollateral(maker, ilk, { price });
 
     for (let i = 0; i < 2; i++) {
-      await maker.service(CDP_MANAGER).openLockAndDraw(ilk, GEM(1), 2);
+      await maker.service(CDP_MANAGER).openLockAndDraw(ilk, GEM(40), 100);
     }
 
     cdpType = service.getCdpType(GEM, ilk);
@@ -87,15 +93,15 @@ describe.each(scenarios)('%s', (ilk, GEM) => {
 });
 
 test('get system-wide debt', () => {
-  expect(service.totalDebtAllCdpTypes.toNumber()).toBeCloseTo(8);
+  expect(service.totalDebtAllCdpTypes.toNumber()).toBeCloseTo(400);
 });
 
 test('get system-wide collateral value', () => {
-  expect(service.totalCollateralValueAllCdpTypes.toNumber()).toBeCloseTo(40);
+  expect(service.totalCollateralValueAllCdpTypes.toNumber()).toBeCloseTo(1600);
 });
 
 test('get system-wide collateralization ratio', async () => {
   expect(service.totalCollateralizationRatioAllCdpTypes.toNumber()).toBeCloseTo(
-    5
+    4
   );
 });

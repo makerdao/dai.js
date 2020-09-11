@@ -22,12 +22,12 @@ import vatSchemas from '../../src/schemas/vat';
 
 let maker, snapshotData, ethAInfo, batAInfo, cdpMgr, cdpTypeService;
 
-const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = DAI(1);
+const ETH_A_COLLATERAL_AMOUNT = ETH(5);
+const ETH_A_DEBT_AMOUNT = DAI(100);
 const ETH_A_PRICE = 180;
 
-const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = DAI(1);
+const BAT_A_COLLATERAL_AMOUNT = BAT(100);
+const BAT_A_DEBT_AMOUNT = DAI(100);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {
@@ -158,8 +158,8 @@ test(DEBT_FLOOR, async () => {
   expect(isBigNumber(ethADebtFloor)).toEqual(true);
   expect(isBigNumber(batADebtFloor)).toEqual(true);
 
-  expect(ethADebtFloor).toEqual(BigNumber('0'));
-  expect(batADebtFloor).toEqual(BigNumber('0'));
+  expect(ethADebtFloor).toEqual(BigNumber('100'));
+  expect(batADebtFloor).toEqual(BigNumber('100'));
 });
 
 test(TOTAL_DAI_SUPPLY, async () => {
@@ -178,7 +178,7 @@ test(TOTAL_DAI_SUPPLY, async () => {
 
 test(ENCUMBERED_COLLATERAL, async () => {
   const cdpId = 1;
-  const expected = fromWei(1000000000000000000);
+  const expected = fromWei(5000000000000000000);
   const encumberedCollateral = await maker.latest(
     ENCUMBERED_COLLATERAL,
     'ETH-A',
@@ -189,13 +189,13 @@ test(ENCUMBERED_COLLATERAL, async () => {
 
 test(ENCUMBERED_DEBT, async () => {
   const cdpId = 1;
-  const expected = fromWei(995000000000000000);
+  const expected = fromWei(99999000000000000000);
   const encumberedDebt = await maker.latest(
     ENCUMBERED_DEBT,
     'ETH-A',
     await cdpMgr.getUrn(cdpId)
   );
-  expect(encumberedDebt.toNumber()).toBeCloseTo(expected.toNumber());
+  expect(encumberedDebt.toNumber()).toBeCloseTo(expected.toNumber(), 1);
 });
 
 test(UNLOCKED_COLLATERAL, async () => {

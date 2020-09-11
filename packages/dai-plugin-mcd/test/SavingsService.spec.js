@@ -39,7 +39,7 @@ describe('Savings Service', () => {
   async function makeSomeDai(amount) {
     const cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
     await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
-    await cdpMgr.openLockAndDraw('ETH-A', ETH(1), DAI(amount));
+    await cdpMgr.openLockAndDraw('ETH-A', ETH(10), DAI(amount));
   }
 
   beforeAll(async () => {
@@ -69,7 +69,7 @@ describe('Savings Service', () => {
   });
 
   test('get total amount of dai in pot', async () => {
-    await makeSomeDai(3);
+    await makeSomeDai(100);
     const potTotalBeforeJoin = await service.getTotalDai();
     expect(potTotalBeforeJoin.toNumber()).toBe(0);
 
@@ -80,7 +80,7 @@ describe('Savings Service', () => {
   });
 
   test('get total amount of dai in pot after some time', async () => {
-    await makeSomeDai(3);
+    await makeSomeDai(100);
     const potTotalBeforeJoin = await service.getTotalDai();
     expect(potTotalBeforeJoin.toNumber()).toBe(0);
 
@@ -124,7 +124,7 @@ describe('Savings Service', () => {
   });
 
   test('check balance after join', async () => {
-    await makeSomeDai(3);
+    await makeSomeDai(100);
 
     const joinAmount = 2;
     await service.join(DAI(joinAmount));
@@ -143,7 +143,7 @@ describe('Savings Service', () => {
   });
 
   test('check balance after join with multiple accounts', async () => {
-    await makeSomeDai(3);
+    await makeSomeDai(100);
     await service.join(DAI(2));
 
     const { address, key } = TestAccountProvider.nextAccount();
@@ -180,7 +180,7 @@ describe('Savings Service', () => {
   });
 
   test('cannot exit pot more than joined', async () => {
-    await makeSomeDai(3);
+    await makeSomeDai(100);
 
     await service.join(DAI(1));
 
@@ -194,7 +194,7 @@ describe('Savings Service', () => {
   });
 
   test('join and exit pot', async () => {
-    await makeSomeDai(3);
+    await makeSomeDai(100);
 
     const startingBalance = await dai.balance();
     const amountBeforeJoin = await service.balance();
@@ -234,7 +234,7 @@ describe('Savings Service', () => {
   });
 
   test('exit all', async () => {
-    await makeSomeDai(3);
+    await makeSomeDai(100);
 
     const startingBalance = (await dai.balance()).toNumber();
     const joinAmount = 2;
@@ -287,7 +287,7 @@ describe('Savings Service', () => {
   });
 
   test('earnings to date', async () => {
-    await makeSomeDai(10);
+    await makeSomeDai(100);
     const joinAmount = 10;
     await service.join(DAI(joinAmount));
 

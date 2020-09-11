@@ -67,12 +67,12 @@ let maker,
   proxyAddress,
   expectedEthVaultAddress,
   expectedBatVaultAddress;
-const ETH_A_COLLATERAL_AMOUNT = ETH(1);
-const ETH_A_DEBT_AMOUNT = DAI(1);
+const ETH_A_COLLATERAL_AMOUNT = ETH(5);
+const ETH_A_DEBT_AMOUNT = DAI(100);
 const ETH_A_PRICE = 180;
 
-const BAT_A_COLLATERAL_AMOUNT = BAT(1);
-const BAT_A_DEBT_AMOUNT = DAI(1);
+const BAT_A_COLLATERAL_AMOUNT = BAT(100);
+const BAT_A_DEBT_AMOUNT = DAI(100);
 const BAT_A_PRICE = 40;
 
 beforeAll(async () => {
@@ -231,7 +231,7 @@ test(VAULT_EXTERNAL_OWNER, async () => {
 test(COLLATERAL_AMOUNT, async () => {
   const cdpId = 1;
   const collateralAmount = await maker.latest(COLLATERAL_AMOUNT, cdpId);
-  const expected = ETH(1);
+  const expected = ETH(5);
 
   expect(collateralAmount.toString()).toEqual(expected.toString());
 });
@@ -239,7 +239,7 @@ test(COLLATERAL_AMOUNT, async () => {
 test(COLLATERAL_VALUE, async () => {
   const cdpId = 1;
   const collateralValue = await maker.latest(COLLATERAL_VALUE, cdpId);
-  const expected = USD(180);
+  const expected = USD(900);
 
   expect(collateralValue.toString()).toEqual(expected.toString());
 });
@@ -247,7 +247,7 @@ test(COLLATERAL_VALUE, async () => {
 test(COLLATERALIZATION_RATIO, async () => {
   const cdpId = 1;
   const colRatio = await maker.latest(COLLATERALIZATION_RATIO, cdpId);
-  const expected = createCurrencyRatio(USD, DAI)(180);
+  const expected = createCurrencyRatio(USD, DAI)(9);
 
   expect(colRatio.toString()).toEqual(expected.toString());
 });
@@ -255,7 +255,7 @@ test(COLLATERALIZATION_RATIO, async () => {
 test(DEBT_VALUE, async () => {
   const cdpId = 1;
   const debtValue = await maker.latest(DEBT_VALUE, cdpId);
-  const expected = DAI(1);
+  const expected = DAI(100);
 
   expect(debtValue.toNumber()).toEqual(expected.toNumber());
 });
@@ -263,7 +263,7 @@ test(DEBT_VALUE, async () => {
 test(LIQUIDATION_PRICE, async () => {
   const cdpId = 1;
   const liqPrice = await maker.latest(LIQUIDATION_PRICE, cdpId);
-  const expected = createCurrencyRatio(USD, ETH)(1.5);
+  const expected = createCurrencyRatio(USD, ETH)(30);
 
   expect(liqPrice.toString()).toEqual(expected.toString());
 });
@@ -271,7 +271,7 @@ test(LIQUIDATION_PRICE, async () => {
 test(DAI_AVAILABLE, async () => {
   const cdpId = 1;
   const daiAvailable = await maker.latest(DAI_AVAILABLE, cdpId);
-  const expected = DAI(119);
+  const expected = DAI(500);
 
   expect(daiAvailable.toString()).toEqual(expected.toString());
 });
@@ -279,7 +279,7 @@ test(DAI_AVAILABLE, async () => {
 test(MIN_SAFE_COLLATERAL_AMOUNT, async () => {
   const cdpId = 1;
   const minSafe = await maker.latest(MIN_SAFE_COLLATERAL_AMOUNT, cdpId);
-  const expected = ETH(0.01);
+  const expected = ETH(0.83);
 
   expect(minSafe.toString()).toEqual(expected.toString());
 });
@@ -287,7 +287,7 @@ test(MIN_SAFE_COLLATERAL_AMOUNT, async () => {
 test(COLLATERAL_AVAILABLE_AMOUNT, async () => {
   const cdpId = 1;
   const avail = await maker.latest(COLLATERAL_AVAILABLE_AMOUNT, cdpId);
-  const expected = ETH(0.99);
+  const expected = ETH(4.17);
 
   expect(avail.toString()).toEqual(expected.toString());
 });
@@ -295,7 +295,7 @@ test(COLLATERAL_AVAILABLE_AMOUNT, async () => {
 test(COLLATERAL_AVAILABLE_VALUE, async () => {
   const cdpId = 1;
   const value = await maker.latest(COLLATERAL_AVAILABLE_VALUE, cdpId);
-  const expected = USD(178.5);
+  const expected = USD(750);
 
   expect(value.toString()).toEqual(expected.toString());
 });
@@ -305,23 +305,23 @@ test(VAULT, async () => {
   const expectedVaultType = 'ETH-A';
   const expectedOwner = proxyAddress;
   const expectedExternalOwner = address;
-  const expectedEncumberedCollateral = fromWei(1000000000000000000);
-  const expectedEncumberedDebt = fromWei(995000000000000000);
+  const expectedEncumberedCollateral = fromWei(5000000000000000000);
+  const expectedEncumberedDebt = fromWei(99999000000000000000);
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
-  const expectedDebtValue = DAI(1);
-  const expectedColRatio = createCurrencyRatio(USD, DAI)(180);
-  const expectedCollateralAmount = ETH(1);
-  const expectedCollateralValue = USD(180);
-  const expectedLiquidationPrice = createCurrencyRatio(USD, ETH)(1.5);
-  const expectedDaiAvailable = DAI(119);
-  const expectedCollateralAvailableAmount = ETH(0.99);
-  const expectedCollateralAvailableValue = USD(178.5);
+  const expectedDebtValue = DAI(100);
+  const expectedColRatio = createCurrencyRatio(USD, DAI)(9);
+  const expectedCollateralAmount = ETH(5);
+  const expectedCollateralValue = USD(900);
+  const expectedLiquidationPrice = createCurrencyRatio(USD, ETH)(30);
+  const expectedDaiAvailable = DAI(500);
+  const expectedCollateralAvailableAmount = ETH(4.17);
+  const expectedCollateralAvailableValue = USD(750);
   const expectedUnlockedCollateral = fromWei(0);
   const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
-  const expectedLiqPenalty = BigNumber('1049999999');
+  const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
-  const expectedDebtFloor = BigNumber('0');
-  const expectedCollateralDebtAvailable = DAI(99999);
+  const expectedDebtFloor = BigNumber('100');
+  const expectedCollateralDebtAvailable = DAI(99900);
 
   const vault = await maker.latest(VAULT, cdpId);
 
@@ -336,7 +336,8 @@ test(VAULT, async () => {
   );
   expect(vault.encumberedCollateral).toEqual(expectedEncumberedCollateral);
   expect(vault.encumberedDebt.toNumber()).toBeCloseTo(
-    expectedEncumberedDebt.toNumber()
+    expectedEncumberedDebt.toNumber(),
+    1
   );
   expect(vault.collateralTypePrice.toString()).toEqual(
     expectedColTypePrice.toString()
@@ -396,13 +397,13 @@ test(BALANCE, async () => {
   expect(ethBalance.symbol).toEqual('ETH');
   expect(batBalance.symbol).toEqual('BAT');
   expect(ethBalance.toBigNumber()).toEqual(BigNumber('100'));
-  expect(batBalance.toBigNumber()).toEqual(BigNumber('999'));
+  expect(batBalance.toBigNumber()).toEqual(BigNumber('900'));
 
   const daiBalance = await maker.latest(BALANCE, 'DAI', address);
   const wethBalance = await maker.latest(BALANCE, 'WETH', address);
 
   expect(daiBalance.symbol).toEqual('DAI');
-  expect(daiBalance.toBigNumber()).toEqual(BigNumber('1'));
+  expect(daiBalance.toBigNumber()).toEqual(BigNumber('199'));
 
   expect(wethBalance.symbol).toEqual('WETH');
   expect(wethBalance.toBigNumber()).toEqual(BigNumber('0'));
@@ -492,11 +493,11 @@ test(COLLATERAL_TYPE_DATA, async () => {
   const collateralType = 'ETH-A';
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
   const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
-  const expectedLiqPenalty = BigNumber('1049999999');
+  const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedPriceWithSafetyMargin = BigNumber('120');
-  const expectedDebtFloor = BigNumber('0');
-  const expectedCollateralDebtAvailable = DAI(99999);
+  const expectedDebtFloor = BigNumber('100');
+  const expectedCollateralDebtAvailable = DAI(99900);
 
   const colData = await maker.latest(COLLATERAL_TYPE_DATA, collateralType);
 
@@ -552,5 +553,5 @@ test(COLLATERAL_DEBT_AVAILABLE, async () => {
     'ETH-A'
   );
 
-  expect(ethACollateralDebt.toNumber()).toEqual(99999);
+  expect(ethACollateralDebt.toNumber()).toEqual(99900);
 });

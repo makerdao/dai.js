@@ -41,6 +41,6 @@ test('get total dai', async () => {
   await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
   await maker
     .service(ServiceRoles.CDP_MANAGER)
-    .openLockAndDraw('ETH-A', ETH(1), DAI(3));
-  expect((await service.getTotalDai()).toNumber()).toBe(DAI(3).toNumber());
+    .openLockAndDraw('ETH-A', ETH(10), DAI(100));
+  expect((await service.getTotalDai()).toNumber()).toBe(DAI(100).toNumber());
 });

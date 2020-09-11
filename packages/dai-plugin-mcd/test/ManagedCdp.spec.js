@@ -22,10 +22,13 @@ beforeAll(async () => {
   // creates it -- this is probably not a future-proof assumption
   proxy = await maker.currentProxy();
   txMgr = maker.service('transactionManager');
+});
+
+beforeEach(async () => {
   snapshotData = await takeSnapshot(maker);
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await restoreSnapshot(snapshotData, maker);
 });
 
@@ -183,47 +186,46 @@ describe.each([
       myGem: startingGemBalance.minus(2)
     });
 
-    await cdp.lockAndDraw(1, 5);
+    await cdp.lockAndDraw(10, 100);
     await expectValuesAfterReset(cdp, {
-      collateral: 3,
-      debt: 5,
-      myDai: startingDaiBalance.plus(5),
-      myGem: startingGemBalance.minus(3)
+      collateral: 12,
+      debt: 100,
+      myDai: startingDaiBalance.plus(100),
+      myGem: startingGemBalance.minus(12)
     });
 
     await cdp.freeCollateral(0.8);
     await expectValuesAfterReset(cdp, {
-      collateral: 2.2,
-      myGem: startingGemBalance.minus(2.2)
+      collateral: 11.2,
+      myGem: startingGemBalance.minus(11.2)
     });
   });
 
   test('openLockAndDraw, get, draw, wipe, wipeAndFree', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(40), DAI(100));
     await expectValues(cdp, {
-      collateral: 1,
-      debt: 1,
-      myDai: startingDaiBalance.plus(1),
-      myGem: startingGemBalance.minus(1)
+      collateral: 40,
+      debt: 100,
+      myDai: startingDaiBalance.plus(100),
+      myGem: startingGemBalance.minus(40)
     });
     cdp.type.reset();
     await cdp.type.prefetch();
     await expectValues(cdp, {
-      val: cdp.type.price.toNumber(),
-      ratio: cdp.type.price.toNumber(),
+      ratio: ilk === 'ETH-A' ? 60 : 40,
       isSafe: true,
       daiAvailable: '149'
     });
 
     const sameCdp = await mgr.getCdp(cdp.id);
-    await expectValues(sameCdp, { collateral: 1, debt: 1 });
+    await expectValues(sameCdp, { collateral: 40, debt: 100 });
 
     const urn = await cdp.getUrn();
     expect(urn.length).toBe(42);
 
-    const draw = cdp.drawDai(1);
+    const draw = cdp.drawDai(10);
     const drawHandler = jest.fn((tx, state) => {
       expect(tx.metadata.method).toBe('draw');
       expect(state).toBe(txStates[drawHandler.mock.calls.length - 1]);
@@ -232,11 +234,11 @@ describe.each([
     await draw;
     expect(drawHandler.mock.calls.length).toBe(2);
     await expectValuesAfterReset(cdp, {
-      debt: 2,
-      myDai: startingDaiBalance.plus(2)
+      debt: 110,
+      myDai: startingDaiBalance.plus(110)
     });
 
-    const wipe = cdp.wipeDai(0.5);
+    const wipe = cdp.wipeDai(5);
     const wipeHandler = jest.fn((tx, state) => {
       expect(tx.metadata.method).toBe('safeWipe');
       expect(state).toBe(txStates[wipeHandler.mock.calls.length - 1]);
@@ -245,26 +247,26 @@ describe.each([
     await wipe;
     expect(wipeHandler.mock.calls.length).toBe(2);
     await expectValuesAfterReset(cdp, {
-      debt: 1.5,
-      myDai: startingDaiBalance.plus(1.5)
+      debt: 105,
+      myDai: startingDaiBalance.plus(105)
     });
 
-    await cdp.wipeAndFree(DAI(1), GEM(0.5));
+    await cdp.wipeAndFree(DAI(5), GEM(0.1));
     await expectValuesAfterReset(cdp, {
-      collateral: 0.5,
-      debt: 0.5,
-      myDai: startingDaiBalance.plus(0.5),
-      myGem: startingGemBalance.minus(0.5)
+      collateral: 39.9,
+      debt: 100,
+      myDai: startingDaiBalance.plus(100),
+      myGem: startingGemBalance.minus(39.9)
     });
   });
 
   test('openLockAndDraw, wipeAll, give', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(40), DAI(100));
     await expectValuesAfterReset(cdp, {
-      debt: 1,
-      myDai: startingDaiBalance.plus(1)
+      debt: 100,
+      myDai: startingDaiBalance.plus(100)
     });
 
     const wipeAll = cdp.wipeAll();
@@ -298,15 +300,15 @@ describe.each([
   test('openLockAndDraw, wipeAllAndFree, giveToProxy', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(40), DAI(100));
     await expectValuesAfterReset(cdp, {
-      collateral: 1,
-      debt: 1,
-      myDai: startingDaiBalance.plus(1),
-      myGem: startingGemBalance.minus(1)
+      collateral: 40,
+      debt: 100,
+      myDai: startingDaiBalance.plus(100),
+      myGem: startingGemBalance.minus(40)
     });
 
-    const wipeAllAndFree = cdp.wipeAllAndFree(GEM(1));
+    const wipeAllAndFree = cdp.wipeAllAndFree(GEM(40));
     const wipeAllAndFreeHandler = jest.fn((tx, state) => {
       expect(tx.metadata.method).toEqual(
         expect.stringContaining('wipeAllAndFree')
@@ -342,9 +344,9 @@ describe.each([
   test('openLockAndDraw, unsafeWipe', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(40), DAI(100));
 
-    const unsafeWipe = cdp.unsafeWipe(DAI(1));
+    const unsafeWipe = cdp.unsafeWipe(DAI(100));
     const unsafeWipeHandler = jest.fn((tx, state) => {
       expect(tx.metadata.method).toEqual(expect.stringContaining('wipe'));
       expect(state).toBe(txStates[unsafeWipeHandler.mock.calls.length - 1]);
@@ -357,7 +359,7 @@ describe.each([
   test('openLockAndDraw, unsafeWipeAll', async () => {
     const txStates = ['pending', 'mined', 'confirmed'];
     const mgr = maker.service(CDP_MANAGER);
-    const cdp = await mgr.openLockAndDraw(ilk, GEM(1), DAI(1));
+    const cdp = await mgr.openLockAndDraw(ilk, GEM(40), DAI(100));
 
     const unsafeWipeAll = cdp.unsafeWipeAll();
     const unsafeWipeAllHandler = jest.fn((tx, state) => {
