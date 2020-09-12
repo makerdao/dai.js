@@ -301,7 +301,6 @@ export default class GovPollingService extends PrivateService {
       });
 
       tally.options[optionToEliminate].eliminated = true;
-      tally.options[optionToEliminate].transfer = BigNumber(0);
 
       // a vote needs to be moved if...
       // 1) it's currently for the eliminated candidate
@@ -313,12 +312,18 @@ export default class GovPollingService extends PrivateService {
 
       // move votes to the next choice on their preference list
       votesToBeMoved.forEach(vote => {
+        const prevChoice = votes[vote.index].choice;
         votes[vote.index].choice = votes[vote.index].ballot.pop();
         if (!tally.options[votes[vote.index].choice])
           tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
+
         tally.options[votes[vote.index].choice].transfer = BigNumber(
           tally.options[votes[vote.index].choice].transfer
         ).plus(vote.mkrSupport || 0);
+
+        tally.options[prevChoice].transfer = BigNumber(
+          tally.options[prevChoice].transfer
+        ).minus(vote.mkrSupport || 0);
       });
 
       // look for a candidate with the majority

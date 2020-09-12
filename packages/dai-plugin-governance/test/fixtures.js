@@ -163,7 +163,7 @@ export const dummyBallotNoMajorityExpect = {
   options: {
     '1': {
       firstChoice: '60.025',
-      transfer: '0',
+      transfer: '-60.025',
       winner: false,
       eliminated: true
     },
@@ -210,7 +210,7 @@ export const dummyBallotMultipleRoundsExpect = {
   options: {
     '1': {
       firstChoice: '60.025',
-      transfer: '0',
+      transfer: '-56.025',
       winner: false,
       eliminated: true
     },
@@ -228,7 +228,7 @@ export const dummyBallotMultipleRoundsExpect = {
     },
     '4': {
       firstChoice: '4',
-      transfer: '0',
+      transfer: '-4',
       winner: false,
       eliminated: true
     }
