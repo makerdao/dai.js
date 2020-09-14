@@ -306,7 +306,7 @@ test(VAULT, async () => {
   const expectedOwner = proxyAddress;
   const expectedExternalOwner = address;
   const expectedEncumberedCollateral = fromWei(5000000000000000000);
-  const expectedEncumberedDebt = fromWei(99999000000000000000);
+  const expectedEncumberedDebt = fromWei(99939000000000000000);
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
   const expectedDebtValue = DAI(100);
   const expectedColRatio = createCurrencyRatio(USD, DAI)(9);
@@ -336,8 +336,7 @@ test(VAULT, async () => {
   );
   expect(vault.encumberedCollateral).toEqual(expectedEncumberedCollateral);
   expect(vault.encumberedDebt.toNumber()).toBeCloseTo(
-    expectedEncumberedDebt.toNumber(),
-    1
+    expectedEncumberedDebt.toNumber()
   );
   expect(vault.collateralTypePrice.toString()).toEqual(
     expectedColTypePrice.toString()

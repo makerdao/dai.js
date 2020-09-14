@@ -189,13 +189,13 @@ test(ENCUMBERED_COLLATERAL, async () => {
 
 test(ENCUMBERED_DEBT, async () => {
   const cdpId = 1;
-  const expected = fromWei(99999000000000000000);
+  const expected = fromWei(99939000000000000000);
   const encumberedDebt = await maker.latest(
     ENCUMBERED_DEBT,
     'ETH-A',
     await cdpMgr.getUrn(cdpId)
   );
-  expect(encumberedDebt.toNumber()).toBeCloseTo(expected.toNumber(), 1);
+  expect(encumberedDebt.toNumber()).toBeCloseTo(expected.toNumber());
 });
 
 test(UNLOCKED_COLLATERAL, async () => {
