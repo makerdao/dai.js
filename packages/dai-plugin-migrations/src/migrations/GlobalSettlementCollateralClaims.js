@@ -47,56 +47,25 @@ export default class GlobalSettlementCollateralClaims {
     return freeCollateral;
   }
 
-  freeEth(cdpId) {
-    const cdpManagerAddress = this._container
-      .get('smartContract')
-      .getContractAddress('CDP_MANAGER_1');
-    const endAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_END_1');
-    const ethJoinAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_JOIN_ETH_A');
-    return this._container
-      .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')
-      .freeETH(cdpManagerAddress, ethJoinAddress, endAddress, cdpId, {
-        dsProxy: true
-      });
+  _ilkToAdapter(ilk) {
+    return 'MCD_JOIN_' + ilk.replace(/-/g, '_');
   }
 
-  freeBat(cdpId) {
+  free(cdpId, ilk) {
     const cdpManagerAddress = this._container
       .get('smartContract')
       .getContractAddress('CDP_MANAGER_1');
     const endAddress = this._container
       .get('smartContract')
       .getContractAddress('MCD_END_1');
-    const gemJoinAddress = this._container
+    const joinAddress = this._container
       .get('smartContract')
-      .getContractAddress('MCD_JOIN_BAT_A');
+      .getContractAddress(this._ilkToAdapter(ilk));
+    const methodName = ilk.substring(0, 3) === 'ETH' ? 'freeETH' : 'freeGem';
     return this._container
       .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')
-      .freeGem(cdpManagerAddress, gemJoinAddress, endAddress, cdpId, {
-        dsProxy: true
-      });
-  }
-
-  freeUsdc(cdpId) {
-    const cdpManagerAddress = this._container
-      .get('smartContract')
-      .getContractAddress('CDP_MANAGER_1');
-    const endAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_END_1');
-    const gemJoinAddress = this._container
-      .get('smartContract')
-      .getContractAddress('MCD_JOIN_USDC_A');
-    return this._container
-      .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')
-      .freeGem(cdpManagerAddress, gemJoinAddress, endAddress, cdpId, {
+      .getContract('PROXY_ACTIONS_END')[methodName](
+        cdpManagerAddress, joinAddress, endAddress, cdpId, {
         dsProxy: true
       });
   }

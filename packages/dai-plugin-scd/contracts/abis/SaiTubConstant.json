@@ -1,0 +1,11 @@
+[
+    {
+        "constant":true,
+        "inputs":[{"name":"cup","type":"bytes32"}],
+        "name":"tab",
+        "outputs":[{"name":"","type":"uint256"}],
+        "payable":false,
+        "stateMutability":"nonpayable",
+        "type":"function"
+    }
+]
