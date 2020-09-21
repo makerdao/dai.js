@@ -335,9 +335,7 @@ test(VAULT, async () => {
     expectedExternalOwner
   );
   expect(vault.encumberedCollateral).toEqual(expectedEncumberedCollateral);
-  expect(vault.encumberedDebt.toNumber()).toBeCloseTo(
-    expectedEncumberedDebt.toNumber()
-  );
+  expect(vault.encumberedDebt.toNumber() - expectedEncumberedDebt.toNumber()).toBeLessThan(0.1);
   expect(vault.collateralTypePrice.toString()).toEqual(
     expectedColTypePrice.toString()
   );

@@ -195,7 +195,7 @@ test(ENCUMBERED_DEBT, async () => {
     'ETH-A',
     await cdpMgr.getUrn(cdpId)
   );
-  expect(encumberedDebt.toNumber()).toBeCloseTo(expected.toNumber());
+  expect(encumberedDebt.toNumber() - expected.toNumber()).toBeLessThan(0.1);
 });
 
 test(UNLOCKED_COLLATERAL, async () => {
