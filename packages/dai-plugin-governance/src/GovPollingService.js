@@ -244,7 +244,8 @@ export default class GovPollingService extends PrivateService {
       rounds: 1,
       winner: null,
       totalMkrParticipation,
-      options: {}
+      options: {},
+      numVoters: votes.length
     };
     const defaultOptionObj = {
       firstChoice: BigNumber(0),
