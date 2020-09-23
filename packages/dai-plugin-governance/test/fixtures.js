@@ -117,7 +117,6 @@ export const dummyBallotWithMajorityExpect = {
   rounds: 1,
   winner: '3',
   totalMkrParticipation: '324.692625397295750537',
-  numVoters: 3,
   options: {
     '1': {
       firstChoice: '60.025',
@@ -137,7 +136,8 @@ export const dummyBallotWithMajorityExpect = {
       winner: true,
       eliminated: false
     }
-  }
+  },
+  numVoters: 3
 };
 
 // ---
@@ -161,7 +161,6 @@ export const dummyBallotNoMajorityExpect = {
   rounds: 2,
   winner: '3',
   totalMkrParticipation: '226.692625397295750537',
-  numVoters: 3,
   options: {
     '1': {
       firstChoice: '60.025',
@@ -181,7 +180,8 @@ export const dummyBallotNoMajorityExpect = {
       winner: true,
       eliminated: false
     }
-  }
+  },
+  numVoters: 3
 };
 
 // ---
@@ -209,7 +209,6 @@ export const dummyBallotMultipleRoundsExpect = {
   rounds: 3,
   winner: '3',
   totalMkrParticipation: '230.692625397295750537',
-  numVoters: 4,
   options: {
     '1': {
       firstChoice: '60.025',
@@ -235,5 +234,6 @@ export const dummyBallotMultipleRoundsExpect = {
       winner: false,
       eliminated: true
     }
-  }
+  },
+  numVoters: 4
 };
