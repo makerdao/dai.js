@@ -74,6 +74,9 @@ export const TUSD = createCurrency('TUSD');
 export const MANA = createCurrency('MANA');
 export const USDT = createCurrency('USDT');
 export const PAXUSD = createCurrency('PAXUSD');
+export const COMP = createCurrency('COMP');
+export const LRC = createCurrency('LRC');
+export const LINK = createCurrency('LINK');
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
@@ -86,7 +89,10 @@ export const defaultCdpTypes = [
   { currency: ZRX, ilk: 'ZRX-A', decimals: 18 },
   { currency: MANA, ilk: 'MANA-A', decimals: 18 },
   { currency: USDT, ilk: 'USDT-A', decimals: 6 },
-  { currency: PAXUSD, ilk: 'PAXUSD-A', decimals: 18 }
+  { currency: PAXUSD, ilk: 'PAXUSD-A', decimals: 18 },
+  { currency: COMP, ilk: 'COMP-A', decimals: 18 },
+  { currency: LRC, ilk: 'LRC-A', decimals: 18 },
+  { currency: LINK, ilk: 'LINK-A', decimals: 18 }
 ];
 
 export const SAI = createCurrency('SAI');
@@ -130,6 +136,7 @@ export const McdPlugin = {
       }
     );
 
+    console.log(tokens);
     // Set global BigNumber precision to enable exponential operations
     BigNumber.config({ POW_PRECISION: 100 });
 

@@ -16,6 +16,7 @@ export const tokenBalance = {
     const currencyToken = getMcdToken(symbol);
     const contract =
       symbol === 'DAI' ? 'MCD_DAI' : symbol === 'WETH' ? 'ETH' : symbol;
+
     if (!currencyToken)
       throw new Error(`${symbol} token is not part of the default tokens list`);
     if (symbol === 'DSR-DAI')

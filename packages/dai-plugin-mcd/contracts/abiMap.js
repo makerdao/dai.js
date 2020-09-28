@@ -45,5 +45,8 @@ module.exports = {
   TUSD: require('./abis/DSToken.json'),
   MANA: require('./abis/DSToken.json'),
   USDT: require('./abis/DSToken.json'),
-  PAXUSD: require('./abis/DSToken.json')
+  PAXUSD: require('./abis/DSToken.json'),
+  COMP: require('./abis/DSToken.json'),
+  LRC: require('./abis/DSToken.json'),
+  LINK: require('./abis/DSToken.json')
 };
