@@ -18,6 +18,7 @@ const EVENT_VAT_FROB = funcSigTopic(
   'frob(bytes32,address,address,address,int256,int256)'
 );
 const EVENT_MANAGER_FROB = funcSigTopic('frob(uint256,int256,int256)');
+const EVENT_MANAGER_MOVE = funcSigTopic('move(uint256,address,uint256)');
 
 const decodeManagerFrob = data => {
   const sig = ethAbi
@@ -107,50 +108,52 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
     .get('smartContract')
     .getContract('MCD_CAT').interface.events;
 
-  const lookups = [
-    {
-      request: web3.getPastLogs({
-        address: CDP_MANAGER,
-        topics: [
-          utils.keccak256(utils.toHex(NewCdp.signature)),
-          null,
-          null,
-          '0x' + padStart(id.toString(16), 64, '0')
-        ],
-        fromBlock
-      }),
-      result: r =>
-        r.map(({ blockNumber: block, transactionHash: txHash }) => {
-          return {
-            type: 'OPEN',
-            order: 0,
-            block,
-            txHash,
-            id,
-            ilk
-          };
-        })
-    },
-    {
-      request: web3.getPastLogs({
-        address: CDP_MANAGER,
-        topics: [
-          EVENT_MANAGER_FROB,
-          null,
-          '0x' + padStart(id.toString(16), 64, '0')
-        ],
-        fromBlock
-      }),
-      result: async r =>
-        r.reduce(async (acc, { blockNumber: block, data, topics }) => {
-          let { dart } = decodeManagerFrob(data);
-          acc = await acc;
-          dart = new BigNumber(dart);
-          // Imprecise debt amount frobbed (not scaled by vat.ilks[ilk].rate)
-          if (dart.lt(0) || dart.gt(0)) {
-            // Lookup the dai join events on this block for this proxy address
-            const proxy = topics[1];
-            const joinDaiEvents = await web3.getPastLogs({
+  const cdpManagerNewCdp = {
+    request: web3.getPastLogs({
+      address: CDP_MANAGER,
+      topics: [
+        utils.keccak256(utils.toHex(NewCdp.signature)),
+        null,
+        null,
+        '0x' + padStart(id.toString(16), 64, '0')
+      ],
+      fromBlock
+    }),
+    result: r =>
+      r.map(({ blockNumber: block, transactionHash: txHash }) => {
+        return {
+          type: 'OPEN',
+          order: 0,
+          block,
+          txHash,
+          id,
+          ilk
+        };
+      })
+  };
+
+  const daiAdapterJoinExit = {
+    request: web3.getPastLogs({
+      address: CDP_MANAGER,
+      topics: [
+        EVENT_MANAGER_FROB,
+        null,
+        '0x' + padStart(id.toString(16), 64, '0')
+      ],
+      fromBlock
+    }),
+    result: async r => {
+      return r.reduce(async (acc, { blockNumber: block, data, topics }) => {
+        let { dart } = decodeManagerFrob(data);
+        acc = await acc;
+        dart = new BigNumber(dart);
+        // Imprecise debt amount frobbed (not scaled by vat.ilks[ilk].rate)
+        if (dart.lt(0) || dart.gt(0)) {
+          // Lookup the dai join events on this block for this proxy address
+          const proxy = topics[1];
+
+          const [joinDaiEvents, cdpMoveEvents] = await Promise.all([
+            web3.getPastLogs({
               address: [MCD_JOIN_DAI, MCD_JOIN_SAI],
               topics: [
                 dart.lt(0) ? EVENT_DAI_ADAPTER_JOIN : EVENT_DAI_ADAPTER_EXIT,
@@ -158,137 +161,162 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
               ],
               fromBlock: block,
               toBlock: block
-            });
-            acc.push(
-              ...joinDaiEvents.map(
-                ({
-                  address,
-                  blockNumber: block,
-                  transactionHash: txHash,
-                  topics
-                }) => ({
-                  type: dart.lt(0) ? 'PAY_BACK' : 'GENERATE',
-                  order: 2,
-                  block,
-                  txHash,
-                  id,
-                  ilk,
-                  adapter: address.toLowerCase(),
-                  proxy: formatAddress(topics[1]),
-                  recipient: formatAddress(topics[2]),
-                  amount: parseWeiNumeric(topics[3])
-                })
-              )
-            );
-          }
-          return acc;
-        }, [])
-    },
-    {
-      request: web3.getPastLogs({
-        address: MCD_VAT,
-        topics: [
-          EVENT_VAT_FROB,
-          null,
-          '0x' + padStart(urnHandler.slice(2), 64, '0')
-        ],
-        fromBlock
-      }),
-      result: r =>
-        r.map(
-          ({
-            address,
-            blockNumber: block,
-            transactionHash: txHash,
-            data,
-            topics,
-            transactionLogIndex
-          }) => {
-            let { ilk, dink, urnHandler } = decodeVatFrob(data);
-            dink = new BigNumber(dink);
-            const reclaim =
-              formatAddress(topics[2]) === urnHandler.toLowerCase() &&
-              formatAddress(topics[3]) == urnHandler.toLowerCase() &&
-              parseInt(transactionLogIndex, 16) === 1;
-            return dink.lt(0) || dink.gt(0)
-              ? {
-                  type: dink.lt(0)
-                    ? 'WITHDRAW'
-                    : reclaim
-                    ? 'RECLAIM'
-                    : 'DEPOSIT',
-                  order: dink.lt(0) ? 3 : 1,
-                  block,
-                  txHash,
-                  id,
-                  ilk,
-                  gem: managedCdp.currency.symbol,
-                  adapter: address.toLowerCase(),
-                  amount: Math.abs(parseWeiNumeric(dink)).toString()
-                }
-              : null;
-          }
-        )
-    },
-    {
-      request: web3.getPastLogs({
-        address: CDP_MANAGER,
-        topics: [EVENT_GIVE, null, '0x' + padStart(id.toString(16), 64, '0')],
-        fromBlock
-      }),
-      result: r =>
-        r.map(({ blockNumber: block, transactionHash: txHash, topics }) => {
-          const prevOwner = formatAddress(topics[1]);
-          return {
-            type: prevOwner === MIGRATION ? 'MIGRATE' : 'GIVE',
-            order: 1,
-            block,
-            txHash,
-            prevOwner,
-            id: numberFromNumeric(topics[2]),
-            newOwner: formatAddress(topics[3])
-          };
-        })
-    },
-    {
-      request: web3.getPastLogs({
-        address: MCD_CAT,
-        topics: [
-          utils.keccak256(utils.toHex(Bite.signature)),
-          null,
-          '0x' + padStart(urnHandler.slice(2), 64, '0')
-        ],
-        fromBlock
-      }),
-      result: r =>
-        r.map(tx => {
-          const {
-            topics,
-            data,
-            blockNumber: block,
-            transactionHash: txHash
-          } = tx;
-          const inputs = Bite.inputs.names.reduceRight((acc, name, idx) => {
-            if (['ilk', 'urn'].some(indexed => indexed === name)) return acc;
-            return [
-              {
-                type: Bite.inputs.types[idx],
-                name
-              },
-              ...acc
-            ];
-          }, []);
-          const { id, ink } = ethAbi.decodeLog(inputs, data, topics);
-          return {
-            type: 'BITE',
-            auctionId: numberFromNumeric(id),
-            amount: new BigNumber(ink).shiftedBy(-18),
-            gem: managedCdp.currency.symbol,
-            block,
-            txHash
-          };
-        })
+            }),
+            web3.getPastLogs({
+              address: CDP_MANAGER,
+              topics: [
+                EVENT_MANAGER_MOVE,
+                proxy,
+                '0x' + padStart(id.toString(16), 64, '0')
+              ],
+              fromBlock: block,
+              toBlock: block
+            })
+          ]);
+
+          const filteredJoinDaiEvents = joinDaiEvents.filter(daiEvent =>
+            cdpMoveEvents.some(
+              moveEvent =>
+                moveEvent.transactionHash === daiEvent.transactionHash
+            )
+          );
+          acc.push(
+            ...filteredJoinDaiEvents.map(
+              ({
+                address,
+                blockNumber: block,
+                transactionHash: txHash,
+                topics
+              }) => ({
+                type: dart.lt(0) ? 'PAY_BACK' : 'GENERATE',
+                order: 2,
+                block,
+                txHash,
+                id,
+                ilk,
+                adapter: address.toLowerCase(),
+                proxy: formatAddress(topics[1]),
+                recipient: formatAddress(topics[2]),
+                amount: parseWeiNumeric(topics[3])
+              })
+            )
+          );
+        }
+        return acc;
+      }, []);
     }
+  };
+
+  const vatFrob = {
+    request: web3.getPastLogs({
+      address: MCD_VAT,
+      topics: [
+        EVENT_VAT_FROB,
+        null,
+        '0x' + padStart(urnHandler.slice(2), 64, '0')
+      ],
+      fromBlock
+    }),
+    result: r =>
+      r.map(
+        ({
+          address,
+          blockNumber: block,
+          transactionHash: txHash,
+          data,
+          topics,
+          transactionLogIndex
+        }) => {
+          let { ilk, dink, urnHandler } = decodeVatFrob(data);
+          dink = new BigNumber(dink);
+          const reclaim =
+            formatAddress(topics[2]) === urnHandler.toLowerCase() &&
+            formatAddress(topics[3]) == urnHandler.toLowerCase() &&
+            parseInt(transactionLogIndex, 16) === 1;
+          return dink.lt(0) || dink.gt(0)
+            ? {
+                type: dink.lt(0) ? 'WITHDRAW' : reclaim ? 'RECLAIM' : 'DEPOSIT',
+                order: dink.lt(0) ? 3 : 1,
+                block,
+                txHash,
+                id,
+                ilk,
+                gem: managedCdp.currency.symbol,
+                adapter: address.toLowerCase(),
+                amount: Math.abs(parseWeiNumeric(dink)).toString()
+              }
+            : null;
+        }
+      )
+  };
+
+  const cdpManagerGive = {
+    request: web3.getPastLogs({
+      address: CDP_MANAGER,
+      topics: [EVENT_GIVE, null, '0x' + padStart(id.toString(16), 64, '0')],
+      fromBlock
+    }),
+    result: r =>
+      r.map(({ blockNumber: block, transactionHash: txHash, topics }) => {
+        const prevOwner = formatAddress(topics[1]);
+        return {
+          type: prevOwner === MIGRATION ? 'MIGRATE' : 'GIVE',
+          order: 1,
+          block,
+          txHash,
+          prevOwner,
+          id: numberFromNumeric(topics[2]),
+          newOwner: formatAddress(topics[3])
+        };
+      })
+  };
+
+  const catBite = {
+    request: web3.getPastLogs({
+      address: MCD_CAT,
+      topics: [
+        utils.keccak256(utils.toHex(Bite.signature)),
+        null,
+        '0x' + padStart(urnHandler.slice(2), 64, '0')
+      ],
+      fromBlock
+    }),
+    result: r =>
+      r.map(tx => {
+        const {
+          topics,
+          data,
+          blockNumber: block,
+          transactionHash: txHash
+        } = tx;
+        const inputs = Bite.inputs.names.reduceRight((acc, name, idx) => {
+          if (['ilk', 'urn'].some(indexed => indexed === name)) return acc;
+          return [
+            {
+              type: Bite.inputs.types[idx],
+              name
+            },
+            ...acc
+          ];
+        }, []);
+        const { id, ink } = ethAbi.decodeLog(inputs, data, topics);
+        return {
+          type: 'BITE',
+          auctionId: numberFromNumeric(id),
+          amount: new BigNumber(ink).shiftedBy(-18),
+          gem: managedCdp.currency.symbol,
+          block,
+          txHash
+        };
+      })
+  };
+
+  const lookups = [
+    cdpManagerNewCdp,
+    daiAdapterJoinExit,
+    vatFrob,
+    cdpManagerGive,
+    catBite
   ];
 
   // eslint-disable-next-line require-atomic-updates
