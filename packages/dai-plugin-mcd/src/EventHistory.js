@@ -90,7 +90,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   const utils = web3._web3.utils;
 
   // 8600000 is 2019-09-22 on mainnet and 2018-09-04 on kovan
-  const fromBlock = [1, 42].includes(web3.network) ? 8600000 : 1;
+  const genesis = [1, 42].includes(web3.network) ? 8600000 : 1;
 
   const promisesBlockTimestamp = {};
   const getBlockTimestamp = block => {
@@ -120,7 +120,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
         null,
         '0x' + padStart(id.toString(16), 64, '0')
       ],
-      fromBlock
+      fromBlock: genesis
     }),
     result: r =>
       r.map(({ blockNumber: block, transactionHash: txHash }) => {
@@ -143,7 +143,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
         null,
         '0x' + padStart(id.toString(16), 64, '0')
       ],
-      fromBlock
+      fromBlock: genesis
     }),
     result: async r => {
       return r.reduce(async (acc, { blockNumber: block, data, topics }) => {
@@ -218,7 +218,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
         null,
         '0x' + padStart(urnHandler.slice(2), 64, '0')
       ],
-      fromBlock
+      fromBlock: genesis
     }),
     result: r =>
       r.map(
@@ -257,7 +257,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
     request: web3.getPastLogs({
       address: CDP_MANAGER,
       topics: [EVENT_GIVE, null, '0x' + padStart(id.toString(16), 64, '0')],
-      fromBlock
+      fromBlock: genesis
     }),
     result: r =>
       r.map(({ blockNumber: block, transactionHash: txHash, topics }) => {
@@ -274,15 +274,16 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
       })
   };
 
-  const catBite = address => ({
+  const catBite = (address, fromBlock, toBlock) => ({
     request: web3.getPastLogs({
-      address,
+      address: MCD_CAT,
       topics: [
         utils.keccak256(utils.toHex(Bite.signature)),
         null,
         '0x' + padStart(urnHandler.slice(2), 64, '0')
       ],
-      fromBlock
+      fromBlock,
+      toBlock
     }),
     result: r =>
       r.map(tx => {
@@ -314,13 +315,14 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
       })
   });
 
+  const catUpgradeBlock = [1, 42].includes(web3.network) ? 10769102 : 1;
   const lookups = [
     cdpManagerNewCdp,
     daiAdapterJoinExit,
     vatFrob,
     cdpManagerGive,
-    catBite(MCD_CAT),
-    catBite(OLD_MCD_CAT)
+    catBite(MCD_CAT, catUpgradeBlock),
+    catBite(OLD_MCD_CAT, genesis, catUpgradeBlock)
   ];
 
   // eslint-disable-next-line require-atomic-updates
