@@ -13,6 +13,7 @@ module.exports = {
   GET_CDPS: require('./abis/GetCdps.json'),
   MCD_ADM: require('./abis/DSRoles.json'),
   MCD_CAT: require('./abis/Cat.json'),
+  OLD_MCD_CAT: require('./abis/Cat.json'),
   MCD_DAI: require('./abis/DSToken.json'),
   MCD_DAI_GUARD: require('./abis/DSGuard.json'),
   MCD_DEPLOY: require('./abis/DssDeploy.json'),

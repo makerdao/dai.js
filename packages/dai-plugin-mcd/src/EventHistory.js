@@ -79,6 +79,9 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
     .getContractAddress('MIGRATION');
   const MCD_VAT = cdpManager.get('smartContract').getContractAddress('MCD_VAT');
   const MCD_CAT = cdpManager.get('smartContract').getContractAddress('MCD_CAT');
+  const OLD_MCD_CAT = cdpManager
+    .get('smartContract')
+    .getContractAddress('OLD_MCD_CAT');
 
   const id = managedCdp.id;
   if (cache[id]) return cache[id];
@@ -271,9 +274,9 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
       })
   };
 
-  const catBite = {
+  const catBite = address => ({
     request: web3.getPastLogs({
-      address: MCD_CAT,
+      address,
       topics: [
         utils.keccak256(utils.toHex(Bite.signature)),
         null,
@@ -309,14 +312,15 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
           txHash
         };
       })
-  };
+  });
 
   const lookups = [
     cdpManagerNewCdp,
     daiAdapterJoinExit,
     vatFrob,
     cdpManagerGive,
-    catBite
+    catBite(MCD_CAT),
+    catBite(OLD_MCD_CAT)
   ];
 
   // eslint-disable-next-line require-atomic-updates
