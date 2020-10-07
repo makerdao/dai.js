@@ -268,6 +268,20 @@ export default class ChiefService extends LocalService {
     });
   }
 
+  async getAllSlates() {
+    const chiefAddress = this._chiefContract().address;
+    const web3Service = this.get('web3');
+    const netId = web3Service.network;
+    const networkName = netIdToName(netId);
+    const etches = await web3Service.getPastLogs({
+      fromBlock: chiefInfo.inception_block[networkName],
+      toBlock: 'latest',
+      address: chiefAddress,
+      topics: [chiefInfo.events.etch]
+    });
+    return etches.map(e => e.topics[1]);
+  }
+
   // Internal --------------------------------------------
 
   _chiefContract({ web3js = false } = {}) {
