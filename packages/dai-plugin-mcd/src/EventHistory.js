@@ -276,7 +276,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
 
   const catBite = (address, fromBlock, toBlock) => ({
     request: web3.getPastLogs({
-      address: MCD_CAT,
+      address,
       topics: [
         utils.keccak256(utils.toHex(Bite.signature)),
         null,
@@ -316,6 +316,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   });
 
   const catUpgradeBlock = [1, 42].includes(web3.network) ? 10769102 : 1;
+
   const lookups = [
     cdpManagerNewCdp,
     daiAdapterJoinExit,
