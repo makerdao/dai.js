@@ -14,7 +14,7 @@ cp $MCD_ADDRESSES $PLUGIN_ADDRESSES
 # must still be set to prevent errors when fetching event history
 
 DEPRECATED_CONTRACTS=$MCD/test/contracts/deprecatedContracts.json
-for CONTRACT in "MIGRATION" "MCD_JOIN_SAI" "SAI"
+for CONTRACT in "MIGRATION" "MCD_JOIN_SAI" "SAI" "OLD_MCD_CAT"
 do
   ADDRESS=`jq ".$CONTRACT" "$DEPRECATED_CONTRACTS"`
   cat $PLUGIN_ADDRESSES | jq_inplace ".$CONTRACT = $(echo $ADDRESS)" $PLUGIN_ADDRESSES
