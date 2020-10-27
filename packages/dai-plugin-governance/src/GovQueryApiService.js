@@ -158,16 +158,14 @@ export default class QueryApi extends PublicService {
     }`;
     const response = await this.getQueryResponseMemoized(this.serverUrl, query);
 
-    return response.voteMkrWeightsAtTimeRankedChoice.nodes
-      .filter(vote => vote.optionIdRaw !== '0')
-      .map(vote => {
-        const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
-        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
-        return {
-          ...vote,
-          ballot
-        };
-      });
+    return response.voteMkrWeightsAtTimeRankedChoice.nodes.map(vote => {
+      const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+      const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+      return {
+        ...vote,
+        ballot
+      };
+    });
   }
 
   async getMkrSupport(pollId, unixTime) {
@@ -180,8 +178,6 @@ export default class QueryApi extends PublicService {
   }`;
     const response = await this.getQueryResponseMemoized(this.serverUrl, query);
     let weights = response.voteOptionMkrWeightsAtTime.nodes;
-    // We don't want to calculate votes for 0:abstain
-    weights = weights.filter(o => o.optionId !== 0);
     const totalWeight = weights.reduce((acc, cur) => {
       const mkrSupport = isNaN(parseFloat(cur.mkrSupport))
         ? 0
