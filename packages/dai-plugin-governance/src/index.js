@@ -19,6 +19,7 @@ import GovQueryApiService from './GovQueryApiService';
 import EsmService from './EsmService';
 import SpellService from './SpellService';
 
+export { MKR, IOU };
 export default {
   addConfig: function(config, { network = 'mainnet', staging = false }) {
     const contractAddresses = {
