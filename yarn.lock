@@ -1915,7 +1915,7 @@
     write-file-atomic "^2.3.0"
 
 "@makerdao/currency@^0.9.3":
-  version "0.9.7"
+  version "0.9.9"
   resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.7.tgz#7b7310cc4feb75ce78330116ae15dad2267040e0"
   integrity sha512-7N4w25lYwJf105RJZk/WZpxzUMs3GOxSJ4Qg2yro7V1bnsEHaZ0IeyrFOtUfo87Ia3tvld+k9JLG6ykYOxI3kw==
   dependencies:
@@ -1923,7 +1923,7 @@
     bignumber.js "^8.1.1"
 
 "@makerdao/currency@^0.9.8":
-  version "0.9.8"
+  version "0.9.9"
   resolved "https://registry.yarnpkg.com/@makerdao/currency/-/currency-0.9.8.tgz#97b853bee7d366499c0f265d1135662dd7d77e0a"
   integrity sha512-Vd6i3iuInk4PMOi8eG5aZbF5yHy2To5Un9o/c4NxfjInhi5owE5O3VKNua1Z6yaW33PQNt8NqQGcCItNZMnnxw==
   dependencies:
