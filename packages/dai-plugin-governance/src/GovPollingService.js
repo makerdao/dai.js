@@ -283,7 +283,6 @@ export default class GovPollingService extends PrivateService {
     // if we couldn't find a winner based on first preferences, run additionaly irv rounds until we find one
     while (!tally.winner) {
       tally.rounds++;
-
       // eliminate the weakest candidate
       const filteredOptions = Object.entries(tally.options).filter(
         ([, optionDetails]) => !optionDetails.eliminated
@@ -302,8 +301,6 @@ export default class GovPollingService extends PrivateService {
       });
 
       tally.options[optionToEliminate].eliminated = true;
-      tally.options[optionToEliminate].transfer = BigNumber(0);
-
       // a vote needs to be moved if...
       // 1) it's currently for the eliminated candidate
       // 2) there's another choice further down in the voter's preference list
@@ -314,12 +311,25 @@ export default class GovPollingService extends PrivateService {
 
       // move votes to the next choice on their preference list
       votesToBeMoved.forEach(vote => {
+        const prevChoice = votes[vote.index].choice;
         votes[vote.index].choice = votes[vote.index].ballot.pop();
-        if (!tally.options[votes[vote.index].choice])
-          tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
-        tally.options[votes[vote.index].choice].transfer = BigNumber(
-          tally.options[votes[vote.index].choice].transfer
-        ).plus(vote.mkrSupport || 0);
+        console.log('vote', vote);
+        console.log(
+          'tally.options[votes[vote.index].choice].eliminated',
+          tally.options[votes[vote.index].choice].eliminated
+        );
+        if (!tally.options[votes[vote.index].choice].eliminated) {
+          if (!tally.options[votes[vote.index].choice])
+            tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
+
+          tally.options[votes[vote.index].choice].transfer = BigNumber(
+            tally.options[votes[vote.index].choice].transfer
+          ).plus(vote.mkrSupport || 0);
+
+          tally.options[prevChoice].transfer = BigNumber(
+            tally.options[prevChoice].transfer
+          ).minus(vote.mkrSupport || 0);
+        }
       });
 
       // look for a candidate with the majority
@@ -360,7 +370,7 @@ export default class GovPollingService extends PrivateService {
         // this shouldn't happen
         throw new Error(`Invalid ranked choice tally ${tally.options}`);
       }
-
+      console.log('tally', tally);
       // if we couldn't find one, go for another round
     }
 
