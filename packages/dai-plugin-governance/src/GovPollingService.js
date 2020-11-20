@@ -313,7 +313,19 @@ export default class GovPollingService extends PrivateService {
       votesToBeMoved.forEach(vote => {
         const prevChoice = votes[vote.index].choice;
         votes[vote.index].choice = votes[vote.index].ballot.pop();
-        if (tally.options[votes[vote.index].choice].eliminated) return;
+        if (tally.options[votes[vote.index].choice].eliminated) {
+          votes[vote.index].choice = votes[vote.index].ballot.pop();
+          let validVoteFound = false;
+          while (votes[vote.index].choice !== 0) {
+            if (!tally.options[votes[vote.index].choice].eliminated) {
+              validVoteFound = true;
+              break;
+            }
+            votes[vote.index].choice = votes[vote.index].ballot.pop();
+          }
+
+          if (!validVoteFound) return;
+        }
         if (!tally.options[votes[vote.index].choice].eliminated) {
           if (!tally.options[votes[vote.index].choice])
             tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
@@ -366,7 +378,6 @@ export default class GovPollingService extends PrivateService {
         // this shouldn't happen
         throw new Error(`Invalid ranked choice tally ${tally.options}`);
       }
-      console.log('tally', tally);
       // if we couldn't find one, go for another round
     }
 
