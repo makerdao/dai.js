@@ -313,6 +313,8 @@ export default class GovPollingService extends PrivateService {
       votesToBeMoved.forEach(vote => {
         const prevChoice = votes[vote.index].choice;
         votes[vote.index].choice = votes[vote.index].ballot.pop();
+        if (!tally.options[votes[vote.index].choice])
+          tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
         if (tally.options[votes[vote.index].choice].eliminated) {
           votes[vote.index].choice = votes[vote.index].ballot.pop();
           let validVoteFound = false;
@@ -327,9 +329,6 @@ export default class GovPollingService extends PrivateService {
           if (!validVoteFound) return;
         }
         if (!tally.options[votes[vote.index].choice].eliminated) {
-          if (!tally.options[votes[vote.index].choice])
-            tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
-
           tally.options[votes[vote.index].choice].transfer = BigNumber(
             tally.options[votes[vote.index].choice].transfer
           ).plus(vote.mkrSupport || 0);
