@@ -39,6 +39,8 @@ export const tokenBalance = {
             return currencyToken(v, -6);
           } else if (symbol === 'WBTC') {
             return currencyToken(v, -8);
+          } else if (symbol === 'GUSD') {
+            return currencyToken(v, -2);
           } else {
             return currencyToken(v, 'wei');
           }
