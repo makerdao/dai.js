@@ -313,11 +313,7 @@ export default class GovPollingService extends PrivateService {
       votesToBeMoved.forEach(vote => {
         const prevChoice = votes[vote.index].choice;
         votes[vote.index].choice = votes[vote.index].ballot.pop();
-        console.log('vote', vote);
-        console.log(
-          'tally.options[votes[vote.index].choice].eliminated',
-          tally.options[votes[vote.index].choice].eliminated
-        );
+        if (tally.options[votes[vote.index].choice].eliminated) return;
         if (!tally.options[votes[vote.index].choice].eliminated) {
           if (!tally.options[votes[vote.index].choice])
             tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
