@@ -315,10 +315,14 @@ export default class GovPollingService extends PrivateService {
         votes[vote.index].choice = votes[vote.index].ballot.pop();
         if (!tally.options[votes[vote.index].choice])
           tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
+
         if (tally.options[votes[vote.index].choice].eliminated) {
           votes[vote.index].choice = votes[vote.index].ballot.pop();
           let validVoteFound = false;
+
           while (votes[vote.index].choice !== 0) {
+            if (!tally.options[votes[vote.index].choice])
+              tally.options[votes[vote.index].choice] = { ...defaultOptionObj };
             if (!tally.options[votes[vote.index].choice].eliminated) {
               validVoteFound = true;
               break;
