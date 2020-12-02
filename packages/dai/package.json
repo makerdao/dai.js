@@ -79,5 +79,8 @@
   },
   "engines": {
     "node": ">=10.16"
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.2"
   }
 }
