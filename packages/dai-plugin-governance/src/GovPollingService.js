@@ -235,6 +235,10 @@ export default class GovPollingService extends PrivateService {
       pollId,
       endUnix
     );
+    return this.runoff(votes);
+  }
+
+  runoff(votes) {
     const totalMkrParticipation = votes.reduce(
       (acc, cur) => BigNumber(cur.mkrSupport || 0).plus(acc),
       BigNumber(0)

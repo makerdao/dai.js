@@ -1,4 +1,4 @@
-// this is just a rough cut which is occasionally useful; 
+// this is just a rough cut which is occasionally useful;
 // don't take anything happening here as authoritative
 
 import repl from 'repl';
@@ -6,6 +6,7 @@ import Maker from '../src';
 import testAccounts from '../../test-helpers/src/testAccounts.json';
 import ScdPlugin from '@makerdao/dai-plugin-scd';
 import GovPlugin from '@makerdao/dai-plugin-governance';
+import matter from 'gray-matter';
 
 let maker;
 
@@ -35,7 +36,7 @@ const env = {
     fromBlock: 0,
     config: {
       url: 'http://localhost:2000',
-      privateKey: testAccounts.keys[0],
+      privateKey: testAccounts.keys[0]
     }
   },
   kovan: {
@@ -62,6 +63,31 @@ const env = {
 
 const currentEnv = env.mainnet;
 
+const endedRcPollInfo = maker => async pollId => {
+  const polls = maker.service('govPolling');
+  const gq = maker.service('govQueryApi');
+  const poll = await polls._getPoll(pollId);
+  const votes = await gq.getMkrSupportRankedChoice(
+    pollId,
+    Math.floor(poll.endDate / 1000)
+  );
+  const pollDoc = await (await fetch(poll.url)).text();
+  const pollMetadata = matter(pollDoc).data;
+  return {
+    ...poll,
+    ...pollMetadata,
+    votes: votes.map(v => [
+      v.ballot.filter(x => x !== 0),
+      parseFloat(v.mkrSupport)
+    ]).sort(([ballotA], [ballotB]) => {
+      if (ballotA.length < ballotB.length) return -1;
+      if (ballotB.length < ballotA.length) return 1;
+      return ballotA[0] - ballotB[0];
+    }),
+    tally: polls.runoff(votes)
+  };
+};
+
 async function main() {
   try {
     const { config, fromBlock } = currentEnv;
@@ -79,16 +105,15 @@ async function main() {
     const { LogNewCup } = scs.getContract('SAI_TUB').interface.events;
 
     const getCdpIds = async address => {
-      const logs = await w3s.getPastLogs(
-        {
-          address: scs.getContractAddress('SAI_TUB'),
-          topics: [
-            utils.keccak256(utils.toHex(LogNewCup.signature)),
-            '0x000000000000000000000000' + (address || maker.currentAddress()).replace(/^0x/, '')
-          ],
-          fromBlock
-        },
-      );
+      const logs = await w3s.getPastLogs({
+        address: scs.getContractAddress('SAI_TUB'),
+        topics: [
+          utils.keccak256(utils.toHex(LogNewCup.signature)),
+          '0x000000000000000000000000' +
+            (address || maker.currentAddress()).replace(/^0x/, '')
+        ],
+        fromBlock
+      });
       return logs.map(l => parseInt(l.data, 16));
     };
 
@@ -105,7 +130,8 @@ async function main() {
       tub: scs.getContract('SAI_TUB'),
       top: scs.getContract('SAI_TOP'),
       WAD: '1000000000000000000',
-      RAY: '1000000000000000000000000000'
+      RAY: '1000000000000000000000000000',
+      endedRcPollInfo: endedRcPollInfo(maker)
     });
   } catch (err) {
     console.error(err);
