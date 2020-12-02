@@ -11,5 +11,5 @@ function sed_inplace {
 }
 
 echo Setting ethers.js polling interval to $INTERVAL ms.
-sed_inplace "s/var pollingInterval = [0-9]*/var pollingInterval = $INTERVAL/" \
-  $CWD/../node_modules/ethers/providers/provider.js
+sed_inplace "s/this._pollingInterval = [0-9]*/this._pollingInterval = $INTERVAL/" \
+  $CWD/../node_modules/@ethersproject/providers/lib.esm/base-provider.js
