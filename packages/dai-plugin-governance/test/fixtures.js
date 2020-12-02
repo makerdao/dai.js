@@ -164,7 +164,7 @@ export const dummyBallotNoMajorityExpect = {
   options: {
     '1': {
       firstChoice: '60.025',
-      transfer: '0',
+      transfer: '-60.025',
       winner: false,
       eliminated: true
     },
@@ -212,7 +212,7 @@ export const dummyBallotMultipleRoundsExpect = {
   options: {
     '1': {
       firstChoice: '60.025',
-      transfer: '0',
+      transfer: '-56.025',
       winner: false,
       eliminated: true
     },
@@ -230,7 +230,60 @@ export const dummyBallotMultipleRoundsExpect = {
     },
     '4': {
       firstChoice: '4',
+      transfer: '-4',
+      winner: false,
+      eliminated: true
+    }
+  },
+  numVoters: 4
+};
+
+export const dummyBallotDontMoveToEliminated = [
+  {
+    mkrSupport: '60.025000000000000000',
+    ballot: createBallot([1, 3])
+  },
+  {
+    mkrSupport: '102.598801867883985831',
+    ballot: createBallot([3, 1])
+  },
+  {
+    mkrSupport: '54.068823529411764706',
+    // option 4 should never get these votes since it's eliminated in the first round
+    ballot: createBallot([2, 4])
+  },
+  {
+    mkrSupport: '4',
+    ballot: createBallot([4, 1])
+  }
+];
+
+export const dummyBallotDontMoveToEliminatedExpect = {
+  rounds: 4,
+  winner: '3',
+  totalMkrParticipation: '220.692625397295750537',
+  options: {
+    '1': {
+      firstChoice: '60.025',
+      transfer: '-56.025',
+      winner: false,
+      eliminated: true
+    },
+    '2': {
+      firstChoice: '54.068823529411764706',
       transfer: '0',
+      winner: false,
+      eliminated: true
+    },
+    '3': {
+      firstChoice: '102.598801867883985831',
+      transfer: '60.025',
+      winner: true,
+      eliminated: false
+    },
+    '4': {
+      firstChoice: '4',
+      transfer: '-4',
       winner: false,
       eliminated: true
     }

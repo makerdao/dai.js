@@ -18,7 +18,9 @@ import {
   dummyBallotWithMajority,
   dummyBallotWithMajorityExpect,
   dummyBallotMultipleRounds,
-  dummyBallotMultipleRoundsExpect
+  dummyBallotMultipleRoundsExpect,
+  dummyBallotDontMoveToEliminated,
+  dummyBallotDontMoveToEliminatedExpect
 } from './fixtures';
 import { MKR } from '../src/utils/constants';
 
@@ -273,6 +275,20 @@ test('ranked choice tally with multiple rounds', async () => {
 
   expect(JSON.stringify(tally)).toBe(
     JSON.stringify(dummyBallotMultipleRoundsExpect)
+  );
+});
+
+test('ranked choice tally verify eliminated options cant get votes', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotDontMoveToEliminated
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotDontMoveToEliminatedExpect)
   );
 });
 
