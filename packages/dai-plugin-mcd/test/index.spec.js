@@ -58,7 +58,7 @@ test('contract address overrides', async () => {
 test('BAT token basic functionality', async () => {
   const token = maker.getToken('BAT');
   expect(token.address()).toEqual(addresses.BAT);
-  expect(await token.balance()).toEqual(BAT(1000));
+  expect(await token.balance()).toEqual(BAT(10000));
 });
 
 test('McdPlugin has a named and a default export', async () => {

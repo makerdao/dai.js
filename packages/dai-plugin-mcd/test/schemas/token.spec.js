@@ -58,7 +58,7 @@ test(TOKEN_BALANCE, async () => {
   expect(ethBalance.symbol).toEqual('ETH');
   expect(batBalance.symbol).toEqual('BAT');
   expect(ethBalance.toBigNumber()).toEqual(BigNumber('100'));
-  expect(batBalance.toBigNumber()).toEqual(BigNumber('1000'));
+  expect(batBalance.toBigNumber()).toEqual(BigNumber('10000'));
 
   const daiBalance = await maker.latest(TOKEN_BALANCE, address, 'DAI');
   const wethBalance = await maker.latest(TOKEN_BALANCE, address, 'WETH');
