@@ -83,8 +83,6 @@ export const GUSD = createCurrency('GUSD');
 export const UNI = createCurrency('UNI');
 export const RENBTC = createCurrency('RENBTC');
 
-
-
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: ETH, ilk: 'ETH-B' },
@@ -106,7 +104,6 @@ export const defaultCdpTypes = [
   { currency: GUSD, ilk: 'GUSD-A', decimals: 2 },
   { currency: UNI, ilk: 'UNI-A', decimals: 8 },
   { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 }
-
 ];
 
 export const SAI = createCurrency('SAI');
