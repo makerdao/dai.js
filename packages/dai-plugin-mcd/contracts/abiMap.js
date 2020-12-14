@@ -52,5 +52,7 @@ module.exports = {
   LINK: require('./abis/DSToken.json'),
   YFI: require('./abis/DSToken.json'),
   BAL: require('./abis/DSToken.json'),
-  GUSD: require('./abis/GUSD.json')
+  GUSD: require('./abis/GUSD.json'),
+  UNI: require('./abis/DSToken.json'),
+  RENBTC: require('./abis/DSToken.json')
 };

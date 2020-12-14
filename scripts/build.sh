@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ $(basename $(dirname $(pwd))) != "packages" ]; then
   echo "This script must be run from a directory under packages/."

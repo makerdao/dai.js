@@ -80,6 +80,10 @@ export const LINK = createCurrency('LINK');
 export const YFI = createCurrency('YFI');
 export const BAL = createCurrency('BAL');
 export const GUSD = createCurrency('GUSD');
+export const UNI = createCurrency('UNI');
+export const RENBTC = createCurrency('RENBTC');
+
+
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
@@ -99,7 +103,10 @@ export const defaultCdpTypes = [
   { currency: LINK, ilk: 'LINK-A', decimals: 18 },
   { currency: YFI, ilk: 'YFI-A', decimals: 18 },
   { currency: BAL, ilk: 'BAL-A', decimals: 18 },
-  { currency: GUSD, ilk: 'GUSD-A', decimals: 2 }
+  { currency: GUSD, ilk: 'GUSD-A', decimals: 2 },
+  { currency: UNI, ilk: 'UNI-A', decimals: 8 },
+  { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 }
+
 ];
 
 export const SAI = createCurrency('SAI');
