@@ -102,7 +102,7 @@ export const defaultCdpTypes = [
   { currency: YFI, ilk: 'YFI-A', decimals: 18 },
   { currency: BAL, ilk: 'BAL-A', decimals: 18 },
   { currency: GUSD, ilk: 'GUSD-A', decimals: 2 },
-  { currency: UNI, ilk: 'UNI-A', decimals: 8 },
+  { currency: UNI, ilk: 'UNI-A', decimals: 18 },
   { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 }
 ];
 
