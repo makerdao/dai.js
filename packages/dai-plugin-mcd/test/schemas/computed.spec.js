@@ -321,7 +321,7 @@ test(VAULT, async () => {
   const expectedLiqPenalty = BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedDebtFloor = BigNumber('100');
-  const expectedCollateralDebtAvailable = DAI(99900);
+  const expectedCollateralDebtAvailable = DAI(999900);
 
   const vault = await maker.latest(VAULT, cdpId);
 
@@ -496,7 +496,7 @@ test(COLLATERAL_TYPE_DATA, async () => {
   const expectedAnnStabilityFee = 0.04999999999989363;
   const expectedPriceWithSafetyMargin = BigNumber('120');
   const expectedDebtFloor = BigNumber('100');
-  const expectedCollateralDebtAvailable = DAI(99900);
+  const expectedCollateralDebtAvailable = DAI(999900);
 
   const colData = await maker.latest(COLLATERAL_TYPE_DATA, collateralType);
 
@@ -542,8 +542,8 @@ test(COLLATERAL_DEBT_CEILINGS, async () => {
     'ETH-A',
     'BAT-A'
   ]);
-  expect(debtCeilings['ETH-A'].toNumber()).toEqual(100000);
-  expect(debtCeilings['BAT-A'].toNumber()).toEqual(5000);
+  expect(debtCeilings['ETH-A'].toNumber()).toEqual(1000000);
+  expect(debtCeilings['BAT-A'].toNumber()).toEqual(1000000);
 });
 
 test(COLLATERAL_DEBT_AVAILABLE, async () => {
@@ -552,5 +552,5 @@ test(COLLATERAL_DEBT_AVAILABLE, async () => {
     'ETH-A'
   );
 
-  expect(ethACollateralDebt.toNumber()).toEqual(99900);
+  expect(ethACollateralDebt.toNumber()).toEqual(999900);
 });

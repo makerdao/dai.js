@@ -32,9 +32,9 @@ const scenarios = [
   liquidation penalty, annual stability fee]
 */
 const systemValues = {
-  'ETH-A': [80, 200, 100000, 1.5, 0.05, '5.0'],
+  'ETH-A': [80, 200, 1000000, 1.5, 0.05, '5.0'],
   // 'ETH-B': [2, 4, 100000, 2, 0.05, '4.0'],
-  'BAT-A': [80, 200, 5000, 2, 0.08, '10.5']
+  'BAT-A': [80, 200, 1000000, 2, 0.08, '10.5']
 };
 
 describe.each(scenarios)('%s', (ilk, GEM) => {

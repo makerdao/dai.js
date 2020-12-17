@@ -147,8 +147,8 @@ test(DEBT_CEILING, async () => {
   expect(isCurrency(ethADebtCeiling)).toEqual(true);
   expect(isCurrency(batADebtCeiling)).toEqual(true);
 
-  expect(ethADebtCeiling.isEqual(DAI(100000))).toEqual(true);
-  expect(batADebtCeiling.isEqual(DAI(5000))).toEqual(true);
+  expect(ethADebtCeiling.isEqual(DAI(1000000))).toEqual(true);
+  expect(batADebtCeiling.isEqual(DAI(1000000))).toEqual(true);
 });
 
 test(DEBT_FLOOR, async () => {
@@ -214,5 +214,5 @@ test(GLOBAL_DEBT_CEILING, async () => {
   const globalDebtCeiling = await maker.latest(GLOBAL_DEBT_CEILING);
 
   expect(globalDebtCeiling.symbol).toEqual(DAI.symbol);
-  expect(globalDebtCeiling.toBigNumber()).toEqual(BigNumber('1000000'));
+  expect(globalDebtCeiling.toBigNumber()).toEqual(BigNumber('6000000'));
 });

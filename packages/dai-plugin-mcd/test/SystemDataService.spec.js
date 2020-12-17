@@ -23,7 +23,7 @@ test('get annual base rate', async () => {
 
 test('get system-wide debt ceiling', async () => {
   const ceiling = await service.getSystemWideDebtCeiling();
-  expect(ceiling).toBe(1000000);
+  expect(ceiling).toBe(6000000);
 });
 
 test('get global settlement status', async () => {
