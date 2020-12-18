@@ -82,6 +82,8 @@ export const BAL = createCurrency('BAL');
 export const GUSD = createCurrency('GUSD');
 export const UNI = createCurrency('UNI');
 export const RENBTC = createCurrency('RENBTC');
+export const AAVE = createCurrency('AAVE');
+export const UNIV2DAIETH = createCurrency('UNIV2DAIETH');
 
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
@@ -103,7 +105,9 @@ export const defaultCdpTypes = [
   { currency: BAL, ilk: 'BAL-A', decimals: 18 },
   { currency: GUSD, ilk: 'GUSD-A', decimals: 2 },
   { currency: UNI, ilk: 'UNI-A', decimals: 18 },
-  { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 }
+  { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 },
+  { currency: AAVE, ilk: 'AAVE-A', decimals: 18 },
+  { currency: UNIV2DAIETH, ilk: 'UNIV2DAIETH-A', decimals: 18 }
 ];
 
 export const SAI = createCurrency('SAI');
