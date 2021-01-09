@@ -130,25 +130,13 @@ export const rankedChoiceIRV = votes => {
       ([, optionDetails]) => !optionDetails.eliminated
     ).length;
 
-    // if there are no more rounds,
-    // or if there is only one opiton remaining
-    // the winner is the option with the most votes
+    // if there are no more rounds or if there is only one opiton remaining
+    // and no winner could be found, then we end the search
     if (
-      (tally.rounds > MAX_ROUNDS && !tally.winner) ||
-      (remainingOptions === 1 && !tally.winner)
+      (tally.rounds > MAX_ROUNDS || remainingOptions === 1) &&
+      !tally.winner
     ) {
-      let max = BigNumber(0);
-      let maxOption;
-      Object.entries(tally.options).forEach(
-        ([option, { firstChoice, transfer }]) => {
-          if (firstChoice.plus(transfer).gt(max)) {
-            max = firstChoice.plus(transfer);
-            maxOption = option;
-          }
-        }
-      );
-
-      tally.winner = maxOption;
+      return tally;
     }
 
     // sanity checks
