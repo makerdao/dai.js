@@ -20,7 +20,9 @@ import {
   dummyBallotMultipleRounds,
   dummyBallotMultipleRoundsExpect,
   dummyBallotDontMoveToEliminated,
-  dummyBallotDontMoveToEliminatedExpect
+  dummyBallotDontMoveToEliminatedExpect,
+  dummyBallotStopWhenOneRemains,
+  dummyBallotStopWhenOneRemainsExpect
 } from './fixtures';
 import { MKR } from '../src/utils/constants';
 
@@ -236,62 +238,6 @@ test('getPercentageMkrVotedRankedChoice', async () => {
   );
 });
 
-test('ranked choice tally with majority', async () => {
-  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
-    () => dummyBallotWithMajority
-  );
-  govPollingService._getPoll = jest.fn(() => ({
-    endDate: 123
-  }));
-  const tally = await govPollingService.getTallyRankedChoiceIrv();
-
-  expect(JSON.stringify(tally)).toBe(
-    JSON.stringify(dummyBallotWithMajorityExpect)
-  );
-});
-
-test('ranked choice tally with no majority', async () => {
-  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
-    () => dummyBallotNoMajority
-  );
-  govPollingService._getPoll = jest.fn(() => ({
-    endDate: 123
-  }));
-  const tally = await govPollingService.getTallyRankedChoiceIrv();
-
-  expect(JSON.stringify(tally)).toBe(
-    JSON.stringify(dummyBallotNoMajorityExpect)
-  );
-});
-
-test('ranked choice tally with multiple rounds', async () => {
-  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
-    () => dummyBallotMultipleRounds
-  );
-  govPollingService._getPoll = jest.fn(() => ({
-    endDate: 123
-  }));
-  const tally = await govPollingService.getTallyRankedChoiceIrv();
-
-  expect(JSON.stringify(tally)).toBe(
-    JSON.stringify(dummyBallotMultipleRoundsExpect)
-  );
-});
-
-test('ranked choice tally verify eliminated options cant get votes', async () => {
-  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
-    () => dummyBallotDontMoveToEliminated
-  );
-  govPollingService._getPoll = jest.fn(() => ({
-    endDate: 123
-  }));
-  const tally = await govPollingService.getTallyRankedChoiceIrv();
-
-  expect(JSON.stringify(tally)).toBe(
-    JSON.stringify(dummyBallotDontMoveToEliminatedExpect)
-  );
-});
-
 test('can get vote logs from contract', async () => {
   const START_DATE = Math.floor(new Date().getTime() / 1000) + 100;
   const END_DATE = START_DATE + 5000;
@@ -358,4 +304,76 @@ test('should correctly decode ranked choice options from event logs', () => {
   );
 
   expect(decodedOptions).toEqual(expectedOptions);
+});
+
+// IRV algo tests
+
+test('ranked choice tally with majority', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotWithMajority
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotWithMajorityExpect)
+  );
+});
+
+test('ranked choice tally with no majority', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotNoMajority
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotNoMajorityExpect)
+  );
+});
+
+test('ranked choice tally with multiple rounds', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotMultipleRounds
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotMultipleRoundsExpect)
+  );
+});
+
+test('ranked choice tally verify eliminated options cant get votes', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotDontMoveToEliminated
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotDontMoveToEliminatedExpect)
+  );
+});
+
+test('ranked choice tally stop when 1 remains', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotStopWhenOneRemains
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotStopWhenOneRemainsExpect)
+  );
 });
