@@ -290,3 +290,64 @@ export const dummyBallotDontMoveToEliminatedExpect = {
   },
   numVoters: 4
 };
+
+// round 1
+// option 1: 101, option 2: 100, option 3: 50, option 4: 49, total: 300
+// round 2
+// option 1: 101, option 2: 100, option 3: 99, option 4: 0, total: 300
+// round 3
+// option 1: 101, option 2: 100, option 3: 0, option 4: 0, total: 300
+// round 4
+// option 1: 201, option 2: 0, option 3: 0, option 4: 0, total: 300
+// winner: option 1
+export const dummyBallotStopWhenOneRemains = [
+  {
+    mkrSupport: '101',
+    ballot: createBallot([1])
+  },
+  {
+    mkrSupport: '100',
+    ballot: createBallot([2, 1])
+  },
+  {
+    mkrSupport: '50',
+    ballot: createBallot([3])
+  },
+  {
+    mkrSupport: '49',
+    ballot: createBallot([4, 3])
+  }
+];
+
+export const dummyBallotStopWhenOneRemainsExpect = {
+  rounds: 4,
+  winner: '1',
+  totalMkrParticipation: '300',
+  options: {
+    '1': {
+      firstChoice: '101',
+      transfer: '100',
+      winner: true,
+      eliminated: false
+    },
+    '2': {
+      firstChoice: '100',
+      transfer: '-100',
+      winner: false,
+      eliminated: true
+    },
+    '3': {
+      firstChoice: '50',
+      transfer: '49',
+      winner: false,
+      eliminated: true
+    },
+    '4': {
+      firstChoice: '49',
+      transfer: '-49',
+      winner: false,
+      eliminated: true
+    }
+  },
+  numVoters: 4
+};
