@@ -9,7 +9,7 @@ const scenarios = [['ETH-A'], ['DAI'], ['MKR']];
   [max bid lifetime, min bid increase]
 */
 const systemData = {
-  'ETH-A': [1, 0.03, 0.04],
+  'ETH-A': [1, 0.01, 0.04],
   DAI: [3, 0.05, 2],
   MKR: [3, 0.05, 2]
 };
