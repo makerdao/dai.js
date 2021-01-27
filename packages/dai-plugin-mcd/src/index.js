@@ -110,7 +110,7 @@ export const defaultCdpTypes = [
   { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 },
   { currency: AAVE, ilk: 'AAVE-A', decimals: 18 },
   { currency: UNIV2DAIETH, ilk: 'UNIV2DAIETH-A', decimals: 18 },
-  { currency: UNIV2WBTCETH, ilk: 'UNIV2WBTCETH-A', decimals: 8 },
+  { currency: UNIV2WBTCETH, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
   { currency: UNIV2USDCETH, ilk: 'UNIV2USDCETH-A', decimals: 18 }
 ];
 
