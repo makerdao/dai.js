@@ -20,6 +20,7 @@ do
   cat $PLUGIN_ADDRESSES | jq_inplace ".$CONTRACT = $(echo $ADDRESS)" $PLUGIN_ADDRESSES
 done
 
+# TODO: refactor this so it just imports the whole json object in mockContracts
 MOCK_CONTRACTS=$MCD/test/contracts/mockContracts.json
 for CONTRACT in "UNIV2DAIETH" "PIP_UNIV2DAIETH" "MCD_JOIN_UNIV2DAIETH_A" "MCD_FLIP_UNIV2DAIETH_A"
 do
