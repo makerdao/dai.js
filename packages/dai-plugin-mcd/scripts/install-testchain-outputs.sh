@@ -12,18 +12,11 @@ cp $MCD_ADDRESSES $PLUGIN_ADDRESSES
 
 # These contracts are not supported on the testchain, but dummy addresses
 # must still be set to prevent errors when fetching event history
-
 DEPRECATED_CONTRACTS=$MCD/test/contracts/deprecatedContracts.json
-for CONTRACT in "MIGRATION" "MCD_JOIN_SAI" "SAI" "OLD_MCD_CAT"
-do
-  ADDRESS=`jq ".$CONTRACT" "$DEPRECATED_CONTRACTS"`
-  cat $PLUGIN_ADDRESSES | jq_inplace ".$CONTRACT = $(echo $ADDRESS)" $PLUGIN_ADDRESSES
-done
+DEPRECATED_ADDRESSES=`jq "." "$DEPRECATED_CONTRACTS"`
+cat $PLUGIN_ADDRESSES | jq_inplace ". += $DEPRECATED_ADDRESSES" $PLUGIN_ADDRESSES
 
-# TODO: refactor this so it just imports the whole json object in mockContracts
+# These contracts are not necessary to deploy on the testchain, e.g. UNI contracts
 MOCK_CONTRACTS=$MCD/test/contracts/mockContracts.json
-for CONTRACT in "UNIV2DAIETH" "PIP_UNIV2DAIETH" "MCD_JOIN_UNIV2DAIETH_A" "MCD_FLIP_UNIV2DAIETH_A"
-do
-  ADDRESS=`jq ".$CONTRACT" "$MOCK_CONTRACTS"`
-  cat $PLUGIN_ADDRESSES | jq_inplace ".$CONTRACT = $(echo $ADDRESS)" $PLUGIN_ADDRESSES
-done
+MOCK_ADDRESSES=`jq "." "$MOCK_CONTRACTS"`
+cat $PLUGIN_ADDRESSES | jq_inplace ". += $MOCK_ADDRESSES" $PLUGIN_ADDRESSES
