@@ -2020,10 +2020,10 @@
   dependencies:
     node-fetch "^2.6.0"
 
-"@makerdao/testchain@^1.1.27":
-  version "1.1.27"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.1.27.tgz#477b3088e8ce8c71933681b62d8d3716f8811864"
-  integrity sha512-zXLNQoiJs8t/79h5ci584pvpYz3XyXj/SZ94bvqZYlr+cTs935OU+2xlv+MldTfH9glduGf/ZgjE6N5b9M1tgw==
+"@makerdao/testchain@^1.1.29":
+  version "1.1.29"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.1.29.tgz#893d33cdf636f934eaaad91c58f73eb585c17dc6"
+  integrity sha512-rCMdhkABYzwKnCnyTDtZhGn+kJHR2PM1Nv2WyJQZHEcCaXnvmpZjkGFarniSvhc+JWwZZy7D7R0t5mGzsyEI5Q==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 
@@ -6221,7 +6221,7 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-ganache-cli@makerdao/ganache-cli#fix/gas-est-crash:
+"ganache-cli@github:makerdao/ganache-cli#fix/gas-est-crash":
   version "6.4.3-beta.0"
   resolved "https://codeload.github.com/makerdao/ganache-cli/tar.gz/3e512b61da2479042627e6155231dcb038110650"
   dependencies:
