@@ -118,7 +118,7 @@ export const defaultCdpTypes = [
   { currency: UNIV2WBTCETH, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
   { currency: UNIV2USDCETH, ilk: 'UNIV2USDCETH-A', decimals: 18 },
   { currency: UNIV2DAIUSDC, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
-  { currency: UNIV2ETHUSDT, ilk: 'UNIV2USDCETH-A', decimals: 18 },
+  { currency: UNIV2ETHUSDT, ilk: 'UNIV2ETHUSDT-A', decimals: 18 },
   { currency: UNIV2LINKETH, ilk: 'UNIV2LINKETH-A', decimals: 18 },
   { currency: UNIV2UNIETH, ilk: 'UNIV2UNIETH-A', decimals: 18 }
 ];
