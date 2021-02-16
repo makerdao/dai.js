@@ -91,7 +91,6 @@ export const UNIV2ETHUSDT = createCurrency('UNIV2ETHUSDT');
 export const UNIV2LINKETH = createCurrency('UNIV2LINKETH');
 export const UNIV2UNIETH = createCurrency('UNIV2UNIETH');
 
-
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: ETH, ilk: 'ETH-B' },
@@ -117,7 +116,7 @@ export const defaultCdpTypes = [
   { currency: UNIV2DAIETH, ilk: 'UNIV2DAIETH-A', decimals: 18 },
   { currency: UNIV2WBTCETH, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
   { currency: UNIV2USDCETH, ilk: 'UNIV2USDCETH-A', decimals: 18 },
-  { currency: UNIV2DAIUSDC, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
+  { currency: UNIV2DAIUSDC, ilk: 'UNIV2DAIUSDC-A', decimals: 18 },
   { currency: UNIV2ETHUSDT, ilk: 'UNIV2ETHUSDT-A', decimals: 18 },
   { currency: UNIV2LINKETH, ilk: 'UNIV2LINKETH-A', decimals: 18 },
   { currency: UNIV2UNIETH, ilk: 'UNIV2UNIETH-A', decimals: 18 }
