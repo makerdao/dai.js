@@ -60,5 +60,8 @@ module.exports = {
   UNIV2WBTCETH: require('./abis/DSToken.json'),
   UNIV2USDCETH: require('./abis/DSToken.json'),
   UNIV2DAIUSDC: require('./abis/DSToken.json'),
-  UNIV2ETHUSDT: require('./abis/DSToken.json')
+  UNIV2ETHUSDT: require('./abis/DSToken.json'),
+  UNIV2LINKETH: require('./abis/DSToken.json'),
+  UNIV2UNIETH: require('./abis/DSToken.json')
+
 };
