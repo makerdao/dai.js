@@ -15,6 +15,7 @@ export default class SpellService extends PublicService {
     this.action = {};
     this.executionDate = {};
     this.scheduledDate = {};
+    this.nextCastTime = {};
   }
 
   getDelayInSeconds() {
@@ -33,6 +34,18 @@ export default class SpellService extends PublicService {
     if (!eta.toNumber()) return undefined;
     this.eta[spellAddress] = new Date(eta.toNumber() * 1000);
     return this.eta[spellAddress];
+  }
+
+  async getNextCastTime(spellAddress) {
+    if (this.nextCastTime[spellAddress]) return this.nextCastTime[spellAddress];
+    const spell = this.get('smartContract').getContractByAddressAndAbi(
+      spellAddress,
+      DsSpellAbi
+    );
+    const nextCastTime = await spell.nextCastTime();
+    if (!nextCastTime.toNumber()) return undefined;
+    this.nextCastTime[spellAddress] = new Date(nextCastTime.toNumber() * 1000);
+    return this.nextCastTime[spellAddress];
   }
 
   async getScheduledDate(spellAddress) {
