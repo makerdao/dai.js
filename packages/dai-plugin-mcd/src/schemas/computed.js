@@ -572,6 +572,21 @@ export const collateralDebtAvailable = {
   })
 };
 
+export const collateralDebtAvailableList = {
+  generate: cdpTypes => ({
+    dependencies: () => cdpTypes.map(type => [COLLATERAL_DEBT_AVAILABLE, type]),
+    computed: (...debtsAvailable) => {
+      return cdpTypes.reduce(
+        (acc, cdpType, idx) => ({
+          ...acc,
+          [cdpType]: debtsAvailable[idx]
+        }),
+        {}
+      );
+    }
+  })
+};
+
 export const collateralTypeCollateralization = {
   generate: (collateralTypeName, percentage = true) => ({
     dependencies: [
@@ -678,5 +693,6 @@ export default {
   collateralTypeData,
   collateralTypesData,
   collateralDebtCeilings,
-  collateralDebtAvailable
+  collateralDebtAvailable,
+  collateralDebtAvailableList
 };
