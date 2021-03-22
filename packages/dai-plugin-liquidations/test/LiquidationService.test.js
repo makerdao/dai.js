@@ -30,5 +30,6 @@ test('can create liquidation service', async () => {
 });
 
 test('get unsafe vaults', async () => {
-  await service.getUnsafeVaults();
-});
+  const urns = await service.getUnsafeVaults('LINK-A');
+  console.log('urns', urns);
+}, 10000);
