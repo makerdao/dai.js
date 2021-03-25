@@ -81,6 +81,8 @@ export const COLLATERAL_TYPE_DATA = 'collateralTypeData';
 export const COLLATERAL_TYPES_DATA = 'collateralTypesData';
 export const COLLATERAL_DEBT_CEILINGS = 'collateralDebtCeilings';
 export const COLLATERAL_DEBT_AVAILABLE = 'collateralDebtAvailable';
+export const COLLATERAL_DEBT_AVAILABLE_LIST = 'collateralDebtAvailableList';
+
 
 // token
 export const TOKEN_BALANCE = 'tokenBalance';

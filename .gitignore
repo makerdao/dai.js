@@ -14,3 +14,4 @@ package-lock.json
 .vscode/
 yarn-error.log
 .yalc/
+.log/

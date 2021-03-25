@@ -97,6 +97,7 @@ export const UNIV2DAIUSDT = createCurrency('UNIV2DAIUSDT');
 export const defaultCdpTypes = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: ETH, ilk: 'ETH-B' },
+  { currency: ETH, ilk: 'ETH-C' },
   { currency: BAT, ilk: 'BAT-A' },
   { currency: USDC, ilk: 'USDC-A', decimals: 6 },
   { currency: WBTC, ilk: 'WBTC-A', decimals: 8 },
