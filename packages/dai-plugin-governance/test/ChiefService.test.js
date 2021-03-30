@@ -115,9 +115,7 @@ test('get hat should return lifted address', async () => {
   expect(newHat).toBe(addressToLift);
 });
 
-test.only('get detailed lock logs', async () => {
-  const uint = '7549338754686726219464911';
-  console.log(uint.toNumber());
+test('get detailed lock logs', async () => {
   await setUpAllowance(maker, chiefService._chiefContract().address);
   await chiefService.lock(2);
 

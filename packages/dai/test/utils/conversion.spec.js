@@ -13,7 +13,6 @@ test('numberToBytes32', () => {
 test('bytes32ToNumber', () => {
   const bytes32 =
     '0x000000000000000000000000000000000000000000000000000000000000005c';
-  console.log(bytes32ToNumber('7549338754686726219464911'));
   expect(bytes32ToNumber(bytes32)).toBe(92);
 });
 
