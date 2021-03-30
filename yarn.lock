@@ -2020,10 +2020,10 @@
   dependencies:
     node-fetch "^2.6.0"
 
-"@makerdao/testchain@^1.2.0-rc.2":
-  version "1.2.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.2.0-rc.2.tgz#459c5a5c0aa9ee4a51dca630c3a3e4d6c5ee1cf1"
-  integrity sha512-aWgGmQ/C3zOSBqvsQ1XrEcq37sQ6f+YJqk8MJQVQuLTfPj+g0s4wGWZq/tG2NwxB/sCZvfDEpITzLNxSf3KamA==
+"@makerdao/testchain@^1.2.0-rc.3":
+  version "1.2.0-rc.3"
+  resolved "https://registry.yarnpkg.com/@makerdao/testchain/-/testchain-1.2.0-rc.3.tgz#ffc2fa078a9aa8e7987b3f28533f20b4ac887070"
+  integrity sha512-q4Y4+t1kATYJHZ7xm2dpE23BVoxL0UGX+tC89zxPOQ2PNlAWkSR4r9oufGz9s9RKkvWuZZXavwjW6TqTknAgCQ==
   dependencies:
     ganache-cli makerdao/ganache-cli#fix/gas-est-crash
 
