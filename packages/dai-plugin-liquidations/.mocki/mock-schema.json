@@ -1,0 +1,858 @@
+{
+  "mockQueries": [
+    {
+      "name": "allClips",
+      "description": "Get all auctions",
+      "args": [
+        {
+          "name": "ilk",
+          "description": null,
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            }
+          },
+          "defaultValue": null
+        },
+        {
+          "name": "maxResults",
+          "description": null,
+          "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+          },
+          "defaultValue": null
+        },
+        {
+          "name": "resultOffset",
+          "description": null,
+          "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+          },
+          "defaultValue": null
+        },
+        {
+          "name": "first",
+          "description": "Only read the first `n` values of the set.",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+          },
+          "defaultValue": null
+        },
+        {
+          "name": "last",
+          "description": "Only read the last `n` values of the set.",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+          },
+          "defaultValue": null
+        },
+        {
+          "name": "offset",
+          "description": "Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`.",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+          },
+          "defaultValue": null
+        },
+        {
+          "name": "before",
+          "description": "Read all values in the set before (above) this cursor.",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Cursor",
+            "ofType": null
+          },
+          "defaultValue": null
+        },
+        {
+          "name": "after",
+          "description": "Read all values in the set after (below) this cursor.",
+          "type": {
+            "kind": "SCALAR",
+            "name": "Cursor",
+            "ofType": null
+          },
+          "defaultValue": null
+        }
+      ],
+      "type": {
+        "kind": "OBJECT",
+        "name": "ClipSaleSnapshotsConnection",
+        "ofType": null
+      },
+      "isDeprecated": false,
+      "deprecationReason": null
+    }
+  ],
+  "mockTypes": [
+    {
+      "kind": "OBJECT",
+      "name": "ClipSaleSnapshotsConnection",
+      "description": "A connection to a list of `ClipSaleSnapshot` values.",
+      "fields": [
+        {
+          "name": "nodes",
+          "description": "A list of `ClipSaleSnapshot` objects.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ClipSaleSnapshot",
+                "ofType": null
+              }
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "edges",
+          "description": "A list of edges which contains the `ClipSaleSnapshot` and cursor to aid in pagination.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ClipSaleSnapshotsEdge",
+                  "ofType": null
+                }
+              }
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "pageInfo",
+          "description": "Information to aid in pagination.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "OBJECT",
+              "name": "PageInfo",
+              "ofType": null
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "totalCount",
+          "description": "The count of *all* `ClipSaleSnapshot` you could get from the connection.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        }
+      ],
+      "inputFields": null,
+      "interfaces": [],
+      "enumValues": null,
+      "possibleTypes": null
+    },
+    {
+      "kind": "OBJECT",
+      "name": "ClipSaleSnapshotsEdge",
+      "description": "A `ClipSaleSnapshot` edge in the connection.",
+      "fields": [
+        {
+          "name": "cursor",
+          "description": "A cursor for use in pagination.",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "Cursor",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "node",
+          "description": "The `ClipSaleSnapshot` at the end of the edge.",
+          "args": [],
+          "type": {
+            "kind": "OBJECT",
+            "name": "ClipSaleSnapshot",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        }
+      ],
+      "inputFields": null,
+      "interfaces": [],
+      "enumValues": null,
+      "possibleTypes": null
+    },
+    {
+      "kind": "OBJECT",
+      "name": "ClipSaleSnapshot",
+      "description": "",
+      "fields": [
+        {
+          "name": "saleId",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigInt",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "pos",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigInt",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "tab",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "lot",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "usr",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "tic",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigInt",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "top",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "active",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "Boolean",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "created",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "Datetime",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "updated",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "Datetime",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "clipAddress",
+          "description": "",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "saleEvents",
+          "description": "SaleEvents associated with the Sale, from blocks prior to the Sale snapshot.          \n - `maxResults` and `resultOffset` arguments are optional and default to no max/offset.          \n - Using `maxResults` and `resultOffset` instead of the built-in pagination arguments (`offset`, `before`, `after` and `limit`) is strongly recommended.               For more information, please see the [vulcanizedb documentation.](https://github.com/makerdao/vulcanizedb/blob/staging/documentation/postgraphile.md#customizing-postgraphile)",
+          "args": [
+            {
+              "name": "maxResults",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "resultOffset",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "first",
+              "description": "Only read the first `n` values of the set.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "last",
+              "description": "Only read the last `n` values of the set.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "offset",
+              "description": "Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "before",
+              "description": "Read all values in the set before (above) this cursor.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Cursor",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "after",
+              "description": "Read all values in the set after (below) this cursor.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Cursor",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "OBJECT",
+              "name": "ClipSaleEventsConnection",
+              "ofType": null
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "ilk",
+          "description": "Snapshot of the Ilk object associated with the Urn whose collateral is being auctioned off.",
+          "args": [],
+          "type": {
+            "kind": "OBJECT",
+            "name": "IlkSnapshot",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "urn",
+          "description": "Snapshot of the Urn whose collateral is being auctioned off.",
+          "args": [],
+          "type": {
+            "kind": "OBJECT",
+            "name": "UrnSnapshot",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        }
+      ],
+      "inputFields": null,
+      "interfaces": [],
+      "enumValues": null,
+      "possibleTypes": null
+    },
+    {
+      "kind": "OBJECT",
+      "name": "ClipSaleEventsConnection",
+      "description": "A connection to a list of `ClipSaleEvent` values.",
+      "fields": [
+        {
+          "name": "nodes",
+          "description": "A list of `ClipSaleEvent` objects.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ClipSaleEvent",
+                "ofType": null
+              }
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "edges",
+          "description": "A list of edges which contains the `ClipSaleEvent` and cursor to aid in pagination.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ClipSaleEventsEdge",
+                  "ofType": null
+                }
+              }
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "pageInfo",
+          "description": "Information to aid in pagination.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "OBJECT",
+              "name": "PageInfo",
+              "ofType": null
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "totalCount",
+          "description": "The count of *all* `ClipSaleEvent` you could get from the connection.",
+          "args": [],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        }
+      ],
+      "inputFields": null,
+      "interfaces": [],
+      "enumValues": null,
+      "possibleTypes": null
+    },
+    {
+      "kind": "OBJECT",
+      "name": "ClipSaleEvent",
+      "description": "Event log related to a Clip auction.",
+      "fields": [
+        {
+          "name": "saleId",
+          "description": "Numerical ID of the Sale.",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigInt",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "top",
+          "description": "Starting price",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigInt",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "tab",
+          "description": "Debt",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "lot",
+          "description": "Amount of collateral being auctioned off.",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "usr",
+          "description": "Address that will receive any leftover collateral",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "kpr",
+          "description": "Address that will receive incentives",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "coin",
+          "description": "Amount of incentive",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "max",
+          "description": "Bidder's max acceptable price",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "price",
+          "description": "Actual price of purchased collateral",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "owe",
+          "description": "DAI paid for this slice of collateral",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "BigFloat",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "act",
+          "description": "Name of the method that triggered the event (can be \"kick\", \"take\", \"redo\", or \"yank\").",
+          "args": [],
+          "type": {
+            "kind": "ENUM",
+            "name": "SaleAct",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "sale",
+          "description": "Snapshot of the Clip Sale at the time of the BidEvent.",
+          "args": [],
+          "type": {
+            "kind": "OBJECT",
+            "name": "ClipSaleSnapshot",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "tx",
+          "description": "Metadata about the transaction when the BidEvent occurred.",
+          "args": [
+            {
+              "name": "first",
+              "description": "Only read the first `n` values of the set.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "last",
+              "description": "Only read the last `n` values of the set.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "offset",
+              "description": "Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "before",
+              "description": "Read all values in the set before (above) this cursor.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Cursor",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "after",
+              "description": "Read all values in the set after (below) this cursor.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Cursor",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "type": {
+            "kind": "NON_NULL",
+            "name": null,
+            "ofType": {
+              "kind": "OBJECT",
+              "name": "TxesConnection",
+              "ofType": null
+            }
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        }
+      ],
+      "inputFields": null,
+      "interfaces": [],
+      "enumValues": null,
+      "possibleTypes": null
+    },
+    {
+      "kind": "OBJECT",
+      "name": "ClipSaleEventsEdge",
+      "description": "A `ClipSaleEvent` edge in the connection.",
+      "fields": [
+        {
+          "name": "cursor",
+          "description": "A cursor for use in pagination.",
+          "args": [],
+          "type": {
+            "kind": "SCALAR",
+            "name": "Cursor",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "node",
+          "description": "The `ClipSaleEvent` at the end of the edge.",
+          "args": [],
+          "type": {
+            "kind": "OBJECT",
+            "name": "ClipSaleEvent",
+            "ofType": null
+          },
+          "isDeprecated": false,
+          "deprecationReason": null
+        }
+      ],
+      "inputFields": null,
+      "interfaces": [],
+      "enumValues": null,
+      "possibleTypes": null
+    },
+    {
+      "kind": "ENUM",
+      "name": "SaleAct",
+      "description": null,
+      "fields": null,
+      "inputFields": null,
+      "interfaces": null,
+      "enumValues": [
+        {
+          "name": "KICK",
+          "description": null,
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "TAKE",
+          "description": null,
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "REDO",
+          "description": null,
+          "isDeprecated": false,
+          "deprecationReason": null
+        },
+        {
+          "name": "YANK",
+          "description": null,
+          "isDeprecated": false,
+          "deprecationReason": null
+        }
+      ],
+      "possibleTypes": null
+    }
+  ]
+}
