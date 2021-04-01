@@ -15,7 +15,8 @@
     "test:integration": "yarn testchain --ci yarn lerna --stream --concurrency 1 --no-bail run test:integration",
     "test:build": "yarn testchain --ci yarn lerna run --stream --concurrency 1 --no-bail test:build",
     "test:logs": "tail -f ./node_modules/@makerdao/testchain/var/ganache.out | grep -v 'eth_blockNumber'",
-    "update-addresses": "./scripts/install-testchain-outputs.sh"
+    "update-addresses": "./scripts/install-testchain-outputs.sh",
+    "create-auction": "./packages/dai-plugin-liquidations/src/create-auctions.js"
   },
   "husky": {
     "hooks": {
