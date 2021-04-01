@@ -51,7 +51,7 @@ schema in sync:
    it without adding a new query or type.
 3. Run `merge-schemas.js` to merge the schemas and generate a new Mocki config file. You
    can just use Node directly: `$ node merge-schemas.js`.
-4. Spin up Mocki and try your query: `$ mocki --path config.yaml`. Mocki seems to have
+4. Spin up Mocki and try your query: `$ mocki run --path config.yml`. Mocki seems to have
    built-in mocks for most scalar primitives, like `Int` and `String`, but is missing
    some of the types like `BigInt` and `JSON` used in the API. If you get a "no mock defined
    for type" error back from the API when you load your query, you may need to stub out the value.
