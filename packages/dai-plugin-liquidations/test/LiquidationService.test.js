@@ -29,7 +29,12 @@ test('can create liquidation service', async () => {
   expect(service).toBeInstanceOf(LiquidationService);
 });
 
-test('get unsafe vaults', async () => {
+test('get unsafe LINK-A vaults', async () => {
   const urns = await service.getUnsafeVaults('LINK-A');
   console.log('urns', urns);
+}, 10000);
+
+test('get all LINK-A clips', async () => {
+  const clips = await service.getAllClips('LINK-A');
+  console.log('clips', clips);
 }, 10000);
