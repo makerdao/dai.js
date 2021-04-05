@@ -17,6 +17,7 @@ module.exports = {
   MCD_DAI: require('./abis/DSToken.json'),
   MCD_DAI_GUARD: require('./abis/DSGuard.json'),
   MCD_DEPLOY: require('./abis/DssDeploy.json'),
+  MCD_DOG: require('./abis/Dog.json'),
   MCD_FLAP: require('./abis/Flapper.json'),
   'MCD_FLIP_*': require('./abis/Flipper.json'),
   MCD_FLOP: require('./abis/Flopper.json'),
