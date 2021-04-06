@@ -15,6 +15,7 @@ module.exports = {
   MCD_CAT: require('./abis/Cat.json'),
   OLD_MCD_CAT: require('./abis/Cat.json'),
   MCD_DAI: require('./abis/DSToken.json'),
+  MCD_DOG: require('./abis/Dog.json'),
   MCD_DAI_GUARD: require('./abis/DSGuard.json'),
   MCD_DEPLOY: require('./abis/DssDeploy.json'),
   MCD_FLAP: require('./abis/Flapper.json'),

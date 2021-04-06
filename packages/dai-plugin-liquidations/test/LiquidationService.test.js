@@ -1,12 +1,15 @@
-// import Maker from '@makerdao/dai';
-// import McdPlugin from '@makerdao/dai-plugin-mcd';
-import Maker from '../../dai/src';
-import { McdPlugin, ETH, DAI, LINK } from '../../dai-plugin-mcd/src';
+import Maker from '@makerdao/dai';
+import McdPlugin from '@makerdao/dai-plugin-mcd';
 import liquidationPlugin from '../src';
 import LiquidationService from '../src/LiquidationService';
 import { createVaults, createAuctions } from '../test/utils';
+import { mineBlocks } from '../../test-helpers/src';
 
 // const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67';
+
+// const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+// console.log('sleeping');
+// await sleep(20000);
 
 let service, network, maker;
 
@@ -33,6 +36,10 @@ beforeAll(async () => {
 
 test.only('can create liquidation service', async () => {
   await createVaults(maker);
+  console.log('mining blocks in test');
+  await mineBlocks(maker.service('web3'), 10);
+  // console.log('sleeping...');
+  // await sleep(20000);
   await createAuctions(maker);
   expect(service).toBeInstanceOf(LiquidationService);
 }, 30000);
