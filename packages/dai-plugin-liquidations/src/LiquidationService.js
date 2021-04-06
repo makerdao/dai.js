@@ -7,6 +7,12 @@ const RAD = new BigNumber('1e45');
 const WAD = new BigNumber('1e18');
 const RAY = new BigNumber('1e27');
 
+//hard-coded for now, but can get from pips, which you can get from ilk registry
+const medianizers = {
+  'LINK-A': '0xbAd4212d73561B240f10C56F27e6D9608963f17b',
+  'YFI-A': '0x89AC26C0aFCB28EC55B6CD2F6b7DAD867Fa24639'
+};
+
 export default class LiquidationService extends PublicService {
   constructor(name = 'liquidation') {
     super(name, ['web3']);
@@ -59,6 +65,30 @@ export default class LiquidationService extends PublicService {
     }}`;
   }
 
+  _allDustQuery() {
+    return `
+    {allIlks(first: 1000) {
+      nodes {
+        id
+        dust
+      }
+    }}`;
+  }
+
+  _buildMedianizerQuery(ilk) {
+    const address = medianizers[ilk];
+    return `
+    {allLogMedianPrices(last: 1, filter: {addressByAddressId: {address: {equalTo: "${address}"}}}) {
+      nodes {
+        val
+        addressByAddressId {
+          address
+        }
+      }
+    }
+  }`;
+}
+
   async getQueryResponse(serverUrl, query, variables) {
     const resp = await fetch(serverUrl, {
       method: 'POST',
@@ -108,5 +138,26 @@ export default class LiquidationService extends PublicService {
       obj.updated = new Date(obj.updated);
       return obj;
     });
+  }
+
+  async getAllDusts() {
+    const response = await this.getQueryResponse(
+      this.serverUrl,
+      this._allDustQuery()
+    );
+    return response.allIlks.nodes.map(i => {
+      i.ilk = i.id;
+      i.dust = BigNumber(i.dust).div(RAD);
+      return i;
+    });
+  }
+
+  async getPrice(ilk) {
+    if (!medianizers[ilk]) return null;
+    const response = await this.getQueryResponse(
+      this.serverUrl,
+      this._buildMedianizerQuery(ilk)
+    );
+    return BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
   }
 }

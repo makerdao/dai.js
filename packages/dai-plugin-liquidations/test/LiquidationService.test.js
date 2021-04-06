@@ -38,3 +38,13 @@ test('get all LINK-A clips', async () => {
   const clips = await service.getAllClips('LINK-A');
   console.log('clips', clips);
 }, 10000);
+
+test('get all dusts', async () => {
+  const dusts = await service.getAllDusts();
+  console.log('dusts', dusts);
+}, 10000);
+
+test('get price for LINK-A', async () => {
+  const price = await service.getPrice('LINK-A');
+  console.log('price', price);
+}, 10000);
