@@ -34,7 +34,7 @@ beforeAll(async () => {
   service = maker.service('liquidation');
 }, 60000);
 
-test.only('can create liquidation service', async () => {
+test('can create liquidation service', async () => {
   await createVaults(maker);
   console.log('mining blocks in test');
   await mineBlocks(maker.service('web3'), 10);

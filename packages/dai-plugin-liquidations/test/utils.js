@@ -116,14 +116,13 @@ export async function createVaults(maker) {
     .service(ServiceRoles.CDP_TYPE)
     .getCdpType(null, 'LINK-A');
   const { currency } = cdpType;
-  await setPrice(
-    maker,
-    createCurrencyRatio(USD, currency)(1),
-    'LINK-A'
-  );
+  await setPrice(maker, createCurrencyRatio(USD, currency)(1), 'LINK-A');
 
   const linkA = '0x4c494e4b2d41';
-  await maker.service('smartContract').getContract('MCD_SPOT').poke(linkA);
+  await maker
+    .service('smartContract')
+    .getContract('MCD_SPOT')
+    .poke(linkA);
 
   //Refreshing Vault Data
   managedVault.reset();
