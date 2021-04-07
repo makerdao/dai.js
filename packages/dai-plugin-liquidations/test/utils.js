@@ -112,29 +112,18 @@ export async function createVaults(maker) {
   await mineBlocks(maker.service('web3'), 10);
 
   // Set price
-  try {
-    const cdpType = maker
-      .service(ServiceRoles.CDP_TYPE)
-      .getCdpType(null, 'LINK-A');
-    const { currency } = cdpType;
-    const p = await setPrice(
-      maker,
-      createCurrencyRatio(USD, currency)(1),
-      'LINK-A'
-    );
-    console.log('POKE RESPONSE', p);
-  } catch (e) {
-    console.log('POKE ERROR', e);
-  }
-  await mineBlocks(maker.service('web3'), 10);
+  const cdpType = maker
+    .service(ServiceRoles.CDP_TYPE)
+    .getCdpType(null, 'LINK-A');
+  const { currency } = cdpType;
+  await setPrice(
+    maker,
+    createCurrencyRatio(USD, currency)(1),
+    'LINK-A'
+  );
 
-  // drip 2
-  console.log(' ');
-  console.log('Dripping LINK-A JUG after changing price');
-  await maker
-    .service('smartContract')
-    .getContract('MCD_JUG')
-    .drip(ilk);
+  const linkA = '0x4c494e4b2d41';
+  await maker.service('smartContract').getContract('MCD_SPOT').poke(linkA);
 
   //Refreshing Vault Data
   managedVault.reset();
