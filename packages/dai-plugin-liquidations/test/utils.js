@@ -4,13 +4,15 @@ import { createCurrencyRatio } from '@makerdao/currency';
 import { mineBlocks } from '../../test-helpers/src';
 import BigNumber from 'bignumber.js';
 
-const ilk = '0xed9989084c494e4b2d41';
+// const ilk = '0xed9989084c494e4b2d41'; //from seth
+const ilk = '0x4c494e4b2d41'; // Ethans
+//stringToBytes = 0x4c494e4b2d41
 // const ilk =
-//   '0x4c494e4b2d410000000000000000000000000000000000000000000000000000';
+//   '0x4c494e4b2d410000000000000000000000000000000000000000000000000000'; //original
 let urns = [];
 // const dogAddress = '0x795f65578081AA750d874E1a3A6c434D1D98E118';
 
-const linkAmt = 20;
+const linkAmt = '20';
 
 export async function createAuctions(maker) {
   const currentAddress = maker.currentAddress();
@@ -34,58 +36,59 @@ export async function createAuctions(maker) {
   }
 }
 
-export async function createVaults(maker) {
-  console.log('Creating risky vault');
-  const manager = maker.service('mcd:cdpManager');
+async function getPrice(maker) {
+  const cdpType = maker
+    .service(ServiceRoles.CDP_TYPE)
+    .getCdpType(null, 'LINK-A');
+  console.log('LINK PRICE:', cdpType.price._amount);
+}
 
-  // TODO: move proxy and allowance checks
+async function setProxyAndAllowances(maker) {
   const kprAddress = maker.currentAddress();
   const linkToken = await maker.getToken(LINK);
 
-  console.log('Ensure there is proxy address');
   await maker.service('proxy').ensureProxy();
   const proxyAddress = await maker.service('proxy').getProxyAddress();
   console.log('Proxy Address: ', proxyAddress);
 
-  //Check for token allowance
   const linkAllowance = await linkToken.allowance(kprAddress, proxyAddress);
   if (Number(linkAllowance._amount) === 0) {
-    console.log('Approving Proxy to use LINK');
     await linkToken.approveUnlimited(proxyAddress);
   }
+}
 
+async function openVaultAndLock(maker) {
+  const manager = maker.service('mcd:cdpManager');
   // open vault
   const vault = await manager.open('LINK-A');
   let vaultId = vault.id;
   console.log('Vault ID', vaultId);
-
   // lock collateral
   console.log(`Locking ${linkAmt} LINK-A`);
   await manager.lock(vault.id, 'LINK-A', LINK(linkAmt));
 
-  console.log('mining blocks');
-  await mineBlocks(maker.service('web3'), 10);
+  return vault;
+}
 
-  // drip 1
-  console.log(' ');
-  console.log('Dripping LINK-A JUG (1)');
+async function setLinkPrice(maker) {
+  const cdpType = maker
+    .service(ServiceRoles.CDP_TYPE)
+    .getCdpType(null, 'LINK-A');
+  const { currency } = cdpType;
+  await setPrice(maker, createCurrencyRatio(USD, currency)(4), 'LINK-A');
   await maker
     .service('smartContract')
-    .getContract('MCD_JUG')
-    .drip(ilk);
+    .getContract('MCD_SPOT')
+    .poke(ilk);
+}
 
-  // Refreshing vault data
+async function resetVaultStats(vault) {
   vault.reset();
   await vault.prefetch();
+}
 
-  // Reading Vault Information
-  let managedVault = await manager.getCdp(vaultId);
-  managedVault.reset();
-  await managedVault.prefetch();
-  const vaultUrnAddr = await manager.getUrn(vaultId);
-  console.log('Vault: Urn Address', vaultUrnAddr);
-  urns.push(vaultUrnAddr);
-
+function vaultStats(managedVault, message) {
+  console.log(message);
   console.log('Collateral Value: ', managedVault.collateralValue._amount);
   console.log('DAI Available to Generate', managedVault.daiAvailable._amount);
   console.log('Debt Value: ', managedVault.debtValue._amount);
@@ -94,11 +97,10 @@ export async function createVaults(maker) {
     managedVault.collateralizationRatio._amount
   );
   console.log('Liquidation Price ', managedVault.liquidationPrice._amount);
-  console.log('Is Vault safe 1 (before drip)? ', managedVault.isSafe);
+  console.log('Is Vault safe?', managedVault.isSafe);
+}
 
-  // draw DAI
-  console.log(' ');
-  BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
+async function drawDai(manager, managedVault, vaultId) {
   const amtDai = await managedVault.daiAvailable._amount;
   console.log(`Drawing ${amtDai.toFixed(18)} from Vault #${vaultId}`);
   try {
@@ -107,37 +109,64 @@ export async function createVaults(maker) {
   } catch (error) {
     console.error(error);
   }
-  // todo optimize where/how we mine blocks so vault becomes unsafe
-  console.log('mining blocks');
+}
+
+// MAIN
+export async function createVaults(maker) {
+  BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
+  await getPrice(maker);
+
+  const manager = maker.service('mcd:cdpManager');
+  const jug = maker.service('smartContract').getContract('MCD_JUG');
+
+  // Initial Setup
+  await setProxyAndAllowances(maker);
+
+  // Open a risky Vault and lock LINK
+  const vault = await openVaultAndLock(maker);
+  const vaultId = vault.id;
+  const managedVault = await manager.getCdp(vaultId);
+  const vaultUrnAddr = await manager.getUrn(vaultId);
+  urns.push(vaultUrnAddr);
+  await resetVaultStats(vault);
+
+  await mineBlocks(maker.service('web3'), 10);
+  await jug.drip(ilk);
+
+  // First check if vault is safe?
+  await vaultStats(vault, '1 - Is initial vault safe?');
+
+  // Draw the exact amount of DAI
+  await drawDai(manager, managedVault, vaultId);
+  await resetVaultStats(vault);
+
+  const amtDai2 = await managedVault.daiAvailable._amount;
+  console.log('amount to draw now after drawing', amtDai2.toFixed(18));
+
+  await vaultStats(vault, '1.5 - Is it safe after drawing?');
+
+  await mineBlocks(maker.service('web3'), 10);
+  await jug.drip(ilk);
+
+  // Now check if vault is safe after draw & drip?
+  await vaultStats(vault, '2 - Is vault safe after drawing and calling drip?');
+
   await mineBlocks(maker.service('web3'), 10);
 
-  // Set price
-  const cdpType = maker
-    .service(ServiceRoles.CDP_TYPE)
-    .getCdpType(null, 'LINK-A');
-  const { currency } = cdpType;
-  await setPrice(maker, createCurrencyRatio(USD, currency)(1), 'LINK-A');
-
-  const linkA = '0x4c494e4b2d41';
+  // Set price too low
+  await setLinkPrice(maker);
+  await mineBlocks(maker.service('web3'), 10);
+  await jug.drip(ilk);
   await maker
     .service('smartContract')
     .getContract('MCD_SPOT')
-    .poke(linkA);
+    .poke(ilk);
 
-  //Refreshing Vault Data
-  managedVault.reset();
-  await managedVault.prefetch();
-  console.log('Is Vault safe (after changing price)? ', managedVault.isSafe);
+  await resetVaultStats(vault);
 
-  // Getting Updated state from Vault
-  console.log(' ');
-  console.log('Collateral Value: ', managedVault.collateralValue._amount);
-  console.log('DAI Available to Generate', managedVault.daiAvailable._amount);
-  console.log('Debt Value: ', managedVault.debtValue._amount);
-  console.log(
-    'Collateralization Ratio ',
-    managedVault.collateralizationRatio._amount
-  );
-  console.log('Liquidation Price ', managedVault.liquidationPrice._amount);
-  console.log('Is Vault safe? (final)', managedVault.isSafe);
+  // show price
+  await getPrice(maker);
+
+  // Now check if vault is safe after draw & drip?
+  await vaultStats(vault, '3 - Is final vault safe?');
 }

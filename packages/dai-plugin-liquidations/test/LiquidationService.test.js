@@ -38,13 +38,12 @@ test('can create liquidation service', async () => {
   await createVaults(maker);
   console.log('mining blocks in test');
   await mineBlocks(maker.service('web3'), 10);
-  // console.log('sleeping...');
-  // await sleep(20000);
+
   await createAuctions(maker);
   expect(service).toBeInstanceOf(LiquidationService);
 }, 30000);
 
-test('get unsafe vaults', async () => {
+xtest('get unsafe vaults', async () => {
   const urns = await service.getUnsafeVaults('LINK-A');
   console.log('urns', urns);
 }, 10000);

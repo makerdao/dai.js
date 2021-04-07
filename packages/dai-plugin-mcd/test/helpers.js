@@ -38,6 +38,7 @@ export async function setPrice(maker, ratio, ilk) {
 
   //check that setPrice worked
   const data = maker.service(ServiceRoles.SYSTEM_DATA);
+  console.log('string to bytes', stringToBytes(ilk));
   const { spot } = await data.vat.ilks(stringToBytes(ilk));
   const spotBN = new BigNumber(spot.toString()).dividedBy(RAY);
   const par = await data.spot.par();
