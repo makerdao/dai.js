@@ -62,3 +62,8 @@ test('get price for LINK-A', async () => {
   const price = await service.getPrice('LINK-A');
   console.log('price', price);
 }, 10000);
+
+test('get clip contract', async () => {
+  console.log('sales', await service._clipperContract().sales(11));
+  console.log('status', await service._clipperContract().getStatus(0));
+});

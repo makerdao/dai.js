@@ -15,7 +15,7 @@ const medianizers = {
 
 export default class LiquidationService extends PublicService {
   constructor(name = 'liquidation') {
-    super(name, ['web3']);
+    super(name, ['web3', 'smartContract']);
   }
 
   connect() {
@@ -159,5 +159,9 @@ export default class LiquidationService extends PublicService {
       this._buildMedianizerQuery(ilk)
     );
     return BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
+  }
+
+  _clipperContract() {
+    return this.get('smartContract').getContractByName('MCD_CLIP_LINK_A');
   }
 }
