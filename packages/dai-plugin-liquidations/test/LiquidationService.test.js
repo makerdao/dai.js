@@ -43,7 +43,22 @@ test('can create liquidation service', async () => {
   expect(service).toBeInstanceOf(LiquidationService);
 }, 30000);
 
-xtest('get unsafe vaults', async () => {
+test('get unsafe LINK-A vaults', async () => {
   const urns = await service.getUnsafeVaults('LINK-A');
   console.log('urns', urns);
+}, 10000);
+
+test('get all LINK-A clips', async () => {
+  const clips = await service.getAllClips('LINK-A');
+  console.log('clips', clips);
+}, 10000);
+
+test('get all dusts', async () => {
+  const dusts = await service.getAllDusts();
+  console.log('dusts', dusts);
+}, 10000);
+
+test('get price for LINK-A', async () => {
+  const price = await service.getPrice('LINK-A');
+  console.log('price', price);
 }, 10000);

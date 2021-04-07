@@ -1,7 +1,17 @@
 import { PublicService } from '@makerdao/services-core';
 import assert from 'assert';
-const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
+//const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
+const LOCAL_URL = 'http://localhost:3000/graphql';
 import BigNumber from 'bignumber.js';
+const RAD = new BigNumber('1e45');
+const WAD = new BigNumber('1e18');
+const RAY = new BigNumber('1e27');
+
+//hard-coded for now, but can get from pips, which you can get from ilk registry
+const medianizers = {
+  'LINK-A': '0xbAd4212d73561B240f10C56F27e6D9608963f17b',
+  'YFI-A': '0x89AC26C0aFCB28EC55B6CD2F6b7DAD867Fa24639'
+};
 
 export default class LiquidationService extends PublicService {
   constructor(name = 'liquidation') {
@@ -14,7 +24,8 @@ export default class LiquidationService extends PublicService {
       case 'mainnet':
       case 1:
       default:
-        this.serverUrl = MAINNET_SERVER_URL;
+        //this.serverUrl = MAINNET_SERVER_URL;
+        this.serverUrl = LOCAL_URL; //TODO: switch once done using the mocked vdb api
     }
   }
 
@@ -33,6 +44,50 @@ export default class LiquidationService extends PublicService {
       }
     }`;
   }
+
+  _buildAllClipsQuery(ilk) {
+    return `
+    {allClips(ilk: "${ilk}") {
+      edges {
+        node {
+          saleId
+          pos
+          tab
+          lot
+          usr
+          tic
+          top
+          active
+          created
+          updated
+        }
+      }
+    }}`;
+  }
+
+  _allDustQuery() {
+    return `
+    {allIlks(first: 1000) {
+      nodes {
+        id
+        dust
+      }
+    }}`;
+  }
+
+  _buildMedianizerQuery(ilk) {
+    const address = medianizers[ilk];
+    return `
+    {allLogMedianPrices(last: 1, filter: {addressByAddressId: {address: {equalTo: "${address}"}}}) {
+      nodes {
+        val
+        addressByAddressId {
+          address
+        }
+      }
+    }
+  }`;
+}
 
   async getQueryResponse(serverUrl, query, variables) {
     const resp = await fetch(serverUrl, {
@@ -65,5 +120,44 @@ export default class LiquidationService extends PublicService {
       if (art.eq(0) || rate.eq(0)) return false;
       return art.div(ink).gt(spot.div(rate));
     });
+  }
+
+  async getAllClips(ilk) {
+    const response = await this.getQueryResponse(
+      this.serverUrl,
+      this._buildAllClipsQuery(ilk)
+    );
+    const clips = response.allClips;
+    return clips.edges.map(c => {
+      let obj = c.node;
+      obj.tic = new Date(obj.tic * 1000);
+      obj.tab = BigNumber(obj.tab).div(RAD);
+      obj.lot = BigNumber(obj.lot).div(WAD);
+      obj.top = BigNumber(obj.top).div(RAY);
+      obj.created = new Date(obj.created);
+      obj.updated = new Date(obj.updated);
+      return obj;
+    });
+  }
+
+  async getAllDusts() {
+    const response = await this.getQueryResponse(
+      this.serverUrl,
+      this._allDustQuery()
+    );
+    return response.allIlks.nodes.map(i => {
+      i.ilk = i.id;
+      i.dust = BigNumber(i.dust).div(RAD);
+      return i;
+    });
+  }
+
+  async getPrice(ilk) {
+    if (!medianizers[ilk]) return null;
+    const response = await this.getQueryResponse(
+      this.serverUrl,
+      this._buildMedianizerQuery(ilk)
+    );
+    return BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
   }
 }
