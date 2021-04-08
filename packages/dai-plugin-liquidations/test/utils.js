@@ -4,36 +4,41 @@ import { createCurrencyRatio } from '@makerdao/currency';
 import { mineBlocks } from '../../test-helpers/src';
 import BigNumber from 'bignumber.js';
 
-// const ilk = '0xed9989084c494e4b2d41'; //from seth
+// const ilk = '0xed9989084c494e4b2d41'; //from seth (the first bit is the contract sig 'ed998908')
 const ilk = '0x4c494e4b2d41'; // Ethans
 //stringToBytes = 0x4c494e4b2d41
 // const ilk =
 //   '0x4c494e4b2d410000000000000000000000000000000000000000000000000000'; //original
 let urns = [];
 // const dogAddress = '0x795f65578081AA750d874E1a3A6c434D1D98E118';
+//99800418305638316473488226407242625739110630383877768873912206733733181632051
 
 const linkAmt = '20';
 
-export async function createAuctions(maker) {
+const urnAdd = '0xB95fFDe0C48F23Df7401b1566C4DA0EDeEF604AC';
+
+export async function liquidateVaults(maker) {
   const currentAddress = maker.currentAddress();
 
   const dogContract = maker
     .service('smartContract')
     .getContractByName('MCD_DOG');
 
-  const bark = async urn => {
-    await dogContract.bark(ilk, urn, currentAddress);
-  };
+  const bark = async urn => await dogContract.bark(ilk, urn, currentAddress);
 
-  for (let i = 0; i < urns.length; i++) {
-    console.log('number of urns to bark', urns.length);
-    console.log('Barking ', urns[i]);
-    await bark(urns[i]);
-  }
-  console.log('Barked Urns: ');
-  for (let i = 0; i < urns.length; i++) {
-    console.log(urns[i]);
-  }
+  const barked = await bark(urnAdd);
+  console.log('bark', barked);
+
+  // for (let i = 0; i < urns.length; i++) {
+  //   console.log('number of urns to bark', urns.length);
+  //   console.log('Barking ', urns[i]);
+  //   const barkId = await bark(urns[i]);
+  //   console.log('bark ID', barkId);
+  // }
+  // console.log('Barked Urns: ');
+  // for (let i = 0; i < urns.length; i++) {
+  //   console.log(urns[i]);
+  // }
 }
 
 async function getPrice(maker) {
@@ -169,4 +174,5 @@ export async function createVaults(maker) {
 
   // Now check if vault is safe after draw & drip?
   await vaultStats(vault, '3 - Is final vault safe?');
+  console.log('URNS', urns);
 }

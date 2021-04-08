@@ -1,5 +1,8 @@
 import { PublicService } from '@makerdao/services-core';
 import assert from 'assert';
+import tracksTransactions, {
+  tracksTransactionsWithOptions
+} from './utils/tracksTransactions';
 //const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
 const LOCAL_URL = 'http://localhost:3000/graphql';
 import BigNumber from 'bignumber.js';
@@ -87,7 +90,7 @@ export default class LiquidationService extends PublicService {
       }
     }
   }`;
-}
+  }
 
   async getQueryResponse(serverUrl, query, variables) {
     const resp = await fetch(serverUrl, {
@@ -160,8 +163,50 @@ export default class LiquidationService extends PublicService {
     );
     return BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
   }
+  /**
+   * 
+    uint256 tab,  // Debt                   [rad]
+    uint256 lot,  // Collateral             [wad]
+    address usr,  // Address that will receive any leftover collateral (urn owner?)
+    address kpr   // Address that will receive incentives (the kicker, me)
+   */
+
+  // async kickAuction(tab, lot, usr, kpr) {
+  //   return await this._clipperContract().kick(tab, lot, usr, kpr);
+  // }
+
+  /*
+    uint256 id,           // Auction id
+    uint256 amt,          // Upper limit on amount of collateral to buy  [wad]
+    uint256 max,          // Maximum acceptable price (DAI / collateral) [ray]
+    address who,          // Receiver of collateral and external call address
+    bytes calldata data   // Data to pass in external call; if length 0, no call is done
+  */
+  // @tracksTransactions
+  async take(id, amount, maxPrice, address) {
+    const nullBytes =
+      '0x0000000000000000000000000000000000000000000000000000000000000000';
+    // const amt = this.get('web3')._web3.utils.toWei(amount.toString(), 'gwei');
+    const amt = amount;
+    // const amt = BigNumber(amount).times(WAD);
+    console.log('amount', amt);
+    // const max = BigNumber(maxPrice).times(RAY);
+    const max = maxPrice;
+    console.log('max', max);
+
+    return await this._clipperContract().take(id, amt, max, address, nullBytes);
+  }
+
+  // @tracksTransactions
+  async joinDaiToAdapter(address, amount) {
+    await this._joinDaiAdapter().join(address, amount);
+  }
 
   _clipperContract() {
-    return this.get('smartContract').getContractByName('MCD_CLIP_LINK_A');
+    return this.get('smartContract').getContract('MCD_CLIP_LINK_A');
+  }
+
+  _joinDaiAdapter() {
+    return this.get('smartContract').getContractByName('MCD_JOIN_DAI');
   }
 }
