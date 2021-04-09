@@ -14,6 +14,7 @@ import { mineBlocks } from '../../test-helpers/src';
 
 const urn = '0xB95fFDe0C48F23Df7401b1566C4DA0EDeEF604AC';
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
+const myProxy = '0x570074CCb147ea3dE2E23fB038D4d78324278886';
 
 let service, network, maker;
 
@@ -45,17 +46,43 @@ test.only('can create liquidation service', async () => {
     (await maker.getToken('DAI').balance()).toString()
   );
 
+  //0x81a794cb000000000000000000000000000000000000000000000000000000000000000
+  //100000000000000000000000000000000000000000000000000000000000000
+  //6600000000000000000000000000000000000000000000000000000000000000
+  //32000000000000000000000000
+  //16fb96a5fa0427af0c8f7cf1eb4870231c8154b600000000000000000000000000000000000000000000000000000000000000
+  //a000000000000000000000000000000000000000000000000000000000000000
+  //200000000000000000000000000000000000000000000000000000000000000000
+
+  //0x81a794cb000000000000000000000000000000000000000000000000000000000000000
+  //100000000000000000000000000000000000000000000000000000000000000
+  //3b00000000000000000000000000000000000000000000000000000000000000
+  //18000000000000000000000000
+  //16fb96a5fa0427af0c8f7cf1eb4870231c8154b600000000000000000000000000000000000000000000000000000000000000
+  //a000000000000000000000000000000000000000000000000000000000000000
+  //200000000000000000000000000000000000000000000000000000000000000000
+
   try {
     // await maker.getToken('DAI').approveUnlimited(maker.currentAddress());
-
     await maker
       .getToken('DAI')
       .approveUnlimited('0xe53793CA0F1a3991D6bfBc5929f89A9eDe65da44');
 
-    const jd = await service.joinDaiToAdapter(maker.currentAddress(), '102');
-    console.log('joined dai', jd);
+    await service.joinDaiToAdapter(maker.currentAddress(), '102');
+    console.log('joined dai');
   } catch (e) {
-    console.error(e);
+    console.error('error joining dai', e);
+  }
+
+  try {
+    const MCD_CLIP_LINK_A = '0xc84b50Ea1cB3f964eFE51961140057f7E69b09c1';
+    await maker
+      .service('smartContract')
+      .getContract('MCD_VAT')
+      .hope(MCD_CLIP_LINK_A);
+    console.log('gave hope to clipper');
+  } catch (e) {
+    console.error('errow with hope', e);
   }
 
   const vatDaiBal = await maker
@@ -67,7 +94,12 @@ test.only('can create liquidation service', async () => {
   await liquidateVaults(maker);
   await mineBlocks(maker.service('web3'), 10);
 
-  const txo = await service.take(0, 102, 50, urn, me);
+  const id = 1;
+  const amt = '1';
+  // const max = '3.99999999999999999999';
+  const max = '4';
+
+  const txo = await service.take(id, amt, max, me);
   // const txMgr = maker.service('transactionManager');
   // txMgr.listen(txo, {
   //   pending: tx => console.log('pending', tx),

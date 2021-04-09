@@ -13,7 +13,7 @@ let urns = [];
 // const dogAddress = '0x795f65578081AA750d874E1a3A6c434D1D98E118';
 //99800418305638316473488226407242625739110630383877768873912206733733181632051
 
-const linkAmt = '20';
+const linkAmt = '11';
 
 const urnAdd = '0xB95fFDe0C48F23Df7401b1566C4DA0EDeEF604AC';
 
@@ -26,8 +26,12 @@ export async function liquidateVaults(maker) {
 
   const bark = async urn => await dogContract.bark(ilk, urn, currentAddress);
 
-  const barked = await bark(urnAdd);
-  console.log('bark', barked);
+  try {
+    const barked = await bark(urnAdd);
+    console.log('bark', barked);
+  } catch (e) {
+    console.error(e);
+  }
 
   // for (let i = 0; i < urns.length; i++) {
   //   console.log('number of urns to bark', urns.length);
@@ -139,7 +143,7 @@ export async function createVaults(maker) {
   await jug.drip(ilk);
 
   // First check if vault is safe?
-  await vaultStats(vault, '1 - Is initial vault safe?');
+  await vaultStats(vault, '1 ------');
 
   // Draw the exact amount of DAI
   await drawDai(manager, managedVault, vaultId);
@@ -148,18 +152,18 @@ export async function createVaults(maker) {
   const amtDai2 = await managedVault.daiAvailable._amount;
   console.log('amount to draw now after drawing', amtDai2.toFixed(18));
 
-  await vaultStats(vault, '1.5 - Is it safe after drawing?');
+  await vaultStats(vault, '1.5 -------');
 
   await mineBlocks(maker.service('web3'), 10);
   await jug.drip(ilk);
 
   // Now check if vault is safe after draw & drip?
-  await vaultStats(vault, '2 - Is vault safe after drawing and calling drip?');
+  await vaultStats(vault, '2 -------');
 
   await mineBlocks(maker.service('web3'), 10);
 
   // Set price too low
-  await setLinkPrice(maker);
+  // await setLinkPrice(maker);
   await mineBlocks(maker.service('web3'), 10);
   await jug.drip(ilk);
   await maker
@@ -173,6 +177,6 @@ export async function createVaults(maker) {
   await getPrice(maker);
 
   // Now check if vault is safe after draw & drip?
-  await vaultStats(vault, '3 - Is final vault safe?');
+  await vaultStats(vault, '3 ----------');
   console.log('URNS', urns);
 }

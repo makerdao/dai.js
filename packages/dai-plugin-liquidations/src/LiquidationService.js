@@ -10,6 +10,9 @@ const RAD = new BigNumber('1e45');
 const WAD = new BigNumber('1e18');
 const RAY = new BigNumber('1e27');
 
+const nullBytes =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+
 //hard-coded for now, but can get from pips, which you can get from ilk registry
 const medianizers = {
   'LINK-A': '0xbAd4212d73561B240f10C56F27e6D9608963f17b',
@@ -184,17 +187,21 @@ export default class LiquidationService extends PublicService {
   */
   // @tracksTransactions
   async take(id, amount, maxPrice, address) {
-    const nullBytes =
-      '0x0000000000000000000000000000000000000000000000000000000000000000';
-    // const amt = this.get('web3')._web3.utils.toWei(amount.toString(), 'gwei');
-    const amt = amount;
-    // const amt = BigNumber(amount).times(WAD);
+    const amt = BigNumber(amount)
+      .times(WAD)
+      .toFixed();
     console.log('amount', amt);
-    // const max = BigNumber(maxPrice).times(RAY);
-    const max = maxPrice;
+
+    const max = BigNumber(maxPrice)
+      .times(RAY)
+      .toFixed();
     console.log('max', max);
 
     return await this._clipperContract().take(id, amt, max, address, nullBytes);
+  }
+
+  async kicks() {
+    return await this._clipperContract().kicks();
   }
 
   // @tracksTransactions
