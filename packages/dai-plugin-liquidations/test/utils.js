@@ -13,7 +13,7 @@ let urns = [];
 // const dogAddress = '0x795f65578081AA750d874E1a3A6c434D1D98E118';
 //99800418305638316473488226407242625739110630383877768873912206733733181632051
 
-const linkAmt = '11';
+const linkAmt = '20';
 
 const urnAdd = '0xB95fFDe0C48F23Df7401b1566C4DA0EDeEF604AC';
 
@@ -32,17 +32,6 @@ export async function liquidateVaults(maker) {
   } catch (e) {
     console.error(e);
   }
-
-  // for (let i = 0; i < urns.length; i++) {
-  //   console.log('number of urns to bark', urns.length);
-  //   console.log('Barking ', urns[i]);
-  //   const barkId = await bark(urns[i]);
-  //   console.log('bark ID', barkId);
-  // }
-  // console.log('Barked Urns: ');
-  // for (let i = 0; i < urns.length; i++) {
-  //   console.log(urns[i]);
-  // }
 }
 
 async function getPrice(maker) {
@@ -74,7 +63,11 @@ async function openVaultAndLock(maker) {
   console.log('Vault ID', vaultId);
   // lock collateral
   console.log(`Locking ${linkAmt} LINK-A`);
-  await manager.lock(vault.id, 'LINK-A', LINK(linkAmt));
+  try {
+    await manager.lock(vault.id, 'LINK-A', LINK(linkAmt));
+  } catch (e) {
+    console.error('lock error:', e);
+  }
 
   return vault;
 }
@@ -95,6 +88,9 @@ async function resetVaultStats(vault) {
   vault.reset();
   await vault.prefetch();
 }
+
+//102000000000000000000000000000
+//102160000018221179642813508263721367230543331440
 
 function vaultStats(managedVault, message) {
   console.log(message);
@@ -125,11 +121,17 @@ export async function createVaults(maker) {
   BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
   await getPrice(maker);
 
+  const linkToken = await maker.getToken(LINK);
+  console.log(
+    'Link Balance:',
+    await linkToken.balanceOf(maker.currentAddress())
+  );
+
   const manager = maker.service('mcd:cdpManager');
   const jug = maker.service('smartContract').getContract('MCD_JUG');
 
   // Initial Setup
-  await setProxyAndAllowances(maker);
+  await setProxyAndAllowances(maker); //not needed for kovan
 
   // Open a risky Vault and lock LINK
   const vault = await openVaultAndLock(maker);

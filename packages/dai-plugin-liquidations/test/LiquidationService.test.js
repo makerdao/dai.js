@@ -46,30 +46,12 @@ test.only('can create liquidation service', async () => {
     (await maker.getToken('DAI').balance()).toString()
   );
 
-  //0x81a794cb000000000000000000000000000000000000000000000000000000000000000
-  //100000000000000000000000000000000000000000000000000000000000000
-  //6600000000000000000000000000000000000000000000000000000000000000
-  //32000000000000000000000000
-  //16fb96a5fa0427af0c8f7cf1eb4870231c8154b600000000000000000000000000000000000000000000000000000000000000
-  //a000000000000000000000000000000000000000000000000000000000000000
-  //200000000000000000000000000000000000000000000000000000000000000000
-
-  //0x81a794cb000000000000000000000000000000000000000000000000000000000000000
-  //100000000000000000000000000000000000000000000000000000000000000
-  //3b00000000000000000000000000000000000000000000000000000000000000
-  //18000000000000000000000000
-  //16fb96a5fa0427af0c8f7cf1eb4870231c8154b600000000000000000000000000000000000000000000000000000000000000
-  //a000000000000000000000000000000000000000000000000000000000000000
-  //200000000000000000000000000000000000000000000000000000000000000000
-
   try {
-    // await maker.getToken('DAI').approveUnlimited(maker.currentAddress());
-    await maker
-      .getToken('DAI')
-      .approveUnlimited('0xe53793CA0F1a3991D6bfBc5929f89A9eDe65da44');
+    const MCD_JOIN_DAI = '0xe53793CA0F1a3991D6bfBc5929f89A9eDe65da44';
+    await maker.getToken('DAI').approveUnlimited(MCD_JOIN_DAI);
 
-    await service.joinDaiToAdapter(maker.currentAddress(), '102');
-    console.log('joined dai');
+    const jd = await service.joinDaiToAdapter(maker.currentAddress(), '102');
+    console.log('joined dai', jd);
   } catch (e) {
     console.error('error joining dai', e);
   }
@@ -98,8 +80,22 @@ test.only('can create liquidation service', async () => {
   const amt = '1';
   // const max = '3.99999999999999999999';
   const max = '4';
+  try {
+    const kicks = await service.kicks();
+    console.log('KICKS:', kicks.toString());
 
-  const txo = await service.take(id, amt, max, me);
+    // const active = await service.active(1);
+    // console.log('ACTIVE', active);
+
+    // const sales = await service.sales(1);
+    // console.log('SALES:', sales.receipt);
+
+    const txo = await service.take(id, amt, max, me);
+    console.log('called take', txo);
+  } catch (e) {
+    console.error('take error:', e);
+  }
+
   // const txMgr = maker.service('transactionManager');
   // txMgr.listen(txo, {
   //   pending: tx => console.log('pending', tx),
@@ -111,8 +107,6 @@ test.only('can create liquidation service', async () => {
     .getContract('MCD_VAT')
     .dai(maker.currentAddress());
   console.log('vat dai balance after take', daiBal2.toString());
-
-  console.log('txo', txo);
 
   expect(service).toBeInstanceOf(LiquidationService);
 }, 30000);

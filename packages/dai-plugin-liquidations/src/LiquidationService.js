@@ -185,8 +185,8 @@ export default class LiquidationService extends PublicService {
     address who,          // Receiver of collateral and external call address
     bytes calldata data   // Data to pass in external call; if length 0, no call is done
   */
-  // @tracksTransactions
-  async take(id, amount, maxPrice, address) {
+  @tracksTransactions
+  async take(id, amount, maxPrice, address, { promise }) {
     const amt = BigNumber(amount)
       .times(WAD)
       .toFixed();
@@ -197,20 +197,38 @@ export default class LiquidationService extends PublicService {
       .toFixed();
     console.log('max', max);
 
-    return await this._clipperContract().take(id, amt, max, address, nullBytes);
+    // const amt = amount;
+    // const max = maxPrice;
+
+    return await this._clipperContract().take(
+      id,
+      amt,
+      max,
+      address,
+      nullBytes,
+      { promise }
+    );
   }
 
   async kicks() {
     return await this._clipperContract().kicks();
   }
 
-  // @tracksTransactions
-  async joinDaiToAdapter(address, amount) {
-    await this._joinDaiAdapter().join(address, amount);
+  async active(id) {
+    return await this._clipperContract().active(id);
+  }
+
+  async sales(id) {
+    return await this._clipperContract().sales(id);
+  }
+
+  @tracksTransactions
+  async joinDaiToAdapter(address, amount, { promise }) {
+    await this._joinDaiAdapter().join(address, amount, { promise });
   }
 
   _clipperContract() {
-    return this.get('smartContract').getContract('MCD_CLIP_LINK_A');
+    return this.get('smartContract').getContractByName('MCD_CLIP_LINK_A');
   }
 
   _joinDaiAdapter() {
