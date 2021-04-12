@@ -2,7 +2,7 @@ import Maker from '@makerdao/dai';
 import McdPlugin from '@makerdao/dai-plugin-mcd';
 // import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
-import LiquidationService from '../src/LiquidationService';
+import LiquidationService, { nullBytes } from '../src/LiquidationService';
 import { createVaults, liquidateVaults } from '../test/utils';
 import { mineBlocks } from '../../test-helpers/src';
 
@@ -73,28 +73,39 @@ test.only('can create liquidation service', async () => {
     .dai(maker.currentAddress());
   console.log('vat dai balance before take', vatDaiBal.toString());
 
-  await liquidateVaults(maker);
+  const id = await liquidateVaults(maker);
+  console.log('ID:', id);
   await mineBlocks(maker.service('web3'), 10);
 
-  const id = 1;
+  // const id = 1;
   const amt = '1';
   // const max = '3.99999999999999999999';
-  const max = '4';
+  const max = '100';
   try {
     const kicks = await service.kicks();
     console.log('KICKS:', kicks.toString());
 
-    // const active = await service.active(1);
-    // console.log('ACTIVE', active);
-
-    // const sales = await service.sales(1);
-    // console.log('SALES:', sales.receipt);
+    const active = await service.active(0);
+    console.log('ACTIVE', active.toNumber());
 
     const txo = await service.take(id, amt, max, me);
     console.log('called take', txo);
   } catch (e) {
     console.error('take error:', e);
   }
+
+  await mineBlocks(maker.service('web3'), 10);
+
+  const sales = await service.sales(id);
+  console.log(
+    'SALES (after "take"):',
+    sales.pos.toString(),
+    sales.tab.toString(),
+    sales.lot.toString(),
+    sales.usr.toString(),
+    sales.tic.toString(),
+    sales.top.toString()
+  );
 
   // const txMgr = maker.service('transactionManager');
   // txMgr.listen(txo, {

@@ -10,7 +10,7 @@ const RAD = new BigNumber('1e45');
 const WAD = new BigNumber('1e18');
 const RAY = new BigNumber('1e27');
 
-const nullBytes =
+export const nullBytes =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 //hard-coded for now, but can get from pips, which you can get from ilk registry
@@ -214,8 +214,8 @@ export default class LiquidationService extends PublicService {
     return await this._clipperContract().kicks();
   }
 
-  async active(id) {
-    return await this._clipperContract().active(id);
+  async active(index) {
+    return await this._clipperContract().active(index);
   }
 
   async sales(id) {

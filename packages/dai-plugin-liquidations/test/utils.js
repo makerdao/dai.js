@@ -28,7 +28,8 @@ export async function liquidateVaults(maker) {
 
   try {
     const barked = await bark(urnAdd);
-    console.log('bark', barked);
+    const id = barked.receipt.logs[4].topics[3];
+    return id;
   } catch (e) {
     console.error(e);
   }
@@ -124,7 +125,7 @@ export async function createVaults(maker) {
   const linkToken = await maker.getToken(LINK);
   console.log(
     'Link Balance:',
-    await linkToken.balanceOf(maker.currentAddress())
+    (await linkToken.balanceOf(maker.currentAddress())).toString()
   );
 
   const manager = maker.service('mcd:cdpManager');
