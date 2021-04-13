@@ -1,8 +1,6 @@
 import { PublicService } from '@makerdao/services-core';
 import assert from 'assert';
-import tracksTransactions, {
-  tracksTransactionsWithOptions
-} from './utils/tracksTransactions';
+import tracksTransactions from './utils/tracksTransactions';
 //const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
 const LOCAL_URL = 'http://localhost:3000/graphql';
 import BigNumber from 'bignumber.js';
@@ -10,8 +8,7 @@ const RAD = new BigNumber('1e45');
 const WAD = new BigNumber('1e18');
 const RAY = new BigNumber('1e27');
 
-export const nullBytes =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
+export const nullBytes = '0x';
 
 //hard-coded for now, but can get from pips, which you can get from ilk registry
 const medianizers = {
@@ -166,19 +163,8 @@ export default class LiquidationService extends PublicService {
     );
     return BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
   }
-  /**
-   * 
-    uint256 tab,  // Debt                   [rad]
-    uint256 lot,  // Collateral             [wad]
-    address usr,  // Address that will receive any leftover collateral (urn owner?)
-    address kpr   // Address that will receive incentives (the kicker, me)
-   */
 
-  // async kickAuction(tab, lot, usr, kpr) {
-  //   return await this._clipperContract().kick(tab, lot, usr, kpr);
-  // }
-
-  /*
+  /* TAKE
     uint256 id,           // Auction id
     uint256 amt,          // Upper limit on amount of collateral to buy  [wad]
     uint256 max,          // Maximum acceptable price (DAI / collateral) [ray]
@@ -190,24 +176,14 @@ export default class LiquidationService extends PublicService {
     const amt = BigNumber(amount)
       .times(WAD)
       .toFixed();
-    console.log('amount', amt);
 
     const max = BigNumber(maxPrice)
       .times(RAY)
       .toFixed();
-    console.log('max', max);
 
-    // const amt = amount;
-    // const max = maxPrice;
-
-    return await this._clipperContract().take(
-      id,
-      amt,
-      max,
-      address,
-      nullBytes,
-      { promise }
-    );
+    return await this._clipperContract().take(id, amt, max, address, '0x', {
+      promise
+    });
   }
 
   async kicks() {
@@ -218,13 +194,43 @@ export default class LiquidationService extends PublicService {
     return await this._clipperContract().active(index);
   }
 
+  /* struct Sale {
+        uint256 pos;  // Index in active array
+        uint256 tab;  // Dai to raise       [rad]
+        uint256 lot;  // collateral to sell [wad]
+        address usr;  // Liquidated CDP
+        uint96  tic;  // Auction start time
+        uint256 top;  // Starting price     [ray]
+    }
+   */
   async sales(id) {
     return await this._clipperContract().sales(id);
   }
 
+  async count() {
+    return await this._clipperContract().count();
+  }
+
+  async list() {
+    return await this._clipperContract().list();
+  }
+
+  async getStatus(id) {
+    return await this._clipperContract().getStatus(id);
+  }
+
+  // async upchost() {
+  //   return await this._clipperContract().upchost();
+  // }
+
+  @tracksTransactions
+  async yank(id, { promise }) {
+    return await this._clipperContract().yank(id, { promise });
+  }
+
   @tracksTransactions
   async joinDaiToAdapter(address, amount, { promise }) {
-    await this._joinDaiAdapter().join(address, amount, { promise });
+    return await this._joinDaiAdapter().join(address, amount, { promise });
   }
 
   _clipperContract() {
