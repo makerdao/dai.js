@@ -2,9 +2,7 @@ import Maker from '@makerdao/dai';
 import McdPlugin from '@makerdao/dai-plugin-mcd';
 // import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
-import LiquidationService, { nullBytes } from '../src/LiquidationService';
-import { createVaults, liquidateVaults } from '../test/utils';
-import { mineBlocks } from '../../test-helpers/src';
+import LiquidationService from '../src/LiquidationService';
 
 // const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67';
 
@@ -12,12 +10,12 @@ import { mineBlocks } from '../../test-helpers/src';
 // console.log('sleeping');
 // await sleep(20000);
 
-const urn = '0xB95fFDe0C48F23Df7401b1566C4DA0EDeEF604AC';
+// const urn = '0xB95fFDe0C48F23Df7401b1566C4DA0EDeEF604AC';
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
-const myProxy = '0x570074CCb147ea3dE2E23fB038D4d78324278886';
+// const myProxy = '0x570074CCb147ea3dE2E23fB038D4d78324278886';
 
 const MCD_CLIP_LINK_A = '0x1eB71cC879960606F8ab0E02b3668EEf92CE6D98'; // kovan
-const MCD_JOIN_DAI = '0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c'; //kovan
+// const MCD_JOIN_DAI = '0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c'; //kovan
 
 // const MCD_CLIP_LINK_A = '0xc84b50Ea1cB3f964eFE51961140057f7E69b09c1'; //testchain
 // const MCD_JOIN_DAI = '0xe53793CA0F1a3991D6bfBc5929f89A9eDe65da44'; //testchain
@@ -117,16 +115,16 @@ xtest('can create risky vaults', async () => {
     .dai(maker.currentAddress());
   console.log('vat dai balance before take', vatDaiBal.toString());
 
-  const id =
-    '0x000000000000000000000000000000000000000000000000000000000000000f';
+  // const id =
+  //   '0x000000000000000000000000000000000000000000000000000000000000000f';
   // const id = await liquidateVaults(maker);
   // console.log('ID:', id);
   // await mineBlocks(maker.service('web3'), 10);
 
   // const id = 1;
-  const amt = '1';
+  // const amt = '1';
   // const max = '3.99999999999999999999';
-  const max = '20';
+  // const max = '20';
   // try {
   //   const kicks = await service.kicks();
   //   console.log('KICKS:', kicks.toString());
@@ -199,8 +197,3 @@ test('get price for LINK-A', async () => {
   const price = await service.getPrice('LINK-A');
   console.log('price', price);
 }, 10000);
-
-test('get clip contract', async () => {
-  console.log('sales', await service._clipperContract().sales(11));
-  console.log('status', await service._clipperContract().getStatus(0));
-});
