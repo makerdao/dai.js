@@ -1,11 +1,14 @@
 import { PublicService } from '@makerdao/services-core';
 import assert from 'assert';
+import tracksTransactions from './utils/tracksTransactions';
 //const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
 const LOCAL_URL = 'http://localhost:3000/graphql';
 import BigNumber from 'bignumber.js';
 const RAD = new BigNumber('1e45');
 const WAD = new BigNumber('1e18');
 const RAY = new BigNumber('1e27');
+
+export const nullBytes = '0x';
 
 //hard-coded for now, but can get from pips, which you can get from ilk registry
 const medianizers = {
@@ -15,7 +18,7 @@ const medianizers = {
 
 export default class LiquidationService extends PublicService {
   constructor(name = 'liquidation') {
-    super(name, ['web3']);
+    super(name, ['web3', 'smartContract']);
   }
 
   connect() {
@@ -87,7 +90,7 @@ export default class LiquidationService extends PublicService {
       }
     }
   }`;
-}
+  }
 
   async getQueryResponse(serverUrl, query, variables) {
     const resp = await fetch(serverUrl, {
@@ -159,5 +162,82 @@ export default class LiquidationService extends PublicService {
       this._buildMedianizerQuery(ilk)
     );
     return BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
+  }
+
+  /* TAKE
+    uint256 id,           // Auction id
+    uint256 amt,          // Upper limit on amount of collateral to buy  [wad]
+    uint256 max,          // Maximum acceptable price (DAI / collateral) [ray]
+    address who,          // Receiver of collateral and external call address
+    bytes calldata data   // Data to pass in external call; if length 0, no call is done
+  */
+  @tracksTransactions
+  async take(id, amount, maxPrice, address, { promise }) {
+    const amt = BigNumber(amount)
+      .times(WAD)
+      .toFixed();
+
+    const max = BigNumber(maxPrice)
+      .times(RAY)
+      .toFixed();
+
+    return await this._clipperContract().take(id, amt, max, address, '0x', {
+      promise
+    });
+  }
+
+  async kicks() {
+    return await this._clipperContract().kicks();
+  }
+
+  async active(index) {
+    return await this._clipperContract().active(index);
+  }
+
+  /* struct Sale {
+        uint256 pos;  // Index in active array
+        uint256 tab;  // Dai to raise       [rad]
+        uint256 lot;  // collateral to sell [wad]
+        address usr;  // Liquidated CDP
+        uint96  tic;  // Auction start time
+        uint256 top;  // Starting price     [ray]
+    }
+   */
+  async sales(id) {
+    return await this._clipperContract().sales(id);
+  }
+
+  async count() {
+    return await this._clipperContract().count();
+  }
+
+  async list() {
+    return await this._clipperContract().list();
+  }
+
+  async getStatus(id) {
+    return await this._clipperContract().getStatus(id);
+  }
+
+  // async upchost() {
+  //   return await this._clipperContract().upchost();
+  // }
+
+  @tracksTransactions
+  async yank(id, { promise }) {
+    return await this._clipperContract().yank(id, { promise });
+  }
+
+  @tracksTransactions
+  async joinDaiToAdapter(address, amount, { promise }) {
+    return await this._joinDaiAdapter().join(address, amount, { promise });
+  }
+
+  _clipperContract() {
+    return this.get('smartContract').getContractByName('MCD_CLIP_LINK_A');
+  }
+
+  _joinDaiAdapter() {
+    return this.get('smartContract').getContractByName('MCD_JOIN_DAI');
   }
 }
