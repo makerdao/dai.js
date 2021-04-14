@@ -3,7 +3,8 @@ import { numberToBytes32 } from '@makerdao/dai/dist/src/utils/conversion';
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 //const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
-const LOCAL_URL = 'http://localhost:3000/graphql';
+// const LOCAL_URL = 'http://localhost:3001/graphql';
+const LOCAL_URL = 'https://b8cf191f38cf.ngrok.io'; // temporary ngrok
 import BigNumber from 'bignumber.js';
 const RAD = new BigNumber('1e45');
 const WAD = new BigNumber('1e18');
@@ -20,6 +21,7 @@ const medianizers = {
 export default class LiquidationService extends PublicService {
   constructor(name = 'liquidation') {
     super(name, ['web3', 'smartContract']);
+    // console.log('link works!');
   }
 
   connect() {
