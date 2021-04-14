@@ -3,6 +3,7 @@ import McdPlugin from '@makerdao/dai-plugin-mcd';
 // import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
 import LiquidationService from '../src/LiquidationService';
+// import { createVaults, liquidateVaults } from './utils';
 
 // const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67';
 
@@ -125,34 +126,46 @@ xtest('can create risky vaults', async () => {
   // const amt = '1';
   // const max = '3.99999999999999999999';
   // const max = '20';
-  // try {
-  //   const kicks = await service.kicks();
-  //   console.log('KICKS:', kicks.toString());
+  try {
+    const kicks = await service.kicks();
+    console.log('KICKS:', kicks.toString());
 
-  //   const active = await service.active(2);
-  //   console.log('ACTIVE', active.toNumber());
+    // const active = await service.active(0);
+    // console.log('ACTIVE', active.toString());
 
-  //   const list = await service.list();
-  //   console.log('LIST', list);
+    // const sales = await service.sales(id);
+    // console.log(
+    //   'SALES',
+    //   sales.pos.toString(),
+    //   sales.tab.toString(),
+    //   sales.lot.toString(),
+    //   sales.usr.toString(),
+    //   sales.tic.toString(),
+    //   sales.top.toString()
+    // );
 
-  //   const txo = await service.take(id, amt, max, me);
-  //   console.log('called take', txo.receipt.logs);
-  // } catch (e) {
-  //   console.error('take error:', e);
-  // }
+    const count = await service.count();
+    console.log('COUNT', count.toString());
+
+    const list = await service.list();
+    console.log('LIST', list);
+
+    // const status = await service.getStatus(id);
+    // console.log(
+    //   'STATUS',
+    //   status.needsRedo,
+    //   status.price.toString(),
+    //   status.lot.toString(),
+    //   status.tab.toString()
+    // );
+
+    // const txo = await service.take(id, amt, max, me);
+    // console.log('called take', txo.receipt.logs);
+  } catch (e) {
+    console.error('take error:', e);
+  }
 
   // await mineBlocks(maker.service('web3'), 10);
-
-  // const sales = await service.sales(id);
-  // console.log(
-  //   'SALES (after "take"):',
-  //   sales.pos.toString(),
-  //   sales.tab.toString(),
-  //   sales.lot.toString(),
-  //   sales.usr.toString(),
-  //   sales.tic.toString(),
-  //   sales.top.toString()
-  // );
 
   // verify collateral was successfully moved to me after 'take'
   const usrVatGemBal = await maker

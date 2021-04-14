@@ -13,9 +13,9 @@ let urns = [];
 // const dogAddress = '0x795f65578081AA750d874E1a3A6c434D1D98E118';
 //99800418305638316473488226407242625739110630383877768873912206733733181632051
 
-const linkAmt = '10xCB4AA4daBD333B240F61c3F830bc397E857A28eD';
+const linkAmt = '1';
 // let vaultId;
-let vaultId = 3519; //todo change this back
+let vaultId = 3529; //todo change this back when starting fresh
 
 const urnAdd = '0xB95fFDe0C48F23Df7401b1566C4DA0EDeEF604AC';
 

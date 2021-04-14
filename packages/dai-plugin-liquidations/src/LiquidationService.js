@@ -1,4 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
+import { numberToBytes32 } from '@makerdao/dai/dist/src/utils/conversion';
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 //const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
@@ -172,7 +173,9 @@ export default class LiquidationService extends PublicService {
     bytes calldata data   // Data to pass in external call; if length 0, no call is done
   */
   @tracksTransactions
-  async take(id, amount, maxPrice, address, { promise }) {
+  async take(auctionId, amount, maxPrice, address, { promise }) {
+    const id = numberToBytes32(auctionId);
+
     const amt = BigNumber(amount)
       .times(WAD)
       .toFixed();
@@ -181,15 +184,24 @@ export default class LiquidationService extends PublicService {
       .times(RAY)
       .toFixed();
 
-    return await this._clipperContract().take(id, amt, max, address, '0x', {
-      promise
-    });
+    return await this._clipperContract().take(
+      id,
+      amt,
+      max,
+      address,
+      nullBytes,
+      {
+        promise
+      }
+    );
   }
 
+  // Returns the total number of kicks, active or inactive
   async kicks() {
     return await this._clipperContract().kicks();
   }
 
+  // Returns the ID of the auction at the index
   async active(index) {
     return await this._clipperContract().active(index);
   }
@@ -202,11 +214,12 @@ export default class LiquidationService extends PublicService {
         uint96  tic;  // Auction start time
         uint256 top;  // Starting price     [ray]
     }
-   */
+  */
   async sales(id) {
     return await this._clipperContract().sales(id);
   }
 
+  // Returns the total number of active auctions
   async count() {
     return await this._clipperContract().count();
   }
