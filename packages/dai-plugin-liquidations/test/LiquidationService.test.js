@@ -51,7 +51,7 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   network = 'kovan';
-  // network = 'test';
+  //network = 'test';
   maker = await makerInstance(network);
   service = maker.service('liquidation');
 }, 60000);
@@ -209,4 +209,19 @@ test('get all dusts', async () => {
 test('get price for LINK-A', async () => {
   const price = await service.getPrice('LINK-A');
   console.log('price', price);
+}, 10000);
+
+test('getHoleAndDirtForIlk', async () => {
+  const data = await service.getHoleAndDirtForIlk('LINK-A');
+  console.log('data', data);
+}, 10000);
+
+test('getHoleAndDirt', async () => {
+  const data = await service.getHoleAndDirt();
+  console.log('data', data);
+}, 10000);
+
+test('getChost', async () => {
+  const chost = await service.getChost();
+  console.log('data', chost);
 }, 10000);
