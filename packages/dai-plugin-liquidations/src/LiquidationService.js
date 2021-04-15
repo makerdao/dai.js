@@ -234,6 +234,7 @@ export default class LiquidationService extends PublicService {
     return await this._clipperContract().getStatus(id);
   }
 
+  // TODO: the current ABI is outdated and doesn't have this function (it has 'updust()')
   // async upchost() {
   //   return await this._clipperContract().upchost();
   // }
@@ -248,8 +249,15 @@ export default class LiquidationService extends PublicService {
     return await this._joinDaiAdapter().join(address, amount, { promise });
   }
 
+  // TODO remove this in favor of _clipperContractByIlk(ilk), but we need to find a better pattern for calling the contract fns on a per ilk basis.
+  // e.g. maybe a Clipper class
   _clipperContract() {
     return this.get('smartContract').getContractByName('MCD_CLIP_LINK_A');
+  }
+
+  _clipperContractByIlk(ilk) {
+    const suffix = ilk.replace('-', '_');
+    return this.get('smartContract').getContractByName(`MCD_CLIP_${suffix}`);
   }
 
   _joinDaiAdapter() {
