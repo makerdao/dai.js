@@ -1,5 +1,8 @@
 import { PublicService } from '@makerdao/services-core';
-import { numberToBytes32 } from '@makerdao/dai/dist/src/utils/conversion';
+import {
+  bytes32ToNumber,
+  numberToBytes32
+} from '@makerdao/dai/dist/src/utils/conversion';
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 //const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
@@ -27,7 +30,6 @@ const medianizers = {
 export default class LiquidationService extends PublicService {
   constructor(name = 'liquidation') {
     super(name, ['web3', 'smartContract']);
-    // console.log('link works!');
   }
 
   connect() {
@@ -236,8 +238,11 @@ export default class LiquidationService extends PublicService {
     return await this._clipperContract().list();
   }
 
-  async getStatus(id) {
-    return await this._clipperContract().getStatus(id);
+  // Returns boolean for if an auction needs a redo and also the current price
+  async getStatus(auctionId) {
+    const id = numberToBytes32(auctionId);
+    const status = await this._clipperContract().getStatus(id);
+    return status;
   }
 
   async getHoleAndDirtForIlk(ilk) {
@@ -282,6 +287,26 @@ export default class LiquidationService extends PublicService {
     return await this._joinDaiAdapter().join(address, amount, { promise });
   }
 
+  @tracksTransactions
+  async bark(ilk, urn, { promise }) {
+    try {
+      const address = this.get('web3').currentAddress();
+      const tx = await this._dogContract().bark(
+        stringToBytes(ilk),
+        urn,
+        address,
+        {
+          promise
+        }
+      );
+
+      const id = tx.receipt.logs[4].topics[3];
+      return bytes32ToNumber(id);
+    } catch (e) {
+      throw console.error(e);
+    }
+  }
+
   // TODO remove this in favor of _clipperContractByIlk(ilk), but we need to find a better pattern for calling the contract fns on a per ilk basis.
   // e.g. maybe a Clipper class
   _clipperContract() {
@@ -299,6 +324,10 @@ export default class LiquidationService extends PublicService {
 
   _dogContractWeb3() {
     return this.get('smartContract').getWeb3ContractByName('MCD_DOG');
+  }
+
+  _dogContract() {
+    return this.get('smartContract').getContractByName('MCD_DOG');
   }
 
   _joinDaiAdapter() {
