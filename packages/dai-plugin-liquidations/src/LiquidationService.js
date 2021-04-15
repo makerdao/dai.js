@@ -12,6 +12,12 @@ const RAY = new BigNumber('1e27');
 
 export const nullBytes = '0x';
 
+const stringToBytes = (str) => {
+  assert(!!str, 'argument is falsy');
+  assert(typeof str === 'string', 'argument is not a string');
+  return '0x' + Buffer.from(str).toString('hex');
+};
+
 //hard-coded for now, but can get from pips, which you can get from ilk registry
 const medianizers = {
   'LINK-A': '0xbAd4212d73561B240f10C56F27e6D9608963f17b',
@@ -234,6 +240,30 @@ export default class LiquidationService extends PublicService {
     return await this._clipperContract().getStatus(id);
   }
 
+  async getHoleAndDirtForIlk(ilk) {
+    const data = await this._dogContractWeb3().methods.ilks(stringToBytes(ilk)).call({from: this.get('web3').currentAddress()});
+    const hole = new BigNumber(data.hole).div(RAD);
+    const dirt = new BigNumber(data.dirt).div(RAD);
+    const diff = hole.minus(dirt);
+    return {hole, dirt, diff};
+  }
+
+  async getHoleAndDirt() {
+    const [h, d] = await Promise.all([
+      this._dogContractWeb3().methods.Hole().call({from: this.get('web3').currentAddress()}),
+      this._dogContractWeb3().methods.Dirt().call({from: this.get('web3').currentAddress()})
+    ]);
+    const hole = new BigNumber(h).div(RAD);
+    const dirt = new BigNumber(d).div(RAD);
+    const diff = hole.minus(dirt);
+    return {hole, dirt, diff};
+  }
+
+  async getChost() {
+    const chost = await this._clipperContractWeb3().methods.chost().call({from: this.get('web3').currentAddress()});
+    return new BigNumber(chost).div(RAD);
+  }
+
   // async upchost() {
   //   return await this._clipperContract().upchost();
   // }
@@ -250,6 +280,14 @@ export default class LiquidationService extends PublicService {
 
   _clipperContract() {
     return this.get('smartContract').getContractByName('MCD_CLIP_LINK_A');
+  }
+
+  _clipperContractWeb3() {
+    return this.get('smartContract').getWeb3ContractByName('MCD_CLIP_LINK_A');
+  }
+
+  _dogContractWeb3() {
+    return this.get('smartContract').getWeb3ContractByName('MCD_DOG');
   }
 
   _joinDaiAdapter() {
