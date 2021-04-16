@@ -171,17 +171,22 @@ test('get price for LINK-A', async () => {
   console.log('price', price);
 }, 10000);
 
-test('getHoleAndDirtForIlk', async () => {
-  const data = await service.getHoleAndDirtForIlk('LINK-A');
-  console.log('data', data);
+test('getHoleAndDirtForIlk for LINK-A', async () => {
+  const holeAndDirt = await service.getHoleAndDirtForIlk('LINK-A');
+  console.log('data', holeAndDirt);
 }, 10000);
 
 test('getHoleAndDirt', async () => {
-  const data = await service.getHoleAndDirt();
-  console.log('data', data);
+  const holeAndDirt = await service.getHoleAndDirt();
+  console.log('data', holeAndDirt);
 }, 10000);
 
 xtest('getChost', async () => {
-  const chost = await service.getChost();
-  console.log('data', chost);
+  const chost = await service.getChost('LINK-A');
+  console.log('chost', chost);
+}, 10000);
+
+test('getTail', async () => {
+  const tail = await service.getTail('LINK-A');
+  console.log('tail', tail);
 }, 10000);

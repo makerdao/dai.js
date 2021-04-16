@@ -247,9 +247,8 @@ export default class LiquidationService extends PublicService {
   }
 
   async getHoleAndDirtForIlk(ilk) {
-    const data = await this._dogContractWeb3()
-      .methods.ilks(stringToBytes(ilk))
-      .call({ from: this.get('web3').currentAddress() });
+    const data = await this._dogContract()
+      .ilks(stringToBytes(ilk));
     const hole = new BigNumber(data.hole).div(RAD);
     const dirt = new BigNumber(data.dirt).div(RAD);
     const diff = hole.minus(dirt);
@@ -258,12 +257,8 @@ export default class LiquidationService extends PublicService {
 
   async getHoleAndDirt() {
     const [h, d] = await Promise.all([
-      this._dogContractWeb3()
-        .methods.Hole()
-        .call({ from: this.get('web3').currentAddress() }),
-      this._dogContractWeb3()
-        .methods.Dirt()
-        .call({ from: this.get('web3').currentAddress() })
+      this._dogContract().Hole(),
+      this._dogContract().Dirt()
     ]);
     const hole = new BigNumber(h).div(RAD);
     const dirt = new BigNumber(d).div(RAD);
@@ -271,11 +266,14 @@ export default class LiquidationService extends PublicService {
     return { hole, dirt, diff };
   }
 
-  async getChost() {
-    const chost = await this._clipperContractWeb3()
-      .methods.chost()
-      .call({ from: this.get('web3').currentAddress() });
+  async getChost(ilk) {
+    const chost = await this._clipperContractByIlk(ilk).chost();
     return new BigNumber(chost).div(RAD);
+  }
+
+  async getTail(ilk) {
+    const tail = await this._clipperContractByIlk(ilk).tail();
+    return tail.toNumber();
   }
 
   @tracksTransactions
@@ -320,14 +318,6 @@ export default class LiquidationService extends PublicService {
   _clipperContractByIlk(ilk) {
     const suffix = ilk.replace('-', '_');
     return this.get('smartContract').getContractByName(`MCD_CLIP_${suffix}`);
-  }
-
-  _clipperContractWeb3() {
-    return this.get('smartContract').getWeb3ContractByName('MCD_CLIP_LINK_A');
-  }
-
-  _dogContractWeb3() {
-    return this.get('smartContract').getWeb3ContractByName('MCD_DOG');
   }
 
   _dogContract() {

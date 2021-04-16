@@ -426,7 +426,8 @@
     "name": "tail",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant":true
   },
   {
     "constant": false,
