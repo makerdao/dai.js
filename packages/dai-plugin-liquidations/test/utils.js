@@ -2,7 +2,41 @@ import { LINK, DAI, ServiceRoles } from '@makerdao/dai-plugin-mcd';
 import { mineBlocks } from '../../test-helpers/src';
 import BigNumber from 'bignumber.js';
 
-const ilk = '0x4c494e4b2d41';
+const ilk = '0x4c494e4b2d41'; // LINK-A
+
+export async function setLiquidationsApprovals(maker) {
+  const joinAddress = maker.service('smartContract').getContract('MCD_JOIN_DAI')
+    .address;
+  const linkClipperAddress = maker
+    .service('smartContract')
+    .getContract('MCD_CLIP_LINK_A').address;
+
+  try {
+    //req to move dai from me to vat
+    await maker.getToken('DAI').approveUnlimited(joinAddress);
+  } catch (e) {
+    throw new Error(`Error approving DAI allowance for join address: ${e}`);
+  }
+
+  try {
+    //req to manipulate my vat dai balance (to "pay" for take calls)
+    await maker
+      .service('smartContract')
+      .getContract('MCD_VAT')
+      .hope(joinAddress);
+  } catch (e) {
+    throw new Error(`Error hoping the join address: ${e}`);
+  }
+  try {
+    //req for clipper to manipulate vat balance (req for each clipper)
+    await maker
+      .service('smartContract')
+      .getContract('MCD_VAT')
+      .hope(linkClipperAddress);
+  } catch (e) {
+    throw new Error(`Error hoping the link clipper address: ${e}`);
+  }
+}
 
 async function getPrice(maker) {
   const cdpType = maker
@@ -17,7 +51,6 @@ async function setProxyAndAllowances(maker) {
 
   await maker.service('proxy').ensureProxy();
   const proxyAddress = await maker.service('proxy').getProxyAddress();
-  console.log('Proxy Address: ', proxyAddress);
 
   const linkAllowance = await linkToken.allowance(kprAddress, proxyAddress);
   if (Number(linkAllowance._amount) === 0) {
@@ -29,10 +62,7 @@ async function openVaultAndLock(maker, linkAmt) {
   const manager = maker.service('mcd:cdpManager');
   // open vault
   const vault = await manager.open('LINK-A');
-  const vaultId = vault.id;
-  console.log('Vault ID', vaultId);
   // lock collateral
-  console.log(`Locking ${linkAmt} LINK-A`);
   try {
     await manager.lock(vault.id, 'LINK-A', LINK(linkAmt));
   } catch (e) {
@@ -50,9 +80,7 @@ async function resetVaultStats(vault) {
 async function drawDai(manager, managedVault, vaultId) {
   const percent = 0.985;
   const amtDai = await managedVault.daiAvailable._amount;
-  console.log(
-    `Drawing ${amtDai.times(percent).toFixed(17)} from Vault #${vaultId}`
-  );
+
   try {
     let drawDai = await manager.draw(
       vaultId,
@@ -107,15 +135,9 @@ export async function createVaults(maker, network = 'testchain') {
     await jug.drip(ilk);
     await drawDai(manager, managedVault, vaultId);
     await resetVaultStats(managedVault);
-    console.log('Drawing DAI', count, 'more times');
     managedVault = await manager.getCdp(vaultId);
     isSafe = managedVault.isSafe;
   }
-
-  console.log(
-    'amount to draw now after drawing',
-    (await managedVault.daiAvailable._amount).toFixed(18)
-  );
 
   while (isSafe) {
     if (network === 'testchain') await mineBlocks(maker.service('web3'), 10);

@@ -9,9 +9,10 @@ import tracksTransactions from './utils/tracksTransactions';
 // const LOCAL_URL = 'http://localhost:3001/graphql';
 const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
 import BigNumber from 'bignumber.js';
-const RAD = new BigNumber('1e45');
-const WAD = new BigNumber('1e18');
-const RAY = new BigNumber('1e27');
+
+export const RAD = new BigNumber('1e45');
+export const WAD = new BigNumber('1e18');
+export const RAY = new BigNumber('1e27');
 
 export const nullBytes = '0x';
 
@@ -284,7 +285,10 @@ export default class LiquidationService extends PublicService {
 
   @tracksTransactions
   async joinDaiToAdapter(address, amount, { promise }) {
-    return await this._joinDaiAdapter().join(address, amount, { promise });
+    const amt = BigNumber(amount)
+      .times(WAD)
+      .toFixed();
+    return await this._joinDaiAdapter().join(address, amt, { promise });
   }
 
   @tracksTransactions

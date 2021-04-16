@@ -1,8 +1,9 @@
 import Maker from '@makerdao/dai';
 import McdPlugin from '@makerdao/dai-plugin-mcd';
+import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
-import LiquidationService from '../src/LiquidationService';
-import { createVaults } from './utils';
+import LiquidationService, { RAD } from '../src/LiquidationService';
+import { createVaults, setLiquidationsApprovals } from './utils';
 
 // const MCD_CLIP_LINK_A = '0x1eB71cC879960606F8ab0E02b3668EEf92CE6D98'; // kovan
 // const MCD_JOIN_DAI = '0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c'; //kovan
@@ -66,62 +67,40 @@ test('can bark an unsafe urn', async () => {
   const id = await service.bark('LINK-A', vaultUrnAddr);
 
   expect(id).toEqual(1);
+});
 
-  // try {
-  //   //req to move dai from me to vat
-  //   // const joinApproval = await maker
-  //   //   .getToken('DAI')
-  //   //   .approveUnlimited(MCD_JOIN_DAI);
-  //   // console.log('join Approval', joinApproval);
-  //   //req to manipulate my vat dai balance (to "pay" for take calls)
-  //   // const hopedDj = await maker
-  //   //   .service('smartContract')
-  //   //   .getContract('MCD_VAT')
-  //   //   .hope(MCD_JOIN_DAI);
-  //   // console.log('gave hope to DJ', hopedDj.receipt.logs);
-  //   // req for clipper to manipulate vat balance (req for each clipper)
-  //   // const hoped = await maker
-  //   //   .service('smartContract')
-  //   //   .getContract('MCD_VAT')
-  //   //   .hope(MCD_CLIP_LINK_A);
-  //   // console.log('gave hope to clipper', hoped.receipt.logs);
-  // } catch (e) {
-  //   console.error('errow with hope', e);
-  // }
-  // const vatDaiBalA = await maker
-  //   .service('smartContract')
-  //   .getContract('MCD_VAT')
-  //   .dai(maker.currentAddress());
-  // console.log('vat dai balance before joining', vatDaiBalA.toString());
+test('can join DAI to the vat', async () => {
+  // Set up approvals
+  await setLiquidationsApprovals(maker);
 
-  // // check the clipper's LINK balance to verify liquidated collateral was successfully moved into clipper
-  // const vatGemBal_ = await maker
-  //   .service('smartContract')
-  //   .getContract('MCD_VAT')
-  //   .gem('0x4c494e4b2d41', MCD_CLIP_LINK_A);
+  const vatDaiBalBefore = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .dai(maker.currentAddress());
 
-  // console.log('vat GEM bal', vatGemBal_.toString());
+  const joinAmt = 80;
+  await service.joinDaiToAdapter(maker.currentAddress(), joinAmt);
 
-  // // try {
-  // //   const jd = await service.joinDaiToAdapter(maker.currentAddress(), '80');
-  // //   console.log('joined dai', jd);
-  // // } catch (e) {
-  // //   console.error('error joining dai', e);
-  // // }
+  const vatDaiBalAfter = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .dai(maker.currentAddress());
 
-  // const vatDaiBal = await maker
-  //   .service('smartContract')
-  //   .getContract('MCD_VAT')
-  //   .dai(maker.currentAddress());
-  // console.log('vat dai balance before take', vatDaiBal.toString());
+  expect(vatDaiBalAfter).toEqual(
+    vatDaiBalBefore.add(
+      BigNumber(joinAmt)
+        .times(RAD)
+        .toFixed()
+    )
+  );
+});
 
+xtest('can successfully bid on an auction', async () => {
   // // const id =
   // //   '0x000000000000000000000000000000000000000000000000000000000000000f';
   // const id = await liquidateVaults(maker, vaultId);
   // console.log('ID:', id);
-
   // // await mineBlocks(maker.service('web3'), 10);
-
   // // const id = 1;
   // // const amt = '1';
   // // const max = '3.99999999999999999999';
@@ -129,10 +108,8 @@ test('can bark an unsafe urn', async () => {
   // try {
   //   const kicks = await service.kicks();
   //   console.log('KICKS:', kicks.toString());
-
   //   // const active = await service.active(0);
   //   // console.log('ACTIVE', active.toString());
-
   //   // const sales = await service.sales(id);
   //   // console.log(
   //   //   'SALES',
@@ -143,13 +120,10 @@ test('can bark an unsafe urn', async () => {
   //   //   sales.tic.toString(),
   //   //   sales.top.toString()
   //   // );
-
   //   const count = await service.count();
   //   console.log('COUNT', count.toString());
-
   //   const list = await service.list();
   //   console.log('LIST', list);
-
   //   // const status = await service.getStatus(id);
   //   // console.log(
   //   //   'STATUS',
@@ -158,23 +132,18 @@ test('can bark an unsafe urn', async () => {
   //   //   status.lot.toString(),
   //   //   status.tab.toString()
   //   // );
-
   //   // const txo = await service.take(id, amt, max, me);
   //   // console.log('called take', txo.receipt.logs);
   // } catch (e) {
   //   console.error('take error:', e);
   // }
-
   // // await mineBlocks(maker.service('web3'), 10);
-
   // // verify collateral was successfully moved to me after 'take'
   // const usrVatGemBal = await maker
   //   .service('smartContract')
   //   .getContract('MCD_VAT')
   //   .gem('0x4c494e4b2d41', me);
-
   // console.log('user vat gem bal', usrVatGemBal.toString());
-
   // const daiBal2 = await maker
   //   .service('smartContract')
   //   .getContract('MCD_VAT')
