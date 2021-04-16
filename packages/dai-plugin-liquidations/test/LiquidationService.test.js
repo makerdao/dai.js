@@ -40,7 +40,7 @@ async function makerInstance(preset) {
 }
 
 beforeAll(async () => {
-  // To run this test on kovan, just switch the network variables below
+  // To run this test on kovan, just switch the network variables below:
   // network = 'kovan';
   network = 'test';
   maker = await makerInstance(network);
@@ -79,7 +79,7 @@ test('can join DAI to the vat', async () => {
     .dai(maker.currentAddress());
 
   const joinAmt = 80;
-  await service.joinDaiToAdapter(maker.currentAddress(), joinAmt);
+  await service.joinDaiToAdapter(joinAmt);
 
   const vatDaiBalAfter = await maker
     .service('smartContract')
@@ -89,6 +89,29 @@ test('can join DAI to the vat', async () => {
   expect(vatDaiBalAfter).toEqual(
     vatDaiBalBefore.add(
       BigNumber(joinAmt)
+        .times(RAD)
+        .toFixed()
+    )
+  );
+});
+
+test('can exit DAI from the vat', async () => {
+  const vatDaiBalBefore = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .dai(maker.currentAddress());
+
+  const exitAmt = 5;
+  await service.exitDaiFromAdapter(exitAmt);
+
+  const vatDaiBalAfter = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .dai(maker.currentAddress());
+
+  expect(vatDaiBalAfter).toEqual(
+    vatDaiBalBefore.sub(
+      BigNumber(exitAmt)
         .times(RAD)
         .toFixed()
     )

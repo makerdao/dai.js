@@ -247,8 +247,7 @@ export default class LiquidationService extends PublicService {
   }
 
   async getHoleAndDirtForIlk(ilk) {
-    const data = await this._dogContract()
-      .ilks(stringToBytes(ilk));
+    const data = await this._dogContract().ilks(stringToBytes(ilk));
     const hole = new BigNumber(data.hole).div(RAD);
     const dirt = new BigNumber(data.dirt).div(RAD);
     const diff = hole.minus(dirt);
@@ -282,11 +281,20 @@ export default class LiquidationService extends PublicService {
   }
 
   @tracksTransactions
-  async joinDaiToAdapter(address, amount, { promise }) {
+  async joinDaiToAdapter(amount, { promise }) {
+    const address = this.get('web3').currentAddress();
     const amt = BigNumber(amount)
       .times(WAD)
       .toFixed();
     return await this._joinDaiAdapter().join(address, amt, { promise });
+  }
+  @tracksTransactions
+  async exitDaiFromAdapter(amount, { promise }) {
+    const address = this.get('web3').currentAddress();
+    const amt = BigNumber(amount)
+      .times(WAD)
+      .toFixed();
+    return await this._joinDaiAdapter().exit(address, amt, { promise });
   }
 
   @tracksTransactions
