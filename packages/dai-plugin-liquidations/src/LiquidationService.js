@@ -6,8 +6,8 @@ import {
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 //const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
-// const LOCAL_URL = 'http://localhost:3001/graphql';
-const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
+const LOCAL_URL = 'http://localhost:3001/graphql';
+//const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
 import BigNumber from 'bignumber.js';
 
 export const RAD = new BigNumber('1e45');
@@ -247,8 +247,7 @@ export default class LiquidationService extends PublicService {
   }
 
   async getHoleAndDirtForIlk(ilk) {
-    const data = await this._dogContract()
-      .ilks(stringToBytes(ilk));
+    const data = await this._dogContract().ilks(stringToBytes(ilk));
     const hole = new BigNumber(data.hole).div(RAD);
     const dirt = new BigNumber(data.dirt).div(RAD);
     const diff = hole.minus(dirt);
@@ -274,6 +273,18 @@ export default class LiquidationService extends PublicService {
   async getTail(ilk) {
     const tail = await this._clipperContractByIlk(ilk).tail();
     return tail.toNumber();
+  }
+
+  async getCut(ilk) {
+    const a = this._abacusContractByIlk(ilk);
+    console.log('a', a);
+    const cut = await this._abacusContractByIlk(ilk).cut();
+    return cut.div(RAY);
+  }
+
+  async getStep(ilk) {
+    const step = await this._abacusContractByIlk(ilk).step();
+    return step.toNumber();
   }
 
   @tracksTransactions
@@ -318,6 +329,11 @@ export default class LiquidationService extends PublicService {
   _clipperContractByIlk(ilk) {
     const suffix = ilk.replace('-', '_');
     return this.get('smartContract').getContractByName(`MCD_CLIP_${suffix}`);
+  }
+
+  _abacusContractByIlk(ilk) {
+    const suffix = ilk.replace('-', '_');
+    return this.get('smartContract').getContractByName(`MCD_CLIP_CALC_${suffix}`);
   }
 
   _dogContract() {

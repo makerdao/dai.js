@@ -41,8 +41,8 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   // To run this test on kovan, just switch the network variables below
-  // network = 'kovan';
-  network = 'test';
+  network = 'kovan';
+  //network = 'test';
   maker = await makerInstance(network);
   service = maker.service('liquidation');
   cdpManager = maker.service('mcd:cdpManager');
@@ -189,4 +189,14 @@ xtest('getChost', async () => {
 test('getTail', async () => {
   const tail = await service.getTail('LINK-A');
   console.log('tail', tail);
+}, 10000);
+
+test.only('getCut', async () => {
+  const cut = await service.getCut('LINK-A');
+  console.log('cut', cut);
+}, 10000);
+
+test.only('getTail', async () => {
+  const step = await service.getStep('LINK-A');
+  console.log('step', step);
 }, 10000);

@@ -2,6 +2,7 @@ import { map, prop } from 'ramda';
 import LiquidationService from './LiquidationService';
 
 export const MCD_CLIP_LINK_A = 'MCD_CLIP_LINK_A';
+export const MCD_CLIP_CALC_LINK_A = 'MCD_CLIP_LINK_A';
 export const MCD_DOG = 'MCD_DOG';
 
 export default {
@@ -23,6 +24,10 @@ export default {
       [MCD_DOG]: {
         address: map(prop('MCD_DOG'), contractAddresses),
         abi: require('../contracts/abis/Dog.json')
+      },
+      [MCD_CLIP_CALC_LINK_A]: {
+        address: map(prop('MCD_CLIP_CALC_LINK_A'), contractAddresses),
+        abi: require('../contracts/abis/Abacus.json')
       }
     };
 
