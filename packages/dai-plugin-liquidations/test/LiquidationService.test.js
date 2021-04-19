@@ -2,7 +2,7 @@ import Maker from '@makerdao/dai';
 import McdPlugin from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
-import LiquidationService, { RAD } from '../src/LiquidationService';
+import LiquidationService, { RAD, WAD } from '../src/LiquidationService';
 import { createVaults, setLiquidationsApprovals } from './utils';
 
 // const MCD_CLIP_LINK_A = '0x1eB71cC879960606F8ab0E02b3668EEf92CE6D98'; // kovan
@@ -118,60 +118,34 @@ test('can exit DAI from the vat', async () => {
   );
 });
 
-xtest('can successfully bid on an auction', async () => {
-  // // const id =
-  // //   '0x000000000000000000000000000000000000000000000000000000000000000f';
-  // const id = await liquidateVaults(maker, vaultId);
-  // console.log('ID:', id);
-  // // await mineBlocks(maker.service('web3'), 10);
-  // // const id = 1;
-  // // const amt = '1';
-  // // const max = '3.99999999999999999999';
-  // // const max = '20';
-  // try {
-  //   const kicks = await service.kicks();
-  //   console.log('KICKS:', kicks.toString());
-  //   // const active = await service.active(0);
-  //   // console.log('ACTIVE', active.toString());
-  //   // const sales = await service.sales(id);
-  //   // console.log(
-  //   //   'SALES',
-  //   //   sales.pos.toString(),
-  //   //   sales.tab.toString(),
-  //   //   sales.lot.toString(),
-  //   //   sales.usr.toString(),
-  //   //   sales.tic.toString(),
-  //   //   sales.top.toString()
-  //   // );
-  //   const count = await service.count();
-  //   console.log('COUNT', count.toString());
-  //   const list = await service.list();
-  //   console.log('LIST', list);
-  //   // const status = await service.getStatus(id);
-  //   // console.log(
-  //   //   'STATUS',
-  //   //   status.needsRedo,
-  //   //   status.price.toString(),
-  //   //   status.lot.toString(),
-  //   //   status.tab.toString()
-  //   // );
-  //   // const txo = await service.take(id, amt, max, me);
-  //   // console.log('called take', txo.receipt.logs);
-  // } catch (e) {
-  //   console.error('take error:', e);
-  // }
-  // // await mineBlocks(maker.service('web3'), 10);
-  // // verify collateral was successfully moved to me after 'take'
-  // const usrVatGemBal = await maker
-  //   .service('smartContract')
-  //   .getContract('MCD_VAT')
-  //   .gem('0x4c494e4b2d41', me);
-  // console.log('user vat gem bal', usrVatGemBal.toString());
-  // const daiBal2 = await maker
-  //   .service('smartContract')
-  //   .getContract('MCD_VAT')
-  //   .dai(maker.currentAddress());
-  // console.log('vat dai balance after take', daiBal2.toString());
+test('can successfully bid on an auction', async () => {
+  const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
+  const ilk = '0x4c494e4b2d41'; // LINK-A
+
+  // We know the vault ID is 1 each time we run this test
+  const id = 1;
+  const amt = '1';
+  const max = '20';
+
+  const usrVatGemBal2 = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .gem(ilk, me);
+
+  // The user's vat gem balance before bidding should be 0
+  expect(usrVatGemBal2.toString()).toEqual('0');
+
+  await service.take(id, amt, max, me);
+
+  const usrVatGemBal3 = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .gem(ilk, me);
+
+  // The balance after winning the bid is the amount bid.
+  expect(usrVatGemBal3.toString()).toEqual(
+    new BigNumber(amt).times(WAD).toString()
+  );
 });
 
 test('get unsafe LINK-A vaults', async () => {
