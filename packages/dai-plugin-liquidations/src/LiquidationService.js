@@ -16,7 +16,7 @@ export const RAY = new BigNumber('1e27');
 
 export const nullBytes = '0x';
 
-const stringToBytes = str => {
+export const stringToBytes = str => {
   assert(!!str, 'argument is falsy');
   assert(typeof str === 'string', 'argument is not a string');
   return '0x' + Buffer.from(str).toString('hex');
@@ -288,6 +288,7 @@ export default class LiquidationService extends PublicService {
       .toFixed();
     return await this._joinDaiAdapter().join(address, amt, { promise });
   }
+
   @tracksTransactions
   async exitDaiFromAdapter(amount, { promise }) {
     const address = this.get('web3').currentAddress();
@@ -295,6 +296,15 @@ export default class LiquidationService extends PublicService {
       .times(WAD)
       .toFixed();
     return await this._joinDaiAdapter().exit(address, amt, { promise });
+  }
+
+  @tracksTransactions
+  async exitGemFromAdapter(ilk, amount, { promise }) {
+    const address = this.get('web3').currentAddress();
+    const amt = BigNumber(amount)
+      .times(WAD)
+      .toFixed();
+    return await this._joinGemAdapter(ilk).exit(address, amt, { promise });
   }
 
   @tracksTransactions
@@ -334,5 +344,10 @@ export default class LiquidationService extends PublicService {
 
   _joinDaiAdapter() {
     return this.get('smartContract').getContractByName('MCD_JOIN_DAI');
+  }
+
+  _joinGemAdapter(ilk) {
+    const suffix = ilk.replace('-', '_');
+    return this.get('smartContract').getContractByName(`MCD_JOIN_${suffix}`);
   }
 }

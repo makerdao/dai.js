@@ -1,8 +1,12 @@
 import Maker from '@makerdao/dai';
-import McdPlugin from '@makerdao/dai-plugin-mcd';
+import McdPlugin, { LINK } from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
-import LiquidationService, { RAD, WAD } from '../src/LiquidationService';
+import LiquidationService, {
+  RAD,
+  WAD,
+  stringToBytes
+} from '../src/LiquidationService';
 import { createVaults, setLiquidationsApprovals } from './utils';
 
 // const MCD_CLIP_LINK_A = '0x1eB71cC879960606F8ab0E02b3668EEf92CE6D98'; // kovan
@@ -10,6 +14,9 @@ import { createVaults, setLiquidationsApprovals } from './utils';
 
 // const MCD_CLIP_LINK_A = '0xc84b50Ea1cB3f964eFE51961140057f7E69b09c1'; //testchain
 // const MCD_JOIN_DAI = '0xe53793CA0F1a3991D6bfBc5929f89A9eDe65da44'; //testchain
+
+const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
+const ilk = 'LINK-A';
 
 const kovanConfig = {
   plugins: [[liquidationPlugin], [McdPlugin, { network }]],
@@ -64,7 +71,7 @@ test('can bark an unsafe urn', async () => {
   );
 
   const vaultUrnAddr = await cdpManager.getUrn(vaultId);
-  const id = await service.bark('LINK-A', vaultUrnAddr);
+  const id = await service.bark(ilk, vaultUrnAddr);
 
   expect(id).toEqual(1);
 });
@@ -119,9 +126,6 @@ test('can exit DAI from the vat', async () => {
 });
 
 test('can successfully bid on an auction', async () => {
-  const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
-  const ilk = '0x4c494e4b2d41'; // LINK-A
-
   // We know the vault ID is 1 each time we run this test
   const id = 1;
   const amt = '1';
@@ -130,7 +134,7 @@ test('can successfully bid on an auction', async () => {
   const usrVatGemBal2 = await maker
     .service('smartContract')
     .getContract('MCD_VAT')
-    .gem(ilk, me);
+    .gem(stringToBytes(ilk), me);
 
   // The user's vat gem balance before bidding should be 0
   expect(usrVatGemBal2.toString()).toEqual('0');
@@ -140,12 +144,49 @@ test('can successfully bid on an auction', async () => {
   const usrVatGemBal3 = await maker
     .service('smartContract')
     .getContract('MCD_VAT')
-    .gem(ilk, me);
+    .gem(stringToBytes(ilk), me);
 
   // The balance after winning the bid is the amount bid.
   expect(usrVatGemBal3.toString()).toEqual(
     new BigNumber(amt).times(WAD).toString()
   );
+});
+
+test('can claim collateral after winning an auction', async () => {
+  const amt = 1;
+
+  const linkToken = await maker.getToken(LINK);
+
+  const linkBalanceBefore = (await linkToken.balanceOf(me)).toNumber();
+
+  // Starting balance of 1000, minus the 25 we locked in the vault
+  const startingBalance = 9975;
+  expect(linkBalanceBefore).toEqual(startingBalance);
+
+  const usrVatGemBal1 = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .gem(stringToBytes(ilk), me);
+
+  // The balance before exit should be the amount we won with 'take'.
+  expect(usrVatGemBal1.toString()).toEqual(
+    new BigNumber(amt).times(WAD).toString()
+  );
+
+  await service.exitGemFromAdapter(ilk, amt);
+
+  const usrVatGemBal2 = await maker
+    .service('smartContract')
+    .getContract('MCD_VAT')
+    .gem(stringToBytes(ilk), me);
+
+  // The user's vat gem balance after exit should be 0
+  expect(usrVatGemBal2.toString()).toEqual('0');
+
+  const linkBalanceAfter = (await linkToken.balanceOf(me)).toNumber();
+
+  // Link balanced increased by the claim amount
+  expect(linkBalanceAfter).toEqual(startingBalance + amt);
 });
 
 test('get unsafe LINK-A vaults', async () => {

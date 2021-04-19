@@ -1,4 +1,4 @@
-import { LINK, DAI, ServiceRoles } from '@makerdao/dai-plugin-mcd';
+import { LINK, DAI } from '@makerdao/dai-plugin-mcd';
 import { mineBlocks } from '../../test-helpers/src';
 import BigNumber from 'bignumber.js';
 
@@ -36,13 +36,6 @@ export async function setLiquidationsApprovals(maker) {
   } catch (e) {
     throw new Error(`Error hoping the link clipper address: ${e}`);
   }
-}
-
-async function getPrice(maker) {
-  const cdpType = maker
-    .service(ServiceRoles.CDP_TYPE)
-    .getCdpType(null, 'LINK-A');
-  console.log('LINK PRICE:', cdpType.price._amount);
 }
 
 async function setProxyAndAllowances(maker) {
@@ -96,15 +89,9 @@ async function drawDai(manager, managedVault, vaultId) {
 // MAIN
 export async function createVaults(maker, network = 'testchain') {
   BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
-  const me = maker.currentAddress();
   const manager = maker.service('mcd:cdpManager');
   const jug = maker.service('smartContract').getContract('MCD_JUG');
   const linkAmt = network === 'testchain' ? '25' : '5';
-
-  await getPrice(maker);
-
-  const linkToken = await maker.getToken(LINK);
-  console.log('Link Balance:', (await linkToken.balanceOf(me)).toString());
 
   // Initial Setup
   if (network === 'testchain') await setProxyAndAllowances(maker); //not needed for kovan
@@ -114,8 +101,6 @@ export async function createVaults(maker, network = 'testchain') {
   const vaultId = vault.id;
 
   let managedVault = await manager.getCdp(vaultId);
-  const vaultUrnAddr = await manager.getUrn(vaultId);
-  console.log('Urn address', vaultUrnAddr);
 
   await resetVaultStats(managedVault);
 
