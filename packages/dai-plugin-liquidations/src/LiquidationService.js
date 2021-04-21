@@ -163,9 +163,7 @@ export default class LiquidationService extends PublicService {
             .sales(id)
             .then(s => {
               let obj = {};
-              obj.obj.tic = new Date(
-                new BigNumber(s.tic).times(1000).toNumber()
-              );
+              obj.tic = new Date(new BigNumber(s.tic).times(1000).toNumber());
               obj.created = obj.tic;
               obj.tab = new BigNumber(s.tab).div(RAD);
               obj.lot = new BigNumber(s.lot).div(WAD);
