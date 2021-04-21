@@ -138,6 +138,7 @@ export default class LiquidationService extends PublicService {
   }
 
   async getAllClips(ilk, options = { vulcanize: true }) {
+    const tail = await this.getTail(ilk);
     if (options.vulcanize) {
       const response = await this.getQueryResponse(
         this.serverUrl,
@@ -152,6 +153,7 @@ export default class LiquidationService extends PublicService {
         obj.top = BigNumber(obj.top).div(RAY);
         obj.created = new Date(obj.created);
         obj.updated = new Date(obj.updated);
+        obj.endDate = new Date((obj.tic + tail) * 1000);
         return obj;
       });
     } else {
@@ -171,6 +173,9 @@ export default class LiquidationService extends PublicService {
               obj.usr = s.usr;
               obj.saleId = id;
               obj.active = true;
+              obj.endDate = new Date(
+                new BigNumber(s.tic.toNumber() + tail).times(1000).toNumber()
+              );
               return obj;
             });
         })
