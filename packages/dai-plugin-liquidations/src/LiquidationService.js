@@ -137,22 +137,48 @@ export default class LiquidationService extends PublicService {
     });
   }
 
-  async getAllClips(ilk) {
-    const response = await this.getQueryResponse(
-      this.serverUrl,
-      this._buildAllClipsQuery(ilk)
-    );
-    const clips = response.allClips;
-    return clips.edges.map(c => {
-      let obj = c.node;
-      obj.tic = new Date(obj.tic * 1000);
-      obj.tab = BigNumber(obj.tab).div(RAD);
-      obj.lot = BigNumber(obj.lot).div(WAD);
-      obj.top = BigNumber(obj.top).div(RAY);
-      obj.created = new Date(obj.created);
-      obj.updated = new Date(obj.updated);
-      return obj;
-    });
+  async getAllClips(ilk, options = { vulcanize: true }) {
+    if (options.vulcanize) {
+      const response = await this.getQueryResponse(
+        this.serverUrl,
+        this._buildAllClipsQuery(ilk)
+      );
+      const clips = response.allClips;
+      return clips.edges.map(c => {
+        let obj = c.node;
+        obj.tic = new Date(obj.tic * 1000);
+        obj.tab = BigNumber(obj.tab).div(RAD);
+        obj.lot = BigNumber(obj.lot).div(WAD);
+        obj.top = BigNumber(obj.top).div(RAY);
+        obj.created = new Date(obj.created);
+        obj.updated = new Date(obj.updated);
+        return obj;
+      });
+    } else {
+      const active = await this._clipperContractByIlk(ilk).list();
+      const activeAuctions = await Promise.all(
+        active.map(a => {
+          const id = a.toNumber();
+          return this._clipperContractByIlk(ilk)
+            .sales(id)
+            .then(s => {
+              let obj = {};
+              obj.obj.tic = new Date(
+                new BigNumber(s.tic).times(1000).toNumber()
+              );
+              obj.created = obj.tic;
+              obj.tab = new BigNumber(s.tab).div(RAD);
+              obj.lot = new BigNumber(s.lot).div(WAD);
+              obj.top = new BigNumber(s.top).div(RAY);
+              obj.usr = s.usr;
+              obj.saleId = id;
+              obj.active = true;
+              return obj;
+            });
+        })
+      );
+      return activeAuctions;
+    }
   }
 
   async getAllDusts() {

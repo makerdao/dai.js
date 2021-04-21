@@ -48,8 +48,8 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   // To run this test on kovan, just switch the network variables below:
-  // network = 'kovan';
-  network = 'test';
+  network = 'kovan';
+  //network = 'test';
   maker = await makerInstance(network);
   service = maker.service('liquidation');
   cdpManager = maker.service('mcd:cdpManager');
@@ -196,6 +196,11 @@ test('get unsafe LINK-A vaults', async () => {
 
 test('get all LINK-A clips', async () => {
   const clips = await service.getAllClips('LINK-A');
+  console.log('clips', clips);
+}, 10000);
+
+test('get all LINK-A clips without vulcanize', async () => {
+  const clips = await service.getAllClips('LINK-A', { vulcanize: false });
   console.log('clips', clips);
 }, 10000);
 
