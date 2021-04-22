@@ -7,11 +7,14 @@
        - checkout
        - run:
           name: Install dependencies
+          command: yarn
+       - run:
+          name: Run Mocki GraphQL Server
           command: |
-            yarn
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
             yarn global add mocki
+          background: true
        - run:
           name: Run tests
           command: |
