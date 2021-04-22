@@ -12,9 +12,9 @@
           name: Run tests
           command: |
             source /home/circleci/setup-env.sh
-            mocki run --path packages/dai-plugin-liquidations/.mocki/config.yml
             yarn lerna bootstrap
             yarn build
+            mocki run --path packages/dai-plugin-liquidations/.mocki/config.yml
             yarn test:build
             yarn coverage
        - run:
