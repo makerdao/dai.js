@@ -1,3 +1,4 @@
+import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import Maker from '@makerdao/dai';
 import McdPlugin, { LINK } from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
@@ -8,12 +9,6 @@ import LiquidationService, {
   stringToBytes
 } from '../src/LiquidationService';
 import { createVaults, setLiquidationsApprovals } from './utils';
-
-// const MCD_CLIP_LINK_A = '0x1eB71cC879960606F8ab0E02b3668EEf92CE6D98'; // kovan
-// const MCD_JOIN_DAI = '0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c'; //kovan
-
-// const MCD_CLIP_LINK_A = '0xc84b50Ea1cB3f964eFE51961140057f7E69b09c1'; //testchain
-// const MCD_JOIN_DAI = '0xe53793CA0F1a3991D6bfBc5929f89A9eDe65da44'; //testchain
 
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 const ilk = 'LINK-A';
@@ -37,7 +32,7 @@ const testchainConfig = {
   }
 };
 
-let service, cdpManager, network, maker;
+let service, cdpManager, network, maker, snapshotData;
 
 async function makerInstance(preset) {
   const config = preset === 'kovan' ? kovanConfig : testchainConfig;
@@ -48,14 +43,19 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   // To run this test on kovan, just switch the network variables below:
-  network = 'kovan';
-  //network = 'test';
+  // network = 'kovan';
+  network = 'test';
   maker = await makerInstance(network);
   service = maker.service('liquidation');
   cdpManager = maker.service('mcd:cdpManager');
+  if (network === 'test') snapshotData = await takeSnapshot(maker);
 }, 60000);
 
-test('can create liquidation service', async () => {
+afterAll(async () => {
+  if (network === 'test') await restoreSnapshot(snapshotData, maker);
+});
+
+test.only('can create liquidation service', async () => {
   expect(service).toBeInstanceOf(LiquidationService);
 });
 
