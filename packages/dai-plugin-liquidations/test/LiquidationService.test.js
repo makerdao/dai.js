@@ -6,6 +6,7 @@ import liquidationPlugin from '../src';
 import LiquidationService, {
   RAD,
   WAD,
+  RAY,
   stringToBytes
 } from '../src/LiquidationService';
 import { createVaults, setLiquidationsApprovals } from './utils';
@@ -123,6 +124,28 @@ test('can exit DAI from the vat', async () => {
         .toFixed()
     )
   );
+});
+
+test('can get kicks from on chain', async () => {
+  const kicks = await service.kicks();
+  expect(kicks.toString()).toEqual('1');
+});
+
+test('can get count from on chain', async () => {
+  const count = await service.count();
+  expect(count.toString()).toEqual('1');
+});
+
+test('can get status from on chain', async () => {
+  const { needsRedo, price, lot, tab } = await service.getStatus(1);
+
+  const collateralAmount = new BigNumber(lot).div(WAD).toString();
+  const daiNeeded = new BigNumber(tab).div(RAD);
+
+  expect(collateralAmount).toEqual('25');
+  expect(new BigNumber(price).div(RAY).toString()).toEqual('13.5');
+  expect(daiNeeded.toNumber()).toBeCloseTo(135);
+  expect(needsRedo).toEqual(false);
 });
 
 test('can successfully bid on an auction', async () => {
