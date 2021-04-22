@@ -14,7 +14,7 @@ const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 const ilk = 'LINK-A';
 
 const kovanConfig = {
-  plugins: [[liquidationPlugin], [McdPlugin, { network }]],
+  plugins: [liquidationPlugin, [McdPlugin, { network }]],
   accounts: {
     owner: {
       type: 'privateKey',
@@ -26,7 +26,7 @@ const kovanConfig = {
   }
 };
 const testchainConfig = {
-  plugins: [[liquidationPlugin], [McdPlugin, { network: 'testchain' }]],
+  plugins: [liquidationPlugin, [McdPlugin, { network: 'testchain' }]],
   web3: {
     pollingInterval: 100
   }
