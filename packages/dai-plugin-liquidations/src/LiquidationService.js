@@ -6,8 +6,8 @@ import {
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
-// const LOCAL_URL = 'http://localhost:3001/graphql';
-const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
+const LOCAL_URL = 'http://localhost:3001/graphql';
+// const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
 import BigNumber from 'bignumber.js';
 
 export const RAD = new BigNumber('1e45');
