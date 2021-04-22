@@ -5,7 +5,7 @@ export const MCD_CLIP_LINK_A = 'MCD_CLIP_LINK_A';
 export const MCD_DOG = 'MCD_DOG';
 
 export default {
-  addConfig: function(config) {
+  addConfig: function(config, { vulcanize = true }) {
     const contractAddresses = {
       kovan: require('../contracts/addresses/kovan.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
@@ -29,7 +29,7 @@ export default {
     return {
       ...config,
       additionalServices: ['liquidation'],
-      liquidation: LiquidationService,
+      liquidation: [LiquidationService, { vulcanize }],
       smartContract: { addContracts }
     };
   }

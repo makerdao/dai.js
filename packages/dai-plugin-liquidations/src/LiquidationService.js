@@ -31,6 +31,13 @@ const medianizers = {
 export default class LiquidationService extends PublicService {
   constructor(name = 'liquidation') {
     super(name, ['web3', 'smartContract']);
+    this.vulcanize = true;
+  }
+
+  initialize(settings) {
+    if (settings.vulcanize === 'false') {
+      this.vulcanize = false;
+    }
   }
 
   connect() {
@@ -141,9 +148,9 @@ export default class LiquidationService extends PublicService {
     });
   }
 
-  async getAllClips(ilk, options = { vulcanize: true }) {
+  async getAllClips(ilk) {
     const tail = await this.getTail(ilk);
-    if (options.vulcanize) {
+    if (this.vulcanize) {
       const response = await this.getQueryResponse(
         this.serverUrl,
         this._buildAllClipsQuery(ilk)
