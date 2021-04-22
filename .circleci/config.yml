@@ -7,14 +7,15 @@
        - checkout
        - run:
           name: Install dependencies
-          command: yarn
+          command: |
+            yarn
+            yarn global add mocki
        - run:
           name: Run tests
           command: |
             source /home/circleci/setup-env.sh
             yarn lerna bootstrap
             yarn build
-            yarn global add mocki
             mocki run --path packages/dai-plugin-liquidations/.mocki/config.yml
             yarn test:build
             yarn coverage
