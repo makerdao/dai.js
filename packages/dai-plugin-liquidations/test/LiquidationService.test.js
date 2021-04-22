@@ -55,7 +55,7 @@ afterAll(async () => {
   if (network === 'test') await restoreSnapshot(snapshotData, maker);
 });
 
-test.only('can create liquidation service', async () => {
+test('can create liquidation service', async () => {
   expect(service).toBeInstanceOf(LiquidationService);
 });
 
