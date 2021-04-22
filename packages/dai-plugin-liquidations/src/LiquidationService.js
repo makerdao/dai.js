@@ -5,9 +5,9 @@ import {
 } from '@makerdao/dai/dist/src/utils/conversion';
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
-//const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
+const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
 // const LOCAL_URL = 'http://localhost:3001/graphql';
-const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
+//const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
 import BigNumber from 'bignumber.js';
 
 export const RAD = new BigNumber('1e45');
@@ -39,8 +39,7 @@ export default class LiquidationService extends PublicService {
       case 'mainnet':
       case 1:
       default:
-        //this.serverUrl = MAINNET_SERVER_URL;
-        this.serverUrl = LOCAL_URL; //TODO: switch once done using the mocked vdb api
+        this.serverUrl = MAINNET_SERVER_URL;
     }
   }
 
