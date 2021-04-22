@@ -14,6 +14,7 @@
             echo 'export PATH=$(yarn global bin):$PATH' >> $BASH_ENV
             source $BASH_ENV
             yarn global add mocki
+            mocki run --path packages/dai-plugin-liquidations/.mocki/config.yml
           background: true
        - run:
           name: Run tests
@@ -21,7 +22,6 @@
             source /home/circleci/setup-env.sh
             yarn lerna bootstrap
             yarn build
-            mocki run --path packages/dai-plugin-liquidations/.mocki/config.yml
             yarn test:build
             yarn coverage
        - run:
