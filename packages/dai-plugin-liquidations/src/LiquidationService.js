@@ -147,7 +147,10 @@ export default class LiquidationService extends PublicService {
   }
 
   async getAllClips(ilk) {
-    const tail = await this.getTail(ilk);
+    const [tail, chost] = await Promise.all([
+      this.getTail(ilk),
+      this.getChost(ilk)
+    ]);
     if (this.vulcanize) {
       const response = await this.getQueryResponse(
         this.serverUrl,
@@ -163,6 +166,7 @@ export default class LiquidationService extends PublicService {
         obj.created = new Date(obj.created);
         obj.updated = new Date(obj.updated);
         obj.endDate = new Date((obj.tic + tail) * 1000);
+        obj.chost = chost;
         return obj;
       });
     } else {
@@ -185,6 +189,7 @@ export default class LiquidationService extends PublicService {
               obj.endDate = new Date(
                 new BigNumber(s.tic.toNumber() + tail).times(1000).toNumber()
               );
+              obj.chost = chost;
               return obj;
             });
         })
