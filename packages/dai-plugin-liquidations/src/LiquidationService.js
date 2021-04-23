@@ -35,9 +35,7 @@ export default class LiquidationService extends PublicService {
   }
 
   initialize(settings) {
-    if (settings.vulcanize === 'false') {
-      this.vulcanize = false;
-    }
+    this.vulcanize = settings.vulcanize;
   }
 
   connect() {
