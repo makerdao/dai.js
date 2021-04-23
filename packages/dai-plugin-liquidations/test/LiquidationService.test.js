@@ -127,17 +127,17 @@ test('can exit DAI from the vat', async () => {
 });
 
 test('can get kicks from on chain', async () => {
-  const kicks = await service.kicks();
+  const kicks = await service.kicks(ilk);
   expect(kicks.toString()).toEqual('1');
 });
 
 test('can get count from on chain', async () => {
-  const count = await service.count();
+  const count = await service.count(ilk);
   expect(count.toString()).toEqual('1');
 });
 
 test('can get status from on chain', async () => {
-  const { needsRedo, price, lot, tab } = await service.getStatus(1);
+  const { needsRedo, price, lot, tab } = await service.getStatus(ilk, 1);
 
   const collateralAmount = new BigNumber(lot).div(WAD).toString();
   const daiNeeded = new BigNumber(tab).div(RAD);
@@ -162,7 +162,7 @@ test('can successfully bid on an auction', async () => {
   // The user's vat gem balance before bidding should be 0
   expect(usrVatGemBal2.toString()).toEqual('0');
 
-  await service.take(id, amt, max, me);
+  await service.take(ilk, id, amt, max, me);
 
   const usrVatGemBal3 = await maker
     .service('smartContract')

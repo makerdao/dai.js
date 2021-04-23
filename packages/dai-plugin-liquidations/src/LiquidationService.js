@@ -222,7 +222,7 @@ export default class LiquidationService extends PublicService {
     bytes calldata data   // Data to pass in external call; if length 0, no call is done
   */
   @tracksTransactions
-  async take(auctionId, amount, maxPrice, address, { promise }) {
+  async take(ilk, auctionId, amount, maxPrice, address, { promise }) {
     const id = numberToBytes32(auctionId);
 
     const amt = BigNumber(amount)
@@ -233,7 +233,7 @@ export default class LiquidationService extends PublicService {
       .times(RAY)
       .toFixed();
 
-    return await this._clipperContract().take(
+    return await this._clipperContractByIlk(ilk).take(
       id,
       amt,
       max,
@@ -246,13 +246,13 @@ export default class LiquidationService extends PublicService {
   }
 
   // Returns the total number of kicks, active or inactive
-  async kicks() {
-    return await this._clipperContract().kicks();
+  async kicks(ilk) {
+    return await this._clipperContractByIlk(ilk).kicks();
   }
 
   // Returns the ID of the auction at the index
-  async active(index) {
-    return await this._clipperContract().active(index);
+  async active(ilk, index) {
+    return await this._clipperContractByIlk(ilk).active(index);
   }
 
   /* struct Sale {
@@ -264,23 +264,23 @@ export default class LiquidationService extends PublicService {
         uint256 top;  // Starting price     [ray]
     }
   */
-  async sales(id) {
-    return await this._clipperContract().sales(id);
+  async sales(ilk, id) {
+    return await this._clipperContractByIlk(ilk).sales(id);
   }
 
   // Returns the total number of active auctions
-  async count() {
-    return await this._clipperContract().count();
+  async count(ilk) {
+    return await this._clipperContractByIlk(ilk).count();
   }
 
-  async list() {
-    return await this._clipperContract().list();
+  async list(ilk) {
+    return await this._clipperContractByIlk(ilk).list();
   }
 
   // Returns boolean for if an auction needs a redo and also the current price
-  async getStatus(auctionId) {
+  async getStatus(ilk, auctionId) {
     const id = numberToBytes32(auctionId);
-    const status = await this._clipperContract().getStatus(id);
+    const status = await this._clipperContractByIlk(ilk).getStatus(id);
     return status;
   }
 
@@ -313,10 +313,10 @@ export default class LiquidationService extends PublicService {
     return tail.toNumber();
   }
 
-  @tracksTransactions
-  async yank(id, { promise }) {
-    return await this._clipperContract().yank(id, { promise });
-  }
+  // @tracksTransactions
+  // async yank(id, { promise }) {
+  //   return await this._clipperContract().yank(id, { promise });
+  // }
 
   @tracksTransactions
   async joinDaiToAdapter(amount, { promise }) {
@@ -363,12 +363,6 @@ export default class LiquidationService extends PublicService {
     } catch (e) {
       throw console.error(e);
     }
-  }
-
-  // TODO remove this in favor of _clipperContractByIlk(ilk), but we need to find a better pattern for calling the contract fns on a per ilk basis.
-  // e.g. maybe a Clipper class
-  _clipperContract() {
-    return this.get('smartContract').getContractByName('MCD_CLIP_LINK_A');
   }
 
   _clipperContractByIlk(ilk) {
