@@ -2,6 +2,7 @@ import { map, prop } from 'ramda';
 import LiquidationService from './LiquidationService';
 
 export const MCD_CLIP_LINK_A = 'MCD_CLIP_LINK_A';
+export const MCD_CLIP_YFI_A = 'MCD_CLIP_YFI_A';
 export const MCD_DOG = 'MCD_DOG';
 
 export default {
@@ -18,6 +19,10 @@ export default {
     const addContracts = {
       [MCD_CLIP_LINK_A]: {
         address: map(prop('MCD_CLIP_LINK_A'), contractAddresses),
+        abi: require('../contracts/abis/Clipper.json')
+      },
+      [MCD_CLIP_YFI_A]: {
+        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
         abi: require('../contracts/abis/Clipper.json')
       },
       [MCD_DOG]: {
