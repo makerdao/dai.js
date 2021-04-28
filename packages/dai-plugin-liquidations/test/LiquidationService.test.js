@@ -44,7 +44,7 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   // To run this test on kovan, just switch the network variables below:
-  // network = 'kovan';
+  //network = 'kovan';
   network = 'test';
   maker = await makerInstance(network);
   service = maker.service('liquidation');
@@ -222,8 +222,8 @@ test('get all LINK-A clips', async () => {
   console.log('clips', clips);
 }, 10000);
 
-test('get all LINK-A clips without vulcanize', async () => {
-  const clips = await service.getAllClips('LINK-A', { vulcanize: false });
+xtest('get all LINK-A clips without vulcanize', async () => {
+  const clips = await service.getAllClips('LINK-A', false);
   console.log('clips', clips);
 }, 10000);
 
