@@ -167,6 +167,7 @@ export default class LiquidationService extends PublicService {
         obj.updated = new Date(obj.updated);
         obj.endDate = new Date((obj.tic + tail) * 1000);
         obj.chost = chost;
+        obj.ilk = ilk;
         return obj;
       });
     } else {
@@ -190,6 +191,7 @@ export default class LiquidationService extends PublicService {
                 new BigNumber(s.tic.toNumber() + tail).times(1000).toNumber()
               );
               obj.chost = chost;
+              obj.ilk = ilk;
               return obj;
             });
         })
