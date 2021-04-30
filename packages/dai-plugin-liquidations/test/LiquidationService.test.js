@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import Maker from '@makerdao/dai';
-import McdPlugin, { LINK } from '@makerdao/dai-plugin-mcd';
+import McdPlugin, { LINK, YFI } from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
 import LiquidationService, {
@@ -12,7 +12,7 @@ import LiquidationService, {
 import { createVaults, setLiquidationsApprovals } from './utils';
 
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
-const ilk = 'LINK-A';
+const ilk = 'YFI-A';
 
 const kovanConfig = {
   plugins: [liquidationPlugin, [McdPlugin, { network }]],
@@ -44,8 +44,8 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   // To run this test on kovan, just switch the network variables below:
-  //network = 'kovan';
-  network = 'test';
+  network = 'kovan';
+  //network = 'test';
   maker = await makerInstance(network);
   service = maker.service('liquidation');
   cdpManager = maker.service('mcd:cdpManager');
@@ -60,7 +60,7 @@ test('can create liquidation service', async () => {
   expect(service).toBeInstanceOf(LiquidationService);
 });
 
-test('can bark an unsafe urn', async () => {
+test.only('can bark an unsafe urn', async () => {
   // The setup to create a risky vault takes quite a long time on kovan
   const timeout = network === 'kovan' ? 480000 : 120000;
   jest.setTimeout(timeout);
@@ -68,7 +68,9 @@ test('can bark an unsafe urn', async () => {
   // Opens a vault, withdraws DAI and calls drip until vault is unsafe.
   const vaultId = await createVaults(
     maker,
-    network === 'test' ? 'testchain' : network
+    network === 'test' ? 'testchain' : network,
+    ilk,
+    YFI
   );
 
   const vaultUrnAddr = await cdpManager.getUrn(vaultId);
@@ -79,8 +81,9 @@ test('can bark an unsafe urn', async () => {
 
 test('can join DAI to the vat', async () => {
   // Set up approvals
-  await setLiquidationsApprovals(maker);
-
+  console.log('1');
+  await setLiquidationsApprovals(maker, ilk);
+  console.log('2');
   const vatDaiBalBefore = await maker
     .service('smartContract')
     .getContract('MCD_VAT')
@@ -101,7 +104,7 @@ test('can join DAI to the vat', async () => {
         .toFixed()
     )
   );
-});
+}, 20000);
 
 test('can exit DAI from the vat', async () => {
   const vatDaiBalBefore = await maker

@@ -1,23 +1,25 @@
-import { LINK, DAI } from '@makerdao/dai-plugin-mcd';
+import { DAI } from '@makerdao/dai-plugin-mcd';
 import { mineBlocks } from '../../test-helpers/src';
 import BigNumber from 'bignumber.js';
+import { stringToBytes } from '../src/LiquidationService';
 
-const ilk = '0x4c494e4b2d41'; // LINK-A
+function _clipperContractByIlk(maker, ilk) {
+  const suffix = ilk.replace('-', '_');
+  return maker.service('smartContract').getContractByName(`MCD_CLIP_${suffix}`);
+}
 
-export async function setLiquidationsApprovals(maker) {
+export async function setLiquidationsApprovals(maker, ilk) {
   const joinAddress = maker.service('smartContract').getContract('MCD_JOIN_DAI')
     .address;
-  const linkClipperAddress = maker
-    .service('smartContract')
-    .getContract('MCD_CLIP_LINK_A').address;
-
+  const clipperAddress = _clipperContractByIlk(maker, ilk).address;
+  console.log('a');
   try {
     //req to move dai from me to vat
     await maker.getToken('DAI').approveUnlimited(joinAddress);
   } catch (e) {
     throw new Error(`Error approving DAI allowance for join address: ${e}`);
   }
-
+  console.log('b');
   try {
     //req to manipulate my vat dai balance (to "pay" for take calls)
     await maker
@@ -27,37 +29,38 @@ export async function setLiquidationsApprovals(maker) {
   } catch (e) {
     throw new Error(`Error hoping the join address: ${e}`);
   }
+  console.log('c');
   try {
     //req for clipper to manipulate vat balance (req for each clipper)
     await maker
       .service('smartContract')
       .getContract('MCD_VAT')
-      .hope(linkClipperAddress);
+      .hope(clipperAddress);
   } catch (e) {
-    throw new Error(`Error hoping the link clipper address: ${e}`);
+    throw new Error(`Error hoping the clipper address: ${e}`);
   }
 }
 
-async function setProxyAndAllowances(maker) {
+async function setProxyAndAllowances(maker, token) {
   const kprAddress = maker.currentAddress();
-  const linkToken = await maker.getToken(LINK);
+  const tok = await maker.getToken(token);
 
   await maker.service('proxy').ensureProxy();
   const proxyAddress = await maker.service('proxy').getProxyAddress();
 
-  const linkAllowance = await linkToken.allowance(kprAddress, proxyAddress);
-  if (Number(linkAllowance._amount) === 0) {
-    await linkToken.approveUnlimited(proxyAddress);
+  const allowance = await tok.allowance(kprAddress, proxyAddress);
+  if (Number(allowance._amount) === 0) {
+    await tok.approveUnlimited(proxyAddress);
   }
 }
 
-async function openVaultAndLock(maker, linkAmt) {
+async function openVaultAndLock(maker, amt, ilk, token) {
   const manager = maker.service('mcd:cdpManager');
   // open vault
-  const vault = await manager.open('LINK-A');
+  const vault = await manager.open(ilk);
   // lock collateral
   try {
-    await manager.lock(vault.id, 'LINK-A', LINK(linkAmt));
+    await manager.lock(vault.id, ilk, token(amt));
   } catch (e) {
     console.error('lock error:', e);
   }
@@ -70,14 +73,14 @@ async function resetVaultStats(vault) {
   await vault.prefetch();
 }
 
-async function drawDai(manager, managedVault, vaultId) {
+async function drawDai(manager, managedVault, vaultId, ilk) {
   const percent = 0.985;
   const amtDai = await managedVault.daiAvailable._amount;
 
   try {
     let drawDai = await manager.draw(
       vaultId,
-      'LINK-A',
+      ilk,
       DAI(amtDai.times(percent).toFixed(17))
     );
     drawDai;
@@ -87,17 +90,17 @@ async function drawDai(manager, managedVault, vaultId) {
 }
 
 // MAIN
-export async function createVaults(maker, network = 'testchain') {
+export async function createVaults(maker, network = 'testchain', ilk, token) {
   BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
   const manager = maker.service('mcd:cdpManager');
   const jug = maker.service('smartContract').getContract('MCD_JUG');
-  const linkAmt = network === 'testchain' ? '25' : '5';
+  const amt = network === 'testchain' ? '25' : '.1';
 
   // Initial Setup
-  if (network === 'testchain') await setProxyAndAllowances(maker); //not needed for kovan
+  if (network === 'testchain') await setProxyAndAllowances(maker, token); //not needed for kovan
 
-  // Open a Vault and lock LINK
-  const vault = await openVaultAndLock(maker, linkAmt);
+  // Open a Vault and lock collateral
+  const vault = await openVaultAndLock(maker, amt, ilk, token);
   const vaultId = vault.id;
 
   let managedVault = await manager.getCdp(vaultId);
@@ -105,9 +108,9 @@ export async function createVaults(maker, network = 'testchain') {
   await resetVaultStats(managedVault);
 
   // // Draw the exact amount of DAI
-  await drawDai(manager, managedVault, vaultId);
+  await drawDai(manager, managedVault, vaultId, ilk);
 
-  await jug.drip(ilk);
+  await jug.drip(stringToBytes(ilk));
   if (network === 'testchain') await mineBlocks(maker.service('web3'), 10);
   await resetVaultStats(managedVault);
 
@@ -117,7 +120,7 @@ export async function createVaults(maker, network = 'testchain') {
   while (count > 0) {
     count--;
     if (network === 'testchain') await mineBlocks(maker.service('web3'), 10);
-    await jug.drip(ilk);
+    await jug.drip(stringToBytes(ilk));
     await drawDai(manager, managedVault, vaultId);
     await resetVaultStats(managedVault);
     managedVault = await manager.getCdp(vaultId);
@@ -126,11 +129,11 @@ export async function createVaults(maker, network = 'testchain') {
 
   while (isSafe) {
     if (network === 'testchain') await mineBlocks(maker.service('web3'), 10);
-    await jug.drip(ilk);
+    await jug.drip(stringToBytes(ilk));
     await maker
       .service('smartContract')
       .getContract('MCD_SPOT')
-      .poke(ilk);
+      .poke(stringToBytes(ilk));
     await resetVaultStats(managedVault);
     managedVault = await manager.getCdp(vaultId);
     isSafe = managedVault.isSafe;
