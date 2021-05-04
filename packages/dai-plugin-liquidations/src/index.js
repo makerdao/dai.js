@@ -3,6 +3,10 @@ import LiquidationService from './LiquidationService';
 
 export const MCD_CLIP_LINK_A = 'MCD_CLIP_LINK_A';
 export const MCD_CLIP_YFI_A = 'MCD_CLIP_YFI_A';
+export const MCD_CLIP_WBTC_A = 'MCD_CLIP_WBTC_A';
+export const MCD_CLIP_ETH_A = 'MCD_CLIP_ETH_A';
+export const MCD_CLIP_ETH_B = 'MCD_CLIP_ETH_B';
+export const MCD_CLIP_ETH_C = 'MCD_CLIP_ETH_C';
 export const MCD_DOG = 'MCD_DOG';
 
 export default {
@@ -22,6 +26,22 @@ export default {
         abi: require('../contracts/abis/Clipper.json')
       },
       [MCD_CLIP_YFI_A]: {
+        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        abi: require('../contracts/abis/Clipper.json')
+      },
+      [MCD_CLIP_WBTC_A]: {
+        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        abi: require('../contracts/abis/Clipper.json')
+      },
+      [MCD_CLIP_ETH_A]: {
+        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        abi: require('../contracts/abis/Clipper.json')
+      },
+      [MCD_CLIP_ETH_B]: {
+        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        abi: require('../contracts/abis/Clipper.json')
+      },
+      [MCD_CLIP_ETH_C]: {
         address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
         abi: require('../contracts/abis/Clipper.json')
       },
