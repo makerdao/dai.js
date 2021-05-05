@@ -147,8 +147,9 @@ export default class LiquidationService extends PublicService {
   }
 
   async getAllClips(ilk) {
-    const [tail, chost] = await Promise.all([
+    const [tail, cusp, chost] = await Promise.all([
       this.getTail(ilk),
+      this.getCusp(ilk),
       this.getChost(ilk)
     ]);
     if (this.vulcanize) {
@@ -167,6 +168,7 @@ export default class LiquidationService extends PublicService {
         obj.updated = new Date(obj.updated);
         obj.endDate = new Date((obj.tic + tail) * 1000);
         obj.chost = chost;
+        obj.cusp = cusp;
         obj.ilk = ilk;
         return obj;
       });
@@ -191,6 +193,7 @@ export default class LiquidationService extends PublicService {
                 new BigNumber(s.tic.toNumber() + tail).times(1000).toNumber()
               );
               obj.chost = chost;
+              obj.cusp = cusp;
               obj.ilk = ilk;
               return obj;
             });
@@ -318,6 +321,11 @@ export default class LiquidationService extends PublicService {
   async getTail(ilk) {
     const tail = await this._clipperContractByIlk(ilk).tail();
     return tail.toNumber();
+  }
+
+  async getCusp(ilk) {
+    const cusp = await this._clipperContractByIlk(ilk).cusp();
+    return new BigNumber(cusp).div(RAY);
   }
 
   // @tracksTransactions

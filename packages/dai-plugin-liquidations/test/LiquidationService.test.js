@@ -260,3 +260,8 @@ test('getTail', async () => {
   const tail = await service.getTail('LINK-A');
   console.log('tail', tail);
 }, 10000);
+
+test.only('getCusp', async () => {
+  const cusp = await service.getCusp('LINK-A');
+  console.log('cusp', cusp);
+}, 10000);
