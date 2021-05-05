@@ -12,14 +12,12 @@ export async function setLiquidationsApprovals(maker, ilk) {
   const joinAddress = maker.service('smartContract').getContract('MCD_JOIN_DAI')
     .address;
   const clipperAddress = _clipperContractByIlk(maker, ilk).address;
-  console.log('a');
   try {
     //req to move dai from me to vat
     await maker.getToken('DAI').approveUnlimited(joinAddress);
   } catch (e) {
     throw new Error(`Error approving DAI allowance for join address: ${e}`);
   }
-  console.log('b');
   try {
     //req to manipulate my vat dai balance (to "pay" for take calls)
     await maker
@@ -29,7 +27,6 @@ export async function setLiquidationsApprovals(maker, ilk) {
   } catch (e) {
     throw new Error(`Error hoping the join address: ${e}`);
   }
-  console.log('c');
   try {
     //req for clipper to manipulate vat balance (req for each clipper)
     await maker
@@ -97,7 +94,7 @@ export async function createVaults(maker, network = 'testchain', ilk, token) {
   const amt = network === 'testchain' ? '25' : '.1';
 
   // Initial Setup
-  if (network === 'testchain') await setProxyAndAllowances(maker, token); //not needed for kovan
+  await setProxyAndAllowances(maker, token);
 
   // Open a Vault and lock collateral
   const vault = await openVaultAndLock(maker, amt, ilk, token);
