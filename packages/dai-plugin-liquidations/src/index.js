@@ -30,19 +30,19 @@ export default {
         abi: require('../contracts/abis/Clipper.json')
       },
       [MCD_CLIP_WBTC_A]: {
-        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        address: map(prop('MCD_CLIP_WBTC_A'), contractAddresses),
         abi: require('../contracts/abis/Clipper.json')
       },
       [MCD_CLIP_ETH_A]: {
-        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        address: map(prop('MCD_CLIP_ETH_A'), contractAddresses),
         abi: require('../contracts/abis/Clipper.json')
       },
       [MCD_CLIP_ETH_B]: {
-        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        address: map(prop('MCD_CLIP_ETH_B'), contractAddresses),
         abi: require('../contracts/abis/Clipper.json')
       },
       [MCD_CLIP_ETH_C]: {
-        address: map(prop('MCD_CLIP_YFI_A'), contractAddresses),
+        address: map(prop('MCD_CLIP_ETH_C'), contractAddresses),
         abi: require('../contracts/abis/Clipper.json')
       },
       [MCD_DOG]: {
