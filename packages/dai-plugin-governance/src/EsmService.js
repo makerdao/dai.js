@@ -1,9 +1,7 @@
 import { PrivateService } from '@makerdao/services-core';
 import { MKR, ESM, END } from './utils/constants';
 import { getCurrency } from './utils/helpers';
-import tracksTransactions, {
-  tracksTransactionsWithOptions
-} from './utils/tracksTransactions';
+import { tracksTransactionsWithOptions } from './utils/tracksTransactions';
 
 export default class EsmService extends PrivateService {
   constructor(name = 'esm') {
@@ -15,22 +13,14 @@ export default class EsmService extends PrivateService {
     return getCurrency(min, MKR).shiftedBy(-18);
   }
 
-  async fired() {
-    const _fired = await this._esmContract().fired();
-    return _fired.eq(1);
-  }
-
   async emergencyShutdownActive() {
     const active = await this._endContract().live();
     return active.eq(0);
   }
 
   async canFire() {
-    const [fired, live] = await Promise.all([
-      this.fired(),
-      this.emergencyShutdownActive()
-    ]);
-    return !fired && !live;
+    const shutdown = await this.emergencyShutdownActive();
+    return !shutdown;
   }
 
   async getTotalStaked() {
@@ -50,15 +40,9 @@ export default class EsmService extends PrivateService {
   async stake(amount, skipChecks = false, { promise }) {
     const mkrAmount = getCurrency(amount, MKR);
     if (!skipChecks) {
-      const [fired, mkrBalance] = await Promise.all([
-        this.fired(),
-        this.get('token')
-          .getToken(MKR)
-          .balance()
-      ]);
-      if (fired) {
-        throw new Error('cannot join when emergency shutdown has been fired');
-      }
+      const mkrBalance = await this.get('token')
+        .getToken(MKR)
+        .balance();
       if (mkrBalance.lt(mkrAmount)) {
         throw new Error('amount to join is greater than the user balance');
       }
@@ -67,7 +51,7 @@ export default class EsmService extends PrivateService {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 2 })
-  async triggerEmergencyShutdown(skipChecks = false, { promise }) {
+  async triggerEmergencyShutdown(skipChecks = false) {
     if (!skipChecks) {
       const [thresholdAmount, totalStaked, canFire] = await Promise.all([
         this.thresholdAmount(),
