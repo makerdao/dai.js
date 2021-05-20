@@ -1,10 +1,9 @@
 import { map, prop } from 'ramda';
-import { ALL_CLIPS, MCD_DOG } from './utils/constants'
+import { ALL_CLIPS, MCD_DOG } from './utils/constants';
 import LiquidationService from './LiquidationService';
 
-
 export default {
-  addConfig: function (config, { vulcanize = true }) {
+  addConfig: function(config, { vulcanize = true }) {
     const contractAddresses = {
       kovan: require('../contracts/addresses/kovan.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
