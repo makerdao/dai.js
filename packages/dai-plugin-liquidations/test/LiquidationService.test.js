@@ -217,7 +217,7 @@ test('can claim collateral after winning an auction', async () => {
 });
 
 test('get unsafe LINK-A vaults', async () => {
-  const urns = await service.getUnsafeVaults('LINK-A');
+  const urns = await service.getUnsafeVaults(['LINK-A', 'BAT-A']);
   console.log('urns', urns);
 }, 10000);
 
@@ -261,7 +261,7 @@ test('getTail', async () => {
   console.log('tail', tail);
 }, 10000);
 
-test.only('getCusp', async () => {
+test('getCusp', async () => {
   const cusp = await service.getCusp('LINK-A');
   console.log('cusp', cusp);
 }, 10000);

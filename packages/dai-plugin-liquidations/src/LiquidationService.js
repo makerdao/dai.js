@@ -6,7 +6,7 @@ import {
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
-const LOCAL_URL = 'http://localhost:3001/graphql';
+//const LOCAL_URL = 'http://localhost:3001/graphql';
 // const LOCAL_URL = 'https://dd0965745ea7.ngrok.io/graphql'; // temporary ngrok
 import BigNumber from 'bignumber.js';
 
@@ -45,9 +45,9 @@ export default class LiquidationService extends PublicService {
       case 1:
         this.serverUrl = MAINNET_SERVER_URL;
         break;
-      case 999:
-        this.serverUrl = LOCAL_URL;
-        break;
+      // case 999:
+      //   this.serverUrl = LOCAL_URL;
+      // break;
       default:
         this.serverUrl = MAINNET_SERVER_URL;
     }
@@ -55,7 +55,7 @@ export default class LiquidationService extends PublicService {
 
   _buildUnsafeUrnQuery(ilk) {
     return `
-      {getUrnsByIlk(ilkIdentifier: "${ilk}", first: 20000) {
+      getUrnsByIlk(ilkIdentifier: "${ilk}", first: 20000) {
         nodes {
           urnIdentifier
           art
@@ -66,7 +66,7 @@ export default class LiquidationService extends PublicService {
           }
         }
       }
-    }`;
+    `;
   }
 
   _buildAllClipsQuery(ilk) {
@@ -130,12 +130,17 @@ export default class LiquidationService extends PublicService {
     return data;
   }
 
-  async getUnsafeVaults(ilk) {
-    const response = await this.getQueryResponse(
-      this.serverUrl,
-      this._buildUnsafeUrnQuery(ilk)
-    );
-    const urns = response.getUrnsByIlk.nodes;
+  async getUnsafeVaults(ilks) {
+    let query = '{';
+    ilks.forEach(i => {
+      query += i.replace('-', '');
+      query += ': ';
+      query += this._buildUnsafeUrnQuery(i);
+    });
+    query += '}';
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const nodes = Object.values(response);
+    const urns = nodes.map(n => n.nodes).flat();
     return urns.filter(u => {
       const art = BigNumber(u.art);
       const ink = BigNumber(u.ink);
