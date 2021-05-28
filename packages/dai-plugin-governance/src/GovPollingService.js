@@ -3,6 +3,7 @@ import { POLLING, BATCH_POLLING } from './utils/constants';
 import { MKR } from './utils/constants';
 import { fromBuffer, toBuffer, paddedArray } from './utils/helpers';
 import { rankedChoiceIRV } from './utils/irv';
+import tracksTransactions from './utils/tracksTransactions';
 
 const POSTGRES_MAX_INT = 2147483647;
 
@@ -17,12 +18,14 @@ export default class GovPollingService extends PrivateService {
     ]);
   }
 
-  async createPoll(startDate, endDate, multiHash, url) {
+  @tracksTransactions
+  async createPoll(startDate, endDate, multiHash, url, { promise }) {
     const txo = await this._pollingContract().createPoll(
       startDate,
       endDate,
       multiHash,
-      url
+      url,
+      { promise }
     );
     const pollId = parseInt(txo.receipt.logs[0].topics[2]);
     return pollId;
