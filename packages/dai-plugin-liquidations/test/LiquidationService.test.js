@@ -26,6 +26,9 @@ const kovanConfig = {
     }
   },
   web3: {
+    // transactionSettings: {
+    //   gasPrice: 1000000000
+    // },
     provider: { infuraProjectId: 'c3f0f26a4c1742e0949d8eedfc47be67' }
   }
 };

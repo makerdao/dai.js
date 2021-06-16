@@ -91,7 +91,30 @@ export async function createVaults(maker, network = 'testchain', ilk, token) {
   BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
   const manager = maker.service('mcd:cdpManager');
   const jug = maker.service('smartContract').getContract('MCD_JUG');
-  const amt = network === 'testchain' ? '25' : '.1';
+  // const amt = network === 'testchain' ? '25' : '.1';
+  const amtToOpen = {
+    'BAT-A': '150',
+    'ETH-A': '1',
+    'ETH-B': '1',
+    'ETH-C': '1',
+    'AAVE-A': '3',
+    'UNI-A': '50',
+    'ZRX-A': '100',
+    'RENBTC-A': '0.01',
+    'LRC-A': '300',
+    'MANA-A': '225',
+    'COMP-A': '0.75',
+    'KNC-A': '100',
+    'BAL-A': '10',
+    'UNIV2DAIETH-A': '1.7',
+    'GUSD-A': '150',
+    'USDC-A': '150',
+    'USDC-B': '150',
+    'PAXUSD-A': '150',
+    'USDT-A': '150',
+    'TUSD-A': '150',
+  };
+  const amt = network === 'testchain' ? '25' : amtToOpen[ilk] || '.1';
 
   // Initial Setup
   await setProxyAndAllowances(maker, token);
