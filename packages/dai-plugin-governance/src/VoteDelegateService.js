@@ -1,12 +1,12 @@
 import { LocalService } from '@makerdao/services-core';
-// import VoteProxy from './VoteProxy';
-import { MKR, VOTE_PROXY_FACTORY /* ZERO_ADDRESS */ } from './utils/constants';
+// import VoteDelegate from './VoteDelegate';
+import { MKR, VOTE_DELEGATE_FACTORY /* ZERO_ADDRESS */ } from './utils/constants';
 // maybe a "dai.js developer utils" package is useful?
 import { getCurrency } from './utils/helpers';
-import voteDelegateAbi from '../contracts/abis/VoteProxy.json';
+import voteDelegateAbi from '../contracts/abis/VoteDelegate.json';
 
-export default class VoteProxyService extends LocalService {
-  constructor(name = 'voteProxy') {
+export default class VoteDelegateService extends LocalService {
+  constructor(name = 'voteDelegate') {
     super(name, ['smartContract', 'chief']);
   }
 
@@ -19,7 +19,7 @@ export default class VoteProxyService extends LocalService {
 
   free(delegateAddress, amt, unit = MKR) {
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
-    return this._proxyContract(delegateAddress).free(mkrAmt);
+    return this._delegateContract(delegateAddress).free(mkrAmt);
   }
 
   voteExec(delegateAddress, picks) {
@@ -71,7 +71,7 @@ export default class VoteProxyService extends LocalService {
   }
 
   _delegateFactoryContract() {
-    return this.get('smartContract').getContractByName(VOTE_PROXY_FACTORY);
+    return this.get('smartContract').getContractByName(VOTE_DELEGATE_FACTORY);
   }
 
   // async _getProxyStatus(address) {

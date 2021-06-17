@@ -5,7 +5,7 @@ export const IOU = createCurrency('IOU');
 
 /* Contracts */
 export const VOTE_PROXY_FACTORY = 'VOTE_PROXY_FACTORY';
-export const VOTE_DELEGATION_FACTORY = 'VOTE_DELEGATION_FACTORY';
+export const VOTE_DELEGATE_FACTORY = 'VOTE_DELEGATE_FACTORY';
 export const POLLING = 'POLLING';
 export const BATCH_POLLING = 'BATCH_POLLING';
 export const CHIEF = 'CHIEF';

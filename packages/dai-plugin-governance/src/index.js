@@ -1,6 +1,7 @@
 import { map, prop } from 'ramda';
 import {
   VOTE_PROXY_FACTORY,
+  VOTE_DELEGATE_FACTORY,
   CHIEF,
   POLLING,
   BATCH_POLLING,
@@ -14,6 +15,7 @@ import {
 import ChiefService from './ChiefService';
 import VoteProxyService from './VoteProxyService';
 import VoteProxyFactoryService from './VoteProxyFactoryService';
+import VoteDelegateService from './VoteDelegateService';
 import GovPollingService from './GovPollingService';
 import GovQueryApiService from './GovQueryApiService';
 import EsmService from './EsmService';
@@ -56,6 +58,10 @@ export default {
         address: map(prop('VOTE_PROXY_FACTORY'), contractAddresses),
         abi: require('../contracts/abis/VoteProxyFactory.json')
       },
+      [VOTE_DELEGATE_FACTORY]: {
+        address: map(prop('VOTE_PROXY_DELEGATE'), contractAddresses),
+        abi: require('../contracts/abis/VoteDelegateFactory.json')
+      },
       [POLLING]: {
         address: map(prop('POLLING'), contractAddresses),
         abi: require('../contracts/abis/PollingEmitter.json')
@@ -77,6 +83,7 @@ export default {
         'chief',
         'voteProxy',
         'voteProxyFactory',
+        'voteDelegate',
         'govPolling',
         'govQueryApi',
         'esm',
@@ -85,6 +92,7 @@ export default {
       chief: [ChiefService],
       voteProxy: [VoteProxyService],
       voteProxyFactory: [VoteProxyFactoryService],
+      voteDelegate: [VoteDelegateService],
       govPolling: [GovPollingService],
       govQueryApi: [GovQueryApiService, { staging }],
       esm: [EsmService],
