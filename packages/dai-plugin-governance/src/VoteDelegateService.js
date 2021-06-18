@@ -1,7 +1,6 @@
 import { LocalService } from '@makerdao/services-core';
-// import VoteDelegate from './VoteDelegate';
-import { MKR, VOTE_DELEGATE_FACTORY /* ZERO_ADDRESS */ } from './utils/constants';
-// maybe a "dai.js developer utils" package is useful?
+import VoteDelegate from './VoteDelegate';
+import { MKR, VOTE_DELEGATE_FACTORY, ZERO_ADDRESS } from './utils/constants';
 import { getCurrency } from './utils/helpers';
 import voteDelegateAbi from '../contracts/abis/VoteDelegate.json';
 
@@ -34,32 +33,20 @@ export default class VoteDelegateService extends LocalService {
 
   // Reads ------------------------------------------------
 
-  // TODO: not sure if we need something similar yet
-  // async getVotedProposalAddresses(proxyAddress) {
-  //   const _slate = await this.get('chief').getVotedSlate(proxyAddress);
-  //   return this.get('chief').getSlateAddresses(_slate);
-  // }
-
-  // TODO: similar read but for delegates
-  // async getVoteProxy(addressToCheck) {
-  //   const {
-  //     hasProxy,
-  //     role,
-  //     address: proxyAddress
-  //   } = await this._getProxyStatus(addressToCheck);
-  //   if (!hasProxy) return { hasProxy, voteProxy: null };
-  //   const otherRole = role === 'hot' ? 'cold' : 'hot';
-  //   const otherAddress = await this._getAddressOfRole(proxyAddress, otherRole);
-  //   return {
-  //     hasProxy,
-  //     voteProxy: new VoteProxy({
-  //       voteProxyService: this,
-  //       proxyAddress,
-  //       [`${role}Address`]: addressToCheck,
-  //       [`${otherRole}Address`]: otherAddress
-  //     })
-  //   };
-  // }
+  async getDelegateProxy(addressToCheck) {
+    const {
+      hasDelegate,
+      address: delegateAddress
+    } = await this._getDelegateStatus(addressToCheck);
+    if (!hasDelegate) return { hasDelegate, voteDelegate: null };
+    return {
+      hasDelegate,
+      voteProxy: new VoteDelegate({
+        voteDelegateService: this,
+        delegateAddress
+      })
+    };
+  }
 
   // Internal --------------------------------------------
 
@@ -74,32 +61,14 @@ export default class VoteDelegateService extends LocalService {
     return this.get('smartContract').getContractByName(VOTE_DELEGATE_FACTORY);
   }
 
-  // async _getProxyStatus(address) {
-  //   const [proxyAddressCold, proxyAddressHot] = await Promise.all([
-  //     this._proxyFactoryContract().coldMap(address),
-  //     this._proxyFactoryContract().hotMap(address)
-  //   ]);
-  //   if (proxyAddressCold !== ZERO_ADDRESS)
-  //     return { role: 'cold', address: proxyAddressCold, hasProxy: true };
-  //   if (proxyAddressHot !== ZERO_ADDRESS)
-  //     return { role: 'hot', address: proxyAddressHot, hasProxy: true };
-  //   return { role: null, address: '', hasProxy: false };
-  // }
+  async _getDelegateStatus(address) {
+    const delegateAddress = await this._delegateFactoryContract().delegates(
+      address
+    );
 
-  // _getAddressOfRole(proxyAddress, role) {
-  //   if (role === 'hot') return this._proxyContract(proxyAddress).hot();
-  //   else if (role === 'cold') return this._proxyContract(proxyAddress).cold();
-  //   return null;
-  // }
+    if (delegateAddress !== ZERO_ADDRESS)
+      return { address: delegateAddress, hasDelegate: true };
+
+    return { address: '', hasDelegate: false };
+  }
 }
-
-// add a few Chief Service methods to the Vote Proxy Service
-// Object.assign(
-//   VoteProxyService.prototype,
-//   ['getVotedSlate', 'getNumDeposits'].reduce((acc, name) => {
-//     acc[name] = function(...args) {
-//       return this.get('chief')[name](...args);
-//     };
-//     return acc;
-//   }, {})
-// );

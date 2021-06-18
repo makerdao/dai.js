@@ -7,13 +7,12 @@ export default class VoteDelegate {
   getDelegateAddress() {
     return this._delegateAddress;
   }
-
 }
 
 const passthroughMethods = [
   'lock',
   'free',
-  'voteExec',
+  'voteExec'
   // 'getNumDeposits',
   // 'getVotedProposalAddresses'
 ];

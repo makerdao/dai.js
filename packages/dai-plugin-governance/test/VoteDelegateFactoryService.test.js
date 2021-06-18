@@ -1,10 +1,9 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import govPlugin from '../src/index';
 import Maker from '@makerdao/dai';
-import VoteDelegateService from '../src/VoteDelegateService';
-// import VoteDelegate from '../src/VoteDelegate';
+import VoteDelegateFactoryService from '../src/VoteDelegateFactoryService';
 
-let maker, voteDelegateService, network, snapshotData;
+let maker, network, vdfs, snapshotData;
 
 const kovanConfig = {
   plugins: [[govPlugin, { network }]],
@@ -41,7 +40,7 @@ beforeAll(async () => {
   network = 'kovan';
   // network = 'test';
   maker = await makerInstance(network);
-  voteDelegateService = maker.service('voteDelegate');
+  vdfs = maker.service('voteDelegateFactory');
   if (network === 'test') snapshotData = await takeSnapshot(maker);
 }, 60000);
 
@@ -49,18 +48,16 @@ afterAll(async () => {
   if (network === 'test') await restoreSnapshot(snapshotData, maker);
 });
 
-test('can create vote delegate service', async () => {
-  expect(voteDelegateService).toBeInstanceOf(VoteDelegateService);
+test('can create vote delegate factory service', async () => {
+  expect(vdfs).toBeInstanceOf(VoteDelegateFactoryService);
 });
 
-test('can create vote delegate service', async () => {
-  expect(voteDelegateService).toBeInstanceOf(VoteDelegateService);
-});
+// will fail because can only have one delegate
+// should work once testchain is configured
+// and chain is a new instance
+xtest('can create a vote delegate contract', async () => {
+  const tx = await vdfs.createDelegateContract();
 
-test('getVoteDelegate returns the vote delegate if exists', async () => {
-  const { hasDelegate } = await voteDelegateService.getDelegateProxy(
-    maker.currentAccount().address
-  );
-
-  expect(hasDelegate).toBe(true);
+  console.log(tx);
+  expect(tx).toBeTruthy();
 });

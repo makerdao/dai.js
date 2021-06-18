@@ -16,6 +16,7 @@ import ChiefService from './ChiefService';
 import VoteProxyService from './VoteProxyService';
 import VoteProxyFactoryService from './VoteProxyFactoryService';
 import VoteDelegateService from './VoteDelegateService';
+import VoteDelegateFactoryService from './VoteDelegateFactoryService';
 import GovPollingService from './GovPollingService';
 import GovQueryApiService from './GovQueryApiService';
 import EsmService from './EsmService';
@@ -59,7 +60,7 @@ export default {
         abi: require('../contracts/abis/VoteProxyFactory.json')
       },
       [VOTE_DELEGATE_FACTORY]: {
-        address: map(prop('VOTE_PROXY_DELEGATE'), contractAddresses),
+        address: map(prop('VOTE_DELEGATE_FACTORY'), contractAddresses),
         abi: require('../contracts/abis/VoteDelegateFactory.json')
       },
       [POLLING]: {
@@ -84,6 +85,7 @@ export default {
         'voteProxy',
         'voteProxyFactory',
         'voteDelegate',
+        'voteDelegateFactory',
         'govPolling',
         'govQueryApi',
         'esm',
@@ -93,6 +95,7 @@ export default {
       voteProxy: [VoteProxyService],
       voteProxyFactory: [VoteProxyFactoryService],
       voteDelegate: [VoteDelegateService],
+      voteDelegateFactory: [VoteDelegateFactoryService],
       govPolling: [GovPollingService],
       govQueryApi: [GovQueryApiService, { staging }],
       esm: [EsmService],
