@@ -1,10 +1,69 @@
 [
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_chief",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_polling",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_delegate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "usr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "wad",
+				"type": "uint256"
+			}
+		],
+		"name": "Free",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "usr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "wad",
+				"type": "uint256"
+			}
+		],
+		"name": "Lock",
+		"type": "event"
+	},
+	{
 		"inputs": [],
-		"name": "GOV",
+		"name": "chief",
 		"outputs": [
 			{
-				"internalType": "contract TokenLike",
+				"internalType": "contract ChiefLike",
 				"name": "",
 				"type": "address"
 			}
@@ -14,10 +73,10 @@
 	},
 	{
 		"inputs": [],
-		"name": "IOU",
+		"name": "delegate",
 		"outputs": [
 			{
-				"internalType": "contract TokenLike",
+				"internalType": "address",
 				"name": "",
 				"type": "address"
 			}
@@ -29,7 +88,7 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "wad",
 				"type": "uint256"
 			}
 		],
@@ -39,10 +98,36 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "gov",
+		"outputs": [
+			{
+				"internalType": "contract TokenLike",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "iou",
+		"outputs": [
+			{
+				"internalType": "contract TokenLike",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "wad",
 				"type": "uint256"
 			}
 		],
@@ -52,10 +137,43 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "polling",
+		"outputs": [
+			{
+				"internalType": "contract PollingLike",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "stake",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function",
+		"constant": true
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "bytes32",
-				"name": "",
+				"name": "slate",
 				"type": "bytes32"
 			}
 		],
@@ -68,7 +186,7 @@
 		"inputs": [
 			{
 				"internalType": "address[]",
-				"name": "",
+				"name": "yays",
 				"type": "address[]"
 			}
 		],
@@ -76,10 +194,72 @@
 		"outputs": [
 			{
 				"internalType": "bytes32",
-				"name": "",
+				"name": "result",
 				"type": "bytes32"
 			}
 		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "pollIds",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "optionIds",
+				"type": "uint256[]"
+			}
+		],
+		"name": "votePoll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "pollId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "optionId",
+				"type": "uint256"
+			}
+		],
+		"name": "votePoll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "pollId",
+				"type": "uint256"
+			}
+		],
+		"name": "withdrawPoll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "pollIds",
+				"type": "uint256[]"
+			}
+		],
+		"name": "withdrawPoll",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	}

@@ -12,6 +12,7 @@ export default class VoteDelegateService extends LocalService {
   // Writes -----------------------------------------------
 
   lock(delegateAddress, amt, unit = MKR) {
+    console.log({delegateAddress, amt});
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
     return this._delegateContract(delegateAddress).lock(mkrAmt);
   }
@@ -33,7 +34,11 @@ export default class VoteDelegateService extends LocalService {
 
   // Reads ------------------------------------------------
 
-  async getDelegateProxy(addressToCheck) {
+  async getStakedBalanceForAddress(delegateAddress, address) {
+    return await this._getStakedBalanceForAddress(delegateAddress, address);
+  }
+
+  async getVoteDelegate(addressToCheck) {
     const {
       hasDelegate,
       address: delegateAddress
@@ -41,7 +46,7 @@ export default class VoteDelegateService extends LocalService {
     if (!hasDelegate) return { hasDelegate, voteDelegate: null };
     return {
       hasDelegate,
-      voteProxy: new VoteDelegate({
+      voteDelegate: new VoteDelegate({
         voteDelegateService: this,
         delegateAddress
       })
@@ -70,5 +75,9 @@ export default class VoteDelegateService extends LocalService {
       return { address: delegateAddress, hasDelegate: true };
 
     return { address: '', hasDelegate: false };
+  }
+
+  async _getStakedBalanceForAddress(delegateAddress, address) {
+    return await this._delegateContract(delegateAddress).stake(address);
   }
 }
