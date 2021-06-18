@@ -58,9 +58,10 @@ test('can create vote delegate service', async () => {
 });
 
 test('getVoteDelegate returns the vote delegate if exists', async () => {
-  const { hasDelegate, voteDelegate } = await voteDelegateService.getVoteDelegate(
-    maker.currentAccount().address
-  );
+  const {
+    hasDelegate,
+    voteDelegate
+  } = await voteDelegateService.getVoteDelegate(maker.currentAccount().address);
 
   expect(hasDelegate).toBe(true);
   expect(voteDelegate).toBeTruthy();

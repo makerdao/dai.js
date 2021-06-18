@@ -12,7 +12,7 @@ export default class VoteDelegateService extends LocalService {
   // Writes -----------------------------------------------
 
   lock(delegateAddress, amt, unit = MKR) {
-    console.log({delegateAddress, amt});
+    console.log({ delegateAddress, amt });
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
     return this._delegateContract(delegateAddress).lock(mkrAmt);
   }
