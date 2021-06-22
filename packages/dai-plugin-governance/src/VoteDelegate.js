@@ -9,20 +9,20 @@ export default class VoteDelegate {
   }
 }
 
-const passthroughMethods = [
-  'lock',
-  'free',
-  'voteExec'
+// const passthroughMethods = [
+//   'lock',
+//   'free',
+//   'voteExec'
   // 'getNumDeposits',
   // 'getVotedProposalAddresses'
-];
+// ];
 
-Object.assign(
-  VoteDelegate.prototype,
-  passthroughMethods.reduce((acc, name) => {
-    acc[name] = function(...args) {
-      return this._voteDelegateService[name](this._delegateAddress, ...args);
-    };
-    return acc;
-  }, {})
-);
+// Object.assign(
+//   VoteDelegate.prototype,
+//   passthroughMethods.reduce((acc, name) => {
+//     acc[name] = function(...args) {
+//       return this._voteDelegateService[name](this._delegateAddress, ...args);
+//     };
+//     return acc;
+//   }, {})
+// );

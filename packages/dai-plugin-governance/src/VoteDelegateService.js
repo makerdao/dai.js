@@ -3,6 +3,7 @@ import VoteDelegate from './VoteDelegate';
 import { MKR, VOTE_DELEGATE_FACTORY, ZERO_ADDRESS } from './utils/constants';
 import { getCurrency } from './utils/helpers';
 import voteDelegateAbi from '../contracts/abis/VoteDelegate.json';
+import { tracksTransactionsWithOptions } from './utils/tracksTransactions';
 
 export default class VoteDelegateService extends LocalService {
   constructor(name = 'voteDelegate') {
@@ -11,12 +12,14 @@ export default class VoteDelegateService extends LocalService {
 
   // Writes -----------------------------------------------
 
-  lock(delegateAddress, amt, unit = MKR) {
+  @tracksTransactionsWithOptions({ numArguments: 4 })
+  lock(delegateAddress, amt, unit = MKR, { promise }) {
     console.log({ delegateAddress, amt });
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
-    return this._delegateContract(delegateAddress).lock(mkrAmt);
+    return this._delegateContract(delegateAddress).lock(mkrAmt, { promise });
   }
 
+  // TODO: @tracksTransaction
   free(delegateAddress, amt, unit = MKR) {
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
     return this._delegateContract(delegateAddress).free(mkrAmt);

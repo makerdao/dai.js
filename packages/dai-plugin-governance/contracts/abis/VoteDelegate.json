@@ -134,7 +134,8 @@
 		"name": "lock",
 		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"constant": false
 	},
 	{
 		"inputs": [],
