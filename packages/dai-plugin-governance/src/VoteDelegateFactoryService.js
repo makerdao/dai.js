@@ -12,7 +12,6 @@ export default class VoteDelegateFactoryService extends LocalService {
   }
 
   // reads
-
   async getVoteDelegate(owner) {
     return this.get('voteDelegate').getVoteDelegate(owner);
   }
