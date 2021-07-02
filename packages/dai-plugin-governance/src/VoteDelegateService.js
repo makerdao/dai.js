@@ -7,10 +7,10 @@ import { tracksTransactionsWithOptions } from './utils/tracksTransactions';
 
 export default class VoteDelegateService extends LocalService {
   constructor(name = 'voteDelegate') {
-    super(name, ['smartContract', 'chief']);
+    super(name, ['smartContract', 'govQueryApi', 'chief']);
   }
 
-  // Writes -----------------------------------------------
+  // writes -----------------------------------------------
 
   @tracksTransactionsWithOptions({ numArguments: 4 })
   lock(delegateAddress, amt, unit = MKR, { promise }) {
@@ -35,10 +35,14 @@ export default class VoteDelegateService extends LocalService {
 
   // TODO: withdrawPoll()
 
-  // Reads ------------------------------------------------
+  // reads ------------------------------------------------
 
   async getStakedBalanceForAddress(delegateAddress, address) {
     return await this._getStakedBalanceForAddress(delegateAddress, address);
+  }
+
+  async getAllDelegates() {
+    return await this.get('govQueryApi').getAllDelegates();
   }
 
   async getVoteDelegate(addressToCheck) {
