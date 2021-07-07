@@ -14,24 +14,28 @@ export default class VoteDelegateService extends LocalService {
 
   @tracksTransactionsWithOptions({ numArguments: 4 })
   lock(delegateAddress, amt, unit = MKR, { promise }) {
-    console.log({ delegateAddress, amt });
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
     return this._delegateContract(delegateAddress).lock(mkrAmt, { promise });
   }
 
-  // TODO: @tracksTransaction
-  free(delegateAddress, amt, unit = MKR) {
+  @tracksTransactionsWithOptions({ numArguments: 4 })
+  free(delegateAddress, amt, unit = MKR, { promise }) {
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
-    return this._delegateContract(delegateAddress).free(mkrAmt);
+    return this._delegateContract(delegateAddress).free(mkrAmt), { promise };
   }
 
   voteExec(delegateAddress, picks) {
     if (Array.isArray(picks))
-      return this._delegateAddress(delegateAddress)['vote(address[])'](picks);
-    return this._delegateAddress(delegateAddress)['vote(bytes32)'](picks);
+      return this._delegateContract(delegateAddress)['vote(address[])'](picks);
+    return this._delegateContract(delegateAddress)['vote(bytes32)'](picks);
   }
 
-  // TODO: votePoll()
+  votePoll(pollIds, optionIds) {
+    if (pollIds.length !== optionIds.length || pollIds.length === 0)
+      throw new Error(
+        'poll id array and option id array must be the same length and have a non-zero number of elements'
+      );
+  }
 
   // TODO: withdrawPoll()
 
@@ -48,14 +52,14 @@ export default class VoteDelegateService extends LocalService {
   async getVoteDelegate(addressToCheck) {
     const {
       hasDelegate,
-      address: delegateAddress
+      address: voteDelegateAddress
     } = await this._getDelegateStatus(addressToCheck);
     if (!hasDelegate) return { hasDelegate, voteDelegate: null };
     return {
       hasDelegate,
       voteDelegate: new VoteDelegate({
         voteDelegateService: this,
-        delegateAddress
+        voteDelegateAddress
       })
     };
   }
@@ -74,12 +78,12 @@ export default class VoteDelegateService extends LocalService {
   }
 
   async _getDelegateStatus(address) {
-    const delegateAddress = await this._delegateFactoryContract().delegates(
+    const voteDelegateAddress = await this._delegateFactoryContract().delegates(
       address
     );
 
-    if (delegateAddress !== ZERO_ADDRESS)
-      return { address: delegateAddress, hasDelegate: true };
+    if (voteDelegateAddress !== ZERO_ADDRESS)
+      return { address: voteDelegateAddress, hasDelegate: true };
 
     return { address: '', hasDelegate: false };
   }

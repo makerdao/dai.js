@@ -1,28 +1,25 @@
 export default class VoteDelegate {
-  constructor({ voteDelegateService, delegateAddress }) {
+  constructor({ voteDelegateService, voteDelegateAddress }) {
     this._voteDelegateService = voteDelegateService;
-    this._delegateAddress = delegateAddress;
+    this._voteDelegateAddress = voteDelegateAddress;
   }
 
-  getDelegateAddress() {
-    return this._delegateAddress;
+  getVoteDelegateAddress() {
+    return this._voteDelegateAddress;
   }
 }
 
-// const passthroughMethods = [
-//   'lock',
-//   'free',
-//   'voteExec'
-  // 'getNumDeposits',
-  // 'getVotedProposalAddresses'
-// ];
+const passthroughMethods = ['lock', 'free', 'voteExec'];
 
-// Object.assign(
-//   VoteDelegate.prototype,
-//   passthroughMethods.reduce((acc, name) => {
-//     acc[name] = function(...args) {
-//       return this._voteDelegateService[name](this._delegateAddress, ...args);
-//     };
-//     return acc;
-//   }, {})
-// );
+Object.assign(
+  VoteDelegate.prototype,
+  passthroughMethods.reduce((acc, name) => {
+    acc[name] = function(...args) {
+      return this._voteDelegateService[name](
+        this._voteDelegateAddress,
+        ...args
+      );
+    };
+    return acc;
+  }, {})
+);

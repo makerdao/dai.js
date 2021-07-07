@@ -190,7 +190,7 @@ export default class GovPollingService extends PrivateService {
 
     // TODO: is this correct calc?
     if (hasDelegate) {
-      const delegateAddress = voteDelegate._delegateAddress;
+      const delegateAddress = voteDelegate.getVoteDelegateAddress();
       balancePromises = balancePromises.concat([
         this.get('token')
           .getToken(MKR)
