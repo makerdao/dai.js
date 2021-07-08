@@ -1,68 +1,127 @@
-import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import govPlugin from '../src/index';
-import Maker from '@makerdao/dai';
+import {
+  restoreSnapshotOriginal,
+  setupTestMakerInstance,
+  sendMkrToAddress
+} from './helpers';
 import VoteDelegateService from '../src/VoteDelegateService';
-// import VoteDelegate from '../src/VoteDelegate';
+import VoteDelegate from '../src/VoteDelegate';
+import { createCurrency } from '@makerdao/currency';
 
-let maker, voteDelegateService, network, snapshotData;
+const MKR = createCurrency('MKR');
+const IOU = createCurrency('IOU');
 
-const kovanConfig = {
-  plugins: [[govPlugin, { network }]],
-  accounts: {
-    owner: {
-      type: 'privateKey',
-      key: '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e'
-    }
-  },
-  web3: {
-    transactionSettings: {
-      gasPrice: 1000000000
-    },
-    provider: { infuraProjectId: 'c3f0f26a4c1742e0949d8eedfc47be67' }
-  }
-};
-
-const testchainConfig = {
-  plugins: [govPlugin, [{ network: 'testchain' }]],
-  web3: {
-    pollingInterval: 100
-  }
-};
-
-async function makerInstance(preset) {
-  const config = preset === 'kovan' ? kovanConfig : testchainConfig;
-  const maker = await Maker.create(preset, config);
-  await maker.authenticate();
-  return maker;
-}
+let maker,
+  vds,
+  vdfs,
+  addresses,
+  delegateAddress,
+  delegateContractAddress,
+  chiefService;
 
 beforeAll(async () => {
-  // To run this test on kovan, just switch the network variables below:
-  // network = 'kovan';
-  network = 'test';
-  maker = await makerInstance(network);
-  voteDelegateService = maker.service('voteDelegate');
-  if (network === 'test') snapshotData = await takeSnapshot(maker);
-}, 60000);
+  maker = await setupTestMakerInstance();
+  vds = maker.service('voteDelegate');
+  vdfs = maker.service('voteDelegateFactory');
+  chiefService = maker.service('chief');
 
-afterAll(async () => {
-  if (network === 'test') await restoreSnapshot(snapshotData, maker);
+  addresses = maker
+    .listAccounts()
+    .reduce((acc, cur) => ({ ...acc, [cur.name]: cur.address }), {});
+
+  delegateAddress = maker.currentAccount().address;
+  await vdfs.createDelegateContract();
 });
 
-xtest('can create vote delegate service', async () => {
-  expect(voteDelegateService).toBeInstanceOf(VoteDelegateService);
+afterAll(async done => {
+  await restoreSnapshotOriginal(global.snapshotId);
+  done();
 });
 
-xtest('can create vote delegate service', async () => {
-  expect(voteDelegateService).toBeInstanceOf(VoteDelegateService);
+test('can create vote delegate service', async () => {
+  expect(vds).toBeInstanceOf(VoteDelegateService);
 });
 
-xtest('getVoteDelegate returns the vote delegate if exists', async () => {
-  const {
-    hasDelegate,
-    voteDelegate
-  } = await voteDelegateService.getVoteDelegate(maker.currentAccount().address);
+test('getVoteDelegate returns the vote delegate if exists', async () => {
+  const { hasDelegate, voteDelegate } = await vds.getVoteDelegate(
+    delegateAddress
+  );
+
+  // Cache the delegateContractAddress for later
+  delegateContractAddress = voteDelegate.getVoteDelegateAddress();
 
   expect(hasDelegate).toBe(true);
-  expect(voteDelegate).toBeTruthy();
+  expect(voteDelegate).toBeInstanceOf(VoteDelegate);
+});
+
+test('user can lock MKR with a delegate', async () => {
+  const sendAmount = 5;
+  const amountToLock = 3;
+  const mkr = await maker.getToken(MKR);
+
+  await sendMkrToAddress(maker, addresses.owner, addresses.ali, sendAmount);
+
+  maker.useAccount('ali');
+
+  await mkr.approveUnlimited(delegateContractAddress);
+
+  // No deposits prior to locking maker
+  const preLockDeposits = await chiefService.getNumDeposits(
+    delegateContractAddress
+  );
+  expect(preLockDeposits.toNumber()).toBe(0);
+
+  await vds.lock(delegateContractAddress, amountToLock);
+
+  const postLockDeposits = await chiefService.getNumDeposits(
+    delegateContractAddress
+  );
+  expect(postLockDeposits.toNumber()).toBe(amountToLock);
+});
+
+test('delegate can cast an executive vote and retrieve voted on addresses from slate', async () => {
+  maker.useAccountWithAddress(delegateAddress);
+
+  //TODO: check fetching delegate contract address with a user's current address
+
+  const picks = [
+    '0x26EC003c72ebA27749083d588cdF7EBA665c0A1D',
+    '0x54F4E468FB0297F55D8DfE57336D186009A1455a'
+  ];
+
+  await vds.voteExec(delegateContractAddress, picks);
+
+  const addressesVotedOn = await vds.getVotedProposalAddresses(
+    delegateContractAddress
+  );
+  expect(addressesVotedOn).toEqual(picks);
+});
+
+test('user can free an amount of MKR from delegate', async () => {
+  const amountToFree = 1;
+  const iou = await maker.getToken(IOU);
+
+  maker.useAccount('ali');
+
+  await iou.approveUnlimited(delegateContractAddress);
+
+  const preFreeDeposits = await chiefService.getNumDeposits(
+    delegateContractAddress
+  );
+  await vds.free(delegateContractAddress, amountToFree);
+
+  const postFreeDeposits = await chiefService.getNumDeposits(
+    delegateContractAddress
+  );
+
+  expect(postFreeDeposits.toNumber()).toBe(
+    preFreeDeposits.toNumber() - amountToFree
+  );
+});
+
+test('getVoteProxy returns a null if none exists for a given address', async () => {
+  const address = addresses.sam;
+  const { hasDelegate, voteDelegate } = await vds.getVoteDelegate(address);
+
+  expect(hasDelegate).toBe(false);
+  expect(voteDelegate).toBeNull();
 });

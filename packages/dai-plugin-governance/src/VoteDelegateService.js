@@ -21,7 +21,7 @@ export default class VoteDelegateService extends LocalService {
   @tracksTransactionsWithOptions({ numArguments: 4 })
   free(delegateAddress, amt, unit = MKR, { promise }) {
     const mkrAmt = getCurrency(amt, unit).toFixed('wei');
-    return this._delegateContract(delegateAddress).free(mkrAmt), { promise };
+    return this._delegateContract(delegateAddress).free(mkrAmt, { promise });
   }
 
   voteExec(delegateAddress, picks) {
@@ -59,6 +59,13 @@ export default class VoteDelegateService extends LocalService {
   }
 
   // reads ------------------------------------------------
+
+  async getVotedProposalAddresses(delegateContractAddress) {
+    const _slate = await this.get('chief').getVotedSlate(
+      delegateContractAddress
+    );
+    return this.get('chief').getSlateAddresses(_slate);
+  }
 
   async getStakedBalanceForAddress(delegateAddress, address) {
     return await this._getStakedBalanceForAddress(delegateAddress, address);
