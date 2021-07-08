@@ -1,7 +1,7 @@
 import { LocalService } from '@makerdao/services-core';
 import VoteDelegate from './VoteDelegate';
 import { MKR, VOTE_DELEGATE_FACTORY, ZERO_ADDRESS } from './utils/constants';
-import { getCurrency } from './utils/helpers';
+import { fromBuffer, getCurrency } from './utils/helpers';
 import voteDelegateAbi from '../contracts/abis/VoteDelegate.json';
 import { tracksTransactionsWithOptions } from './utils/tracksTransactions';
 
@@ -30,11 +30,32 @@ export default class VoteDelegateService extends LocalService {
     return this._delegateContract(delegateAddress)['vote(bytes32)'](picks);
   }
 
-  votePoll(pollIds, optionIds) {
-    if (pollIds.length !== optionIds.length || pollIds.length === 0)
+  votePoll(delegateAddress, pollIds, options) {
+    if (pollIds.length !== options.length || pollIds.length === 0)
       throw new Error(
         'poll id array and option id array must be the same length and have a non-zero number of elements'
       );
+
+    const optionIds = options.map(option => {
+      if (!Array.isArray(option)) return option;
+      if (option.length === 1) return option[0];
+      const byteArray = new Uint8Array(32);
+      option.forEach((optionIndex, i) => {
+        byteArray[byteArray.length - i - 1] = optionIndex;
+      });
+      return fromBuffer(byteArray).toString();
+    });
+
+    if (pollIds.length === 1) {
+      const func = 'votePoll(uint256,uint256)';
+      return this._delegateContract(delegateAddress)[func](
+        pollIds[0],
+        optionIds[0]
+      );
+    } else {
+      const func = 'votePoll(uint256[],uint256[])';
+      return this._delegateContract(delegateAddress)[func](pollIds, optionIds);
+    }
   }
 
   // TODO: withdrawPoll()

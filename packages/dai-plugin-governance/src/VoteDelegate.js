@@ -9,7 +9,7 @@ export default class VoteDelegate {
   }
 }
 
-const passthroughMethods = ['lock', 'free', 'voteExec'];
+const passthroughMethods = ['lock', 'free', 'voteExec', 'votePoll'];
 
 Object.assign(
   VoteDelegate.prototype,
