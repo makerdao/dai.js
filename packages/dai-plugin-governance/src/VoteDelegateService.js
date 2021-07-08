@@ -58,8 +58,6 @@ export default class VoteDelegateService extends LocalService {
     }
   }
 
-  // TODO: withdrawPoll()
-
   // reads ------------------------------------------------
 
   async getStakedBalanceForAddress(delegateAddress, address) {
