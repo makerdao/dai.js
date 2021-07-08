@@ -9,8 +9,8 @@ export default class VoteDelegateFactoryService extends LocalService {
 
   // writes
   @tracksTransactions
-  createDelegateContract({ promise }) {
-    return this._delegateFactoryContract().create({ promise });
+  async createDelegateContract({ promise }) {
+    return await this._delegateFactoryContract().create({ promise });
   }
 
   // reads

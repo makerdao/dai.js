@@ -38,8 +38,8 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   // To run this test on kovan, just switch the network variables below:
-  network = 'kovan';
-  // network = 'test';
+  // network = 'kovan';
+  network = 'test';
   maker = await makerInstance(network);
   voteDelegateService = maker.service('voteDelegate');
   if (network === 'test') snapshotData = await takeSnapshot(maker);
@@ -49,15 +49,15 @@ afterAll(async () => {
   if (network === 'test') await restoreSnapshot(snapshotData, maker);
 });
 
-test('can create vote delegate service', async () => {
+xtest('can create vote delegate service', async () => {
   expect(voteDelegateService).toBeInstanceOf(VoteDelegateService);
 });
 
-test('can create vote delegate service', async () => {
+xtest('can create vote delegate service', async () => {
   expect(voteDelegateService).toBeInstanceOf(VoteDelegateService);
 });
 
-test('getVoteDelegate returns the vote delegate if exists', async () => {
+xtest('getVoteDelegate returns the vote delegate if exists', async () => {
   const {
     hasDelegate,
     voteDelegate

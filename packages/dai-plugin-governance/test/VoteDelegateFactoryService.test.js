@@ -1,5 +1,9 @@
-import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import govPlugin from '../src/index';
+import {
+  // takeSnapshot,
+  // restoreSnapshot,
+  setupTestMakerInstance
+} from './helpers';
+import govPlugin from '../src';
 import Maker from '@makerdao/dai';
 import VoteDelegateFactoryService from '../src/VoteDelegateFactoryService';
 
@@ -22,7 +26,7 @@ const kovanConfig = {
 };
 
 const testchainConfig = {
-  plugins: [govPlugin, [{ network: 'testchain' }]],
+  plugins: [govPlugin, { network: 'ganache' }],
   web3: {
     pollingInterval: 100
   }
@@ -37,16 +41,18 @@ async function makerInstance(preset) {
 
 beforeAll(async () => {
   // To run this test on kovan, just switch the network variables below:
-  network = 'kovan';
-  // network = 'test';
-  maker = await makerInstance(network);
+  // network = 'kovan';
+  network = 'test';
+  // maker = await makerInstance(network);
+  maker = await setupTestMakerInstance();
+  // sc = maker.service('smartContract');
   vdfs = maker.service('voteDelegateFactory');
-  if (network === 'test') snapshotData = await takeSnapshot(maker);
+  // if (network === 'test') snapshotData = await takeSnapshot(maker);
 }, 60000);
 
-afterAll(async () => {
-  if (network === 'test') await restoreSnapshot(snapshotData, maker);
-});
+// afterAll(async () => {
+//   if (network === 'test') await restoreSnapshot(snapshotData, maker);
+// });
 
 test('can create vote delegate factory service', async () => {
   expect(vdfs).toBeInstanceOf(VoteDelegateFactoryService);
@@ -55,7 +61,7 @@ test('can create vote delegate factory service', async () => {
 // will fail because can only have one delegate
 // should work once testchain is configured
 // and chain is a new instance
-xtest('can create a vote delegate contract', async () => {
+test('can create a vote delegate contract', async () => {
   const tx = await vdfs.createDelegateContract();
 
   console.log(tx);
