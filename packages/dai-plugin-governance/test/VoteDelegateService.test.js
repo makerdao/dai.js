@@ -78,6 +78,16 @@ test('user can lock MKR with a delegate', async () => {
   expect(postLockDeposits.toNumber()).toBe(amountToLock);
 });
 
+test("can check a user's delegated stake", async () => {
+  const stakedAmt = 3;
+  const deposits = await vds.getStakedBalanceForAddress(
+    delegateContractAddress,
+    maker.currentAccount().address
+  );
+
+  expect(deposits.toNumber()).toBe(stakedAmt);
+});
+
 test('delegate can cast an executive vote and retrieve voted on addresses from slate', async () => {
   maker.useAccountWithAddress(delegateAddress);
 
