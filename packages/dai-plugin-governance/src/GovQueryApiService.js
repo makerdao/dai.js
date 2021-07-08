@@ -208,4 +208,21 @@ export default class QueryApi extends PublicService {
     const joins = response.allEsmJoins.nodes;
     return joins;
   }
+
+  async getAllDelegates() {
+    const query = `
+      {
+        allDelegates {
+          nodes {
+            delegate
+            voteDelegate
+            blockTimestamp
+          }
+        }
+      }
+    `;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const delegates = response.allDelegates.nodes;
+    return delegates;
+  }
 }
