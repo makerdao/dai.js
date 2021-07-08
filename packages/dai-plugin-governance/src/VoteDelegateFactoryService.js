@@ -18,6 +18,10 @@ export default class VoteDelegateFactoryService extends LocalService {
     return this.get('voteDelegate').getVoteDelegate(owner);
   }
 
+  isDelegate(address) {
+    return this._delegateFactoryContract().isDelegate(address);
+  }
+
   _delegateFactoryContract() {
     return this.get('smartContract').getContractByName(VOTE_DELEGATE_FACTORY);
   }
