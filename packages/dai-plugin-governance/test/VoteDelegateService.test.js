@@ -79,7 +79,7 @@ test('user can lock MKR with a delegate', async () => {
 });
 
 test("can check a user's delegated stake", async () => {
-  const stakedAmt = 3;
+  const stakedAmt = 3000000000000000000;
   const deposits = await vds.getStakedBalanceForAddress(
     delegateContractAddress,
     maker.currentAccount().address
@@ -104,6 +104,19 @@ test('delegate can cast an executive vote and retrieve voted on addresses from s
     delegateContractAddress
   );
   expect(addressesVotedOn).toEqual(picks);
+});
+
+test('delegate can vote polls and see Voted event emitted', async () => {
+  const POLL_IDS = [0, 1];
+  const OPTION_IDS = [3, [1, 4]];
+  const txo = await vds.votePoll(delegateContractAddress, POLL_IDS, OPTION_IDS);
+  const loggedOptionIds = [
+    parseInt(txo.receipt.logs[0].topics[3]),
+    parseInt(txo.receipt.logs[1].topics[3])
+  ];
+  // this will fail if the event was not emitted
+  expect(loggedOptionIds[0]).toBe(OPTION_IDS[0]);
+  expect(loggedOptionIds[1]).toBe(1025);
 });
 
 test('user can free an amount of MKR from delegate', async () => {
