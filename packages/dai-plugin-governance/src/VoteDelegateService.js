@@ -73,7 +73,7 @@ export default class VoteDelegateService extends LocalService {
       delegateAddress,
       address
     );
-    return new BigNumber(bal).shiftedBy(-18);
+    return new BigNumber(bal);
   }
 
   async getAllDelegates() {
