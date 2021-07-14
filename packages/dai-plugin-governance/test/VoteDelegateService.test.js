@@ -79,7 +79,7 @@ test('user can lock MKR with a delegate', async () => {
 });
 
 test("can check a user's delegated stake", async () => {
-  const stakedAmt = 3000000000000000000;
+  const stakedAmt = 3;
   const deposits = await vds.getStakedBalanceForAddress(
     delegateContractAddress,
     maker.currentAccount().address
