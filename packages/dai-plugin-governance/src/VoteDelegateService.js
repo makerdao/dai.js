@@ -1,6 +1,5 @@
 import { LocalService } from '@makerdao/services-core';
 import VoteDelegate from './VoteDelegate';
-import BigNumber from 'bignumber.js';
 import { MKR, VOTE_DELEGATE_FACTORY, ZERO_ADDRESS } from './utils/constants';
 import { fromBuffer, getCurrency } from './utils/helpers';
 import voteDelegateAbi from '../contracts/abis/VoteDelegate.json';
@@ -72,8 +71,9 @@ export default class VoteDelegateService extends LocalService {
     const bal = await this._getStakedBalanceForAddress(
       delegateAddress,
       address
-    );
-    return new BigNumber(bal).shiftedBy(-18);
+    ).then(MKR.wei);
+
+    return bal;
   }
 
   async getAllDelegates() {

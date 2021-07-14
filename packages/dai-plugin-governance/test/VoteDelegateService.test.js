@@ -106,6 +106,19 @@ test('delegate can cast an executive vote and retrieve voted on addresses from s
   expect(addressesVotedOn).toEqual(picks);
 });
 
+test('delegate can vote polls and see Voted event emitted', async () => {
+  const POLL_IDS = [0, 1];
+  const OPTION_IDS = [3, [1, 4]];
+  const txo = await vds.votePoll(delegateContractAddress, POLL_IDS, OPTION_IDS);
+  const loggedOptionIds = [
+    parseInt(txo.receipt.logs[0].topics[3]),
+    parseInt(txo.receipt.logs[1].topics[3])
+  ];
+  // this will fail if the event was not emitted
+  expect(loggedOptionIds[0]).toBe(OPTION_IDS[0]);
+  expect(loggedOptionIds[1]).toBe(1025);
+});
+
 test('user can free an amount of MKR from delegate', async () => {
   const amountToFree = 1;
   const iou = await maker.getToken(IOU);
