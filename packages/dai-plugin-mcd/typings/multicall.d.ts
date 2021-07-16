@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 declare global {
   interface Currency {}
   interface CurrencyRatio {}
