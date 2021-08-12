@@ -3,6 +3,7 @@ import { POLLING, BATCH_POLLING } from './utils/constants';
 import { MKR } from './utils/constants';
 import { fromBuffer, toBuffer, paddedArray } from './utils/helpers';
 import { rankedChoiceIRV } from './utils/irv';
+import tracksTransactions from './utils/tracksTransactions';
 
 const POSTGRES_MAX_INT = 2147483647;
 
@@ -13,16 +14,19 @@ export default class GovPollingService extends PrivateService {
       'govQueryApi',
       'token',
       'chief',
-      'voteProxy'
+      'voteProxy',
+      'voteDelegate'
     ]);
   }
 
-  async createPoll(startDate, endDate, multiHash, url) {
+  @tracksTransactions
+  async createPoll(startDate, endDate, multiHash, url, { promise }) {
     const txo = await this._pollingContract().createPoll(
       startDate,
       endDate,
       multiHash,
-      url
+      url,
+      { promise }
     );
     const pollId = parseInt(txo.receipt.logs[0].topics[2]);
     return pollId;
@@ -173,12 +177,38 @@ export default class GovPollingService extends PrivateService {
     const { hasProxy, voteProxy } = await this.get('voteProxy').getVoteProxy(
       address
     );
+    const { hasDelegate, voteDelegate } = await this.get(
+      'voteDelegate'
+    ).getVoteDelegate(address);
+
     let balancePromises = [
       this.get('token')
         .getToken(MKR)
         .balanceOf(address),
       this.get('chief').getNumDeposits(address)
     ];
+
+    // TODO: is this correct calc?
+    if (hasDelegate) {
+      const delegateAddress = voteDelegate.getVoteDelegateAddress();
+      balancePromises = balancePromises.concat([
+        this.get('token')
+          .getToken(MKR)
+          .balanceOf(delegateAddress),
+        this.get('chief').getNumDeposits(delegateAddress)
+      ]);
+      const balances = await Promise.all(balancePromises);
+      const total = balances.reduce((total, num) => total.plus(num), MKR(0));
+      return {
+        mkrBalance: balances[0],
+        chiefBalance: balances[1],
+        linkedMkrBalance: null,
+        linkedChiefBalance: null,
+        proxyChiefBalance: null,
+        total
+      };
+    }
+
     if (hasProxy) {
       const otherAddress =
         address.toLowerCase() === voteProxy.getHotAddress().toLowerCase()

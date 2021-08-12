@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.32.11",
+  "version": "0.32.12",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -59,7 +59,7 @@
     "@makerdao/currency": "0.9.9",
     "@makerdao/multicall": "^0.11.0",
     "@makerdao/services-core": "^0.9.9",
-    "@makerdao/test-helpers": "^0.2.1",
+    "@makerdao/test-helpers": "^0.3.0",
     "assert": "^1.4.1",
     "bignumber.js": "^7.2.1",
     "chalk": "^2.4.1",
@@ -74,7 +74,7 @@
     "promise-props": "^1.0.0",
     "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
-    "web3": "1.2.9",
+    "web3": "^1.5.1",
     "web3-provider-engine": "makerdao/provider-engine#kovan-fix-dist"
   },
   "engines": {
