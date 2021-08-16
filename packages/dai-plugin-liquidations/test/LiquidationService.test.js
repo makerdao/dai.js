@@ -9,13 +9,15 @@ import LiquidationService, {
   RAY,
   stringToBytes
 } from '../src/LiquidationService';
-import { createVaults, setLiquidationsApprovals } from './utils';
+import { createVaults, setLiquidationsApprovals, getLockAmount } from './utils';
 
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 
 //currently this test suite tests one ilk.  change the below values to test a different ilk
 const ilk = 'YFI-A';
 const token = YFI;
+const ilkBalance = 10000; // Testchain faucet drops tokens into the account ahead of time.
+const amtToBid = '0.005'; // A fraction of the available auction collateral
 
 const kovanConfig = {
   plugins: [liquidationPlugin, [McdPlugin, { network }]],
@@ -26,14 +28,14 @@ const kovanConfig = {
     }
   },
   web3: {
-    // transactionSettings: {
-    //   gasPrice: 1000000000
-    // },
     provider: { infuraProjectId: 'c3f0f26a4c1742e0949d8eedfc47be67' }
   }
 };
 const testchainConfig = {
-  plugins: [liquidationPlugin, [McdPlugin, { network: 'testchain' }]],
+  plugins: [
+    [liquidationPlugin, { vulcanize: false }],
+    [McdPlugin, { network: 'testchain' }]
+  ],
   web3: {
     pollingInterval: 100
   }
@@ -49,17 +51,19 @@ async function makerInstance(preset) {
 }
 
 beforeAll(async () => {
-  // To run this test on kovan, just switch the network variables below:
+  // To run this test on kovan, just switch the network variable below:
   //network = 'kovan';
-  network = 'test';
-  maker = await makerInstance(network);
+  network = 'testchain';
+
+  const preset = network === 'testchain' ? 'test' : network;
+  maker = await makerInstance(preset);
   service = maker.service('liquidation');
   cdpManager = maker.service('mcd:cdpManager');
-  if (network === 'test') snapshotData = await takeSnapshot(maker);
+  if (network === 'testchain') snapshotData = await takeSnapshot(maker);
 }, 60000);
 
 afterAll(async () => {
-  if (network === 'test') await restoreSnapshot(snapshotData, maker);
+  if (network === 'testchain') await restoreSnapshot(snapshotData, maker);
 });
 
 test('can create liquidation service', async () => {
@@ -72,12 +76,7 @@ test('can bark an unsafe urn', async () => {
   jest.setTimeout(timeout);
 
   // Opens a vault, withdraws DAI and calls drip until vault is unsafe.
-  const vaultId = await createVaults(
-    maker,
-    network === 'test' ? 'testchain' : network,
-    ilk,
-    token
-  );
+  const vaultId = await createVaults(maker, network, ilk, token);
 
   const vaultUrnAddr = await cdpManager.getUrn(vaultId);
   const id = await service.bark(ilk, vaultUrnAddr);
@@ -146,20 +145,19 @@ test('can get count from on chain', async () => {
 test('can get status from on chain', async () => {
   const { needsRedo, price, lot, tab } = await service.getStatus(ilk, 1);
 
-  const collateralAmount = new BigNumber(lot).div(WAD).toString();
+  const collateralAmount = new BigNumber(lot).div(WAD);
   const daiNeeded = new BigNumber(tab).div(RAD);
 
-  expect(parseInt(collateralAmount)).toBeGreaterThan(0);
-  expect(new BigNumber(price).div(RAY).toString()).toEqual('13.5');
-  expect(daiNeeded.toNumber()).toBeCloseTo(135);
+  expect(collateralAmount.gt(0)).toBe(true);
+  expect(new BigNumber(price).div(RAY).toString()).toEqual('19500');
+  expect(daiNeeded.toNumber()).toBeCloseTo(1000);
   expect(needsRedo).toEqual(false);
 });
 
 test('can successfully bid on an auction', async () => {
-  // We know the vault ID is 1 each time we run this test
+  // We know the auction ID is 1 each time we run this test
   const id = 1;
-  const amt = '1';
-  const max = '100000';
+  const max = '19500'; // Current YFI collateral price
 
   const usrVatGemBal2 = await maker
     .service('smartContract')
@@ -169,7 +167,7 @@ test('can successfully bid on an auction', async () => {
   // The user's vat gem balance before bidding should be 0
   expect(usrVatGemBal2.toString()).toEqual('0');
 
-  await service.take(ilk, id, amt, max, me);
+  await service.take(ilk, id, amtToBid, max, me);
 
   const usrVatGemBal3 = await maker
     .service('smartContract')
@@ -178,19 +176,16 @@ test('can successfully bid on an auction', async () => {
 
   // The balance after winning the bid is the amount bid.
   expect(usrVatGemBal3.toString()).toEqual(
-    new BigNumber(amt).times(WAD).toString()
+    new BigNumber(amtToBid).times(WAD).toString()
   );
 });
 
 test('can claim collateral after winning an auction', async () => {
-  const amt = 1;
-
   const tokenContract = maker.getToken(token);
-
   const balanceBefore = (await tokenContract.balanceOf(me)).toNumber();
 
-  // Starting balance of 1000, minus the 25 we locked in the vault
-  const startingBalance = 9975;
+  // Collateral balance, minus the amount we locked in the vault
+  const startingBalance = ilkBalance - getLockAmount(network, ilk);
   expect(balanceBefore).toEqual(startingBalance);
 
   const usrVatGemBal1 = await maker
@@ -200,10 +195,10 @@ test('can claim collateral after winning an auction', async () => {
 
   // The balance before exit should be the amount we won with 'take'.
   expect(usrVatGemBal1.toString()).toEqual(
-    new BigNumber(amt).times(WAD).toString()
+    new BigNumber(amtToBid).times(WAD).toString()
   );
 
-  await service.exitGemFromAdapter(ilk, amt);
+  await service.exitGemFromAdapter(ilk, amtToBid);
 
   const usrVatGemBal2 = await maker
     .service('smartContract')
@@ -213,10 +208,10 @@ test('can claim collateral after winning an auction', async () => {
   // The user's vat gem balance after exit should be 0
   expect(usrVatGemBal2.toString()).toEqual('0');
 
-  const balanceAfter = (await tokenContract.balanceOf(me)).toNumber();
+  const balanceAfter = (await tokenContract.balanceOf(me)).toBigNumber();
 
-  // Link balanced increased by the claim amount
-  expect(balanceAfter).toEqual(startingBalance + amt);
+  // Collateral balance increased by the claim amount
+  expect(balanceAfter).toEqual(new BigNumber(startingBalance).plus(amtToBid));
 });
 
 test('get unsafe LINK-A vaults', async () => {
@@ -224,13 +219,8 @@ test('get unsafe LINK-A vaults', async () => {
   console.log('urns', urns);
 }, 10000);
 
-test('get all LINK-A clips', async () => {
-  const clips = await service.getAllClips('LINK-A');
-  console.log('clips', clips);
-}, 10000);
-
-xtest('get all LINK-A clips without vulcanize', async () => {
-  const clips = await service.getAllClips('LINK-A', false);
+test(`get all ${ilk} clips`, async () => {
+  const clips = await service.getAllClips(ilk);
   console.log('clips', clips);
 }, 10000);
 

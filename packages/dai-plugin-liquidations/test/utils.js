@@ -86,12 +86,7 @@ async function drawDai(manager, managedVault, vaultId, ilk) {
   }
 }
 
-// MAIN
-export async function createVaults(maker, network = 'testchain', ilk, token) {
-  BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
-  const manager = maker.service('mcd:cdpManager');
-  const jug = maker.service('smartContract').getContract('MCD_JUG');
-  // const amt = network === 'testchain' ? '25' : '.1';
+export function getLockAmount(network, ilk) {
   const amtToOpen = {
     'BAT-A': '150',
     'ETH-A': '1',
@@ -112,9 +107,18 @@ export async function createVaults(maker, network = 'testchain', ilk, token) {
     'USDC-B': '150',
     'PAXUSD-A': '150',
     'USDT-A': '150',
-    'TUSD-A': '150',
+    'TUSD-A': '150'
   };
-  const amt = network === 'testchain' ? '25' : amtToOpen[ilk] || '.1';
+  return network === 'testchain' ? '25' : amtToOpen[ilk] || '.1';
+}
+
+// MAIN
+export async function createVaults(maker, network = 'testchain', ilk, token) {
+  BigNumber.config({ ROUNDING_MODE: 1 }); //rounds down
+  const manager = maker.service('mcd:cdpManager');
+  const jug = maker.service('smartContract').getContract('MCD_JUG');
+
+  const amt = getLockAmount(network, ilk);
 
   // Initial Setup
   await setProxyAndAllowances(maker, token);
