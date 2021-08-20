@@ -80,6 +80,10 @@ export default class VoteDelegateService extends LocalService {
     return await this.get('govQueryApi').getAllDelegates();
   }
 
+  async getDelegatesVotingHistoryByAddresses(addresses) {
+    return await this.get('govQueryApi').getOptionVotingForMany(addresses);
+  }
+
   async getVoteDelegate(addressToCheck) {
     const {
       hasDelegate,
