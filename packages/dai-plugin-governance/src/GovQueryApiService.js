@@ -6,7 +6,6 @@ import {
   toBuffer,
   paddedArray
 } from './utils/helpers';
-import { LOCAL_URL } from './utils/constants';
 
 export default class QueryApi extends PublicService {
   constructor(name = 'govQueryApi') {
@@ -46,10 +45,9 @@ export default class QueryApi extends PublicService {
 
   connect() {
     const network = this.get('web3').network;
-    this.serverUrl = LOCAL_URL;
-    // this.serverUrl = this.staging
-    //   ? netIdtoSpockUrlStaging(network)
-    //   : netIdtoSpockUrl(network);
+    this.serverUrl = this.staging
+      ? netIdtoSpockUrlStaging(network)
+      : netIdtoSpockUrl(network);
   }
 
   async getAllWhitelistedPolls() {
@@ -128,15 +126,10 @@ export default class QueryApi extends PublicService {
   }
 
   async getOptionVotingForMany(addresses) {
-    // FIXME: my local db has a different function name than the staging one. Switch this variable name accordingly.
-    const GQL_GET_VOTES_BY_ARRAY = 'allCurrentVotesArray18';
-    const ARG_ADDRESS = 'argAddress2';
-
     const formattedAddresses = addresses.map(a => `"${a}"`);
-    console.log(formattedAddresses);
     const query = `
     {
-      ${GQL_GET_VOTES_BY_ARRAY}(${ARG_ADDRESS}: [${formattedAddresses}]) {
+      allCurrentVotesArray(argAddress: [${formattedAddresses}]) {
         nodes {
           voter
           pollId
@@ -148,7 +141,7 @@ export default class QueryApi extends PublicService {
     }
     `;
     const response = await this.getQueryResponse(this.serverUrl, query);
-    const delegates = response[GQL_GET_VOTES_BY_ARRAY].nodes;
+    const delegates = response.allCurrentVotesArray.nodes;
     return delegates;
   }
 

@@ -80,7 +80,7 @@ export default class VoteDelegateService extends LocalService {
     return await this.get('govQueryApi').getAllDelegates();
   }
 
-  async getDelegatesVotingHistoryByAddresses(addresses) {
+  async getVotingHistoryByAddresses(addresses) {
     return await this.get('govQueryApi').getOptionVotingForMany(addresses);
   }
 
