@@ -161,6 +161,31 @@ export default class GovPollingService extends PrivateService {
     });
   }
 
+  async getAllOptionsVotingForMany(addresses) {
+    const formattedAddresses = addresses.map(a => `"${a.toLowerCase()}"`);
+    const polls = await this.get('govQueryApi').getAllOptionsVotingForMany(
+      formattedAddresses
+    );
+    if (!polls) return [];
+    return polls.map(o => {
+      let rankedChoiceOption = null;
+      if (o.optionIdRaw) {
+        const ballotBuffer = toBuffer(o.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        rankedChoiceOption = ballot
+          .reverse()
+          .filter(choice => choice !== 0 && choice !== '0');
+      }
+      return {
+        voter: o.voter,
+        pollId: o.pollId,
+        option: o.optionId,
+        blockTimestamp: o.blockTimestamp,
+        rankedChoiceOption
+      };
+    });
+  }
+
   async getNumUniqueVoters(pollId) {
     return this.get('govQueryApi').getNumUniqueVoters(pollId);
   }

@@ -125,11 +125,10 @@ export default class QueryApi extends PublicService {
     return response.allCurrentVotes.nodes;
   }
 
-  async getOptionVotingForMany(addresses) {
-    const formattedAddresses = addresses.map(a => `"${a}"`);
+  async getAllOptionsVotingForMany(addresses) {
     const query = `
     {
-      allCurrentVotesArray(argAddress: [${formattedAddresses}]) {
+      allCurrentVotesArray(argAddress: [${addresses}]) {
         nodes {
           voter
           pollId
