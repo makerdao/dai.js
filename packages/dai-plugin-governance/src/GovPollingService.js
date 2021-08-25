@@ -163,11 +163,11 @@ export default class GovPollingService extends PrivateService {
 
   async getAllOptionsVotingForMany(addresses) {
     const formattedAddresses = addresses.map(a => `"${a.toLowerCase()}"`);
-    const polls = await this.get('govQueryApi').getAllOptionsVotingForMany(
+    const options = await this.get('govQueryApi').getAllOptionsVotingForMany(
       formattedAddresses
     );
-    if (!polls) return [];
-    return polls.map(o => {
+    if (!options) return [];
+    return options.map(o => {
       let rankedChoiceOption = null;
       if (o.optionIdRaw) {
         const ballotBuffer = toBuffer(o.optionIdRaw, { endian: 'little' });
