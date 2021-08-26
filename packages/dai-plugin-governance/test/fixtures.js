@@ -62,6 +62,28 @@ export const allOptionsExpect = [
   { pollId: 49, option: 2, rankedChoiceOption: null }
 ];
 
+export const dummyAllOptionsMany = [
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 102, optionId: 772, optionIdRaw: '772' },
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 101, optionId: 1025, optionIdRaw: '1025' },
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 96, optionId: 2, optionIdRaw: null },
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 49, optionId: 2, optionIdRaw: null },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 102, optionId: 772, optionIdRaw: '772' },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 101, optionId: 1025, optionIdRaw: '1025' },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 96, optionId: 2, optionIdRaw: null },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 49, optionId: 2, optionIdRaw: null }
+];
+
+export const allOptionsManyExpect = [
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 102, option: 772, rankedChoiceOption: [4, 3] },
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 101, option: 1025, rankedChoiceOption: [1, 4] },
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 96, option: 2, rankedChoiceOption: null },
+  { voter: '0xa', blockTimestamp: 60321321, pollId: 49, option: 2, rankedChoiceOption: null },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 102, option: 772, rankedChoiceOption: [4, 3] },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 101, option: 1025, rankedChoiceOption: [1, 4] },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 96, option: 2, rankedChoiceOption: null },
+  { voter: '0xb', blockTimestamp: 60321321, pollId: 49, option: 2, rankedChoiceOption: null }
+];
+
 export const dummyEsmData = [
   {
     txFrom: '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6',

@@ -54,3 +54,11 @@ test('get all current votes', async () => {
   );
   console.log('options', options);
 });
+
+test('get all current votes for multiple addresses', async () => {
+  const options = await service.getAllOptionsVotingForMany([
+    '0xb93f14636678d680dcbbed20c77f2b6220b52c39',
+    '0x18c22d3937d774e0af0214b28c34856ad0a23272'
+  ]);
+  console.log('options', options);
+});

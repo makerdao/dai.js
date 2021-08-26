@@ -11,6 +11,8 @@ import {
   dummyOption,
   dummyAllOptions,
   allOptionsExpect,
+  dummyAllOptionsMany,
+  allOptionsManyExpect,
   dummyWeight,
   dummyNumUnique,
   dummyBallotNoMajority,
@@ -168,6 +170,16 @@ test('getAllOptionsVotingFor', async () => {
   const options = await govPollingService.getAllOptionsVotingFor('0xaddress');
   expect(mockFn).toBeCalled();
   expect(options).toEqual(allOptionsExpect);
+});
+
+test('getAllOptionsVotingForMany', async () => {
+  const mockFn = jest.fn(async () => dummyAllOptionsMany);
+  govQueryApiService.getAllOptionsVotingForMany = mockFn;
+  const options = await govPollingService.getAllOptionsVotingForMany([
+    '0xaddressA, 0xaddressB'
+  ]);
+  expect(mockFn).toBeCalled();
+  expect(options).toEqual(allOptionsManyExpect);
 });
 
 test('getNumUniqueVoters', async () => {
