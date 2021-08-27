@@ -117,6 +117,7 @@ export default class QueryApi extends PublicService {
           pollId
           optionId
           optionIdRaw
+          blockTimestamp
         }
       }
     }`;
