@@ -281,6 +281,16 @@ export default class GovPollingService extends PrivateService {
     );
   }
 
+  async getMkrAmtVotedByAddress(pollId) {
+    const { endDate } = await this._getPoll(pollId);
+    const endUnix = Math.floor(endDate / 1000);
+    const votes = await this.get('govQueryApi').getMkrSupportByAddress(
+      pollId,
+      endUnix
+    );
+    return votes;
+  }
+
   async getTallyRankedChoiceIrv(pollId) {
     const { endDate } = await this._getPoll(pollId);
     const endUnix = Math.floor(endDate / 1000);

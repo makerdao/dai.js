@@ -167,6 +167,35 @@ export default class QueryApi extends PublicService {
     return response.timeToBlockNumber.nodes[0];
   }
 
+  async getMkrSupportByAddress(pollId, unixTime) {
+    const query = `{voteAddressMkrWeightsAtTime(argPollId: ${pollId}, argUnix: ${unixTime}){
+    nodes{
+      voter
+      optionId
+      optionIdRaw
+      mkrSupport
+    }
+  }
+  }`;
+
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const votes = response.voteAddressMkrWeightsAtTime.nodes.map(vote => {
+      let rankedChoiceOption = null;
+      if (vote.optionIdRaw) {
+        const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        rankedChoiceOption = ballot
+          .reverse()
+          .filter(choice => choice !== 0 && choice !== '0');
+      }
+      return {
+        ...vote,
+        rankedChoiceOption
+      };
+    });
+    return votes;
+  }
+
   async getMkrSupportRankedChoice(pollId, unixTime) {
     const query = `{voteMkrWeightsAtTimeRankedChoice(argPollId: ${pollId}, argUnix: ${unixTime}){
       nodes{
