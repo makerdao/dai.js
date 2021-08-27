@@ -140,8 +140,8 @@ export default class QueryApi extends PublicService {
     }
     `;
     const response = await this.getQueryResponse(this.serverUrl, query);
-    const delegates = response.allCurrentVotesArray.nodes;
-    return delegates;
+    const votes = response.allCurrentVotesArray.nodes;
+    return votes;
   }
 
   async getOptionVotingForRankedChoice(address, pollId) {
