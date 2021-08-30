@@ -63,25 +63,153 @@ export const allOptionsExpect = [
 ];
 
 export const dummyAllOptionsMany = [
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 102, optionId: 772, optionIdRaw: '772' },
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 101, optionId: 1025, optionIdRaw: '1025' },
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 96, optionId: 2, optionIdRaw: null },
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 49, optionId: 2, optionIdRaw: null },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 102, optionId: 772, optionIdRaw: '772' },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 101, optionId: 1025, optionIdRaw: '1025' },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 96, optionId: 2, optionIdRaw: null },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 49, optionId: 2, optionIdRaw: null }
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 102,
+    optionId: 772,
+    optionIdRaw: '772'
+  },
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 101,
+    optionId: 1025,
+    optionIdRaw: '1025'
+  },
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 96,
+    optionId: 2,
+    optionIdRaw: null
+  },
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 49,
+    optionId: 2,
+    optionIdRaw: null
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 102,
+    optionId: 772,
+    optionIdRaw: '772'
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 101,
+    optionId: 1025,
+    optionIdRaw: '1025'
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 96,
+    optionId: 2,
+    optionIdRaw: null
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 49,
+    optionId: 2,
+    optionIdRaw: null
+  }
 ];
 
 export const allOptionsManyExpect = [
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 102, option: 772, rankedChoiceOption: [4, 3] },
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 101, option: 1025, rankedChoiceOption: [1, 4] },
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 96, option: 2, rankedChoiceOption: null },
-  { voter: '0xa', blockTimestamp: 60321321, pollId: 49, option: 2, rankedChoiceOption: null },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 102, option: 772, rankedChoiceOption: [4, 3] },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 101, option: 1025, rankedChoiceOption: [1, 4] },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 96, option: 2, rankedChoiceOption: null },
-  { voter: '0xb', blockTimestamp: 60321321, pollId: 49, option: 2, rankedChoiceOption: null }
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 102,
+    option: 772,
+    rankedChoiceOption: [4, 3]
+  },
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 101,
+    option: 1025,
+    rankedChoiceOption: [1, 4]
+  },
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 96,
+    option: 2,
+    rankedChoiceOption: null
+  },
+  {
+    voter: '0xa',
+    blockTimestamp: 60321321,
+    pollId: 49,
+    option: 2,
+    rankedChoiceOption: null
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 102,
+    option: 772,
+    rankedChoiceOption: [4, 3]
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 101,
+    option: 1025,
+    rankedChoiceOption: [1, 4]
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 96,
+    option: 2,
+    rankedChoiceOption: null
+  },
+  {
+    voter: '0xb',
+    blockTimestamp: 60321321,
+    pollId: 49,
+    option: 2,
+    rankedChoiceOption: null
+  }
+];
+
+export const dummyMkrVotedByAddress = [
+  {
+    voter: '0x14a4ed2000ca405452c140e21c10b3536c1a98e4',
+    optionId: 1,
+    optionIdRaw: '1',
+    mkrSupport: '239.500000000000000000'
+  },
+  {
+    voter: '0x87e6888935180a9b27a9b48b75c9b779bfec1f76',
+    optionId: 0,
+    optionIdRaw: '0',
+    mkrSupport: '1480.609359492058691716'
+  }
+];
+
+export const mkrVotedByAddressExpect = [
+  {
+    voter: '0x14a4ed2000ca405452c140e21c10b3536c1a98e4',
+    optionId: 1,
+    optionIdRaw: '1',
+    mkrSupport: '239.500000000000000000',
+    rankedChoiceOption: [1]
+  },
+  {
+    voter: '0x87e6888935180a9b27a9b48b75c9b779bfec1f76',
+    optionId: 0,
+    optionIdRaw: '0',
+    mkrSupport: '1480.609359492058691716',
+    rankedChoiceOption: []
+  }
 ];
 
 export const dummyEsmData = [

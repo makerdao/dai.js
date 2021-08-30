@@ -260,8 +260,9 @@ export default class GovPollingService extends PrivateService {
   }
 
   async getMkrAmtVoted(pollId) {
-    const { endDate } = await this._getPoll(pollId);
-    const endUnix = Math.floor(endDate / 1000);
+    const poll = await this._getPoll(pollId);
+    if (!poll) return null;
+    const endUnix = Math.floor(poll.endDate / 1000);
     const weights = await this.get('govQueryApi').getMkrSupport(
       pollId,
       endUnix
@@ -270,8 +271,9 @@ export default class GovPollingService extends PrivateService {
   }
 
   async getMkrAmtVotedRankedChoice(pollId) {
-    const { endDate } = await this._getPoll(pollId);
-    const endUnix = Math.floor(endDate / 1000);
+    const poll = await this._getPoll(pollId);
+    if (!poll) return null;
+    const endUnix = Math.floor(poll.endDate / 1000);
     const weights = await this.get('govQueryApi').getMkrSupportRankedChoice(
       pollId,
       endUnix
@@ -282,18 +284,35 @@ export default class GovPollingService extends PrivateService {
   }
 
   async getMkrAmtVotedByAddress(pollId) {
-    const { endDate } = await this._getPoll(pollId);
-    const endUnix = Math.floor(endDate / 1000);
-    const votes = await this.get('govQueryApi').getMkrSupportByAddress(
+    const poll = await this._getPoll(pollId);
+    if (!poll) return [];
+    const endUnix = Math.floor(poll.endDate / 1000);
+    const results = await this.get('govQueryApi').getMkrSupportByAddress(
       pollId,
       endUnix
     );
+    if (!results) return [];
+    const votes = results.map(vote => {
+      let rankedChoiceOption = null;
+      if (vote.optionIdRaw) {
+        const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        rankedChoiceOption = ballot
+          .reverse()
+          .filter(choice => choice !== 0 && choice !== '0');
+      }
+      return {
+        ...vote,
+        rankedChoiceOption
+      };
+    });
     return votes;
   }
 
   async getTallyRankedChoiceIrv(pollId) {
-    const { endDate } = await this._getPoll(pollId);
-    const endUnix = Math.floor(endDate / 1000);
+    const poll = await this._getPoll(pollId);
+    if (!poll) return {};
+    const endUnix = Math.floor(poll.endDate / 1000);
     const votes = await this.get('govQueryApi').getMkrSupportRankedChoice(
       pollId,
       endUnix
@@ -332,8 +351,9 @@ export default class GovPollingService extends PrivateService {
   }
 
   async getWinningProposal(pollId) {
-    const { endDate } = await this._getPoll(pollId);
-    const endUnix = Math.floor(endDate / 1000);
+    const poll = await this._getPoll(pollId);
+    if (!poll) return null;
+    const endUnix = Math.floor(poll.endDate / 1000);
     const currentVotes = await this.get('govQueryApi').getMkrSupport(
       pollId,
       endUnix

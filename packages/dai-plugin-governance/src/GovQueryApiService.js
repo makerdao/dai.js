@@ -179,21 +179,8 @@ export default class QueryApi extends PublicService {
   }`;
 
     const response = await this.getQueryResponse(this.serverUrl, query);
-    const votes = response.voteAddressMkrWeightsAtTime.nodes.map(vote => {
-      let rankedChoiceOption = null;
-      if (vote.optionIdRaw) {
-        const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
-        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
-        rankedChoiceOption = ballot
-          .reverse()
-          .filter(choice => choice !== 0 && choice !== '0');
-      }
-      return {
-        ...vote,
-        rankedChoiceOption
-      };
-    });
-    return votes;
+    const results = response.voteAddressMkrWeightsAtTime.nodes;
+    return results;
   }
 
   async getMkrSupportRankedChoice(pollId, unixTime) {
