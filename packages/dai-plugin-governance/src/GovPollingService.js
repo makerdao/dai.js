@@ -156,6 +156,7 @@ export default class GovPollingService extends PrivateService {
       return {
         pollId: o.pollId,
         option: o.optionId,
+        blockTimestamp: o.blockTimestamp,
         rankedChoiceOption
       };
     });

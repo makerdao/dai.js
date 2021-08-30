@@ -49,17 +49,32 @@ export const dummyWeight = 5.5;
 export const dummyOption = 1;
 
 export const dummyAllOptions = [
-  { pollId: 102, optionId: 772, optionIdRaw: '772' },
-  { pollId: 101, optionId: 1025, optionIdRaw: '1025' },
-  { pollId: 96, optionId: 2, optionIdRaw: null },
-  { pollId: 49, optionId: 2, optionIdRaw: null }
+  { pollId: 102, optionId: 772, optionIdRaw: '772', blockTimestamp: 60321321 },
+  {
+    pollId: 101,
+    optionId: 1025,
+    optionIdRaw: '1025',
+    blockTimestamp: 60321321
+  },
+  { pollId: 96, optionId: 2, optionIdRaw: null, blockTimestamp: 60321321 },
+  { pollId: 49, optionId: 2, optionIdRaw: null, blockTimestamp: 60321321 }
 ];
 
 export const allOptionsExpect = [
-  { pollId: 102, option: 772, rankedChoiceOption: [4, 3] },
-  { pollId: 101, option: 1025, rankedChoiceOption: [1, 4] },
-  { pollId: 96, option: 2, rankedChoiceOption: null },
-  { pollId: 49, option: 2, rankedChoiceOption: null }
+  {
+    pollId: 102,
+    option: 772,
+    rankedChoiceOption: [4, 3],
+    blockTimestamp: 60321321
+  },
+  {
+    pollId: 101,
+    option: 1025,
+    rankedChoiceOption: [1, 4],
+    blockTimestamp: 60321321
+  },
+  { pollId: 96, option: 2, rankedChoiceOption: null, blockTimestamp: 60321321 },
+  { pollId: 49, option: 2, rankedChoiceOption: null, blockTimestamp: 60321321 }
 ];
 
 export const dummyAllOptionsMany = [
