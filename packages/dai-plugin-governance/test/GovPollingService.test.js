@@ -13,6 +13,8 @@ import {
   allOptionsExpect,
   dummyAllOptionsMany,
   allOptionsManyExpect,
+  dummyMkrVotedByAddress,
+  mkrVotedByAddressExpect,
   dummyWeight,
   dummyNumUnique,
   dummyBallotNoMajority,
@@ -180,6 +182,14 @@ test('getAllOptionsVotingForMany', async () => {
   ]);
   expect(mockFn).toBeCalled();
   expect(options).toEqual(allOptionsManyExpect);
+});
+
+test('getMkrAmtVotedByAddress', async () => {
+  const mockFn = jest.fn(async () => dummyMkrVotedByAddress);
+  govQueryApiService.getMkrSupportByAddress = mockFn;
+  const votes = await govPollingService.getMkrAmtVotedByAddress('101');
+  expect(mockFn).toBeCalled();
+  expect(votes).toEqual(mkrVotedByAddressExpect);
 });
 
 test('getNumUniqueVoters', async () => {
