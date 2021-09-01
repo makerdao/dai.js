@@ -168,6 +168,22 @@ export default class QueryApi extends PublicService {
     return response.timeToBlockNumber.nodes[0];
   }
 
+  async getMkrSupportByAddress(pollId, unixTime) {
+    const query = `{voteAddressMkrWeightsAtTime(argPollId: ${pollId}, argUnix: ${unixTime}){
+    nodes{
+      voter
+      optionId
+      optionIdRaw
+      mkrSupport
+    }
+  }
+  }`;
+
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const results = response.voteAddressMkrWeightsAtTime.nodes;
+    return results;
+  }
+
   async getMkrSupportRankedChoice(pollId, unixTime) {
     const query = `{voteMkrWeightsAtTimeRankedChoice(argPollId: ${pollId}, argUnix: ${unixTime}){
       nodes{

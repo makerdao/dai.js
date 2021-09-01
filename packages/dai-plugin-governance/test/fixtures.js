@@ -195,6 +195,38 @@ export const allOptionsManyExpect = [
   }
 ];
 
+export const dummyMkrVotedByAddress = [
+  {
+    voter: '0x14a4ed2000ca405452c140e21c10b3536c1a98e4',
+    optionId: 1,
+    optionIdRaw: '1',
+    mkrSupport: '239.500000000000000000'
+  },
+  {
+    voter: '0x87e6888935180a9b27a9b48b75c9b779bfec1f76',
+    optionId: 0,
+    optionIdRaw: '0',
+    mkrSupport: '1480.609359492058691716'
+  }
+];
+
+export const mkrVotedByAddressExpect = [
+  {
+    voter: '0x14a4ed2000ca405452c140e21c10b3536c1a98e4',
+    optionId: 1,
+    optionIdRaw: '1',
+    mkrSupport: '239.500000000000000000',
+    rankedChoiceOption: [1]
+  },
+  {
+    voter: '0x87e6888935180a9b27a9b48b75c9b779bfec1f76',
+    optionId: 0,
+    optionIdRaw: '0',
+    mkrSupport: '1480.609359492058691716',
+    rankedChoiceOption: []
+  }
+];
+
 export const dummyEsmData = [
   {
     txFrom: '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6',
