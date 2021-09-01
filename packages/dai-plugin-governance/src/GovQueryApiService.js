@@ -188,6 +188,26 @@ export default class QueryApi extends PublicService {
     });
   }
 
+  async buggyGetMkrSupportRankedChoice(pollId, unixTime) {
+    const query = `{buggyVoteMkrWeightsAtTimeRankedChoice(argPollId: ${pollId}, argUnix: ${unixTime}){
+      nodes{
+        optionIdRaw
+        mkrSupport
+      }
+    }
+    }`;
+    const response = await this.getQueryResponseMemoized(this.serverUrl, query);
+
+    return response.voteMkrWeightsAtTimeRankedChoice.nodes.map(vote => {
+      const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+      const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+      return {
+        ...vote,
+        ballot
+      };
+    });
+  }
+
   async getMkrSupport(pollId, unixTime) {
     const query = `{voteOptionMkrWeightsAtTime(argPollId: ${pollId}, argUnix: ${unixTime}){
     nodes{

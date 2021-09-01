@@ -292,6 +292,16 @@ export default class GovPollingService extends PrivateService {
     return this.runoff(votes);
   }
 
+  async buggyGetTallyRankedChoiceIrv(pollId) {
+    const { endDate } = await this._getPoll(pollId);
+    const endUnix = Math.floor(endDate / 1000);
+    const votes = await this.get('govQueryApi').buggyGetMkrSupportRankedChoice(
+      pollId,
+      endUnix
+    );
+    return this.runoff(votes);
+  }
+
   runoff(votes) {
     return rankedChoiceIRV(votes);
   }
