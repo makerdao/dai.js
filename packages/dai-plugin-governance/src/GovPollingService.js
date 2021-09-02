@@ -322,8 +322,9 @@ export default class GovPollingService extends PrivateService {
   }
 
   async buggyGetTallyRankedChoiceIrv(pollId) {
-    const { endDate } = await this._getPoll(pollId);
-    const endUnix = Math.floor(endDate / 1000);
+    const poll = await this._getPoll(pollId);
+    if (!poll) return {};
+    const endUnix = Math.floor(poll.endDate / 1000);
     const votes = await this.get('govQueryApi').buggyGetMkrSupportRankedChoice(
       pollId,
       endUnix

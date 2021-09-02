@@ -399,3 +399,17 @@ test('ranked choice tally stop when 1 remains', async () => {
     JSON.stringify(dummyBallotStopWhenOneRemainsExpect)
   );
 });
+
+test('buggy ranked choice tally with majority', async () => {
+  govQueryApiService.buggyGetMkrSupportRankedChoice = jest.fn(
+    () => dummyBallotStopWhenOneRemains
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.buggyGetTallyRankedChoiceIrv();
+
+  expect(JSON.stringify(tally)).toBe(
+    JSON.stringify(dummyBallotStopWhenOneRemainsExpect)
+  );
+});

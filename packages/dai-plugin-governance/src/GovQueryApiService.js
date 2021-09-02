@@ -214,7 +214,7 @@ export default class QueryApi extends PublicService {
     }`;
     const response = await this.getQueryResponseMemoized(this.serverUrl, query);
 
-    return response.voteMkrWeightsAtTimeRankedChoice.nodes.map(vote => {
+    return response.buggyVoteMkrWeightsAtTimeRankedChoice.nodes.map(vote => {
       const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
       const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
       return {

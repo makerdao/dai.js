@@ -38,6 +38,11 @@ test('get ranked choice mkr weight by option', async () => {
   console.log('votes', votes);
 });
 
+test('buggy get ranked choice mkr weight by option', async () => {
+  const votes = await service.buggyGetMkrSupportRankedChoice(1, 999999999);
+  console.log('votes', votes);
+});
+
 test('get block number', async () => {
   const num = await service.getBlockNumber(1511634513);
   console.log('num', num);
