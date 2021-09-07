@@ -310,6 +310,32 @@ export default class GovPollingService extends PrivateService {
     return votes;
   }
 
+  async buggyGetMkrAmtVotedByAddress(pollId) {
+    const poll = await this._getPoll(pollId);
+    if (!poll) return [];
+    const endUnix = Math.floor(poll.endDate / 1000);
+    const results = await this.get('govQueryApi').buggyGetMkrSupportByAddress(
+      pollId,
+      endUnix
+    );
+    if (!results) return [];
+    const votes = results.map(vote => {
+      let rankedChoiceOption = null;
+      if (vote.optionIdRaw) {
+        const ballotBuffer = toBuffer(vote.optionIdRaw, { endian: 'little' });
+        const ballot = paddedArray(32 - ballotBuffer.length, ballotBuffer);
+        rankedChoiceOption = ballot
+          .reverse()
+          .filter(choice => choice !== 0 && choice !== '0');
+      }
+      return {
+        ...vote,
+        rankedChoiceOption
+      };
+    });
+    return votes;
+  }
+
   async getTallyRankedChoiceIrv(pollId) {
     const poll = await this._getPoll(pollId);
     if (!poll) return {};

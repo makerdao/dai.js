@@ -33,6 +33,11 @@ test('get mkr weight by option', async () => {
   console.log('weights', weights);
 });
 
+test.only('get buggy mkr support by address', async () => {
+  const votes = await service.buggyGetMkrSupportByAddress(1, 999999999);
+  console.log('votes', votes);
+});
+
 test('get ranked choice mkr weight by option', async () => {
   const votes = await service.getMkrSupportRankedChoice(1, 999999999);
   console.log('votes', votes);

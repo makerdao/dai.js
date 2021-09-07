@@ -184,6 +184,22 @@ export default class QueryApi extends PublicService {
     return results;
   }
 
+  async buggyGetMkrSupportByAddress(pollId, unixTime) {
+    const query = `{buggyVoteAddressMkrWeightsAtTime(argPollId: ${pollId}, argUnix: ${unixTime}){
+    nodes{
+      voter
+      optionId
+      optionIdRaw
+      mkrSupport
+    }
+  }
+  }`;
+
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const results = response.buggyVoteAddressMkrWeightsAtTime.nodes;
+    return results;
+  }
+
   async getMkrSupportRankedChoice(pollId, unixTime) {
     const query = `{voteMkrWeightsAtTimeRankedChoice(argPollId: ${pollId}, argUnix: ${unixTime}){
       nodes{
