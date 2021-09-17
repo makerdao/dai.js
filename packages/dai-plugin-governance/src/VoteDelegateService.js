@@ -95,6 +95,14 @@ export default class VoteDelegateService extends LocalService {
     };
   }
 
+  async getMkrLockedDelegate(address, unixtimeStart, unixtimeEnd) {
+    return await this.get('govQueryApi').getMkrLockedDelegate(
+      address,
+      unixtimeStart,
+      unixtimeEnd
+    );
+  }
+
   // Internal --------------------------------------------
 
   _delegateContract(address) {

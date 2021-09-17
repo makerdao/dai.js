@@ -7,6 +7,8 @@ import {
   paddedArray
 } from './utils/helpers';
 
+const LOCAL_URL = 'https://2151-24-8-30-196.ngrok.io/v1';
+
 export default class QueryApi extends PublicService {
   constructor(name = 'govQueryApi') {
     super(name, ['web3']);
@@ -44,10 +46,11 @@ export default class QueryApi extends PublicService {
   }
 
   connect() {
-    const network = this.get('web3').network;
-    this.serverUrl = this.staging
-      ? netIdtoSpockUrlStaging(network)
-      : netIdtoSpockUrl(network);
+    // const network = this.get('web3').network;
+    this.serverUrl = LOCAL_URL;
+    // this.serverUrl = this.staging
+    //   ? netIdtoSpockUrlStaging(network)
+    //   : netIdtoSpockUrl(network);
   }
 
   async getAllWhitelistedPolls() {
@@ -259,6 +262,25 @@ export default class QueryApi extends PublicService {
     `;
     const response = await this.getQueryResponse(this.serverUrl, query);
     const delegates = response.allDelegates.nodes;
+    return delegates;
+  }
+
+  async getMkrLockedDelegate(address, unixtimeStart, unixtimeEnd) {
+    const query = `
+      {
+        mkrLockedDelegate(argAddress: "${address}" unixtimeStart: ${unixtimeStart}, unixtimeEnd: ${unixtimeEnd}) {
+          nodes {
+            fromAddress
+            lockAmount
+            blockNumber
+            blockTimestamp
+            lockTotal
+          }
+        }
+      }
+    `;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const delegates = response.mkrLockedDelegate.nodes;
     return delegates;
   }
 }
