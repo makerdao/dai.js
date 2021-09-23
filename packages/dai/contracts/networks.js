@@ -1,6 +1,6 @@
 import tokens from './tokens';
 import contracts from './contracts';
-import * as abis from './abis';
+import abis from './abis';
 import kovanAddresses from './addresses/kovan.json';
 import mainnetAddresses from './addresses/mainnet.json';
 import testnetAddresses from './addresses/testnet.json';

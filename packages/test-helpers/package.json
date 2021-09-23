@@ -4,15 +4,14 @@
   "version": "0.3.0",
   "license": "MIT",
   "main": "dist/index.js",
-  "unpkg": "umd/index.js",
+  "unpkg": "dist/index.js",
   "dependencies": {
     "node-fetch": "^2.6.0"
   },
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:umd",
-    "build:cjs": "../../scripts/build.sh && cp src/testAccounts.json dist",
-    "build:umd": "webpack --config ../../webpack.config.js",
-    "clean": "rm -rf ./dist ./umd",
+    "tsc": "tsc",
+    "build": "yarn clean && tsc",
+    "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "test": "jest"
   },

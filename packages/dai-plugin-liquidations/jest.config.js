@@ -1,4 +1,5 @@
 module.exports = {
+  preset: 'ts-jest',
   rootDir: './',
   coverageReporters: ['json', 'lcov', 'text-summary'],
   collectCoverageFrom: ['src/**/*.js'],

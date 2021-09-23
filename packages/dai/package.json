@@ -22,24 +22,23 @@
   ],
   "bugs": {
     "url": "https://github.com/makerdao/dai.js/issues",
-    "email": "wouter@makerdao.com"
+    "email": "hello@dux.makerdao.network"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/makerdao/dai.js.git"
   },
   "files": [
-    "dist/**/*",
-    "umd/*"
+    "dist/**/*"
   ],
+  "typings": "dist/src/index.d.ts",
   "main": "dist/src/index.js",
-  "unpkg": "umd/index.js",
-  "jsdelivr": "umd/index.js",
+  "unpkg": "dist/src/index.js",
+  "jsdelivr": "dist/src/index.js",
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:umd",
-    "build:umd": "webpack --config ../../webpack.config.js",
-    "build:cjs": "./scripts/build-backend.sh",
-    "clean": "rm -rf ./dist ./umd",
+    "tsc": "tsc",
+    "build": "yarn clean && tsc",
+    "clean": "rm -rf ./dist",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
     "test": "yarn testchain --ci jest --runInBand",

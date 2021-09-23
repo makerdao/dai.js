@@ -1,3 +1,4 @@
+// @ts-nocheck
 import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
@@ -6,7 +7,7 @@ import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 import uniq from 'lodash/uniq';
 import has from 'lodash/has';
-import assert from 'assert';
+import { strict as assert } from 'assert';
 
 // a plugin must be either an object with at least one of these keys defined, or
 // a single function, which will be treated as the value for `afterCreate`.
@@ -15,8 +16,14 @@ const PLUGIN_KEYS = ['beforeCreate', 'afterCreate', 'addConfig'];
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
  */
-export default class Maker {
-  constructor(preset, options = {}, userOptions = {}) {
+class MakerClass {
+  _container: any;
+  _authenticatedPromise: Promise<any>;
+  currencies: any;
+  QueryApi: any;
+  utils: any;
+
+  constructor(preset, options: any = {}, userOptions: any = {}) {
     const { plugins = [], ...otherOptions } = options;
 
     for (const [plugin, pluginOptions] of plugins) {
@@ -31,7 +38,7 @@ export default class Maker {
     if (plugins && userOptions) mergeOptions(otherOptions, userOptions);
 
     const config = ConfigFactory.create(preset, otherOptions, resolver);
-    this._container = new DefaultServiceProvider(config).buildContainer();
+    this._container = (new DefaultServiceProvider(config)).buildContainer();
 
     for (const [plugin, pluginOptions] of plugins) {
       if (plugin.afterCreate) plugin.afterCreate(this, config, pluginOptions);
@@ -85,8 +92,10 @@ function delegateToServices(maker, services) {
     for (const methodName of services[serviceName]) {
       if (serviceName === 'cdp') {
         maker[methodName] = () => {
-          throw new Error(`"${methodName}" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').${methodName}`);
-        }
+          throw new Error(
+            `"${methodName}" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').${methodName}`
+          );
+        };
       } else {
         maker[methodName] = (...args) =>
           maker.service(serviceName)[methodName](...args);
@@ -107,7 +116,20 @@ function mergeOptions(object, source) {
   });
 }
 
-Maker.create = async function(...args) {
+const standardizePluginConfig = plugins =>
+  plugins.map((x, i) => {
+    let [plugin, pluginOptions] = Array.isArray(x) ? x : [x, {}];
+    if (typeof plugin === 'function') plugin = { afterCreate: plugin };
+
+    assert(
+      PLUGIN_KEYS.some(x => has(plugin, x)),
+      `plugins[${i}] does not seem to be a plugin`
+    );
+
+    return [plugin, pluginOptions];
+  });
+
+async function create(...args) {
   const [preset, options = {}] = args;
   const { plugins, ...otherOptions } = options;
 
@@ -123,20 +145,16 @@ Maker.create = async function(...args) {
     }
   }
 
-  const maker = new Maker(preset, options, userOptions);
+  const maker = new MakerClass(preset, options, userOptions);
   if (options.autoAuthenticate !== false) await maker.authenticate();
   return maker;
+}
+
+const Maker = {
+  create,
+  currencies: null,
+  QueryApi: null,
+  utils: null
 };
 
-const standardizePluginConfig = plugins =>
-  plugins.map((x, i) => {
-    let [plugin, pluginOptions] = Array.isArray(x) ? x : [x, {}];
-    if (typeof plugin === 'function') plugin = { afterCreate: plugin };
-
-    assert(
-      PLUGIN_KEYS.some(x => has(plugin, x)),
-      `plugins[${i}] does not seem to be a plugin`
-    );
-
-    return [plugin, pluginOptions];
-  });
+export default Maker;

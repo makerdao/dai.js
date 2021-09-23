@@ -54,16 +54,16 @@ export const WETH = createCurrency('WETH');
 export const PETH = createCurrency('PETH');
 export const SAI = createCurrency('SAI');
 
-export const ALLOWANCE_AMOUNT = BigNumber(
+export const ALLOWANCE_AMOUNT = new BigNumber(
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 );
 
 export default {
-  addConfig: (_, { addressOverrides } = {}) => {
-    if (addressOverrides) {
+  addConfig: (_, config: { addressOverrides?: any}) => {
+    if (config && config.addressOverrides) {
       addContracts = mapValues(addContracts, (contractDetails, name) => ({
         ...contractDetails,
-        address: addressOverrides[name] || contractDetails.address
+        address: config.addressOverrides[name] || contractDetails.address
       }));
     }
 

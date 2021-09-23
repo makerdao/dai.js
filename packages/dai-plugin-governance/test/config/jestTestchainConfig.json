@@ -1,4 +1,5 @@
 {
+  "preset": "ts-jest",
   "rootDir": "../../",
   "roots": ["lib", "src", "test"],
   "setupFilesAfterEnv": ["<rootDir>/test/config/setup-test.js"],

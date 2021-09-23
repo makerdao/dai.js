@@ -1,5 +1,5 @@
 import { mcdMaker, setupCollateral } from '../helpers';
-import { CDP_MANAGER } from '../../contracts/addresses/testnet';
+import { CDP_MANAGER } from '../../contracts/addresses/testnet.json';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles } from '../../src/constants';
 import { ETH, BAT, DAI } from '../../src';

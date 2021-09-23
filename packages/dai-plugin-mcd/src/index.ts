@@ -131,7 +131,7 @@ export const defaultCdpTypes = [
 
 export const SAI = createCurrency('SAI');
 
-export const ALLOWANCE_AMOUNT = BigNumber(
+export const ALLOWANCE_AMOUNT = new BigNumber(
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 );
 
@@ -148,7 +148,7 @@ export const defaultTokens = [
 export const McdPlugin = {
   addConfig: (
     _,
-    { cdpTypes = defaultCdpTypes, addressOverrides, prefetch = true } = {}
+    { cdpTypes = defaultCdpTypes, addressOverrides = null, prefetch = true } = {}
   ) => {
     if (addressOverrides) {
       addContracts = mapValues(addContracts, (contractDetails, name) => ({
