@@ -1,5 +1,5 @@
 import testPreset from '../../src/config/presets/test';
-import {createConfig } from '../../src/config/ConfigFactory';
+import { createConfig } from '../../src/config/ConfigFactory';
 
 test('returns a preset by name', () => {
   expect(createConfig('test')).toEqual(testPreset);

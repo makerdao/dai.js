@@ -2,7 +2,7 @@
 import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
-import {createConfig} from './config/ConfigFactory';
+import { createConfig } from './config/ConfigFactory';
 import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 import uniq from 'lodash/uniq';

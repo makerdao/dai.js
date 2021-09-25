@@ -1,10 +1,10 @@
 import Maker from '../src';
-import {createConfig} from '../src/config/ConfigFactory';
+import { createConfig } from '../src/config/ConfigFactory';
 import { LocalService } from '@makerdao/services-core';
 import { MakerClass } from '../src/Maker';
 jest.mock('../src/config/ConfigFactory');
 
-let mockedCreateConfig:jest.Mock = null;
+let mockedCreateConfig: jest.Mock = null;
 
 beforeEach(() => {
   mockedCreateConfig = <jest.Mock>createConfig;
@@ -29,7 +29,7 @@ test('object plugin with addConfig and afterCreate', async () => {
       expect(config.autoAuthenticate).toBe(false);
       return {};
     }),
-    afterCreate: jest.fn((maker) => {
+    afterCreate: jest.fn(maker => {
       expect(maker).toBeInstanceOf(MakerClass);
     })
   };
