@@ -59,4 +59,12 @@ const proxies = {
   proxyRegistry
 };
 
-export default { daiV1, dappHub, exchangesV1, general, proxies, multicall, cageFree };
+export default {
+  daiV1,
+  dappHub,
+  exchangesV1,
+  general,
+  proxies,
+  multicall,
+  cageFree
+};

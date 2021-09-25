@@ -7,15 +7,15 @@ export interface IServiceProvider {
   _services: any;
   _resolver: any;
   _container: any;
-  buildContainer():any;
+  buildContainer(): any;
 }
 
-export default class ServiceProvider implements IServiceProvider{
-  _config: any
-  _services: any
-  _resolver: any
-  _container: any 
-  
+export default class ServiceProvider implements IServiceProvider {
+  _config: any;
+  _services: any;
+  _resolver: any;
+  _container: any;
+
   constructor(config, { services = {}, defaults = {}, disabled = {} } = {}) {
     this._config = config;
 
@@ -74,9 +74,7 @@ export default class ServiceProvider implements IServiceProvider{
 
       const instanceName = instance.manager().name();
       if (instanceName !== role) {
-        throw new Error(
-          `Role mismatch: "${instanceName}", "${role}"`
-        );
+        throw new Error(`Role mismatch: "${instanceName}", "${role}"`);
       }
 
       instance.manager().settings(settings);

@@ -3,10 +3,10 @@ import { ALL_CLIPS, MCD_DOG } from './utils/constants';
 import LiquidationService from './LiquidationService';
 
 type ContractAddresses = {
-  kovan : {[key: string]: string},
-  mainnet : {[key: string]: string},
-  testnet? : {[key: string]: string},
-}
+  kovan: { [key: string]: string };
+  mainnet: { [key: string]: string };
+  testnet?: { [key: string]: string };
+};
 
 export default {
   addConfig: function(config, { vulcanize = true }) {
@@ -14,7 +14,7 @@ export default {
       kovan: require('../contracts/addresses/kovan.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
     };
-    
+
     try {
       contractAddresses.testnet = require('../contracts/addresses/testnet.json');
     } catch (err) {

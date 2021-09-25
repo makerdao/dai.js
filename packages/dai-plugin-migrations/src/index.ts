@@ -47,10 +47,11 @@ function overrideContractAddresses(addressOverrides, contracts) {
 export const DAI_1 = createCurrency('DAI_1');
 
 export default {
-  addConfig: (_, config: { addressOverrides?: any}) => {
-    const addContracts = config && config.addressOverrides
-      ? overrideContractAddresses(config.addressOverrides, allContracts)
-      : allContracts;
+  addConfig: (_, config: { addressOverrides?: any }) => {
+    const addContracts =
+      config && config.addressOverrides
+        ? overrideContractAddresses(config.addressOverrides, allContracts)
+        : allContracts;
 
     return {
       smartContract: { addContracts },

@@ -22,12 +22,11 @@ import GovQueryApiService from './GovQueryApiService';
 import EsmService from './EsmService';
 import SpellService from './SpellService';
 
-
 type ContractAddresses = {
-  kovan : {[key: string]: string},
-  mainnet : {[key: string]: string},
-  testnet? : {[key: string]: string},
-}
+  kovan: { [key: string]: string };
+  mainnet: { [key: string]: string };
+  testnet?: { [key: string]: string };
+};
 
 export { MKR, IOU };
 

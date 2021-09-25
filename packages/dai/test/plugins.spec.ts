@@ -1,15 +1,19 @@
 import Maker from '../src';
-import ConfigFactory from '../src/config/ConfigFactory';
+import {createConfig} from '../src/config/ConfigFactory';
 import { LocalService } from '@makerdao/services-core';
+import { MakerClass } from '../src/Maker';
+jest.mock('../src/config/ConfigFactory');
+
+let mockedCreateConfig:jest.Mock = null;
 
 beforeEach(() => {
-  jest.spyOn(ConfigFactory, 'create');
-  ConfigFactory.create.mockClear();
+  mockedCreateConfig = <jest.Mock>createConfig;
+  mockedCreateConfig.mockClear();
 });
 
 test('function plugin', async () => {
   const testPlugin = jest.fn(maker => {
-    expect(maker).toBeInstanceOf(Maker);
+    expect(maker).toBeInstanceOf(MakerClass);
   });
 
   await Maker.create('test', {
@@ -25,8 +29,8 @@ test('object plugin with addConfig and afterCreate', async () => {
       expect(config.autoAuthenticate).toBe(false);
       return {};
     }),
-    afterCreate: jest.fn((maker, config) => {
-      expect(maker).toBeInstanceOf(Maker);
+    afterCreate: jest.fn((maker) => {
+      expect(maker).toBeInstanceOf(MakerClass);
     })
   };
 
@@ -38,8 +42,8 @@ test('object plugin with addConfig and afterCreate', async () => {
 
   expect(testPlugin.addConfig).toBeCalled();
   expect(testPlugin.afterCreate).toBeCalled();
-  expect(ConfigFactory.create).toBeCalled();
-  expect(ConfigFactory.create.mock.calls[0][1]).toEqual({
+  expect(createConfig).toBeCalled();
+  expect((createConfig as jest.Mock).mock.calls[0][1]).toEqual({
     autoAuthenticate: false,
     foo: 3
   });
@@ -92,8 +96,8 @@ test('add options, merging correctly', async () => {
   });
 
   expect(testPlugin.addConfig).toBeCalled();
-  expect(ConfigFactory.create).toBeCalled();
-  expect(ConfigFactory.create.mock.calls[0][1]).toEqual({
+  expect(mockedCreateConfig).toBeCalled();
+  expect(mockedCreateConfig.mock.calls[0][1]).toEqual({
     additionalServices: ['mock1', 'mock2'],
     mock1: MockService1,
     mock2: MockService2,
@@ -185,7 +189,7 @@ test('plugin override rules', async () => {
     }
   });
 
-  const configFactoryCall = ConfigFactory.create.mock.calls[0][1];
+  const configFactoryCall = mockedCreateConfig.mock.calls[0][1];
   const addContractsResult = configFactoryCall.smartContract.addContracts;
 
   // User supplied overrides all
@@ -311,10 +315,10 @@ test('each plugin type can be created with an optional options object for additi
   expect(beforeCreatePlugin.beforeCreate).toBeCalled();
   expect(afterCreatePlugin.afterCreate).toBeCalled();
   expect(functionPlugin).toBeCalled();
-  expect(ConfigFactory.create).toBeCalled();
+  expect(mockedCreateConfig).toBeCalled();
 
   //beforeCreate and addConfig plugins can modify the maker config
-  expect(ConfigFactory.create.mock.calls[0][1]).toEqual({
+  expect(mockedCreateConfig.mock.calls[0][1]).toEqual({
     additionalServices: ['mock1', 'mock2'],
     mock1: MockService1,
     mock2: MockService2,
@@ -327,7 +331,6 @@ test('each plugin type can be created with an optional options object for additi
 test('object plugin with beforeCreate can make an async call', async () => {
   const mockAsyncCall = async () => {
     return new Promise(resolve => {
-      setTimeout(50);
       resolve({ testOption: 'myOption' });
     });
   };
@@ -344,8 +347,8 @@ test('object plugin with beforeCreate can make an async call', async () => {
   });
 
   expect(testPlugin.beforeCreate).toBeCalled();
-  expect(ConfigFactory.create).toBeCalled();
-  expect(ConfigFactory.create.mock.calls[0][1]).toEqual({
+  expect(mockedCreateConfig).toBeCalled();
+  expect(mockedCreateConfig.mock.calls[0][1]).toEqual({
     autoAuthenticate: false,
     testOption: 'myOption'
   });

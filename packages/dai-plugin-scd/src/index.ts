@@ -59,7 +59,7 @@ export const ALLOWANCE_AMOUNT = new BigNumber(
 );
 
 export default {
-  addConfig: (_, config: { addressOverrides?: any}) => {
+  addConfig: (_, config: { addressOverrides?: any }) => {
     if (config && config.addressOverrides) {
       addContracts = mapValues(addContracts, (contractDetails, name) => ({
         ...contractDetails,

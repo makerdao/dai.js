@@ -11,4 +11,4 @@ Maker.currencies = currencies;
 Maker.QueryApi = { getQueryResponse };
 Maker.utils = { stringToBytes32 };
 
-module.exports = Maker;
+export default Maker;

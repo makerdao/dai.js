@@ -148,7 +148,11 @@ export const defaultTokens = [
 export const McdPlugin = {
   addConfig: (
     _,
-    { cdpTypes = defaultCdpTypes, addressOverrides = null, prefetch = true } = {}
+    {
+      cdpTypes = defaultCdpTypes,
+      addressOverrides = null,
+      prefetch = true
+    } = {}
   ) => {
     if (addressOverrides) {
       addContracts = mapValues(addContracts, (contractDetails, name) => ({

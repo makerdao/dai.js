@@ -36,7 +36,8 @@ export const resolver = {
   }
 };
 
-export default class DefaultServiceProvider extends ServiceProvider implements IServiceProvider {
+export default class DefaultServiceProvider extends ServiceProvider
+  implements IServiceProvider {
   constructor(config: any = {}) {
     if (config.web3) {
       config = {
@@ -67,7 +68,5 @@ export default class DefaultServiceProvider extends ServiceProvider implements I
       },
       ...resolver
     });
-    
   }
-
 }

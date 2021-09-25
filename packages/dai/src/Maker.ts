@@ -2,7 +2,7 @@
 import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
-import ConfigFactory from './config/ConfigFactory';
+import {createConfig} from './config/ConfigFactory';
 import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 import uniq from 'lodash/uniq';
@@ -16,7 +16,7 @@ const PLUGIN_KEYS = ['beforeCreate', 'afterCreate', 'addConfig'];
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
  */
-class MakerClass {
+export class MakerClass {
   _container: any;
   _authenticatedPromise: Promise<any>;
   currencies: any;
@@ -37,8 +37,8 @@ class MakerClass {
     // This ensures user supplied config options always take priority
     if (plugins && userOptions) mergeOptions(otherOptions, userOptions);
 
-    const config = ConfigFactory.create(preset, otherOptions, resolver);
-    this._container = (new DefaultServiceProvider(config)).buildContainer();
+    const config = createConfig(preset, otherOptions, resolver);
+    this._container = new DefaultServiceProvider(config).buildContainer();
 
     for (const [plugin, pluginOptions] of plugins) {
       if (plugin.afterCreate) plugin.afterCreate(this, config, pluginOptions);
