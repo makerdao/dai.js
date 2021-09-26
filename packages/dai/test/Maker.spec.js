@@ -1,6 +1,5 @@
-import Maker, { ETH, LocalService } from '../src/index';
-import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
-const Maker2 = require('../src/index');
+import Maker from '../src/index';
+// import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 
 async function createMaker(privateKey) {
   return await Maker.create('test', { privateKey });
@@ -8,12 +7,6 @@ async function createMaker(privateKey) {
 
 test('create without any options', async () => {
   await Maker.create('test');
-});
-
-test('import vs require', () => {
-  expect(Maker2).toEqual(Maker);
-  expect(Maker2.ETH).toEqual(ETH);
-  expect(Maker2.LocalService).toEqual(LocalService);
 });
 
 test('throws for delegated cdp methods', async () => {

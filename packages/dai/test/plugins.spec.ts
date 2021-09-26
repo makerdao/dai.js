@@ -1,13 +1,12 @@
 import Maker from '../src';
-import { createConfig } from '../src/config/ConfigFactory';
+import ConfigFactory from '../src/config/ConfigFactory';
 import { LocalService } from '@makerdao/services-core';
 import { MakerClass } from '../src/Maker';
-jest.mock('../src/config/ConfigFactory');
 
-let mockedCreateConfig: jest.Mock = null;
+let mockedCreateConfig: jest.SpyInstance = null;
 
 beforeEach(() => {
-  mockedCreateConfig = <jest.Mock>createConfig;
+  mockedCreateConfig = <jest.SpyInstance>jest.spyOn(ConfigFactory, 'createConfig');
   mockedCreateConfig.mockClear();
 });
 
@@ -42,8 +41,8 @@ test('object plugin with addConfig and afterCreate', async () => {
 
   expect(testPlugin.addConfig).toBeCalled();
   expect(testPlugin.afterCreate).toBeCalled();
-  expect(createConfig).toBeCalled();
-  expect((createConfig as jest.Mock).mock.calls[0][1]).toEqual({
+  expect(mockedCreateConfig).toBeCalled();
+  expect(mockedCreateConfig.mock.calls[0][1]).toEqual({
     autoAuthenticate: false,
     foo: 3
   });

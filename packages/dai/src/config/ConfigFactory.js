@@ -89,7 +89,8 @@ function checkForReservedWords(words) {
  * @param {string} preset
  * @param {object} options
  */
-export function createConfig(preset, options = {}, resolver) {
+
+function createConfig(preset, options = {}, resolver) {
   if (typeof preset !== 'string') {
     options = preset;
     preset = options.preset;
@@ -136,4 +137,8 @@ export function createConfig(preset, options = {}, resolver) {
   }
 
   return config;
+}
+
+export default {
+  createConfig
 }

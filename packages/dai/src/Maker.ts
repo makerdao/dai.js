@@ -2,7 +2,7 @@
 import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
-import { createConfig } from './config/ConfigFactory';
+import ConfigFactory from './config/ConfigFactory';
 import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 import uniq from 'lodash/uniq';
@@ -37,7 +37,7 @@ export class MakerClass {
     // This ensures user supplied config options always take priority
     if (plugins && userOptions) mergeOptions(otherOptions, userOptions);
 
-    const config = createConfig(preset, otherOptions, resolver);
+    const config = ConfigFactory.createConfig(preset, otherOptions, resolver);
     this._container = new DefaultServiceProvider(config).buildContainer();
 
     for (const [plugin, pluginOptions] of plugins) {

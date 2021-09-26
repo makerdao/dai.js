@@ -1,6 +1,6 @@
 import tracksTransactions from '../utils/tracksTransactions';
 import { PrivateService } from '@makerdao/services-core';
-import { dappHub } from '../../contracts/abis';
+import abis from '../../contracts/abis';
 import { Contract } from 'ethers';
 
 export default class DSProxyService extends PrivateService {
@@ -94,14 +94,14 @@ export default class DSProxyService extends PrivateService {
   _getWrappedProxyContract(address) {
     return this._smartContractService.getContractByAddressAndAbi(
       address,
-      dappHub.dsProxy
+      abis.dappHub.dsProxy
     );
   }
 
   getUnwrappedProxyContract(address) {
     return new Contract(
       address,
-      dappHub.dsProxy,
+      abis.dappHub.dsProxy,
       this.get('web3').getEthersSigner()
     );
   }

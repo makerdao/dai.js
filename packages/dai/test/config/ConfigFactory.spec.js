@@ -1,18 +1,18 @@
 import testPreset from '../../src/config/presets/test';
-import { createConfig } from '../../src/config/ConfigFactory';
+import ConfigFactory from '../../src/config/ConfigFactory';
 
 test('returns a preset by name', () => {
-  expect(createConfig('test')).toEqual(testPreset);
+  expect(ConfigFactory.createConfig('test')).toEqual(testPreset);
 });
 
 test('throws an error when requesting a non-existing preset', () => {
-  expect(() => createConfig('does-not-exist')).toThrow(
+  expect(() => ConfigFactory.createConfig('does-not-exist')).toThrow(
     'Cannot find configuration preset with name: does-not-exist'
   );
 });
 
 test('it handles url, privateKey, provider, and web3 options', () => {
-  const config = createConfig(
+  const config = ConfigFactory.createConfig(
     'http',
     {
       url: 'http://foo.net',
@@ -54,31 +54,31 @@ test('it handles url, privateKey, provider, and web3 options', () => {
 
 //TODO
 test('it overwrites a service name', () => {
-  const config = createConfig('http', { allowance: 'OtherService' });
+  const config = ConfigFactory.createConfig('http', { allowance: 'OtherService' });
   // expect(config.allowance).toEqual(['OtherService', {}]);
   expect(config.allowance).toEqual('OtherService');
 });
 
 test('it adds service options', () => {
-  const config = createConfig('http', { allowance: { foo: 'bar' } });
+  const config = ConfigFactory.createConfig('http', { allowance: { foo: 'bar' } });
   // expect(config.allowance).toEqual([true, { foo: 'bar' }]);
   expect(config.allowance).toEqual({ foo: 'bar' });
 });
 
 test('it passes service options for an omitted service', () => {
-  const config = createConfig('http', { allowance: { foo: 'bar' } });
+  const config = ConfigFactory.createConfig('http', { allowance: { foo: 'bar' } });
   // expect(config.allowance).toEqual([true, { foo: 'bar' }]);
   expect(config.allowance).toEqual({ foo: 'bar' });
 });
 
 test('it preserves the preset service name', () => {
   const preset = { proxy: 'AltProxyService' };
-  const config = createConfig({ preset, proxy: { foo: true } });
+  const config = ConfigFactory.createConfig({ preset, proxy: { foo: true } });
   expect(config.proxy).toEqual(['AltProxyService', { foo: true }]);
 });
 
 test('skip unknown service roles', () => {
-  const config = createConfig('http', {
+  const config = ConfigFactory.createConfig('http', {
     foo: 'FooService'
   });
   expect(config.foo).toBeFalsy();
@@ -89,7 +89,7 @@ test('should capture transaction settings', () => {
     gasPrice: 12000000000,
     gasLimit: 4000000
   };
-  const config = createConfig('http', {
+  const config = ConfigFactory.createConfig('http', {
     web3: {
       transactionSettings: txSettings
     }
@@ -98,7 +98,7 @@ test('should capture transaction settings', () => {
 });
 
 test('should capture confirmedBlockCount', () => {
-  const config = createConfig('http', {
+  const config = ConfigFactory.createConfig('http', {
     web3: {
       confirmedBlockCount: 8
     }
@@ -107,7 +107,7 @@ test('should capture confirmedBlockCount', () => {
 });
 
 test('allow new service roles if specified', () => {
-  const config = createConfig('http', {
+  const config = ConfigFactory.createConfig('http', {
     additionalServices: ['foo'],
     foo: 'FooService'
   });
@@ -116,7 +116,7 @@ test('allow new service roles if specified', () => {
 
 test('reject invalid service roles', () => {
   expect(() => {
-    createConfig('http', {
+    ConfigFactory.createConfig('http', {
       additionalServices: ['url']
     });
   }).toThrow(/cannot be used as service role names/);
