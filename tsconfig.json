@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "es5",
         "module": "esnext",
         "esModuleInterop": true,
         "declaration": true,
@@ -10,13 +10,15 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "sourceMap": true,
+        "downlevelIteration": true,
         "lib": [
-            "es6",
+            "esnext",
             "dom"
         ],
         "allowJs": true,
         "resolveJsonModule": true,
         "moduleResolution": "node",
+        "types": ["jest", "node"],
     },
     "exclude": [
         "node_modules",
