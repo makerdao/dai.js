@@ -2,7 +2,7 @@
  jobs:
    build:
      docker:
-       - image: levity/dapptools-node-latest
+       - image: makerdao-dux/dapptools-node-circleci-docker
      steps:
        - checkout
        - run:

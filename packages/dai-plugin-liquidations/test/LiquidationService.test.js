@@ -43,7 +43,6 @@ const testchainConfig = {
   }
 };
 
-
 async function makerInstance(preset) {
   const config = preset === 'kovan' ? kovanConfig : testchainConfig;
   const maker = await Maker.create(preset, config);
@@ -51,7 +50,6 @@ async function makerInstance(preset) {
   return maker;
 }
 describe('LiquidationService', () => {
-
   beforeAll(async () => {
     // To run this test on kovan, just switch the network variable below:
     //network = 'kovan';
@@ -260,5 +258,4 @@ describe('LiquidationService', () => {
     const cusp = await service.getCusp('LINK-A');
     console.log('cusp', cusp);
   }, 10000);
-
 });
