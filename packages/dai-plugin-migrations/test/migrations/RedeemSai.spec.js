@@ -4,31 +4,31 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ETH } from '@makerdao/dai';
 
 let maker, migration, snapshotData;
+jest.setTimeout(30000);
 
 describe('Redeem Sai', () => {
   beforeAll(async () => {
-    jest.setTimeout(30000);
 
     maker = await migrationMaker();
     snapshotData = await takeSnapshot(maker);
     const service = maker.service(ServiceRoles.MIGRATION);
     migration = service.getMigration(Migrations.REDEEM_SAI);
     await shutDown();
-  });
+  }, 30000);
 
   afterAll(async () => {
     await restoreSnapshot(snapshotData, maker);
-  });
+  }, 30000);
 
   test('should be off after shutdown', async () => {
     const off = await migration.off();
     expect(off).toBe(true);
-  });
+  }, 30000);
 
   test('should get the exchange rate', async () => {
     const rate = await migration.getRate();
     expect(rate).toBe(0.0025);
-  });
+  }, 30000);
 
   test('should redeem sai', async () => {
     const sai = maker.getToken('SAI');
@@ -53,5 +53,5 @@ describe('Redeem Sai', () => {
     expect(ethBalanceAfterRedemption.toNumber()).toBeGreaterThan(
       ethBalanceBeforeRedemption.toNumber()
     );
-  });
+  }, 30000);
 });

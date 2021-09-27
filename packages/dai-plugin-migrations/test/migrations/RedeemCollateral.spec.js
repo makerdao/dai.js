@@ -3,10 +3,10 @@ import { ServiceRoles, Migrations } from '../../src/constants';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 
 let maker, migration, snapshotData;
+jest.setTimeout(30000);
 
 describe('Redeem collateral', () => {
   beforeAll(async () => {
-    jest.setTimeout(30000);
 
     maker = await migrationMaker();
     snapshotData = await takeSnapshot(maker);
@@ -14,20 +14,20 @@ describe('Redeem collateral', () => {
     migration = service.getMigration(Migrations.REDEEM_COLLATERAL);
     await shutDown();
     await migration._contract('SAI_TOP').setCooldown(0);
-  });
+  }, 30000);
 
   afterAll(async () => {
     await restoreSnapshot(snapshotData, maker);
-  });
+  }, 30000);
 
   test('should get the remaining cooldown', async () => {
     const cooldown = await migration.cooldown();
     expect(cooldown.toNumber()).toBe(0);
-  });
+  }, 30000);
 
   test('should get the total peth in tap', async () => {
     expect(await migration.pethInTap()).toBe(0.535);
-  });
+  }, 30000);
 
   test('should redeem collateral', async () => {
     const cdp = await maker.service('cdp').getCdp(1);
@@ -37,5 +37,5 @@ describe('Redeem collateral', () => {
     await migration.redeemCollateral(cdp, collateral);
     const pethBalance = await peth.balanceOf(address);
     expect(pethBalance.toNumber()).toBe(collateral.toNumber());
-  });
+  }, 30000);
 });
