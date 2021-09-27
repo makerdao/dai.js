@@ -31,13 +31,13 @@
   "files": [
     "dist/**/*"
   ],
-  "typings": "dist/src/index.d.ts",
-  "main": "dist/src/index.js",
-  "unpkg": "dist/src/index.js",
-  "jsdelivr": "dist/src/index.js",
+  "typings": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "unpkg": "dist/index.js",
+  "jsdelivr": "dist/index.js",
+  "module": "dist/dai.esm.js",
   "scripts": {
-    "tsc": "tsc",
-    "build": "yarn clean && tsc",
+    "build": "yarn clean && tsdx build",
     "clean": "rm -rf ./dist",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",

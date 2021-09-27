@@ -3,14 +3,14 @@
         "target": "es5",
         "module": "esnext",
         "esModuleInterop": true,
-        "declaration": true,
+        "declaration": false,
         "noImplicitAny": false,
         "removeComments": true,
         "noLib": false,
         "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
         "sourceMap": true,
         "downlevelIteration": true,
+        "experimentalDecorators": true,
         "lib": [
             "esnext",
             "dom"

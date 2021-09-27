@@ -7,7 +7,6 @@ jest.setTimeout(30000);
 
 describe('Redeem collateral', () => {
   beforeAll(async () => {
-
     maker = await migrationMaker();
     snapshotData = await takeSnapshot(maker);
     const service = maker.service(ServiceRoles.MIGRATION);

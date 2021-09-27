@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getCurrency, ETH } from '../Currency';
 import tracksTransactions from '../../utils/tracksTransactions';
 

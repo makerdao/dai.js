@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { currencies, getCurrency } from '../Currency';
 
 export default class Erc20Token {

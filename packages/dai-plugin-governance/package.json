@@ -7,12 +7,12 @@
     "type": "git",
     "url": "https://github.com/makerdao/dai-plugin-governance.git"
   },
+  "typings": "dist/src/index.d.ts",
   "main": "dist/src/index.js",
   "unpkg": "dist/src/index.js",
   "jsdelivr": "dist/src/index.js",
   "scripts": {
-    "tsc": "tsc",
-    "build": "yarn clean && tsc",
+    "build": "yarn clean && tsdx build",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",

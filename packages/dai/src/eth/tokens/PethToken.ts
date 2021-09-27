@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Erc20Token from './Erc20Token';
 import { WETH, PETH } from '../Currency';
 
