@@ -6,7 +6,9 @@ import { MakerClass } from '../src/Maker';
 let mockedCreateConfig: jest.SpyInstance = null;
 
 beforeEach(() => {
-  mockedCreateConfig = <jest.SpyInstance>jest.spyOn(ConfigFactory, 'createConfig');
+  mockedCreateConfig = <jest.SpyInstance>(
+    jest.spyOn(ConfigFactory, 'createConfig')
+  );
   mockedCreateConfig.mockClear();
 });
 

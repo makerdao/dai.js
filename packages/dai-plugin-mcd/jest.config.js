@@ -7,6 +7,7 @@ module.exports = {
   coverageReporters: ['json', 'lcov', 'text-summary'],
   collectCoverageFrom: ['src/**/*.js', 'src/**/*.ts'],
   globalSetup: '<rootDir>/test/setup-global.js',
+  setupFilesAfterEnv: ['<rootDir>/test/setup-test.js'],
   roots: ['src', 'test'],
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',

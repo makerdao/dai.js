@@ -141,4 +141,4 @@ function createConfig(preset, options = {}, resolver) {
 
 export default {
   createConfig
-}
+};

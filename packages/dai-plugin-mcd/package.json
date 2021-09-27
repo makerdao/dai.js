@@ -3,9 +3,9 @@
   "description": "Plugin to add Multi-Collateral Dai support to dai.js",
   "version": "1.6.35",
   "license": "MIT",
-  "main": "dist/index.js",
-  "unpkg": "dist/index.js",
-  "jsdelivr": "dist/index.js",
+  "main": "dist/src/index.js",
+  "unpkg": "dist/src/index.js",
+  "jsdelivr": "dist/src/index.js",
   "scripts": {
     "tsc": "tsc",
     "build": "yarn clean && tsc",

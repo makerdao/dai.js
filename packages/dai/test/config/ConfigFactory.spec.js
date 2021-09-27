@@ -54,19 +54,25 @@ test('it handles url, privateKey, provider, and web3 options', () => {
 
 //TODO
 test('it overwrites a service name', () => {
-  const config = ConfigFactory.createConfig('http', { allowance: 'OtherService' });
+  const config = ConfigFactory.createConfig('http', {
+    allowance: 'OtherService'
+  });
   // expect(config.allowance).toEqual(['OtherService', {}]);
   expect(config.allowance).toEqual('OtherService');
 });
 
 test('it adds service options', () => {
-  const config = ConfigFactory.createConfig('http', { allowance: { foo: 'bar' } });
+  const config = ConfigFactory.createConfig('http', {
+    allowance: { foo: 'bar' }
+  });
   // expect(config.allowance).toEqual([true, { foo: 'bar' }]);
   expect(config.allowance).toEqual({ foo: 'bar' });
 });
 
 test('it passes service options for an omitted service', () => {
-  const config = ConfigFactory.createConfig('http', { allowance: { foo: 'bar' } });
+  const config = ConfigFactory.createConfig('http', {
+    allowance: { foo: 'bar' }
+  });
   // expect(config.allowance).toEqual([true, { foo: 'bar' }]);
   expect(config.allowance).toEqual({ foo: 'bar' });
 });

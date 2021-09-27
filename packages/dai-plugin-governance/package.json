@@ -7,9 +7,9 @@
     "type": "git",
     "url": "https://github.com/makerdao/dai-plugin-governance.git"
   },
-  "main": "dist/index.js",
-  "unpkg": "dist/index.js",
-  "jsdelivr": "dist/index.js",
+  "main": "dist/src/index.js",
+  "unpkg": "dist/src/index.js",
+  "jsdelivr": "dist/src/index.js",
   "scripts": {
     "tsc": "tsc",
     "build": "yarn clean && tsc",
@@ -37,7 +37,6 @@
     "@makerdao/dai": "^0.31"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
     "@makerdao/dai": "^0.31",
     "@makerdao/dai-plugin-config": "^0.2.14-rc.1",
     "web3-utils": "^1.2.6"

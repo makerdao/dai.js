@@ -6,7 +6,6 @@ module.exports = {
   rootDir: './',
   coverageReporters: ['json', 'lcov', 'text-summary'],
   collectCoverageFrom: ['src/**/*.js', 'src/**/*.ts'],
-  globalSetup: '<rootDir>/test/setup-global.js',
   roots: ['src', 'test'],
   setupFilesAfterEnv: ['<rootDir>/test/config/original-setup.js'],
   testPathIgnorePatterns: [

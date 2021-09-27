@@ -250,7 +250,7 @@ describe('Savings Service', () => {
 
     const endingBalance = (await dai.balance()).toNumber();
     expect(endingBalance).toBeCloseTo(startingBalance + accruedInterest, 8);
-  });
+  }, 30000);
 
   xtest('get dsr event history via web3', async () => {
     await makeSomeDai(10);
@@ -299,5 +299,5 @@ describe('Savings Service', () => {
     // in the test we know the chi, so we can verify that calculation is close
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
     expect(etdB.minus(etdA).toNumber()).toBeCloseTo(accruedInterest, 10);
-  });
+  }, 30000);
 });

@@ -1,10 +1,15 @@
 {
   "preset": "ts-jest",
   "rootDir": "../../",
+  "transform": {
+    "^.+\\.(ts|js)?$": "ts-jest"
+  },
   "roots": ["lib", "src", "test"],
   "setupFilesAfterEnv": ["<rootDir>/test/config/setup-test.js"],
   "testPathIgnorePatterns": [
     "<rootDir>/node_modules/",
     "<rootDir>/test/integration/"
-  ]
+  ],
+  "testEnvironment": "jsdom"
+
 }
