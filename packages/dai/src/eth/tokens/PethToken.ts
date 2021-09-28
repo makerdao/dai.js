@@ -8,7 +8,7 @@ export default class PethToken extends Erc20Token {
     this._tub = tub;
   }
 
-  join(amount, { unit = WETH, promise  = undefined} = {}) {
+  join(amount, { unit = WETH, promise = undefined } = {}) {
     const value = this._valueForContract(amount, unit);
     return this._tub.join(value, { promise });
   }

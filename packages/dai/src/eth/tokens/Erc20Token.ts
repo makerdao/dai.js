@@ -93,7 +93,12 @@ export default class Erc20Token {
     });
   }
 
-  transferFrom(from, to, value, { unit = this._currency, promise = undefined } = {}) {
+  transferFrom(
+    from,
+    to,
+    value,
+    { unit = this._currency, promise = undefined } = {}
+  ) {
     return this._contract.transferFrom(
       from,
       to,
