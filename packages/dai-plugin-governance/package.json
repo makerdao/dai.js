@@ -7,10 +7,11 @@
     "type": "git",
     "url": "https://github.com/makerdao/dai-plugin-governance.git"
   },
-  "typings": "dist/src/index.d.ts",
-  "main": "dist/src/index.js",
-  "unpkg": "dist/src/index.js",
-  "jsdelivr": "dist/src/index.js",
+  "main": "dist/index.js",
+  "unpkg": "dist/index.js",
+  "jsdelivr": "dist/dai-plugin-governance.esm.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/dai-plugin-governance.esm.js",
   "scripts": {
     "build": "yarn clean && tsdx build",
     "clean": "rm -rf ./dist",
@@ -37,7 +38,6 @@
     "@makerdao/dai": "^0.31"
   },
   "devDependencies": {
-    "@makerdao/dai": "^0.31",
     "@makerdao/dai-plugin-config": "^0.2.14-rc.1",
     "web3-utils": "^1.2.6"
   }
