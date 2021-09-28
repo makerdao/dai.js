@@ -30,7 +30,7 @@ beforeAll(async () => {
     .get('web3')
     .get('accounts')
     .currentAddress();
-});
+}, 30000);
 
 describe('with existing DSProxy', () => {
   test('open CDP, lock ETH and draw SAI (single tx)', async () => {
@@ -50,7 +50,7 @@ describe('with existing DSProxy', () => {
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
     expect(await cdp.getDebtValue()).toEqual(SAI(1));
-  });
+  }, 30000);
 
   test('open CDP, lock ETH and draw SAI (multi tx)', async () => {
     const cdp = await cdpService.openProxyCdp(dsProxyAddress);
@@ -67,7 +67,7 @@ describe('with existing DSProxy', () => {
     expect(cdpInfoPre.ink.toString()).toEqual('0');
     expect(cdpInfoPost.ink.toString()).toEqual('100000000000000000');
     expect(await cdp.getDebtValue()).toEqual(SAI(1));
-  });
+  }, 30000);
 
   sharedTests(
     cdpService => cdpService.openProxyCdp(dsProxyAddress),
@@ -93,7 +93,7 @@ describe('without existing DSProxy', () => {
     const cdp = await cdpService.openProxyCdp();
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
-  });
+  }, 30000);
 
   test('open CDP, lock ETH and draw SAI (single tx)', async () => {
     const balancePre = await ethToken.balanceOf(currentAddress);
@@ -108,5 +108,5 @@ describe('without existing DSProxy', () => {
     expect(cdp.id).toBeGreaterThan(0);
     expect(cdp.dsProxyAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/);
     expect(await cdp.getDebtValue()).toEqual(SAI(1));
-  });
+  }, 30000);
 });

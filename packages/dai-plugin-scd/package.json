@@ -9,7 +9,7 @@
   "jsdelivr": "dist/dai-plugin-scd.esm.js",
   "module": "dist/dai-plugin-scd.esm.js",
   "scripts": {
-    "build": "yarn clean && tsdx build",
+    "build": "yarn clean && tsdx build && ./scripts/copy-files.sh",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",
