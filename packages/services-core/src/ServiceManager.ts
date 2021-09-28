@@ -46,6 +46,10 @@ function _waitForDependencies(callback) {
  *
  */
 class ServiceManager extends ServiceManagerBase {
+  _name;
+  _dependencies;
+  _injections;
+  
   /**
    * @param {*} service
    * @returns {boolean}
@@ -154,7 +158,8 @@ class ServiceManager extends ServiceManagerBase {
   }
 
   createService() {
-    return { manager: () => this };
+    const self = this;
+    return { manager: ():ServiceManager => self };
   }
 }
 

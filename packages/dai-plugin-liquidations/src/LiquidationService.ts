@@ -2,7 +2,7 @@ import { PublicService } from '@makerdao/services-core';
 import {
   bytes32ToNumber,
   numberToBytes32
-} from '@makerdao/dai/dist/src/utils/conversion';
+} from '@makerdao/dai/src/utils/conversion';
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
@@ -28,6 +28,8 @@ const medianizers = {
 };
 
 export default class LiquidationService extends PublicService {
+  vulcanize: boolean;
+  serverUrl: string;
   constructor(name = 'liquidation') {
     super(name, ['web3', 'smartContract']);
     this.vulcanize = true;
@@ -112,7 +114,7 @@ export default class LiquidationService extends PublicService {
   }`;
   }
 
-  async getQueryResponse(serverUrl, query, variables) {
+  async getQueryResponse(serverUrl, query, variables?) {
     const resp = await fetch(serverUrl, {
       method: 'POST',
       headers: {
@@ -138,13 +140,14 @@ export default class LiquidationService extends PublicService {
     });
     query += '}';
     const response = await this.getQueryResponse(this.serverUrl, query);
-    const nodes = Object.values(response);
+    // TODO: Type response
+    const nodes = Object.values(response) as any;
     const urns = nodes.map(n => n.nodes).flat();
     return urns.filter(u => {
-      const art = BigNumber(u.art);
-      const ink = BigNumber(u.ink);
-      const rate = BigNumber(u.ilk.rate);
-      const spot = BigNumber(u.ilk.spot);
+      const art = new BigNumber(u.art);
+      const ink = new BigNumber(u.ink);
+      const rate = new BigNumber(u.ilk.rate);
+      const spot = new BigNumber(u.ilk.spot);
       if (art.eq(0) || rate.eq(0)) return false;
       return art.div(ink).gt(spot.div(rate));
     });
@@ -165,9 +168,9 @@ export default class LiquidationService extends PublicService {
       return clips.edges.map(c => {
         let obj = c.node;
         obj.tic = new Date(obj.tic * 1000);
-        obj.tab = BigNumber(obj.tab).div(RAD);
-        obj.lot = BigNumber(obj.lot).div(WAD);
-        obj.top = BigNumber(obj.top).div(RAY);
+        obj.tab = new BigNumber(obj.tab).div(RAD);
+        obj.lot = new BigNumber(obj.lot).div(WAD);
+        obj.top = new BigNumber(obj.top).div(RAY);
         obj.created = new Date(obj.created);
         obj.updated = new Date(obj.updated);
         obj.endDate = new Date((obj.tic + tail) * 1000);
@@ -184,21 +187,24 @@ export default class LiquidationService extends PublicService {
           return this._clipperContractByIlk(ilk)
             .sales(id)
             .then(s => {
-              let obj = {};
-              obj.tic = new Date(new BigNumber(s.tic).times(1000).toNumber());
-              obj.created = obj.tic;
-              obj.tab = new BigNumber(s.tab).div(RAD);
-              obj.lot = new BigNumber(s.lot).div(WAD);
-              obj.top = new BigNumber(s.top).div(RAY);
-              obj.usr = s.usr;
-              obj.saleId = id;
-              obj.active = true;
-              obj.endDate = new Date(
-                new BigNumber(s.tic.toNumber() + tail).times(1000).toNumber()
-              );
-              obj.chost = chost;
-              obj.cusp = cusp;
-              obj.ilk = ilk;
+              const tic = new Date(new BigNumber(s.tic).times(1000).toNumber());
+              const obj = {
+                tic,
+                created: tic,
+                tab : new BigNumber(s.tab).div(RAD),
+                lot : new BigNumber(s.lot).div(WAD),
+                top : new BigNumber(s.top).div(RAY),
+                usr : s.usr,
+                saleId : id,
+                active : true,
+                endDate : new Date(
+                  new BigNumber(s.tic.toNumber() + tail).times(1000).toNumber()
+                ),
+                chost : chost,
+                cusp : cusp,
+                ilk : ilk,
+              };
+              
               return obj;
             });
         })
@@ -214,7 +220,7 @@ export default class LiquidationService extends PublicService {
     );
     return response.allIlks.nodes.map(i => {
       i.ilk = i.id;
-      i.dust = BigNumber(i.dust).div(RAD);
+      i.dust = new BigNumber(i.dust).div(RAD);
       return i;
     });
   }
@@ -225,7 +231,7 @@ export default class LiquidationService extends PublicService {
       this.serverUrl,
       this._buildMedianizerQuery(ilk)
     );
-    return BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
+    return new BigNumber(response.allLogMedianPrices.nodes[0].val).div(WAD);
   }
 
   /* TAKE
@@ -239,11 +245,11 @@ export default class LiquidationService extends PublicService {
   async take(ilk, auctionId, amount, maxPrice, address, { promise }) {
     const id = numberToBytes32(auctionId);
 
-    const amt = BigNumber(amount)
+    const amt = new BigNumber(amount)
       .times(WAD)
       .toFixed();
 
-    const max = BigNumber(maxPrice)
+    const max = new BigNumber(maxPrice)
       .times(RAY)
       .toFixed();
 
@@ -340,7 +346,7 @@ export default class LiquidationService extends PublicService {
   @tracksTransactions
   async joinDaiToAdapter(amount, { promise }) {
     const address = this.get('web3').currentAddress();
-    const amt = BigNumber(amount)
+    const amt = new BigNumber(amount)
       .times(WAD)
       .toFixed();
     return await this._joinDaiAdapter().join(address, amt, { promise });
@@ -349,7 +355,7 @@ export default class LiquidationService extends PublicService {
   @tracksTransactions
   async exitDaiFromAdapter(amount, { promise }) {
     const address = this.get('web3').currentAddress();
-    const amt = BigNumber(amount)
+    const amt = new BigNumber(amount)
       .times(WAD)
       .toFixed();
     return await this._joinDaiAdapter().exit(address, amt, { promise });
@@ -358,7 +364,7 @@ export default class LiquidationService extends PublicService {
   @tracksTransactions
   async exitGemFromAdapter(ilk, amount, { promise }) {
     const address = this.get('web3').currentAddress();
-    const amt = BigNumber(amount)
+    const amt = new BigNumber(amount)
       .times(WAD)
       .toFixed();
     return await this._joinGemAdapter(ilk).exit(address, amt, { promise });

@@ -5,12 +5,13 @@
   "license": "MIT",
   "main": "dist/index.js",
   "unpkg": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/test-helpers.esm.js",
   "dependencies": {
     "node-fetch": "^2.6.0"
   },
   "scripts": {
-    "tsc": "tsc",
-    "build": "yarn clean && tsc",
+    "build": "yarn clean && tsdx build",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "test": "jest"

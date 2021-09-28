@@ -136,16 +136,18 @@ function _guardLifeCycleMethods() {
 }
 
 class ServiceBase {
+  _serviceManager;
   /**
    * @param {string} type
    * @param {string} name
    * @param {string[]} dependencies
    */
   constructor(type, name, dependencies = []) {
-    if (!name) name = this.constructor.role;
+    // TODO: Check where this comes from d
+    /*if (!name) name = this.constructor.role;
     if (this.constructor.dependencies) {
       dependencies = this.constructor.dependencies;
-    }
+    }*/
 
     if (typeof ServiceType[type] === 'undefined') {
       throw new Error('Invalid ServiceType: ' + type);

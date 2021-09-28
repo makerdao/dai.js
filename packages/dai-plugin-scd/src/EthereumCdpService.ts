@@ -21,6 +21,8 @@ import tracksTransactions from './utils/tracksTransactions';
 import assert from 'assert';
 
 export default class EthereumCdpService extends PrivateService {
+  freeEth;
+  
   /**
    * @param {string} name
    */
@@ -212,13 +214,13 @@ export default class EthereumCdpService extends PrivateService {
     });
   }
 
-  freePeth(cdpId, amount, { unit = PETH, promise } = {}) {
+  freePeth(cdpId, amount, { unit = PETH, promise = undefined } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toFixed('wei');
     return this._tubContract().free(hexCdpId, value, { promise });
   }
 
-  drawSai(cdpId, amount, { unit = SAI, promise } = {}) {
+  drawSai(cdpId, amount, { unit = SAI, promise = undefined } = {}) {
     const hexCdpId = numberToBytes32(cdpId);
     const value = getCurrency(amount, unit).toFixed('wei');
     return this._tubContract().draw(hexCdpId, value, { promise });

@@ -16,6 +16,16 @@ function _promisify(unsafeCallback) {
 }
 
 class ServiceManagerBase {
+  _init;
+  _connect;
+  _auth;
+  _type;
+  _state;
+  _initPromise;
+  _connectPromise;
+  _authPromise;
+  _settings;
+  
   /**
    * @param init {function|null}
    * @param connect {function|null}
@@ -63,7 +73,7 @@ class ServiceManagerBase {
   /**
    * @returns {Promise}
    */
-  initialize(settings) {
+  initialize(settings?) {
     // If our current state is preceding the INITIALIZING state, we need to set up initialization
     if (this._state.inState(ServiceState.CREATED)) {
       // Assert that there is no initPromise at this point
