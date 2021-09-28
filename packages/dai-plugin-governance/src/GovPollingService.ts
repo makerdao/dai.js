@@ -1,3 +1,5 @@
+// TODO Remove ignore
+// @ts-nocheck
 import { PrivateService } from '@makerdao/services-core';
 import { POLLING, BATCH_POLLING } from './utils/constants';
 import { MKR } from './utils/constants';
@@ -8,6 +10,8 @@ import tracksTransactions from './utils/tracksTransactions';
 const POSTGRES_MAX_INT = 2147483647;
 
 export default class GovPollingService extends PrivateService {
+  polls;
+
   constructor(name = 'govPolling') {
     super(name, [
       'smartContract',
