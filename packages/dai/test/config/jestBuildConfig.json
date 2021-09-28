@@ -1,6 +1,9 @@
 {
   "preset": "ts-jest",
   "rootDir": "../../",
+  "transform": {
+    "^.+\\.(ts|js)?$": "ts-jest"
+  },
   "testMatch": ["<rootDir>/test/build.spec.js"],
   "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"]
 }
