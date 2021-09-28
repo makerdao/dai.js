@@ -271,7 +271,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  unsafeWipeAll(id, { promise = undefined} = {}) {
+  unsafeWipeAll(id, { promise = undefined } = {}) {
     return this.proxyActions.wipeAll(
       this._managerAddress,
       this._adapterAddress('DAI'),

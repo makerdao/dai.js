@@ -1,8 +1,12 @@
-import { MKR } from '..';
+import { MKR } from '../tokens';
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export default class ChiefMigrate {
+  _manager;
+  _oldChief;
+  _oldProxyFactoryContract;
+
   constructor(manager) {
     this._manager = manager;
     this._oldChief = manager.get('smartContract').getContract('OLD_CHIEF');
@@ -16,8 +20,10 @@ export default class ChiefMigrate {
     const address = this._manager.get('accounts').currentAddress();
     const voteProxyAddress = await this._getVoteProxyAddress(address);
 
-    const mkrLockedDirectly = MKR.wei(await this._oldChief.deposits(address));
-    const mkrLockedViaProxy = MKR.wei(
+    const mkrLockedDirectly = (MKR as any).wei(
+      await this._oldChief.deposits(address)
+    );
+    const mkrLockedViaProxy = (MKR as any).wei(
       voteProxyAddress ? await this._oldChief.deposits(voteProxyAddress) : 0
     );
 

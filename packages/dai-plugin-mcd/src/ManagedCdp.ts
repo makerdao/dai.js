@@ -145,7 +145,11 @@ export class ManagedCdpClass {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
-  wipeAndFree(wipeAmount = DAI(0), freeAmount = this.currency(0), { promise = undefined } = {}) {
+  wipeAndFree(
+    wipeAmount = DAI(0),
+    freeAmount = this.currency(0),
+    { promise = undefined } = {}
+  ) {
     assert(wipeAmount && freeAmount, 'amounts must be defined');
     wipeAmount = castAsCurrency(wipeAmount, DAI);
     freeAmount = castAsCurrency(freeAmount, this.currency);
@@ -196,7 +200,6 @@ export class ManagedCdpClass {
     this.type.reset();
   }
 }
-
 
 export default {
   create: async function(createTxo, ilk, cdpManager) {

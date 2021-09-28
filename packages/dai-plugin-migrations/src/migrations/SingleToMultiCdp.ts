@@ -1,9 +1,11 @@
 import { tracksTransactionsWithOptions } from '../utils';
 import { getIdBytes, stringToBytes } from '../utils';
-import { SAI, MKR } from '..';
+import { SAI, MKR } from '../tokens';
 import dsValue from '../../contracts/abis/DSValue.json';
 
 export default class SingleToMultiCdp {
+  _manager;
+
   constructor(manager) {
     this._manager = manager;
     return this;

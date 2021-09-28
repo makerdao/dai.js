@@ -1,4 +1,6 @@
 export default class GlobalSettlementSavingsDai {
+  _container;
+
   constructor(container) {
     this._container = container;
     return this;

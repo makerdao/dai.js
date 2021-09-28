@@ -1,9 +1,11 @@
-import { DAI_1 } from '../index';
+import { DAI_1 } from '../tokens';
 import { stringToBytes } from '../utils';
 import BigNumber from 'bignumber.js';
 import { WAD } from '../constants';
 
 export default class GlobalSettlementDaiRedeemer {
+  _container;
+
   constructor(container) {
     this._container = container;
     return this;
@@ -48,7 +50,7 @@ export default class GlobalSettlementDaiRedeemer {
       .get('smartContract')
       .getContractAddress('MCD_END_1');
     const gemBalance = await vat.gem(stringToBytes(ilk), endAddress);
-    return BigNumber(gemBalance).div(WAD);
+    return new BigNumber(gemBalance).div(WAD);
   }
 
   async bagAmount(address) {
@@ -85,10 +87,10 @@ export default class GlobalSettlementDaiRedeemer {
       .getContractAddress('MCD_END_1');
     const ilkBytes = stringToBytes(ilk);
     const methodName = ilk.substring(0, 3) === 'ETH' ? 'cashETH' : 'cashGem';
+    /* prettier-ignore */
     return this._container
       .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')[methodName](
-        joinAddress, endAddress, ilkBytes, formattedAmount, {
+      .getContract('PROXY_ACTIONS_END')[methodName](joinAddress, endAddress, ilkBytes, formattedAmount, {
         dsProxy: true
       });
   }

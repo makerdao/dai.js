@@ -1,4 +1,6 @@
 export default class RedeemCollateral {
+  _manager;
+
   constructor(manager) {
     this._manager = manager;
     return this;

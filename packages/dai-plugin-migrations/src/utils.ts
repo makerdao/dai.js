@@ -46,7 +46,7 @@ last object which contains a key named `promise`.
 
 export const tracksTransactions = tracksTransactionsWithOptions({});
 
-export function tracksTransactionsWithOptions({ numArguments }) {
+export function tracksTransactionsWithOptions({ numArguments = undefined }) {
   return (target, name, descriptor) => {
     const original = descriptor.value;
     const correctArgsLength = numArguments || original.length;

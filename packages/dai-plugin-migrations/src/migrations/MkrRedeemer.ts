@@ -1,4 +1,5 @@
 export default class MkrRedeemer {
+  _manager;
   constructor(manager) {
     this._manager = manager;
     return this;

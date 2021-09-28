@@ -1,6 +1,9 @@
-import { DAI } from '..';
+import { DAI } from '../tokens';
 
 export default class RedeemSai {
+  _manager;
+  _tap;
+
   constructor(manager) {
     this._manager = manager;
     this._tap = this._manager.get('smartContract').getContract('SAI_TAP');

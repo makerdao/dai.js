@@ -1,5 +1,5 @@
 // not run through babel, so we must use an ES5-safe export
-module.exports = {
+export default {
   SAI_TUB: require('./abis/SaiTub.json'),
   MCD_END_1: require('./abis/End.json'),
   MCD_VAT_1: require('./abis/Vat.json'),

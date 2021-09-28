@@ -2,7 +2,13 @@ import assert from 'assert';
 import { ServiceRoles } from './constants';
 import { stringToBytes } from './utils';
 import { DAI, ETH, WETH } from './tokens';
-import { annualStabilityFee, debtCeiling, liquidationPenalty, liquidationRatio, price } from './math';
+import {
+  annualStabilityFee,
+  debtCeiling,
+  liquidationPenalty,
+  liquidationRatio,
+  price
+} from './math';
 
 export default class CdpType {
   _cdpTypeService;

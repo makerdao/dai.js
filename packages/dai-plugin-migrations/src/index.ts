@@ -1,10 +1,11 @@
-import { createCurrency } from '@makerdao/currency';
 import testnetAddresses from '../contracts/addresses/testnet.json';
 import kovanAddresses from '../contracts/addresses/kovan.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
 import abiMap from '../contracts/abiMap';
 import MigrationService from './MigrationService';
+import { OLD_MKR, DAI_1 } from './tokens';
 import { ServiceRoles as ServiceRoles_ } from './constants';
+export * from './tokens';
 export const ServiceRoles = ServiceRoles_;
 const { MIGRATION } = ServiceRoles;
 
@@ -29,11 +30,6 @@ const allContracts = Object.entries(testnetAddresses).reduce(
   {}
 );
 
-export const OLD_MKR = createCurrency('OLD_MKR');
-export const SAI = createCurrency('SAI');
-export const DAI = createCurrency('DAI');
-export const MKR = createCurrency('MKR');
-
 function overrideContractAddresses(addressOverrides, contracts) {
   Object.entries(addressOverrides).forEach(([name, overrideAddress]) => {
     if (contracts[name]) {
@@ -43,8 +39,6 @@ function overrideContractAddresses(addressOverrides, contracts) {
 
   return contracts;
 }
-
-export const DAI_1 = createCurrency('DAI_1');
 
 export default {
   addConfig: (_, config: { addressOverrides?: any }) => {

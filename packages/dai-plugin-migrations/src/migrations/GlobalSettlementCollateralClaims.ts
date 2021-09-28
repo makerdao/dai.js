@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { RAY } from '../constants';
 
 export default class GlobalSettlementCollateralClaims {
+  _container;
   constructor(container) {
     this._container = container;
     return this;
@@ -43,7 +44,7 @@ export default class GlobalSettlementCollateralClaims {
         return { id, owed, redeemable, ilk, urn, tag: tagDivRay };
       })
     );
-    if (!freeCollateral.some(v => v.redeemable)) return false;
+    if (!freeCollateral.some((v: any) => v.redeemable)) return false;
     return freeCollateral;
   }
 
@@ -62,10 +63,10 @@ export default class GlobalSettlementCollateralClaims {
       .get('smartContract')
       .getContractAddress(this._ilkToAdapter(ilk));
     const methodName = ilk.substring(0, 3) === 'ETH' ? 'freeETH' : 'freeGem';
+    /* prettier-ignore */
     return this._container
       .get('smartContract')
-      .getContract('PROXY_ACTIONS_END')[methodName](
-        cdpManagerAddress, joinAddress, endAddress, cdpId, {
+      .getContract('PROXY_ACTIONS_END')[methodName](cdpManagerAddress, joinAddress, endAddress, cdpId, {
         dsProxy: true
       });
   }

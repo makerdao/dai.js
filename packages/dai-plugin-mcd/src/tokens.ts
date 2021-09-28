@@ -43,51 +43,50 @@ export const UNIV2UNIETH = createCurrency('UNIV2UNIETH');
 export const UNIV2WBTCDAI = createCurrency('UNIV2WBTCDAI');
 export const UNIV2AAVEETH = createCurrency('UNIV2AAVEETH');
 export const UNIV2DAIUSDT = createCurrency('UNIV2DAIUSDT');
-  
+
 export const SAI = createCurrency('SAI');
 
 export const defaultCdpTypes = [
-    { currency: ETH, ilk: 'ETH-A' },
-    { currency: ETH, ilk: 'ETH-B' },
-    { currency: ETH, ilk: 'ETH-C' },
-    { currency: BAT, ilk: 'BAT-A' },
-    { currency: USDC, ilk: 'USDC-A', decimals: 6 },
-    { currency: WBTC, ilk: 'WBTC-A', decimals: 8 },
-    { currency: USDC, ilk: 'USDC-B', decimals: 6 },
-    { currency: TUSD, ilk: 'TUSD-A', decimals: 18 },
-    { currency: KNC, ilk: 'KNC-A', decimals: 18 },
-    { currency: ZRX, ilk: 'ZRX-A', decimals: 18 },
-    { currency: MANA, ilk: 'MANA-A', decimals: 18 },
-    { currency: USDT, ilk: 'USDT-A', decimals: 6 },
-    { currency: PAXUSD, ilk: 'PAXUSD-A', decimals: 18 },
-    { currency: COMP, ilk: 'COMP-A', decimals: 18 },
-    { currency: LRC, ilk: 'LRC-A', decimals: 18 },
-    { currency: LINK, ilk: 'LINK-A', decimals: 18 },
-    { currency: YFI, ilk: 'YFI-A', decimals: 18 },
-    { currency: BAL, ilk: 'BAL-A', decimals: 18 },
-    { currency: GUSD, ilk: 'GUSD-A', decimals: 2 },
-    { currency: UNI, ilk: 'UNI-A', decimals: 18 },
-    { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 },
-    { currency: AAVE, ilk: 'AAVE-A', decimals: 18 },
-    { currency: UNIV2DAIETH, ilk: 'UNIV2DAIETH-A', decimals: 18 },
-    { currency: UNIV2WBTCETH, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
-    { currency: UNIV2USDCETH, ilk: 'UNIV2USDCETH-A', decimals: 18 },
-    { currency: UNIV2DAIUSDC, ilk: 'UNIV2DAIUSDC-A', decimals: 18 },
-    { currency: UNIV2ETHUSDT, ilk: 'UNIV2ETHUSDT-A', decimals: 18 },
-    { currency: UNIV2LINKETH, ilk: 'UNIV2LINKETH-A', decimals: 18 },
-    { currency: UNIV2UNIETH, ilk: 'UNIV2UNIETH-A', decimals: 18 },
-    { currency: UNIV2WBTCDAI, ilk: 'UNIV2WBTCDAI-A', decimals: 18 },
-    { currency: UNIV2AAVEETH, ilk: 'UNIV2AAVEETH-A', decimals: 18 },
-    { currency: UNIV2DAIUSDT, ilk: 'UNIV2DAIUSDT-A', decimals: 18 }
-  ];
-  
+  { currency: ETH, ilk: 'ETH-A' },
+  { currency: ETH, ilk: 'ETH-B' },
+  { currency: ETH, ilk: 'ETH-C' },
+  { currency: BAT, ilk: 'BAT-A' },
+  { currency: USDC, ilk: 'USDC-A', decimals: 6 },
+  { currency: WBTC, ilk: 'WBTC-A', decimals: 8 },
+  { currency: USDC, ilk: 'USDC-B', decimals: 6 },
+  { currency: TUSD, ilk: 'TUSD-A', decimals: 18 },
+  { currency: KNC, ilk: 'KNC-A', decimals: 18 },
+  { currency: ZRX, ilk: 'ZRX-A', decimals: 18 },
+  { currency: MANA, ilk: 'MANA-A', decimals: 18 },
+  { currency: USDT, ilk: 'USDT-A', decimals: 6 },
+  { currency: PAXUSD, ilk: 'PAXUSD-A', decimals: 18 },
+  { currency: COMP, ilk: 'COMP-A', decimals: 18 },
+  { currency: LRC, ilk: 'LRC-A', decimals: 18 },
+  { currency: LINK, ilk: 'LINK-A', decimals: 18 },
+  { currency: YFI, ilk: 'YFI-A', decimals: 18 },
+  { currency: BAL, ilk: 'BAL-A', decimals: 18 },
+  { currency: GUSD, ilk: 'GUSD-A', decimals: 2 },
+  { currency: UNI, ilk: 'UNI-A', decimals: 18 },
+  { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 },
+  { currency: AAVE, ilk: 'AAVE-A', decimals: 18 },
+  { currency: UNIV2DAIETH, ilk: 'UNIV2DAIETH-A', decimals: 18 },
+  { currency: UNIV2WBTCETH, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
+  { currency: UNIV2USDCETH, ilk: 'UNIV2USDCETH-A', decimals: 18 },
+  { currency: UNIV2DAIUSDC, ilk: 'UNIV2DAIUSDC-A', decimals: 18 },
+  { currency: UNIV2ETHUSDT, ilk: 'UNIV2ETHUSDT-A', decimals: 18 },
+  { currency: UNIV2LINKETH, ilk: 'UNIV2LINKETH-A', decimals: 18 },
+  { currency: UNIV2UNIETH, ilk: 'UNIV2UNIETH-A', decimals: 18 },
+  { currency: UNIV2WBTCDAI, ilk: 'UNIV2WBTCDAI-A', decimals: 18 },
+  { currency: UNIV2AAVEETH, ilk: 'UNIV2AAVEETH-A', decimals: 18 },
+  { currency: UNIV2DAIUSDT, ilk: 'UNIV2DAIUSDT-A', decimals: 18 }
+];
+
 export const defaultTokens = [
-    ...new Set([
-      ...defaultCdpTypes.map(type => type.currency),
-      DAI,
-      WETH,
-      SAI,
-      DSR_DAI
-    ])
-  ];
-  
+  ...new Set([
+    ...defaultCdpTypes.map(type => type.currency),
+    DAI,
+    WETH,
+    SAI,
+    DSR_DAI
+  ])
+];
