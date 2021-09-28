@@ -48,25 +48,25 @@ describe('Savings Service', () => {
     dai = maker.getToken(DAI);
     proxyAddress = await maker.service('proxy').ensureProxy();
     await dai.approveUnlimited(proxyAddress);
-  });
+  }, 30000);
 
   afterAll(async () => {
     await maker.service('allowance').removeAllowance('DAI', proxyAddress);
-  });
+  }, 30000);
 
   beforeEach(async () => {
     maker.service('accounts').useAccount('default');
     snapshotData = await takeSnapshot(maker);
-  });
+  }, 30000);
 
   afterEach(async () => {
     await restoreSnapshot(snapshotData, maker);
-  });
+  }, 30000);
 
   test('get dai savings rate', async () => {
     const dsr = await service.getYearlyRate();
     expect(dsr.toNumber()).toBeCloseTo(0.01);
-  });
+  }, 30000);
 
   test('get total amount of dai in pot', async () => {
     await makeSomeDai(100);
@@ -77,7 +77,7 @@ describe('Savings Service', () => {
 
     const potTotalAfterJoin = await service.getTotalDai();
     expect(potTotalAfterJoin.toNumber()).toBe(2);
-  });
+  }, 30000);
 
   test('get total amount of dai in pot after some time', async () => {
     await makeSomeDai(100);
@@ -98,18 +98,18 @@ describe('Savings Service', () => {
       joinAmount + accruedInterest,
       10
     );
-  });
+  }, 30000);
 
   test('check amount in balance', async () => {
     const amount = await service.balance();
     expect(DAI.isInstance(amount)).toBeTruthy();
-  });
+  }, 30000);
 
   test('check amount using balance of', async () => {
     const proxyAddress = await maker.currentProxy();
     const amount = await service.balanceOf(proxyAddress);
     expect(DAI.isInstance(amount)).toBeTruthy();
-  });
+  }, 30000);
 
   test('get balance without proxy', async () => {
     const { address, key } = TestAccountProvider.nextAccount();
@@ -121,7 +121,7 @@ describe('Savings Service', () => {
     const balance = await service.balance();
 
     expect(balance.toNumber()).toBe(0);
-  });
+  }, 30000);
 
   test('check balance after join', async () => {
     await makeSomeDai(100);
@@ -140,7 +140,7 @@ describe('Savings Service', () => {
       joinAmount + accruedInterest,
       10
     );
-  });
+  }, 30000);
 
   test('check balance after join with multiple accounts', async () => {
     await makeSomeDai(100);
@@ -177,7 +177,7 @@ describe('Savings Service', () => {
       otherAccountJoinAmount + accruedInterest,
       10
     );
-  });
+  }, 30000);
 
   test('cannot exit pot more than joined', async () => {
     await makeSomeDai(100);
@@ -191,7 +191,7 @@ describe('Savings Service', () => {
 
     const endingBalance = await dai.balance();
     expect(endingBalance).toEqual(startingBalance);
-  });
+  }, 30000);
 
   test('join and exit pot', async () => {
     await makeSomeDai(100);
@@ -231,7 +231,7 @@ describe('Savings Service', () => {
         endingBalance.toBigNumber().toString()
       )
     ).toBe(true);
-  });
+  }, 30000);
 
   test('exit all', async () => {
     await makeSomeDai(100);

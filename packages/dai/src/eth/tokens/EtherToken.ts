@@ -1,8 +1,10 @@
-// @ts-nocheck
 import { getCurrency, ETH } from '../Currency';
 import tracksTransactions from '../../utils/tracksTransactions';
 
 export default class EtherToken {
+  _web3;
+  _gasService;
+  _transactionManager;
   constructor(web3Service, gasService, transactionManager) {
     this._web3 = web3Service;
     this._gasService = gasService;

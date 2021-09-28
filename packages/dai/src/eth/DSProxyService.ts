@@ -1,11 +1,13 @@
-// @ts-nocheck
 import tracksTransactions from '../utils/tracksTransactions';
 import { PrivateService } from '@makerdao/services-core';
 import abis from '../../contracts/abis';
 import { Contract } from 'ethers';
 
 export default class DSProxyService extends PrivateService {
-  _currentProxy: any;
+  _currentProxy;
+  _smartContractService;
+  _currentAddress;
+
   constructor(name = 'proxy') {
     super(name, ['web3']);
   }

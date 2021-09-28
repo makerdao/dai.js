@@ -1,4 +1,3 @@
-// @ts-nocheck
 import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
