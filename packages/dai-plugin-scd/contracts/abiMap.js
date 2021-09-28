@@ -1,5 +1,5 @@
 // might not be run through babel in the future, so we must use an ES5-safe export
-module.exports = {
+export default {
   SAI_PIP: require('./abis/DSValue.json'),
   SAI_PEP: require('./abis/DSValue.json'),
   SAI_PIT: require('./abis/GemPit.json'),

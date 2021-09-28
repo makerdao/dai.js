@@ -22,7 +22,7 @@ import assert from 'assert';
 
 export default class EthereumCdpService extends PrivateService {
   freeEth;
-  
+
   /**
    * @param {string} name
    */

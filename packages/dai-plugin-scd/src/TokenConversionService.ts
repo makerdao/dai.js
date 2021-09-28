@@ -20,7 +20,7 @@ export default class TokenConversionService extends PrivateService {
   }
 
   @tracksTransactions
-  async convertWethToPeth(amount, { unit = WETH, promise } = {}) {
+  async convertWethToPeth(amount, { unit = WETH, promise = undefined } = {}) {
     const pethContract = this._getToken(PETH);
 
     await this.get('allowance').requireAllowance(

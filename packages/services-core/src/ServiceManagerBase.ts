@@ -25,7 +25,7 @@ class ServiceManagerBase {
   _connectPromise;
   _authPromise;
   _settings;
-  
+
   /**
    * @param init {function|null}
    * @param connect {function|null}

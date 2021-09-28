@@ -191,20 +191,20 @@ export default class LiquidationService extends PublicService {
               const obj = {
                 tic,
                 created: tic,
-                tab : new BigNumber(s.tab).div(RAD),
-                lot : new BigNumber(s.lot).div(WAD),
-                top : new BigNumber(s.top).div(RAY),
-                usr : s.usr,
-                saleId : id,
-                active : true,
-                endDate : new Date(
+                tab: new BigNumber(s.tab).div(RAD),
+                lot: new BigNumber(s.lot).div(WAD),
+                top: new BigNumber(s.top).div(RAY),
+                usr: s.usr,
+                saleId: id,
+                active: true,
+                endDate: new Date(
                   new BigNumber(s.tic.toNumber() + tail).times(1000).toNumber()
                 ),
-                chost : chost,
-                cusp : cusp,
-                ilk : ilk,
+                chost: chost,
+                cusp: cusp,
+                ilk: ilk
               };
-              
+
               return obj;
             });
         })
@@ -245,13 +245,9 @@ export default class LiquidationService extends PublicService {
   async take(ilk, auctionId, amount, maxPrice, address, { promise }) {
     const id = numberToBytes32(auctionId);
 
-    const amt = new BigNumber(amount)
-      .times(WAD)
-      .toFixed();
+    const amt = new BigNumber(amount).times(WAD).toFixed();
 
-    const max = new BigNumber(maxPrice)
-      .times(RAY)
-      .toFixed();
+    const max = new BigNumber(maxPrice).times(RAY).toFixed();
 
     return await this._clipperContractByIlk(ilk).take(
       id,
@@ -346,27 +342,21 @@ export default class LiquidationService extends PublicService {
   @tracksTransactions
   async joinDaiToAdapter(amount, { promise }) {
     const address = this.get('web3').currentAddress();
-    const amt = new BigNumber(amount)
-      .times(WAD)
-      .toFixed();
+    const amt = new BigNumber(amount).times(WAD).toFixed();
     return await this._joinDaiAdapter().join(address, amt, { promise });
   }
 
   @tracksTransactions
   async exitDaiFromAdapter(amount, { promise }) {
     const address = this.get('web3').currentAddress();
-    const amt = new BigNumber(amount)
-      .times(WAD)
-      .toFixed();
+    const amt = new BigNumber(amount).times(WAD).toFixed();
     return await this._joinDaiAdapter().exit(address, amt, { promise });
   }
 
   @tracksTransactions
   async exitGemFromAdapter(ilk, amount, { promise }) {
     const address = this.get('web3').currentAddress();
-    const amt = new BigNumber(amount)
-      .times(WAD)
-      .toFixed();
+    const amt = new BigNumber(amount).times(WAD).toFixed();
     return await this._joinGemAdapter(ilk).exit(address, amt, { promise });
   }
 

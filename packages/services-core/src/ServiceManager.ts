@@ -49,7 +49,7 @@ class ServiceManager extends ServiceManagerBase {
   _name;
   _dependencies;
   _injections;
-  
+
   /**
    * @param {*} service
    * @returns {boolean}
@@ -159,7 +159,7 @@ class ServiceManager extends ServiceManagerBase {
 
   createService() {
     const self = this;
-    return { manager: ():ServiceManager => self };
+    return { manager: (): ServiceManager => self };
   }
 }
 
