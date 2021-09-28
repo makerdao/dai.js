@@ -5,7 +5,6 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "tsc": "tsc",
     "build": "yarn lerna run build",
     "lint": "eslint packages/**/src packages/**/test",
     "prettier": "prettier --single-quote --write 'packages/**/{src,test,contracts}/**/*.js'",
@@ -33,7 +32,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "lerna": "^3.15.0"
+    "lerna": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",

@@ -29,13 +29,14 @@
   },
   "dependencies": {
     "@makerdao/currency": "0.9.9",
+    "@makerdao/dai": "^0.32.13",
     "@makerdao/services-core": "^0.10.0",
     "assert": "^2.0.0",
     "debug": "^4.1.1",
     "ramda": "^0.25.0"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.31"
+    "@makerdao/dai": "^0.32.13"
   },
   "devDependencies": {
     "@makerdao/dai-plugin-config": "^0.2.14-rc.1",

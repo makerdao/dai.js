@@ -26,7 +26,6 @@
     "@makerdao/currency": "^0.9.9",
     "@makerdao/services-core": "^0.9.9",
     "assert": "^2.0.0",
-    "babel-eslint": "^10.0.3",
     "bignumber.js": "^8.1.1",
     "chokidar": "^2.0.4",
     "copyfiles": "^2.0.0",

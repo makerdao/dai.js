@@ -7,7 +7,7 @@
   "unpkg": "dist/index.js",
   "typings": "dist/index.d.ts",
   "jsdelivr": "dist/dai-plugin-mcd.esm.js",
-  "module":  "dist/dai-plugin-mcd.esm.js",
+  "module": "dist/dai-plugin-mcd.esm.js",
   "scripts": {
     "build": "yarn clean && tsdx build",
     "clean": "rm -rf ./dist",
@@ -20,11 +20,12 @@
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {
-    "@makerdao/dai": ">=0.18.9"
+    "@makerdao/dai": ">=0.18.9",
+    "@makerdao/services-core": "^0.10.0"
   },
   "dependencies": {
     "@makerdao/currency": "0.9.9",
-    "@makerdao/services-core": "^0.9.9",
+    "@makerdao/services-core": "^0.10.0",
     "bignumber.js": "^8.1.1",
     "rxjs": "^6.5.4"
   },
