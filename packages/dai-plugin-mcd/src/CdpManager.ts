@@ -5,7 +5,7 @@ import tracksTransactions, {
 } from './utils/tracksTransactions';
 import { ServiceRoles } from './constants';
 import assert from 'assert';
-import ManagedCdp from './ManagedCdp';
+import ManagedCdp, { ManagedCdpClass } from './ManagedCdp';
 import {
   castAsCurrency,
   stringToBytes,
@@ -14,11 +14,17 @@ import {
 } from './utils';
 import has from 'lodash/has';
 import padStart from 'lodash/padStart';
-import { DAI, ETH, GNT } from './index';
+import { DAI, ETH, GNT } from './tokens';
 const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA } = ServiceRoles;
 import getEventHistoryImpl from './EventHistory';
+import BigNumber from 'bignumber.js';
 
 export default class CdpManager extends LocalService {
+  _getCdpIdsPromises;
+  _getUrnPromises;
+  _instanceCache;
+  _eventHistoryCache;
+
   constructor(name = CDP_MANAGER) {
     super(name, [
       'smartContract',
@@ -62,7 +68,7 @@ export default class CdpManager extends LocalService {
       await promiseWait(5000);
     }
 
-    cdp = new ManagedCdp(id, ilk, this, options);
+    cdp = new ManagedCdpClass(id, ilk, this, options);
 
     this._putInInstanceCache(id, cdp, cacheEnabled);
     if (!has(options, 'prefetch') || options.prefetch) await cdp.prefetch();
@@ -77,11 +83,11 @@ export default class CdpManager extends LocalService {
     const ids = await this.getCdpIds(proxyAddress, descending);
     const debts = await Promise.all(
       ids.map(c => {
-        const cdp = new ManagedCdp(c.id, c.ilk, this);
+        const cdp = new ManagedCdpClass(c.id, c.ilk, this);
         return cdp.prefetch().then(() => cdp.debtValue);
       })
     );
-    return debts.reduce((a, b) => a.plus(b));
+    return debts.reduce((a: BigNumber, b: BigNumber) => a.plus(b));
   }
 
   @tracksTransactions
@@ -253,7 +259,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  async wipeAll(id, owner, { promise } = {}) {
+  async wipeAll(id, owner, { promise = undefined } = {}) {
     if (!owner) owner = await this.getOwner(id);
     return this.proxyActions.safeWipeAll(
       this._managerAddress,
@@ -265,7 +271,7 @@ export default class CdpManager extends LocalService {
   }
 
   @tracksTransactions
-  unsafeWipeAll(id, { promise } = {}) {
+  unsafeWipeAll(id, { promise = undefined} = {}) {
     return this.proxyActions.wipeAll(
       this._managerAddress,
       this._adapterAddress('DAI'),

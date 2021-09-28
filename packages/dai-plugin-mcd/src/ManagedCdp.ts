@@ -4,10 +4,18 @@ import tracksTransactions, {
 } from './utils/tracksTransactions';
 import { ServiceRoles } from './constants';
 import assert from 'assert';
-import { DAI } from './index';
+import { DAI } from './tokens';
 import * as math from './math';
 
-export default class ManagedCdp {
+export class ManagedCdpClass {
+  id;
+  ilk;
+  _cdpManager;
+  type;
+  currency;
+  cache;
+  _urnInfoPromise;
+
   constructor(id, ilk, cdpManager, options = { prefetch: true }) {
     assert(typeof id === 'number', 'ID must be a number');
     this.id = id;
@@ -137,7 +145,7 @@ export default class ManagedCdp {
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })
-  wipeAndFree(wipeAmount = DAI(0), freeAmount = this.currency(0), { promise }) {
+  wipeAndFree(wipeAmount = DAI(0), freeAmount = this.currency(0), { promise = undefined } = {}) {
     assert(wipeAmount && freeAmount, 'amounts must be defined');
     wipeAmount = castAsCurrency(wipeAmount, DAI);
     freeAmount = castAsCurrency(freeAmount, this.currency);
@@ -189,9 +197,12 @@ export default class ManagedCdp {
   }
 }
 
-ManagedCdp.create = async function(createTxo, ilk, cdpManager) {
-  const id = cdpManager.getNewCdpId(createTxo);
-  const cdp = new ManagedCdp(id, ilk, cdpManager);
-  await cdp.prefetch();
-  return cdp;
+
+export default {
+  create: async function(createTxo, ilk, cdpManager) {
+    const id = cdpManager.getNewCdpId(createTxo);
+    const cdp = new ManagedCdpClass(id, ilk, cdpManager);
+    await cdp.prefetch();
+    return cdp;
+  }
 };

@@ -1,10 +1,20 @@
 import assert from 'assert';
 import { ServiceRoles } from './constants';
 import { stringToBytes } from './utils';
-import { DAI, ETH, WETH } from './index';
-import * as math from './math';
+import { DAI, ETH, WETH } from './tokens';
+import { annualStabilityFee, debtCeiling, liquidationPenalty, liquidationRatio, price } from './math';
 
 export default class CdpType {
+  _cdpTypeService;
+  _systemData;
+  _web3Service;
+  currency;
+  decimals;
+  ilk;
+  _ilkBytes;
+  cache;
+  _prefetchPromise;
+
   constructor(
     cdpTypeService,
     { currency, ilk, decimals },
@@ -34,15 +44,15 @@ export default class CdpType {
   }
 
   get debtCeiling() {
-    return math.debtCeiling(this._getCached('vatInfo').line);
+    return debtCeiling(this._getCached('vatInfo').line);
   }
 
   get liquidationRatio() {
-    return math.liquidationRatio(this._getCached('spotInfo').mat);
+    return liquidationRatio(this._getCached('spotInfo').mat);
   }
 
   get price() {
-    return math.price(
+    return price(
       this.currency,
       this._getCached('par'),
       this._getCached('vatInfo').spot,
@@ -51,11 +61,11 @@ export default class CdpType {
   }
 
   get liquidationPenalty() {
-    return math.liquidationPenalty(this._getCached('catInfo').chop);
+    return liquidationPenalty(this._getCached('catInfo').chop);
   }
 
   get annualStabilityFee() {
-    return math.annualStabilityFee(this._getCached('jugInfo').duty);
+    return annualStabilityFee(this._getCached('jugInfo').duty);
   }
 
   async ilkInfo(contract = 'vat') {

@@ -1,5 +1,5 @@
 // not run through babel, so we must use an ES5-safe export
-module.exports = {
+export default {
   REP: require('./abis/REP.json'),
   ZRX: require('./abis/ZRX.json'),
   OMG: require('./abis/OMG.json'),

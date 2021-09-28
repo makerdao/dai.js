@@ -1,12 +1,14 @@
 import { PublicService } from '@makerdao/services-core';
 import { ServiceRoles } from './constants';
-import { DAI } from './index';
+import { DAI } from './tokens';
 import BigNumber from 'bignumber.js';
 import { RAY, WAD, SECONDS_PER_YEAR } from './constants';
 import tracksTransactions from './utils/tracksTransactions';
 import { getDsrEventHistory } from './EventHistory';
 
 export default class SavingsService extends PublicService {
+  _eventHistoryCache;
+
   constructor(name = ServiceRoles.SAVINGS) {
     super(name, [
       'smartContract',

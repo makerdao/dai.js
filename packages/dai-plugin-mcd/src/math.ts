@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { createCurrencyRatio } from '@makerdao/currency';
 import { RAY, WAD } from './constants';
-import { DAI, USD } from './index';
+import { DAI, USD } from './tokens';
 
 // NOTE: When a function below has an argument with the same name as a function
 // defined earlier in the file, that means it expects that argument's value to
