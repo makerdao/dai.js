@@ -1,3 +1,6 @@
+// TODO: Rewrite this service to make it more simple
+// @ts-nocheck
+/* eslint-disable */
 import { PublicService } from '@makerdao/services-core';
 import { createWatcher } from '@makerdao/multicall';
 import debug from 'debug';
@@ -29,6 +32,25 @@ const catchNestedErrors = key => f =>
   })(f);
 
 export default class MulticallService extends PublicService {
+  _schemas = [];
+  _schemaByObservableKey = {};
+  _schemaInstances = {};
+  _subjects = {};
+  _observables = {};
+  _watcherUpdates = null;
+  _schemaSubscribers = {};
+  _totalSchemaSubscribers = 0;
+  _totalActiveSchemas = 0;
+  _multicallResultCache = {};
+  _addresses = {};
+  _removeSchemaTimers = {};
+  _removeSchemaDelay;
+  _debounceTime;
+  _latestDebounceTime;
+  _latestTimeout;
+  _connectedAddress;
+  _watcher;
+
   constructor(name = 'multicall') {
     super(name, ['web3', 'smartContract']);
 
@@ -46,7 +68,15 @@ export default class MulticallService extends PublicService {
     this._removeSchemaTimers = {};
   }
 
-  initialize(settings = {}) {
+  initialize(
+    settings = {
+      addresses: undefined,
+      removeSchemaDelay: 1000,
+      debounceTime: 1,
+      latestDebounceTime: 1,
+      latestTimeout: 10000
+    }
+  ) {
     this._addresses = settings.addresses || this.get('smartContract').getContractAddresses();
     this._removeSchemaDelay = settings.removeSchemaDelay || 1000;
     this._debounceTime = settings.debounceTime || 1;
@@ -58,7 +88,7 @@ export default class MulticallService extends PublicService {
     this._connectedAddress = this.get('web3').currentAddress();
   }
 
-  createWatcher({ useWeb3Provider = false, interval = 'block', rpcUrl, ...config } = {}) {
+  createWatcher({ useWeb3Provider = false, interval = 'block', rpcUrl = '', ...config } = {}) {
     const web3 = this.get('web3');
     config = {
       multicallAddress: this.get('smartContract').getContractAddress('MULTICALL'),

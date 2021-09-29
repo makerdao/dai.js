@@ -6,7 +6,7 @@ import {
   liquidationPrice as calcLiquidationPrice,
   minSafeCollateralAmount as calcMinSafeCollateralAmount
 } from '../math';
-import { USD, DAI, DSR_DAI, defaultCdpTypes, ALLOWANCE_AMOUNT } from '../';
+import { USD, DAI, DSR_DAI, defaultCdpTypes, ALLOWANCE_AMOUNT } from '..';
 import BigNumber from 'bignumber.js';
 import {
   DEBT_CEILING,
@@ -626,8 +626,8 @@ export const systemCollateralization = {
           totalDebtValue: acc.totalDebtValue.plus(debtValue.toBigNumber())
         }),
         {
-          totalCollateralValue: BigNumber(0),
-          totalDebtValue: BigNumber(0)
+          totalCollateralValue: new BigNumber(0),
+          totalDebtValue: new BigNumber(0)
         }
       );
 

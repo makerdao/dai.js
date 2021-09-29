@@ -75,7 +75,11 @@ class Container {
       throw new Error('Provide a service name.');
     }
 
-    if (!this._services[name] && throwIfMissing && extractedServices.includes(name)) {
+    if (
+      !this._services[name] &&
+      throwIfMissing &&
+      extractedServices.includes(name)
+    ) {
       throw new ExtractedServiceError(name);
     }
 
