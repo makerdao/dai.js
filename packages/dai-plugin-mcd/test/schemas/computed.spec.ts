@@ -318,9 +318,9 @@ test(VAULT, async () => {
   const expectedCollateralAvailableValue = USD(750);
   const expectedUnlockedCollateral = fromWei(0);
   const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
-  const expectedLiqPenalty = BigNumber('0.05');
+  const expectedLiqPenalty = new BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
-  const expectedDebtFloor = BigNumber('100');
+  const expectedDebtFloor = new BigNumber('100');
   const expectedCollateralDebtAvailable = DAI(999900);
 
   const vault = await maker.latest(VAULT, cdpId);
@@ -395,17 +395,17 @@ test(BALANCE, async () => {
 
   expect(ethBalance.symbol).toEqual('ETH');
   expect(batBalance.symbol).toEqual('BAT');
-  expect(ethBalance.toBigNumber()).toEqual(BigNumber('100'));
-  expect(batBalance.toBigNumber()).toEqual(BigNumber('9900'));
+  expect(ethBalance.toBigNumber()).toEqual(new BigNumber('100'));
+  expect(batBalance.toBigNumber()).toEqual(new BigNumber('9900'));
 
   const daiBalance = await maker.latest(BALANCE, 'DAI', address);
   const wethBalance = await maker.latest(BALANCE, 'WETH', address);
 
   expect(daiBalance.symbol).toEqual('DAI');
-  expect(daiBalance.toBigNumber()).toEqual(BigNumber('199'));
+  expect(daiBalance.toBigNumber()).toEqual(new BigNumber('199'));
 
   expect(wethBalance.symbol).toEqual('WETH');
-  expect(wethBalance.toBigNumber()).toEqual(BigNumber('0'));
+  expect(wethBalance.toBigNumber()).toEqual(new BigNumber('0'));
 
   const dsrDaiBalance = await maker.latest(BALANCE, 'DSR-DAI', address);
   expect(dsrDaiBalance.symbol).toEqual('DSR-DAI');
@@ -492,10 +492,10 @@ test(COLLATERAL_TYPE_DATA, async () => {
   const collateralType = 'ETH-A';
   const expectedColTypePrice = createCurrencyRatio(USD, ETH)(180);
   const expectedLiqRatio = createCurrencyRatio(USD, DAI)(1.5);
-  const expectedLiqPenalty = BigNumber('0.05');
+  const expectedLiqPenalty = new BigNumber('0.05');
   const expectedAnnStabilityFee = 0.04999999999989363;
-  const expectedPriceWithSafetyMargin = BigNumber('120');
-  const expectedDebtFloor = BigNumber('100');
+  const expectedPriceWithSafetyMargin = new BigNumber('120');
+  const expectedDebtFloor = new BigNumber('100');
   const expectedCollateralDebtAvailable = DAI(999900);
 
   const colData = await maker.latest(COLLATERAL_TYPE_DATA, collateralType);

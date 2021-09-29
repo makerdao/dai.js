@@ -12,8 +12,9 @@ export async function mcdMaker({
   preset = 'test',
   network = 'testnet',
   prefetch = true,
-  addressOverrides,
+  addressOverrides = undefined,
   cdpTypes,
+  multicall = false,
   ...settings
 } = {}) {
   const maker = await Maker.create(preset, {
@@ -21,6 +22,7 @@ export async function mcdMaker({
     web3: {
       pollingInterval: 100
     },
+    multicall,
     ...settings
   });
   return maker;

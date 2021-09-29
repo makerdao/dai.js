@@ -6,7 +6,8 @@ async function createMaker(privateKey) {
 }
 
 test('create without any options', async () => {
-  await Maker.create('test');
+  const created = await Maker.create('test');
+  expect(created).toBeDefined();
 });
 
 test('throws for delegated cdp methods', async () => {

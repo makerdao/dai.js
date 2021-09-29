@@ -1,12 +1,8 @@
-import callGanache from './callGanache';
-import mineBlocks from './mineBlocks';
-import { takeSnapshot, restoreSnapshot } from './snapshot';
-import TestAccountProvider from './TestAccountProvider';
+import cGanache from './callGanache';
+import mBlocks from './mineBlocks';
+import tAccountProvider from './TestAccountProvider';
 
-module.exports = {
-  callGanache,
-  mineBlocks,
-  takeSnapshot,
-  restoreSnapshot,
-  TestAccountProvider
-};
+export const callGanache = cGanache;
+export const mineBlocks = mBlocks;
+export * from './snapshot';
+export const TestAccountProvider = tAccountProvider;
