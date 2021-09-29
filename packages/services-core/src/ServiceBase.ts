@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ServiceManager from './ServiceManager';
 import ServiceType from './ServiceType';
 import ServiceState from './ServiceState';
@@ -143,11 +144,11 @@ class ServiceBase {
    * @param {string[]} dependencies
    */
   constructor(type, name, dependencies = []) {
-    // TODO: Check where this comes from d
-    /*if (!name) name = this.constructor.role;
+    // TODO: This makes typescript cry, and I don't understand where those parameters get assigned.
+    if (!name) name = this.constructor.role;
     if (this.constructor.dependencies) {
       dependencies = this.constructor.dependencies;
-    }*/
+    }
 
     if (typeof ServiceType[type] === 'undefined') {
       throw new Error('Invalid ServiceType: ' + type);

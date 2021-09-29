@@ -1,6 +1,9 @@
 export class IllegalStateError extends Error {}
 
 export default class StateMachine {
+  _state;
+  _nextStates;
+  _stateChangedHandlers;
   constructor(initialState, transitions) {
     if (typeof transitions !== 'object') {
       throw new Error('StateMachine transitions parameter must be an object.');

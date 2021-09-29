@@ -33,10 +33,10 @@ const privateServiceLifeCycle = {
   ERROR: []
 };
 
-const serviceTypeTransitions = {
+export const serviceTypeTransitions = {
   LOCAL: localServiceLifeCycle,
   PUBLIC: publicServiceLifeCycle,
   PRIVATE: privateServiceLifeCycle
 };
 
-export { ServiceType as default, serviceTypeTransitions };
+export default ServiceType;

@@ -37,7 +37,7 @@ export default function standardizeConfig(role, config, resolver) {
         : config;
       break;
     default:
-      throw new Error(`could not parse settings for ${role}:`, config);
+      throw new Error(`could not parse settings for ${role}: ${JSON.stringify(config)}`);
   }
 
   return [className, settings];

@@ -1,7 +1,11 @@
 import callGanache from './callGanache';
 
 export async function takeSnapshot(maker) {
-  let snapshotData = { snapshotId: null, transactionCounts: 0, currentBlock: 0 };
+  let snapshotData = {
+    snapshotId: null,
+    transactionCounts: 0,
+    currentBlock: 0
+  };
   const res = await callGanache('evm_snapshot');
   const { result } = await res.json();
   snapshotData.snapshotId = parseInt(result, 16);

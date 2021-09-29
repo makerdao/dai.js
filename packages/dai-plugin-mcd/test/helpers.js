@@ -14,7 +14,7 @@ export async function mcdMaker({
   prefetch = true,
   addressOverrides = undefined,
   cdpTypes,
-  multicall = false,
+  multicall = true,
   ...settings
 } = {}) {
   const maker = await Maker.create(preset, {

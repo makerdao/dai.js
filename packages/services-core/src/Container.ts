@@ -41,6 +41,10 @@ export function orderServices(services) {
 }
 
 class Container {
+  _services;
+  isAuthenticated;
+  _orderedServiceNames;
+
   constructor() {
     this._services = {};
     this.isAuthenticated = false;
