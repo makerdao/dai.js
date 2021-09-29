@@ -12,4 +12,5 @@ test('can get a service from maker', async () => {
   const maker = await createMaker();
   const proxy = maker.service('proxy');
   expect(proxy).toBeDefined();
+ 
 });

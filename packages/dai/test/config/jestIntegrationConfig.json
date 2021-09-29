@@ -4,6 +4,7 @@
   "transform": {
     "^.+\\.(ts|js)?$": "ts-jest"
   },
+  "testEnvironment": "jsdom",
   "testMatch": ["<rootDir>/test/integration/*.js"],
   "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"]
 }
