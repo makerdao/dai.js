@@ -76,7 +76,6 @@ const BAT_A_DEBT_AMOUNT = DAI(100);
 const BAT_A_PRICE = 40;
 
 describe('Computed', () => {
-
   beforeAll(async () => {
     jest.setTimeout(10000);
     snapshotData = await takeSnapshot(maker);
@@ -370,7 +369,9 @@ describe('Computed', () => {
       expectedLiqRatio.toString()
     );
     expect(vault.liquidationPenalty).toEqual(expectedLiqPenalty);
-    expect(vault.annualStabilityFee.toNumber()).toEqual(expectedAnnStabilityFee);
+    expect(vault.annualStabilityFee.toNumber()).toEqual(
+      expectedAnnStabilityFee
+    );
     expect(vault.debtFloor).toEqual(expectedDebtFloor);
     expect(vault.collateralDebtAvailable.toString()).toEqual(
       expectedCollateralDebtAvailable.toString()
@@ -515,7 +516,9 @@ describe('Computed', () => {
     expect(colData.annualStabilityFee.toNumber()).toEqual(
       expectedAnnStabilityFee
     );
-    expect(colData.priceWithSafetyMargin).toEqual(expectedPriceWithSafetyMargin);
+    expect(colData.priceWithSafetyMargin).toEqual(
+      expectedPriceWithSafetyMargin
+    );
     expect(colData.debtFloor).toEqual(expectedDebtFloor);
 
     expect(colData.collateralDebtAvailable.toString()).toEqual(
@@ -556,5 +559,4 @@ describe('Computed', () => {
 
     expect(ethACollateralDebt.toNumber()).toEqual(999900);
   });
-
 });
