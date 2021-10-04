@@ -8,7 +8,6 @@ for (let symbol in currencies) {
   Maker[symbol] = currencies[symbol];
 }
 
-
 Maker.currencies = currencies;
 Maker.QueryApi = { getQueryResponse };
 Maker.utils = { stringToBytes32 };
@@ -17,4 +16,3 @@ export default Maker;
 
 export const QueryApi = { getQueryResponse };
 export const utils = { stringToBytes32 };
-

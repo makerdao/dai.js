@@ -4,7 +4,6 @@ import {
 } from './TestAccountProvider';
 
 describe('TestAccountProvider', () => {
-
   test('should reject illegal indices', () => {
     const msg =
       'Index must be a natural number between 0 and ' +
@@ -21,7 +20,10 @@ describe('TestAccountProvider', () => {
 
     expect(
       () =>
-        new TestAccountProvider({ addresses: ['x', 'y', 'z'], keys: ['x', 'y'] })
+        new TestAccountProvider({
+          addresses: ['x', 'y', 'z'],
+          keys: ['x', 'y']
+        })
     ).toThrow('Accounts addresses and keys arrays must have the same length');
   });
 
@@ -55,5 +57,4 @@ describe('TestAccountProvider', () => {
     provider.setIndex(originalIndex);
     expect(provider.getIndex()).toBe(originalIndex);
   });
-
-})
+});
