@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { mcdMaker } from '../helpers';
 import { ServiceRoles } from '../../src/constants';
 import { ETH, DAI } from '../../src';
-import { uniqueId } from '../../src/utils/index';
+import { uniqueId } from '../../src/utils';
 import debug from 'debug';
 import { infuraProjectId } from './index';
 
