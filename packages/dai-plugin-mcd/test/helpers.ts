@@ -26,7 +26,7 @@ export async function mcdMaker({
     ...settings
   });
   return maker;
-} 
+}
 
 export async function setPrice(maker, ratio, ilk) {
   const scs = maker.service('smartContract');
@@ -66,11 +66,11 @@ export async function mint(maker, amount) {
 }
 
 type Options = {
-  mint?: number,
-  price?: number
-}
+  mint?: number;
+  price?: number;
+};
 
-export async function setupCollateral(maker, ilk, options:Options = {}) {
+export async function setupCollateral(maker, ilk, options: Options = {}) {
   const proxy = await maker.currentProxy();
   const cdpType = maker.service(ServiceRoles.CDP_TYPE).getCdpType(null, ilk);
   const { currency } = cdpType;

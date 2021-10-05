@@ -2,7 +2,6 @@ import uniq from 'lodash/uniq';
 import Container from './Container';
 import standardizeConfig from './standardizeConfig';
 
-
 export default class ServiceProvider {
   _config: any;
   _services: any;

@@ -16,7 +16,7 @@ export default class CdpTypeService extends PublicService {
     this.reset = this.resetAllCdpTypes;
   }
 
-  initialize(settings = { cdpTypes : undefined, prefetch: undefined }) {
+  initialize(settings = { cdpTypes: undefined, prefetch: undefined }) {
     this.settings = settings;
     this.cdpTypes = (settings.cdpTypes || []).map(
       cdpType => new CdpType(this, cdpType, { prefetch: settings.prefetch })

@@ -77,7 +77,6 @@ const BAT_A_PRICE = 40;
 
 jest.setTimeout(10000);
 
-
 describe('Computed', () => {
   beforeAll(async () => {
     snapshotData = await takeSnapshot(maker);
