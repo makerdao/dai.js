@@ -1,7 +1,6 @@
 export { default as standardizeConfig } from './standardizeConfig';
 export {
-  default as ServiceProvider,
-  IServiceProvider
+  default as ServiceProvider
 } from './ServiceProvider';
 export { default as Container } from './Container';
 export { default as LocalService } from './LocalService';
