@@ -50,10 +50,6 @@ describe('Savings Service', () => {
     await dai.approveUnlimited(proxyAddress);
   }, 30000);
 
-  afterAll(async () => {
-    await maker.service('allowance').removeAllowance('DAI', proxyAddress);
-  }, 30000);
-
   beforeEach(async () => {
     maker.service('accounts').useAccount('default');
     snapshotData = await takeSnapshot(maker);

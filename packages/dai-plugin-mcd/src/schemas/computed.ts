@@ -493,15 +493,30 @@ export const savings = {
 };
 
 export const userVaultsList = {
-  generate: address => ({
+  generate: (address, descending) => ({
     dependencies: ({ get }) => {
       const cdpManagerAddress = get('smartContract').getContractAddress(
         'CDP_MANAGER'
       );
       return [
-        [USER_VAULT_IDS, cdpManagerAddress, [PROXY_ADDRESS, address]],
-        [USER_VAULT_ADDRESSES, cdpManagerAddress, [PROXY_ADDRESS, address]],
-        [USER_VAULT_TYPES, cdpManagerAddress, [PROXY_ADDRESS, address]]
+        [
+          USER_VAULT_IDS,
+          cdpManagerAddress,
+          [PROXY_ADDRESS, address],
+          descending
+        ],
+        [
+          USER_VAULT_ADDRESSES,
+          cdpManagerAddress,
+          [PROXY_ADDRESS, address],
+          descending
+        ],
+        [
+          USER_VAULT_TYPES,
+          cdpManagerAddress,
+          [PROXY_ADDRESS, address],
+          descending
+        ]
       ];
     },
     computed: (ids, addresses, types) =>

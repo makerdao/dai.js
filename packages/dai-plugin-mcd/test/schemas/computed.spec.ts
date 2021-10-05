@@ -75,6 +75,8 @@ const BAT_A_COLLATERAL_AMOUNT = BAT(100);
 const BAT_A_DEBT_AMOUNT = DAI(100);
 const BAT_A_PRICE = 40;
 
+const descending = true;
+
 jest.setTimeout(10000);
 
 describe('Computed', () => {
@@ -464,7 +466,11 @@ describe('Computed', () => {
   });
 
   test(USER_VAULTS_LIST, async () => {
-    const [batVault, ethVault] = await maker.latest(USER_VAULTS_LIST, address);
+    const [batVault, ethVault] = await maker.latest(
+      USER_VAULTS_LIST,
+      address,
+      descending
+    );
 
     expect(batVault.vaultId).toEqual(2);
     expect(ethVault.vaultId).toEqual(1);
@@ -477,12 +483,12 @@ describe('Computed', () => {
   });
 
   test(`${USER_VAULTS_LIST} for account with no proxy`, async () => {
-    const promise = maker.latest(USER_VAULTS_LIST, address2);
+    const promise = maker.latest(USER_VAULTS_LIST, address2, descending);
     await expect(promise).rejects.toThrow(/invalid/i);
   });
 
   test(`${USER_VAULTS_LIST} for account with no proxy`, async () => {
-    const promise = maker.latest(USER_VAULTS_LIST, address2);
+    const promise = maker.latest(USER_VAULTS_LIST, address2, descending);
     await expect(promise).rejects.toThrow(/invalid/i);
   });
 

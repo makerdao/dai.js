@@ -7,7 +7,7 @@ import { validateAddress } from './_validators';
 import { bytesToString } from '../utils';
 
 export const getCdps = {
-  generate: (vaultManagerAddress, proxyAddress, descending = true) => ({
+  generate: (vaultManagerAddress, proxyAddress, descending) => ({
     id: `GET_CDPS.getCdps${descending ? 'Desc' : 'Asc'}(${proxyAddress})`,
     contract: 'GET_CDPS',
     call: [
