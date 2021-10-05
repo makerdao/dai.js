@@ -23,7 +23,7 @@ export default function makeSigner(web3Service): any {
         switch (key) {
           case 'resolveName':
             return address => address;
-          case '_isProvider': 
+          case '_isProvider':
             return true;
           case 'call':
             return call;

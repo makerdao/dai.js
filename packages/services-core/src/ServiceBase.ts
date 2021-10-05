@@ -149,7 +149,6 @@ class ServiceBase {
     if (this.constructor.dependencies) {
       dependencies = this.constructor.dependencies;
     }
-    
 
     if (typeof ServiceType[type] === 'undefined') {
       throw new Error('Invalid ServiceType: ' + type);

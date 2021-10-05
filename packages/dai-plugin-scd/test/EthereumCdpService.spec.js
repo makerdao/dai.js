@@ -7,7 +7,6 @@ import { ServiceRoles } from '../src/utils/constants';
 let cdpService;
 
 describe('CDP Service', () => {
-
   beforeAll(async () => {
     const maker = await scdMaker();
 
@@ -45,7 +44,9 @@ describe('CDP Service', () => {
 
     beforeAll(async () => {
       cdp = await cdpService.openCdp();
-      proxyAddress = (await cdpService.get('proxy').currentProxy()).toLowerCase();
+      proxyAddress = (
+        await cdpService.get('proxy').currentProxy()
+      ).toLowerCase();
       proxyCdp = await cdpService.openProxyCdp(proxyAddress);
     });
 
@@ -121,5 +122,4 @@ describe('CDP Service', () => {
     const cdp = await txo;
     expect(cdp).toBeInstanceOf(Cdp);
   });
-
 });

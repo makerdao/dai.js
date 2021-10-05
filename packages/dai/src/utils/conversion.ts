@@ -19,7 +19,7 @@ export function stringToBytes32(text, pad = true) {
   if (pad) {
     return ethersUtils.hexlify(ethersUtils.zeroPad(data, 32));
   }
-  
+
   return ethersUtils.hexlify(data);
 }
 

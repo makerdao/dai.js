@@ -22,7 +22,9 @@ export default class SmartContractService extends PrivateService {
     this.getContractAddressByName = this.getContractAddress;
   }
 
-  initialize(settings = { addContracts : undefined, addressOverrides: undefined }) {
+  initialize(
+    settings = { addContracts: undefined, addressOverrides: undefined }
+  ) {
     if (settings.addContracts) {
       this._addedContracts = Object.keys(settings.addContracts).reduce(
         (acc, key) => {
@@ -41,7 +43,11 @@ export default class SmartContractService extends PrivateService {
       .setSmartContractService(this);
   }
 
-  getContractByAddressAndAbi(address, abi, { name = undefined, wrap = true } = {}) {
+  getContractByAddressAndAbi(
+    address,
+    abi,
+    { name = undefined, wrap = true } = {}
+  ) {
     assert(address, `Missing address for contract "${name}"`);
     if (!name) name = this.lookupContractName(address);
 

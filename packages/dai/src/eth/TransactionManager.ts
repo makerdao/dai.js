@@ -86,7 +86,12 @@ export default class TransactionManager extends PublicService {
   sendTransaction(options, metadata) {
     return this._createTransactionObject(
       (async () => {
-        const txOptions = await this._buildTransactionOptions(options, undefined, undefined, undefined);
+        const txOptions = await this._buildTransactionOptions(
+          options,
+          undefined,
+          undefined,
+          undefined
+        );
         return this.get('web3').sendTransaction(txOptions);
       })(),
       metadata
@@ -148,7 +153,14 @@ export default class TransactionManager extends PublicService {
     return this.get('proxy').execute(contract, method, args, options, address);
   }
 
-  _createTransactionObject(tx, { businessObject = undefined, metadata = undefined, promise = undefined } = {}) {
+  _createTransactionObject(
+    tx,
+    {
+      businessObject = undefined,
+      metadata = undefined,
+      promise = undefined
+    } = {}
+  ) {
     const txo = new TransactionObject(tx, this, {
       businessObject,
       metadata
@@ -205,7 +217,7 @@ export default class TransactionManager extends PublicService {
       to: undefined,
       data: undefined
     };
-   
+
     let data = contract.interface.functions[method](...args).data;
     let proxyAddress;
 
