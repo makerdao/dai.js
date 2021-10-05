@@ -2,9 +2,10 @@
 
 import { promisify } from '../../utils';
 
-export default function makeSigner(web3Service) {
+export default function makeSigner(web3Service): any {
   const provider = web3Service.web3Provider();
   const call = promisify(web3Service._web3.eth.call);
+
   return {
     getAddress: () => web3Service.currentAddress(),
     estimateGas: tx => web3Service.estimateGas(tx),
@@ -14,11 +15,16 @@ export default function makeSigner(web3Service) {
         from: web3Service.currentAddress()
       });
     },
+    call,
+    isSigner: () => true,
+    _isSigner: true,
     provider: new Proxy(provider, {
       get(target, key) {
         switch (key) {
           case 'resolveName':
             return address => address;
+          case '_isProvider':
+            return true;
           case 'call':
             return call;
           default:

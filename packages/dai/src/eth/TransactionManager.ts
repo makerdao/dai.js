@@ -8,6 +8,9 @@ import debug from 'debug';
 const log = debug('dai:TransactionManager');
 
 export default class TransactionManager extends PublicService {
+  _newTxListeners;
+  _tracker;
+
   constructor(name = 'transactionManager') {
     super(name, ['web3', 'nonce', 'proxy', 'gas']);
     this._newTxListeners = [];
@@ -83,7 +86,12 @@ export default class TransactionManager extends PublicService {
   sendTransaction(options, metadata) {
     return this._createTransactionObject(
       (async () => {
-        const txOptions = await this._buildTransactionOptions(options);
+        const txOptions = await this._buildTransactionOptions(
+          options,
+          undefined,
+          undefined,
+          undefined
+        );
         return this.get('web3').sendTransaction(txOptions);
       })(),
       metadata
@@ -145,7 +153,14 @@ export default class TransactionManager extends PublicService {
     return this.get('proxy').execute(contract, method, args, options, address);
   }
 
-  _createTransactionObject(tx, { businessObject, metadata, promise } = {}) {
+  _createTransactionObject(
+    tx,
+    {
+      businessObject = undefined,
+      metadata = undefined,
+      promise = undefined
+    } = {}
+  ) {
     const txo = new TransactionObject(tx, this, {
       businessObject,
       metadata
@@ -196,7 +211,13 @@ export default class TransactionManager extends PublicService {
   }
 
   async _getGasLimit(options, contract, method, args) {
-    let transaction = {};
+    let transaction = {
+      value: undefined,
+      from: undefined,
+      to: undefined,
+      data: undefined
+    };
+
     let data = contract.interface.functions[method](...args).data;
     let proxyAddress;
 
@@ -222,6 +243,10 @@ export default class TransactionManager extends PublicService {
 }
 
 class Tracker {
+  _listeners;
+  _globalListeners;
+  _transactions;
+
   static states = ['initialized', 'pending', 'mined', 'finalized', 'error'];
 
   constructor() {
@@ -234,7 +259,7 @@ class Tracker {
     this._init(key);
     this._transactions[key].push(tx);
 
-    for (let state of this.constructor.states) {
+    for (let state of Tracker.states) {
       tx.on(state, () => {
         if (options.globalTxStateUpdates) {
           this._globalListeners.forEach(cb =>
@@ -312,7 +337,7 @@ class Tracker {
   _init(key) {
     if (!this._transactions[key]) this._transactions[key] = [];
     if (!this._listeners[key]) {
-      this._listeners[key] = this.constructor.states.reduce((acc, state) => {
+      this._listeners[key] = Tracker.states.reduce((acc, state) => {
         acc[state] = [];
         return acc;
       }, {});

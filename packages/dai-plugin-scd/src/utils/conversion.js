@@ -1,6 +1,6 @@
-import { utils as ethersUtils } from 'ethers';
+import { BigNumber, utils as ethersUtils } from 'ethers';
 
 export function numberToBytes32(num) {
-  const bn = ethersUtils.bigNumberify(num);
-  return ethersUtils.hexlify(ethersUtils.padZeros(bn, 32));
+  const bn = BigNumber.from(num);
+  return ethersUtils.hexlify(ethersUtils.zeroPad(bn, 32));
 }
