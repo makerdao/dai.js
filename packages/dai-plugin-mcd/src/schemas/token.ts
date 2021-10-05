@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { TOKEN_BALANCE, TOKEN_ALLOWANCE_BASE } from './_constants';
 import { validateAddress } from './_validators';
 
-export const ALLOWANCE_AMOUNT = BigNumber(
+export const ALLOWANCE_AMOUNT = new BigNumber(
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 );
 
@@ -75,7 +75,7 @@ export const tokenAllowanceBase = {
       call: ['allowance(address,address)(uint256)', address, proxyAddress]
     };
   },
-  returns: [[TOKEN_ALLOWANCE_BASE, v => BigNumber(v)]]
+  returns: [[TOKEN_ALLOWANCE_BASE, v => new BigNumber(v)]]
 };
 
 export const tokenAllowance = {

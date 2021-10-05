@@ -35,7 +35,7 @@ export const jugBase = {
     contract: 'MCD_JUG',
     call: ['base()(uint256)']
   }),
-  returns: [[BASE_COLLATERAL_FEE, v => BigNumber(v)]]
+  returns: [[BASE_COLLATERAL_FEE, v => new BigNumber(v)]]
 };
 
 export default {

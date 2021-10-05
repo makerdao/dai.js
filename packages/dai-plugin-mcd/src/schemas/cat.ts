@@ -22,8 +22,8 @@ export const catIlks = {
   },
   returns: [
     [LIQUIDATOR_ADDRESS],
-    [LIQUIDATION_PENALTY, v => fromWei(BigNumber(v).minus(WAD))],
-    [MAX_AUCTION_LOT_SIZE, v => fromRad(BigNumber(v))]
+    [LIQUIDATION_PENALTY, v => fromWei(new BigNumber(v).minus(WAD))],
+    [MAX_AUCTION_LOT_SIZE, v => fromRad(new BigNumber(v))]
   ]
 };
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const tag = (strings, ...keys) => (...values) => {
   const dict = values[values.length - 1] || {};
   const result = [strings[0]];

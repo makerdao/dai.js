@@ -37,7 +37,7 @@ export const cdpManagerCdpi = {
     contract: 'CDP_MANAGER',
     call: ['cdpi()(uint256)']
   }),
-  returns: [[VAULTS_CREATED, v => BigNumber(v)]]
+  returns: [[VAULTS_CREATED, v => new BigNumber(v)]]
 };
 
 export const cdpManagerOwner = {

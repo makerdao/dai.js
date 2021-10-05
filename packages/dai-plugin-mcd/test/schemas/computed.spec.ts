@@ -75,9 +75,11 @@ const BAT_A_COLLATERAL_AMOUNT = BAT(100);
 const BAT_A_DEBT_AMOUNT = DAI(100);
 const BAT_A_PRICE = 40;
 
+jest.setTimeout(10000);
+
+
 describe('Computed', () => {
   beforeAll(async () => {
-    jest.setTimeout(10000);
     snapshotData = await takeSnapshot(maker);
     maker = await mcdMaker({
       cdpTypes: [

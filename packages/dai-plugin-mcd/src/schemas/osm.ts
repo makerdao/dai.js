@@ -12,7 +12,7 @@ export const tokenPriceLastUpdate = {
     contract: `PIP_${token}`,
     call: ['zzz()(uint64)']
   }),
-  returns: [[TOKEN_PRICE_LAST_UPDATE, v => BigNumber(v).times(1000)]]
+  returns: [[TOKEN_PRICE_LAST_UPDATE, v => new BigNumber(v).times(1000)]]
 };
 
 export const tokenPriceUpdateInterval = {
@@ -21,7 +21,7 @@ export const tokenPriceUpdateInterval = {
     contract: `PIP_${token}`,
     call: ['hop()(uint16)']
   }),
-  returns: [[TOKEN_PRICE_UPDATE_INTERVAL, v => BigNumber(v).times(1000)]]
+  returns: [[TOKEN_PRICE_UPDATE_INTERVAL, v => new BigNumber(v).times(1000)]]
 };
 
 export const tokenPriceNextUpdate = {

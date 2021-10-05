@@ -38,7 +38,7 @@ describe('Savings Service', () => {
 
   async function makeSomeDai(amount) {
     const cdpMgr = await maker.service(ServiceRoles.CDP_MANAGER);
-    await setupCollateral(maker, 'ETH-A', { price: 150, debtCeiling: 50 });
+    await setupCollateral(maker, 'ETH-A', { price: 150 });
     await cdpMgr.openLockAndDraw('ETH-A', ETH(10), DAI(amount));
   }
 
@@ -102,13 +102,13 @@ describe('Savings Service', () => {
 
   test('check amount in balance', async () => {
     const amount = await service.balance();
-    expect(DAI.isInstance(amount)).toBeTruthy();
+    expect((DAI as any).isInstance(amount)).toBeTruthy();
   }, 30000);
 
   test('check amount using balance of', async () => {
     const proxyAddress = await maker.currentProxy();
     const amount = await service.balanceOf(proxyAddress);
-    expect(DAI.isInstance(amount)).toBeTruthy();
+    expect((DAI as any).isInstance(amount)).toBeTruthy();
   }, 30000);
 
   test('get balance without proxy', async () => {
@@ -223,7 +223,7 @@ describe('Savings Service', () => {
 
     // Due to how 'exit' handles rounding sub-wei amounts, the ending balance can be one wei less than expected
     const amountLessWei = DAI(startingBalance)
-      .minus(DAI.wei(1))
+      .minus((DAI as any).wei(1))
       .toBigNumber()
       .toString();
     expect(
@@ -261,8 +261,8 @@ describe('Savings Service', () => {
     await service.exit(DAI(exitAmount));
     const events = await service.getEventHistory(proxyAddress);
 
-    const depositEventIdx = findIndex(events, { type: 'DSR_DEPOSIT' });
-    const withdrawEventIdx = findIndex(events, { type: 'DSR_WITHDRAW' });
+    const depositEventIdx = findIndex(events, { type: 'DSR_DEPOSIT' } as any);
+    const withdrawEventIdx = findIndex(events, { type: 'DSR_WITHDRAW' } as any);
 
     expect(depositEventIdx).toBeGreaterThan(-1);
     expect(events[depositEventIdx].gem).toEqual('DAI');
@@ -273,7 +273,7 @@ describe('Savings Service', () => {
 
     // Due to how 'exit' handles rounding sub-wei amounts, the exit amount returned can be one wei less than intended
     const amountLessWei = DAI(exitAmount)
-      .minus(DAI.wei(1))
+      .minus((DAI as any).wei(1))
       .toBigNumber()
       .toString();
     expect(

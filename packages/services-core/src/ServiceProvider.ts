@@ -2,15 +2,8 @@ import uniq from 'lodash/uniq';
 import Container from './Container';
 import standardizeConfig from './standardizeConfig';
 
-export interface IServiceProvider {
-  _config: any;
-  _services: any;
-  _resolver: any;
-  _container: any;
-  buildContainer(): any;
-}
 
-export default class ServiceProvider implements IServiceProvider {
+export default class ServiceProvider {
   _config: any;
   _services: any;
   _resolver: any;

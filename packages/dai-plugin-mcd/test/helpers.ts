@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { createCurrencyRatio } from '@makerdao/currency';
-import Maker from '../../dai/src';
+import Maker from '@makerdao/dai';
 import { McdPlugin, ETH, USD, GNT } from '../src';
 import { ServiceRoles } from '../src/constants';
 import { stringToBytes } from '../src/utils';
@@ -13,7 +13,7 @@ export async function mcdMaker({
   network = 'testnet',
   prefetch = true,
   addressOverrides = undefined,
-  cdpTypes,
+  cdpTypes = undefined,
   multicall = true,
   ...settings
 } = {}) {
@@ -26,7 +26,7 @@ export async function mcdMaker({
     ...settings
   });
   return maker;
-}
+} 
 
 export async function setPrice(maker, ratio, ilk) {
   const scs = maker.service('smartContract');
@@ -34,7 +34,7 @@ export async function setPrice(maker, ratio, ilk) {
   const pip = scs.getContract('PIP_' + symbol);
 
   // using uint here instead of bytes32 so it gets left-padded
-  const val = ethAbi.encodeParameter('uint', ratio.toFixed('wei'));
+  const val = (ethAbi as any).encodeParameter('uint', ratio.toFixed('wei'));
   await pip.poke(val);
   await scs.getContract('MCD_SPOT').poke(stringToBytes(ilk));
 
@@ -65,7 +65,12 @@ export async function mint(maker, amount) {
   expect(endBalance.minus(startBalance)).toEqual(amount);
 }
 
-export async function setupCollateral(maker, ilk, options = {}) {
+type Options = {
+  mint?: number,
+  price?: number
+}
+
+export async function setupCollateral(maker, ilk, options:Options = {}) {
   const proxy = await maker.currentProxy();
   const cdpType = maker.service(ServiceRoles.CDP_TYPE).getCdpType(null, ilk);
   const { currency } = cdpType;

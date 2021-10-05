@@ -1,4 +1,4 @@
-import { ServiceProvider, IServiceProvider } from '@makerdao/services-core';
+import { ServiceProvider } from '@makerdao/services-core';
 import AccountsService from '../eth/AccountsService';
 import AllowanceService from '../eth/AllowanceService';
 import CacheService from '../utils/CacheService';
@@ -36,8 +36,7 @@ export const resolver = {
   }
 };
 
-export default class DefaultServiceProvider extends ServiceProvider
-  implements IServiceProvider {
+export default class DefaultServiceProvider extends ServiceProvider {
   constructor(config: any = {}) {
     if (config.web3) {
       config = {

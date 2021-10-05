@@ -6,12 +6,17 @@ const { CDP_TYPE, SYSTEM_DATA } = ServiceRoles;
 import * as math from './math';
 
 export default class CdpTypeService extends PublicService {
+  reset;
+  settings;
+  cdpTypes;
+  prefetch;
+
   constructor(name = CDP_TYPE) {
     super(name, [SYSTEM_DATA]);
     this.reset = this.resetAllCdpTypes;
   }
 
-  initialize(settings = {}) {
+  initialize(settings = { cdpTypes : undefined, prefetch: undefined }) {
     this.settings = settings;
     this.cdpTypes = (settings.cdpTypes || []).map(
       cdpType => new CdpType(this, cdpType, { prefetch: settings.prefetch })
