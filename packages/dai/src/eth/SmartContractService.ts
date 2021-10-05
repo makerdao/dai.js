@@ -8,6 +8,12 @@ import mapValues from 'lodash/mapValues';
 import assert from 'assert';
 
 export default class SmartContractService extends PrivateService {
+  getContractByName;
+  getContractAddressByName;
+  _addedContracts;
+  _addressOverrides;
+  _contractInfoCache;
+
   constructor(name = 'smartContract') {
     super(name, ['web3', 'transactionManager']);
 
@@ -16,7 +22,7 @@ export default class SmartContractService extends PrivateService {
     this.getContractAddressByName = this.getContractAddress;
   }
 
-  initialize(settings = {}) {
+  initialize(settings = { addContracts : undefined, addressOverrides: undefined }) {
     if (settings.addContracts) {
       this._addedContracts = Object.keys(settings.addContracts).reduce(
         (acc, key) => {
@@ -35,7 +41,7 @@ export default class SmartContractService extends PrivateService {
       .setSmartContractService(this);
   }
 
-  getContractByAddressAndAbi(address, abi, { name, wrap = true } = {}) {
+  getContractByAddressAndAbi(address, abi, { name = undefined, wrap = true } = {}) {
     assert(address, `Missing address for contract "${name}"`);
     if (!name) name = this.lookupContractName(address);
 
@@ -49,7 +55,7 @@ export default class SmartContractService extends PrivateService {
     return wrapContract(contract, name, abi, txManager);
   }
 
-  getContractAddress(name, { version } = {}) {
+  getContractAddress(name, { version = undefined } = {}) {
     const { address } = this._getContractInfo(name, version);
     return address;
   }
@@ -61,7 +67,7 @@ export default class SmartContractService extends PrivateService {
     );
   }
 
-  getContract(name, { version, wrap = true } = {}) {
+  getContract(name, { version = undefined, wrap = true } = {}) {
     const info = this._getContractInfo(name, version);
     return this.getContractByAddressAndAbi(info.address, info.abi, {
       name,
@@ -102,7 +108,7 @@ export default class SmartContractService extends PrivateService {
     return this.get('web3').web3Contract(abi, address);
   }
 
-  _getContractInfo(name, version) {
+  _getContractInfo(name, version?) {
     assert(this.hasContract(name), `No contract found for "${name}"`);
     const contracts = this._getAllContractInfo();
     const contractInfo = findContractInfoForVersion(contracts[name], version);
@@ -146,7 +152,7 @@ export default class SmartContractService extends PrivateService {
   }
 }
 
-function findContractInfoForVersion(versions, version) {
+function findContractInfoForVersion(versions, version?) {
   if (!version) version = Math.max(...versions.map(info => info.version));
   return versions.find(info => info.version === version);
 }

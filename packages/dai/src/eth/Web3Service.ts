@@ -9,6 +9,21 @@ import debug from 'debug';
 const log = debug('dai:Web3Service');
 
 export default class Web3Service extends PrivateService {
+  _blockListeners;
+  _info;
+  _ethersSigner;
+  _web3;
+  _transactionSettings;
+  _confirmedBlockCount;
+  _defaultEmitter;
+  eth;
+  _pollingInterval;
+  _networkId;
+  _currentBlockId;
+  _currentBlock;
+  _newBlocksSubscription;
+  _updateBlocksInterval;
+
   constructor(name = 'web3') {
     super(name, ['accounts', 'timer', 'cache', 'event']);
 
@@ -49,24 +64,6 @@ export default class Web3Service extends PrivateService {
     this._web3 = new Web3();
     this._web3.setProvider(this.get('accounts').getProvider());
 
-    Object.assign(
-      this,
-      [
-        'estimateGas',
-        'getAccounts',
-        'getBalance',
-        'getBlock',
-        'getPastLogs',
-        'getStorageAt',
-        'getTransaction',
-        'getTransactionReceipt',
-        'subscribe'
-      ].reduce((acc, method) => {
-        acc[method] = (...args) => this._web3.eth[method](...args);
-        return acc;
-      }, {})
-    );
-
     this.eth = new Proxy(this, {
       get(target, key) {
         if (typeof key === 'string')
@@ -82,6 +79,46 @@ export default class Web3Service extends PrivateService {
     this._transactionSettings = settings.transactionSettings;
     this._confirmedBlockCount = settings.confirmedBlockCount || 5;
     this._pollingInterval = settings.pollingInterval || 4000;
+  }
+
+  subscribe(...args) {
+    return this._web3.eth.subscribe(...args);
+  }
+
+  estimateGas(...args) {
+    return this._web3.eth.estimateGas(...args);
+  }
+
+  wait(...args) {
+    return this._web3.eth.wait(...args);
+  }
+
+  getBalance(...args) {
+    return this._web3.eth.getBalance(...args);
+  }
+
+  getAccounts(...args) {
+    return this._web3.eth.getAccounts(...args);
+  }
+
+  getBlock(...args) {
+    return this._web3.eth.getBlock(...args);
+  }
+
+  getPastLogs(...args) {
+    return this._web3.eth.getPastLogs(...args);
+  }
+
+  getStorageAt(...args) {
+    return this._web3.eth.getStorageAt(...args);
+  }
+
+  getTransaction(...args) {
+    return this._web3.eth.getTransaction(...args);
+  }
+
+  getTransactionReceipt(...args) {
+    return this._web3.eth.getTransactionReceipt(...args);
   }
 
   async connect() {
