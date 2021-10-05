@@ -27,6 +27,7 @@ export default {
   addConfig: function(config, { network = 'mainnet', staging = false }) {
     const contractAddresses = {
       kovan: require('../contracts/addresses/kovan.json'),
+      goerli: require('../contracts/addresses/goerli.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
     };
 

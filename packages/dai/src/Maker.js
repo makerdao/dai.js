@@ -85,8 +85,10 @@ function delegateToServices(maker, services) {
     for (const methodName of services[serviceName]) {
       if (serviceName === 'cdp') {
         maker[methodName] = () => {
-          throw new Error(`"${methodName}" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').${methodName}`);
-        }
+          throw new Error(
+            `"${methodName}" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').${methodName}`
+          );
+        };
       } else {
         maker[methodName] = (...args) =>
           maker.service(serviceName)[methodName](...args);
@@ -108,6 +110,7 @@ function mergeOptions(object, source) {
 }
 
 Maker.create = async function(...args) {
+  console.log({ args });
   const [preset, options = {}] = args;
   const { plugins, ...otherOptions } = options;
 

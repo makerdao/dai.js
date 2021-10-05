@@ -17,6 +17,7 @@
     "test": "yarn testchain --ci jest --runInBand",
     "test:debug": "yarn testchain --ci node --inspect-brk ../../node_modules/.bin/jest --runInBand",
     "test:kovan": "export NETWORK='kovan' && yarn test --config ./test/config/jestIntegrationConfig.json",
+    "test:goerli": "export NETWORK='goerli' && yarn test --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {

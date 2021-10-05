@@ -53,6 +53,21 @@ const env = {
       }
     }
   },
+  goerli: {
+    // TODO update for goerli
+    fromBlock: 4750000,
+    config: {
+      url: 'https://kovan.infura.io/v3/c3f0f26a4c1742e0949d8eedfc47be67',
+      privateKey: process.env.KOVAN_PRIVATE_KEY,
+      smartContract: { addressOverrides },
+      token: {
+        addressOverrides: {
+          PETH: addressOverrides.SAI_SKR,
+          DAI: addressOverrides.SAI_SAI
+        }
+      }
+    }
+  },
   mainnet: {
     config: {
       fromBlock: 4750000,
@@ -76,14 +91,13 @@ const endedRcPollInfo = maker => async pollId => {
   return {
     ...poll,
     ...pollMetadata,
-    votes: votes.map(v => [
-      v.ballot.filter(x => x !== 0),
-      parseFloat(v.mkrSupport)
-    ]).sort(([ballotA], [ballotB]) => {
-      if (ballotA.length < ballotB.length) return -1;
-      if (ballotB.length < ballotA.length) return 1;
-      return ballotA[0] - ballotB[0];
-    }),
+    votes: votes
+      .map(v => [v.ballot.filter(x => x !== 0), parseFloat(v.mkrSupport)])
+      .sort(([ballotA], [ballotB]) => {
+        if (ballotA.length < ballotB.length) return -1;
+        if (ballotB.length < ballotA.length) return 1;
+        return ballotA[0] - ballotB[0];
+      }),
     tally: polls.runoff(votes)
   };
 };
