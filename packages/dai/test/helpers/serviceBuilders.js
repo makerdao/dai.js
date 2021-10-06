@@ -18,7 +18,7 @@ export const kovanProviderConfig = {
 export const goerliProviderConfig = {
   // TODO update for goerli
   web3: {
-    privateKey: process.env.KOVAN_PRIVATE_KEY,
+    privateKey: process.env.GOERLI_PRIVATE_KEY,
     provider: {
       type: ProviderType.INFURA,
       network: 'kovan',

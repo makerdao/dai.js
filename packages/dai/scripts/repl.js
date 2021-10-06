@@ -53,21 +53,6 @@ const env = {
       }
     }
   },
-  goerli: {
-    // TODO update for goerli
-    fromBlock: 4750000,
-    config: {
-      url: 'https://kovan.infura.io/v3/c3f0f26a4c1742e0949d8eedfc47be67',
-      privateKey: process.env.KOVAN_PRIVATE_KEY,
-      smartContract: { addressOverrides },
-      token: {
-        addressOverrides: {
-          PETH: addressOverrides.SAI_SKR,
-          DAI: addressOverrides.SAI_SAI
-        }
-      }
-    }
-  },
   mainnet: {
     config: {
       fromBlock: 4750000,
