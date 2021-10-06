@@ -21,7 +21,7 @@ export const goerliProviderConfig = {
     privateKey: process.env.GOERLI_PRIVATE_KEY,
     provider: {
       type: ProviderType.INFURA,
-      network: 'kovan',
+      network: 'goerli',
       infuraProjectId
     }
   }
