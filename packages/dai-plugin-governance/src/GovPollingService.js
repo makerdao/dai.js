@@ -322,7 +322,9 @@ export default class GovPollingService extends PrivateService {
     );
     const numVoters = currentVotes.length;
 
-    const sorted = currentVotes.sort((prev, next) => prev.mkrSupport > next.mkrSupport ? -1 : 1);
+    const sorted = currentVotes.sort((prev, next) =>
+      prev.mkrSupport > next.mkrSupport ? -1 : 1
+    );
     const winner = (sorted[0] ? sorted[0].optionId : 0).toString();
 
     const totalMkrParticipation = currentVotes.reduce(
@@ -330,7 +332,6 @@ export default class GovPollingService extends PrivateService {
       new BigNumber(0)
     );
 
-    // TODO: remove the unnecessary properties
     const options = currentVotes.reduce((a, v) => {
       a[v.optionId] = {
         mkrSupport: new BigNumber(v.mkrSupport || 0),
