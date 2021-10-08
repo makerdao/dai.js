@@ -1,4 +1,5 @@
 import { PrivateService } from '@makerdao/services-core';
+import BigNumber from 'bignumber.js';
 import { POLLING, BATCH_POLLING } from './utils/constants';
 import { MKR } from './utils/constants';
 import { fromBuffer, toBuffer, paddedArray } from './utils/helpers';
@@ -308,6 +309,54 @@ export default class GovPollingService extends PrivateService {
       };
     });
     return votes;
+  }
+
+  async getTallyPlurality(pollId) {
+    const poll = await this._getPoll(pollId);
+    if (!poll) return null;
+
+    const endUnix = Math.floor(poll.endDate / 1000);
+    const currentVotes = await this.get('govQueryApi').getMkrSupport(
+      pollId,
+      endUnix
+    );
+
+    const numVoters = (
+      await this.get('govQueryApi').getMkrSupportRankedChoice(pollId, endUnix)
+    ).length;
+
+    let max = currentVotes[0];
+    for (let i = 1; i < currentVotes.length; i++) {
+      if (currentVotes[i].mkrSupport > max.mkrSupport) {
+        max = currentVotes[i];
+      }
+    }
+
+    const winner = (max ? max.optionId : 0).toString();
+
+    const totalMkrParticipation = currentVotes.reduce(
+      (acc, cur) => BigNumber(cur.mkrSupport || 0).plus(acc),
+      BigNumber(0)
+    );
+
+    // TODO: remove the unnecessary properties
+    const options = currentVotes.reduce((a, v) => {
+      a[v.optionId] = {
+        firstChoice: new BigNumber(v.mkrSupport || 0),
+        transfer: new BigNumber(0),
+        winner: v.optionId === parseInt(winner),
+        eliminated: false
+      };
+      return a;
+    }, {});
+
+    return {
+      winner,
+      rounds: 1,
+      totalMkrParticipation,
+      numVoters,
+      options
+    };
   }
 
   async getTallyRankedChoiceIrv(pollId) {
