@@ -320,39 +320,27 @@ export default class GovPollingService extends PrivateService {
       pollId,
       endUnix
     );
+    const numVoters = currentVotes.length;
 
-    const numVoters = (
-      await this.get('govQueryApi').getMkrSupportRankedChoice(pollId, endUnix)
-    ).length;
-
-    let max = currentVotes[0];
-    for (let i = 1; i < currentVotes.length; i++) {
-      if (currentVotes[i].mkrSupport > max.mkrSupport) {
-        max = currentVotes[i];
-      }
-    }
-
-    const winner = (max ? max.optionId : 0).toString();
+    const sorted = currentVotes.sort((prev, next) => prev.mkrSupport > next.mkrSupport ? -1 : 1);
+    const winner = (sorted[0] ? sorted[0].optionId : 0).toString();
 
     const totalMkrParticipation = currentVotes.reduce(
-      (acc, cur) => BigNumber(cur.mkrSupport || 0).plus(acc),
-      BigNumber(0)
+      (acc, cur) => new BigNumber(cur.mkrSupport || 0).plus(acc),
+      new BigNumber(0)
     );
 
     // TODO: remove the unnecessary properties
     const options = currentVotes.reduce((a, v) => {
       a[v.optionId] = {
-        firstChoice: new BigNumber(v.mkrSupport || 0),
-        transfer: new BigNumber(0),
-        winner: v.optionId === parseInt(winner),
-        eliminated: false
+        mkrSupport: new BigNumber(v.mkrSupport || 0),
+        winner: v.optionId === parseInt(winner)
       };
       return a;
     }, {});
 
     return {
       winner,
-      rounds: 1,
       totalMkrParticipation,
       numVoters,
       options
