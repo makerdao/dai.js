@@ -81,17 +81,17 @@ export default class SpellService extends PublicService {
     this.done[spellAddress] = spell.done();
     return this.done[spellAddress];
   }
-  
+
   async getExecutiveHash(spellAddress) {
-    if (this.executiveHash[spellAddress]) return this.executiveHash[spellAddress];
+    if (this.executiveHash[spellAddress])
+      return this.executiveHash[spellAddress];
     const spell = this.get('smartContract').getContractByAddressAndAbi(
       spellAddress,
       DsSpellAbi
     );
-    this.executiveHash[spellAddress] = spell.description()
-      .then(description => {
-        return description.substr(description.indexOf('0x'), description.length);
-      });
+    this.executiveHash[spellAddress] = spell.description().then(description => {
+      return description.substr(description.indexOf('0x'), description.length);
+    });
 
     return this.executiveHash[spellAddress];
   }

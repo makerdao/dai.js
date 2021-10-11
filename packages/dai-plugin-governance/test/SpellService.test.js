@@ -59,12 +59,21 @@ describe('use mainnet', () => {
     expect(done).toBe(true);
   });
 
-  
   test('get executive hash text', async () => {
     const done = await spellService.getExecutiveHash(
       '0x9400d4D59134af2a48a4bf4237E809A80f90Fe63'
     );
-    expect(done).toBe('0xe1126241f8df6e094363eac12a5c4620f0dbf54c4d7da7fa94f5b8dd499e30d2');
+    expect(done).toBe(
+      '0xe1126241f8df6e094363eac12a5c4620f0dbf54c4d7da7fa94f5b8dd499e30d2'
+    );
+  });
+
+  
+  test('get office hours', async () => {
+    const done = await spellService.getOfficeHours(
+      '0x9400d4D59134af2a48a4bf4237E809A80f90Fe63'
+    );
+    expect(done).toBe(true);
   });
 
 
