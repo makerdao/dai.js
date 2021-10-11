@@ -61,14 +61,12 @@ describe('use mainnet', () => {
     );
   });
 
-
   test('get office hours', async () => {
     const done = await spellService.getOfficeHours(
       '0x9400d4D59134af2a48a4bf4237E809A80f90Fe63'
     );
     expect(done).toBe(true);
   });
-
 
   test('get spell done boolean', async () => {
     const done = await spellService.getDone(
