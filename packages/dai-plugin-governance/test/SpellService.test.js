@@ -59,11 +59,20 @@ describe('use mainnet', () => {
     expect(done).toBe(true);
   });
 
+  
+  test('get executive hash text', async () => {
+    const done = await spellService.getExecutiveHash(
+      '0x9400d4D59134af2a48a4bf4237E809A80f90Fe63'
+    );
+    expect(done).toBe('0xe1126241f8df6e094363eac12a5c4620f0dbf54c4d7da7fa94f5b8dd499e30d2');
+  });
+
+
   test('get spell action address', async () => {
     const action = await spellService.getAction(
-      '0xf880d43bb9a32dd212c77b82a7336be31ecaee08'
+      '0x9400d4D59134af2a48a4bf4237E809A80f90Fe63'
     );
-    expect(action).toBe('0x68D4e46c1ca8a346f82e36f324A9C0935041De79');
+    expect(action).toBe('0xb0f5c8C11547563614E01c2E1e5daC4DA00043A2');
   });
 });
 
