@@ -339,7 +339,7 @@ export default class GovPollingService extends PrivateService {
     }));
 
     const sorted = summedSupport.sort((prev, next) =>
-      prev.mkrSupport > next.mkrSupport ? -1 : 1
+      prev.mkrSupport.gt(next.mkrSupport) ? -1 : 1
     );
 
     const winner = (sorted[0] ? sorted[0].optionId : 0).toString();
