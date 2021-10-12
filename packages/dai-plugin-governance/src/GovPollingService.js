@@ -352,7 +352,7 @@ export default class GovPollingService extends PrivateService {
     const options = summedSupport.reduce((a, v) => {
       a[v.optionId] = {
         mkrSupport: new BigNumber(v.mkrSupport || 0),
-        winner: v.optionId === parseInt(winner)
+        winner: v.optionId === winner
       };
       return a;
     }, {});
