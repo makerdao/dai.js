@@ -338,6 +338,12 @@ export default class LiquidationService extends PublicService {
   // }
 
   @tracksTransactions
+  async redo(ilk, auctionId, address, { promise }) {
+    const id = numberToBytes32(auctionId);
+    return await this._clipperContractByIlk(ilk).redo(id, address, { promise });
+  }
+
+  @tracksTransactions
   async joinDaiToAdapter(amount, { promise }) {
     const address = this.get('web3').currentAddress();
     const amt = BigNumber(amount)
