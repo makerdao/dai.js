@@ -52,6 +52,15 @@ describe('use mainnet', () => {
     expect(eta).toEqual(new Date('2020-01-26T11:53:19.000Z'));
   });
 
+  test('get spell expiration', async () => {
+    const eta = await spellService.getExpiration(
+      '0x9400d4D59134af2a48a4bf4237E809A80f90Fe63'
+    );
+    expect(eta).toEqual(new Date('2021-11-07T20:22:48.000Z'));
+  });
+
+  //TODO: add test for getNextCastTime();
+
   test('get executive hash text', async () => {
     const done = await spellService.getExecutiveHash(
       '0x9400d4D59134af2a48a4bf4237E809A80f90Fe63'
