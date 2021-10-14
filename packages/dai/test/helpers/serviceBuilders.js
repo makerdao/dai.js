@@ -14,6 +14,17 @@ export const kovanProviderConfig = {
     }
   }
 };
+export const goerliProviderConfig = {
+  // TODO update for goerli
+  web3: {
+    privateKey: process.env.GOERLI_PRIVATE_KEY,
+    provider: {
+      type: ProviderType.INFURA,
+      network: 'goerli',
+      infuraProjectId
+    }
+  }
+};
 export const websocketProviderConfig = {
   web3: {
     provider: {

@@ -76,14 +76,13 @@ const endedRcPollInfo = maker => async pollId => {
   return {
     ...poll,
     ...pollMetadata,
-    votes: votes.map(v => [
-      v.ballot.filter(x => x !== 0),
-      parseFloat(v.mkrSupport)
-    ]).sort(([ballotA], [ballotB]) => {
-      if (ballotA.length < ballotB.length) return -1;
-      if (ballotB.length < ballotA.length) return 1;
-      return ballotA[0] - ballotB[0];
-    }),
+    votes: votes
+      .map(v => [v.ballot.filter(x => x !== 0), parseFloat(v.mkrSupport)])
+      .sort(([ballotA], [ballotB]) => {
+        if (ballotA.length < ballotB.length) return -1;
+        if (ballotB.length < ballotA.length) return 1;
+        return ballotA[0] - ballotB[0];
+      }),
     tally: polls.runoff(votes)
   };
 };

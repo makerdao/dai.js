@@ -1,6 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
 
-
 import { map, omit, pick } from 'lodash/fp';
 import invariant from 'invariant';
 import {

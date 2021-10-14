@@ -26,6 +26,7 @@ type ContractAddresses = {
   kovan: { [key: string]: string };
   mainnet: { [key: string]: string };
   testnet?: { [key: string]: string };
+  goerli?:{ [key: string]: string };
 };
 
 export { MKR, IOU };
@@ -34,6 +35,7 @@ export default {
   addConfig: function(config, { network = 'mainnet', staging = false }) {
     const contractAddresses: ContractAddresses = {
       kovan: require('../contracts/addresses/kovan.json'),
+      goerli: require('../contracts/addresses/goerli.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
     };
 

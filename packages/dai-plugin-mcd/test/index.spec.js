@@ -27,6 +27,7 @@ test('addConfig outputs contract addresses for all networks', () => {
     expect(token.address).toEqual({
       testnet: expect.any(String),
       kovan: expect.any(String),
+      goerli: expect.any(String),
       mainnet: expect.any(String)
     });
   }

@@ -26,7 +26,9 @@ import {
   dummyBallotDontMoveToEliminated,
   dummyBallotDontMoveToEliminatedExpect,
   dummyBallotStopWhenOneRemains,
-  dummyBallotStopWhenOneRemainsExpect
+  dummyBallotStopWhenOneRemainsExpect,
+  dummyMkrGetMkrSupportRCForPluralityData,
+  dummyMkrGetMkrSupportRCForPluralityDataAdjusted
 } from './fixtures';
 import { MKR } from '../src/utils/constants';
 
@@ -326,6 +328,66 @@ test('should correctly decode ranked choice options from event logs', () => {
   );
 
   expect(decodedOptions).toEqual(expectedOptions);
+});
+
+test('plurality tally', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyMkrGetMkrSupportRCForPluralityData
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyPlurality();
+
+  const expectedResult = {
+    winner: '1',
+    totalMkrParticipation: '809',
+    numVoters: 5,
+    options: {
+      '0': {
+        mkrSupport: '109',
+        winner: false
+      },
+      '1': {
+        mkrSupport: '700',
+        winner: true
+      }
+    }
+  };
+
+  expect(JSON.parse(JSON.stringify(tally))).toEqual(expectedResult);
+});
+
+test('plurality tally with adjusted votes', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyMkrGetMkrSupportRCForPluralityDataAdjusted
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyPlurality();
+
+  const expectedResult = {
+    winner: '2',
+    totalMkrParticipation: '2041',
+    numVoters: 7,
+    options: {
+      '0': {
+        mkrSupport: '109',
+        winner: false
+      },
+      '1': {
+        mkrSupport: '700',
+        winner: false
+      },
+      '2': {
+        mkrSupport: '1232',
+        winner: true
+      }
+    }
+  };
+
+  expect(JSON.parse(JSON.stringify(tally))).toEqual(expectedResult);
 });
 
 // IRV algo tests

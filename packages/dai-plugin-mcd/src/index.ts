@@ -4,6 +4,7 @@ import reduce from 'lodash/reduce';
 import uniqBy from 'lodash/uniqBy';
 import testnetAddresses from '../contracts/addresses/testnet.json';
 import kovanAddresses from '../contracts/addresses/kovan.json';
+import goerliAddresses from '../contracts/addresses/goerli.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
 import abiMap from '../contracts/abiMap';
 import CdpManager from './CdpManager';
@@ -40,6 +41,7 @@ let addContracts = reduce(
         address: {
           testnet: testnetAddress,
           kovan: kovanAddresses[name],
+          goerli: goerliAddresses[name],
           mainnet: mainnetAddresses[name]
         }
       };
@@ -91,7 +93,11 @@ export const McdPlugin = {
       token: {
         erc20: [
           { currency: DAI, address: (addContracts as any).MCD_DAI.address },
-          { currency: WETH, address: (addContracts as any).ETH.address, abi: wethAbi },
+          {
+            currency: WETH,
+            address: (addContracts as any).ETH.address,
+            abi: wethAbi
+          },
           ...tokens
         ]
       },

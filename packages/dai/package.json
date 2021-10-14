@@ -1,14 +1,8 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.32.13-beta5",
+  "version": "0.40.0",
   "contributors": [
-    "Wouter Kampmann <wouter@makerdao.com>",
-    "Sean Brennan <sean@makerdao.com>",
-    "Tyler Sorensen <tyler@makerdao.com>",
-    "Ethan Bennett <ethan@makerdao.com>",
-    "Lawrence Wang <lawrence@makerdao.com>",
-    "Joshua Levine <joshua@makerdao.com>",
-    "Michael Elliot <mike@makerdao.com>"
+    "DUX <hello@dux.makerdao.network>"
   ],
   "description": "Library for interacting with the Dai Stablecoin System.",
   "license": "MIT",
@@ -47,6 +41,7 @@
     "test:watch": "yarn test --watch",
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
+    "test:goerli": "export NETWORK='goerli' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
     "test:build": "yarn test --config ./test/config/jestBuildConfig.json",
     "repl": "../../node_modules/.bin/tsc scripts/repl.ts"

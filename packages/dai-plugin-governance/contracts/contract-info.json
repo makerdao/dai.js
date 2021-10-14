@@ -2,7 +2,8 @@
   "chief": {
     "inception_block": {
       "mainnet": "0x487813",
-      "kovan": "0x649575"
+      "kovan": "0x649575",
+      "goerli": "0x649575"
     },
     "events": {
       "etch": "0x4f0892983790f53eea39a7a496f6cb40e8811b313871337b6a761efc6c67bb1f",
@@ -15,7 +16,8 @@
   "pause": {
     "inception_block": {
       "mainnet": "8928171",
-      "kovan": "14764552"
+      "kovan": "14764552",
+      "goerli": "14764552"
     },
     "events": {
       "exec": "0x168ccd6700000000000000000000000000000000000000000000000000000000",
