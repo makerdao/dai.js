@@ -46,7 +46,14 @@ export const UNIV2DAIUSDT = createCurrency('UNIV2DAIUSDT');
 
 export const SAI = createCurrency('SAI');
 
-export const defaultCdpTypes = [
+type CDP_TYPE = {
+  currency: any,
+  ilk: string, 
+  address?: string,
+  decimals?: number,
+  abi?: any
+}
+export const defaultCdpTypes: CDP_TYPE[] = [
   { currency: ETH, ilk: 'ETH-A' },
   { currency: ETH, ilk: 'ETH-B' },
   { currency: ETH, ilk: 'ETH-C' },

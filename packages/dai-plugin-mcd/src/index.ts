@@ -64,7 +64,7 @@ export const McdPlugin = {
     } = {}
   ) => {
     if (addressOverrides) {
-      addContracts = mapValues(addContracts, (contractDetails, name) => ({
+      addContracts = mapValues(addContracts, (contractDetails: any, name) => ({
         ...contractDetails,
         address: addressOverrides[name] || contractDetails.address
       }));
@@ -90,8 +90,8 @@ export const McdPlugin = {
       smartContract: { addContracts },
       token: {
         erc20: [
-          { currency: DAI, address: addContracts.MCD_DAI.address },
-          { currency: WETH, address: addContracts.ETH.address, abi: wethAbi },
+          { currency: DAI, address: (addContracts as any).MCD_DAI.address },
+          { currency: WETH, address: (addContracts as any).ETH.address, abi: wethAbi },
           ...tokens
         ]
       },

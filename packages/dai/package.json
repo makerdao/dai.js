@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.32.13",
+  "version": "0.32.13-beta5",
   "contributors": [
     "Wouter Kampmann <wouter@makerdao.com>",
     "Sean Brennan <sean@makerdao.com>",
@@ -33,11 +33,11 @@
   ],
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
-  "unpkg": "dist/index.js",
+  "unpkg": "dist/dai.umd.production.min.js",
   "jsdelivr": "dist/dai.esm.js",
-  "module": "dist/dai.esm.js",
+  "module": "dist/dai.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean && tsdx build  && ./scripts/copy-files.sh",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd && ./scripts/copy-files.sh",
     "clean": "rm -rf ./dist",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
@@ -68,6 +68,7 @@
     "invariant": "^2.2.2",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.11",
+    "lodash-es": "^4.17.21",
     "promise-props": "^1.0.0",
     "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
@@ -78,6 +79,7 @@
     "node": ">=10.16"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.5",
     "gray-matter": "^4.0.2"
   }
 }

@@ -16,9 +16,8 @@ import {
   throwIfEmpty,
   tap
 } from 'rxjs/operators';
-import get from 'lodash/get';
-import set from 'lodash/set';
-import find from 'lodash/find';
+
+import { get, set, find } from 'lodash';
 
 const log = debug('dai:MulticallService');
 const log2 = debug('dai:MulticallService:observables');

@@ -1,5 +1,4 @@
-import isEqual from 'lodash/isEqual';
-
+import { isEqual } from 'lodash';
 //////////////////////////////
 /////  Polling Helpers  //////
 //////////////////////////////

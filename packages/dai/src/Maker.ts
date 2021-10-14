@@ -2,10 +2,8 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
-import mergeWith from 'lodash/mergeWith';
-import cloneDeep from 'lodash/cloneDeep';
-import uniq from 'lodash/uniq';
-import has from 'lodash/has';
+import { mergeWith, cloneDeep, uniq, has } from 'lodash';
+
 import { strict as assert } from 'assert';
 
 // a plugin must be either an object with at least one of these keys defined, or

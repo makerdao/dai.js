@@ -1,7 +1,7 @@
 import { PublicService } from '@makerdao/services-core';
-import map from 'lodash/fp/map';
-import omit from 'lodash/fp/omit';
-import pick from 'lodash/fp/pick';
+
+
+import { map, omit, pick } from 'lodash/fp';
 import invariant from 'invariant';
 import {
   privateKeyAccountFactory,

@@ -3,7 +3,7 @@ import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import Web3 from 'web3';
 import makeSigner from './web3/ShimEthersSigner';
-import last from 'lodash/last';
+import { last } from 'lodash';
 import assert from 'assert';
 import debug from 'debug';
 const log = debug('dai:Web3Service');
@@ -181,7 +181,7 @@ export default class Web3Service extends PrivateService {
 
   get rpcUrl() {
     const provider = last(this._web3.currentProvider._providers);
-    return provider.rpcUrl || provider._url || null;
+    return (provider as any).rpcUrl || (provider as any)._url || null;
   }
 
   blockNumber() {

@@ -6,12 +6,12 @@
   "main": "dist/index.js",
   "unpkg": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "module": "dist/test-helpers.esm.js",
+  "module": "dist/test-helpers.umd.production.min.js",
   "dependencies": {
     "node-fetch": "^2.6.0"
   },
   "scripts": {
-    "build": "yarn clean && tsdx build",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "test": "jest"

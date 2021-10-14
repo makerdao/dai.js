@@ -7,9 +7,9 @@
   "main": "dist/index.js",
   "unpkg": "dist/index.js",
   "jsdelivr": "dist/dai-plugin-liquidations.esm.js",
-  "module": "dist/dai-plugin-liquidations.esm.js",
+  "module": "dist/dai-plugin-liquidations.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean && tsdx build && ./scripts/copy-files.sh",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd && ./scripts/copy-files.sh",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",

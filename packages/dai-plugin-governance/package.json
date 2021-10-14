@@ -11,9 +11,9 @@
   "unpkg": "dist/index.js",
   "jsdelivr": "dist/dai-plugin-governance.esm.js",
   "typings": "dist/index.d.ts",
-  "module": "dist/dai-plugin-governance.esm.js",
+  "module": "dist/dai-plugin-governance.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean && tsdx build && ./scripts/copy-files.sh",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd && ./scripts/copy-files.sh",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",

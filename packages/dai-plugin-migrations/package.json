@@ -7,9 +7,9 @@
   "unpkg": "dist/index.js",
   "typings": "dist/index.d.ts",
   "module": "dist/dai-plugin-migrations.esm.js",
-  "jsdelivr": "dist/dai-plugin-migrations.esm.js",
+  "jsdelivr": "dist/dai-plugin-migrations.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean  && tsdx build",
+    "build": "yarn clean  && tsdx build --format cjs,esm,umd",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",

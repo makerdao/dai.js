@@ -1,4 +1,4 @@
-import merge from 'lodash/merge';
+import { merge } from 'lodash';
 import { standardizeConfig } from '@makerdao/services-core';
 
 export function mergeServiceConfig(role, sink, source, resolver) {

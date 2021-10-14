@@ -61,7 +61,7 @@ export const ALLOWANCE_AMOUNT = new BigNumber(
 export default {
   addConfig: (_, config: { addressOverrides?: any }) => {
     if (config && config.addressOverrides) {
-      addContracts = mapValues(addContracts, (contractDetails, name) => ({
+      addContracts = mapValues(addContracts, (contractDetails: any, name) => ({
         ...contractDetails,
         address: config.addressOverrides[name] || contractDetails.address
       }));
@@ -76,7 +76,7 @@ export default {
           // { currency: PETH, address: addContracts.SKR.address },
           // { currency: WETH, address: addContracts.GEM.address },
           // { currency: MKR, address: addContracts.GOV.address },
-          { currency: SAI, address: addContracts.SAI.address }
+          { currency: SAI, address: (addContracts as any).SAI.address }
         ]
       },
       additionalServices: [CDP, PRICE, CONVERSION],

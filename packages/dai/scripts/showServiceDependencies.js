@@ -3,8 +3,7 @@
 
 import DefaultServiceProvider, { resolver } from '../src/config/DefaultServiceProvider';
 import chalk from 'chalk';
-import times from 'lodash/times';
-
+import { times } from 'lodash';
 
 const colors = [
   '#e6194b',
