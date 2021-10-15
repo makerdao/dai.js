@@ -42,22 +42,6 @@ export class MakerClass {
     }
 
     if (otherOptions.autoAuthenticate !== false) this.authenticate();
-
-    delegateToServices(this, {
-      accounts: [
-        'addAccount',
-        'currentAccount',
-        'currentAddress',
-        'listAccounts',
-        'useAccount',
-        'useAccountWithAddress'
-      ],
-      cdp: ['getCdp', 'openCdp', 'getCdpIds'],
-      event: ['on'],
-      proxy: ['currentProxy'],
-      token: ['getToken'],
-      multicall: ['watch', 'latest']
-    });
   }
 
   authenticate() {
@@ -67,6 +51,68 @@ export class MakerClass {
     return this._authenticatedPromise;
   }
 
+  // shorthand methods
+  addAccount(...args) {
+    return this.service('accounts').addAccount(...args);
+  }
+
+  currentAccount(...args) {
+    return this.service('accounts').currentAccount(...args);
+  }
+
+  listAccounts(...args) {
+    return this.service('accounts').listAccounts(...args);
+  }
+
+  useAccount(...args) {
+    return this.service('accounts').useAccount(...args);
+  }
+
+  useAccountWithAddress(...args) {
+    return this.service('accounts').useAccountWithAddress(...args);
+  }
+
+  currentAddress(...args) {
+    return this.service('accounts').currentAddress(...args);
+  }
+  
+  on(...args) {
+    return this.service('event').on(...args);
+  }
+  
+  getToken(...args) {
+    return this.service('token').getToken(...args);
+  }
+
+  currentProxy(...args) {
+    return this.service('proxy').currentProxy(...args);
+  }
+
+  watch(...args) {
+    return this.service('multicall').watch(...args);
+  }
+
+  latest(...args) {
+    return this.service('multicall').latest(...args);
+  }
+
+  openCdp() {
+    throw new Error(
+      '"openCdp" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').openCdp'
+    );
+  }
+
+  getCdp() {
+    throw new Error(
+      '"getCdp" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').getCdp'
+    );
+  }
+
+  getCdpIds() {
+    throw new Error(
+      '"getCdpIds" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').getCdpIds'
+    );
+  }
   // skipAuthCheck should only be set if you're sure you don't need the service
   // to be initialized yet, e.g. when setting up a plugin
   service(service, skipAuthCheck = false) {
@@ -81,23 +127,6 @@ export class MakerClass {
       );
     }
     return this._container.service(service);
-  }
-}
-
-function delegateToServices(maker, services) {
-  for (const serviceName in services) {
-    for (const methodName of services[serviceName]) {
-      if (serviceName === 'cdp') {
-        maker[methodName] = () => {
-          throw new Error(
-            `"${methodName}" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').${methodName}`
-          );
-        };
-      } else {
-        maker[methodName] = (...args) =>
-          maker.service(serviceName)[methodName](...args);
-      }
-    }
   }
 }
 
