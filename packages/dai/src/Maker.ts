@@ -75,11 +75,11 @@ export class MakerClass {
   currentAddress(...args) {
     return this.service('accounts').currentAddress(...args);
   }
-  
+
   on(...args) {
     return this.service('event').on(...args);
   }
-  
+
   getToken(...args) {
     return this.service('token').getToken(...args);
   }
