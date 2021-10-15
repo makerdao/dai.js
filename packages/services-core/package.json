@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/services-core",
   "description": "Dependency injection framework",
-  "version": "0.11.0-alpha.0",
+  "version": "0.11.0-alpha.1",
   "license": "MIT",
   "main": "dist/index.js",
   "unpkg": "dist/index.js",
