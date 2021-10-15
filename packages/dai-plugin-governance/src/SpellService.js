@@ -16,6 +16,7 @@ export default class SpellService extends PublicService {
     this.executionDate = {};
     this.scheduledDate = {};
     this.nextCastTime = {};
+    this.expiration = {};
     this.executiveHash = {};
     this.officeHours = {};
   }
@@ -48,6 +49,18 @@ export default class SpellService extends PublicService {
     if (!nextCastTime.toNumber()) return undefined;
     this.nextCastTime[spellAddress] = new Date(nextCastTime.toNumber() * 1000);
     return this.nextCastTime[spellAddress];
+  }
+
+  async getExpiration(spellAddress) {
+    if (this.expiration[spellAddress]) return this.expiration[spellAddress];
+    const spell = this.get('smartContract').getContractByAddressAndAbi(
+      spellAddress,
+      DsSpellAbi
+    );
+    const expiration = await spell.expiration();
+    if (!expiration.toNumber()) return undefined;
+    this.expiration[spellAddress] = new Date(expiration.toNumber() * 1000);
+    return this.expiration[spellAddress];
   }
 
   async getScheduledDate(spellAddress) {
