@@ -37,5 +37,6 @@
     "lodash": "^4.17.15",
     "prettier": "^1.12.1",
     "webpack-bundle-analyzer": "^3.3.2"
-  }
+  },
+  "gitHead": "035aa87023c84916295cd4a2735cb2f6fdb1506e"
 }

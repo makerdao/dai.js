@@ -31,5 +31,6 @@
     "bignumber.js": "^8.1.1",
     "rxjs": "^6.5.4"
   },
-  "types": "typings/index.d.ts"
+  "types": "typings/index.d.ts",
+  "gitHead": "035aa87023c84916295cd4a2735cb2f6fdb1506e"
 }

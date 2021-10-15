@@ -21,5 +21,6 @@
     "LICENSE",
     "dist/**/*",
     "umd/*"
-  ]
+  ],
+  "gitHead": "035aa87023c84916295cd4a2735cb2f6fdb1506e"
 }

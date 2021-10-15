@@ -24,5 +24,6 @@
     "@makerdao/services-core": "^0.11.0-alpha.0",
     "bignumber.js": "^8.1.1",
     "ramda": "^0.27.1"
-  }
+  },
+  "gitHead": "035aa87023c84916295cd4a2735cb2f6fdb1506e"
 }
