@@ -42,5 +42,5 @@
     "@makerdao/dai-plugin-config": "^0.2.14-rc.1",
     "web3-utils": "^1.2.6"
   },
-  "gitHead": "035aa87023c84916295cd4a2735cb2f6fdb1506e"
+  "gitHead": "689f3670142282c9483c74d5658f60161d4287bb"
 }

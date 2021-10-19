@@ -3446,33 +3446,6 @@
     babel-runtime "^6.26.0"
     ramda "^0.26.1"
 
-"@makerdao/dai@^0.32.13":
-  version "0.32.15"
-  resolved "https://registry.yarnpkg.com/@makerdao/dai/-/dai-0.32.15.tgz#59ccc8f829d514db23ca7354cbeed1c4e961feb6"
-  integrity sha512-PwdWkYpXi3E4KnFcXfg9ht6j+3kw0bR+Ts7vdbuKorV3AWgjni/M89rSD6q1HztTIEZ89pph5PbxAXtxLBJ/mQ==
-  dependencies:
-    "@babel/runtime" "^7.3.4"
-    "@makerdao/currency" "0.9.9"
-    "@makerdao/multicall" "^0.11.0"
-    "@makerdao/services-core" "^0.9.9"
-    "@makerdao/test-helpers" "^0.2.1"
-    assert "^1.4.1"
-    bignumber.js "^7.2.1"
-    chalk "^2.4.1"
-    debug "^3.1.0"
-    ethereumjs-util "^5.2.0"
-    ethers "^3.0.15"
-    ethers-web3-bridge "0.0.1"
-    eventemitter2 "^5.0.1"
-    invariant "^2.2.2"
-    isomorphic-fetch "^2.2.1"
-    lodash "^4.17.11"
-    promise-props "^1.0.0"
-    rxjs "^6.5.4"
-    toposort "^2.0.2"
-    web3 "^1.5.1"
-    web3-provider-engine makerdao/provider-engine#kovan-fix-dist
-
 "@makerdao/multicall@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@makerdao/multicall/-/multicall-0.11.0.tgz#690f0fc85f0ca0d430263034df6956b3ad71cbf7"
@@ -3486,15 +3459,6 @@
     isomorphic-ws "^4.0.1"
     lodash "^4.17.11"
     ws "^7.2.0"
-
-"@makerdao/services-core@^0.9.9":
-  version "0.9.9"
-  resolved "https://registry.yarnpkg.com/@makerdao/services-core/-/services-core-0.9.9.tgz#22bccab226cebfbe9649e34156f4aaa109cc0f86"
-  integrity sha512-EFimChs0KpIFMW7wpB0foYA77YP785384h0RbQB517X14blNvgR1T1eZCxFH0YZWw5nISfxGh0lf6l1ImAdfEw==
-  dependencies:
-    babel-runtime "^6.26.0"
-    lodash "^4.17.15"
-    toposort "^2.0.2"
 
 "@makerdao/test-helpers@^0.2.1":
   version "0.2.1"
@@ -18218,7 +18182,7 @@ web3-utils@^1.2.6:
     underscore "1.9.1"
     utf8 "3.0.0"
 
-web3@^1.5.1, web3@^1.6.0:
+web3@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/web3/-/web3-1.6.0.tgz#d8fa0cd9e7bf252f9fe43bb77dc42bc6671affde"
   integrity sha512-rWpXnO88MiVX5yTRqMBCVKASxc7QDkXZZUl1D48sKlbX4dt3BAV+nVMVUKCBKiluZ5Bp8pDrVCUdPx/jIYai5Q==
