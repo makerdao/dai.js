@@ -56,9 +56,10 @@ afterEach(() => {
 
 //FIXME: The testchain version of ganache-cli doesn't seem to auto-advance to the next block
 // with the current configuration it was initialized with, causing the last expect here to fail.
+// also, with ethersjs, change .fromWei to parseEther(val).toString()
 xtest('get eth balance via multicall', async () => {
   const web3 = multicall.get('web3');
-  const fromWei = web3._web3.utils.fromWei;
+  const fromWei = web3.utils.fromWei;
   watcher.stop();
   const initialBlock = (await web3.getBlock('latest')).number + 1;
   const initialEthBalance = fromWei(await web3.getBalance(address)).toString();

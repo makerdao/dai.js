@@ -40,9 +40,12 @@ test('throw error on a failure to connect', async () => {
   expect.assertions(1);
   const service = buildTestService();
   await service.manager().initialize();
-  service._web3.eth.net.getId = cb => {
+  service._ethersProvider.getNetwork = cb => {
     cb(new Error('fake connection failure error'));
   };
+  // service._web3.eth.net.getId = cb => {
+  //   cb(new Error('fake connection failure error'));
+  // };
 
   try {
     await service.manager().connect();
@@ -95,7 +98,7 @@ test('have ETH in test account', done => {
     .connect()
     .then(() => service.getBalance(TestAccountProvider.nextAddress()))
     .then(balance => {
-      expect(Number(service._web3.utils.fromWei(balance))).toBeGreaterThan(50);
+      expect(Number(service._utils.formatEther(balance))).toBeGreaterThan(50);
       done();
     });
 });

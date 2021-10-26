@@ -15,7 +15,10 @@ function buildTestGasService() {
     return {
       from: TestAccountProvider.nextAddress(),
       to: TestAccountProvider.nextAddress(),
-      amount: service.get('web3')._web3.utils.toWei('0.01')
+      amount: service
+        .get('web3')
+        .utils.parseEther('0.01')
+        .toString()
     };
   };
 
@@ -108,10 +111,18 @@ test('fetches gas station data', async () => {
 
 test('returns a valid gas price', async () => {
   const gasStationData = await gasService._gasStationDataPromise;
+  console.log('gas data', gasStationData);
   const gasPrice = await gasService.getGasPrice();
+  console.log('gas price', gasPrice);
+  const num = (gasStationData['fast'] / 10).toString();
+  console.log('num', num);
   const expectedValue = gasService
     .get('web3')
-    ._web3.utils.toWei((gasStationData['fast'] / 10).toString(), 'gwei');
+    .utils.parseUnits(num, 'gwei')
+    .toString();
+  console.log('expected val', expectedValue);
+  //100000000 current
+  //100000000 new
   expect(typeof gasPrice).toBe('string');
   expect(gasPrice).toBe(expectedValue);
 });

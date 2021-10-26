@@ -8,7 +8,7 @@ import {
   providerAccountFactory,
   browserProviderAccountFactory
 } from './accounts/factories';
-import { setupEngine } from './accounts/setup';
+import { setupEngine, setupEthersProvider } from './accounts/setup';
 import { AccountType } from '../utils/constants';
 import assert from 'assert';
 import debug from 'debug';
@@ -30,9 +30,14 @@ export default class AccountsService extends PublicService {
   async initialize(settings = {}) {
     this._settings = omit('web3', settings);
 
-    const result = await setupEngine(settings);
-    this._engine = result.engine;
-    this._provider = result.provider;
+    // an object with { engine }
+    // engine has the providers
+    // const result = await setupEngine(settings);
+    const provider = await setupEthersProvider(settings);
+    const signer = provider.getSigner();
+    // this._engine = result.engine;
+    this._provider = provider;
+    this._signer = signer;
   }
 
   async connect() {
@@ -43,11 +48,17 @@ export default class AccountsService extends PublicService {
     if (accountNames.length === 0) {
       await this.addAccount('default', { type: AccountType.PROVIDER });
     }
-    this._engine.start();
+    // this._engine.start();
   }
 
   getProvider() {
-    return this._engine;
+    // return this._engine;
+    return this._provider;
+  }
+
+  getSigner() {
+    // return this._engine;
+    return this._signer;
   }
 
   addAccountType(type, factory) {
@@ -64,7 +75,7 @@ export default class AccountsService extends PublicService {
       name = null;
     }
     const { type, autoSwitch, ...otherSettings } = options;
-    invariant(this._engine, 'engine must be set up before adding an account');
+    // invariant(this._engine, 'engine must be set up before adding an account');
     if (name && this._accounts[name]) {
       throw new Error('An account with this name already exists.');
     }
@@ -131,15 +142,17 @@ export default class AccountsService extends PublicService {
       }
     }
 
-    if (this._currentAccount) {
-      this._engine.stop();
-      this._engine.removeProvider(this.currentWallet());
-    }
+    // TODO fix this later
+    // if (this._currentAccount) {
+    //   this._engine.stop();
+    //   this._engine.removeProvider(this.currentWallet());
+    // }
 
     this._currentAccount = name;
     // add the provider at index 0 so that it takes precedence over RpcSource
-    this._engine.addProvider(this.currentWallet(), 0);
-    this._engine.start();
+    // this._engine.push(this.currentWallet(), 0);
+    // this._engine.addProvider(this.currentWallet(), 0);
+    // this._engine.start();
     if (this.hasAccount()) {
       this.get('event').emit('accounts/CHANGE', {
         account: this.currentAccount()

@@ -2,6 +2,7 @@ import { PrivateService } from '@makerdao/services-core';
 import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import Web3 from 'web3';
+import { ethers } from 'ethers';
 import makeSigner from './web3/ShimEthersSigner';
 import last from 'lodash/last';
 import assert from 'assert';
@@ -15,6 +16,7 @@ export default class Web3Service extends PrivateService {
     this._blockListeners = {};
     this._info = {};
     Web3ServiceList.push(this);
+    this._utils = ethers.utils;
   }
 
   currentAddress() {
@@ -27,7 +29,8 @@ export default class Web3Service extends PrivateService {
   }
 
   web3Provider() {
-    return this._web3.currentProvider;
+    return this._ethersProvider;
+    // return this._web3.currentProvider;
   }
 
   transactionSettings() {
@@ -42,40 +45,55 @@ export default class Web3Service extends PrivateService {
     return new this._web3.eth.Contract(abi, address);
   }
 
+  getAccounts(...args) {
+    return this.listAccounts(args);
+  }
+
   initialize(settings) {
     log('initializing...');
     this._defaultEmitter = this.get('event');
+    // const rpcUrl = getRpcUrl(providerSettings);
+    // const subscriptionProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    // this._ethers = new ethers();
+    this._ethersProvider = this.get('accounts').getProvider();
+    this._ethersSigner = this.get('accounts').getSigner();
 
-    this._web3 = new Web3();
-    this._web3.setProvider(this.get('accounts').getProvider());
+    // this._web3 = new Web3();
+    // this._web3.setProvider(this.get('accounts').getProvider());
 
+    // pseudo code on how I might abstract this:
+    // const source = this._web3.eth;
+    const source = this._ethersProvider;
     Object.assign(
       this,
       [
         'estimateGas',
-        'getAccounts',
-        'getBalance',
-        'getBlock',
+        // 'getAccounts',
+        'listAccounts',
+        'getBalance', /// yes
+        'getBlock', // yes
         'getPastLogs',
-        'getStorageAt',
-        'getTransaction',
-        'getTransactionReceipt',
+        'getStorageAt', // yes
+        'getTransaction', // yes
+        'getTransactionReceipt', // yes
         'subscribe'
       ].reduce((acc, method) => {
-        acc[method] = (...args) => this._web3.eth[method](...args);
+        acc[method] = (...args) => source[method](...args);
         return acc;
       }, {})
     );
 
-    this.eth = new Proxy(this, {
-      get(target, key) {
-        if (typeof key === 'string')
-          console.warn(`use .${key} instead of .eth.${key}`);
-        return target[key];
-      }
-    });
+    // May still need this...
+    // this.eth = new Proxy(this, {
+    //   get(target, key) {
+    //     if (typeof key === 'string')
+    //       console.warn(`use .${key} instead of .eth.${key}`);
+    //     return target[key];
+    //   }
+    // });
 
     this.manager().onDisconnected(() => this._stopListeningForNewBlocks());
+    console.log('settings.provider', settings.provider);
     this._defaultEmitter.emit('web3/INITIALIZED', {
       provider: settings.provider
     });
@@ -87,8 +105,14 @@ export default class Web3Service extends PrivateService {
   async connect() {
     log('connecting...');
 
-    this._networkId = parseInt(await promisify(this._web3.eth.net.getId)());
-    this._currentBlock = await this._web3.eth.getBlockNumber();
+    // this._networkId = parseInt(await promisify(this._web3.eth.net.getId)());
+    // this._networkId = parseInt(
+    //   (await promisify(this._ethersProvider.getNetwork)()).chainId
+    // );
+    this._networkId = (await this._ethersProvider.getNetwork()).chainId;
+
+    this._currentBlock = this._ethersProvider.getBlockNumber();
+    // this._currentBlock = await this._web3.eth.getBlockNumber();
     this._updateBlockNumber(this._currentBlock);
     this._listenForNewBlocks();
 
@@ -147,6 +171,10 @@ export default class Web3Service extends PrivateService {
     return provider.rpcUrl || provider._url || null;
   }
 
+  get utils() {
+    return this._utils;
+  }
+
   blockNumber() {
     return this._currentBlock;
   }
@@ -180,20 +208,30 @@ export default class Web3Service extends PrivateService {
 
   _listenForNewBlocks() {
     if (this.networkName !== 'test') {
-      log('Using newBlockHeaders subscription for block detection');
-      this._newBlocksSubscription = this.subscribe('newBlockHeaders').on(
-        'data',
-        ({ number: blockNumber }) => {
+      // log('Using newBlockHeaders subscription for block detection');
+      this._newBlocksSubscription = this._ethersProvider.on(
+        'block',
+        blockNumber => {
+          console.log('got blockNumba', blockNumber);
           if (!this._currentBlock) this._currentBlock = blockNumber - 1;
           for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
             this._updateBlockNumber(i);
           }
         }
       );
+      // this._newBlocksSubscription = this.subscribe('newBlockHeaders').on(
+      //   'data',
+      //   ({ number: blockNumber }) => {
+      //     if (!this._currentBlock) this._currentBlock = blockNumber - 1;
+      //     for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
+      //       this._updateBlockNumber(i);
+      //     }
+      //   }
+      // );
     } else {
       log('Using manual getBlockNumber polling for block detection');
       const updateBlocks = async () => {
-        const blockNumber = await this._web3.eth.getBlockNumber();
+        const blockNumber = await this._ethersProvider.getBlockNumber();
         if (!this._currentBlock) this._currentBlock = blockNumber - 1;
         for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
           this._updateBlockNumber(i);
@@ -205,6 +243,33 @@ export default class Web3Service extends PrivateService {
       );
     }
   }
+  // _listenForNewBlocks() {
+  //   if (this.networkName !== 'test') {
+  //     log('Using newBlockHeaders subscription for block detection');
+  //     this._newBlocksSubscription = this.subscribe('newBlockHeaders').on(
+  //       'data',
+  //       ({ number: blockNumber }) => {
+  //         if (!this._currentBlock) this._currentBlock = blockNumber - 1;
+  //         for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
+  //           this._updateBlockNumber(i);
+  //         }
+  //       }
+  //     );
+  //   } else {
+  //     log('Using manual getBlockNumber polling for block detection');
+  //     const updateBlocks = async () => {
+  //       const blockNumber = await this._ethersProvider.getBlockNumber();
+  //       if (!this._currentBlock) this._currentBlock = blockNumber - 1;
+  //       for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
+  //         this._updateBlockNumber(i);
+  //       }
+  //     };
+  //     this._updateBlocksInterval = setInterval(
+  //       updateBlocks,
+  //       this._pollingInterval
+  //     );
+  //   }
+  // }
 
   _updateBlockNumber(blockNumber) {
     log(`Latest block: ${blockNumber}`);

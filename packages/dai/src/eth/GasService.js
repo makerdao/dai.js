@@ -60,10 +60,10 @@ export default class GasService extends PublicService {
     if (this.price) return this.price;
     const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
     const gasStationData = await this._gasStationDataPromise;
-    const price = this.get('web3')._web3.utils.toWei(
-      (gasStationData[speedSetting] / 10).toString(),
-      'gwei'
-    );
+    const num = (gasStationData[speedSetting] / 10).toString();
+    const price = this.get('web3')
+      .utils.parseUnits(num, 'gwei')
+      .toString();
 
     return price;
   }

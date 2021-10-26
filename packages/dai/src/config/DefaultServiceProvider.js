@@ -1,4 +1,5 @@
-import { ServiceProvider } from '@makerdao/services-core';
+// import { ServiceProvider } from '@makerdao/services-core';
+import ServiceProvider from '../../../services-core/src/ServiceProvider';
 import AccountsService from '../eth/AccountsService';
 import AllowanceService from '../eth/AllowanceService';
 import CacheService from '../utils/CacheService';
