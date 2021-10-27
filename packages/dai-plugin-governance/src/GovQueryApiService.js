@@ -7,8 +7,6 @@ import {
   paddedArray
 } from './utils/helpers';
 
-const LOCAL_URL = 'https://2151-24-8-30-196.ngrok.io/v1';
-
 export default class QueryApi extends PublicService {
   constructor(name = 'govQueryApi') {
     super(name, ['web3']);
@@ -46,11 +44,10 @@ export default class QueryApi extends PublicService {
   }
 
   connect() {
-    // const network = this.get('web3').network;
-    this.serverUrl = LOCAL_URL;
-    // this.serverUrl = this.staging
-    //   ? netIdtoSpockUrlStaging(network)
-    //   : netIdtoSpockUrl(network);
+    const network = this.get('web3').network;
+    this.serverUrl = this.staging
+      ? netIdtoSpockUrlStaging(network)
+      : netIdtoSpockUrl(network);
   }
 
   async getAllWhitelistedPolls() {
