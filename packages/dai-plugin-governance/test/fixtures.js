@@ -16,6 +16,59 @@ export const dummyMkrSupportData = [
   }
 ];
 
+export const dummyMkrGetMkrSupportRCForPluralityData = [
+  {
+    optionIdRaw: '1',
+    mkrSupport: '40'
+  },
+  {
+    optionIdRaw: '1',
+    mkrSupport: '60'
+  },
+  {
+    optionIdRaw: '0',
+    mkrSupport: '77'
+  },
+  {
+    optionIdRaw: '0',
+    mkrSupport: '32'
+  },
+  {
+    optionIdRaw: '1',
+    mkrSupport: '600'
+  }
+];
+export const dummyMkrGetMkrSupportRCForPluralityDataAdjusted = [
+  {
+    optionIdRaw: '1',
+    mkrSupport: '40'
+  },
+  {
+    optionIdRaw: '1',
+    mkrSupport: '60'
+  },
+  {
+    optionIdRaw: '0',
+    mkrSupport: '77'
+  },
+  {
+    optionIdRaw: '0',
+    mkrSupport: '32'
+  },
+  {
+    optionIdRaw: '1',
+    mkrSupport: '600'
+  },
+  {
+    optionIdRaw: '2',
+    mkrSupport: '32'
+  },
+  {
+    optionIdRaw: '2',
+    mkrSupport: '1200'
+  }
+];
+
 export const dummyAllPollsData = [
   {
     creator: '0xeda95d1bdb60f901986f43459151b6d1c734b8a2',

@@ -16,6 +16,9 @@ export default class SpellService extends PublicService {
     this.executionDate = {};
     this.scheduledDate = {};
     this.nextCastTime = {};
+    this.expiration = {};
+    this.executiveHash = {};
+    this.officeHours = {};
   }
 
   getDelayInSeconds() {
@@ -48,6 +51,18 @@ export default class SpellService extends PublicService {
     return this.nextCastTime[spellAddress];
   }
 
+  async getExpiration(spellAddress) {
+    if (this.expiration[spellAddress]) return this.expiration[spellAddress];
+    const spell = this.get('smartContract').getContractByAddressAndAbi(
+      spellAddress,
+      DsSpellAbi
+    );
+    const expiration = await spell.expiration();
+    if (!expiration.toNumber()) return undefined;
+    this.expiration[spellAddress] = new Date(expiration.toNumber() * 1000);
+    return this.expiration[spellAddress];
+  }
+
   async getScheduledDate(spellAddress) {
     if (this.scheduledDate[spellAddress])
       return this.scheduledDate[spellAddress];
@@ -78,6 +93,31 @@ export default class SpellService extends PublicService {
     );
     this.done[spellAddress] = spell.done();
     return this.done[spellAddress];
+  }
+
+  async getExecutiveHash(spellAddress) {
+    if (this.executiveHash[spellAddress])
+      return this.executiveHash[spellAddress];
+    const spell = this.get('smartContract').getContractByAddressAndAbi(
+      spellAddress,
+      DsSpellAbi
+    );
+    this.executiveHash[spellAddress] = spell.description().then(description => {
+      return description.substr(description.indexOf('0x'), description.length);
+    });
+
+    return this.executiveHash[spellAddress];
+  }
+
+  async getOfficeHours(spellAddress) {
+    if (this.officeHours[spellAddress]) return this.officeHours[spellAddress];
+    const spell = this.get('smartContract').getContractByAddressAndAbi(
+      spellAddress,
+      DsSpellAbi
+    );
+    this.officeHours[spellAddress] = spell.officeHours();
+
+    return this.officeHours[spellAddress];
   }
 
   async getAction(spellAddress) {
