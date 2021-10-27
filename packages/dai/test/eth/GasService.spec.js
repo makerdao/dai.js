@@ -111,16 +111,12 @@ test('fetches gas station data', async () => {
 
 test('returns a valid gas price', async () => {
   const gasStationData = await gasService._gasStationDataPromise;
-  console.log('gas data', gasStationData);
   const gasPrice = await gasService.getGasPrice();
-  console.log('gas price', gasPrice);
   const num = (gasStationData['fast'] / 10).toString();
-  console.log('num', num);
   const expectedValue = gasService
     .get('web3')
     .utils.parseUnits(num, 'gwei')
     .toString();
-  console.log('expected val', expectedValue);
   //100000000 current
   //100000000 new
   expect(typeof gasPrice).toBe('string');

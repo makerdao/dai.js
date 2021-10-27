@@ -44,7 +44,7 @@ export default class SmartContractService extends PrivateService {
     //todo, this may be outdated
     const signerOrProvider = web3Service.get('accounts').hasAccount()
       ? web3Service.getEthersSigner()
-      : web3Service.getEthersSigner().provider;
+      : web3Service.web3Provider();
 
     const contract = new Contract(address, abi, signerOrProvider);
     const txManager = wrap && this.get('transactionManager');

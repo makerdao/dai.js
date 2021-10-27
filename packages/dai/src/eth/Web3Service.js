@@ -3,7 +3,7 @@ import { promisify, getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
 import Web3 from 'web3';
 import { ethers } from 'ethers';
-import makeSigner from './web3/ShimEthersSigner';
+// import makeSigner from './web3/ShimEthersSigner';
 import last from 'lodash/last';
 import assert from 'assert';
 import debug from 'debug';
@@ -24,7 +24,8 @@ export default class Web3Service extends PrivateService {
   }
 
   getEthersSigner() {
-    if (!this._ethersSigner) this._ethersSigner = makeSigner(this);
+    if (!this._ethersSigner)
+      this._ethersSigner = this.get('accounts').getSigner();
     return this._ethersSigner;
   }
 
@@ -93,7 +94,6 @@ export default class Web3Service extends PrivateService {
     // });
 
     this.manager().onDisconnected(() => this._stopListeningForNewBlocks());
-    console.log('settings.provider', settings.provider);
     this._defaultEmitter.emit('web3/INITIALIZED', {
       provider: settings.provider
     });
@@ -111,7 +111,8 @@ export default class Web3Service extends PrivateService {
     // );
     this._networkId = (await this._ethersProvider.getNetwork()).chainId;
 
-    this._currentBlock = this._ethersProvider.getBlockNumber();
+    this._currentBlock = await this._ethersProvider.getBlockNumber();
+    console.log('^^^current block on connect', this._currentBlock);
     // this._currentBlock = await this._web3.eth.getBlockNumber();
     this._updateBlockNumber(this._currentBlock);
     this._listenForNewBlocks();
@@ -212,7 +213,7 @@ export default class Web3Service extends PrivateService {
       this._newBlocksSubscription = this._ethersProvider.on(
         'block',
         blockNumber => {
-          console.log('got blockNumba', blockNumber);
+          // console.log('got blockNumba', blockNumber);
           if (!this._currentBlock) this._currentBlock = blockNumber - 1;
           for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
             this._updateBlockNumber(i);
@@ -232,6 +233,7 @@ export default class Web3Service extends PrivateService {
       log('Using manual getBlockNumber polling for block detection');
       const updateBlocks = async () => {
         const blockNumber = await this._ethersProvider.getBlockNumber();
+        // console.log('blockNumber!', blockNumber);
         if (!this._currentBlock) this._currentBlock = blockNumber - 1;
         for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
           this._updateBlockNumber(i);

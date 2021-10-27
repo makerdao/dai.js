@@ -197,13 +197,13 @@ export default class TransactionManager extends PublicService {
 
   async _getGasLimit(options, contract, method, args) {
     let transaction = {};
-    let data = contract.interface.functions[method](...args).data;
+    let data = contract.functions[method](...args).data;
     let proxyAddress;
 
     if (options.dsProxy) {
       proxyAddress = await this.get('proxy').currentProxy();
       const proxy = this.get('proxy').getUnwrappedProxyContract(proxyAddress);
-      data = proxy.interface.functions['execute'](contract.address, data).data;
+      data = proxy.functions['execute'](contract.address, data).data;
     }
 
     if (options.value) {

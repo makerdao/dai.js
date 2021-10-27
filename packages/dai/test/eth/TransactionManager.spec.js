@@ -4,7 +4,8 @@ import {
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
 import { uniqueId } from '../../src/utils';
-import { mineBlocks } from '@makerdao/test-helpers';
+// import { mineBlocks } from '@makerdao/test-helpers';
+import { mineBlocks } from '../../../test-helpers/src';
 import size from 'lodash/size';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');
@@ -107,7 +108,6 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
   );
 });
 
-// TODO
 describe('lifecycle hooks', () => {
   let service, txMgr, priceService, open, cdp;
 
@@ -148,7 +148,7 @@ describe('lifecycle hooks', () => {
     await priceService.setEthPrice(400);
   });
 
-  test('lifecycle hooks for open and lock', async () => {
+  test.only('lifecycle hooks for open and lock', async () => {
     log('open id:', uniqueId(open));
     const openHandlers = makeHandlers('open');
 

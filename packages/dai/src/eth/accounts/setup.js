@@ -12,14 +12,11 @@ const DEFAULT_POLLING_INTERVAL = 4000;
 export async function setupEthersProvider(settings) {
   const { provider: providerSettings, pollingInterval } = settings.web3;
   const rpcUrl = getRpcUrl(providerSettings);
-  console.log('rpcUrl', rpcUrl);
-  console.log('providerSettings', providerSettings);
   const subscriptionProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
   return subscriptionProvider;
 }
 
 export async function setupEngine(settings) {
-  console.log('setup engine');
   const { provider: providerSettings, pollingInterval } = settings.web3;
 
   // TODO: not sure if accepts options
@@ -29,7 +26,6 @@ export async function setupEngine(settings) {
   const result = { engine };
 
   const getHttpProvider = () => {
-    console.log('getHttpProvider');
     const rpcUrl = getRpcUrl(providerSettings);
     const subscriptionProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
     // const subscriptionProvider = new SubscriptionSubprovider();
@@ -90,7 +86,6 @@ export async function setupEngine(settings) {
       throw new Error('provider type must be defined');
   }
 
-  console.log('provider type', providerSettings.type);
   engine.push(result.provider);
   return result;
 }

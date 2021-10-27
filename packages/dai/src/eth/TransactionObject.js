@@ -74,6 +74,7 @@ export default class TransactionObject extends TransactionLifeCycle {
       // when you're on a local testnet, the transaction will probably already
       // be mined by this point. but on other nets, you still have to wait for
       // it to be mined.
+      // TODO: could we use tx.wait() here?
       if (!tx || !tx.blockHash) {
         tx = await this._keepWaitingForTx();
       }
@@ -83,7 +84,9 @@ export default class TransactionObject extends TransactionLifeCycle {
       this._blockNumberWhenMined = tx.blockNumber;
       this.receipt = await this._waitForReceipt();
       if (!!this.receipt.gasUsed && !!gasPrice) {
-        this._fees = ETH.wei(gasPrice).times(this.receipt.gasUsed);
+        this._fees = ETH.wei(gasPrice.toString()).times(
+          this.receipt.gasUsed.toString()
+        );
       } else {
         /*
           console.warn('Unable to calculate transaction fee. Gas usage or price is unavailable. Usage = ',

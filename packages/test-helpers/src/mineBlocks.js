@@ -19,14 +19,14 @@ export default async function mineBlocks(service, count) {
     'mineBlocks may not work well; pollingInterval is too long'
   );
 
-  const initialNumber = web3Service.blockNumber();
+  const initialNumber = await web3Service.blockNumber();
 
   for (let i = 0; i < count; i++) {
     await callGanache('evm_mine');
     await new Promise(resolve => setTimeout(resolve, WAIT_AFTER_MINE_CALL));
   }
 
-  const newNumber = web3Service.blockNumber();
+  const newNumber = await web3Service.blockNumber();
   const expectedNumber = initialNumber + count;
   assert(
     newNumber >= expectedNumber,
