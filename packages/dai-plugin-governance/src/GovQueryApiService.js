@@ -261,4 +261,23 @@ export default class QueryApi extends PublicService {
     const delegates = response.allDelegates.nodes;
     return delegates;
   }
+
+  async getMkrLockedDelegate(address, unixtimeStart, unixtimeEnd) {
+    const query = `
+      {
+        mkrLockedDelegate(argAddress: "${address}" unixtimeStart: ${unixtimeStart}, unixtimeEnd: ${unixtimeEnd}) {
+          nodes {
+            fromAddress
+            lockAmount
+            blockNumber
+            blockTimestamp
+            lockTotal
+          }
+        }
+      }
+    `;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const delegates = response.mkrLockedDelegate.nodes;
+    return delegates;
+  }
 }
