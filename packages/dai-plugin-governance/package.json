@@ -36,7 +36,7 @@
     "ramda": "^0.25.0"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.41.0-alpha.3"
+    "@makerdao/dai": "^0.41.0-alpha.4"
   },
   "devDependencies": {
     "@makerdao/dai-plugin-config": "^0.2.14-rc.1",
