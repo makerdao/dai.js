@@ -28,7 +28,7 @@ const kovanConfig = {
     }
   },
   web3: {
-    provider: { infuraProjectId: 'c3f0f26a4c1742e0949d8eedfc47be67' }
+    provider: { infuraProjectId: '406b22e3688c42898054d22555f43271' }
   }
 };
 const testchainConfig = {

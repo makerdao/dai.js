@@ -3,7 +3,7 @@ import ProviderType from '../../src/eth/web3/ProviderType';
 import has from 'lodash/has';
 import merge from 'lodash/merge';
 
-export const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67'; //dai.js project id
+export const infuraProjectId = '406b22e3688c42898054d22555f43271'; //dai.js project id
 
 export const kovanProviderConfig = {
   web3: {
