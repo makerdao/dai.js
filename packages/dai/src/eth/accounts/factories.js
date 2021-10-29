@@ -17,7 +17,10 @@ export function privateKeyAccountFactory({ key }) {
   const keyBuffer = Buffer.from(keySansPrefix, 'hex');
 
   const subprovider = new Wallet(
-    { getAddressString: () => account.address.toLowerCase(), getPrivateKey: () => keyBuffer },
+    {
+      getAddressString: () => account.address.toLowerCase(),
+      getPrivateKey: () => keyBuffer
+    },
     {}
   );
 
