@@ -1,6 +1,6 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.41.0-alpha.2",
+  "version": "0.41.0-alpha.3",
   "contributors": [
     "DUX <hello@dux.makerdao.network>"
   ],
@@ -49,7 +49,7 @@
     "@babel/runtime": "^7.3.4",
     "@makerdao/currency": "0.9.9",
     "@makerdao/multicall": "^0.11.0",
-    "@makerdao/services-core": "^0.11.0-alpha.1",
+    "@makerdao/services-core": "^0.11.0-alpha.2",
     "@makerdao/test-helpers": "^0.2.1",
     "assert": "^1.4.1",
     "bignumber.js": "^7.2.1",
@@ -76,5 +76,5 @@
     "@types/lodash-es": "^4.17.5",
     "gray-matter": "^4.0.2"
   },
-  "gitHead": "035aa87023c84916295cd4a2735cb2f6fdb1506e"
+  "gitHead": "689f3670142282c9483c74d5658f60161d4287bb"
 }
