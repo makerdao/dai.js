@@ -47,6 +47,12 @@ See [packages/dai/README.md](https://github.com/makerdao/dai.js/blob/dev/package
  npx lerna add @makerdao/services-core packages/dai-plugin-mcd
 ```
 
+## Releasing a version
+
+```
+npx lerna version prerelease
+npx lerna publish from-package
+```
 
 
 [build]: https://circleci.com/gh/makerdao/dai.js.svg?style=svg
