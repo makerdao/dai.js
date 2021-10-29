@@ -53,6 +53,8 @@
     "jest-fetch-mock": "^3.0.3",
     "lint-staged": "^7.1.0",
     "minimist": "^1.2.0",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^1.12.1",
     "sane": "^4.0.3",
     "solc": "^0.4.23",
