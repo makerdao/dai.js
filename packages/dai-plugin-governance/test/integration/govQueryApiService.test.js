@@ -63,3 +63,10 @@ test('get all current votes for multiple addresses', async () => {
   ]);
   console.log('options', options);
 });
+
+test('get MKR locked to a delegate over time', async () => {
+  const events = await service.getMkrLockedDelegate(
+    '0x845b36e1e4F41a361dD711Bda8ea239bF191fE95'
+  );
+  console.log('events', events);
+});

@@ -148,3 +148,16 @@ test('getVoteProxy returns a null if none exists for a given address', async () 
   expect(hasDelegate).toBe(false);
   expect(voteDelegate).toBeNull();
 });
+
+test('getMkrLockedDelegate calls equivalent govQueryApi method', async () => {
+  const address = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
+  const startTime = 0;
+  const endTime = Math.floor(Date.now() / 1000);
+
+  const queryService = vds.get('govQueryApi');
+  const spy = jest.spyOn(queryService, 'getMkrLockedDelegate');
+
+  await vds.getMkrLockedDelegate(address);
+
+  expect(spy).toBeCalledWith(address, startTime, endTime);
+});
