@@ -1,4 +1,4 @@
-import ethUtil from 'ethereumjs-util';
+import { toChecksumAddress } from 'ethereumjs-util';
 import { getQueryResponse } from './utils/getQueryResponse';
 import uniq from 'lodash/uniq';
 const MAINNET_SERVER_URL = 'https://sai-mainnet.makerfoundation.com/v1';
@@ -19,7 +19,7 @@ export default class QueryApi {
   }
 
   async getCdpIdsForOwner(rawAddress) {
-    const address = ethUtil.toChecksumAddress(rawAddress);
+    const address = toChecksumAddress(rawAddress);
     const query = `query ($lad: String) {
       cups1: allCups(condition: { lad: $lad }) {
         nodes {

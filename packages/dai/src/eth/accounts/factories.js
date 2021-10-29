@@ -1,4 +1,4 @@
-import ethUtil from 'ethereumjs-util';
+import { privateToAddress } from 'ethereumjs-util';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
 import { getBrowserProvider } from './setup';
 import assert from 'assert';
@@ -8,12 +8,12 @@ export function privateKeyAccountFactory({ key }) {
     throw new Error('Invalid private key format');
   }
 
-  const [keyWithPrefix, keySansPrefix] = key.startsWith('0x')
+  const [, keySansPrefix] = key.startsWith('0x')
     ? [key, key.replace(/^0x/, '')]
     : ['0x' + key, key];
 
   const address =
-    '0x' + ethUtil.privateToAddress(keyWithPrefix).toString('hex');
+    '0x' + privateToAddress(Buffer.from(keySansPrefix, 'hex')).toString('hex');
   const keyBuffer = Buffer.from(keySansPrefix, 'hex');
 
   const subprovider = new Wallet(
