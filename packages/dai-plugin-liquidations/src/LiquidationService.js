@@ -236,7 +236,7 @@ export default class LiquidationService extends PublicService {
     bytes calldata data   // Data to pass in external call; if length 0, no call is done
   */
   @tracksTransactions
-  async take(ilk, auctionId, amount, maxPrice, address, { promise }) {
+  async take(ilk, auctionId, amount, maxPrice, address, data = nullBytes, { promise }) {
     const id = numberToBytes32(auctionId);
 
     const amt = BigNumber(amount)
@@ -252,7 +252,7 @@ export default class LiquidationService extends PublicService {
       amt,
       max,
       address,
-      nullBytes,
+      data,
       {
         promise
       }
@@ -336,6 +336,12 @@ export default class LiquidationService extends PublicService {
   // async yank(id, { promise }) {
   //   return await this._clipperContract().yank(id, { promise });
   // }
+
+  @tracksTransactions
+  async redo(ilk, auctionId, address, { promise }) {
+    const id = numberToBytes32(auctionId);
+    return await this._clipperContractByIlk(ilk).redo(id, address, { promise });
+  }
 
   @tracksTransactions
   async joinDaiToAdapter(amount, { promise }) {
