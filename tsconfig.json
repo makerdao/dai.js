@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "esnext",
+        "esModuleInterop": true,
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "noLib": false,
+        "emitDecoratorMetadata": true,
+        "sourceMap": true,
+        "downlevelIteration": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "esnext",
+            "dom"
+        ],
+        "allowJs": true,
+        "resolveJsonModule": true,
+        "moduleResolution": "node",
+        "types": ["jest", "node"],
+    },
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}

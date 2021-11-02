@@ -1,19 +1,13 @@
-import Maker, { ETH, LocalService } from '../src/index';
-import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
-const Maker2 = require('../src/index');
+import Maker from '../src/index';
+// import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 
 async function createMaker(privateKey) {
   return await Maker.create('test', { privateKey });
 }
 
 test('create without any options', async () => {
-  await Maker.create('test');
-});
-
-test('import vs require', () => {
-  expect(Maker2).toEqual(Maker);
-  expect(Maker2.ETH).toEqual(ETH);
-  expect(Maker2.LocalService).toEqual(LocalService);
+  const created = await Maker.create('test');
+  expect(created).toBeDefined();
 });
 
 test('throws for delegated cdp methods', async () => {
@@ -21,7 +15,9 @@ test('throws for delegated cdp methods', async () => {
   try {
     await maker.openCdp();
   } catch (err) {
-    expect(err.message).toBe("\"openCdp\" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').openCdp");
+    expect(err.message).toBe(
+      '"openCdp" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').openCdp'
+    );
   }
 });
 

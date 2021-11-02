@@ -32,9 +32,9 @@ beforeAll(async () => {
   await vdfs.createDelegateContract();
 });
 
-afterAll(async done => {
+afterAll(async () => {
   await restoreSnapshotOriginal(global.snapshotId);
-  done();
+  return;
 });
 
 test('can create vote delegate service', async () => {

@@ -40,7 +40,23 @@ Run `yarn coverage` to generate a test coverage report.
 
 See [packages/dai/README.md](https://github.com/makerdao/dai.js/blob/dev/packages/dai/README.md#commands) for instructions.
 
+
+## Adding a package as dependency of another
+
+```
+ npx lerna add @makerdao/services-core packages/dai-plugin-mcd
+```
+
+## Releasing a version
+
+```
+npx lerna version prerelease
+npx lerna publish from-package
+```
+
+
 [build]: https://circleci.com/gh/makerdao/dai.js.svg?style=svg
 [build-url]: https://circleci.com/gh/makerdao/dai.js
 [cover]: https://codecov.io/gh/makerdao/dai.js/branch/dev/graph/badge.svg
 [cover-url]: https://codecov.io/gh/makerdao/dai.js
+

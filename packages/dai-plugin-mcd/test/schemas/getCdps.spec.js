@@ -1,5 +1,5 @@
 import { mcdMaker, setupCollateral } from '../helpers';
-import { CDP_MANAGER } from '../../contracts/addresses/testnet';
+import { CDP_MANAGER } from '../../contracts/addresses/testnet.json';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles } from '../../src/constants';
 import { ETH, BAT, DAI } from '../../src';
@@ -21,6 +21,8 @@ const ETH_A_PRICE = 180;
 const BAT_A_COLLATERAL_AMOUNT = BAT(100);
 const BAT_A_DEBT_AMOUNT = DAI(100);
 const BAT_A_PRICE = 40;
+
+const descending = true;
 
 beforeAll(async () => {
   maker = await mcdMaker({
@@ -61,7 +63,8 @@ test(USER_VAULT_IDS, async () => {
   const userVaultIds = await maker.latest(
     USER_VAULT_IDS,
     CDP_MANAGER,
-    proxyAddress
+    proxyAddress,
+    descending
   );
 
   expect(userVaultIds[0]).toEqual(2);
@@ -72,7 +75,8 @@ test(USER_VAULT_ADDRESSES, async () => {
   const userVaultAddresses = await maker.latest(
     USER_VAULT_ADDRESSES,
     CDP_MANAGER,
-    proxyAddress
+    proxyAddress,
+    descending
   );
 
   expect(userVaultAddresses[0]).toEqual(await mgr.getUrn(batCdp.id));
@@ -83,7 +87,8 @@ test(USER_VAULT_TYPES, async () => {
   const userVaultTypes = await maker.latest(
     USER_VAULT_TYPES,
     CDP_MANAGER,
-    proxyAddress
+    proxyAddress,
+    descending
   );
 
   expect(userVaultTypes[0]).toEqual('BAT-A');

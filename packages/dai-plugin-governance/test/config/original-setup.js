@@ -1,7 +1,7 @@
 import { takeSnapshotOriginal } from '../helpers';
 
-beforeAll(async done => {
+beforeAll(async () => {
   global.useOldChain = true;
   global.snapshotId = await takeSnapshotOriginal();
-  done();
+  return;
 });

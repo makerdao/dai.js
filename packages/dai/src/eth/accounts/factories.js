@@ -1,4 +1,4 @@
-import ethUtil from 'ethereumjs-util';
+import Account from 'eth-lib/lib/account';
 import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
 import { getBrowserProvider } from './setup';
 import assert from 'assert';
@@ -8,20 +8,23 @@ export function privateKeyAccountFactory({ key }) {
     throw new Error('Invalid private key format');
   }
 
-  const [keyWithPrefix, keySansPrefix] = key.startsWith('0x')
+  const [keyWithPreffix, keySansPrefix] = key.startsWith('0x')
     ? [key, key.replace(/^0x/, '')]
     : ['0x' + key, key];
 
-  const address =
-    '0x' + ethUtil.privateToAddress(keyWithPrefix).toString('hex');
+  const account = Account.fromPrivate(keyWithPreffix);
+
   const keyBuffer = Buffer.from(keySansPrefix, 'hex');
 
   const subprovider = new Wallet(
-    { getAddressString: () => address, getPrivateKey: () => keyBuffer },
+    {
+      getAddressString: () => account.address.toLowerCase(),
+      getPrivateKey: () => keyBuffer
+    },
     {}
   );
 
-  return { subprovider, address };
+  return { subprovider, address: account.address };
 }
 
 async function getAccountAddress(subprovider, { offset = 0, address } = {}) {

@@ -1,6 +1,6 @@
 import { buildTestSmartContractService } from '../helpers/serviceBuilders';
 import { getNewAccount, setNewAccount } from '../helpers/proxyHelpers';
-import addresses from '../../contracts/addresses/testnet';
+import addresses from '../../contracts/addresses/testnet.json';
 import Maker from '../../src/index';
 
 let service;

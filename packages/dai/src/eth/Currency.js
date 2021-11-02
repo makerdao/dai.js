@@ -1,6 +1,5 @@
 import tokens from '../../contracts/tokens';
-import values from 'lodash/values';
-
+import { values } from 'lodash';
 import {
   createCurrency,
   createCurrencyRatio,

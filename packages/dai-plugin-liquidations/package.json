@@ -1,28 +1,29 @@
 {
   "name": "@makerdao/dai-plugin-liquidations",
   "description": "Plugin to add liquidations to dai.js",
-  "version": "0.1.1",
+  "version": "0.2.0-alpha.3",
   "license": "MIT",
+  "typings": "dist/index.d.ts",
   "main": "dist/index.js",
-  "unpkg": "umd/index.js",
-  "jsdelivr": "umd/index.js",
+  "unpkg": "dist/index.js",
+  "jsdelivr": "dist/dai-plugin-liquidations.esm.js",
+  "module": "dist/dai-plugin-liquidations.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:umd",
-    "build:umd": "webpack --config ../../webpack.config.js",
-    "build:cjs": "../../scripts/build.sh",
-    "clean": "rm -rf ./dist ./umd",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd && ./scripts/copy-files.sh",
+    "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
     "test": "yarn testchain --ci jest --runInBand"
   },
   "peerDependencies": {
-    "@makerdao/dai": ">0.17.0"
+    "@makerdao/dai": "^0.41.0-alpha.2"
   },
   "dependencies": {
     "@makerdao/currency": "0.9.9",
-    "@makerdao/services-core": "^0.9.9",
+    "@makerdao/services-core": "^0.11.0-alpha.3",
     "bignumber.js": "^8.1.1",
     "ramda": "^0.27.1"
-  }
+  },
+  "gitHead": "689f3670142282c9483c74d5658f60161d4287bb"
 }

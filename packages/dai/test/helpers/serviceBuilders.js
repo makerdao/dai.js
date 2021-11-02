@@ -1,7 +1,6 @@
 import DefaultServiceProvider from '../../src/config/DefaultServiceProvider';
 import ProviderType from '../../src/eth/web3/ProviderType';
-import has from 'lodash/has';
-import merge from 'lodash/merge';
+import { has, merge } from 'lodash';
 
 export const infuraProjectId = 'c3f0f26a4c1742e0949d8eedfc47be67'; //dai.js project id
 

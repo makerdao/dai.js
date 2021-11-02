@@ -8,9 +8,9 @@ beforeAll(async () => {
   vdfs = maker.service('voteDelegateFactory');
 });
 
-afterAll(async done => {
+afterAll(async () => {
   await restoreSnapshotOriginal(global.snapshotId);
-  done();
+  return;
 });
 
 test('can create vote delegate factory service', async () => {

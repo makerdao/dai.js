@@ -1,20 +1,20 @@
 {
   "name": "@makerdao/dai-plugin-governance",
   "description": "A dai.js plugin for adding MKR governance support to dapps.",
-  "version": "0.14.7",
+  "version": "0.15.0-alpha.4",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/makerdao/dai-plugin-governance.git"
   },
   "main": "dist/index.js",
-  "unpkg": "umd/index.js",
-  "jsdelivr": "umd/index.js",
+  "unpkg": "dist/index.js",
+  "jsdelivr": "dist/dai-plugin-governance.esm.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/dai-plugin-governance.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:umd",
-    "build:umd": "webpack --config ../../webpack.config.js",
-    "clean": "rm -rf ./dist ./umd",
-    "build:cjs": "../../scripts/build.sh",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd && ./scripts/copy-files.sh",
+    "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",
     "test": "yarn testchain --ci jest --runInBand",
@@ -29,18 +29,18 @@
   },
   "dependencies": {
     "@makerdao/currency": "0.9.9",
-    "@makerdao/services-core": "^0.10.0",
+    "@makerdao/dai": "^0.41.0-alpha.4",
+    "@makerdao/services-core": "^0.11.0-alpha.3",
     "assert": "^2.0.0",
     "debug": "^4.1.1",
     "ramda": "^0.25.0"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.31"
+    "@makerdao/dai": "^0.41.0-alpha.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@makerdao/dai": "^0.31",
     "@makerdao/dai-plugin-config": "^0.2.14-rc.1",
     "web3-utils": "^1.2.6"
-  }
+  },
+  "gitHead": "689f3670142282c9483c74d5658f60161d4287bb"
 }

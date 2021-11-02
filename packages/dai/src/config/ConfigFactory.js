@@ -5,8 +5,8 @@ import ws from './presets/ws.json';
 import mainnet from './presets/mainnet.json';
 import browser from './presets/browser.json';
 import inject from './presets/inject.json';
-import intersection from 'lodash/intersection';
-import merge from 'lodash/merge';
+
+import { merge, intersection } from 'lodash';
 import { mergeServiceConfig } from './index';
 import { AccountType } from '../utils/constants';
 
@@ -85,57 +85,60 @@ function checkForReservedWords(words) {
   }
 }
 
-export default class ConfigFactory {
-  /**
-   * @param {string} preset
-   * @param {object} options
-   */
-  static create(preset, options = {}, resolver) {
-    if (typeof preset !== 'string') {
-      options = preset;
-      preset = options.preset;
-    }
+/**
+ * @param {string} preset
+ * @param {object} options
+ */
 
-    const config = loadPreset(preset);
-    const additionalServices = options.additionalServices || [];
-    checkForReservedWords(additionalServices);
-
-    for (let role of serviceRoles.concat(additionalServices)) {
-      if (!(role in options)) continue;
-      if (!(role in config)) {
-        config[role] = options[role];
-        continue;
-      }
-      config[role] = mergeServiceConfig(
-        role,
-        config[role],
-        options[role],
-        resolver
-      );
-    }
-
-    // web3-specific convenience options
-    if (config.web3) {
-      const web3Settings = config.web3[1] || config.web3;
-      if (!web3Settings.provider) web3Settings.provider = {};
-
-      if (options.url) {
-        web3Settings.provider.url = options.url;
-      }
-
-      if (options.provider) {
-        merge(web3Settings.provider, options.provider);
-      }
-    }
-
-    // accounts-specific convenience option
-    if (options.privateKey) {
-      config.accounts = {
-        ...config.accounts,
-        default: { type: AccountType.PRIVATE_KEY, key: options.privateKey }
-      };
-    }
-
-    return config;
+function createConfig(preset, options = {}, resolver) {
+  if (typeof preset !== 'string') {
+    options = preset;
+    preset = options.preset;
   }
+
+  const config = loadPreset(preset);
+  const additionalServices = options.additionalServices || [];
+  checkForReservedWords(additionalServices);
+
+  for (let role of serviceRoles.concat(additionalServices)) {
+    if (!(role in options)) continue;
+    if (!(role in config)) {
+      config[role] = options[role];
+      continue;
+    }
+    config[role] = mergeServiceConfig(
+      role,
+      config[role],
+      options[role],
+      resolver
+    );
+  }
+
+  // web3-specific convenience options
+  if (config.web3) {
+    const web3Settings = config.web3[1] || config.web3;
+    if (!web3Settings.provider) web3Settings.provider = {};
+
+    if (options.url) {
+      web3Settings.provider.url = options.url;
+    }
+
+    if (options.provider) {
+      merge(web3Settings.provider, options.provider);
+    }
+  }
+
+  // accounts-specific convenience option
+  if (options.privateKey) {
+    config.accounts = {
+      ...config.accounts,
+      default: { type: AccountType.PRIVATE_KEY, key: options.privateKey }
+    };
+  }
+
+  return config;
 }
+
+export default {
+  createConfig
+};

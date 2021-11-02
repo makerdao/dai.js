@@ -5,7 +5,7 @@ import {
 } from '../helpers/serviceBuilders';
 import { uniqueId } from '../../src/utils';
 import { mineBlocks } from '@makerdao/test-helpers';
-import size from 'lodash/size';
+import { size } from 'lodash';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');
 import Maker from '../../src';
@@ -60,7 +60,7 @@ test('reuse the same web3 service in test services', () => {
   expect(services.txMgr.manager().isConnected()).toBe(true);
   expect(services.txMgr.get('web3')).toBe(services.contract.get('web3'));
   expect(services.currentAddress).toMatch(/^0x[0-9A-Fa-f]+$/);
-});
+}, 30000);
 
 test('wrapped contract call accepts a businessObject option', async () => {
   expect.assertions(3);
@@ -85,7 +85,7 @@ test('wrapped contract call accepts a businessObject option', async () => {
   const bob = await txo;
   expect(services.txMgr.isMined(txo)).toBe(true);
   expect(bob.add(10)).toEqual(11);
-});
+}, 30000);
 
 test('wrapped contract call adds nonce, web3 settings', async () => {
   const { txMgr, currentAddress, contract } = services;
@@ -105,7 +105,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
       gasPrice: gasPrice
     }
   );
-});
+}, 30000);
 
 // TODO
 describe('lifecycle hooks', () => {
@@ -135,18 +135,17 @@ describe('lifecycle hooks', () => {
     // await service.manager().authenticate();
     // txMgr = service.get('smartContract').get('transactionManager');
     // priceService = service.get('price');
-  });
+  }, 30000);
 
   beforeEach(async () => {
-    jest.setTimeout(15000);
     open = service.openCdp();
     cdp = await open;
-  });
+  }, 30000);
 
   afterAll(async () => {
     // set price back to 400s
     await priceService.setEthPrice(400);
-  });
+  }, 30000);
 
   test('lifecycle hooks for open and lock', async () => {
     log('open id:', uniqueId(open));
@@ -169,7 +168,7 @@ describe('lifecycle hooks', () => {
     expect(lockHandlers.initialized).toBeCalledTimes(5);
     expect(lockHandlers.pending).toBeCalledTimes(5);
     expect(lockHandlers.mined).toBeCalledTimes(5);
-  });
+  }, 30000);
 
   test('lifecycle hooks for give', async () => {
     const newCdpAddress = '0x75ac1188e69c815844dd433c2b3ccad1f5a109ff';
@@ -183,7 +182,7 @@ describe('lifecycle hooks', () => {
     expect(giveHandlers.initialized).toBeCalled();
     expect(giveHandlers.pending).toBeCalled();
     expect(giveHandlers.mined).toBeCalled();
-  });
+  }, 30000);
 
   test('lifecycle hooks for bite', async () => {
     const lock = cdp.lockEth(0.1);
@@ -205,7 +204,7 @@ describe('lifecycle hooks', () => {
     expect(biteHandlers.initialized).toBeCalled();
     expect(biteHandlers.pending).toBeCalled();
     expect(biteHandlers.mined).toBeCalled();
-  });
+  }, 30000);
 
   test('clear Tx when state is confirmed/finalized and older than 5 minutes', async () => {
     const openId = uniqueId(open).toString();
@@ -228,7 +227,7 @@ describe('lifecycle hooks', () => {
     expect(size(txMgr._tracker._listeners)).toEqual(
       size(txMgr._tracker._transactions)
     );
-  });
+  }, 30000);
 
   test('clear Tx when state is error and older than 5 minutes', async () => {
     expect.assertions(4);
@@ -258,7 +257,7 @@ describe('lifecycle hooks', () => {
 
     txMgr._tracker.clearExpiredTransactions();
     expect(Object.keys(txMgr._tracker._transactions)).not.toContain(drawId);
-  });
+  }, 30000);
 
   test('finalized Tx is set to correct state without without requiring a call to confirm()', async () => {
     const openHandlers = makeHandlers('open');
@@ -269,7 +268,7 @@ describe('lifecycle hooks', () => {
 
     expect(openTx.isFinalized()).toBe(true);
     expect(openHandlers.confirmed).toBeCalled();
-  });
+  }, 30000);
 
   test('return error message with error callback', async () => {
     const makeListener = () =>
@@ -299,7 +298,7 @@ describe('lifecycle hooks', () => {
       expect(drawTx.isError()).toBe(true);
       expect(drawHandlers.error).toHaveBeenCalledWith(drawTx, err);
     }
-  });
+  }, 30000);
 });
 
 describe('transaction options', () => {
@@ -310,7 +309,7 @@ describe('transaction options', () => {
     await service.manager().authenticate();
     txManager = service.get('transactionManager');
     contract = service.getContract('SAI_TUB');
-  });
+  }, 30000);
 
   test('sets necessary values', async () => {
     let options;
@@ -332,7 +331,7 @@ describe('transaction options', () => {
       []
     );
     expect(Object.keys(options)).toEqual(['gasLimit', 'nonce']);
-  });
+  }, 30000);
 
   test('passes through explicit options', async () => {
     const options = await txManager._buildTransactionOptions(
@@ -347,5 +346,5 @@ describe('transaction options', () => {
       'gasPrice',
       'nonce'
     ]);
-  });
+  }, 30000);
 });

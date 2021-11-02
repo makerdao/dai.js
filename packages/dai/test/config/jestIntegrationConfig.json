@@ -1,5 +1,10 @@
 {
+  "preset": "ts-jest",
   "rootDir": "../../",
-  "testMatch": ["<rootDir>/test/integration/*.js"],
+  "transform": {
+    "^.+\\.(ts|js)?$": "ts-jest"
+  },
+  "testEnvironment": "jsdom",
+  "testMatch": ["<rootDir>/test/integration/*.spec.js", "<rootDir>/test/integration/*.spec.ts"],
   "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"]
 }
