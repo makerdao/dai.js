@@ -1,9 +1,9 @@
 export function wrapContract(contract, name, abi, txManager) {
-  // Non-constant functions can modify state
   const nonConstantFns = {};
   for (let { type, constant, name, inputs, stateMutability } of abi) {
+    // Non-constant functions can modify state
     const canModifyState =
-      constant === false || ['pure', 'view'].includes(stateMutability);
+      constant === false || !['pure', 'view'].includes(stateMutability);
     if (type === 'function' && canModifyState) {
       // Map all of the contract method names + sigs in cases where the method
       // sig is used as the key due to method overloading, e.g.

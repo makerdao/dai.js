@@ -32,9 +32,13 @@ export default tracksTransactions;
 
 export function tracksTransactionsWithOptions({ numArguments }) {
   return (target, name, descriptor) => {
+    // The original function
     const original = descriptor.value;
     const correctArgsLength = numArguments || original.length;
+
+    // Overwrite the function
     descriptor.value = function(...args) {
+      // Ref to the last argument, which should be the promise key
       const last = args[args.length - 1];
       let options;
       if (
@@ -42,7 +46,10 @@ export function tracksTransactionsWithOptions({ numArguments }) {
         last !== null &&
         last.constructor === Object
       ) {
+        // Reset args without the promise key
         args = args.slice(0, args.length - 1);
+
+        // Set the promise key
         options = last;
       } else {
         options = {};

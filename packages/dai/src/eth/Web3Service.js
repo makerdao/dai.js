@@ -112,7 +112,6 @@ export default class Web3Service extends PrivateService {
     this._networkId = (await this._ethersProvider.getNetwork()).chainId;
 
     this._currentBlock = await this._ethersProvider.getBlockNumber();
-    console.log('^^^current block on connect', this._currentBlock);
     // this._currentBlock = await this._web3.eth.getBlockNumber();
     this._updateBlockNumber(this._currentBlock);
     this._listenForNewBlocks();
@@ -209,11 +208,10 @@ export default class Web3Service extends PrivateService {
 
   _listenForNewBlocks() {
     if (this.networkName !== 'test') {
-      // log('Using newBlockHeaders subscription for block detection');
+      log('Using newBlockHeaders subscription for block detection');
       this._newBlocksSubscription = this._ethersProvider.on(
         'block',
         blockNumber => {
-          // console.log('got blockNumba', blockNumber);
           if (!this._currentBlock) this._currentBlock = blockNumber - 1;
           for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
             this._updateBlockNumber(i);
@@ -233,7 +231,6 @@ export default class Web3Service extends PrivateService {
       log('Using manual getBlockNumber polling for block detection');
       const updateBlocks = async () => {
         const blockNumber = await this._ethersProvider.getBlockNumber();
-        // console.log('blockNumber!', blockNumber);
         if (!this._currentBlock) this._currentBlock = blockNumber - 1;
         for (let i = this._currentBlock + 1; i <= blockNumber; i++) {
           this._updateBlockNumber(i);

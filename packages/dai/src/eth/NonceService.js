@@ -14,16 +14,10 @@ export default class NonceService extends PublicService {
   }
 
   async _getTxCount(address) {
-    //todo how to best abstract this?
-    // also not sure if "pending" is a valid argument for ethers GTC call
-    return this._web3Service._ethersProvider.getTransactionCount(
+    return this._accountsService._provider.getTransactionCount(
       address,
       'pending'
     );
-    // return promisify(this._web3Service._ethersProvider.getTransactionCount)(
-    //   address,
-    //   'pending'
-    // );
   }
 
   _compareNonceCounts(txCount, address) {

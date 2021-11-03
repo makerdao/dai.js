@@ -60,10 +60,9 @@ export default class GasService extends PublicService {
     if (this.price) return this.price;
     const speedSetting = txSpeed ? txSpeed : this.transactionSpeed;
     const gasStationData = await this._gasStationDataPromise;
-    const num = (gasStationData[speedSetting] / 10).toString();
     const price = this.get('web3')
-      .utils.parseUnits(num, 'gwei')
-      .toString();
+      .utils.parseUnits((gasStationData[speedSetting] / 10).toString(), 'gwei')
+      .toNumber();
 
     return price;
   }
@@ -89,8 +88,9 @@ export default class GasService extends PublicService {
       return this.fallback;
     }
 
-    const blockLimit = web3Data[0].gasLimit;
-    const estimate = web3Data[1];
+    //TODO: ethers 5 returns a bignumber, can refactor the comparisons below
+    const blockLimit = web3Data[0].gasLimit.toNumber();
+    const estimate = web3Data[1].toNumber();
 
     if (!this.multiplier && !this.absolute) {
       return Math.min(this.absolute, blockLimit);

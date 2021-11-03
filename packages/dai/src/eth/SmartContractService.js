@@ -40,8 +40,6 @@ export default class SmartContractService extends PrivateService {
     if (!name) name = this.lookupContractName(address);
 
     const web3Service = this.get('web3');
-
-    //todo, this may be outdated
     const signerOrProvider = web3Service.get('accounts').hasAccount()
       ? web3Service.getEthersSigner()
       : web3Service.web3Provider();

@@ -10,7 +10,8 @@ import size from 'lodash/size';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');
 import Maker from '../../src';
-import ScdPlugin from '@makerdao/dai-plugin-scd';
+import ScdPlugin from '../../../dai-plugin-scd/src';
+// import ScdPlugin from '@makerdao/dai-plugin-scd';
 
 async function scdMaker({
   preset = 'test',
@@ -108,6 +109,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
   );
 });
 
+// TODO
 describe('lifecycle hooks', () => {
   let service, txMgr, priceService, open, cdp;
 
@@ -148,7 +150,7 @@ describe('lifecycle hooks', () => {
     await priceService.setEthPrice(400);
   });
 
-  test.only('lifecycle hooks for open and lock', async () => {
+  test('lifecycle hooks for open and lock', async () => {
     log('open id:', uniqueId(open));
     const openHandlers = makeHandlers('open');
 

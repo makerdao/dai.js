@@ -149,7 +149,11 @@ export default class TransactionObject extends TransactionLifeCycle {
     }
 
     const elapsed = (new Date() - startTime) / 1000;
-    log(`mined ${this.hash.substring(8)}... done in ${elapsed}s`);
+    log(
+      `mined ${this.metadata.contract}.${this.metadata.method} with nonce ${
+        tx.nonce
+      } ${this.hash.substring(8)}... done in ${elapsed}s`
+    );
     return tx;
   }
 }

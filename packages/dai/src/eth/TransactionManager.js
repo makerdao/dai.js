@@ -197,12 +197,14 @@ export default class TransactionManager extends PublicService {
 
   async _getGasLimit(options, contract, method, args) {
     let transaction = {};
-    let data = contract.functions[method](...args).data;
+    let data = contract.interface.encodeFunctionData(method, args);
     let proxyAddress;
 
     if (options.dsProxy) {
       proxyAddress = await this.get('proxy').currentProxy();
       const proxy = this.get('proxy').getUnwrappedProxyContract(proxyAddress);
+      //TODO you'll need something like this for proxy contract:
+      //let data = iFace.encodeFunctionData(method, args);
       data = proxy.functions['execute'](contract.address, data).data;
     }
 
