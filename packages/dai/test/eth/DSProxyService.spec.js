@@ -118,14 +118,14 @@ describe('execute', () => {
   });
 
   test('should execute without a provided proxy address', async () => {
-    const hash = await maker
+    const { hash } = await maker
       .service('proxy')
       .execute(tubContract, 'open', [], { gasLimit: 4000000 });
     expect(hash).toMatch(/0x[a-f0-9]{64}/);
   });
 
   test('should execute with a provided proxy address', async () => {
-    const hash = await maker
+    const { hash } = await maker
       .service('proxy')
       .execute(
         tubContract,

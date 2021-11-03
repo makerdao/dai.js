@@ -134,7 +134,7 @@ export default class TransactionManager extends PublicService {
   // if options.dsProxy is set, execute this contract method through the
   // proxy contract at that address.
   _execute(contract, method, args, options) {
-    if (!options.dsProxy) return contract[method](...args, options);
+    if (!options.dsProxy) return contract.functions[method](...args, options);
 
     let address;
     if (typeof options.dsProxy === 'string') {
@@ -187,11 +187,11 @@ export default class TransactionManager extends PublicService {
       let txSpeed = options.transactionSpeed;
       options.gasPrice = await this.get('gas').getGasPrice(txSpeed);
     }
-
+    const nonce = await this.get('nonce').getNonce();
     return {
       ...options,
       ...this.get('web3').transactionSettings(),
-      nonce: await this.get('nonce').getNonce()
+      nonce
     };
   }
 
@@ -204,7 +204,11 @@ export default class TransactionManager extends PublicService {
       proxyAddress = await this.get('proxy').currentProxy();
       const proxy = this.get('proxy').getUnwrappedProxyContract(proxyAddress);
       //TODO you'll need something like this for proxy contract:
-      //let data = iFace.encodeFunctionData(method, args);
+      // data = proxy.interface.encodeFunctionData(
+      //   'execute',
+      //   contract.address,
+      //   data
+      // );
       data = proxy.functions['execute'](contract.address, data).data;
     }
 

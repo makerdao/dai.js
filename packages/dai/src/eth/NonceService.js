@@ -57,17 +57,20 @@ export default class NonceService extends PublicService {
   async getNonce() {
     const address = this._web3Service.currentAddress();
     const txCount = await this._getTxCount(address);
-    let nonce;
+    console.log('tx count', txCount);
+    return txCount;
+    //TODO: should I redo the caching?
+    // let nonce;
 
-    if (this._counts[address]) {
-      nonce = this._compareNonceCounts(txCount, address);
-      this._counts[address] += 1;
-    } else {
-      this._counts[address] = txCount;
-      nonce = txCount;
-      this._counts[address] += 1;
-    }
+    // if (this._counts[address]) {
+    //   nonce = this._compareNonceCounts(txCount, address);
+    //   this._counts[address] += 1;
+    // } else {
+    //   this._counts[address] = txCount;
+    //   nonce = txCount;
+    //   this._counts[address] += 1;
+    // }
 
-    return nonce;
+    // return nonce;
   }
 }

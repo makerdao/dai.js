@@ -24,13 +24,16 @@ export default class Web3Service extends PrivateService {
   }
 
   getEthersSigner() {
-    if (!this._ethersSigner)
-      this._ethersSigner = this.get('accounts').getSigner();
-    return this._ethersSigner;
+    return this.get('accounts').getSigner();
+    // console.log('has !this._ethersSigner', !!this._ethersSigner);
+    // if (!this._ethersSigner)
+    //   this._ethersSigner = this.get('accounts').getSigner();
+    // return this._ethersSigner;
   }
 
   web3Provider() {
-    return this._ethersProvider;
+    return this.get('accounts').getProvider();
+    // return this._ethersProvider;
     // return this._web3.currentProvider;
   }
 

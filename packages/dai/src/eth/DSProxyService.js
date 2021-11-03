@@ -63,8 +63,15 @@ export default class DSProxyService extends PrivateService {
     }
     const proxyAddress = address ? address : this._currentProxy;
     const proxyContract = this.getUnwrappedProxyContract(proxyAddress);
-    const data = contract.interface.functions[method](...args).data;
-    return proxyContract.execute(contract.address, data, options);
+    // let data = contract.interface.functions[method](...args).data;
+
+    const data = contract.interface.encodeFunctionData(method, args);
+
+    return proxyContract['execute(address,bytes)'](
+      contract.address,
+      data,
+      options
+    );
   }
 
   async getProxyAddress(providedAddress = false) {
@@ -99,10 +106,8 @@ export default class DSProxyService extends PrivateService {
   }
 
   getUnwrappedProxyContract(address) {
-    return new Contract(
-      address,
-      dappHub.dsProxy,
-      this.get('web3').getEthersSigner()
-    );
+    const sig = this.get('web3').getEthersSigner();
+    console.log('getUnwrappedProxyContract signer', sig);
+    return new Contract(address, dappHub.dsProxy, sig);
   }
 }

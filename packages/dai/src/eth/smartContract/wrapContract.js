@@ -37,8 +37,28 @@ export function wrapContract(contract, name, abi, txManager) {
         if (key in target) return target[key];
         if (!txManager || !nonConstantFns[key]) return contract[key];
 
-        return (...args) =>
-          txManager.sendContractCall(contract, key, args, name);
+        return (...args) => {
+          for (const fnKey in contract.interface.functions) {
+            if (contract.interface.functions[fnKey].name === key) {
+              const lastArg = args[args.length - 1];
+
+              // If the last arg is an object with a promise key, don't count it
+              const functionInputsLength = lastArg.promise
+                ? args.length - 1
+                : args.length;
+
+              //TODO: do I want to do it this way?
+              if (
+                contract.interface.functions[fnKey].inputs.length ===
+                functionInputsLength
+              )
+                key = fnKey;
+              //TODO DD: make sure passing args doesnt change data even though we know its empty
+            }
+          }
+          console.log('passing this key', key);
+          return txManager.sendContractCall(contract, key, args, name);
+        };
       },
 
       set(target, key, value) {
