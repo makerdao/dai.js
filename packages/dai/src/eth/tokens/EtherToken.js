@@ -1,5 +1,6 @@
 import { getCurrency, ETH } from '../Currency';
 import tracksTransactions from '../../utils/tracksTransactions';
+import { ethers } from 'ethers';
 
 export default class EtherToken {
   constructor(web3Service, gasService, transactionManager) {
@@ -47,7 +48,7 @@ export default class EtherToken {
       {
         from: fromAddress,
         to: toAddress,
-        value: getCurrency(amount, unit).toFixed('wei')
+        value: ethers.BigNumber.from(getCurrency(amount, unit).toFixed('wei'))
       },
       {
         metadata: {
@@ -55,7 +56,9 @@ export default class EtherToken {
             name: 'transfer',
             from: fromAddress,
             to: toAddress,
-            amount: getCurrency(amount, unit)
+            amount: ethers.BigNumber.from(
+              getCurrency(amount, unit).toFixed('wei')
+            )
           }
         },
         promise

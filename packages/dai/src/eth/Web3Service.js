@@ -147,12 +147,13 @@ export default class Web3Service extends PrivateService {
     https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction
   */
   sendTransaction(...args) {
-    return new Promise((resolve, reject) => {
-      this._web3.eth
-        .sendTransaction(...args)
-        .on('transactionHash', resolve)
-        .on('error', reject);
-    });
+    return this._ethersProvider.getSigner().sendTransaction(...args);
+    // return new Promise((resolve, reject) => {
+    //   this._ethersProvider
+    //     .sendTransaction(...args)
+    //     .on('transactionHash', resolve)
+    //     .on('error', reject);
+    // });
   }
 
   networkId() {
