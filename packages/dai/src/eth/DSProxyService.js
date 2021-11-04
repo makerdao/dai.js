@@ -106,8 +106,10 @@ export default class DSProxyService extends PrivateService {
   }
 
   getUnwrappedProxyContract(address) {
-    const sig = this.get('web3').getEthersSigner();
-    console.log('getUnwrappedProxyContract signer', sig);
-    return new Contract(address, dappHub.dsProxy, sig);
+    return new Contract(
+      address,
+      dappHub.dsProxy,
+      this.get('web3').getEthersSigner()
+    );
   }
 }

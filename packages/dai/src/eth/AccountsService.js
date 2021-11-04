@@ -8,7 +8,7 @@ import {
   providerAccountFactory,
   browserProviderAccountFactory
 } from './accounts/factories';
-import { setupEngine, setupEthersProvider } from './accounts/setup';
+import { setupEthersProvider } from './accounts/setup';
 import { AccountType } from '../utils/constants';
 import assert from 'assert';
 import debug from 'debug';
@@ -69,6 +69,8 @@ export default class AccountsService extends PublicService {
     this._accountFactories[type] = factory;
   }
 
+  //TODO reduce complexity of addAccount:
+  /* eslint-disable */
   async addAccount(name, options = {}) {
     if (name && typeof name !== 'string') {
       options = name;
@@ -83,10 +85,10 @@ export default class AccountsService extends PublicService {
     invariant(factory, `no factory for type "${type}"`);
     const accountData = await factory(otherSettings, this._provider);
 
-    //I think we now need to assign the signer this new subprovider: accountData.subprovider
-    // TODO: maybe this should be done somewhere else
-    // or a "reset signer" function?
-    this._signer = accountData.subprovider;
+    // TODO: This seems to work, but is it the best implementation?
+    this._signer = accountData.subprovider._isProvider
+      ? accountData.subprovider.getSigner()
+      : accountData.subprovider;
 
     // TODO allow this to silently fail only in situations where it's expected,
     // e.g. when connecting to a read-only provider
