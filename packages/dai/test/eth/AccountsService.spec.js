@@ -1,24 +1,26 @@
 import { buildTestService } from '../helpers/serviceBuilders';
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
-import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
+// import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
+import { ethers } from 'ethers';
+
 import {
   providerAccountFactory,
   browserProviderAccountFactory
 } from '../../src/eth/accounts/factories';
-import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
-import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
+// import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
+// import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
 jest.useFakeTimers();
 
-function mockEngine(overrides = {}) {
-  return {
-    stop: jest.fn(),
-    start: jest.fn(),
-    removeProvider: jest.fn(),
-    addProvider: jest.fn(),
-    ...overrides
-  };
-}
+// function mockEngine(overrides = {}) {
+//   return {
+//     stop: jest.fn(),
+//     start: jest.fn(),
+//     removeProvider: jest.fn(),
+//     addProvider: jest.fn(),
+//     ...overrides
+//   };
+// }
 
 test('account with private key string literal in settings', async () => {
   const account = TestAccountProvider.nextAccount();
@@ -29,7 +31,7 @@ test('account with private key string literal in settings', async () => {
   });
   await service.manager().connect();
   expect(service.currentAddress()).toEqual(account.address);
-  expect(service.currentWallet()).toBeInstanceOf(Wallet);
+  expect(service.currentWallet()).toBeInstanceOf(ethers.Wallet);
 });
 
 test('provider account with offset', async () => {
@@ -102,7 +104,7 @@ test('account with custom subprovider implementation', async () => {
 test('addAccount throws with duplicate name', async () => {
   const service = buildTestService('accounts', { accounts: true });
   await service.manager().authenticate();
-  service._engine = mockEngine();
+  // service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
   try {
@@ -116,7 +118,7 @@ test('addAccount throws with duplicate name', async () => {
 test('addAccount throws with duplicate address', async () => {
   const service = buildTestService('accounts', { accounts: true });
   await service.manager().authenticate();
-  service._engine = mockEngine();
+  // service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   try {
     await service.addAccount('f00', { type: 'privateKey', key: a1.key });
@@ -129,7 +131,7 @@ test('addAccount throws with duplicate address', async () => {
 test('currentAccount', async () => {
   const service = buildTestService('accounts', { accounts: true });
   await service.manager().authenticate();
-  service._engine = mockEngine();
+  // service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
   service.useAccount('foo');
@@ -143,7 +145,7 @@ test('currentAccount', async () => {
 test('listAccounts', async () => {
   const service = buildTestService('accounts', { accounts: true });
   await service.manager().authenticate();
-  service._engine = mockEngine();
+  // service._engine = mockEngine();
   const a1 = TestAccountProvider.nextAccount();
   const a2 = TestAccountProvider.nextAccount();
   await service.addAccount('foo', { type: 'privateKey', key: a1.key });
@@ -222,6 +224,9 @@ test('add and use account with no name', async () => {
   service.useAccount('foo');
   service.useAccount(a2.address);
 
+  // TODO: write some equivalent expects to replace these
+  // since we no longer use provider engine.
+
   // expect(engine.stop).toBeCalled();
   // expect(engine.removeProvider).toBeCalled();
   // expect(engine.start).toBeCalled();
@@ -229,10 +234,11 @@ test('add and use account with no name', async () => {
   expect(service.currentAddress()).toEqual(a2.address);
 });
 
-// TODO: needs to be refactored for ethers provider
-xtest('providerAccountFactory', async () => {
-  const rpc = new RpcSource({ rpcUrl: 'http://localhost:2000' });
-  const account = await providerAccountFactory({}, rpc);
+test('providerAccountFactory', async () => {
+  const provider = new ethers.providers.JsonRpcProvider(
+    'http://localhost:2000'
+  );
+  const account = await providerAccountFactory({}, provider);
   expect(account.address).toEqual('0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6');
 });
 
@@ -263,8 +269,7 @@ describe('mocking window', () => {
     delete window.ethereum;
   });
 
-  // TODO: needs to be refactored for ethers provider
-  xtest('use wrong browser account', async () => {
+  test('use wrong browser account', async () => {
     window.web3 = {
       currentProvider: mockProvider,
       eth: {
@@ -285,8 +290,7 @@ describe('mocking window', () => {
     }
   });
 
-  // TODO: needs to be refactored for ethers provider
-  xtest('browser autoSwitch', async () => {
+  test('browser autoSwitch', async () => {
     window.web3 = {
       currentProvider: mockProvider,
       eth: {
@@ -318,19 +322,17 @@ describe('mocking window', () => {
     expect(service.currentAddress()).toEqual('0xf01');
   });
 
-  // TODO: needs to be refactored for ethers provider
-  xtest('browserProviderAccountFactory with window.web3', async () => {
+  test('browserProviderAccountFactory with window.web3', async () => {
     window.web3 = {
       currentProvider: mockProvider
     };
 
     const account = await browserProviderAccountFactory();
     expect(account.address).toEqual('0xf00');
-    expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
+    expect(account.subprovider).toBeInstanceOf(ethers.providers.Web3Provider);
   });
 
-  // TODO: needs to be refactored for ethers provider
-  xtest('browserProviderAccountFactory with window.ethereum, user accepts provider', async () => {
+  test('browserProviderAccountFactory with window.ethereum, user accepts provider', async () => {
     window.ethereum = {
       enable: () => {
         window.ethereum['sendAsync'] = mockProvider.sendAsync;
@@ -338,11 +340,9 @@ describe('mocking window', () => {
     };
     const account = await browserProviderAccountFactory();
     expect(account.address).toEqual('0xf00');
-    expect(account.subprovider).toBeInstanceOf(ProviderSubprovider);
+    expect(account.subprovider).toBeInstanceOf(ethers.providers.Web3Provider);
   });
 
-  // TODO: needs to be refactored for ethers provider
-  // also check that this passing is not a false positive
   test('browserProviderAccountFactory with window.ethereum, user rejects provider', async () => {
     window.ethereum = {
       enable: async () => {

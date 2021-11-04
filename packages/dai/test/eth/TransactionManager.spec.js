@@ -99,7 +99,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
 
   expect(txMgr._execute).toHaveBeenCalledWith(
     token.wrappedContract,
-    'approve',
+    'approve(address,uint256)',
     [currentAddress, 20000],
     {
       gasLimit: 1234567,

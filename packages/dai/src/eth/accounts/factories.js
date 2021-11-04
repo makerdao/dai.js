@@ -15,7 +15,6 @@ export function privateKeyAccountFactory({ key }, provider) {
 
   const address =
     '0x' + ethUtil.privateToAddress(keyWithPrefix).toString('hex');
-  const keyBuffer = Buffer.from(keySansPrefix, 'hex');
 
   const subprovider = new ethers.Wallet(key, provider);
 

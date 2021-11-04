@@ -98,7 +98,7 @@ export async function getBrowserProvider() {
   }
 
   const wrap = provider => {
-    const subprovider = new ProviderSubprovider(provider);
+    const subprovider = new ethers.providers.Web3Provider(provider);
     subprovider.isWindowProvider = true;
     return subprovider;
   };
@@ -110,6 +110,26 @@ export async function getBrowserProvider() {
     return wrap(window.web3.currentProvider);
   }
 }
+// export async function getBrowserProvider() {
+//   if (typeof window === 'undefined') {
+//     throw new Error(
+//       'Cannot use ProviderType.BROWSER because window is undefined'
+//     );
+//   }
+
+//   const wrap = provider => {
+//     const subprovider = new ProviderSubprovider(provider);
+//     subprovider.isWindowProvider = true;
+//     return subprovider;
+//   };
+
+//   if (window.ethereum) {
+//     await window.ethereum.enable();
+//     return wrap(window.ethereum);
+//   } else if (window.web3) {
+//     return wrap(window.web3.currentProvider);
+//   }
+// }
 // export async function getBrowserProvider() {
 //   if (typeof window === 'undefined') {
 //     throw new Error(
