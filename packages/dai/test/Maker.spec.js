@@ -21,7 +21,9 @@ test('throws for delegated cdp methods', async () => {
   try {
     await maker.openCdp();
   } catch (err) {
-    expect(err.message).toBe("\"openCdp\" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').openCdp");
+    expect(err.message).toBe(
+      '"openCdp" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').openCdp'
+    );
   }
 });
 

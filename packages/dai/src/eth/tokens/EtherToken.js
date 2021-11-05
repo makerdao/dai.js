@@ -19,7 +19,7 @@ export default class EtherToken {
   }
 
   async balanceOf(owner) {
-    return ETH.wei(await this._web3.getBalance(owner));
+    return ETH.wei((await this._web3.getBalance(owner))._hex);
   }
 
   // eslint-disable-next-line

@@ -1,10 +1,6 @@
 import { ethers } from 'ethers';
-import BigNumber from 'bignumber.js';
 import { currencies, getCurrency } from '../Currency';
 import { UINT256_MAX } from '../../utils/constants';
-
-// const maxAllowance = BigNumber(UINT256_MAX).shiftedBy(-18);
-const maxAllowance = BigNumber(2000000000000000000);
 
 export default class Erc20Token {
   constructor(contract, web3Service, decimals = 18, symbol, currency) {
@@ -64,18 +60,8 @@ export default class Erc20Token {
   }
 
   approveUnlimited(spender, options = {}) {
-    const WAD = new BigNumber('1e18');
-    // const MAX_UINT = 2 ** 256 - 1;
-    // const amt = this._valueForContract(500, this._currency);
-    // const amt = new BigNumber(500);
-    // const amt = 500000000000000000000;
-
-    // const amt = '0x1b1ae4d6e2ef500000';
-    // const amt = new BigNumber(500).times(WAD);
-    const amt = new BigNumber(500).times(WAD).toString();
-    // 50000000000000000000000000
     if (!spender) spender = this._web3.currentAddress();
-    return this._contract.approve(spender, amt, {
+    return this._contract.approve(spender, ethers.BigNumber.from(UINT256_MAX), {
       metadata: {
         action: {
           name: 'approve',

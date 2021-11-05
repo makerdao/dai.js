@@ -116,10 +116,9 @@ test('returns a valid gas price', async () => {
   const expectedValue = gasService
     .get('web3')
     .utils.parseUnits(num, 'gwei')
-    .toString();
-  //100000000 current
-  //100000000 new
-  expect(typeof gasPrice).toBe('string');
+    .toNumber();
+
+  expect(typeof gasPrice).toBe('number');
   expect(gasPrice).toBe(expectedValue);
 });
 
