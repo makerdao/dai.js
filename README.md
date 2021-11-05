@@ -49,10 +49,17 @@ See [packages/dai/README.md](https://github.com/makerdao/dai.js/blob/dev/package
 
 ## Releasing a version
 
+From the root of the project:
+
 ```
 npx lerna version prerelease
 npx lerna publish from-package
 ```
+
+This will create a new version for all the packages and publish automatically, prerelease is for alpha versions.
+
+If you want a release or another kind please check [lerna version](https://github.com/lerna/lerna/tree/main/commands/version) documentation.
+
 
 
 [build]: https://circleci.com/gh/makerdao/dai.js.svg?style=svg
