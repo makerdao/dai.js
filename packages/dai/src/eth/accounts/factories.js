@@ -79,15 +79,9 @@ export async function providerAccountFactory({ offset, address }, provider) {
   // provider in place for other accounts, so the subprovider here has to be
   // a different instance. using Proxy is a simple way to accomplish this.
   const subprovider = new Proxy(provider, {});
-  let addr;
-  try {
-    addr = await getAccountAddress(subprovider, { offset, address });
-  } catch (e) {
-    console.error('^^^myerr', e);
-  }
   return {
     subprovider,
-    address: addr
+    address: await getAccountAddress(subprovider, { offset, address })
   };
 }
 

@@ -8,7 +8,7 @@ import {
   providerAccountFactory,
   browserProviderAccountFactory
 } from './accounts/factories';
-import { setupEthersProvider } from './accounts/setup';
+import { setupEngine } from './accounts/setup';
 import { AccountType } from '../utils/constants';
 import assert from 'assert';
 import debug from 'debug';
@@ -30,14 +30,8 @@ export default class AccountsService extends PublicService {
   async initialize(settings = {}) {
     this._settings = omit('web3', settings);
 
-    // an object with { engine }
-    // engine has the providers
-    // const result = await setupEngine(settings);
-    const provider = await setupEthersProvider(settings);
-    const signer = provider.getSigner();
-    // this._engine = result.engine;
+    const provider = await setupEngine(settings);
     this._provider = provider;
-    this._signer = signer;
   }
 
   async connect() {
@@ -85,11 +79,6 @@ export default class AccountsService extends PublicService {
     invariant(factory, `no factory for type "${type}"`);
     const accountData = await factory(otherSettings, this._provider);
 
-    // TODO: This seems to work, but is it the best implementation?
-    this._signer = accountData.subprovider._isProvider
-      ? accountData.subprovider.getSigner()
-      : accountData.subprovider;
-
     // TODO allow this to silently fail only in situations where it's expected,
     // e.g. when connecting to a read-only provider
     if (!accountData.address) {
@@ -109,6 +98,11 @@ export default class AccountsService extends PublicService {
       autoSwitch: autoSwitch || false,
       ...accountData
     };
+
+    // TODO: This seems to work, but is it the best implementation?
+    this._signer = accountData.subprovider._isProvider
+      ? accountData.subprovider.getSigner()
+      : accountData.subprovider;
 
     this._accounts[name] = account;
     if (!this._currentAccount || name === 'default') {
