@@ -203,13 +203,10 @@ export default class TransactionManager extends PublicService {
     if (options.dsProxy) {
       proxyAddress = await this.get('proxy').currentProxy();
       const proxy = this.get('proxy').getUnwrappedProxyContract(proxyAddress);
-      //TODO you'll need something like this for proxy contract:
-      // data = proxy.interface.encodeFunctionData(
-      //   'execute',
-      //   contract.address,
-      //   data
-      // );
-      data = proxy.functions['execute'](contract.address, data).data;
+      data = proxy.interface.encodeFunctionData('execute(address,bytes)', [
+        contract.address,
+        data
+      ]);
     }
 
     if (options.value) {

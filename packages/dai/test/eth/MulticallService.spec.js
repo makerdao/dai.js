@@ -1,6 +1,7 @@
 import TestAccountProvider from '@makerdao/test-helpers/src/TestAccountProvider';
 import Maker from '../../src/index';
 import BigNumber from 'bignumber.js';
+import { fromWei } from '../../src/utils/conversion';
 import ScdPlugin from '@makerdao/dai-plugin-scd';
 
 import schemas, {
@@ -56,10 +57,8 @@ afterEach(() => {
 
 //FIXME: The testchain version of ganache-cli doesn't seem to auto-advance to the next block
 // with the current configuration it was initialized with, causing the last expect here to fail.
-// also, with ethersjs, change .fromWei to parseEther(val).toString()
 xtest('get eth balance via multicall', async () => {
   const web3 = multicall.get('web3');
-  const fromWei = web3.utils.fromWei;
   watcher.stop();
   const initialBlock = (await web3.getBlock('latest')).number + 1;
   const initialEthBalance = fromWei(await web3.getBalance(address)).toString();

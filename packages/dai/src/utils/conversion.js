@@ -1,13 +1,14 @@
-import { BigNumber, utils as ethersUtils } from 'ethers';
+import { BigNumber as EthersBigNumber, utils as ethersUtils } from 'ethers';
+import BigNumber from 'bignumber.js';
 import assert from 'assert';
 
 export function numberToBytes32(num) {
-  const bn = BigNumber.from(num);
+  const bn = EthersBigNumber.from(num);
   return ethersUtils.hexlify(ethersUtils.zeroPad(bn, 32));
 }
 
 export function bytes32ToNumber(bytes32) {
-  return BigNumber.from(bytes32).toNumber();
+  return EthersBigNumber.from(bytes32).toNumber();
 }
 
 export function stringToBytes32(text, pad = true) {

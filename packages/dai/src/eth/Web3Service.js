@@ -171,8 +171,8 @@ export default class Web3Service extends PrivateService {
   }
 
   get rpcUrl() {
-    const provider = last(this._web3.currentProvider._providers);
-    return provider.rpcUrl || provider._url || null;
+    const provider = this.web3Provider();
+    return provider.connection.url || null;
   }
 
   get utils() {
