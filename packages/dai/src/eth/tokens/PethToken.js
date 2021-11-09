@@ -1,6 +1,7 @@
 import Erc20Token from './Erc20Token';
 import { WETH, PETH } from '../Currency';
 
+// TODO: this file needs to be deprecated in favor of the dai-plugin-scd one
 export default class PethToken extends Erc20Token {
   constructor(contract, web3Service, tub) {
     super(contract, web3Service, 18, 'PETH');
@@ -18,16 +19,16 @@ export default class PethToken extends Erc20Token {
   }
 
   async wrapperRatio() {
-    return WETH.ray(await this._tub.per());
+    return WETH.ray((await this._tub.per())._hex);
   }
 
   async joinPrice(amount, unit = WETH) {
     const value = this._valueForContract(amount, unit);
-    return WETH.wei(await this._tub.ask(value));
+    return WETH.wei((await this._tub.ask(value))._hex);
   }
 
   async exitPrice(amount, unit = WETH) {
     const value = this._valueForContract(amount, unit);
-    return WETH.wei(await this._tub.bid(value));
+    return WETH.wei((await this._tub.bid(value))._hex);
   }
 }
