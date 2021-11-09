@@ -1,10 +1,10 @@
 import { PrivateService } from '@makerdao/services-core';
-import { promisify, getNetworkName } from '../utils';
+import { getNetworkName } from '../utils';
 import Web3ServiceList from '../utils/Web3ServiceList';
-import Web3 from 'web3';
+// import Web3 from 'web3';
 import { ethers } from 'ethers';
 // import makeSigner from './web3/ShimEthersSigner';
-import last from 'lodash/last';
+// import last from 'lodash/last';
 import assert from 'assert';
 import debug from 'debug';
 const log = debug('dai:Web3Service');

@@ -8,7 +8,7 @@ export function privateKeyAccountFactory({ key }, provider) {
     throw new Error('Invalid private key format');
   }
 
-  const [keyWithPrefix, keySansPrefix] = key.startsWith('0x')
+  const [keyWithPrefix] = key.startsWith('0x')
     ? [key, key.replace(/^0x/, '')]
     : ['0x' + key, key];
 
