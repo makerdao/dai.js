@@ -129,7 +129,7 @@ export default class Web3Service extends PrivateService {
   }
 
   getPastLogs(...args) {
-    return this._ethersProvider.getPastLogs(...args);
+    return this._ethersProvider.getLogs(...args);
   }
 
   getStorageAt(...args) {
