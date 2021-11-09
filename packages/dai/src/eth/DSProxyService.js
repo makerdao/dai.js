@@ -63,8 +63,6 @@ export default class DSProxyService extends PrivateService {
     }
     const proxyAddress = address ? address : this._currentProxy;
     const proxyContract = this.getUnwrappedProxyContract(proxyAddress);
-    // let data = contract.interface.functions[method](...args).data;
-
     const data = contract.interface.encodeFunctionData(method, args);
 
     return proxyContract['execute(address,bytes)'](

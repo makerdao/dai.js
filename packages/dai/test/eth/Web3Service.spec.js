@@ -43,9 +43,6 @@ test('throw error on a failure to connect', async () => {
   service._ethersProvider.getNetwork = cb => {
     cb(new Error('fake connection failure error'));
   };
-  // service._web3.eth.net.getId = cb => {
-  //   cb(new Error('fake connection failure error'));
-  // };
 
   try {
     await service.manager().connect();

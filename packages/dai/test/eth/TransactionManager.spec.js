@@ -4,8 +4,8 @@ import {
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
 import { uniqueId } from '../../src/utils';
-// import { mineBlocks } from '@makerdao/test-helpers';
 import { mineBlocks } from '../../../test-helpers/src';
+// import { mineBlocks } from '@makerdao/test-helpers';
 import size from 'lodash/size';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');

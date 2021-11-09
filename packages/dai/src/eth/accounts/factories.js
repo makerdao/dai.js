@@ -1,5 +1,4 @@
 import ethUtil from 'ethereumjs-util';
-// import Wallet from 'web3-provider-engine/dist/es5/subproviders/wallet';
 import { ethers } from 'ethers';
 import { getBrowserProvider } from './setup';
 import assert from 'assert';
@@ -21,7 +20,6 @@ export function privateKeyAccountFactory({ key }, provider) {
   return { subprovider, address };
 }
 
-//TODO: make this work with both ethers 5 and old sub provider way
 async function getAccountAddress(subprovider, { offset = 0, address } = {}) {
   assert(!(offset && address), 'Cannot set both address and offset');
 
@@ -46,33 +44,6 @@ async function getAccountAddress(subprovider, { offset = 0, address } = {}) {
       .catch(e => reject(e));
   });
 }
-
-// async function getAccountAddress(subprovider, { offset = 0, address } = {}) {
-//   assert(!(offset && address), 'Cannot set both address and offset');
-
-//   return new Promise((resolve, reject) =>
-//     subprovider.handleRequest(
-//       { method: 'eth_accounts', params: [], id: 1 },
-//       null,
-//       (err, val) => {
-//         if (err) return reject(err);
-//         if (address) {
-//           const matchingAddress = val.find(
-//             a => a.toLowerCase() === address.toLowerCase()
-//           );
-//           assert(matchingAddress, 'No matching address found in provider.');
-//           resolve(matchingAddress.toLowerCase());
-//         } else {
-//           resolve(
-//             typeof val[offset] === 'string'
-//               ? val[offset].toLowerCase()
-//               : val[offset]
-//           );
-//         }
-//       }
-//     )
-//   );
-// }
 
 export async function providerAccountFactory({ offset, address }, provider) {
   // we need to be able to swap out this account while leaving the original

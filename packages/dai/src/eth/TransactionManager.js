@@ -134,6 +134,7 @@ export default class TransactionManager extends PublicService {
   // if options.dsProxy is set, execute this contract method through the
   // proxy contract at that address.
   _execute(contract, method, args, options) {
+    //TODO: double check if this can just be "contract[method](..."
     if (!options.dsProxy) return contract.functions[method](...args, options);
 
     let address;

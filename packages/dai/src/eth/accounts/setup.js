@@ -1,11 +1,5 @@
 import ProviderType from '../web3/ProviderType';
 import { ethers } from 'ethers';
-// import Web3ProviderEngine from 'web3-provider-engine/dist/es5';
-// import { JsonRpcEngine } from 'json-rpc-engine';
-// import WebsocketSubprovider from 'web3-provider-engine/dist/es5/subproviders/websocket';
-// import RpcSource from 'web3-provider-engine/dist/es5/subproviders/rpc';
-// import SubscriptionSubprovider from 'web3-provider-engine/dist/es5/subproviders/subscriptions';
-// import ProviderSubprovider from 'web3-provider-engine/dist/es5/subproviders/provider';
 
 // const DEFAULT_POLLING_INTERVAL = 4000;
 
@@ -44,7 +38,6 @@ export async function setupEngine(settings) {
     return externalProvider;
   };
 
-  // eventually fix this so we can switch on provider type even with ethers
   switch (providerSettings.type) {
     case ProviderType.BROWSER:
       provider = await getBrowserProvider();
