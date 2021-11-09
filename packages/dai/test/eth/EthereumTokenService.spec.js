@@ -52,19 +52,24 @@ test('_getTokenInfo returns token address for current network', () => {
 });
 
 test('addressOverrides', async () => {
+  const [mockPeth, mockPeth2, mockWeth] = [
+    '0xbeefed1bedded2dabbed3defaced4decade5bead',
+    '0xbeefed2bedded2dabbed3defaced4decade5bead',
+    '0xbeefed3bedded2dabbed3defaced4decade5bead'
+  ];
   const service = buildTestEthereumTokenService({
     token: {
       addressOverrides: {
         PETH: {
-          testnet: '0xmockpeth',
-          kovan: '0xmockpeth2'
+          testnet: mockPeth,
+          kovan: mockPeth2
         },
-        WETH: '0xmockweth'
+        WETH: mockWeth
       }
     }
   });
   await service.manager().authenticate();
 
-  expect(service.getToken('PETH')._contract.address).toBe('0xmockpeth');
-  expect(service.getToken('WETH')._contract.address).toBe('0xmockweth');
+  expect(service.getToken('PETH')._contract.address).toBe(mockPeth);
+  expect(service.getToken('WETH')._contract.address).toBe(mockWeth);
 });

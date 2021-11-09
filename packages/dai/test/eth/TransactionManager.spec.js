@@ -5,8 +5,8 @@ import {
 } from '../helpers/serviceBuilders';
 import { uniqueId } from '../../src/utils';
 import { mineBlocks } from '../../../test-helpers/src';
+import { size } from 'lodash';
 // import { mineBlocks } from '@makerdao/test-helpers';
-// import size from 'lodash/size';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');
 import Maker from '../../src';
