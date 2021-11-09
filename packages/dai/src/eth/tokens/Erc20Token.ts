@@ -3,7 +3,13 @@ import { currencies, getCurrency } from '../Currency';
 import { UINT256_MAX } from '../../utils/constants';
 
 export default class Erc20Token {
-  constructor(contract, web3Service, decimals = 18, symbol, currency) {
+  _contract;
+  _web3;
+  _decimals;
+  symbol;
+  _currency;
+
+  constructor(contract, web3Service, decimals = 18, symbol, currency?) {
     this._contract = contract;
     this._web3 = web3Service;
     this._decimals = decimals;
@@ -75,7 +81,7 @@ export default class Erc20Token {
     });
   }
 
-  transfer(to, value, { unit = this._currency, promise } = {}) {
+  transfer(to, value, { unit = this._currency, promise = undefined } = {}) {
     return this._contract.transfer(to, this._valueForContract(value, unit), {
       metadata: {
         action: {
@@ -89,7 +95,12 @@ export default class Erc20Token {
     });
   }
 
-  transferFrom(from, to, value, { unit = this._currency, promise } = {}) {
+  transferFrom(
+    from,
+    to,
+    value,
+    { unit = this._currency, promise = undefined } = {}
+  ) {
     return this._contract.transferFrom(
       from,
       to,

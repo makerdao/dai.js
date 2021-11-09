@@ -98,8 +98,7 @@ If you have deployed contract code changes to the testchain, run `scripts/instal
 
 ### Commands
 
-- `yarn build:cjs` - create a commonJS build in `dist` folder
-- `yarn build:umd` - create a UMD build in `umd` folder
+- `yarn build` - create a ES6 build in `dist` folder
 - `yarn lint` - run an ESLint check
 - `yarn coverage` - run code coverage and generate report in the `coverage` folder
 - `yarn test` - start a test chain and run all tests

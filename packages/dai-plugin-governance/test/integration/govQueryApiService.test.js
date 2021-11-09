@@ -2,10 +2,11 @@ import { setupTestMakerInstance } from '../helpers';
 
 let service;
 
+jest.setTimeout(10000);
+
 beforeAll(async () => {
   const maker = await setupTestMakerInstance('kovan');
   service = maker.service('govQueryApi');
-  jest.setTimeout(10000);
 });
 
 test('get all active polls', async () => {
@@ -21,7 +22,7 @@ test('get unique voters', async () => {
 test('get mkr weight', async () => {
   const weight = await service.getMkrWeight('address', 999999999);
   console.log('weight', weight);
-});
+}, 10000);
 
 test('get current vote', async () => {
   const option = await service.getOptionVotingFor('0xv', 1);
@@ -61,4 +62,11 @@ test('get all current votes for multiple addresses', async () => {
     '0x18c22d3937d774e0af0214b28c34856ad0a23272'
   ]);
   console.log('options', options);
+});
+
+test('get MKR locked to a delegate over time', async () => {
+  const events = await service.getMkrLockedDelegate(
+    '0x845b36e1e4F41a361dD711Bda8ea239bF191fE95'
+  );
+  console.log('events', events);
 });

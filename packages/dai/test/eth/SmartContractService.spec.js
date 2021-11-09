@@ -4,7 +4,7 @@ import {
   buildTestService,
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
-import originalAddresses from '../../contracts/addresses/testnet';
+import originalAddresses from '../../contracts/addresses/testnet.json';
 
 test('getContract should have proper error checking', async () => {
   const service = buildTestSmartContractService();

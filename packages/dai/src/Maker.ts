@@ -2,11 +2,9 @@ import DefaultServiceProvider, {
   resolver
 } from './config/DefaultServiceProvider';
 import ConfigFactory from './config/ConfigFactory';
-import mergeWith from 'lodash/mergeWith';
-import cloneDeep from 'lodash/cloneDeep';
-import uniq from 'lodash/uniq';
-import has from 'lodash/has';
-import assert from 'assert';
+import { mergeWith, cloneDeep, uniq, has } from 'lodash';
+
+import { strict as assert } from 'assert';
 
 // a plugin must be either an object with at least one of these keys defined, or
 // a single function, which will be treated as the value for `afterCreate`.
@@ -15,8 +13,14 @@ const PLUGIN_KEYS = ['beforeCreate', 'afterCreate', 'addConfig'];
 /**
  * do not call `new Maker()` directly; use `Maker.create` instead
  */
-export default class Maker {
-  constructor(preset, options = {}, userOptions = {}) {
+export class MakerClass {
+  _container: any;
+  _authenticatedPromise: Promise<any>;
+  currencies: any;
+  QueryApi: any;
+  utils: any;
+
+  constructor(preset, options: any = {}, userOptions: any = {}) {
     const { plugins = [], ...otherOptions } = options;
 
     for (const [plugin, pluginOptions] of plugins) {
@@ -30,7 +34,7 @@ export default class Maker {
     // This ensures user supplied config options always take priority
     if (plugins && userOptions) mergeOptions(otherOptions, userOptions);
 
-    const config = ConfigFactory.create(preset, otherOptions, resolver);
+    const config = ConfigFactory.createConfig(preset, otherOptions, resolver);
     this._container = new DefaultServiceProvider(config).buildContainer();
 
     for (const [plugin, pluginOptions] of plugins) {
@@ -38,22 +42,6 @@ export default class Maker {
     }
 
     if (otherOptions.autoAuthenticate !== false) this.authenticate();
-
-    delegateToServices(this, {
-      accounts: [
-        'addAccount',
-        'currentAccount',
-        'currentAddress',
-        'listAccounts',
-        'useAccount',
-        'useAccountWithAddress'
-      ],
-      cdp: ['getCdp', 'openCdp', 'getCdpIds'],
-      event: ['on'],
-      proxy: ['currentProxy'],
-      token: ['getToken'],
-      multicall: ['watch', 'latest']
-    });
   }
 
   authenticate() {
@@ -63,6 +51,68 @@ export default class Maker {
     return this._authenticatedPromise;
   }
 
+  // shorthand methods
+  addAccount(...args) {
+    return this.service('accounts').addAccount(...args);
+  }
+
+  currentAccount(...args) {
+    return this.service('accounts').currentAccount(...args);
+  }
+
+  listAccounts(...args) {
+    return this.service('accounts').listAccounts(...args);
+  }
+
+  useAccount(...args) {
+    return this.service('accounts').useAccount(...args);
+  }
+
+  useAccountWithAddress(...args) {
+    return this.service('accounts').useAccountWithAddress(...args);
+  }
+
+  currentAddress(...args) {
+    return this.service('accounts').currentAddress(...args);
+  }
+
+  on(...args) {
+    return this.service('event').on(...args);
+  }
+
+  getToken(...args) {
+    return this.service('token').getToken(...args);
+  }
+
+  currentProxy(...args) {
+    return this.service('proxy').currentProxy(...args);
+  }
+
+  watch(...args) {
+    return this.service('multicall').watch(...args);
+  }
+
+  latest(...args) {
+    return this.service('multicall').latest(...args);
+  }
+
+  openCdp() {
+    throw new Error(
+      '"openCdp" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').openCdp'
+    );
+  }
+
+  getCdp() {
+    throw new Error(
+      '"getCdp" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').getCdp'
+    );
+  }
+
+  getCdpIds() {
+    throw new Error(
+      '"getCdpIds" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service(\'cdp\').getCdpIds'
+    );
+  }
   // skipAuthCheck should only be set if you're sure you don't need the service
   // to be initialized yet, e.g. when setting up a plugin
   service(service, skipAuthCheck = false) {
@@ -80,23 +130,6 @@ export default class Maker {
   }
 }
 
-function delegateToServices(maker, services) {
-  for (const serviceName in services) {
-    for (const methodName of services[serviceName]) {
-      if (serviceName === 'cdp') {
-        maker[methodName] = () => {
-          throw new Error(
-            `"${methodName}" is no longer available here. Add @makerdao/dai-plugin-scd, then use maker.service('cdp').${methodName}`
-          );
-        };
-      } else {
-        maker[methodName] = (...args) =>
-          maker.service(serviceName)[methodName](...args);
-      }
-    }
-  }
-}
-
 function mergeOptions(object, source) {
   return mergeWith(object, source, (objValue, srcValue, key) => {
     if (Array.isArray(objValue) && key === 'abi') return uniq(objValue);
@@ -109,7 +142,20 @@ function mergeOptions(object, source) {
   });
 }
 
-Maker.create = async function(...args) {
+const standardizePluginConfig = plugins =>
+  plugins.map((x, i) => {
+    let [plugin, pluginOptions] = Array.isArray(x) ? x : [x, {}];
+    if (typeof plugin === 'function') plugin = { afterCreate: plugin };
+
+    assert(
+      PLUGIN_KEYS.some(x => has(plugin, x)),
+      `plugins[${i}] does not seem to be a plugin`
+    );
+
+    return [plugin, pluginOptions];
+  });
+
+async function create(...args) {
   const [preset, options = {}] = args;
   const { plugins, ...otherOptions } = options;
 
@@ -125,20 +171,16 @@ Maker.create = async function(...args) {
     }
   }
 
-  const maker = new Maker(preset, options, userOptions);
+  const maker = new MakerClass(preset, options, userOptions);
   if (options.autoAuthenticate !== false) await maker.authenticate();
   return maker;
+}
+
+const Maker = {
+  create,
+  currencies: null,
+  QueryApi: null,
+  utils: null
 };
 
-const standardizePluginConfig = plugins =>
-  plugins.map((x, i) => {
-    let [plugin, pluginOptions] = Array.isArray(x) ? x : [x, {}];
-    if (typeof plugin === 'function') plugin = { afterCreate: plugin };
-
-    assert(
-      PLUGIN_KEYS.some(x => has(plugin, x)),
-      `plugins[${i}] does not seem to be a plugin`
-    );
-
-    return [plugin, pluginOptions];
-  });
+export default Maker;

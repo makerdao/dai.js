@@ -37,7 +37,7 @@ export default class ProxyCdp {
     const tub = this._smartContractService.getContract(contracts.SAI_TUB);
     const saiProxy = this._smartContractService.getContract(contracts.SAI_PROXY); // prettier-ignore
 
-    let method, args;
+    let method, args, promise;
     if (!this.dsProxyAddress) {
       const proxyRegistryAddress = this._smartContractService.getContractAddressByName(contracts.PROXY_REGISTRY); // prettier-ignore
 
@@ -139,7 +139,7 @@ export default class ProxyCdp {
       return parseInt(log.data, 16);
     };
 
-    const promise = (async () => {
+    promise = (async () => {
       const txo = await saiProxy[method](...args);
       this.id = getId(txo);
       return this;

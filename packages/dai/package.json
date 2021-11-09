@@ -1,14 +1,8 @@
 {
   "name": "@makerdao/dai",
-  "version": "0.35.16",
+  "version": "0.41.0-alpha.5",
   "contributors": [
-    "Wouter Kampmann <wouter@makerdao.com>",
-    "Sean Brennan <sean@makerdao.com>",
-    "Tyler Sorensen <tyler@makerdao.com>",
-    "Ethan Bennett <ethan@makerdao.com>",
-    "Lawrence Wang <lawrence@makerdao.com>",
-    "Joshua Levine <joshua@makerdao.com>",
-    "Michael Elliot <mike@makerdao.com>"
+    "DUX <hello@dux.makerdao.network>"
   ],
   "description": "Library for interacting with the Dai Stablecoin System.",
   "license": "MIT",
@@ -22,43 +16,40 @@
   ],
   "bugs": {
     "url": "https://github.com/makerdao/dai.js/issues",
-    "email": "wouter@makerdao.com"
+    "email": "hello@dux.makerdao.network"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/makerdao/dai.js.git"
   },
   "files": [
-    "dist/**/*",
-    "umd/*"
+    "dist/**/*"
   ],
-  "main": "dist/src/index.js",
-  "unpkg": "umd/index.js",
-  "jsdelivr": "umd/index.js",
+  "typings": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "unpkg": "dist/dai.umd.production.min.js",
+  "jsdelivr": "dist/dai.esm.js",
+  "module": "dist/dai.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:umd",
-    "build:umd": "webpack --config ../../webpack.config.js",
-    "build:cjs": "./scripts/build-backend.sh",
-    "clean": "rm -rf ./dist ./umd",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd && ./scripts/copy-files.sh",
+    "clean": "rm -rf ./dist",
     "testchain": "../../scripts/run-testchain.sh",
     "coverage": "yarn test --coverage",
     "test": "yarn testchain --ci jest --runInBand",
     "test:debug": "yarn testchain --ci node --inspect-brk ../../node_modules/.bin/jest --runInBand",
-    "build:backend:watch": "sane ./scripts/build-backend.sh src --wait=10",
-    "build:backend:src:watch": "./scripts/watch-backend-src.sh",
     "prepublishOnly": "yarn build",
     "test:watch": "yarn test --watch",
     "test:mainnet": "export NETWORK='mainnet' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:kovan": "export NETWORK='kovan' && jest --runInBand --config ./test/config/jestIntegrationConfig.json",
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json",
     "test:build": "yarn test --config ./test/config/jestBuildConfig.json",
-    "repl": "../../node_modules/.bin/babel-node --experimental-repl-await scripts/repl.js"
+    "repl": "../../node_modules/.bin/tsc scripts/repl.ts"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
     "@makerdao/currency": "0.9.9",
     "@makerdao/multicall": "^0.11.0",
-    "@makerdao/services-core": "^0.9.9",
+    "@makerdao/services-core": "^0.11.0-alpha.4",
     "@makerdao/test-helpers": "^0.2.1",
     "assert": "^1.4.1",
     "bignumber.js": "^7.2.1",
@@ -71,6 +62,7 @@
     "invariant": "^2.2.2",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.11",
+    "lodash-es": "^4.17.21",
     "promise-props": "^1.0.0",
     "rxjs": "^6.5.4",
     "toposort": "^2.0.2",
@@ -80,6 +72,8 @@
     "node": ">=10.16"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.5",
     "gray-matter": "^4.0.2"
-  }
+  },
+  "gitHead": "689f3670142282c9483c74d5658f60161d4287bb"
 }

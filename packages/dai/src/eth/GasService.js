@@ -1,5 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
-import map from 'lodash/map';
+import { map } from 'lodash';
 import fetch from 'isomorphic-fetch';
 
 export const API_URL =

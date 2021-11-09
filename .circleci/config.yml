@@ -3,6 +3,7 @@
    build:
      docker:
        - image: makerdaodux/dapptools-node-circleci-docker
+     resource_class: large
      steps:
        - checkout
        - run:

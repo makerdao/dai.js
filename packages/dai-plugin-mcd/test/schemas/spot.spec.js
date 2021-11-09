@@ -1,7 +1,7 @@
 import { mcdMaker } from '../helpers';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { isValidAddressString } from '../../src/utils';
-import testnetAddresses from '../../contracts/addresses/testnet';
+import testnetAddresses from '../../contracts/addresses/testnet.json';
 
 import {
   PRICE_FEED_ADDRESS,

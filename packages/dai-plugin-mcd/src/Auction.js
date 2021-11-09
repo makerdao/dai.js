@@ -1,6 +1,6 @@
 import { WAD } from './constants';
 import BigNumber from 'bignumber.js';
-import { DAI } from './index';
+import { DAI } from './tokens';
 
 export default class Auction {
   constructor(ilk, smartContractService) {

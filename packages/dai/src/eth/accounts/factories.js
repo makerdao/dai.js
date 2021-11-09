@@ -1,4 +1,3 @@
-import ethUtil from 'ethereumjs-util';
 import { ethers } from 'ethers';
 import { getBrowserProvider } from './setup';
 import assert from 'assert';
@@ -17,7 +16,7 @@ export function privateKeyAccountFactory({ key }, provider) {
 
   const subprovider = new ethers.Wallet(key, provider);
 
-  return { subprovider, address };
+  return { subprovider, address: account.address };
 }
 
 async function getAccountAddress(subprovider, { offset = 0, address } = {}) {

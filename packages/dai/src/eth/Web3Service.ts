@@ -10,6 +10,21 @@ import debug from 'debug';
 const log = debug('dai:Web3Service');
 
 export default class Web3Service extends PrivateService {
+  _blockListeners;
+  _info;
+  _ethersSigner;
+  _web3;
+  _transactionSettings;
+  _confirmedBlockCount;
+  _defaultEmitter;
+  eth;
+  _pollingInterval;
+  _networkId;
+  _currentBlockId;
+  _currentBlock;
+  _newBlocksSubscription;
+  _updateBlocksInterval;
+
   constructor(name = 'web3') {
     super(name, ['accounts', 'timer', 'cache', 'event']);
 
@@ -61,24 +76,25 @@ export default class Web3Service extends PrivateService {
     // this._web3 = new Web3();
     // this._web3.setProvider(this.get('accounts').getProvider());
 
-    Object.assign(
-      this,
-      [
-        'estimateGas',
-        // 'getAccounts',
-        'listAccounts',
-        'getBalance', // yes
-        'getBlock', // yes
-        'getPastLogs',
-        'getStorageAt', // yes
-        'getTransaction', // yes
-        'getTransactionReceipt', // yes
-        'subscribe'
-      ].reduce((acc, method) => {
-        acc[method] = (...args) => this._ethersProvider[method](...args);
-        return acc;
-      }, {})
-    );
+    //TODO make sure all the methods listed here are added to this class below
+    // Object.assign(
+    //   this,
+    //   [
+    //     'estimateGas',
+    //     // 'getAccounts',
+    //     'listAccounts',
+    //     'getBalance', // yes
+    //     'getBlock', // yes
+    //     'getPastLogs',
+    //     'getStorageAt', // yes
+    //     'getTransaction', // yes
+    //     'getTransactionReceipt', // yes
+    //     'subscribe'
+    //   ].reduce((acc, method) => {
+    //     acc[method] = (...args) => this._ethersProvider[method](...args);
+    //     return acc;
+    //   }, {})
+    // );
 
     this.manager().onDisconnected(() => this._stopListeningForNewBlocks());
     this._defaultEmitter.emit('web3/INITIALIZED', {
@@ -87,6 +103,46 @@ export default class Web3Service extends PrivateService {
     this._transactionSettings = settings.transactionSettings;
     this._confirmedBlockCount = settings.confirmedBlockCount || 5;
     this._pollingInterval = settings.pollingInterval || 4000;
+  }
+
+  subscribe(...args) {
+    return this._web3.eth.subscribe(...args);
+  }
+
+  estimateGas(...args) {
+    return this._web3.eth.estimateGas(...args);
+  }
+
+  wait(...args) {
+    return this._web3.eth.wait(...args);
+  }
+
+  getBalance(...args) {
+    return this._web3.eth.getBalance(...args);
+  }
+
+  getAccounts(...args) {
+    return this._web3.eth.getAccounts(...args);
+  }
+
+  getBlock(...args) {
+    return this._web3.eth.getBlock(...args);
+  }
+
+  getPastLogs(...args) {
+    return this._web3.eth.getPastLogs(...args);
+  }
+
+  getStorageAt(...args) {
+    return this._web3.eth.getStorageAt(...args);
+  }
+
+  getTransaction(...args) {
+    return this._web3.eth.getTransaction(...args);
+  }
+
+  getTransactionReceipt(...args) {
+    return this._web3.eth.getTransactionReceipt(...args);
   }
 
   async connect() {
@@ -150,7 +206,7 @@ export default class Web3Service extends PrivateService {
 
   get rpcUrl() {
     const provider = this.web3Provider();
-    return provider.connection.url || null;
+    return (provider as any).connection.url || null;
   }
 
   get utils() {

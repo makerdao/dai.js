@@ -20,10 +20,10 @@ beforeAll(async () => {
   voteProxyService = maker.service('voteProxy');
 });
 
-afterAll(async done => {
+afterAll(async () => {
   if (global.useOldChain) {
     await restoreSnapshotOriginal(global.snapshotId);
-    done();
+    return;
   } else {
     global.client.restoreSnapshot(global.testchainId, global.defaultSnapshotId);
     await sleep(15000);
@@ -31,7 +31,7 @@ afterAll(async done => {
     await global.client.delete(global.testchainId);
     await sleep(15000);
 
-    done();
+    return;
   }
 });
 

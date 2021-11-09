@@ -1,16 +1,16 @@
 {
   "name": "@makerdao/services-core",
   "description": "Dependency injection framework",
-  "version": "0.10.0",
+  "version": "0.11.0-alpha.4",
   "license": "MIT",
   "main": "dist/index.js",
-  "unpkg": "umd/index.js",
-  "jsdelivr": "umd/index.js",
+  "unpkg": "dist/index.js",
+  "jsdelivr": "dist/services-core.esm.js",
+  "module": "dist/services-core.umd.production.min.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:umd",
-    "build:umd": "webpack --config ../../webpack.config.js",
-    "build:cjs": "../../scripts/build.sh",
-    "clean": "rm -rf ./dist ./umd",
+    "build": "yarn clean && tsdx build --format cjs,esm,umd",
+    "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "test": "jest",
     "coverage": "jest --coverage"
@@ -24,8 +24,11 @@
     "umd/*"
   ],
   "dependencies": {
-    "babel-runtime": "^6.26.0",
     "lodash": "^4.17.15",
     "toposort": "^2.0.2"
+  },
+  "gitHead": "689f3670142282c9483c74d5658f60161d4287bb",
+  "peerDependencies": {
+    "@makerdao/dai": "^0.41.0-alpha.2"
   }
 }

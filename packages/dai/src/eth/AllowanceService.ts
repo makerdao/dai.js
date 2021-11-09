@@ -3,9 +3,11 @@ import BigNumber from 'bignumber.js';
 import { UINT256_MAX } from '../utils/constants';
 import tracksTransactions from '../utils/tracksTransactions';
 
-const maxAllowance = BigNumber(UINT256_MAX).shiftedBy(-18);
+const maxAllowance = new BigNumber(UINT256_MAX).shiftedBy(-18);
 
 export default class AllowanceService extends PrivateService {
+  _shouldMinimizeAllowance: boolean;
+
   constructor(name = 'allowance') {
     super(name, ['token', 'event']);
     this._shouldMinimizeAllowance = false;
