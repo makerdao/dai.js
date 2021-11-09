@@ -98,11 +98,6 @@ export default class AccountsService extends PublicService {
       ...accountData
     };
 
-    // TODO: This seems to work, but is it the best implementation?
-    this._signer = accountData.subprovider._isProvider
-      ? accountData.subprovider.getSigner()
-      : accountData.subprovider;
-
     this._accounts[name] = account;
     if (!this._currentAccount || name === 'default') {
       this.useAccount(name);
@@ -162,6 +157,10 @@ export default class AccountsService extends PublicService {
      * our task is to update the signer in web3Service when it changes
      *
      */
+    // TODO: This seems to work, but is it the best implementation?
+    this._signer = account.subprovider._isProvider
+      ? account.subprovider.getSigner()
+      : account.subprovider;
 
     // this._engine.push(this.currentWallet(), 0);
     // this._engine.addProvider(this.currentWallet(), 0);
