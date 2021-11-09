@@ -13,6 +13,7 @@ export default class Web3Service extends PrivateService {
   _blockListeners;
   _info;
   _ethersSigner;
+  _ethersProvider;
   _web3;
   _transactionSettings;
   _confirmedBlockCount;
@@ -24,6 +25,7 @@ export default class Web3Service extends PrivateService {
   _currentBlock;
   _newBlocksSubscription;
   _updateBlocksInterval;
+  _utils;
 
   constructor(name = 'web3') {
     super(name, ['accounts', 'timer', 'cache', 'event']);
@@ -60,10 +62,6 @@ export default class Web3Service extends PrivateService {
 
   web3Contract(abi, address) {
     return new this._web3.eth.Contract(abi, address);
-  }
-
-  getAccounts(...args) {
-    return this.listAccounts(args);
   }
 
   initialize(settings) {
@@ -106,43 +104,44 @@ export default class Web3Service extends PrivateService {
   }
 
   subscribe(...args) {
-    return this._web3.eth.subscribe(...args);
+    return this._ethersProvider.subscribe(...args);
   }
 
   estimateGas(...args) {
-    return this._web3.eth.estimateGas(...args);
+    return this._ethersProvider.estimateGas(...args);
   }
 
   wait(...args) {
-    return this._web3.eth.wait(...args);
+    return this._ethersProvider.wait(...args);
   }
 
   getBalance(...args) {
-    return this._web3.eth.getBalance(...args);
+    return this._ethersProvider.getBalance(...args);
   }
 
   getAccounts(...args) {
-    return this._web3.eth.getAccounts(...args);
+    //TODO does it need to be spread?
+    return this._ethersProvider.listAccounts(...args);
   }
 
   getBlock(...args) {
-    return this._web3.eth.getBlock(...args);
+    return this._ethersProvider.getBlock(...args);
   }
 
   getPastLogs(...args) {
-    return this._web3.eth.getPastLogs(...args);
+    return this._ethersProvider.getPastLogs(...args);
   }
 
   getStorageAt(...args) {
-    return this._web3.eth.getStorageAt(...args);
+    return this._ethersProvider.getStorageAt(...args);
   }
 
   getTransaction(...args) {
-    return this._web3.eth.getTransaction(...args);
+    return this._ethersProvider.getTransaction(...args);
   }
 
   getTransactionReceipt(...args) {
-    return this._web3.eth.getTransactionReceipt(...args);
+    return this._ethersProvider.getTransactionReceipt(...args);
   }
 
   async connect() {
