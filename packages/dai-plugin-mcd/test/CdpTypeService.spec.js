@@ -5,6 +5,8 @@ import { ETH } from '../src';
 let maker, service;
 
 describe('with default types', () => {
+  //TODO probably could reduce this, but 5000 was seemingly too short
+  jest.setTimeout(30000);
   beforeAll(async () => {
     maker = await mcdMaker();
     service = maker.service(ServiceRoles.CDP_TYPE);

@@ -3,8 +3,13 @@ import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { Currency } from '@makerdao/currency';
 import { defaultTokens } from './tokens';
+import { utils as ethersUtils } from 'ethers';
 
 const web3Utils = new Web3().utils;
+
+export function hexZeroPad(srt, numBytes) {
+  return ethersUtils.hexZeroPad(srt, numBytes);
+}
 
 export function stringToBytes(str) {
   assert(!!str, 'argument is falsy');
