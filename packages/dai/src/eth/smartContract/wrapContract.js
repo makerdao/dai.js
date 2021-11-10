@@ -56,7 +56,6 @@ export function wrapContract(contract, name, abi, txManager) {
               //TODO DD: make sure passing args doesnt change data even though we know its empty
             }
           }
-          console.log('passing this key', key);
           return txManager.sendContractCall(contract, key, args, name);
         };
       },

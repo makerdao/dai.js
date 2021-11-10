@@ -75,7 +75,7 @@ export default class SpellService extends PublicService {
     const paddedSpellAddress =
       '0x' + padStart(spellAddress.replace(/^0x/, ''), 64, '0');
     const [plotEvent] = await web3Service.getPastLogs({
-      fromBlock: pauseInfo.inception_block[networkName],
+      fromBlock: parseInt(pauseInfo.inception_block[networkName]),
       toBlock: 'latest',
       address: pauseAddress,
       topics: [pauseInfo.events.plot, paddedSpellAddress]
@@ -142,7 +142,7 @@ export default class SpellService extends PublicService {
     const paddedSpellAddress =
       '0x' + padStart(spellAddress.replace(/^0x/, ''), 64, '0');
     const [execEvent] = await web3Service.getPastLogs({
-      fromBlock: pauseInfo.inception_block[networkName],
+      fromBlock: parseInt(pauseInfo.inception_block[networkName]),
       toBlock: 'latest',
       address: pauseAddress,
       topics: [pauseInfo.events.exec, paddedSpellAddress]

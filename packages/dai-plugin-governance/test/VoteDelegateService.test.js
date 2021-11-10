@@ -1,7 +1,8 @@
 import {
   restoreSnapshotOriginal,
   setupTestMakerInstance,
-  sendMkrToAddress
+  sendMkrToAddress,
+  sleep
 } from './helpers';
 import VoteDelegateService from '../src/VoteDelegateService';
 import VoteDelegate from '../src/VoteDelegate';
@@ -33,8 +34,18 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await restoreSnapshotOriginal(global.snapshotId);
-  return;
+  if (global.useOldChain) {
+    await restoreSnapshotOriginal(global.snapshotId);
+    return;
+  } else {
+    global.client.restoreSnapshot(global.testchainId, global.defaultSnapshotId);
+    await sleep(15000);
+
+    await global.client.delete(global.testchainId);
+    await sleep(15000);
+
+    return;
+  }
 });
 
 test('can create vote delegate service', async () => {
@@ -56,11 +67,11 @@ test('getVoteDelegate returns the vote delegate if exists', async () => {
 test('user can lock MKR with a delegate', async () => {
   const sendAmount = 5;
   const amountToLock = 3;
-  const mkr = await maker.getToken(MKR);
 
   await sendMkrToAddress(maker, addresses.owner, addresses.ali, sendAmount);
 
   maker.useAccount('ali');
+  const mkr = await maker.getToken(MKR);
 
   await mkr.approveUnlimited(delegateContractAddress);
 
@@ -121,9 +132,9 @@ test('delegate can vote polls and see Voted event emitted', async () => {
 
 test('user can free an amount of MKR from delegate', async () => {
   const amountToFree = 1;
-  const iou = await maker.getToken(IOU);
 
   maker.useAccount('ali');
+  const iou = await maker.getToken(IOU);
 
   await iou.approveUnlimited(delegateContractAddress);
 

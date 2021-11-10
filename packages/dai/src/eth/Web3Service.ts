@@ -41,10 +41,10 @@ export default class Web3Service extends PrivateService {
   }
 
   getEthersSigner() {
-    return this.get('accounts').getSigner();
+    // return this.get('accounts').getSigner();
     // if (!this._ethersSigner)
-    //   this._ethersSigner = this.get('accounts').getSigner();
-    // return this._ethersSigner;
+    this._ethersSigner = this.get('accounts').getSigner();
+    return this._ethersSigner;
   }
 
   web3Provider() {

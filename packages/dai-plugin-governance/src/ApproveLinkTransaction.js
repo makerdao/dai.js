@@ -19,20 +19,28 @@ export default class ApproveLinkTransaction {
   build(method, args) {
     const promise = (async () => {
       await 0;
-      await this._contract[method](...[...args, { promise }]);
-      await this._parseLogs();
+      const txo = await this._contract[method](...[...args, { promise }]);
+      this._parseLogs(txo.receipt.logs);
       return this;
     })();
     this.promise = promise;
     return promise;
   }
 
-  //_parseLogs(logs) {
-  async _parseLogs() {
-    // TODO if removing this method's "logs" argument causes problems (due to promise tracking),
-    // try moving this logic higher in the call stack.
-    const filter = this._contract.filters.LinkConfirmed();
-    const [{ args: eventArgs }] = await this._contract.queryFilter(filter);
+  _parseLogs(logs) {
+    const [topic] = this._contract.interface.encodeFilterTopics(
+      'LinkConfirmed',
+      []
+    );
+
+    const [receiptEvent] = logs.filter(
+      e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for LinkConfirmed events
+    );
+
+    const { args: eventArgs } = this._contract.interface.parseLog({
+      data: receiptEvent.data,
+      topics: receiptEvent.topics
+    });
 
     this.proxyAddress = eventArgs['voteProxy'];
   }
