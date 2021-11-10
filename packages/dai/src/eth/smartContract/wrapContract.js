@@ -43,7 +43,7 @@ export function wrapContract(contract, name, abi, txManager) {
               const lastArg = args[args.length - 1];
 
               // If the last arg is an object with a promise key, don't count it
-              const functionInputsLength = lastArg.promise
+              const functionInputsLength = lastArg?.promise
                 ? args.length - 1
                 : args.length;
 
