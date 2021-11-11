@@ -61,7 +61,7 @@ export default class SavingsService extends PublicService {
   }
 
   async balanceOf(guy) {
-    const slice = new BigNumber(await this._pot.pie(guy));
+    const slice = new BigNumber((await this._pot.pie(guy))._hex);
     const chi = await this.chi();
     return DAI(
       slice
@@ -72,7 +72,7 @@ export default class SavingsService extends PublicService {
   }
 
   async getTotalDai() {
-    const totalPie = new BigNumber(await this._pot.Pie());
+    const totalPie = new BigNumber((await this._pot.Pie())._hex);
     const chi = await this.chi();
     return DAI(
       totalPie
@@ -83,12 +83,12 @@ export default class SavingsService extends PublicService {
   }
 
   async getYearlyRate() {
-    const dsr = new BigNumber(await this._pot.dsr()).div(RAY);
+    const dsr = new BigNumber((await this._pot.dsr())._hex).div(RAY);
     return dsr.pow(SECONDS_PER_YEAR).minus(1);
   }
 
   async chi() {
-    return new BigNumber(await this._pot.chi()).div(RAY);
+    return new BigNumber((await this._pot.chi())._hex).div(RAY);
   }
 
   get _proxyActions() {
