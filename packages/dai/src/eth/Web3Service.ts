@@ -120,7 +120,6 @@ export default class Web3Service extends PrivateService {
   }
 
   getAccounts(...args) {
-    //TODO does it need to be spread?
     return this._ethersProvider.listAccounts(...args);
   }
 

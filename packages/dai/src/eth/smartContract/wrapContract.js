@@ -47,13 +47,11 @@ export function wrapContract(contract, name, abi, txManager) {
                 ? args.length - 1
                 : args.length;
 
-              //TODO: do I want to do it this way?
               if (
                 contract.interface.functions[fnKey].inputs.length ===
                 functionInputsLength
               )
                 key = fnKey;
-              //TODO DD: make sure passing args doesnt change data even though we know its empty
             }
           }
           return txManager.sendContractCall(contract, key, args, name);

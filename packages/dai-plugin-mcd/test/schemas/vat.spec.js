@@ -77,23 +77,18 @@ test(TOTAL_ENCUMBERED_DEBT, async () => {
   // against those rather than data extracted from the chain
   const { rate: ethARate } = ethAInfo;
   const { rate: batARate } = batAInfo;
-
   const ethADebtAmount = ETH_A_DEBT_AMOUNT.toBigNumber();
   const batADebtAmount = BAT_A_DEBT_AMOUNT.toBigNumber();
-
   const ethAEncumberedDebt = await maker.latest(TOTAL_ENCUMBERED_DEBT, 'ETH-A');
   const batAEncumberedDebt = await maker.latest(TOTAL_ENCUMBERED_DEBT, 'BAT-A');
-
   expect(isBigNumber(ethAEncumberedDebt)).toEqual(true);
   expect(isBigNumber(batAEncumberedDebt)).toEqual(true);
-
   expect(ethAEncumberedDebt.toNumber()).toBeCloseTo(
-    ethADebtAmount.div(fromRay(ethARate)).toNumber(),
+    ethADebtAmount.div(fromRay(ethARate._hex)).toNumber(),
     12
   );
-
   expect(batAEncumberedDebt.toNumber()).toBeCloseTo(
-    batADebtAmount.div(fromRay(batARate)).toNumber(),
+    batADebtAmount.div(fromRay(batARate._hex)).toNumber(),
     12
   );
 });
@@ -114,8 +109,8 @@ test(DEBT_SCALING_FACTOR, async () => {
   expect(isBigNumber(ethADebtScalingFactor)).toEqual(true);
   expect(isBigNumber(batADebtScalingFactor)).toEqual(true);
 
-  expect(ethADebtScalingFactor).toEqual(fromRay(ethARate));
-  expect(batADebtScalingFactor).toEqual(fromRay(batARate));
+  expect(ethADebtScalingFactor).toEqual(fromRay(ethARate._hex));
+  expect(batADebtScalingFactor).toEqual(fromRay(batARate._hex));
 });
 
 test(PRICE_WITH_SAFETY_MARGIN, async () => {
@@ -166,8 +161,12 @@ test(TOTAL_DAI_SUPPLY, async () => {
   const { Art: ethAArt, rate: ethARate } = ethAInfo;
   const { Art: batAArt, rate: batARate } = batAInfo;
 
-  const ethADaiGenerated = DAI.rad(BigNumber(ethAArt).times(ethARate));
-  const batADaiGenerated = DAI.rad(BigNumber(batAArt).times(batARate));
+  const ethADaiGenerated = DAI.rad(
+    BigNumber(ethAArt._hex).times(ethARate._hex)
+  );
+  const batADaiGenerated = DAI.rad(
+    BigNumber(batAArt._hex).times(batARate._hex)
+  );
   const sumOfDaiGeneratedFromIlks = ethADaiGenerated.plus(batADaiGenerated);
 
   const totalDaiAmount = await maker.latest(TOTAL_DAI_SUPPLY);
