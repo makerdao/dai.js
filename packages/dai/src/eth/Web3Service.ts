@@ -33,7 +33,6 @@ export default class Web3Service extends PrivateService {
     this._blockListeners = {};
     this._info = {};
     Web3ServiceList.push(this);
-    this._utils = ethers.utils;
   }
 
   currentAddress() {
@@ -208,6 +207,7 @@ export default class Web3Service extends PrivateService {
   }
 
   get utils() {
+    if (!this._utils) this._utils = ethers.utils;
     return this._utils;
   }
 
