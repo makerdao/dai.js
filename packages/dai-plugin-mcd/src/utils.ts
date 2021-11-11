@@ -4,18 +4,24 @@ import Web3 from 'web3';
 import { Currency } from '@makerdao/currency';
 import { defaultTokens } from './tokens';
 import { utils as ethersUtils } from 'ethers';
+export { ethersUtils };
 
 const web3Utils = new Web3().utils;
 
-export function hexZeroPad(srt, numBytes) {
+export function hexZeroPad(srt, numBytes = 32) {
   return ethersUtils.hexZeroPad(srt, numBytes);
 }
 
 export function stringToBytes(str) {
   assert(!!str, 'argument is falsy');
   assert(typeof str === 'string', 'argument is not a string');
-  return '0x' + Buffer.from(str).toString('hex');
+  return ethersUtils.formatBytes32String(str);
 }
+// export function stringToBytes(str) {
+//   assert(!!str, 'argument is falsy');
+//   assert(typeof str === 'string', 'argument is not a string');
+//   return '0x' + Buffer.from(str).toString('hex');
+// }
 
 export function bytesToString(hex) {
   return Buffer.from(hex.replace(/^0x/, ''), 'hex')

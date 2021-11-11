@@ -38,6 +38,8 @@ const systemValues = {
 };
 
 describe.each(scenarios)('%s', (ilk, GEM) => {
+  //TODO probably could reduce this, but 5000 was seemingly too short
+  jest.setTimeout(30000);
   const price = 10;
   let cdpType, ratio;
 

@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { ServiceRoles } from './constants';
-import { stringToBytes, hexZeroPad } from './utils';
+import { stringToBytes } from './utils';
 import { DAI, ETH, WETH } from './tokens';
 import {
   annualStabilityFee,
@@ -33,7 +33,7 @@ export default class CdpType {
     this.currency = currency;
     this.decimals = decimals || 18;
     this.ilk = ilk;
-    this._ilkBytes = hexZeroPad(stringToBytes(this.ilk), 32);
+    this._ilkBytes = stringToBytes(this.ilk);
     this.cache = {};
     if (options.prefetch) this.prefetch();
   }

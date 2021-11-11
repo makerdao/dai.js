@@ -386,18 +386,16 @@ export default class CdpManager extends LocalService {
     const managerContract = this.get('smartContract').getContract(
       'CDP_MANAGER'
     );
-    const web3 = this.get('web3')._web3;
-    const { NewCdp } = managerContract.interface.events;
-    const topic = web3.utils.keccak256(web3.utils.toHex(NewCdp.signature));
-    const receiptEvent = logs.filter(
+    const [topic] = managerContract.interface.encodeFilterTopics('NewCdp', []);
+    const [receiptEvent] = logs.filter(
       e => e.topics[0].toLowerCase() === topic.toLowerCase()
     );
-    const parsedLog = NewCdp.parse(
-      receiptEvent[0].topics,
-      receiptEvent[0].data
-    );
-    assert(parsedLog['cdp'], 'could not find log for NewCdp event');
-    return parseInt(parsedLog['cdp']);
+    const { args: eventArgs } = managerContract.interface.parseLog({
+      data: receiptEvent.data,
+      topics: receiptEvent.topics
+    });
+    assert(eventArgs['cdp'], 'could not find log for NewCdp event');
+    return parseInt(eventArgs['cdp']);
   }
 
   getEventHistory(managedCdp) {

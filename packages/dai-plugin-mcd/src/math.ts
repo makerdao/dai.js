@@ -12,7 +12,7 @@ import { DAI, USD } from './tokens';
 // ilk math
 
 export function debtCeiling(line) {
-  return DAI.rad(line);
+  return DAI.rad(line._hex);
 }
 
 export function liquidationPenalty(chop) {
