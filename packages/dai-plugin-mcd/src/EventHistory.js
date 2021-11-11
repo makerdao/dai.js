@@ -68,9 +68,9 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   const MCD_JOIN_DAI = cdpManager
     .get('smartContract')
     .getContractAddress('MCD_JOIN_DAI');
-  const MCD_JOIN_SAI = cdpManager
-    .get('smartContract')
-    .getContractAddress('MCD_JOIN_SAI');
+  // const MCD_JOIN_SAI = cdpManager
+  //   .get('smartContract')
+  //   .getContractAddress('MCD_JOIN_SAI');
   const CDP_MANAGER = cdpManager
     .get('smartContract')
     .getContractAddress('CDP_MANAGER');
@@ -87,7 +87,6 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   if (cache[id]) return cache[id];
 
   const web3 = cdpManager.get('web3');
-  const utils = web3.utils;
 
   // 8600000 is 2019-09-22 on mainnet and 2018-09-04 on kovan
   const genesis = [1, 42].includes(web3.network) ? 8600000 : 1;
@@ -103,19 +102,26 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   const urnHandler = (await cdpManager.getUrn(id)).toLowerCase();
   const ilk = managedCdp.ilk;
 
-  const { NewCdp } = cdpManager
+  const Bite = cdpManager
     .get('smartContract')
-    .getContract('CDP_MANAGER').interface.events;
+    .getContract('MCD_CAT')
+    .interface.getEvent('Bite');
 
-  const { Bite } = cdpManager
+  const [newCdpTopic0] = cdpManager
     .get('smartContract')
-    .getContract('MCD_CAT').interface.events;
+    .getContract('CDP_MANAGER')
+    .interface.encodeFilterTopics('NewCdp', []);
+
+  const [biteTopic0] = cdpManager
+    .get('smartContract')
+    .getContract('MCD_CAT')
+    .interface.encodeFilterTopics('Bite', []);
 
   const cdpManagerNewCdp = {
     request: web3.getPastLogs({
       address: CDP_MANAGER,
       topics: [
-        utils.keccak256(utils.toHex(NewCdp.signature)),
+        newCdpTopic0,
         null,
         null,
         '0x' + padStart(id.toString(16), 64, '0')
@@ -157,7 +163,13 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
 
           const [joinDaiEvents, cdpMoveEvents] = await Promise.all([
             web3.getPastLogs({
-              address: [MCD_JOIN_DAI, MCD_JOIN_SAI],
+              /*
+              FIXME: ethers 5 doesn't support passing an array of addresses into getLogs
+              as we move further away from SCD, join Sai events are less likely, but
+              we should eventually re-add this functionality by duplicating this call for MCD_JOIN_SAI.
+              */
+              // address: [MCD_JOIN_DAI, MCD_JOIN_SAI],
+              address: MCD_JOIN_DAI,
               topics: [
                 dart.lt(0) ? EVENT_DAI_ADAPTER_JOIN : EVENT_DAI_ADAPTER_EXIT,
                 proxy
@@ -277,11 +289,7 @@ export default async function getEventHistory(cdpManager, managedCdp, cache) {
   const catBite = (address, fromBlock, toBlock) => ({
     request: web3.getPastLogs({
       address,
-      topics: [
-        utils.keccak256(utils.toHex(Bite.signature)),
-        null,
-        '0x' + padStart(urnHandler.slice(2), 64, '0')
-      ],
+      topics: [biteTopic0, null, '0x' + padStart(urnHandler.slice(2), 64, '0')],
       fromBlock,
       toBlock
     }),

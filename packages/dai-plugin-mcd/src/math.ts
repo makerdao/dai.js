@@ -57,8 +57,8 @@ export function collateralValue(collateralAmount, price) {
 }
 
 export function debtValue(art, rate) {
-  art = DAI.wei(art);
-  return art.times(rate).shiftedBy(-27);
+  art = DAI.wei(art._hex);
+  return art.times(rate._hex).shiftedBy(-27);
 }
 
 export function collateralizationRatio(collateralValue, debtValue) {
