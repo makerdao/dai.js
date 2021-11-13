@@ -44,8 +44,8 @@ export default class CdpType {
 
   get totalDebt() {
     const { Art, rate } = this._getCached('vatInfo');
-    return DAI.wei(Art)
-      .times(rate)
+    return DAI.wei(Art._hex)
+      .times(rate._hex)
       .shiftedBy(-27);
   }
 
