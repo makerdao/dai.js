@@ -71,19 +71,23 @@ test('ether transfer should move transferValue from sender to receiver', done =>
     .manager()
     .authenticate()
     .then(() => {
+      console.log('1st then');
       sender = ethereumTokenService.get('web3').currentAddress();
       token = ethereumTokenService.getToken(ETH);
       return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
     })
     .then(balances => {
+      console.log('2nd then balances', balances);
       senderBalance = ETH(balances[0]);
       receiverBalance = ETH(balances[1]);
       return token.transfer(receiver, '0.1');
     })
-    .then(() =>
-      Promise.all([token.balanceOf(sender), token.balanceOf(receiver)])
-    )
+    .then(() => {
+      console.log('3rd then');
+      return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
+    })
     .then(balances => {
+      console.log('4th then');
       const newSenderBalance = ETH(balances[0]),
         newReceiverBalance = ETH(balances[1]);
       expect(newReceiverBalance.minus(0.1).eq(receiverBalance)).toBeTruthy();

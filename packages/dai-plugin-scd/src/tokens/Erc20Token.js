@@ -1,4 +1,6 @@
+import { ethers } from 'ethers';
 import { currencies, getCurrency } from '../Currency';
+import { UINT256_MAX } from '../../utils/constants';
 
 export default class Erc20Token {
   constructor(contract, web3Service, decimals = 18, symbol, currency) {
@@ -36,7 +38,7 @@ export default class Erc20Token {
   }
 
   _valueFromContract(value) {
-    return this._currency(value, -1 * this._decimals);
+    return this._currency(value.toString(), -1 * this._decimals);
   }
 
   approve(spender, value, { unit = this._currency, ...options } = {}) {
@@ -59,7 +61,8 @@ export default class Erc20Token {
 
   approveUnlimited(spender, options = {}) {
     if (!spender) spender = this._web3.currentAddress();
-    return this._contract.approve(spender, -1, {
+    return this._contract.approve(spender, ethers.BigNumber.from(UINT256_MAX), {
+      // return this._contract.approve(spender, -1, {
       metadata: {
         action: {
           name: 'approve',

@@ -157,10 +157,19 @@ export default class Web3Service extends PrivateService {
     https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction
   */
   sendTransaction(...args) {
+    // const prov = new ethers.providers.Web3Provider(this.web3Provider());
+    //@ts-ignore
+    // return prov.getSigner().sendTransaction(...args);
     return new Promise((resolve, reject) => {
       this._web3.eth
         .sendTransaction(...args)
-        .on('transactionHash', resolve)
+        .on('transactionHash', tx => {
+          return resolve({
+            hash: tx,
+            // ethers TransactionResponse expects a wait method
+            wait: () => {}
+          });
+        })
         .on('error', reject);
     });
   }

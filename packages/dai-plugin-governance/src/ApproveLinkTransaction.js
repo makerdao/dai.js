@@ -28,18 +28,20 @@ export default class ApproveLinkTransaction {
   }
 
   _parseLogs(logs) {
-    const { LinkConfirmed } = this._contract.interface.events;
-    const web3 = this._txMgr.get('web3')._web3;
-    const topic = web3.utils.keccak256(
-      web3.utils.toHex(LinkConfirmed.signature)
+    const [topic] = this._contract.interface.encodeFilterTopics(
+      'LinkConfirmed',
+      []
     );
-    const receiptEvent = logs.filter(
+
+    const [receiptEvent] = logs.filter(
       e => e.topics[0].toLowerCase() === topic.toLowerCase() //filter for LinkConfirmed events
     );
-    const parsedLog = LinkConfirmed.parse(
-      receiptEvent[0].topics,
-      receiptEvent[0].data
-    );
-    this.proxyAddress = parsedLog['voteProxy'];
+
+    const { args: eventArgs } = this._contract.interface.parseLog({
+      data: receiptEvent.data,
+      topics: receiptEvent.topics
+    });
+
+    this.proxyAddress = eventArgs['voteProxy'];
   }
 }

@@ -1,7 +1,10 @@
 export function wrapContract(contract, name, abi, txManager) {
   const nonConstantFns = {};
-  for (let { type, constant, name, inputs } of abi) {
-    if (type === 'function' && constant === false) {
+  for (let { type, constant, name, inputs, stateMutability } of abi) {
+    // Non-constant functions can modify state
+    const canModifyState =
+      constant === false || !['pure', 'view'].includes(stateMutability);
+    if (type === 'function' && canModifyState) {
       // Map all of the contract method names + sigs in cases where the method
       // sig is used as the key due to method overloading, e.g.
       // contract["method(address,uint256)"](foo, bar)
@@ -34,8 +37,25 @@ export function wrapContract(contract, name, abi, txManager) {
         if (key in target) return target[key];
         if (!txManager || !nonConstantFns[key]) return contract[key];
 
-        return (...args) =>
-          txManager.sendContractCall(contract, key, args, name);
+        return (...args) => {
+          for (const fnKey in contract.interface.functions) {
+            if (contract.interface.functions[fnKey].name === key) {
+              const lastArg = args[args.length - 1];
+
+              // If the last arg is an object with a promise key, don't count it
+              const functionInputsLength = lastArg?.promise
+                ? args.length - 1
+                : args.length;
+
+              if (
+                contract.interface.functions[fnKey].inputs.length ===
+                functionInputsLength
+              )
+                key = fnKey;
+            }
+          }
+          return txManager.sendContractCall(contract, key, args, name);
+        };
       },
 
       set(target, key, value) {
