@@ -1,4 +1,5 @@
-import { DAI } from '@makerdao/dai-plugin-mcd';
+// import { DAI } from '@makerdao/dai-plugin-mcd';
+import { DAI } from '../../dai-plugin-mcd/src';
 import { mineBlocks } from '../../test-helpers/src';
 import BigNumber from 'bignumber.js';
 import { stringToBytes } from '../src/LiquidationService';

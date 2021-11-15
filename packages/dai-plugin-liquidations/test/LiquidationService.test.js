@@ -1,6 +1,8 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-import Maker from '@makerdao/dai';
-import { McdPlugin, YFI } from '@makerdao/dai-plugin-mcd';
+// import Maker from '@makerdao/dai/';
+import Maker from '../../dai/src';
+// import { McdPlugin, YFI } from '@makerdao/dai-plugin-mcd';
+import { McdPlugin, YFI } from '../../dai-plugin-mcd/src';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
 import LiquidationService, {
@@ -145,11 +147,11 @@ describe('LiquidationService', () => {
   test('can get status from on chain', async () => {
     const { needsRedo, price, lot, tab } = await service.getStatus(ilk, 1);
 
-    const collateralAmount = new BigNumber(lot).div(WAD);
-    const daiNeeded = new BigNumber(tab).div(RAD);
+    const collateralAmount = new BigNumber(lot._hex).div(WAD);
+    const daiNeeded = new BigNumber(tab._hex).div(RAD);
 
     expect(collateralAmount.gt(0)).toBe(true);
-    expect(new BigNumber(price).div(RAY).toString()).toEqual('19500');
+    expect(new BigNumber(price._hex).div(RAY).toString()).toEqual('19500');
     expect(daiNeeded.toNumber()).toBeCloseTo(1000);
     expect(needsRedo).toEqual(false);
   });
