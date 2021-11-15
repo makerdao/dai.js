@@ -401,7 +401,7 @@ export default class EthereumCdpService extends PrivateService {
       this.getTargetPrice()
     ]);
 
-    const totalCollateralValue = new BigNumber(totalWethLocked)
+    const totalCollateralValue = new BigNumber(totalWethLocked._hex)
       .div(WAD)
       .times(wethPrice.toBigNumber());
     const systemSaiDebt = saiSupply.times(targetPrice);
@@ -471,7 +471,7 @@ export default class EthereumCdpService extends PrivateService {
     const hexCdpId = numberToBytes32(cdpId);
     const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
     const valueSai = getCurrency(amountSai, SAI).toFixed('wei');
-
+    //
     return this._saiProxyTubContract().lockAndDraw(
       this._tubContract().address,
       hexCdpId,

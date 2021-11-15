@@ -38,20 +38,24 @@ export function wrapContract(contract, name, abi, txManager) {
         if (!txManager || !nonConstantFns[key]) return contract[key];
 
         return (...args) => {
+          const lastArg = args[args.length - 1];
+
+          // If the last arg is a business object, don't count it as a function input
+          const functionInputsLength =
+            typeof lastArg === 'object' &&
+            lastArg !== null &&
+            lastArg.constructor === Object
+              ? args.length - 1
+              : args.length;
+
           for (const fnKey in contract.interface.functions) {
-            if (contract.interface.functions[fnKey].name === key) {
-              const lastArg = args[args.length - 1];
-
-              // If the last arg is an object with a promise key, don't count it
-              const functionInputsLength = lastArg?.promise
-                ? args.length - 1
-                : args.length;
-
-              if (
-                contract.interface.functions[fnKey].inputs.length ===
+            // Match the function override with key that has the same number of inputs
+            if (
+              contract.interface.functions[fnKey].name === key &&
+              contract.interface.functions[fnKey].inputs.length ===
                 functionInputsLength
-              )
-                key = fnKey;
+            ) {
+              key = fnKey;
             }
           }
           return txManager.sendContractCall(contract, key, args, name);
