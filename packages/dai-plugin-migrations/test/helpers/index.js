@@ -1,4 +1,5 @@
-import Maker from '@makerdao/dai';
+// import Maker from '@makerdao/dai';
+import Maker from '../../../dai/src';
 import MigrationPlugin from '../../src';
 import { Migrations } from '../../src/constants';
 import { createCurrencyRatio } from '@makerdao/currency';
@@ -7,13 +8,20 @@ import McdPlugin, {
   ETH,
   GNT,
   USD
-} from '@makerdao/dai-plugin-mcd';
-import ScdPlugin from '@makerdao/dai-plugin-scd';
+} from '../../../dai-plugin-mcd/src';
+// import McdPlugin, {
+//   ServiceRoles,
+//   ETH,
+//   GNT,
+//   USD
+// } from '@makerdao/dai-plugin-mcd';
+import ScdPlugin from '../../../dai-plugin-scd/src';
+// import ScdPlugin from '@makerdao/dai-plugin-scd';
 import ethAbi from 'web3-eth-abi';
 import { utils } from 'ethers';
 
 export function stringToBytes(str) {
-  return '0x' + Buffer.from(str).toString('hex');
+  return utils.formatBytes32String(str);
 }
 
 export function bytesToString(hex) {

@@ -2,7 +2,10 @@ import { migrationMaker, setupCollateral } from '../helpers';
 import { mockContracts, globalSettlement } from '../helpers/mocks';
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
-import { DAI, ETH } from '@makerdao/dai-plugin-mcd';
+// import { DAI, ETH } from '@makerdao/dai-plugin-mcd';
+import { DAI, ETH } from '../../../dai-plugin-mcd/src';
+
+jest.setTimeout(30000);
 
 let maker, migration, smartContract, cdpManager, snapshot;
 

@@ -4,7 +4,6 @@ import Web3 from 'web3';
 import { Currency } from '@makerdao/currency';
 import { defaultTokens } from './tokens';
 import { utils as ethersUtils } from 'ethers';
-export { ethersUtils };
 
 const web3Utils = new Web3().utils;
 
