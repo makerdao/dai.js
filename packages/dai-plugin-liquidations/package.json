@@ -17,7 +17,7 @@
     "test": "yarn testchain --ci jest --runInBand"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.41.0-alpha.2"
+    "@makerdao/dai": "^0.41.0"
   },
   "dependencies": {
     "@makerdao/currency": "0.9.9",
