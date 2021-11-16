@@ -1,8 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
-import {
-  bytes32ToNumber,
-  numberToBytes32
-} from '@makerdao/dai/src/utils/conversion';
+import { utils } from '@makerdao/dai';
 import assert from 'assert';
 import tracksTransactions from './utils/tracksTransactions';
 const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
@@ -14,6 +11,8 @@ export const WAD = new BigNumber('1e18');
 export const RAY = new BigNumber('1e27');
 
 export const nullBytes = '0x';
+
+const { bytes32ToNumber, numberToBytes32 } = utils;
 
 export const stringToBytes = str => {
   assert(!!str, 'argument is falsy');
