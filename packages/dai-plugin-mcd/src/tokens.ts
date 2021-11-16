@@ -33,6 +33,8 @@ export const GUSD = createCurrency('GUSD');
 export const UNI = createCurrency('UNI');
 export const RENBTC = createCurrency('RENBTC');
 export const AAVE = createCurrency('AAVE');
+export const MATIC = createCurrency('MATIC');
+export const WSTETH = createCurrency('WSTETH');
 export const UNIV2DAIETH = createCurrency('UNIV2DAIETH');
 export const UNIV2WBTCETH = createCurrency('UNIV2WBTCETH');
 export const UNIV2USDCETH = createCurrency('UNIV2USDCETH');
@@ -76,6 +78,8 @@ export const defaultCdpTypes: CDP_TYPE[] = [
   { currency: UNI, ilk: 'UNI-A', decimals: 18 },
   { currency: RENBTC, ilk: 'RENBTC-A', decimals: 8 },
   { currency: AAVE, ilk: 'AAVE-A', decimals: 18 },
+  { currency: MATIC, ilk: 'MATIC-A', decimals: 18 },
+  { currency: WSTETH, ilk: 'WSTETH-A', decimals: 18 },
   { currency: UNIV2DAIETH, ilk: 'UNIV2DAIETH-A', decimals: 18 },
   { currency: UNIV2WBTCETH, ilk: 'UNIV2WBTCETH-A', decimals: 18 },
   { currency: UNIV2USDCETH, ilk: 'UNIV2USDCETH-A', decimals: 18 },
