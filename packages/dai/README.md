@@ -48,6 +48,7 @@ transferDai(address, amount) {
  }
 ```
 
+
 Example for using CDPs:
 
 ```js
