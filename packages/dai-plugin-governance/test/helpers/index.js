@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
-// import Maker from '@makerdao/dai';
-import Maker from '../../../dai/src';
+import Maker from '@makerdao/dai';
 import govPlugin from '../../src/index';
 import configPlugin from '@makerdao/dai-plugin-config';
 import { createCurrency } from '@makerdao/currency';

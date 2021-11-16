@@ -62,7 +62,6 @@ export default class Erc20Token {
   approveUnlimited(spender, options = {}) {
     if (!spender) spender = this._web3.currentAddress();
     return this._contract.approve(spender, ethers.BigNumber.from(UINT256_MAX), {
-      // return this._contract.approve(spender, -1, {
       metadata: {
         action: {
           name: 'approve',

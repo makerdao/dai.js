@@ -355,7 +355,6 @@ export default class EthereumCdpService extends PrivateService {
   }
 
   async getLiquidationPrice(cdpId) {
-    // ..
     const [debt, liqRatio, collateral] = await Promise.all([
       this.getDebtValue(cdpId, USD),
       this.getLiquidationRatio(),
@@ -471,7 +470,7 @@ export default class EthereumCdpService extends PrivateService {
     const hexCdpId = numberToBytes32(cdpId);
     const valueEth = getCurrency(amountEth, ETH).toFixed('wei');
     const valueSai = getCurrency(amountSai, SAI).toFixed('wei');
-    //
+
     return this._saiProxyTubContract().lockAndDraw(
       this._tubContract().address,
       hexCdpId,

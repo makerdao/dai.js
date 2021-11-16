@@ -49,7 +49,7 @@ export function wrapContract(contract, name, abi, txManager) {
               : args.length;
 
           for (const fnKey in contract.interface.functions) {
-            // Match the function override with key that has the same number of inputs
+            // Match the function overload with key that has the same number of inputs
             if (
               contract.interface.functions[fnKey].name === key &&
               contract.interface.functions[fnKey].inputs.length ===

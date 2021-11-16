@@ -80,9 +80,9 @@ test('ether transfer should move transferValue from sender to receiver', done =>
       receiverBalance = ETH(balances[1]);
       return token.transfer(receiver, '0.1');
     })
-    .then(() => {
-      return Promise.all([token.balanceOf(sender), token.balanceOf(receiver)]);
-    })
+    .then(() =>
+      Promise.all([token.balanceOf(sender), token.balanceOf(receiver)])
+    )
     .then(balances => {
       const newSenderBalance = ETH(balances[0]),
         newReceiverBalance = ETH(balances[1]);

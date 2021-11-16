@@ -1,8 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
-// import Maker from '@makerdao/dai/';
-import Maker from '../../dai/src';
-// import { McdPlugin, YFI } from '@makerdao/dai-plugin-mcd';
-import { McdPlugin, YFI } from '../../dai-plugin-mcd/src';
+import Maker from '@makerdao/dai';
+import { McdPlugin, YFI } from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
 import LiquidationService, {

@@ -4,14 +4,12 @@ import {
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
 import { uniqueId } from '../../src/utils';
-import { mineBlocks } from '../../../test-helpers/src';
 import { size } from 'lodash';
-// import { mineBlocks } from '@makerdao/test-helpers';
+import { mineBlocks } from '@makerdao/test-helpers';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');
 import Maker from '../../src';
-import ScdPlugin from '../../../dai-plugin-scd/src';
-// import ScdPlugin from '@makerdao/dai-plugin-scd';
+import ScdPlugin from '@makerdao/dai-plugin-scd';
 
 async function scdMaker({
   preset = 'test',
@@ -64,7 +62,7 @@ test('reuse the same web3 service in test services', () => {
   expect(services.currentAddress).toMatch(/^0x[0-9A-Fa-f]+$/);
 }, 30000);
 
-test('contract call accepts a businessObject option', async () => {
+test('wrapped contract call accepts a businessObject option', async () => {
   expect.assertions(3);
   const token = services.contract.getContract('WETH');
 

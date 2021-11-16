@@ -2,11 +2,7 @@ import { PublicService } from '@makerdao/services-core';
 import {
   bytes32ToNumber,
   numberToBytes32
-} from '../../dai/src/utils/conversion';
-// import {
-//   bytes32ToNumber,
-//   numberToBytes32
-// } from '@makerdao/dai/src/utils/conversion';
+} from '@makerdao/dai/src/utils/conversion';
 import assert from 'assert';
 import { utils } from 'ethers';
 import tracksTransactions from './utils/tracksTransactions';
