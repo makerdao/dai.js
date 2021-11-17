@@ -21,7 +21,7 @@
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.41.0-alpha.2",
+    "@makerdao/dai": "^0.41.0",
     "@makerdao/services-core": "^0.11.0-alpha.1"
   },
   "dependencies": {
