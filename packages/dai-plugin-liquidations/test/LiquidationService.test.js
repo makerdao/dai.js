@@ -94,7 +94,7 @@ describe('LiquidationService', () => {
   test('can bark an unsafe urn', async () => {
     // The setup to create a risky vault takes quite a long time on kovan
     const timeout =
-      network === 'kovan' || network === 'goerli' ? 480000 : 120000;
+      network === 'kovan' || network === 'goerli' ? 960000 : 120000;
     jest.setTimeout(timeout);
 
     // Opens a vault, withdraws DAI and calls drip until vault is unsafe.
