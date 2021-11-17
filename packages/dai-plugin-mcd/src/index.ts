@@ -3,7 +3,7 @@ import mapValues from 'lodash/mapValues';
 import reduce from 'lodash/reduce';
 import uniqBy from 'lodash/uniqBy';
 import testnetAddresses from '../contracts/addresses/testnet.json';
-import kovanAddresses from '../contracts/addresses/kovan.json';
+// import kovanAddresses from '../contracts/addresses/kovan.json';
 import goerliAddresses from '../contracts/addresses/goerli.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
 import abiMap from '../contracts/abiMap';
@@ -40,7 +40,8 @@ let addContracts = reduce(
         abi,
         address: {
           testnet: testnetAddress,
-          kovan: kovanAddresses[name],
+          // kovan no longer actively supported
+          // kovan: kovanAddresses[name],
           goerli: goerliAddresses[name],
           mainnet: mainnetAddresses[name]
         }
