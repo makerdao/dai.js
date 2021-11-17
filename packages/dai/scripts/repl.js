@@ -42,7 +42,7 @@ const env = {
   kovan: {
     fromBlock: 4750000,
     config: {
-      url: 'https://kovan.infura.io/v3/c3f0f26a4c1742e0949d8eedfc47be67',
+      url: 'https://kovan.infura.io/v3/406b22e3688c42898054d22555f43271',
       privateKey: process.env.KOVAN_PRIVATE_KEY,
       smartContract: { addressOverrides },
       token: {
@@ -56,7 +56,7 @@ const env = {
   mainnet: {
     config: {
       fromBlock: 4750000,
-      url: 'https://mainnet.infura.io/v3/c3f0f26a4c1742e0949d8eedfc47be67'
+      url: 'https://mainnet.infura.io/v3/406b22e3688c42898054d22555f43271'
     }
   }
 };

@@ -1,1 +1,1 @@
-export const infuraProjectId = '992c66ef9bcf438aa47e45c789d3bd31';
+export const infuraProjectId = '406b22e3688c42898054d22555f43271';
