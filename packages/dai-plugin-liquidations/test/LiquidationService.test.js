@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import Maker from '@makerdao/dai';
-import { McdPlugin, MATIC } from '@makerdao/dai-plugin-mcd';
+import { McdPlugin, WSTETH } from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
 import LiquidationService, {
@@ -14,8 +14,8 @@ import { createVaults, setLiquidationsApprovals, getLockAmount } from './utils';
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 
 //currently this test suite tests one ilk.  change the below values to test a different ilk
-const ilk = 'MATIC-A';
-const token = MATIC;
+const ilk = 'WSTETH-A';
+const token = WSTETH;
 const ilkBalance = 10000; // Testchain faucet drops tokens into the account ahead of time.
 const amtToBid = '0.005'; // A fraction of the available auction collateral
 
@@ -30,6 +30,9 @@ const goerliConfig = {
     }
   },
   web3: {
+    transactionSettings: {
+      gasPrice: 1000000000 // 1 gwei all day
+    },
     provider: { infuraProjectId: '992c66ef9bcf438aa47e45c789d3bd31' }
   }
 };
