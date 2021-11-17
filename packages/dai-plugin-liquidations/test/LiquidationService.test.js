@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import Maker from '@makerdao/dai';
-import { McdPlugin, YFI } from '@makerdao/dai-plugin-mcd';
+import { McdPlugin, MATIC } from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
 import LiquidationService, {
@@ -14,13 +14,25 @@ import { createVaults, setLiquidationsApprovals, getLockAmount } from './utils';
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 
 //currently this test suite tests one ilk.  change the below values to test a different ilk
-const ilk = 'YFI-A';
-const token = YFI;
+const ilk = 'MATIC-A';
+const token = MATIC;
 const ilkBalance = 10000; // Testchain faucet drops tokens into the account ahead of time.
 const amtToBid = '0.005'; // A fraction of the available auction collateral
 
 let service, cdpManager, network, maker, snapshotData;
 
+const goerliConfig = {
+  plugins: [liquidationPlugin, [McdPlugin, { network }]],
+  accounts: {
+    owner: {
+      type: 'privateKey',
+      key: '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e'
+    }
+  },
+  web3: {
+    provider: { infuraProjectId: '992c66ef9bcf438aa47e45c789d3bd31' }
+  }
+};
 const kovanConfig = {
   plugins: [liquidationPlugin, [McdPlugin, { network }]],
   accounts: {
@@ -44,7 +56,12 @@ const testchainConfig = {
 };
 
 async function makerInstance(preset) {
-  const config = preset === 'kovan' ? kovanConfig : testchainConfig;
+  const config =
+    preset === 'kovan'
+      ? kovanConfig
+      : preset === 'goerli'
+      ? goerliConfig
+      : testchainConfig;
   const maker = await Maker.create(preset, config);
   await maker.authenticate();
   return maker;
@@ -52,8 +69,9 @@ async function makerInstance(preset) {
 describe('LiquidationService', () => {
   beforeAll(async () => {
     // To run this test on kovan, just switch the network variable below:
-    //network = 'kovan';
-    network = 'testchain';
+    // network = 'kovan';
+    network = 'goerli';
+    // network = 'testchain';
 
     const preset = network === 'testchain' ? 'test' : network;
     maker = await makerInstance(preset);
@@ -72,7 +90,8 @@ describe('LiquidationService', () => {
 
   test('can bark an unsafe urn', async () => {
     // The setup to create a risky vault takes quite a long time on kovan
-    const timeout = network === 'kovan' ? 480000 : 120000;
+    const timeout =
+      network === 'kovan' || network === 'goerli' ? 480000 : 120000;
     jest.setTimeout(timeout);
 
     // Opens a vault, withdraws DAI and calls drip until vault is unsafe.
