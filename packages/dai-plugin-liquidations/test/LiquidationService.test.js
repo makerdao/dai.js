@@ -1,6 +1,6 @@
 import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import Maker from '@makerdao/dai';
-import { McdPlugin, WSTETH } from '@makerdao/dai-plugin-mcd';
+import { McdPlugin, YFI } from '@makerdao/dai-plugin-mcd';
 import BigNumber from 'bignumber.js';
 import liquidationPlugin from '../src';
 import LiquidationService, {
@@ -14,8 +14,8 @@ import { createVaults, setLiquidationsApprovals, getLockAmount } from './utils';
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 
 //currently this test suite tests one ilk.  change the below values to test a different ilk
-const ilk = 'WSTETH-A';
-const token = WSTETH;
+const ilk = 'YFI-A';
+const token = YFI;
 const ilkBalance = 10000; // Testchain faucet drops tokens into the account ahead of time.
 const amtToBid = '0.005'; // A fraction of the available auction collateral
 
@@ -236,8 +236,8 @@ describe('LiquidationService', () => {
     expect(balanceAfter).toEqual(new BigNumber(startingBalance).plus(amtToBid));
   });
 
-  test('get unsafe LINK-A vaults', async () => {
-    const urns = await service.getUnsafeVaults(['LINK-A', 'BAT-A']);
+  test('get unsafe ilk vaults', async () => {
+    const urns = await service.getUnsafeVaults([ilk]);
     console.log('urns', urns);
   }, 10000);
 
@@ -251,13 +251,13 @@ describe('LiquidationService', () => {
     console.log('dusts', dusts);
   }, 10000);
 
-  test('get price for LINK-A', async () => {
-    const price = await service.getPrice('LINK-A');
+  test('get price for ilk', async () => {
+    const price = await service.getPrice(ilk);
     console.log('price', price);
   }, 10000);
 
-  test('getHoleAndDirtForIlk for LINK-A', async () => {
-    const holeAndDirt = await service.getHoleAndDirtForIlk('LINK-A');
+  test('getHoleAndDirtForIlk for ilk', async () => {
+    const holeAndDirt = await service.getHoleAndDirtForIlk(ilk);
     console.log('data', holeAndDirt);
   }, 10000);
 
@@ -267,17 +267,17 @@ describe('LiquidationService', () => {
   }, 10000);
 
   xtest('getChost', async () => {
-    const chost = await service.getChost('LINK-A');
+    const chost = await service.getChost(ilk);
     console.log('chost', chost);
   }, 10000);
 
   test('getTail', async () => {
-    const tail = await service.getTail('LINK-A');
+    const tail = await service.getTail(ilk);
     console.log('tail', tail);
   }, 10000);
 
   test('getCusp', async () => {
-    const cusp = await service.getCusp('LINK-A');
+    const cusp = await service.getCusp(ilk);
     console.log('cusp', cusp);
   }, 10000);
 });

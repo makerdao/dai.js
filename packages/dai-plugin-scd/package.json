@@ -20,7 +20,7 @@
     "test:integration": "export NETWORK='test' && yarn test --config ./test/config/jestIntegrationConfig.json"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.42.0"
+    "@makerdao/dai": "^0.42.2"
   },
   "dependencies": {
     "@makerdao/currency": "^0.9.9",
