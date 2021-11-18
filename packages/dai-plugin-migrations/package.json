@@ -9,7 +9,7 @@
   "module": "dist/dai-plugin-migrations.esm.js",
   "jsdelivr": "dist/dai-plugin-migrations.umd.production.min.js",
   "scripts": {
-    "build": "yarn clean  && tsdx build --format cjs,esm,umd",
+    "build": "yarn clean  && tsdx build --format cjs,esm,umd && ./scripts/copy-files.sh",
     "clean": "rm -rf ./dist",
     "prepublishOnly": "yarn build",
     "testchain": "../../scripts/run-testchain.sh",
