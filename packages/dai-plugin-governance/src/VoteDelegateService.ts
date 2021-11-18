@@ -71,7 +71,7 @@ export default class VoteDelegateService extends LocalService {
     const bal = await this._getStakedBalanceForAddress(
       delegateAddress,
       address
-    ).then(MKR.wei);
+    ).then(val => MKR.wei(val._hex));
 
     return bal;
   }

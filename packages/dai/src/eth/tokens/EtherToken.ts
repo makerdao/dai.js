@@ -1,5 +1,6 @@
 import { getCurrency, ETH } from '../Currency';
 import tracksTransactions from '../../utils/tracksTransactions';
+import { ethers } from 'ethers';
 
 export default class EtherToken {
   _web3;
@@ -46,11 +47,14 @@ export default class EtherToken {
 
   @tracksTransactions
   async transferFrom(fromAddress, toAddress, amount, { unit = ETH, promise }) {
+    const curAmt = ethers.BigNumber.from(
+      getCurrency(amount, unit).toFixed('wei')
+    )._hex;
     return this._transactionManager.sendTransaction(
       {
         from: fromAddress,
         to: toAddress,
-        value: getCurrency(amount, unit).toFixed('wei')
+        value: curAmt
       },
       {
         metadata: {

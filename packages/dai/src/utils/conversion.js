@@ -1,14 +1,14 @@
+import { BigNumber as EthersBigNumber, utils as ethersUtils } from 'ethers';
 import BigNumber from 'bignumber.js';
-import { utils as ethersUtils } from 'ethers';
 import assert from 'assert';
 
 export function numberToBytes32(num) {
-  const bn = ethersUtils.bigNumberify(num);
-  return ethersUtils.hexlify(ethersUtils.padZeros(bn, 32));
+  const bn = EthersBigNumber.from(num);
+  return ethersUtils.hexlify(ethersUtils.zeroPad(bn, 32));
 }
 
 export function bytes32ToNumber(bytes32) {
-  return ethersUtils.bigNumberify(bytes32).toNumber();
+  return EthersBigNumber.from(bytes32).toNumber();
 }
 
 export function stringToBytes32(text, pad = true) {
@@ -16,7 +16,9 @@ export function stringToBytes32(text, pad = true) {
   if (data.length > 32) {
     throw new Error('too long');
   }
-  if (pad) data = ethersUtils.padZeros(data, 32);
+  if (pad) {
+    return ethersUtils.hexlify(ethersUtils.zeroPad(data, 32));
+  }
   return ethersUtils.hexlify(data);
 }
 

@@ -5,7 +5,7 @@
         "name":"tab",
         "outputs":[{"name":"","type":"uint256"}],
         "payable":false,
-        "stateMutability":"nonpayable",
+        "stateMutability":"view",
         "type":"function"
     }
 ]

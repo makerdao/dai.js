@@ -33,7 +33,7 @@ export default class Auction {
     const beg = await this.contract.beg();
     // the contract's BigNumber implementation (bn.js) doesn't support decimals,
     // so we use bignumber.js instead
-    return new BigNumber(beg)
+    return new BigNumber(beg._hex)
       .div(WAD)
       .minus(1)
       .toNumber();

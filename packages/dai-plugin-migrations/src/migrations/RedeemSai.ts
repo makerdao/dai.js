@@ -11,7 +11,8 @@ export default class RedeemSai {
   }
 
   off() {
-    return this._tap.off();
+    // _tap.off() has a name clash with the ethers Contract listener "BaseContract.off(eventName)"
+    return this._tap['off()']();
   }
 
   async getRate() {

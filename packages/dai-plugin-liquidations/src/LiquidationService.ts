@@ -1,6 +1,7 @@
 import { PublicService } from '@makerdao/services-core';
 import { utils } from '@makerdao/dai';
 import assert from 'assert';
+import { utils as ethersUtils } from 'ethers';
 import tracksTransactions from './utils/tracksTransactions';
 const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
 //const LOCAL_URL = 'http://localhost:3001/graphql';
@@ -14,11 +15,9 @@ export const nullBytes = '0x';
 
 const { bytes32ToNumber, numberToBytes32 } = utils;
 
-export const stringToBytes = str => {
-  assert(!!str, 'argument is falsy');
-  assert(typeof str === 'string', 'argument is not a string');
-  return '0x' + Buffer.from(str).toString('hex');
-};
+export function stringToBytes(str) {
+  return ethersUtils.formatBytes32String(str);
+}
 
 //hard-coded for now, but can get from pips, which you can get from ilk registry
 const medianizers = {

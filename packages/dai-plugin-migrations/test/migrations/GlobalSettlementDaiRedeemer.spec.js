@@ -4,6 +4,8 @@ import { takeSnapshot, restoreSnapshot } from '@makerdao/test-helpers';
 import { ServiceRoles, Migrations } from '../../src/constants';
 import { DAI, ETH } from '@makerdao/dai-plugin-mcd';
 
+jest.setTimeout(30000);
+
 let maker, migration, smartContract, cdpManager, snapshot;
 
 describe('Global Settlement Dai Redeemer migration', () => {

@@ -266,7 +266,7 @@ export default function sharedTests(openCdp, initCdpService) {
           await cdp.shut();
           const info = await cdp.getInfo();
           expect(info.lad).toBe('0x0000000000000000000000000000000000000000');
-        });
+        }, 30000);
       });
 
       test('read liquidation price', async () => {
