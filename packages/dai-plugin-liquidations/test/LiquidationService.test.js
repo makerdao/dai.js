@@ -13,7 +13,7 @@ import { createVaults, setLiquidationsApprovals, getLockAmount } from './utils';
 
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 
-//currently this test suite tests one ilk.  change the below values to test a different ilk
+//currently this test suite tests one ilk, change the below values to test a different ilk
 const ilk = 'YFI-A';
 const token = YFI;
 const ilkBalance = 10000; // Testchain faucet drops tokens into the account ahead of time.
@@ -21,6 +21,21 @@ const amtToBid = '0.005'; // A fraction of the available auction collateral
 
 let service, cdpManager, network, maker, snapshotData;
 
+const goerliConfig = {
+  plugins: [liquidationPlugin, [McdPlugin, { network }]],
+  accounts: {
+    owner: {
+      type: 'privateKey',
+      key: '0x474beb999fed1b3af2ea048f963833c686a0fba05f5724cb6417cf3b8ee9697e'
+    }
+  },
+  web3: {
+    transactionSettings: {
+      gasPrice: 1000000000 // 1 gwei all day
+    },
+    provider: { infuraProjectId: '992c66ef9bcf438aa47e45c789d3bd31' }
+  }
+};
 const kovanConfig = {
   plugins: [liquidationPlugin, [McdPlugin, { network }]],
   accounts: {
@@ -30,7 +45,7 @@ const kovanConfig = {
     }
   },
   web3: {
-    provider: { infuraProjectId: 'c3f0f26a4c1742e0949d8eedfc47be67' }
+    provider: { infuraProjectId: '406b22e3688c42898054d22555f43271' }
   }
 };
 const testchainConfig = {
@@ -44,7 +59,12 @@ const testchainConfig = {
 };
 
 async function makerInstance(preset) {
-  const config = preset === 'kovan' ? kovanConfig : testchainConfig;
+  const config =
+    preset === 'kovan'
+      ? kovanConfig
+      : preset === 'goerli'
+      ? goerliConfig
+      : testchainConfig;
   const maker = await Maker.create(preset, config);
   await maker.authenticate();
   return maker;
@@ -52,7 +72,8 @@ async function makerInstance(preset) {
 describe('LiquidationService', () => {
   beforeAll(async () => {
     // To run this test on kovan, just switch the network variable below:
-    //network = 'kovan';
+    // network = 'kovan';
+    // network = 'goerli';
     network = 'testchain';
 
     const preset = network === 'testchain' ? 'test' : network;
@@ -72,7 +93,8 @@ describe('LiquidationService', () => {
 
   test('can bark an unsafe urn', async () => {
     // The setup to create a risky vault takes quite a long time on kovan
-    const timeout = network === 'kovan' ? 480000 : 120000;
+    const timeout =
+      network === 'kovan' || network === 'goerli' ? 960000 : 120000;
     jest.setTimeout(timeout);
 
     // Opens a vault, withdraws DAI and calls drip until vault is unsafe.
@@ -214,8 +236,8 @@ describe('LiquidationService', () => {
     expect(balanceAfter).toEqual(new BigNumber(startingBalance).plus(amtToBid));
   });
 
-  test('get unsafe LINK-A vaults', async () => {
-    const urns = await service.getUnsafeVaults(['LINK-A', 'BAT-A']);
+  test('get unsafe ilk vaults', async () => {
+    const urns = await service.getUnsafeVaults([ilk]);
     console.log('urns', urns);
   }, 10000);
 
@@ -229,13 +251,13 @@ describe('LiquidationService', () => {
     console.log('dusts', dusts);
   }, 10000);
 
-  test('get price for LINK-A', async () => {
-    const price = await service.getPrice('LINK-A');
+  test('get price for ilk', async () => {
+    const price = await service.getPrice(ilk);
     console.log('price', price);
   }, 10000);
 
-  test('getHoleAndDirtForIlk for LINK-A', async () => {
-    const holeAndDirt = await service.getHoleAndDirtForIlk('LINK-A');
+  test('getHoleAndDirtForIlk for ilk', async () => {
+    const holeAndDirt = await service.getHoleAndDirtForIlk(ilk);
     console.log('data', holeAndDirt);
   }, 10000);
 
@@ -245,17 +267,17 @@ describe('LiquidationService', () => {
   }, 10000);
 
   xtest('getChost', async () => {
-    const chost = await service.getChost('LINK-A');
+    const chost = await service.getChost(ilk);
     console.log('chost', chost);
   }, 10000);
 
   test('getTail', async () => {
-    const tail = await service.getTail('LINK-A');
+    const tail = await service.getTail(ilk);
     console.log('tail', tail);
   }, 10000);
 
   test('getCusp', async () => {
-    const cusp = await service.getCusp('LINK-A');
+    const cusp = await service.getCusp(ilk);
     console.log('cusp', cusp);
   }, 10000);
 });

@@ -56,6 +56,8 @@ export default {
   UNI: require('./abis/DSToken.json'),
   RENBTC: require('./abis/DSToken.json'),
   AAVE: require('./abis/DSToken.json'),
+  MATIC: require('./abis/DSToken.json'),
+  WSTETH: require('./abis/DSToken.json'),
   UNIV2DAIETH: require('./abis/DSToken.json'),
   UNIV2WBTCETH: require('./abis/DSToken.json'),
   UNIV2USDCETH: require('./abis/DSToken.json'),
