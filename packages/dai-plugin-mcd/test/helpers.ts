@@ -2,8 +2,8 @@ import assert from 'assert';
 import { createCurrencyRatio } from '@makerdao/currency';
 import Maker from '@makerdao/dai';
 import { McdPlugin, ETH, USD, GNT } from '../src';
-import { ServiceRoles } from '../src/constants';
 import { stringToBytes } from '../src/utils';
+import { ServiceRoles } from '../src/constants';
 import ethAbi from 'web3-eth-abi';
 import BigNumber from 'bignumber.js';
 import { RAY } from '../src/constants';
@@ -29,6 +29,7 @@ export async function mcdMaker({
 }
 
 export async function setPrice(maker, ratio, ilk) {
+  const ilkBytes = stringToBytes(ilk);
   const scs = maker.service('smartContract');
   const { symbol } = ratio.denominator;
   const pip = scs.getContract('PIP_' + symbol);
@@ -36,15 +37,15 @@ export async function setPrice(maker, ratio, ilk) {
   // using uint here instead of bytes32 so it gets left-padded
   const val = (ethAbi as any).encodeParameter('uint', ratio.toFixed('wei'));
   await pip.poke(val);
-  await scs.getContract('MCD_SPOT').poke(stringToBytes(ilk));
+  await scs.getContract('MCD_SPOT').poke(ilkBytes);
 
   //check that setPrice worked
   const data = maker.service(ServiceRoles.SYSTEM_DATA);
-  const { spot } = await data.vat.ilks(stringToBytes(ilk));
+  const { spot } = await data.vat.ilks(ilkBytes);
   const spotBN = new BigNumber(spot.toString()).dividedBy(RAY);
   const par = await data.spot.par();
   const parBN = new BigNumber(par.toString()).dividedBy(RAY);
-  const { mat } = await data.spot.ilks(stringToBytes(ilk));
+  const { mat } = await data.spot.ilks(ilkBytes);
   const matBN = new BigNumber(mat.toString()).dividedBy(RAY);
   assert(
     ratio.toNumber() ===

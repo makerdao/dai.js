@@ -12,7 +12,7 @@ import { DAI, USD } from './tokens';
 // ilk math
 
 export function debtCeiling(line) {
-  return DAI.rad(line);
+  return DAI.rad(line._hex);
 }
 
 export function liquidationPenalty(chop) {
@@ -49,7 +49,7 @@ export function annualStabilityFee(duty) {
 // cdp math
 
 export function collateralAmount(currency, ink) {
-  return currency.wei(ink);
+  return currency.wei(ink._hex);
 }
 
 export function collateralValue(collateralAmount, price) {
@@ -57,8 +57,8 @@ export function collateralValue(collateralAmount, price) {
 }
 
 export function debtValue(art, rate) {
-  art = DAI.wei(art);
-  return art.times(rate).shiftedBy(-27);
+  art = DAI.wei(art._hex);
+  return art.times(rate._hex).shiftedBy(-27);
 }
 
 export function collateralizationRatio(collateralValue, debtValue) {

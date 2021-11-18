@@ -223,13 +223,13 @@ export default class ChiefService extends LocalService {
   getNumDeposits(address) {
     return this._chiefContract()
       .deposits(address)
-      .then(MKR.wei);
+      .then(n => MKR.wei(n._hex));
   }
 
   getApprovalCount(address) {
     return this._chiefContract()
       .approvals(address)
-      .then(MKR.wei);
+      .then(n => MKR.wei(n._hex));
   }
 
   getHat() {

@@ -40,11 +40,11 @@ export default class SystemDataService extends PublicService {
       this.vat.dai(vowAddr),
       this.vat.sin(vowAddr)
     ]);
-    return DAI.rad(dai).minus(DAI.rad(sin));
+    return DAI.rad(dai._hex).minus(DAI.rad(sin._hex));
   }
 
   async getTotalDai() {
-    return DAI.rad(await this.vat.debt());
+    return DAI.rad((await this.vat.debt())._hex);
   }
 
   // Helpers ----------------------------------------------

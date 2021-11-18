@@ -14,11 +14,16 @@ export default function makeSigner(web3Service) {
         from: web3Service.currentAddress()
       });
     },
+    call,
+    isSigner: () => true,
+    _isSigner: true,
     provider: new Proxy(provider, {
       get(target, key) {
         switch (key) {
           case 'resolveName':
             return address => address;
+          case '_isProvider':
+            return true;
           case 'call':
             return call;
           default:

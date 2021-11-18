@@ -13,7 +13,7 @@ import ethAbi from 'web3-eth-abi';
 import { utils } from 'ethers';
 
 export function stringToBytes(str) {
-  return '0x' + Buffer.from(str).toString('hex');
+  return utils.formatBytes32String(str);
 }
 
 export function bytesToString(hex) {

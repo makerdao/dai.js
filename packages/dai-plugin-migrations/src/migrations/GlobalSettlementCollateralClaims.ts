@@ -33,13 +33,13 @@ export default class GlobalSettlementCollateralClaims {
         const tag = await end.tag(ilks[i]);
         const ilk = await vat.ilks(ilks[i]);
 
-        const owed = new BigNumber(vatUrn.art)
-          .times(ilk.rate)
+        const owed = new BigNumber(vatUrn.art._hex)
+          .times(ilk.rate._hex)
           .div(RAY)
           .times(tag)
           .div(RAY);
         const redeemable =
-          tag.gt(0) && new BigNumber(vatUrn.ink).minus(owed).gt(0);
+          tag.gt(0) && new BigNumber(vatUrn.ink._hex).minus(owed).gt(0);
         const tagDivRay = new BigNumber(tag).div(RAY);
         return { id, owed, redeemable, ilk, urn, tag: tagDivRay };
       })

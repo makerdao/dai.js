@@ -4,8 +4,8 @@ import {
   buildTestSmartContractService
 } from '../helpers/serviceBuilders';
 import { uniqueId } from '../../src/utils';
-import { mineBlocks } from '@makerdao/test-helpers';
 import { size } from 'lodash';
+import { mineBlocks } from '@makerdao/test-helpers';
 import debug from 'debug';
 const log = debug('sai:testing:TxMgr.spec');
 import Maker from '../../src';
@@ -97,7 +97,7 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
 
   expect(txMgr._execute).toHaveBeenCalledWith(
     token.wrappedContract,
-    'approve',
+    'approve(address,uint256)',
     [currentAddress, 20000],
     {
       gasLimit: 1234567,
