@@ -21,12 +21,10 @@ export default class ChiefMigrate {
     const voteProxyAddress = await this._getVoteProxyAddress(address);
 
     const mkrLockedDirectly = (MKR as any).wei(
-      (await this._oldChief.deposits(address))._hex
+      await this._oldChief.deposits(address)
     );
     const mkrLockedViaProxy = (MKR as any).wei(
-      voteProxyAddress
-        ? (await this._oldChief.deposits(voteProxyAddress))._hex
-        : 0
+      voteProxyAddress ? await this._oldChief.deposits(voteProxyAddress) : 0
     );
 
     return { mkrLockedDirectly, mkrLockedViaProxy };

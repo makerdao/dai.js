@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
-    "@makerdao/currency": "0.9.9",
+    "@makerdao/currency": "^0.9.10",
     "@makerdao/multicall": "^0.11.0",
     "@makerdao/services-core": "^0.11.4-alpha.0",
     "@makerdao/test-helpers": "^0.2.1",

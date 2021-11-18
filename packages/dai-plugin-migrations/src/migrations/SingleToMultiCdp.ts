@@ -179,7 +179,7 @@ export default class SingleToMultiCdp {
         this._getToken(MKR).address(),
         MKR(mkrAmount).toFixed('wei')
       )
-      .then(a => SAI.wei(a._hex));
+      .then(a => SAI.wei(a));
   }
 
   _getToken(symbol) {
