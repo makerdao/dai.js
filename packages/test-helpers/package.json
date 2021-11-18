@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/test-helpers",
   "description": "test helpers for the monorepo",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "MIT",
   "main": "dist/index.js",
   "unpkg": "dist/index.js",
@@ -24,6 +24,6 @@
   ],
   "gitHead": "689f3670142282c9483c74d5658f60161d4287bb",
   "peerDependencies": {
-    "@makerdao/dai": "^0.41.0-alpha.2"
+    "@makerdao/dai": "^0.42.0"
   }
 }
