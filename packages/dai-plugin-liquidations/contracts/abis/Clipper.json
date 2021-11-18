@@ -456,8 +456,7 @@
     "name": "upchost",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "constant": true
+    "type": "function"
   },
   {
     "inputs": [],
