@@ -1,8 +1,5 @@
 import { PublicService } from '@makerdao/services-core';
-import {
-  bytes32ToNumber,
-  numberToBytes32
-} from '@makerdao/dai/src/utils/conversion';
+import { utils as daiUtils } from '@makerdao/dai';
 import assert from 'assert';
 import { utils } from 'ethers';
 import tracksTransactions from './utils/tracksTransactions';
@@ -15,6 +12,8 @@ export const WAD = new BigNumber('1e18');
 export const RAY = new BigNumber('1e27');
 
 export const nullBytes = '0x';
+
+const { bytes32ToNumber, numberToBytes32 } = daiUtils;
 
 export function stringToBytes(str) {
   return utils.formatBytes32String(str);

@@ -31,6 +31,8 @@ export const MCD_CLIP_TUSD_A = 'MCD_CLIP_TUSD_A';
 export const MCD_CLIP_PAXUSD_A = 'MCD_CLIP_PAXUSD_A';
 export const MCD_CLIP_GUSD_A = 'MCD_CLIP_GUSD_A';
 export const MCD_CLIP_USDT_A = 'MCD_CLIP_USDT_A';
+export const MCD_CLIP_MATIC_A = 'MCD_CLIP_MATIC_A';
+export const MCD_CLIP_WSTETH_A = 'MCD_CLIP_WSTETH_A';
 
 export const ALL_CLIPS = [
   MCD_CLIP_AAVE_A,
@@ -64,5 +66,7 @@ export const ALL_CLIPS = [
   MCD_CLIP_TUSD_A,
   MCD_CLIP_PAXUSD_A,
   MCD_CLIP_GUSD_A,
-  MCD_CLIP_USDT_A
+  MCD_CLIP_USDT_A,
+  MCD_CLIP_MATIC_A,
+  MCD_CLIP_WSTETH_A
 ];
