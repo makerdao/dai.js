@@ -73,8 +73,8 @@ describe('LiquidationService', () => {
   beforeAll(async () => {
     // To run this test on kovan, just switch the network variable below:
     // network = 'kovan';
-    network = 'goerli';
-    // network = 'testchain';
+    // network = 'goerli';
+    network = 'testchain';
 
     const preset = network === 'testchain' ? 'test' : network;
     maker = await makerInstance(preset);
