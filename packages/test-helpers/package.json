@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/test-helpers",
   "description": "test helpers for the monorepo",
-  "version": "0.5.1",
+  "version": "0.5.2-alpha.0",
   "license": "MIT",
   "main": "dist/index.js",
   "unpkg": "dist/index.js",
