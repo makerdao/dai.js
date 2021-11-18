@@ -13,7 +13,7 @@ import { createVaults, setLiquidationsApprovals, getLockAmount } from './utils';
 
 const me = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
 
-//currently this test suite tests one ilk.  change the below values to test a different ilk
+//currently this test suite tests one ilk, change the below values to test a different ilk
 const ilk = 'YFI-A';
 const token = YFI;
 const ilkBalance = 10000; // Testchain faucet drops tokens into the account ahead of time.
