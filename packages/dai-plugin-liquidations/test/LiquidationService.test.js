@@ -266,7 +266,7 @@ describe('LiquidationService', () => {
     console.log('data', holeAndDirt);
   }, 10000);
 
-  xtest('getChost', async () => {
+  test('getChost', async () => {
     const chost = await service.getChost(ilk);
     console.log('chost', chost);
   }, 10000);
