@@ -1,7 +1,7 @@
 import { PublicService } from '@makerdao/services-core';
-import { utils as daiUtils } from '@makerdao/dai';
+import { utils } from '@makerdao/dai';
 import assert from 'assert';
-import { utils } from 'ethers';
+import { utils as ethersUtils } from 'ethers';
 import tracksTransactions from './utils/tracksTransactions';
 const MAINNET_SERVER_URL = 'https://api.makerdao.com/graphql';
 //const LOCAL_URL = 'http://localhost:3001/graphql';
@@ -13,10 +13,10 @@ export const RAY = new BigNumber('1e27');
 
 export const nullBytes = '0x';
 
-const { bytes32ToNumber, numberToBytes32 } = daiUtils;
+const { bytes32ToNumber, numberToBytes32 } = utils;
 
 export function stringToBytes(str) {
-  return utils.formatBytes32String(str);
+  return ethersUtils.formatBytes32String(str);
 }
 
 //hard-coded for now, but can get from pips, which you can get from ilk registry
