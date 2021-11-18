@@ -92,6 +92,7 @@ export function getLockAmount(network, ilk) {
     'ETH-A': '1',
     'ETH-B': '1',
     'ETH-C': '1',
+    'WSTETH-A': '1',
     'AAVE-A': '3',
     'UNI-A': '50',
     'ZRX-A': '100',

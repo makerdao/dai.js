@@ -3,18 +3,6 @@ import ProviderType from '../../src/web3/ProviderType';
 import has from 'lodash/has';
 import merge from 'lodash/merge';
 
-// export const infuraProjectId = '406b22e3688c42898054d22555f43271'; //dai.js project id
-//
-// export const kovanProviderConfig = {
-//   web3: {
-//     privateKey: process.env.KOVAN_PRIVATE_KEY,
-//     provider: {
-//       type: ProviderType.INFURA,
-//       network: 'kovan',
-//       infuraProjectId
-//     }
-//   }
-// };
 export const websocketProviderConfig = {
   web3: {
     provider: {
