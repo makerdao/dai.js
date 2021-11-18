@@ -185,13 +185,13 @@ export default class LiquidationService extends PublicService {
           return this._clipperContractByIlk(ilk)
             .sales(id)
             .then(s => {
-              const tic = new Date(new BigNumber(s.tic).times(1000).toNumber());
+              const tic = new Date(new BigNumber(s.tic._hex).times(1000).toNumber());
               const obj = {
                 tic,
                 created: tic,
-                tab: new BigNumber(s.tab).div(RAD),
-                lot: new BigNumber(s.lot).div(WAD),
-                top: new BigNumber(s.top).div(RAY),
+                tab: new BigNumber(s.tab._hex).div(RAD),
+                lot: new BigNumber(s.lot._hex).div(WAD),
+                top: new BigNumber(s.top._hex).div(RAY),
                 usr: s.usr,
                 saleId: id,
                 active: true,
@@ -300,8 +300,8 @@ export default class LiquidationService extends PublicService {
 
   async getHoleAndDirtForIlk(ilk) {
     const data = await this._dogContract().ilks(stringToBytes(ilk));
-    const hole = new BigNumber(data.hole).div(RAD);
-    const dirt = new BigNumber(data.dirt).div(RAD);
+    const hole = new BigNumber(data.hole._hex).div(RAD);
+    const dirt = new BigNumber(data.dirt._hex).div(RAD);
     const diff = hole.minus(dirt);
     return { hole, dirt, diff };
   }
@@ -311,15 +311,15 @@ export default class LiquidationService extends PublicService {
       this._dogContract().Hole(),
       this._dogContract().Dirt()
     ]);
-    const hole = new BigNumber(h).div(RAD);
-    const dirt = new BigNumber(d).div(RAD);
+    const hole = new BigNumber(h._hex).div(RAD);
+    const dirt = new BigNumber(d._hex).div(RAD);
     const diff = hole.minus(dirt);
     return { hole, dirt, diff };
   }
 
   async getChost(ilk) {
     const chost = await this._clipperContractByIlk(ilk).chost();
-    return new BigNumber(chost).div(RAD);
+    return new BigNumber(chost._hex).div(RAD);
   }
 
   async getTail(ilk) {
@@ -329,7 +329,7 @@ export default class LiquidationService extends PublicService {
 
   async getCusp(ilk) {
     const cusp = await this._clipperContractByIlk(ilk).cusp();
-    return new BigNumber(cusp).div(RAY);
+    return new BigNumber(cusp._hex).div(RAY);
   }
 
   // @tracksTransactions
