@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/dai-plugin-migrations",
   "description": "Plugin to add migrations to dai.js",
-  "version": "1.4.0-alpha.4",
+  "version": "1.5.0",
   "license": "MIT",
   "main": "dist/index.js",
   "unpkg": "dist/index.js",
@@ -17,12 +17,12 @@
     "test": "yarn testchain --ci jest --runInBand"
   },
   "peerDependencies": {
-    "@makerdao/dai": "^0.41.0-alpha.9"
+    "@makerdao/dai": "^0.42.0"
   },
   "dependencies": {
     "@makerdao/currency": "0.9.9",
-    "@makerdao/dai": "^0.41.0-alpha.9",
-    "@makerdao/services-core": "^0.11.0-alpha.9",
+    "@makerdao/dai": "^0.42.0",
+    "@makerdao/services-core": "^0.11.1",
     "bignumber.js": "^8.1.1"
   },
   "gitHead": "689f3670142282c9483c74d5658f60161d4287bb"
