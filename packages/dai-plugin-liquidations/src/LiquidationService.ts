@@ -185,7 +185,9 @@ export default class LiquidationService extends PublicService {
           return this._clipperContractByIlk(ilk)
             .sales(id)
             .then(s => {
-              const tic = new Date(new BigNumber(s.tic._hex).times(1000).toNumber());
+              const tic = new Date(
+                new BigNumber(s.tic._hex).times(1000).toNumber()
+              );
               const obj = {
                 tic,
                 created: tic,
