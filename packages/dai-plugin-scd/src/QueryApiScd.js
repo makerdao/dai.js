@@ -9,13 +9,9 @@ export default class QueryApi {
     switch (network) {
       case 'mainnet':
       case 1:
+      default:
         this.serverUrl = MAINNET_SERVER_URL;
         break;
-      case 'kovan':
-      case 42:
-        throw new Error('Kovan is no longer supported');
-      default:
-        throw new Error(`don't know what to do for network "${network}"`);
     }
   }
 
