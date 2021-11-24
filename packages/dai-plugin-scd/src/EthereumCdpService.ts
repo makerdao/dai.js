@@ -249,7 +249,7 @@ export default class EthereumCdpService extends PrivateService {
 
   async getCollateralValue(cdpId, unit = ETH) {
     const hexCdpId = numberToBytes32(cdpId);
-    const pethValue = PETH.wei((await this._tubContract().ink(hexCdpId))._hex);
+    const pethValue = PETH.wei(await this._tubContract().ink(hexCdpId));
     if (unit.symbol === PETH.symbol) return pethValue;
 
     const pethPrice = await this.get('price').getWethToPethRatio();

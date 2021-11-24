@@ -19,16 +19,16 @@ export default class PethToken extends Erc20Token {
   }
 
   async wrapperRatio() {
-    return WETH.ray((await this._tub.per())._hex);
+    return WETH.ray(await this._tub.per());
   }
 
   async joinPrice(amount, unit = WETH) {
     const value = this._valueForContract(amount, unit);
-    return WETH.wei((await this._tub.ask(value))._hex);
+    return WETH.wei(await this._tub.ask(value));
   }
 
   async exitPrice(amount, unit = WETH) {
     const value = this._valueForContract(amount, unit);
-    return WETH.wei((await this._tub.bid(value))._hex);
+    return WETH.wei(await this._tub.bid(value));
   }
 }

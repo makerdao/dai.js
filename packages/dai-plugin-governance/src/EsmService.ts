@@ -10,7 +10,7 @@ export default class EsmService extends PrivateService {
 
   async thresholdAmount() {
     const min = await this._esmContract().min();
-    return getCurrency(min._hex, MKR).shiftedBy(-18);
+    return getCurrency(min, MKR).shiftedBy(-18);
   }
 
   async emergencyShutdownActive() {
@@ -25,7 +25,7 @@ export default class EsmService extends PrivateService {
 
   async getTotalStaked() {
     const total = await this._esmContract().Sum();
-    return getCurrency(total._hex, MKR).shiftedBy(-18);
+    return getCurrency(total, MKR).shiftedBy(-18);
   }
 
   async getTotalStakedByAddress(address = false) {
@@ -33,7 +33,7 @@ export default class EsmService extends PrivateService {
       address = this.get('web3').currentAddress();
     }
     const total = await this._esmContract().sum(address);
-    return getCurrency(total._hex, MKR).shiftedBy(-18);
+    return getCurrency(total, MKR).shiftedBy(-18);
   }
 
   @tracksTransactionsWithOptions({ numArguments: 3 })

@@ -48,9 +48,7 @@ export default class PriceService extends PrivateService {
   }
 
   async getPethPrice() {
-    return USD_PETH.ray(
-      (await this._getContract(contracts.SAI_TUB).tag())._hex
-    );
+    return USD_PETH.ray(await this._getContract(contracts.SAI_TUB).tag());
   }
 
   async getMkrPrice() {

@@ -49,7 +49,7 @@ export default class EtherToken {
   async transferFrom(fromAddress, toAddress, amount, { unit = ETH, promise }) {
     const curAmt = ethers.BigNumber.from(
       getCurrency(amount, unit).toFixed('wei')
-    )._hex;
+    );
     return this._transactionManager.sendTransaction(
       {
         from: fromAddress,
