@@ -346,7 +346,10 @@ export default class GovPollingService extends PrivateService {
       prev.mkrSupport.gt(next.mkrSupport) ? -1 : 1
     );
 
-    const winner = (sorted[0] ? sorted[0].optionId : 0).toString();
+
+    // The winner is the first option, unless the first option is "0" which is abstain
+    // in that case we pick the next option
+    const winner = (sorted[0] && sorted[0].optionId !== 0 ? sorted[0].optionId : sorted[1].optionId).toString();
 
     const totalMkrParticipation = summedSupport.reduce(
       (acc, cur) => new BigNumber(cur.mkrSupport || 0).plus(acc),
