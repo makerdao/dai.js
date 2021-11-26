@@ -69,7 +69,6 @@ export const dummyMkrGetMkrSupportRCForPluralityDataAdjusted = [
   }
 ];
 
-
 export const dummyMkrGetMkrSupportRCForPluralityDataAbstain = [
   {
     optionIdRaw: '1',
