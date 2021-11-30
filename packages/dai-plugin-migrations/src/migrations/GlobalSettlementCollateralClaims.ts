@@ -31,7 +31,11 @@ export default class GlobalSettlementCollateralClaims {
         const urn = await cdpManager.urns(id);
         const vatUrn = await vat.urns(ilks[i], urn);
         const ink = new BigNumber(vatUrn.ink._hex);
-        const tag = new BigNumber((await end.tag(ilks[i]))._hex);
+        const tagVal = await end.tag(ilks[i]);
+        //in tests, tag is encoded as a uint, instad of bytes32
+        const tag = tagVal._hex
+          ? new BigNumber(tagVal._hex)
+          : new BigNumber(tagVal);
         const ilk = await vat.ilks(ilks[i]);
 
         const owed = new BigNumber(vatUrn.art._hex)
