@@ -351,11 +351,48 @@ test('plurality tally', async () => {
       '1': {
         mkrSupport: '700',
         winner: true
+      },
+      '2': {
+        mkrSupport: '0',
+        winner: false
       }
     }
   };
 
   expect(JSON.parse(JSON.stringify(tally))).toEqual(expectedResult);
+});
+
+test('plurality tally with NO MKR support', async () => {
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+
+  // Return an empty array when there is no support
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(() => []);
+
+  const tally = await govPollingService.getTallyPlurality();
+
+  const expectedResult = {
+    winner: '0',
+    totalMkrParticipation: '0',
+    numVoters: 0,
+    options: {
+      '0': {
+        mkrSupport: '0',
+        winner: true
+      },
+      '1': {
+        mkrSupport: '0',
+        winner: false
+      },
+      '2': {
+        mkrSupport: '0',
+        winner: false
+      }
+    }
+  };
+
+  expect(JSON.stringify(tally)).toEqual(JSON.stringify(expectedResult));
 });
 
 test('plurality tally with adjusted votes', async () => {

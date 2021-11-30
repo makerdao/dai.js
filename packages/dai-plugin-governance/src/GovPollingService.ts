@@ -326,16 +326,27 @@ export default class GovPollingService extends PrivateService {
 
     const numVoters = currentVotes.length;
 
-    const resultsObject = currentVotes.reduce((acc, cur) => {
-      if (acc[cur.optionIdRaw]) {
-        acc[cur.optionIdRaw] = new BigNumber(acc[cur.optionIdRaw]).plus(
-          cur.mkrSupport
-        );
-      } else {
-        acc[cur.optionIdRaw] = new BigNumber(cur.mkrSupport);
-      }
-      return acc;
-    }, {});
+    // We assume all plurality votes have 3 options including abstain.
+    const pluralityDefaultOptions = {
+      '0': new BigNumber(0),
+      '1': new BigNumber(0),
+      '2': new BigNumber(0)
+    };
+
+    const resultsObject = currentVotes.reduce(
+      (acc, cur) => {
+        if (acc[cur.optionIdRaw]) {
+          acc[cur.optionIdRaw] = new BigNumber(acc[cur.optionIdRaw]).plus(
+            cur.mkrSupport
+          );
+        } else {
+          acc[cur.optionIdRaw] = new BigNumber(cur.mkrSupport);
+        }
+        return acc;
+      },
+      // Return a default state if currentVotes is empty.
+      pluralityDefaultOptions
+    );
 
     const summedSupport = Object.keys(resultsObject).map(option => ({
       optionId: option,
