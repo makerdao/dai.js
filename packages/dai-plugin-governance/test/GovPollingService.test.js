@@ -28,7 +28,8 @@ import {
   dummyBallotStopWhenOneRemains,
   dummyBallotStopWhenOneRemainsExpect,
   dummyMkrGetMkrSupportRCForPluralityData,
-  dummyMkrGetMkrSupportRCForPluralityDataAdjusted
+  dummyMkrGetMkrSupportRCForPluralityDataAdjusted,
+  dummyMkrGetMkrSupportRCForPluralityDataAbstain
 } from './fixtures';
 import { MKR } from '../src/utils/constants';
 
@@ -383,6 +384,38 @@ test('plurality tally with adjusted votes', async () => {
       '2': {
         mkrSupport: '1232',
         winner: true
+      }
+    }
+  };
+
+  expect(JSON.parse(JSON.stringify(tally))).toEqual(expectedResult);
+});
+
+test('plurality tally with abstain majority ', async () => {
+  govQueryApiService.getMkrSupportRankedChoice = jest.fn(
+    () => dummyMkrGetMkrSupportRCForPluralityDataAbstain
+  );
+  govPollingService._getPoll = jest.fn(() => ({
+    endDate: 123
+  }));
+  const tally = await govPollingService.getTallyPlurality();
+
+  const expectedResult = {
+    winner: '1',
+    totalMkrParticipation: '2041',
+    numVoters: 7,
+    options: {
+      '0': {
+        mkrSupport: '1309',
+        winner: false
+      },
+      '1': {
+        mkrSupport: '700',
+        winner: true
+      },
+      '2': {
+        mkrSupport: '32',
+        winner: false
       }
     }
   };
