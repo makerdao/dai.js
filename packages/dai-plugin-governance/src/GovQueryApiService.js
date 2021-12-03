@@ -273,6 +273,7 @@ export default class QueryApi extends PublicService {
             blockNumber
             blockTimestamp
             lockTotal
+            hash
           }
         }
       }
