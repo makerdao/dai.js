@@ -30,7 +30,12 @@ export default class GlobalSettlementCollateralClaims {
       ids.map(async (id, i) => {
         const urn = await cdpManager.urns(id);
         const vatUrn = await vat.urns(ilks[i], urn);
-        const tag = await end.tag(ilks[i]);
+        const ink = new BigNumber(vatUrn.ink._hex);
+        const tagVal = await end.tag(ilks[i]);
+        //in tests, tag is encoded as a uint, instad of bytes32
+        const tag = tagVal._hex
+          ? new BigNumber(tagVal._hex)
+          : new BigNumber(tagVal);
         const ilk = await vat.ilks(ilks[i]);
 
         const owed = new BigNumber(vatUrn.art._hex)
@@ -38,9 +43,8 @@ export default class GlobalSettlementCollateralClaims {
           .div(RAY)
           .times(tag)
           .div(RAY);
-        const redeemable =
-          tag.gt(0) && new BigNumber(vatUrn.ink._hex).minus(owed).gt(0);
-        const tagDivRay = new BigNumber(tag).div(RAY);
+        const redeemable = tag.gt(0) && ink.minus(owed).gt(0);
+        const tagDivRay = tag.div(RAY);
         return { id, owed, redeemable, ilk, urn, tag: tagDivRay };
       })
     );

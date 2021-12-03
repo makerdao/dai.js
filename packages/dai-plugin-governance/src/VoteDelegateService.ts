@@ -107,6 +107,10 @@ export default class VoteDelegateService extends LocalService {
     );
   }
 
+  async getMkrDelegatedTo(address) {
+    return await this.get('govQueryApi').getMkrDelegatedTo(address);
+  }
+
   // Internal --------------------------------------------
 
   _delegateContract(address) {
