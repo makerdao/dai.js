@@ -282,7 +282,7 @@ export default class QueryApi extends PublicService {
     return delegates;
   }
 
-  // Returns a list of the delegates the address has delegated to
+  // Returns a list of the delegates the address has delegated to.
   async getMkrDelegatedTo(address) {
     const query = `
       {
