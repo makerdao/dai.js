@@ -70,3 +70,10 @@ test('get MKR locked to a delegate over time', async () => {
   );
   console.log('events', events);
 });
+
+test('get all delegates an address is delegating to', async () => {
+  const delegates = await service.getMkrDelegatedTo(
+    '0x845b36e1e4F41a361dD711Bda8ea239bF191fE95'
+  );
+  console.log('delegates', delegates);
+});

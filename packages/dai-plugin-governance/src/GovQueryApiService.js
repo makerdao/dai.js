@@ -262,6 +262,7 @@ export default class QueryApi extends PublicService {
     return delegates;
   }
 
+  // Returns a list of delegators that have delegated to the address
   async getMkrLockedDelegate(address, unixtimeStart, unixtimeEnd) {
     const query = `
       {
@@ -278,6 +279,27 @@ export default class QueryApi extends PublicService {
     `;
     const response = await this.getQueryResponse(this.serverUrl, query);
     const delegates = response.mkrLockedDelegate.nodes;
+    return delegates;
+  }
+
+  // Returns a list of the delegates the address has delegated to
+  async getMkrDelegatedTo(address) {
+    const query = `
+      {
+        mkrDelegatedTo(argAddress: "${address}") {
+          nodes {
+            fromAddress
+            immediateCaller
+            lockAmount
+            blockNumber
+            blockTimestamp
+            hash
+          }
+        }
+      }
+    `;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const delegates = response.mkrDelegatedTo.nodes;
     return delegates;
   }
 }

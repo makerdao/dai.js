@@ -161,3 +161,14 @@ test('getMkrLockedDelegate calls equivalent govQueryApi method', async () => {
 
   expect(spy).toBeCalledWith(address, startTime, endTime);
 });
+
+test('getMkrDelegatedTo calls equivalent govQueryApi method', async () => {
+  const address = '0x16fb96a5fa0427af0c8f7cf1eb4870231c8154b6';
+
+  const queryService = vds.get('govQueryApi');
+  const spy = jest.spyOn(queryService, 'getMkrDelegatedTo');
+
+  await vds.getMkrDelegatedTo(address);
+
+  expect(spy).toBeCalledWith(address);
+});
