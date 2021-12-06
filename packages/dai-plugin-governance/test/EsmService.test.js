@@ -9,6 +9,8 @@ import EsmService from '../src/EsmService';
 
 import { dummyEsmData, parsedDummyEsmData } from './fixtures';
 
+jest.setTimeout(30000);
+
 let maker, esmService;
 beforeAll(async () => {
   maker = await setupTestMakerInstance();
