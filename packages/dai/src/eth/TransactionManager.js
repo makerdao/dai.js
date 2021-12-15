@@ -184,11 +184,7 @@ export default class TransactionManager extends PublicService {
 
     if (!this.get('gas').disablePrice) {
       let txSpeed = options.transactionSpeed;
-      options.maxFeePerGas = await this.get('gas').getGasPrice(txSpeed);
-      options.maxPriorityFeePerGas = this.get('web3')._web3.utils.toWei(
-        (2.5).toString(),
-        'gwei'
-      );
+      options.gasPrice = await this.get('gas').getGasPrice(txSpeed);
     }
 
     return {
