@@ -102,7 +102,8 @@ test('wrapped contract call adds nonce, web3 settings', async () => {
     {
       gasLimit: 1234567,
       nonce: expect.any(Number),
-      gasPrice: gasPrice
+      maxFeePerGas: gasPrice,
+      maxPriorityFeePerGas: '2500000000'
     }
   );
 }, 30000);
@@ -321,7 +322,12 @@ describe('transaction options', () => {
       'open',
       []
     );
-    expect(Object.keys(options)).toEqual(['gasLimit', 'gasPrice', 'nonce']);
+    expect(Object.keys(options)).toEqual([
+      'gasLimit',
+      'maxFeePerGas',
+      'maxPriorityFeePerGas',
+      'nonce'
+    ]);
 
     txManager.get('gas').disablePrice = true;
     options = await txManager._buildTransactionOptions(
@@ -343,7 +349,8 @@ describe('transaction options', () => {
     expect(Object.keys(options)).toEqual([
       'value',
       'gasLimit',
-      'gasPrice',
+      'maxFeePerGas',
+      'maxPriorityFeePerGas',
       'nonce'
     ]);
   }, 30000);
