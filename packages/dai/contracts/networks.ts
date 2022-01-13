@@ -145,6 +145,10 @@ export default [
   { name: 'goerli', networkId: 5, contracts: contractInfo('goerli') },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
   { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },
-  { name: 'goerliFork', networkId: 31337, contracts: contractInfo('goerliFork') },
+  {
+    name: 'goerliFork',
+    networkId: 31337,
+    contracts: contractInfo('goerliFork')
+  },
   { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('testnet') }
 ];

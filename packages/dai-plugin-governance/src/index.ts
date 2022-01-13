@@ -26,6 +26,7 @@ type ContractAddresses = {
   kovan: { [key: string]: string };
   mainnet: { [key: string]: string };
   testnet?: { [key: string]: string };
+  goerliFork?: { [key: string]: string };
   goerli?: { [key: string]: string };
 };
 
@@ -36,11 +37,12 @@ export default {
     const contractAddresses: ContractAddresses = {
       kovan: require('../contracts/addresses/kovan.json'),
       goerli: require('../contracts/addresses/goerli.json'),
+      goerliFork: require('../contracts/addresses/goerli.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
     };
 
     try {
-      contractAddresses.testnet = require('../contracts/addresses/goerli.json');
+      contractAddresses.testnet = require('../contracts/addresses/testnet.json');
     } catch (err) {
       // do nothing here; throw an error only if we later attempt to use ganache
     }
