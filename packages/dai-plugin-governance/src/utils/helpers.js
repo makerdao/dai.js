@@ -26,7 +26,7 @@ export const netIdToName = id => {
     case 1337:
       return 'testnet';
     case 31337:
-      return 'goerliFork';
+      return 'goerlifork';
     default:
       return '';
   }
