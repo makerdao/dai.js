@@ -36,7 +36,7 @@ export default {
     const contractAddresses: ContractAddresses = {
       kovan: require('../contracts/addresses/kovan.json'),
       goerli: require('../contracts/addresses/goerli.json'),
-      mainnet: require('../contracts/addresses/mainnet.json'),
+      mainnet: require('../contracts/addresses/mainnet.json')
     };
 
     try {
