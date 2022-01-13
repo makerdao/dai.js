@@ -10,6 +10,7 @@ const addressMapping = {
   mainnet: mainnetAddresses,
   kovan: kovanAddresses,
   goerli: goerliAddresses,
+  goerlifork: goerliAddresses,
   testnet: testnetAddresses
 };
 
@@ -144,5 +145,10 @@ export default [
   { name: 'goerli', networkId: 5, contracts: contractInfo('goerli') },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
   { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },
+  {
+    name: 'goerlifork',
+    networkId: 31337,
+    contracts: contractInfo('goerlifork')
+  },
   { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('testnet') }
 ];

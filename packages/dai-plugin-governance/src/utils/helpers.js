@@ -23,6 +23,10 @@ export const netIdToName = id => {
       return 'kovan';
     case 999:
       return 'ganache';
+    case 1337:
+      return 'testnet';
+    case 31337:
+      return 'goerlifork';
     default:
       return '';
   }
@@ -33,6 +37,8 @@ export const netIdtoSpockUrl = id => {
     case 1:
       return MAINNET_URL;
     case 5:
+    case 1337:
+    case 31337:
       return GOERLI_URL;
     case 42:
       return KOVAN_URL;
@@ -46,6 +52,8 @@ export const netIdtoSpockUrlStaging = id => {
     case 1:
       return STAGING_MAINNET_URL;
     case 5:
+    case 1337:
+    case 31337:
       return GOERLI_URL;
     case 42:
       return KOVAN_URL;

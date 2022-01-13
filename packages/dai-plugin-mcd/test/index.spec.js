@@ -26,6 +26,7 @@ test('addConfig outputs contract addresses for all networks', () => {
   for (const token of erc20) {
     expect(token.address).toEqual({
       testnet: expect.any(String),
+      goerlifork: expect.any(String),
       // kovan no longer actively supported
       // kovan: expect.any(String),
       goerli: expect.any(String),

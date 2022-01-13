@@ -40,6 +40,7 @@ let addContracts = reduce(
         abi,
         address: {
           testnet: testnetAddress,
+          goerlifork: goerliAddresses[name],
           // kovan no longer actively supported
           // kovan: kovanAddresses[name],
           goerli: goerliAddresses[name],
