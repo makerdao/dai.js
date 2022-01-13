@@ -4,13 +4,12 @@ import abis from './abis';
 import kovanAddresses from './addresses/kovan.json';
 import goerliAddresses from './addresses/goerli.json';
 import mainnetAddresses from './addresses/mainnet.json';
-import testnetAddresses from './addresses/testnet.json';
 
 const addressMapping = {
   mainnet: mainnetAddresses,
   kovan: kovanAddresses,
   goerli: goerliAddresses,
-  testnet: testnetAddresses
+  testnet: goerliAddresses
 };
 
 export function contractAddressesInfo(addresses) {
@@ -144,5 +143,6 @@ export default [
   { name: 'goerli', networkId: 5, contracts: contractInfo('goerli') },
   { name: 'kovan', networkId: 42, contracts: contractInfo('kovan') },
   { name: 'test', networkId: 1337, contracts: contractInfo('testnet') },
+  { name: 'test', networkId: 31337, contracts: contractInfo('testnet') },
   { name: 'test', networkId: TESTNET_ID, contracts: contractInfo('testnet') }
 ];

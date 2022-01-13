@@ -36,11 +36,11 @@ export default {
     const contractAddresses: ContractAddresses = {
       kovan: require('../contracts/addresses/kovan.json'),
       goerli: require('../contracts/addresses/goerli.json'),
-      mainnet: require('../contracts/addresses/mainnet.json')
+      mainnet: require('../contracts/addresses/mainnet.json'),
     };
 
     try {
-      contractAddresses.testnet = require('../contracts/addresses/testnet.json');
+      contractAddresses.testnet = require('../contracts/addresses/goerli.json');
     } catch (err) {
       // do nothing here; throw an error only if we later attempt to use ganache
     }

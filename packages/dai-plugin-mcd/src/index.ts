@@ -2,7 +2,7 @@ import assert from 'assert';
 import mapValues from 'lodash/mapValues';
 import reduce from 'lodash/reduce';
 import uniqBy from 'lodash/uniqBy';
-import testnetAddresses from '../contracts/addresses/testnet.json';
+import testnetAddresses from '../contracts/addresses/goerli.json';
 // import kovanAddresses from '../contracts/addresses/kovan.json';
 import goerliAddresses from '../contracts/addresses/goerli.json';
 import mainnetAddresses from '../contracts/addresses/mainnet.json';
