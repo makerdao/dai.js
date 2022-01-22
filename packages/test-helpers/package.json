@@ -8,7 +8,7 @@
   "typings": "dist/index.d.ts",
   "module": "dist/test-helpers.umd.production.min.js",
   "dependencies": {
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^3.1.1"
   },
   "scripts": {
     "build": "yarn clean && tsdx build --format cjs,esm,umd",
