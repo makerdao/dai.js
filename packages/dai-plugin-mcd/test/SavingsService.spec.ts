@@ -294,6 +294,6 @@ describe('Savings Service', () => {
     expect(etdB.gt(etdA)).toBe(true);
     // in the test we know the chi, so we can verify that calculation is close
     const accruedInterest = calculateAccruedInterest(joinAmount, chi1, chi2);
-    expect(etdB.minus(etdA).toNumber()).toBeCloseTo(accruedInterest, 10);
+    expect(etdB.minus(etdA).toNumber()).toBeCloseTo(accruedInterest, 9);
   }, 30000);
 });
