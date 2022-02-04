@@ -6,6 +6,7 @@ import {
   POLLING,
   BATCH_POLLING,
   ESM,
+  ESM_OLD,
   END,
   PAUSE,
   MKR,
@@ -50,6 +51,10 @@ export default {
     const addressKey = network == 'ganache' ? 'testnet' : network;
 
     const esmContracts = {
+      [ESM_OLD]: {
+        address: map(prop('MCD_ESM'), contractAddresses),
+        abi: require('../contracts/abis/ESM-old.json')
+      },
       [ESM]: {
         address: map(prop('MCD_ESM'), contractAddresses),
         abi: require('../contracts/abis/ESM.json')
