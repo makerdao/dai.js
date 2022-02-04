@@ -1,7 +1,7 @@
 {
   "name": "@makerdao/dai-plugin-liquidations",
   "description": "Plugin to add liquidations to dai.js",
-  "version": "0.3.4",
+  "version": "0.3.5-alpha.0",
   "license": "MIT",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
