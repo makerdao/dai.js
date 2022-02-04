@@ -9,6 +9,7 @@ export const VOTE_DELEGATE_FACTORY = 'VOTE_DELEGATE_FACTORY';
 export const POLLING = 'POLLING';
 export const BATCH_POLLING = 'BATCH_POLLING';
 export const CHIEF = 'CHIEF';
+export const ESM_OLD = 'ESM_OLD';
 export const ESM = 'ESM';
 export const END = 'END';
 export const PAUSE = 'PAUSE';
