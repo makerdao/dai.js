@@ -256,7 +256,7 @@ export default class QueryApi extends PublicService {
   }
   }`;
     const response = await this.getQueryResponse(this.serverUrl, query);
-    const joins = response.allEsmJoins.nodes;
+    const joins = response.allEsmV2Joins.nodes;
     return joins;
   }
 
