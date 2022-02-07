@@ -91,6 +91,27 @@ export default class EsmService extends PrivateService {
     return sortedParsedStakes;
   }
 
+  async getStakingV2History() {
+    const stakes = await this.get('govQueryApi').getEsmV2Joins();
+    const parsedStakes = stakes.map(e => {
+      const transactionHash = e.txHash;
+      const senderAddress = e.txFrom;
+      const amount = MKR(e.joinAmount);
+      const time = new Date(e.blockTimestamp);
+      return {
+        transactionHash,
+        senderAddress,
+        amount,
+        time
+      };
+    });
+    const sortedParsedStakes = parsedStakes.sort((a, b) => {
+      //sort by date descending
+      return b.time - a.time;
+    });
+    return sortedParsedStakes;
+  }
+
   _esmContract() {
     return this.get('smartContract').getContractByName(ESM);
   }

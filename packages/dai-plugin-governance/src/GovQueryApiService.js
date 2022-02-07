@@ -245,6 +245,21 @@ export default class QueryApi extends PublicService {
     return joins;
   }
 
+  async getEsmV2Joins() {
+    const query = `{allEsmV2Joins {
+      nodes {
+        txFrom
+        txHash
+        joinAmount
+        blockTimestamp
+      }
+  }
+  }`;
+    const response = await this.getQueryResponse(this.serverUrl, query);
+    const joins = response.allEsmJoins.nodes;
+    return joins;
+  }
+
   async getAllDelegates() {
     const query = `
       {
