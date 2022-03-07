@@ -28,6 +28,7 @@ type ContractAddresses = {
   mainnet: { [key: string]: string };
   testnet?: { [key: string]: string };
   goerlifork?: { [key: string]: string };
+  mainnetfork?: { [key: string]: string };
   goerli?: { [key: string]: string };
 };
 
@@ -39,6 +40,7 @@ export default {
       kovan: require('../contracts/addresses/kovan.json'),
       goerli: require('../contracts/addresses/goerli.json'),
       goerlifork: require('../contracts/addresses/goerli.json'),
+      mainnetfork: require('../contracts/addresses/mainnet.json'),
       mainnet: require('../contracts/addresses/mainnet.json')
     };
 

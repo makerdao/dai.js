@@ -41,6 +41,7 @@ let addContracts = reduce(
         address: {
           testnet: testnetAddress,
           goerlifork: goerliAddresses[name],
+          mainnetfork: mainnetAddresses[name],
           // kovan no longer actively supported
           // kovan: kovanAddresses[name],
           goerli: goerliAddresses[name],

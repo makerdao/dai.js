@@ -27,6 +27,8 @@ export const netIdToName = id => {
       return 'testnet';
     case 31337:
       return 'goerlifork';
+    case 31338:
+      return 'mainnetfork';
     default:
       return '';
   }
@@ -35,6 +37,7 @@ export const netIdToName = id => {
 export const netIdtoSpockUrl = id => {
   switch (parseInt(id, 10)) {
     case 1:
+    case 31338:
       return MAINNET_URL;
     case 5:
     case 1337:
@@ -50,6 +53,7 @@ export const netIdtoSpockUrl = id => {
 export const netIdtoSpockUrlStaging = id => {
   switch (parseInt(id, 10)) {
     case 1:
+    case 31338:
       return STAGING_MAINNET_URL;
     case 5:
     case 1337:
