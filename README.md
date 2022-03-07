@@ -1,10 +1,14 @@
-# Dai.js SDK monorepo
+# [DEPRECATED] Dai.js SDK monorepo
 
 [![Build Status][build]][build-url]
 [![Coverage Status][cover]][cover-url]
 
 Uses [Lerna](https://github.com/lerna/lerna). Automatically lints and prettifies
 code on commit.
+
+## Deprecation
+
+Dai.js is no longer actively maintained.
 
 ## Documentation
 
