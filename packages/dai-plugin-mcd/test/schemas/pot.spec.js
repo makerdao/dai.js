@@ -56,7 +56,7 @@ afterAll(async () => {
 test(TOTAL_SAVINGS_DAI, async () => {
   const totalSavingsDai = await maker.latest(TOTAL_SAVINGS_DAI);
   expect(BigNumber.isBigNumber(totalSavingsDai)).toEqual(true);
-  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.999795);
+  expect(totalSavingsDai.toNumber()).toBeCloseTo(0.999795, 1);
 });
 
 test(SAVINGS_DAI, async () => {
