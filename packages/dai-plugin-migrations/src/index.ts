@@ -20,7 +20,8 @@ const allContracts = Object.entries(testnetAddresses).reduce(
         address: {
           testnet: testnetAddress,
           kovan: kovanAddresses[name],
-          mainnet: mainnetAddresses[name]
+          mainnet: mainnetAddresses[name],
+          mainnetfork: mainnetAddresses[name]
         }
       };
     }

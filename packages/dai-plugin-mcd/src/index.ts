@@ -22,10 +22,10 @@ const { CDP_MANAGER, CDP_TYPE, SYSTEM_DATA, AUCTION, SAVINGS } = ServiceRoles;
 // look up contract ABIs using abiMap.
 // if an exact match is not found, prefix-match against keys ending in *, e.g.
 // MCD_JOIN_ETH_B matches MCD_JOIN_*
-// this implementation assumes that all contracts in kovan.json are also in testnet.json
+// this implementation assumes that all contracts in goerli/testnet.json are also in mainnet.json
 let addContracts = reduce(
-  testnetAddresses,
-  (result, testnetAddress, name) => {
+  mainnetAddresses,
+  (result, mainnetAddress, name) => {
     let abi = abiMap[name];
     if (!abi) {
       const prefix = Object.keys(abiMap).find(
@@ -39,13 +39,13 @@ let addContracts = reduce(
       result[name] = {
         abi,
         address: {
-          testnet: testnetAddress,
+          testnet: testnetAddresses[name],
           goerlifork: goerliAddresses[name],
-          mainnetfork: mainnetAddresses[name],
+          mainnetfork: mainnetAddress,
           // kovan no longer actively supported
           // kovan: kovanAddresses[name],
           goerli: goerliAddresses[name],
-          mainnet: mainnetAddresses[name]
+          mainnet: mainnetAddress
         }
       };
     }
