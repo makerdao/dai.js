@@ -107,7 +107,11 @@ export default class SmartContractService extends PrivateService {
     const contracts = this._getAllContractInfo();
     const contractInfo = findContractInfoForVersion(contracts[name], version);
     assert(contractInfo, `Cannot find contract ${name}, version ${version}`);
-    assert(contractInfo.address, `Contract ${name} has no address`);
+    let { networkName } = this.get('web3');
+    assert(
+      contractInfo.address,
+      `Contract ${name} has no address on ${networkName}`
+    );
     return contractInfo;
   }
 
