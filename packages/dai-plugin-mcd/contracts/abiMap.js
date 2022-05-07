@@ -67,5 +67,14 @@ export default {
   UNIV2UNIETH: require('./abis/DSToken.json'),
   UNIV2WBTCDAI: require('./abis/DSToken.json'),
   UNIV2AAVEETH: require('./abis/DSToken.json'),
-  UNIV2DAIUSDT: require('./abis/DSToken.json')
+  UNIV2DAIUSDT: require('./abis/DSToken.json'),
+  RWA001: require('./abis/DSToken.json'),
+  RWA002: require('./abis/DSToken.json'),
+  RWA003: require('./abis/DSToken.json'),
+  RWA004: require('./abis/DSToken.json'),
+  RWA005: require('./abis/DSToken.json'),
+  GUNIV3DAIUSDC1: require('./abis/DSToken.json'),
+  ADAI: require('./abis/DSToken.json'),
+  GUNIV3DAIUSDC2: require('./abis/DSToken.json'),
+  CRVV1ETHSTETH: require('./abis/DSToken.json')
 };
