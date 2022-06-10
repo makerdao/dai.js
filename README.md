@@ -1,3 +1,9 @@
+# DEPRECATED
+
+Active maintenance of this library has been discontinued. Please visit [https://chat.makerdao.com](https://chat.makerdao.com) for support.
+
+[![No Maintenance Intended](https://unmaintained.tech/badge.svg)](https://unmaintained.tech/)
+
 # Dai.js SDK monorepo
 
 [![Build Status][build]][build-url]
