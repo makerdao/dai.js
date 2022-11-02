@@ -1,6 +1,7 @@
 declare global {
   interface Currency {}
   interface CurrencyRatio {}
+  interface BigNumber {}
   interface VaultResult {
      /**
      * The id of this vault.
